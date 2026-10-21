@@ -34,6 +34,11 @@ HERE = Path(__file__).resolve().parent
 REPO = HERE.parent
 DATA = REPO / "data"
 OFFICIAL_HOSTS = {"denvergov.org", "www.denvergov.org"}
+try:
+    # Government sites on .org/.com (cities, counties, tax collectors), listed with a reason in official_hosts.json.
+    OFFICIAL_HOSTS |= set(json.loads((HERE / "official_hosts.json").read_text())["hosts"])
+except FileNotFoundError:
+    pass
 # Hosts that reject automated requests outright. Checking them every day
 # only produces noise; the curated list covers them another way or the gap
 # is accepted.
@@ -47,7 +52,7 @@ def is_official(url: str) -> bool:
     host = urllib.parse.urlsplit(url).netloc.lower().split(":")[0]
     if host in SKIP_HOSTS:
         return False
-    return bool(re.search(r"\.(gov|us|mil)$", host)) or host in OFFICIAL_HOSTS
+    return bool(re.search(r"\.(gov|us|mil)$", host)) or any(host == h or host.endswith("." + h) for h in OFFICIAL_HOSTS)
 
 
 def jurisdiction_for(path: Path) -> str:
@@ -139,7 +144,7 @@ def main() -> int:
         s.setdefault("title", None)
         out.append({k: s[k] for k in ("id", "jurisdiction", "title", "url", "kind", "origin", "used_by", "ignore",
                                       "contains", "drop_json_keys", "replaces", "keep", "follow", "follow_limit", "critical",
-                                      "reconcile", "directory") if s.get(k) or k == "follow" and s.get(k) is False})
+                                      "reconcile", "directory", "button", "button_value") if s.get(k) or k == "follow" and s.get(k) is False})
     excluded = set(load_scope().get("excluded", {}))
     dropped = [s for s in out if s["jurisdiction"] in excluded]
     out = [s for s in out if s["jurisdiction"] not in excluded]

@@ -270,7 +270,6 @@ def reconcile_in_counties(text: str, source: dict, today: str, repo: Path = REPO
     if data is None:
         return [finding("no_engine_file", "action", source, path.name, f"{path.name} not found; nothing to compare with")]
     out = []
-    check_on = min(on, today) if today >= on else on
     for c in data["counties"]:
         row = rows.get(c["countyCode"])
         if row is None:
@@ -278,9 +277,326 @@ def reconcile_in_counties(text: str, source: dict, today: str, repo: Path = REPO
         dated = [r for r in c.get("rateChanges", []) if r["on"] <= on]
         ours = dated[-1]["rate"] if dated else c["rate"]
         if abs(ours - row[1]) > 1e-9:
-            out.append(finding("rate_differs", "action", source, c["name"],
-                               f"the notice (effective {on}) lists {row[1]} vs the engine's {ours} as of that date; "
-                               "county rate changes are dated rows in the data, so a person adds the row", c["countyCode"]))
+            f = finding("rate_differs", "action", source, c["name"],
+                        f"the notice (effective {on}) lists {row[1]} vs the engine's {ours} as of that date", c["countyCode"])
+            if on == f"{on[:4]}-01-01" and not c.get("rateChanges"):
+                # A January 1 table states the county's rate for the whole year: a one-line correction.
+                f["change"] = {"file": f"data/local/{path.name}", "id_key": "countyCode", "id": c["countyCode"], "key": "rate",
+                               "old": ours, "new": round(row[1], 6), "effective_from": on, "source_url": source.get("url", "")}
+            else:
+                f["detail"] += "; county rate changes in mid-year are dated rows in the data, so a person adds the row"
+            out.append(f)
+    return out
+
+
+# --------------------------------------------------------------------------
+# helpers for HTML pages and ASP.NET downloads
+# --------------------------------------------------------------------------
+
+def _html_text(html: str) -> str:
+    import html as _html  # noqa: PLC0415
+    html = re.sub(r"(?is)<(script|style)\b.*?</\1>", " ", html)
+    return re.sub(r"\s+", " ", _html.unescape(re.sub(r"<[^>]+>", " ", html))).strip()
+
+
+def post_form(url: str, fields: dict[str, str], timeout: float = 90) -> bytes:
+    """POST a form and return the body. A module-level function so tests can replace it."""
+    import urllib.parse  # noqa: PLC0415
+    import urllib.request  # noqa: PLC0415
+    import watch  # noqa: PLC0415 - for the same identifying user agent as every other fetch
+    req = urllib.request.Request(url, data=urllib.parse.urlencode(fields).encode(), headers={
+        "User-Agent": watch.USER_AGENT, "Content-Type": "application/x-www-form-urlencoded"})
+    with urllib.request.urlopen(req, timeout=timeout) as resp:
+        return resp.read(50 * 1024 * 1024)
+
+
+def _aspnet_button(page_html: str, url: str, button: str, value: str) -> bytes:
+    """Presses a submit button on an ASP.NET page the way a browser does: read
+    the hidden state fields, post them back with the button."""
+    import html as _html  # noqa: PLC0415
+    fields = {}
+    for name in ("__EVENTTARGET", "__EVENTARGUMENT", "__LASTFOCUS", "__VIEWSTATE", "__VIEWSTATEGENERATOR", "__EVENTVALIDATION"):
+        m = re.search(r'name="%s"[^>]*value="([^"]*)"' % re.escape(name), page_html)
+        fields[name] = _html.unescape(m.group(1)) if m else ""
+    fields[button] = value
+    return post_form(url, fields)
+
+
+# --------------------------------------------------------------------------
+# Kentucky occupational license taxes (Secretary of State, KRS 67.766)
+# --------------------------------------------------------------------------
+
+def _us_date(s: str) -> str:
+    m = re.fullmatch(r"\s*(\d{1,2})/(\d{1,2})/(\d{4})\s*", str(s or ""))
+    return f"{m.group(3)}-{int(m.group(1)):02d}-{int(m.group(2)):02d}" if m else ""
+
+
+def _name_key(s: str) -> str:
+    return re.sub(r"[^a-z0-9]+", " ", str(s).lower()).strip()
+
+
+def reconcile_ky_districts(body: bytes, source: dict, today: str, repo: Path = REPO, directory: dict | None = None) -> list[dict]:
+    """The Secretary of State's spreadsheet of every occupational-tax district
+    (what its web form calls "Excel spreadsheet of all Occupational License Tax
+    Districts"). Each row carries the date the district last changed its entry.
+    The data was scraped from the same database on `scrapedOn`, so a row
+    updated after that date, or a district the data lacks, is exactly what a
+    person needs to look at. Rates here are free text ("2.375% eff. 1/1/2026",
+    "$75 flat"), so this reports and never proposes a one-line change."""
+    try:
+        import xlrd  # noqa: PLC0415
+        with open(os.devnull, "w") as quiet:
+            sheet = xlrd.open_workbook(file_contents=body, logfile=quiet).sheet_by_index(0)
+        header = [str(sheet.cell_value(0, c)).strip() for c in range(sheet.ncols)]
+        rows = [{header[c]: sheet.cell_value(r, c) for c in range(sheet.ncols)} for r in range(1, sheet.nrows)]
+        assert "Tax District Name" in header and "Last Updated" in header
+    except Exception:  # noqa: BLE001
+        rows = []
+    if len(rows) < 150:
+        return [finding("unreadable", "action", source, "Kentucky occupational tax district spreadsheet",
+                        f"read {len(rows)} districts, expected about 230; the download may have changed.")]
+    path = repo / "data" / "local" / f"KY-occupational-{today[:4]}.json"
+    data = _load(path)
+    if data is None:
+        return [finding("no_engine_file", "action", source, path.name, f"{path.name} not found; nothing to compare with")]
+    j = data["jurisdictions"]
+    scraped_on = j.get("scrapedOn", "")
+    known = {_name_key(x["name"]) for x in j.get("scraped", [])} | {"louisville metro jefferson county", "lexington fayette urban county government"}
+    out = []
+    for r in rows:
+        name = str(r["Tax District Name"]).strip()
+        last = max([d for d in (_us_date(r.get("Last Updated")), _us_date(r.get("Change Date")), _us_date(r.get("Date Entered"))) if d] or [""])
+        detail = (f"rate '{r.get('Tax Rate', '')}'" + (f", {r['Net Profits']}" if r.get("Net Profits") else "")
+                  + (f", minimum {r['Min Tax']}" if r.get("Min Tax") else "") + (f", cap {r['Cap']}" if r.get("Cap") else ""))
+        if _name_key(name) not in known:
+            out.append(finding("missing_from_engine", "action", source, name,
+                               f"the Secretary of State lists this district (entered {_us_date(r.get('Date Entered')) or 'unknown'}; {detail}) but {path.name} does not", str(r.get("Tax District ID", ""))))
+        elif scraped_on and last > scraped_on:
+            out.append(finding("record_changed", "action", source, name,
+                               f"the Secretary of State's record changed {last}, after the data was scraped on {scraped_on} ({detail}); re-read the ordinance",
+                               str(r.get("Tax District ID", ""))))
+    return out
+
+
+# --------------------------------------------------------------------------
+# Michigan city income taxes (two pages: the Treasury's list, Grand Rapids' rate table)
+# --------------------------------------------------------------------------
+
+def _number_word(word: str) -> int | None:
+    units = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve", "thirteen", "fourteen",
+             "fifteen", "sixteen", "seventeen", "eighteen", "nineteen"]
+    tens = {"twenty": 20, "thirty": 30, "forty": 40}
+    w = word.lower().strip()
+    if w in units:
+        return units.index(w)
+    head, _, tail = w.partition("-")
+    if head in tens and (not tail or tail in units[1:10]):
+        return tens[head] + (units.index(tail) if tail else 0)
+    return None
+
+
+def reconcile_mi_city_list(html: str, source: dict, today: str, repo: Path = REPO, directory: dict | None = None) -> list[dict]:
+    """The Treasury's page naming every Michigan city with an income tax. The
+    data must hold exactly those cities (plus Detroit, which Treasury
+    administers); a name nobody recognises is a new city."""
+    text = _html_text(html)
+    m = re.search(r"These Michigan cities administer their own taxes.*?taxpayer support\.(.*?)Follow us", text)
+    count = re.search(r"(\w+(?:-\w+)?) Michigan cities levy", text)
+    data = _load(repo / "data" / "local" / f"MI-cities-{today[:4]}.json")
+    if not m or data is None:
+        return [finding("unreadable", "action", source, "Michigan city list", "could not find the list of cities on the Treasury page; its layout may have changed.")]
+    listed = m.group(1)
+    names = [c["name"] for c in data["cities"]]
+    rest = listed
+    out = []
+    for n in sorted(names, key=len, reverse=True):
+        if n in rest:
+            rest = rest.replace(n, " ", 1)
+        elif n in text:
+            continue  # named elsewhere on the page (Detroit, which Treasury administers itself)
+        else:
+            out.append(finding("not_in_official_file", "action", source, n, "the data has this city but the Treasury's list of cities does not"))
+    leftover = rest.strip()
+    if leftover:
+        out.append(finding("missing_from_engine", "action", source, leftover, f"the Treasury's list names {leftover!r}, which the data does not have"))
+    stated = _number_word(count.group(1)) if count else None
+    if stated is not None and stated != len(names):
+        out.append(finding("count_differs", "action", source, "Michigan city count", f"the Treasury says {count.group(1)} cities; the data has {len(names)}"))
+    return out
+
+
+def reconcile_mi_city_rates(html: str, source: dict, today: str, repo: Path = REPO, directory: dict | None = None) -> list[dict]:
+    """Grand Rapids' consolidated table of the other Michigan cities' resident
+    and nonresident rates and exemptions. A secondary source (it was once wrong
+    about Saginaw), so this reports a difference for a person to check against
+    the city's own page; it never proposes an edit."""
+    text = _html_text(html)
+    data = _load(repo / "data" / "local" / f"MI-cities-{today[:4]}.json")
+    if data is None:
+        return [finding("no_engine_file", "action", source, "MI-cities", "data file not found; nothing to compare with")]
+    out, seen = [], 0
+    for c in data["cities"]:
+        m = re.search(re.escape(c["name"]) + r" Effective Date of Ordinance.*?Exemption Amount ([\d,]+) .*?Resident Rate ([\d.]+)% Non-Resident Rate ([\d.]+)%", text)
+        if not m:
+            continue
+        seen += 1
+        ex, res, non = int(m.group(1).replace(",", "")), round(float(m.group(2)) / 100, 6), round(float(m.group(3)) / 100, 6)
+        diffs = []
+        if abs(c["residentRate"] - res) > 1e-9:
+            diffs.append(f"resident rate table {res} vs data {c['residentRate']}")
+        if abs(c["nonresidentRate"] - non) > 1e-9:
+            diffs.append(f"nonresident rate table {non} vs data {c['nonresidentRate']}")
+        if c["exemptionAmount"] != ex:
+            diffs.append(f"exemption table {ex} vs data {c['exemptionAmount']}")
+        if diffs:
+            note = c.get("sourceNote", "")
+            known = "Grand Rapids" in note and any(w in note for w in ("WRONG", "INCORRECT", "Corrected"))
+            out.append(finding("rate_differs", "info" if known else "action", source, c["name"],
+                               "; ".join(diffs) + (" (the data's own note records that this table is wrong for this city)" if known else "; check the city's own page"),
+                               ))
+    if seen < len(data["cities"]) * 0.75:
+        return [finding("unreadable", "action", source, "Michigan city rate table", f"found {seen} of {len(data['cities'])} cities in the table; its layout may have changed.")]
+    return out
+
+
+# --------------------------------------------------------------------------
+# Alabama municipal occupational taxes (League of Municipalities survey list)
+# --------------------------------------------------------------------------
+
+def reconcile_al_league(html: str, source: dict, today: str, repo: Path = REPO, directory: dict | None = None) -> list[dict]:
+    """The League's list of municipal occupational tax rates ("given to the
+    League by survey", no dates). Compared city by city with the data; a
+    difference is reported for a person to check with the city, never applied,
+    because the page gives no effective date."""
+    m = re.search(r'<div id="OccupationalTax">(.*?)(?:<footer|Copyright)', html, re.S)
+    body = _html_text(m.group(1)).split("appropriate entity for updates.")[-1] if m else ""
+    items = re.findall(r"([A-Z][A-Za-z .'-]+?)\s+(\d+(?:\.\d+)?)%", body)
+    data = _load(repo / "data" / "local" / f"AL-municipalities-{today[:4]}.json")
+    if len(items) < 15 or data is None:
+        return [finding("unreadable", "action", source, "Alabama League occupational tax list",
+                        f"found {len(items)} cities, expected about 25; the page's layout may have changed.")]
+    ours = {_name_key(x["name"]): x for x in data["municipalities"]}
+    out = []
+    for name, rate in items:
+        x = ours.get(_name_key(name))
+        r = round(float(rate) / 100, 6)
+        if x is None:
+            out.append(finding("missing_from_engine", "action", source, name.strip(), f"the League lists {name.strip()} at {rate}%, which the data does not have"))
+            continue
+        end = x["rate"]
+        for h in x.get("rateHistory", []):
+            end = h.get("rate", end)
+        if abs(end - r) > 1e-9:
+            tier = x.get("confirmation", {}).get("tier", "")
+            # The League's list is the data's own source only for "league_survey_only" cities;
+            # elsewhere the data was confirmed against the city's own document and the survey is the stale party.
+            f = finding("rate_differs", "action" if tier == "league_survey_only" else "info", source, x["name"],
+                        f"the League's survey list says {rate}%; the data has {end * 100:g}%"
+                        + ("; ask the city" if tier == "league_survey_only" else f" (confirmed from the city's own document: tier {tier})"))
+            out.append(f)
+    return out
+
+
+# --------------------------------------------------------------------------
+# Ohio school district income tax (Department of Taxation's yearly list, a PDF)
+# --------------------------------------------------------------------------
+
+_SD_HEADER = re.compile(r"(?:School Districts With an Income Tax as of [A-Za-z]+ \d{4}\*? )?\d of \d School Tax Year Primary District \d{4} First Year County Number IRN School District Rate Effective")
+_SD_ROW = re.compile(r"(?:(?<= )|^)([A-Z][A-Za-z.]+(?: [A-Z][A-Za-z.]+)?\)?)(?: \*)? (\d{4}) (\d{5}) ")
+
+
+def parse_oh_school_list(text: str) -> tuple[int | None, list[dict], int | None]:
+    """(tax year, rows, the document's own count). A row is a county, the
+    four-digit district number, the IRN, a name that may wrap and carry notes
+    with percentages in them, then the rate and the year it first took effect.
+    Only the rate in that final position is trusted."""
+    flat = _SD_HEADER.sub(" ", re.sub(r"\s+", " ", text))
+    year = re.search(r"Tax Year (\d{4}) Rate Additional Information", flat)
+    if not year:
+        return None, [], None
+    body = flat[year.end():]
+    starts = [m.start() for m in _SD_ROW.finditer(body)]
+    rows = []
+    for a, b in zip(starts, starts[1:] + [len(body)]):
+        chunk = body[a:b]
+        m = _SD_ROW.match(chunk)
+        tail = re.search(r"(\d\.\d{2}) %(?: \(b\))? (\d{4})(?: \(a\).*)?\s*$", chunk[m.end():])
+        if m and tail:
+            rows.append({"sd": m.group(2), "irn": m.group(3), "name": chunk[m.end():m.end() + tail.start()].strip(), "rate": round(float(tail.group(1)) / 100, 6),
+                         "since": tail.group(2)})
+    total = re.search(r"Total number of districts are (\d+)", flat)
+    return int(year.group(1)), rows, int(total.group(1)) if total else None
+
+
+def reconcile_oh_school_districts(text: str, source: dict, today: str, repo: Path = REPO, directory: dict | None = None) -> list[dict]:
+    """Compares the Department of Taxation's list of every school district
+    income tax with data/local/OH-school-districts-<year>.json. The list is
+    for one tax year, so a rate on it holds for that whole year: a clean
+    one-line correction. Rows the reader cannot parse, or a parsed count that
+    is not the document's own count, make the whole file unreadable rather
+    than partly trusted."""
+    year, rows, total = parse_oh_school_list(text)
+    if year is None or not rows or (total is not None and len(rows) != total):
+        return [finding("unreadable", "action", source, "Ohio school district income tax list",
+                        f"read {len(rows)} districts{'' if total is None else f' of the {total} the document states'}; its layout may have changed.")]
+    path = repo / "data" / "local" / f"OH-school-districts-{year}.json"
+    data = _load(path)
+    if data is None:
+        return [finding("no_engine_file", "action", source, path.name, f"{path.name} not found; nothing to compare with")]
+    key = f"rate{year}"
+    ours = {}
+    dup = set()
+    for d in data["districts"]:
+        (dup.add if d["sdNumber"] in ours else lambda x: None)(d["sdNumber"])
+        ours[d["sdNumber"]] = d
+    seen = set()
+    out = []
+    for r in rows:
+        seen.add(r["sd"])
+        d = ours.get(r["sd"])
+        if d is None:
+            out.append(finding("missing_from_engine", "action", source, f"{r['name']} ({r['sd']})", f"on the Department's list at {r['rate'] * 100:g}% but not in {path.name}", r["sd"]))
+        elif abs(d.get(key, 0) - r["rate"]) > 1e-9:
+            f = finding("rate_differs", "action", source, d["name"], f"the Department's {year} list says {r['rate'] * 100:g}%; the data has {d.get(key, 0) * 100:g}%", r["sd"])
+            if r["sd"] not in dup and d.get(key):
+                f["change"] = {"file": f"data/local/{path.name}", "id_key": "sdNumber", "id": r["sd"], "key": key, "old": d.get(key), "new": r["rate"],
+                               "effective_from": f"{year}-01-01", "source_url": source.get("url", "")}
+            out.append(f)
+    for sd, d in ours.items():
+        if sd not in seen and d.get(key):
+            out.append(finding("not_in_official_file", "action", source, d["name"], f"the data has a {d[key] * 100:g}% rate for {year} but the Department's list does not include this district", sd))
+    return out
+
+
+# --------------------------------------------------------------------------
+# West Virginia city service fees (WVU Shared Services' list of every city's ordinance)
+# --------------------------------------------------------------------------
+
+def reconcile_wv_city_fees(html: str, source: dict, today: str, repo: Path = REPO, directory: dict | None = None) -> list[dict]:
+    """The list names each West Virginia city that charges a weekly user fee
+    and the amount. Compared with the data's serviceFeeCities: a city on the
+    list that the data lacks (Chester), or an amount that differs, is reported.
+    A city whose list amount equals the data's recorded prior rate is treated
+    as the list being behind, not the data being wrong. No effective dates are
+    given, so nothing is proposed."""
+    text = _html_text(html)
+    sections = re.split(r"(?<![A-Za-z])([A-Z][a-z]+(?: [A-Z][a-z]+)?) The (?=user fee|Charleston ordinance|service fee)", text)
+    listed: dict[str, float] = {}
+    for i in range(1, len(sections) - 1, 2):
+        m = re.search(r"\$(\d+(?:\.\d+)?) per (?:calendar )?week", sections[i + 1])
+        if m:
+            listed[sections[i]] = float(m.group(1))
+    data = _load(repo / "data" / "states" / f"WV-{today[:4]}.json")
+    if len(listed) < 5 or data is None:
+        return [finding("unreadable", "action", source, "West Virginia city user fee list", f"found {len(listed)} cities with an amount, expected about 8; the page's layout may have changed.")]
+    ours = data["localIncomeTax"]["serviceFeeCities"]
+    out = []
+    for city, fee in listed.items():
+        d = ours.get(city)
+        if d is None:
+            out.append(finding("missing_from_engine", "action", source, city, f"the list shows a ${fee:g} per week user fee in {city}, which the data does not have"))
+        elif abs(d["weeklyRate"] - fee) > 1e-9 and abs(d.get("priorWeeklyRate", -1) - fee) > 1e-9:
+            out.append(finding("rate_differs", "action", source, city, f"the list says ${fee:g} per week; the data has ${d['weeklyRate']:g}"))
     return out
 
 
@@ -443,7 +759,9 @@ def reconcile_pa_local(body: bytes, source: dict, today: str, repo: Path = REPO,
     return out
 
 
-RECONCILERS = {"oh_municipal": reconcile_oh_municipal, "oh_jedd": reconcile_oh_jedd, "in_counties": reconcile_in_counties, "pa_local": reconcile_pa_local}
+RECONCILERS = {"oh_municipal": reconcile_oh_municipal, "oh_jedd": reconcile_oh_jedd, "in_counties": reconcile_in_counties, "pa_local": reconcile_pa_local,
+               "ky_districts": reconcile_ky_districts, "mi_city_list": reconcile_mi_city_list, "mi_city_rates": reconcile_mi_city_rates,
+               "al_league": reconcile_al_league, "oh_school": reconcile_oh_school_districts, "wv_city_fees": reconcile_wv_city_fees}
 
 
 def run(sources: list[dict], fetcher, today: str, repo: Path = REPO) -> list[dict]:
@@ -465,13 +783,19 @@ def run(sources: list[dict], fetcher, today: str, repo: Path = REPO) -> list[dic
             findings.append(finding("unreadable", "action", s, s.get("title") or s["url"],
                                     f"could not read the official file to compare with the engine's data ({f.error})"))
             continue
+        if s.get("button"):  # a form button that returns a file (the ASP.NET "download" pattern)
+            try:
+                f = type("Posted", (), {"ok": True, "body": _aspnet_button(f.body.decode("utf-8", errors="replace"), s["url"], s["button"], s.get("button_value", "")), "error": ""})()
+            except Exception as e:  # noqa: BLE001
+                findings.append(finding("unreadable", "action", s, s.get("title") or s["url"], f"could not download the file behind the form button ({type(e).__name__}: {str(e)[:80]})"))
+                continue
         directory: dict[str, str] = {}
         if s.get("directory"):
             d = fetcher(s["directory"])
             if d.ok:
                 directory = parse_finder_directory(d.body.decode("utf-8", errors="replace"))
         try:
-            if name == "pa_local":
+            if name in ("pa_local", "ky_districts"):
                 text = f.body  # a binary spreadsheet: the reader needs the bytes
             elif s["url"].lower().split("?")[0].endswith(".pdf"):
                 import watch  # noqa: PLC0415 - circular at import time, fine at call time

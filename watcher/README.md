@@ -52,6 +52,18 @@ on any date, so none is left to "we'll catch it at the January refresh".
 - A state-code key in a data file (`"TX": {...}`) attributes the cites beneath
   it to that state, so e.g. a state's garnishment statute follows its scope.
 
+### City and county sites
+
+Cities, counties and tax collectors on `.org` and `.com` sites were never being
+watched, though the data cites dozens of their pages (RITA, Greenwood Village,
+Aurora, Kentucky and Alabama cities, Ohio villages). `official_hosts.json` lists
+those hosts with a reason each, and `build_sources.py` treats them like `.gov`.
+Law-firm blogs, payroll vendors, news sites, legal-code aggregators and
+web.archive.org copies are deliberately not listed: they are not the source of
+a rate. Some of these sites (code publishers such as American Legal and
+Municode, a few city sites) turn scripts away; they are retried in a real
+browser in the daily run and stay on the "Blocks bots" list if that fails too.
+
 ## Reading what pages link to
 
 A landing page often stays the same while the document behind it changes: a
@@ -136,9 +148,18 @@ ones) a rule that covers its exact lines, and that no reader is unlisted.
 |---|---|---|
 | Ohio Finder rate files, row by row, with effective dates | OH municipal rates, OH JEDD/JEDZ rates (rate and its `rateSourceRaw` percent move together) | automatic |
 | DCED's statewide Excel register, row by row (all ~2,600 PA municipalities and school districts), with effective dates | PA local earned-income and local-services taxes: a rate and its total move together; the official date must equal the date the data records and fall on or before January 1 | automatic |
-| A sentence in an official document that names the year ("For 2026, the state ... rate ... is 2.95%") | IL, MI (rate, exemption; a second Treasury notice must agree), KY (rate, standard deduction), IN, LA, MS | automatic |
-| A sentence that does not name the year | PA state rate, IA, CT, NC, AZ, CO, MA, DE, MD, MN, AR, WI, SC, HI, DC, VA | report only |
-| A table in an official file | Indiana county rates (compared daily, 92 rows) | report only |
+| A sentence in an official document that names the year ("For 2026, the state ... rate ... is 2.95%") | IL, MI (rate, exemption; a second Treasury notice must agree), KY (rate, standard deduction), IN, LA, MS, and New York's three flat-rate editions (state supplemental, NYC supplemental, Yonkers resident surcharge and nonresident rate: the document must say it is the Jan 1 to Dec 31 edition for the file's year) | automatic |
+| A sentence that does not name the year | PA state rate, IA, CT, NC, AZ, CO, MA, DE, MD, MN, AR, WI, SC, HI, DC, VA, IN exemption amounts | report only |
+| Indiana Departmental Notice #1, county table (92 rows) | IN counties: a table effective January 1 corrects the county's rate in that year's file; an October 1 table or a county with its own dated rows is reported | automatic / a person |
+| Ohio Department of Taxation's school district income tax list (214 districts, one PDF; all rows must parse to the document's own count) | OH school districts: a district's rate for the tax year is corrected in that year's file | automatic |
+| Maryland Comptroller's list of "the actual {year} local income tax rates" | MD: the 22 flat-rate counties (Anne Arundel and Frederick are tiered, so a person's) | automatic |
+| Oregon's combined-payroll instructions plus the transit guide's "1/1/yy and beyond" row (both must agree) | OR: TriMet, Lane Transit and statewide transit rates | automatic |
+| Seattle's payroll expense tax tables, headed by the year | WA: compensation and payroll thresholds, upper band, and every rate on the year's table | automatic |
+| City and county pages: Denver and Glendale occupational privilege taxes, Canby and Sandy transit taxes, Wilmington's wage tax, St. Louis' earnings and payroll expense taxes, Charleston's service fee, Pittsburgh's payroll expense tax and the PA local services tax limits | CO, OR, DE, MO, WV, PA | report only |
+| WVU Shared Services' list of every West Virginia city's user fee | WV: a city on the list the data lacks (Chester today), or a different amount | report only |
+| Kentucky Secretary of State's spreadsheet of every occupational tax district, downloaded through the site's own form button | KY: a district added, or whose record changed after the data was scraped (Whitesville, entered 2026-10-06, is the first catch) | report only |
+| Treasury's list of the 24 cities, and Grand Rapids' rate table | MI cities: a new or vanished city, or a rate or exemption that differs | report only |
+| Alabama League of Municipalities' survey list | AL: a city's rate that differs from the data (information where the data was confirmed from the city's own document) | report only |
 | Per-period tables, bracket schedules, mid-year dated rows, city/county registries with no bulk file | the rest (see the ledger for each state and the reason) | a person |
 
 Why the year matters: a document that says "for 2026" is stating a value for
@@ -149,6 +170,8 @@ is only ever reported. Readers live in `extractors.json`; each is a pattern, the
 data lines it owns, and a frozen excerpt of the real sentence it was written
 against, which the tests re-read. `python watcher/extractors.py --refresh`
 rebuilds the excerpts from the stored snapshots and confirms the data agrees.
+
+Prose that quotes a changed figure (a `comment` saying "4.95% for 2026") is not edited by the updater; the report and the pull request list those fields so the reviewer can fix the wording.
 
 A school district's rate is repeated in every municipality inside it, so one official change becomes dozens of proposals. Pennsylvania's rule therefore has its own limits (80 changes, 120 disagreements) instead of the global 5 and 10; a flood past that still applies nothing.
 

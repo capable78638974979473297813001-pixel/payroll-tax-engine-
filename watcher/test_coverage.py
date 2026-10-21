@@ -83,6 +83,32 @@ class EveryTaxingJurisdictionIsWatched(unittest.TestCase):
             self.assertGreaterEqual(len(pages), 2, f"{code}: only {len(pages)} curated page(s); add its news or notices page")
 
 
+class LocalGovernmentSitesAreWatched(unittest.TestCase):
+    """A city or county page on a .org or .com site is as official as one on
+    .gov; the data cites dozens, and none were being watched."""
+
+    HOSTS = json.loads((HERE / "official_hosts.json").read_text())["hosts"]
+
+    def test_every_listed_host_says_why_it_is_official(self):
+        for host, why in self.HOSTS.items():
+            self.assertGreater(len(why), 8, host)
+            self.assertNotRegex(host, r"justia|findlaw|archive\.org|facebook|blog|news|nolo|dochub|bloomberg|\bey\.com", host)
+
+    def test_a_city_site_is_official_and_a_law_firm_blog_is_not(self):
+        import build_sources  # noqa: PLC0415
+        self.assertTrue(build_sources.is_official("https://www.ritaohio.com/TaxRatesTable"))
+        self.assertTrue(build_sources.is_official("https://www.greenwoodvillage.com/206/Occupational-Privilege-Tax"))
+        self.assertTrue(build_sources.is_official("https://tax.ohio.gov/x"))
+        self.assertFalse(build_sources.is_official("https://law.justia.com/codes/x"))
+        self.assertFalse(build_sources.is_official("https://web.archive.org/web/2025/https://www.in.gov/dor/files/dn01.pdf"))
+
+    def test_the_pages_the_data_cites_on_those_hosts_are_in_the_watch(self):
+        urls = {s["url"] for s in SOURCES.values()}
+        for must in ("https://www.greenwoodvillage.com/206/Occupational-Privilege-Tax", "https://www.villageofwoodville.com/tax-information",
+                     "https://www.ritaohio.com/TaxRatesTable", "https://almonline.org/TaxRates.aspx"):
+            self.assertIn(must, urls)
+
+
 class TheLedgerAccountsForThemAll(unittest.TestCase):
     def test_every_covered_jurisdiction_is_in_the_ledger_and_nothing_else_is(self):
         self.assertEqual(set(LEDGER), set(SCOPE["keep"]))
@@ -104,7 +130,7 @@ class TheLedgerAccountsForThemAll(unittest.TestCase):
                     x = REGISTRY[name]
                     self.assertEqual(x["jurisdiction"], code, ref)
                     self.assertTrue(x.get("year_anchored", True), f"{ref} does not name the year, so it cannot be automatic")
-                    self.assertIn("{year}", x["pattern"], ref)
+                    self.assertTrue("{year}" in x["pattern"] or "{yy}" in x["pattern"], ref)
                     for path in x["paths"]:
                         rel = x["file"].replace("{year}", str(year))
                         self.assertIsNotNone(au._rule_for(CFG, rel, str(path[-1])), f"{ref}: no rule allows {path[-1]} in {rel}")
@@ -169,8 +195,9 @@ class EveryReaderStillReadsItsDocument(unittest.TestCase):
     def test_an_anchored_pattern_names_the_year_in_what_it_matches(self):
         for name, x in REGISTRY.items():
             if x.get("year_anchored", True):
-                self.assertIn("{year}", x["pattern"], name)
-                self.assertIn(str(x["calibration"]["year"]), x["calibration"]["excerpt"], f"{name}: the matched sentence must contain the year")
+                self.assertTrue("{year}" in x["pattern"] or "{yy}" in x["pattern"], name)
+                y = str(x["calibration"]["year"])
+                self.assertTrue(y in x["calibration"]["excerpt"] or f"/{y[2:]} " in x["calibration"]["excerpt"], f"{name}: the matched sentence must contain the year")
                 self.assertIsNone(extractors.stated_value(x["calibration"]["excerpt"], x["pattern"], x["calibration"]["year"] - 1, x.get("transform", "")),
                                   f"{name}: matched a sentence about a different year")
 
