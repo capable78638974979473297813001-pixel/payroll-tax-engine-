@@ -26,6 +26,9 @@ Three tiers, from most to least certain:
               that no data file cites, or that changed without any figure
               changing, never lands here.
 
+A fourth list is not a tier: the paycheck sources the watch could not read.
+A change on one of those cannot be caught, so they are named in the report.
+
 Run after autoupdate.py in the daily workflow:
 
     python watcher/zero_day.py        # writes reports/zero-day-latest.{json,md}
@@ -64,7 +67,25 @@ def possible(change: dict, source: dict) -> list[str]:
     return sorted(set(figures))[:20]
 
 
-def classify(watch_summary: dict, autoupdate: dict, sources: list[dict]) -> dict:
+def blind_spots(sources: list[dict], state: dict) -> list[dict]:
+    """Sources a paycheck number depends on that the watch could not read at its
+    last attempt, or has never read. A change on one of these cannot be caught,
+    so it is listed rather than left to look like "nothing happened"."""
+    out = []
+    for s in sources:
+        if not feeds_a_paycheck(s):
+            continue
+        r = state.get(s["id"])
+        if r and r.get("last_ok") and not r.get("failures"):
+            continue
+        out.append({"jurisdiction": s.get("jurisdiction", ""), "title": s.get("title") or s["url"], "url": s["url"],
+                    "why": (r or {}).get("last_error") or "not read yet",
+                    "never_read": not (r and r.get("last_ok")),
+                    "feeds": [u for u in s.get("used_by", []) if u.startswith(PAYCHECK_DATA)][:4]})
+    return sorted(out, key=lambda b: (not b["never_read"], b["jurisdiction"], b["url"]))
+
+
+def classify(watch_summary: dict, autoupdate: dict, sources: list[dict], state: dict | None = None) -> dict:
     by_id = {s["id"]: s for s in sources}
     fixed = [{"file": p["file"], "name": p.get("name", ""), "edits": [(e["key"], e["old_text"], e["new_text"]) for e in p["edits"]],
               "source": p.get("evidence", {}).get("url", "")} for p in autoupdate.get("applied", [])]
@@ -86,15 +107,28 @@ def classify(watch_summary: dict, autoupdate: dict, sources: list[dict]) -> dict
         else:
             informational += 1
     return {"date": watch_summary.get("date") or autoupdate.get("date", ""), "fixed": fixed, "verified": verified,
-            "possible": maybe, "informational_changes": informational}
+            "possible": maybe, "informational_changes": informational, "blind_spots": blind_spots(sources, state) if state is not None else []}
+
+
+def blind_markdown(blind: list[dict]) -> list[str]:
+    if not blind:
+        return []
+    never = sum(b["never_read"] for b in blind)
+    out = [f"## Not being read ({len(blind)}; {never} never read)", "",
+           "A change on these pages cannot be caught until they can be read. Replace the address, or check them by hand:", ""]
+    out += [f"- {b['jurisdiction']} [{b['title'][:90]}]({b['url']}): {b['why'][:100]}; feeds {', '.join('`' + f + '`' for f in b['feeds'])}" for b in blind[:40]]
+    if len(blind) > 40:
+        out.append(f"- ... and {len(blind) - 40} more (see zero-day-latest.json)")
+    return out + [""]
 
 
 def markdown(z: dict) -> str:
     out = [f"# Zero-day problems: {z['date']}", ""]
+    blind = z.get("blind_spots", [])
     if not (z["fixed"] or z["verified"] or z["possible"]):
-        out += ["None. A paycheck-affecting change would have been listed here.", "",
+        out += ["None in the sources that could be read." if blind else "None. A paycheck-affecting change would have been listed here.", "",
                 f"{z['informational_changes']} other source change(s) were informational only (headings, links, news, wording): nothing was changed for them.", ""]
-        return "\n".join(out)
+        return "\n".join(out + blind_markdown(blind))
     if z["fixed"]:
         out += [f"## Fixed automatically ({len(z['fixed'])})", "",
                 "Each was one commit to `main` touching only the file named; `git revert` the commit to undo it.", ""]
@@ -114,7 +148,7 @@ def markdown(z: dict) -> str:
             out.append(f"- {m['jurisdiction']} [{m['title']}]({m['url']}): figures {', '.join(m['figures'][:10])}; feeds {', '.join('`' + f + '`' for f in m['feeds'])}")
         out.append("")
     out.append(f"{z['informational_changes']} other source change(s) were informational only and changed nothing.")
-    return "\n".join(out) + "\n"
+    return "\n".join(out + blind_markdown(blind)) + "\n"
 
 
 def main() -> int:
@@ -128,7 +162,11 @@ def main() -> int:
     except FileNotFoundError:
         auto = {}
     sources = json.loads((HERE / "sources.json").read_text())["sources"]
-    z = classify(summary, auto, sources)
+    try:
+        state = json.loads((HERE / "state" / "state.json").read_text())
+    except FileNotFoundError:
+        state = {}
+    z = classify(summary, auto, sources, state)
     (reports / "zero-day-latest.json").write_text(json.dumps(z, indent=1) + "\n")
     (reports / "zero-day-latest.md").write_text(markdown(z))
     print(markdown(z))

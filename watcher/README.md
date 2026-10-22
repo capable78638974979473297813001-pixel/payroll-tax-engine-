@@ -148,6 +148,18 @@ the next run retries. **Emergency stop:** set the repository variable
 `AUTOUPDATE_PAUSED` to `true` (the run then only reports); `autoupdate.json` also
 has an `enabled` switch.
 
+**What it cannot see.** A change on a page the watch cannot read cannot be
+caught. Every paycheck source (one cited by a file under `data/states`,
+`federal`, `local`, `minimum-wage`, `garnishment` or `employer-thresholds`) that
+failed its last read, or was never read, is listed in the zero-day report under
+"Not being read", so a quiet day never hides a blind spot. Typical causes: a site
+that refuses automated requests (the watch never tries to defeat bot protection),
+a dead address (replace the URL in the data file's citation, then rerun
+`build_sources.py`), or a missing repository secret (`NYSENATE_API_KEY`).
+`test_coverage.py` also fails if a data file a paycheck uses is cited by no
+source at all; the only exceptions are three prior-year files that cite frozen
+web.archive.org copies, whose live documents are watched through the current year.
+
 ## Fixing a number on its own
 
 `autoupdate.py` can correct a number in `data/` without a person typing it, but
