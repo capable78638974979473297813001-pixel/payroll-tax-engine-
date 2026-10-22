@@ -62,6 +62,7 @@ import bisect
 import fnmatch
 import functools
 import json
+import os
 import re
 import subprocess
 import sys
@@ -759,6 +760,64 @@ def apply(accepted: list[dict], cfg: dict, repo: Path, sources: list[dict], toda
 
 
 # --------------------------------------------------------------------------
+# committing: only the files that were fixed
+# --------------------------------------------------------------------------
+
+# Files a run writes about itself, besides the data it fixed and the generated bundle.
+RUN_FILES = ("watcher/reports/autoupdate-latest.json", "watcher/reports/autoupdate-latest.md", "watcher/autoupdate-log.jsonl")
+
+
+def intended_files(applied: list[dict]) -> set[str]:
+    return {p["file"] for p in applied}
+
+
+def stray_files(paths: list[str], applied: list[dict]) -> list[str]:
+    """Paths that are neither a file the run fixed, the generated bundle, nor the run's own report."""
+    ok = intended_files(applied) | set(RUN_FILES)
+    return [p for p in paths if p not in ok and not p.startswith(GENERATED_PREFIXES)]
+
+
+def commit_applied(repo: Path, applied: list[dict], today: str) -> str:
+    """One commit holding exactly the fixed lines, the regenerated bundle and
+    the run's report. Anything else staged or changed makes it refuse, and the
+    index is cleared, so a zero-day fix can never carry a stray edit onto
+    main. Returns the commit id. The message says how to undo it."""
+    paths = sorted(intended_files(applied)) + [str(x) for x in RUN_FILES if (repo / x).exists()]
+    _git(repo, "add", "--", *paths)
+    if (repo / "supabase" / "functions" / "_shared").exists():
+        _git(repo, "add", "--", "supabase/functions/_shared")
+    staged = [ln for ln in _git(repo, "diff", "--cached", "--name-only").splitlines() if ln]
+    stray = stray_files(staged, applied)
+    unstaged = [ln for ln in _git(repo, "diff", "--name-only").splitlines() if ln]
+    if stray or unstaged:
+        _git(repo, "reset", "-q")
+        raise Rejected(f"refusing to commit: unexpected changes ({', '.join((stray + unstaged)[:5])})")
+    lines = []
+    for p in applied:
+        for e in p["edits"]:
+            lines.append(f"- {p['file']} line {e['line']}: {e['key']} {e['old_text']} -> {e['new_text']} ({p.get('name', '')}; effective {p.get('effective_from', '')}; {p.get('evidence', {}).get('url', '')})")
+    n = sum(len(p["edits"]) for p in applied)
+    names = ", ".join(sorted({p.get("name", "") for p in applied if p.get("name")})[:3])
+    msg = (f"Zero-day fix {today}: {n} value{'s' if n != 1 else ''} corrected from official sources ({names})\n\n"
+           "An official source changed a number the engine uses to calculate pay, and the data lagged. Each line below was re-read\n"
+           "from the source twice, passed every rule in watcher/autoupdate.py, and the full test suite passed before this commit.\n\n"
+           + "\n".join(lines) + "\n\nTo undo: git revert <this commit>.")
+    _git(repo, "commit", "-q", "-m", msg)
+    return _git(repo, "rev-parse", "HEAD").strip()
+
+
+def guard_commit(repo: Path, rev: str = "HEAD") -> list[str]:
+    """Stray files in a zero-day commit, judged by the report committed with
+    it. Empty means the commit touched only what it says it fixed."""
+    files = [ln for ln in _git(repo, "show", "--name-only", "--pretty=", rev).splitlines() if ln]
+    try:
+        applied = json.loads(_git(repo, "show", f"{rev}:watcher/reports/autoupdate-latest.json")).get("applied", [])
+    except (RuntimeError, ValueError):
+        applied = []
+    return stray_files(files, applied)
+
+
+# --------------------------------------------------------------------------
 # reporting
 # --------------------------------------------------------------------------
 
@@ -865,13 +924,21 @@ def run_all(sources: list[dict], fetcher, today: str, repo: Path, text_of) -> li
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     ap.add_argument("--apply", action="store_true", help="write the accepted changes (needs enabled: true)")
+    ap.add_argument("--commit", action="store_true", help="with --apply: commit exactly the fixed files (the caller pushes)")
+    ap.add_argument("--guard", metavar="REV", help="exit 1 if commit REV touches anything but what it says it fixed")
     ap.add_argument("--repo", default=str(REPO))
     args = ap.parse_args(argv)
     repo = Path(args.repo)
+    if args.guard:
+        stray = guard_commit(repo, args.guard)
+        print("stray files in the commit: " + ", ".join(stray) if stray else "the commit touches only what it fixed")
+        return 1 if stray else 0
     sys.path.insert(0, str(HERE))
     import watch  # noqa: PLC0415
 
     cfg = load_config(repo / "watcher" / "autoupdate.json")
+    if os.environ.get("AUTOUPDATE_PAUSED", "").lower() == "true":
+        cfg["enabled"] = False  # the emergency stop: a repository variable, no code change needed
     sources = json.loads((repo / "watcher" / "sources.json").read_text())["sources"]
     today = dt.date.today().isoformat()
     gap = max(cfg["min_confirm_gap_seconds"] + 2, 2)
@@ -905,6 +972,9 @@ def main(argv: list[str] | None = None) -> int:
           "edits": [(e["key"], e["old_text"], e["new_text"]) for e in p["edits"]]} for p in accepted]
         + [{"date": today, "id": r["proposal"].get("id", "?"), "result": "left for a person", "reason": r["reason"]} for r in rejected],
         repo / "watcher" / "autoupdate-log.jsonl")
+    if args.commit and mode == "applied":
+        sha = commit_applied(repo, accepted, today)
+        print(f"committed {sha}")
     print(text)
     return 0
 

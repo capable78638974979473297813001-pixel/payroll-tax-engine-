@@ -54,6 +54,10 @@ def muni_file(extra: dict | None = None) -> dict:
     return d
 
 
+def normalize_p(p):
+    return au.normalize(p)
+
+
 def write_json(root: Path, rel: str, data) -> None:
     (root / rel).parent.mkdir(parents=True, exist_ok=True)
     (root / rel).write_text(json.dumps(data, indent=2) + "\n")
@@ -1099,6 +1103,125 @@ class LocalTaxReaders(Base):
         self.assertEqual([f["code"] for f in fs], ["MD-county-Allegany"])  # Kent already 3.3%
         self.assertEqual(fs[0]["change"]["edits"][0]["path"], ["countyRates", "Allegany", "flat"])
         self.assertEqual(extractors.findings(reg, {"md": text.replace(str(YEAR), str(YEAR - 1))}, {s["id"]: s for s in src}, TODAY, self.root), [])
+
+
+class ZeroDayDelivery(Base):
+    """A fix goes to main as one commit that holds only what it fixed."""
+
+    def setUp(self) -> None:
+        super().setUp()
+        self.origin = self.root.parent / (self.root.name + "-origin.git")
+        subprocess.run(["git", "init", "-q", "--bare", "-b", "main", str(self.origin)], check=True)
+        git(self.root, "branch", "-M", "main")
+        git(self.root, "remote", "add", "origin", str(self.origin))
+        git(self.root, "push", "-q", "origin", "main")
+        (self.root / "supabase" / "functions" / "_shared").mkdir(parents=True)
+        (self.root / "supabase" / "functions" / "_shared" / "data-bundle.ts").write_text("old\n")
+        (self.root / "watcher" / "reports").mkdir(parents=True, exist_ok=True)
+        git(self.root, "add", "-A")
+        git(self.root, "commit", "-qm", "bundle")
+
+    def tearDown(self) -> None:
+        import shutil
+        shutil.rmtree(self.origin, ignore_errors=True)
+        super().tearDown()
+
+    def applied(self):
+        acc, rej = au.triage([self.proposal()], self.cfg, self.root, SOURCES, TODAY, 1, NOW)
+        self.assertEqual(rej, [])
+        return au.apply(acc, self.cfg, self.root, SOURCES, TODAY, verify=["echo new > supabase/functions/_shared/data-bundle.ts"], now=NOW)
+
+    def write_reports(self, applied):
+        (self.root / "watcher" / "reports" / "autoupdate-latest.json").write_text(json.dumps({"applied": applied}))
+        (self.root / "watcher" / "reports" / "autoupdate-latest.md").write_text("# report\n")
+
+    def test_the_commit_holds_the_fixed_file_the_bundle_and_the_report_and_nothing_else(self):
+        applied = self.applied()
+        self.write_reports(applied)
+        sha = au.commit_applied(self.root, applied, TODAY)
+        files = set(git(self.root, "show", "--name-only", "--pretty=", sha).split())
+        self.assertEqual(files, {FILE, "supabase/functions/_shared/data-bundle.ts", "watcher/reports/autoupdate-latest.json", "watcher/reports/autoupdate-latest.md"})
+        msg = git(self.root, "log", "-1", "--format=%B", sha)
+        self.assertIn("Zero-day fix", msg)
+        self.assertIn("0.01 -> 0.0125", msg)
+        self.assertIn("git revert", msg)
+        self.assertEqual(au.guard_commit(self.root, sha), [])
+        git(self.root, "push", "-q", "origin", "main")
+        clone = self.root.parent / (self.root.name + "-clone")
+        subprocess.run(["git", "clone", "-q", str(self.origin), str(clone)], check=True)
+        try:
+            self.assertEqual(json.loads((clone / FILE).read_text())["municipalities"][0]["rate"], 0.0125)
+        finally:
+            import shutil
+            shutil.rmtree(clone, ignore_errors=True)
+
+    def test_a_stray_edit_in_the_tree_stops_the_commit_and_clears_the_index(self):
+        applied = self.applied()
+        self.write_reports(applied)
+        (self.root / "src" / "calc.ts").write_text("export const rate = 0.99;\n")
+        with self.assertRaises(au.Rejected) as cm:
+            au.commit_applied(self.root, applied, TODAY)
+        self.assertIn("unexpected changes", str(cm.exception))
+        self.assertEqual(git(self.root, "diff", "--cached", "--name-only"), "")
+        self.assertEqual(git(self.root, "log", "-1", "--format=%s").strip(), "bundle")
+
+    def test_a_staged_stray_file_is_caught_too(self):
+        applied = self.applied()
+        self.write_reports(applied)
+        (self.root / "evil.txt").write_text("x")
+        git(self.root, "add", "evil.txt")
+        with self.assertRaises(au.Rejected):
+            au.commit_applied(self.root, applied, TODAY)
+        self.assertEqual(git(self.root, "diff", "--cached", "--name-only"), "")
+
+    def test_the_guard_flags_a_commit_that_carries_something_it_did_not_fix(self):
+        applied = self.applied()
+        self.write_reports(applied)
+        (self.root / "src" / "calc.ts").write_text("export const rate = 0.99;\n")
+        git(self.root, "add", "-A")
+        git(self.root, "commit", "-qm", "sneaky")
+        self.assertEqual(au.guard_commit(self.root), ["src/calc.ts"])
+        self.assertEqual(au.main(["--repo", str(self.root), "--guard", "HEAD"]), 1)
+
+    def test_the_stray_check_names_exactly_what_is_allowed(self):
+        applied = [self.proposal()]
+        self.assertEqual(au.stray_files([FILE, "supabase/functions/_shared/engine/x.ts", "watcher/autoupdate-log.jsonl"], [normalize_p(p) for p in applied]), [])
+        self.assertEqual(au.stray_files(["data/local/OH-municipalities-2025.json", "site/server.ts", "watcher/autoupdate.json"], applied),
+                         ["data/local/OH-municipalities-2025.json", "site/server.ts", "watcher/autoupdate.json"])
+
+    def run_main(self, env=None, **kw):
+        cfg = {**CONFIG, "enabled": True}
+        (self.root / "watcher" / "autoupdate.json").write_text(json.dumps(cfg))
+        (self.root / "watcher" / "sources.json").write_text(json.dumps({"sources": SOURCES}))
+        git(self.root, "add", "-A")
+        git(self.root, "commit", "-qm", "config")
+        p = self.proposal()
+        finding = {"kind": "rate_differs", "severity": "action", "code": "00142", "name": "Aberdeen", "source_id": "oh-muni", "reads": self.reads(0.0125),
+                   "change": {"file": FILE, "id_key": "municode", "id": "00142", "key": "rate", "old": 0.01, "new": 0.0125,
+                              "effective_from": f"{YEAR}-01-01", "source_url": FINDER}}
+        fake_watch = SimpleNamespace(fetch=lambda url: None)
+        saved = au.DEFAULT_VERIFY
+        au.DEFAULT_VERIFY = []
+        try:
+            with mock.patch.dict(sys.modules, {"watch": fake_watch}), mock.patch.object(au, "gather", return_value=([finding], 1)), \
+                 mock.patch("builtins.print"), mock.patch.dict(os.environ, env or {}):
+                return au.main(["--repo", str(self.root), "--apply", "--commit"])
+        finally:
+            au.DEFAULT_VERIFY = saved
+
+    def test_main_applies_and_commits_when_enabled(self):
+        before = git(self.root, "rev-parse", "HEAD").strip()
+        self.assertEqual(self.run_main(), 0)
+        after = git(self.root, "rev-parse", "HEAD").strip()
+        self.assertNotEqual(before, after)
+        self.assertTrue(git(self.root, "log", "-1", "--format=%s").startswith("Zero-day fix"))
+        self.assertEqual(au.guard_commit(self.root), [])
+        self.assertEqual(json.loads((self.root / FILE).read_text())["municipalities"][0]["rate"], 0.0125)
+
+    def test_the_emergency_stop_variable_turns_every_change_off(self):
+        self.assertEqual(self.run_main(env={"AUTOUPDATE_PAUSED": "true"}), 0)
+        self.assertEqual(git(self.root, "log", "-1", "--format=%s").strip(), "config")  # nothing committed after the setup
+        self.assertEqual(json.loads((self.root / FILE).read_text())["municipalities"][0]["rate"], 0.01)
 
 
 class FromTheOfficialFileToTheLine(Base):
