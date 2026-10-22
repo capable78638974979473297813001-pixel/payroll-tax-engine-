@@ -1,14 +1,31 @@
 {
- "date": "2026-10-20",
+ "date": "2026-10-22",
  "counts": {
-  "unchanged": 373,
-  "blocked": 4,
-  "changed": 7,
-  "gone": 2,
-  "new": 236
+  "unchanged": 1002,
+  "new": 17,
+  "changed": 41,
+  "blocked": 34,
+  "gone": 5,
+  "unreachable": 5
  },
- "total": 622,
+ "total": 1104,
  "changed": [
+  {
+   "id": "al-494cac99a9",
+   "jurisdiction": "AL",
+   "title": "Alabama DOR: news",
+   "url": "https://www.revenue.alabama.gov/news",
+   "detail": "5 lines added, 5 removed; 1 links added, 1 removed",
+   "figures_added": [],
+   "figures_removed": [],
+   "links_added": [
+    "https://www.revenue.alabama.gov/memo-new-license-plate-mvd-memo-2026-007/"
+   ],
+   "links_removed": [
+    "https://www.revenue.alabama.gov/business-license-newsletter-fall-2026/"
+   ],
+   "significant": true
+  },
   {
    "id": "al-dcd77af5c8",
    "jurisdiction": "AL",
@@ -22,79 +39,402 @@
    "significant": false
   },
   {
-   "id": "in-f3e8cf456b~fefe2c31",
-   "jurisdiction": "IN",
-   "title": "Departmental Notice #1 (linked from Indiana DOR withholding)",
-   "url": "https://www.in.gov/dA/92797e5a5f/dn01.pdf?language_id=1",
-   "detail": "46 lines added, 54 removed",
-   "figures_added": [
-    "0.0171"
-   ],
+   "id": "az-b66098e04c",
+   "jurisdiction": "AZ",
+   "title": "City of Flagstaff -- City of Flagstaff announces minimum wage for 2026",
+   "url": "https://www.flagstaff.az.gov/CivicAlerts.aspx?AID=2165",
+   "detail": "2 lines added, 2 removed",
+   "figures_added": [],
+   "figures_removed": [],
+   "links_added": [],
+   "links_removed": [],
+   "significant": true
+  },
+  {
+   "id": "ca-3e493dc2a7~a35d58c8",
+   "jurisdiction": "CA",
+   "title": "Aviso Legal (Spanish) FY25-26 (linked from City of Santa Monica -- Minimum Wage)",
+   "url": "https://www.santamonica.gov/media/Minimum_Wage/Notifications/25-26%20Notices/2025-26__Notification_Spanish%202025-09-08.pdf",
+   "detail": "9 lines added, 120 removed",
+   "figures_added": [],
    "figures_removed": [
-    "0.017"
+    "$\n17.81",
+    "$22.50",
+    "4.62",
+    "4.62",
+    "4.62",
+    "4.63",
+    "4.63"
    ],
    "links_added": [],
    "links_removed": [],
    "significant": true
   },
   {
-   "id": "in-e42a1b3562",
-   "jurisdiction": "IN",
-   "title": "Indiana DOR: departmental notices",
-   "url": "https://www.in.gov/dor/legal-resources/tax-library/departmental-notices/",
-   "detail": "1 lines added, 1 removed; 15 links added, 15 removed",
+   "id": "ca-3e493dc2a7~69c43111",
+   "jurisdiction": "CA",
+   "title": "Aviso Legal (Spanish) FY26-27 (linked from City of Santa Monica -- Minimum Wage)",
+   "url": "https://www.santamonica.gov/media/Minimum_Wage/Notifications/26-27%20Notices/2026-27_Notification_Spanish%202026-06-09.pdf",
+   "detail": "9 lines added, 120 removed",
+   "figures_added": [],
+   "figures_removed": [
+    "$\n18.47",
+    "$25.00",
+    "4.62",
+    "4.62",
+    "4.62",
+    "4.63",
+    "4.63"
+   ],
+   "links_added": [],
+   "links_removed": [],
+   "significant": true
+  },
+  {
+   "id": "ca-3e493dc2a7~fd5146ef",
+   "jurisdiction": "CA",
+   "title": "Enforcement Guide (linked from City of Santa Monica -- Minimum Wage)",
+   "url": "https://www.santamonica.gov/Media/Minimum_Wage/MinimumWage_Enforcement-Businesses.pdf",
+   "detail": "9 lines added, 63 removed",
+   "figures_added": [],
+   "figures_removed": [
+    "310.458",
+    "800.593"
+   ],
+   "links_added": [],
+   "links_removed": [],
+   "significant": true
+  },
+  {
+   "id": "ca-3e493dc2a7~83e19890",
+   "jurisdiction": "CA",
+   "title": "FAQ (English) (linked from City of Santa Monica -- Minimum Wage)",
+   "url": "https://santamonica.gov/media/Minimum_Wage/MinimumWageFAQ_English2023.pdf",
+   "detail": "9 lines added, 369 removed",
+   "figures_added": [],
+   "figures_removed": [
+    "$10.00",
+    "$10.50",
+    "$10.50",
+    "$12.00",
+    "$12.00",
+    "$13.25",
+    "$13.25",
+    "$14.25",
+    "$14.25",
+    "$15.00",
+    "$15.00",
+    "$15.00",
+    "$15.66",
+    "$15.66",
+    "$15.96",
+    "$15.96",
+    "$15.96",
+    "1.09",
+    "1.09",
+    "100%",
+    "20%",
+    "30%",
+    "4.62",
+    "4.62",
+    "4.62",
+    "4.62",
+    "4.62",
+    "4.62",
+    "4.62",
+    "4.62",
+    "4.62",
+    "4.62",
+    "4.62",
+    "4.62",
+    "4.63",
+    "4.63",
+    "4.63",
+    "4.63",
+    "5%",
+    "85%"
+   ],
+   "links_added": [],
+   "links_removed": [],
+   "significant": true
+  },
+  {
+   "id": "ca-3e493dc2a7~9a0a9501",
+   "jurisdiction": "CA",
+   "title": "Hotel Wage Fact Sheet (linked from City of Santa Monica -- Minimum Wage)",
+   "url": "https://www.santamonica.gov/Media/Minimum_Wage/SantaMonicaWageLaw-Hotels.pdf",
+   "detail": "9 lines added, 43 removed",
+   "figures_added": [],
+   "figures_removed": [
+    "4.63",
+    "4.63"
+   ],
+   "links_added": [],
+   "links_removed": [],
+   "significant": true
+  },
+  {
+   "id": "ca-3e493dc2a7~d01625f8",
+   "jurisdiction": "CA",
+   "title": "Impressum [German] (linked from City of Santa Monica -- Minimum Wage)",
+   "url": "https://www.santamonica.gov/media/Minimum_Wage/Notifications/26-27%20Notices/2026-27_Notification_German.pdf",
+   "detail": "9 lines added, 98 removed",
+   "figures_added": [],
+   "figures_removed": [
+    "01.01",
+    "01.01",
+    "01.07",
+    "01.07",
+    "30.06",
+    "4.62",
+    "4.62",
+    "4.62"
+   ],
+   "links_added": [],
+   "links_removed": [],
+   "significant": true
+  },
+  {
+   "id": "ca-3e493dc2a7~d80c6177",
+   "jurisdiction": "CA",
+   "title": "Legal Notice FY25-26 (linked from City of Santa Monica -- Minimum Wage)",
+   "url": "https://www.santamonica.gov/media/Minimum_Wage/Notifications/25-26%20Notices/2025-26__Notification_English%202025-09-08.pdf",
+   "detail": "9 lines added, 121 removed",
+   "figures_added": [],
+   "figures_removed": [
+    "$\n17.81",
+    "$22.50",
+    "4.62",
+    "4.62",
+    "4.62",
+    "4.63",
+    "4.63"
+   ],
+   "links_added": [],
+   "links_removed": [],
+   "significant": true
+  },
+  {
+   "id": "ca-3e493dc2a7~5e204301",
+   "jurisdiction": "CA",
+   "title": "Legal Notice FY26-27 (linked from City of Santa Monica -- Minimum Wage)",
+   "url": "https://www.santamonica.gov/media/Minimum_Wage/Notifications/26-27%20Notices/2026-27_Notification_English%202026-06-09.pdf",
+   "detail": "9 lines added, 120 removed",
+   "figures_added": [],
+   "figures_removed": [
+    "$\n18.47",
+    "$25.00",
+    "4.62",
+    "4.62",
+    "4.62",
+    "4.63",
+    "4.63"
+   ],
+   "links_added": [],
+   "links_removed": [],
+   "significant": true
+  },
+  {
+   "id": "ca-3e493dc2a7~38854072",
+   "jurisdiction": "CA",
+   "title": "Legal na Paunawa [Tagalog] (linked from City of Santa Monica -- Minimum Wage)",
+   "url": "https://www.santamonica.gov/media/Minimum_Wage/Notifications/26-27%20Notices/2026-27_Notification_Tagalog.pdf",
+   "detail": "9 lines added, 96 removed",
+   "figures_added": [],
+   "figures_removed": [
+    "$\n18.47",
+    "4.62",
+    "4.62",
+    "4.62"
+   ],
+   "links_added": [],
+   "links_removed": [],
+   "significant": true
+  },
+  {
+   "id": "ca-3e493dc2a7~c7a5de03",
+   "jurisdiction": "CA",
+   "title": "Paid Sick Leave Checklist (linked from City of Santa Monica -- Minimum Wage)",
+   "url": "https://www.santamonica.gov/Media/Minimum_Wage/PaidSickLeave-ChecklistforBusinesses.pdf",
+   "detail": "9 lines added, 19 removed",
+   "figures_added": [],
+   "figures_removed": [],
+   "links_added": [],
+   "links_removed": [],
+   "significant": true
+  },
+  {
+   "id": "ca-3e493dc2a7~c23d645f",
+   "jurisdiction": "CA",
+   "title": "Paid Sick Leave Tips (linked from City of Santa Monica -- Minimum Wage)",
+   "url": "https://www.santamonica.gov/Media/Minimum_Wage/PaidSickLeaveTips-Employees.pdf",
+   "detail": "9 lines added, 39 removed",
+   "figures_added": [],
+   "figures_removed": [],
+   "links_added": [],
+   "links_removed": [],
+   "significant": true
+  },
+  {
+   "id": "ca-3e493dc2a7~662515bf",
+   "jurisdiction": "CA",
+   "title": "Paid Sick Leave: Must do/ Should do (linked from City of Santa Monica -- Minimum Wage)",
+   "url": "https://www.santamonica.gov/Media/Minimum_Wage/MinimumWagePostcard_MustShouldDo.pdf",
+   "detail": "9 lines added, 35 removed",
+   "figures_added": [],
+   "figures_removed": [],
+   "links_added": [],
+   "links_removed": [],
+   "significant": true
+  },
+  {
+   "id": "ca-3e493dc2a7~60158b00",
+   "jurisdiction": "CA",
+   "title": "Th\u00f4ng b\u00e1o ph\u00e1p l\u00fd [Vietnamese] (linked from City of Santa Monica -- Minimum Wage)",
+   "url": "https://www.santamonica.gov/media/Minimum_Wage/Notifications/26-27%20Notices/2026-27_Notification_Vietnamese.pdf",
+   "detail": "9 lines added, 92 removed",
+   "figures_added": [],
+   "figures_removed": [
+    "$18.47",
+    "4.62",
+    "4.62",
+    "4.62"
+   ],
+   "links_added": [],
+   "links_removed": [],
+   "significant": true
+  },
+  {
+   "id": "ca-3e493dc2a7~bb781a8c",
+   "jurisdiction": "CA",
+   "title": "\u041e\u0444\u0438\u0446\u0438\u0430\u043b\u044c\u043d\u043e\u0435 \u0443\u0432\u0435\u0434\u043e\u043c\u043b\u0435\u043d\u0438\u0435 [Russian] (linked from City of Santa Monica -- Minimum Wage)",
+   "url": "https://www.santamonica.gov/media/Minimum_Wage/Notifications/26-27%20Notices/2026-27_Notification_Russian.pdf",
+   "detail": "9 lines added, 107 removed",
+   "figures_added": [],
+   "figures_removed": [
+    "18.47",
+    "4.62",
+    "4.62",
+    "4.62"
+   ],
+   "links_added": [],
+   "links_removed": [],
+   "significant": true
+  },
+  {
+   "id": "ca-3e493dc2a7~517ef09e",
+   "jurisdiction": "CA",
+   "title": "\u053b\u0580\u0561\u057e\u0561\u056f\u0561\u0576 \u056e\u0561\u0576\u0578\u0582\u0581\u0578\u0582\u0574 [Armenian] (linked from City of Santa Monica -- Minimum Wage)",
+   "url": "https://www.santamonica.gov/media/Minimum_Wage/Notifications/26-27%20Notices/2026-27_Notification_Armenian.pdf",
+   "detail": "9 lines added, 103 removed",
+   "figures_added": [],
+   "figures_removed": [
+    "$18.47",
+    "4.62",
+    "4.62",
+    "4.62"
+   ],
+   "links_added": [],
+   "links_removed": [],
+   "significant": true
+  },
+  {
+   "id": "ca-3e493dc2a7~bb966645",
+   "jurisdiction": "CA",
+   "title": "\u0e04\u0e33\u0e1a\u0e2d\u0e01\u0e01\u0e25\u0e48\u0e32\u0e27\u0e17\u0e32\u0e07\u0e01\u0e0e\u0e2b\u0e21\u0e32\u0e22 [Thai] (linked from City of Santa Monica -- Minimum Wage)",
+   "url": "https://www.santamonica.gov/media/Minimum_Wage/Notifications/26-27%20Notices/2026-27_Notification_Thai.pdf",
+   "detail": "9 lines added, 76 removed",
+   "figures_added": [],
+   "figures_removed": [
+    "$18.47",
+    "4.62",
+    "4.62",
+    "4.62"
+   ],
+   "links_added": [],
+   "links_removed": [],
+   "significant": true
+  },
+  {
+   "id": "ca-3e493dc2a7~42b14eda",
+   "jurisdiction": "CA",
+   "title": "\u6cd5\u5f8b\u58f0\u660e [Simplified Chinese] (linked from City of Santa Monica -- Minimum Wage)",
+   "url": "https://www.santamonica.gov/media/Minimum_Wage/Notifications/26-27%20Notices/2026-27_Notification_Simplified_Chinese.pdf",
+   "detail": "9 lines added, 67 removed",
+   "figures_added": [],
+   "figures_removed": [
+    "$\n18.47",
+    "4.62",
+    "4.62",
+    "4.62"
+   ],
+   "links_added": [],
+   "links_removed": [],
+   "significant": true
+  },
+  {
+   "id": "ca-3e493dc2a7~d8fc836c",
+   "jurisdiction": "CA",
+   "title": "\ubc95\uc801 \uace0\uc9c0 [Korean] (linked from City of Santa Monica -- Minimum Wage)",
+   "url": "https://www.santamonica.gov/media/Minimum_Wage/Notifications/26-27%20Notices/2026-27_Notification_Korean.pdf",
+   "detail": "9 lines added, 81 removed",
+   "figures_added": [],
+   "figures_removed": [
+    "$18.47",
+    "4.62",
+    "4.62",
+    "4.62"
+   ],
+   "links_added": [],
+   "links_removed": [],
+   "significant": true
+  },
+  {
+   "id": "ks-6a3e772e2e",
+   "jurisdiction": "KS",
+   "title": "K.S.A. \u00a7 60-2310 \u2014 wage garnishment: maximum part of earnings subject to garnishment is the lesser of 25% of aggregate disposable earnings, or the amount by which disposable earnings exceed 30 times the federal minimum hourly wage",
+   "url": "https://www.ksrevisor.gov/statutes/chapters/ch60/060_023_0010.html",
+   "detail": "1 lines added, 0 removed; 1 links added, 0 removed",
    "figures_added": [],
    "figures_removed": [],
    "links_added": [
-    "https://www.in.gov/dor/files/dn05.pdf",
-    "https://www.in.gov/dor/files/dn08.pdf",
-    "https://www.in.gov/dor/files/dn33.pdf",
-    "https://www.in.gov/dor/files/dn36.pdf",
-    "https://www.in.gov/dor/files/dn37.pdf",
-    "https://www.in.gov/dor/files/dn40.pdf",
-    "https://www.in.gov/dor/files/dn41.pdf",
-    "https://www.in.gov/dor/files/dn42.pdf",
-    "https://www.in.gov/dor/files/dn44.pdf",
-    "https://www.in.gov/dor/files/reference/dn01.pdf",
-    "https://www.in.gov/dor/files/reference/dn02.pdf",
-    "https://www.in.gov/dor/files/reference/dn03.pdf",
-    "https://www.in.gov/dor/files/reference/dn16.pdf",
-    "https://www.in.gov/dor/files/reference/dn43.pdf",
-    "https://www.in.gov/dor/files/reference/dn45.pdf"
+    "https://www.ksrevisor.gov/statutes/chapters/ch60/docs/LCC_Packet20261106/LCC Notice November 6, 2026.pdf"
+   ],
+   "links_removed": [],
+   "significant": true
+  },
+  {
+   "id": "ky-829edc7fb7",
+   "jurisdiction": "KY",
+   "title": "Kentucky withholding",
+   "url": "https://revenue.ky.gov/Business/Pages/Employer-Payroll-Withholding.aspx",
+   "detail": "1 lines added, 1 removed; 3 links added, 3 removed",
+   "figures_added": [],
+   "figures_removed": [],
+   "links_added": [
+    "https://revenue.ky.gov/Business/PublishingImages/Pages/Employer-Payroll-Withholding/2024%20Withholding%20Calculator%20%28Team%20KY%29-%20Final%20version%20to%20publish.xlsx",
+    "https://revenue.ky.gov/Forms/2025%20Specifications%20for%20Electronic%20Submission%20of%201099B%2c%201099DIV%2c%201099G%2c%201099INT%2c%201099K%2c%201099MISC%2c%201099NEC%2c%201099OID%2c%201099R%20and%20W2G%20Tax%20Information%20on%20CD%20or%20MyTaxes.ky.gov.pdf",
+    "https://revenue.ky.gov/Forms/2026%20Specifications%20for%20Electronic%20Submission%20of%20Annual%20wage%20and%20Tax%20Information%20Via%20Electronic%20Media%20or%20Web.pdf"
    ],
    "links_removed": [
-    "https://www.in.gov/dA/08aee5849a/dn08.pdf?language_id=1",
-    "https://www.in.gov/dA/08b0a91827/dn45.pdf?language_id=1",
-    "https://www.in.gov/dA/1c13cef183/dn01.pdf?language_id=1",
-    "https://www.in.gov/dA/380e7e58fd/dn05.pdf?language_id=1",
-    "https://www.in.gov/dA/4303779d38/dn02.pdf?language_id=1",
-    "https://www.in.gov/dA/4f00d6bd37/dn41.pdf?language_id=1",
-    "https://www.in.gov/dA/846e009a54/dn33.pdf?language_id=1",
-    "https://www.in.gov/dA/b597a0cf17/dn42.pdf?language_id=1",
-    "https://www.in.gov/dA/b8bf9db542/dn43.pdf?language_id=1",
-    "https://www.in.gov/dA/c7308ef71f/dn36.pdf?language_id=1",
-    "https://www.in.gov/dA/cd91fc13f4/dn40.pdf?language_id=1",
-    "https://www.in.gov/dA/dbdab50b66/dn16.pdf?language_id=1",
-    "https://www.in.gov/dA/e466396cf5/dn03.pdf?language_id=1",
-    "https://www.in.gov/dA/eb284a415f/dn44.pdf?language_id=1",
-    "https://www.in.gov/dA/fa61e1bc2b/dn37.pdf?language_id=1"
+    "https://revenue.ky.gov/Business/PublishingImages/Pages/Employer-Payroll-Withholding/2024%20Withholding%20Calculator%20(Team%20KY)-%20Final%20version%20to%20publish.xlsx",
+    "https://revenue.ky.gov/Forms/2025%20Specifications%20for%20Electronic%20Submission%20of%201099B,%201099DIV,%201099G,%201099INT,%201099K,%201099MISC,%201099NEC,%201099OID,%201099R%20and%20W2G%20Tax%20Information%20on%20CD%20or%20MyTaxes.ky.gov.pdf",
+    "https://revenue.ky.gov/Forms/2025%20Specifications%20for%20Electronic%20Submission%20of%20Annual%20wage%20and%20Tax%20Information%20Via%20Electronic%20Media%20or%20Web.pdf"
    ],
    "significant": true
   },
   {
-   "id": "in-86066aa1c0",
-   "jurisdiction": "IN",
-   "title": "Indiana Departmental Notice #1 (county rates)",
-   "url": "https://www.in.gov/dor/files/dn01.pdf",
-   "detail": "46 lines added, 54 removed",
-   "figures_added": [
-    "0.0171"
-   ],
-   "figures_removed": [
-    "0.017"
-   ],
+   "id": "me-306412aaa2",
+   "jurisdiction": "ME",
+   "title": "Maine Revenue Services: home (announcements)",
+   "url": "https://www.maine.gov/revenue/",
+   "detail": "1 lines added, 2 removed; 0 links added, 1 removed",
+   "figures_added": [],
+   "figures_removed": [],
    "links_added": [],
-   "links_removed": [],
+   "links_removed": [
+    "https://www.maine.gov/revenue/mtpwebinarschedule"
+   ],
    "significant": true
   },
   {
@@ -102,60 +442,308 @@
    "jurisdiction": "MI",
    "title": "Michigan LEO -- Michigan's Minimum Wage Set to Increase on Jan. 1, 2026",
    "url": "https://www.michigan.gov/leo/news/2025/12/08/michigans-minimum-wage-set-to-increase-on-jan-1-2026",
-   "detail": "2 lines added, 2 removed (link lists / headlines only)",
+   "detail": "1 lines added, 1 removed (link lists / headlines only)",
    "figures_added": [],
    "figures_removed": [
-    "$2"
+    "$1.5"
    ],
    "links_added": [],
    "links_removed": [],
    "significant": false
   },
   {
+   "id": "mi-b2211f9083",
+   "jurisdiction": "MI",
+   "title": "Other Michigan cities with income tax (City of Grand Rapids rate table)",
+   "url": "https://www.grandrapidsmi.gov/departments/fiscal-services/income-tax/other-michigan-cities-with-income-tax/",
+   "detail": "1 lines added, 1 removed (link lists / headlines only)",
+   "figures_added": [],
+   "figures_removed": [],
+   "links_added": [],
+   "links_removed": [],
+   "significant": false
+  },
+  {
+   "id": "mn-bb67f51ead",
+   "jurisdiction": "MN",
+   "title": "City of Saint Paul -- Minimum Wage Increases for Small and Micro Businesses (effective July 1, 2026)",
+   "url": "https://www.stpaul.gov/news/city-saint-paul-minimum-wage-increases-small-and-micro-businesses",
+   "detail": "12 lines added, 12 removed",
+   "figures_added": [],
+   "figures_removed": [],
+   "links_added": [],
+   "links_removed": [],
+   "significant": true
+  },
+  {
+   "id": "mo-2d09c4e722",
+   "jurisdiction": "MO",
+   "title": "St. Louis: earnings tax department",
+   "url": "https://www.stlouis-mo.gov/government/departments/collector/earnings-tax/index.cfm",
+   "detail": "1 lines added, 1 removed (link lists / headlines only)",
+   "figures_added": [],
+   "figures_removed": [],
+   "links_added": [],
+   "links_removed": [],
+   "significant": false
+  },
+  {
+   "id": "nc-e720098358",
+   "jurisdiction": "NC",
+   "title": "NCDOR -- Withholding Tax Frequently Asked Questions",
+   "url": "https://www.ncdor.gov/withholding-tax-frequently-asked-questions",
+   "detail": "0 lines added, 25 removed (link lists / headlines only)",
+   "figures_added": [],
+   "figures_removed": [],
+   "links_added": [],
+   "links_removed": [],
+   "significant": false
+  },
+  {
+   "id": "ny-d4f2c6eeff~d2fc2171",
+   "jurisdiction": "NY",
+   "title": "fact sheet PDF (linked from IRS -- Determining if an employer is an applicable)",
+   "url": "http://www.treasury.gov/press-center/press-releases/Documents/Fact%20Sheet%20021014.pdf",
+   "detail": "4 lines added, 5 removed",
+   "figures_added": [],
+   "figures_removed": [],
+   "links_added": [],
+   "links_removed": [],
+   "significant": true
+  },
+  {
    "id": "oh-557c86e52b",
    "jurisdiction": "OH",
    "title": "RITA (Regional Income Tax Agency): news and updates (municipal rate and law changes)",
    "url": "https://www.ritaohio.com/Resources/News",
-   "detail": "8 lines added, 6 removed; 4 links added, 3 removed",
-   "figures_added": [
-    "9%"
-   ],
+   "detail": "1 lines added, 1 removed",
+   "figures_added": [],
    "figures_removed": [],
+   "links_added": [],
+   "links_removed": [],
+   "significant": true
+  },
+  {
+   "id": "or-f5c7c2d0d9",
+   "jurisdiction": "OR",
+   "title": "Oregon Department of Revenue: news",
+   "url": "https://www.oregon.gov/dor/news/Pages/default.aspx",
+   "detail": "30 lines added, 29 removed; 6 links added, 4 removed",
+   "figures_added": [],
+   "figures_removed": [
+    "$2.5"
+   ],
    "links_added": [
-    "https://www.ritaohio.com/Resources/News/ViewNews?gid=51cd1d53-eb98-4ba4-864a-30e8d190a56a",
-    "https://www.ritaohio.com/Resources/News/ViewNews?gid=8a25d195-993e-49fc-b7d2-5f9e2756a309",
-    "https://www.ritaohio.com/Resources/News/ViewNews?gid=9c040fc4-37c8-4ca4-b331-0c8ee46ad509",
-    "https://www.ritaohio.com/Resources/News?currentPage=19"
+    "https://apps.oregon.gov/oregon-newsroom/OR/DCBS/Posts/Post/2026-community-bank-week",
+    "https://apps.oregon.gov/oregon-newsroom/OR/DCBS/Posts/Post/2610-media-contest",
+    "https://apps.oregon.gov/oregon-newsroom/OR/OPRD/Posts/Post/ATV-advisory-committee-Nov-4",
+    "https://apps.oregon.gov/oregon-newsroom/OR/OST/Posts",
+    "https://apps.oregon.gov/oregon-newsroom/OR/OST/Posts/Post/OIC-Reviews-Fund-Benchmarks-and-Reports-Strong-Performance-of-SAIF",
+    "https://apps.oregon.gov/oregon-newsroom/OR/Posts/Search?from=10%2F21%2F2026&to=10%2F21%2F2026"
    ],
    "links_removed": [
-    "https://www.ritaohio.com/Resources/News/ViewNews?gid=33b4cbc6-1ea4-4d02-a437-b1d09742336e",
-    "https://www.ritaohio.com/Resources/News/ViewNews?gid=379ccc34-438c-4764-8a20-c3c80793784f",
-    "https://www.ritaohio.com/Resources/News/ViewNews?gid=62aeeffd-59f7-4d78-a378-e27793d06b52"
+    "https://apps.oregon.gov/oregon-newsroom/OR/DCBS/Posts/Post/2610-ppfp-conference",
+    "https://apps.oregon.gov/oregon-newsroom/OR/DCBS/Posts/Post/settlement-with-crypto-kiosk-operator",
+    "https://apps.oregon.gov/oregon-newsroom/OR/OEM/Posts/Post/Support-Bend",
+    "https://apps.oregon.gov/oregon-newsroom/OR/Posts/Search?from=10%2F16%2F2026&to=10%2F16%2F2026"
    ],
    "significant": true
   },
   {
-   "id": "oh-2fd5ea2a78",
-   "jurisdiction": "OH",
-   "title": "RITA: tax professionals news",
-   "url": "https://www.ritaohio.com/TaxProfessionals/News",
+   "id": "pa-da0fba1e41",
+   "jurisdiction": "PA",
+   "title": "PA Department of Revenue -- Employer Withholding (reciprocal agreements)",
+   "url": "https://www.pa.gov/en/agencies/revenue/resources/tax-types-and-information/employer-withholding.html",
+   "detail": "1 lines added, 0 removed (link lists / headlines only)",
+   "figures_added": [],
+   "figures_removed": [],
+   "links_added": [],
+   "links_removed": [],
+   "significant": false
+  },
+  {
+   "id": "pa-19b2687c65",
+   "jurisdiction": "PA",
+   "title": "PA Department of Revenue -- Personal Income Tax (3.07%)",
+   "url": "https://www.pa.gov/agencies/revenue/resources/tax-types-and-information/personal-income-tax",
+   "detail": "1 lines added, 0 removed (link lists / headlines only)",
+   "figures_added": [],
+   "figures_removed": [],
+   "links_added": [],
+   "links_removed": [],
+   "significant": false
+  },
+  {
+   "id": "pa-a6cda778f7",
+   "jurisdiction": "PA",
+   "title": "Pennsylvania Department of Revenue: newsroom",
+   "url": "https://www.pa.gov/agencies/revenue/newsroom",
    "detail": "1 lines added, 0 removed; 1 links added, 0 removed",
    "figures_added": [],
    "figures_removed": [],
    "links_added": [
-    "https://www.ritaohio.com/Resources/News/ViewNews?gid=9c040fc4-37c8-4ca4-b331-0c8ee46ad509"
+    "https://www.pa.gov/agencies/revenue/newsroom/shapiro-administration-provides-free-legal-support-on-tax-issues-to-pennsylvanians-through-low-income-taxpayer-clinics"
+   ],
+   "links_removed": [],
+   "significant": true
+  },
+  {
+   "id": "pa-8251b0b3ee",
+   "jurisdiction": "PA",
+   "title": "Pennsylvania employer withholding",
+   "url": "https://www.pa.gov/agencies/revenue/resources/tax-types-and-information/employer-withholding",
+   "detail": "1 lines added, 0 removed; 1 links added, 0 removed",
+   "figures_added": [],
+   "figures_removed": [],
+   "links_added": [
+    "https://www.pa.gov/agencies/revenue/newsroom/shapiro-administration-provides-free-legal-support-on-tax-issues-to-pennsylvanians-through-low-income-taxpayer-clinics"
+   ],
+   "links_removed": [],
+   "significant": true
+  },
+  {
+   "id": "us-f10e455e50",
+   "jurisdiction": "US",
+   "title": "IRS draft tax forms: payroll forms only (W-4, W-4P/R, Pub 15/15-T, 940/941/944, W-2/W-3)",
+   "url": "https://www.irs.gov/draft-tax-forms",
+   "detail": "read with a headless browser; 3 lines added, 2 removed; 2 links added, 1 removed",
+   "figures_added": [],
+   "figures_removed": [],
+   "links_added": [
+    "https://www.irs.gov/pub/irs-dft/i944--dft.pdf",
+    "https://www.irs.gov/pub/irs-dft/p15--dft.pdf"
+   ],
+   "links_removed": [
+    "https://www.irs.gov/pub/irs-dft/i940--dft.pdf"
+   ],
+   "significant": true
+  },
+  {
+   "id": "wa-78ec5c3b87",
+   "jurisdiction": "WA",
+   "title": "City of Seattle, City Finance -- Payroll expense tax (2025 thresholds and rates)",
+   "url": "https://www.seattle.gov/city-finance/business-taxes-and-licenses/seattle-taxes/payroll-expense-tax",
+   "detail": "1 lines added, 7 removed; 1 links added, 1 removed",
+   "figures_added": [],
+   "figures_removed": [
+    "42.56"
+   ],
+   "links_added": [
+    "https://www.seattle.gov/city-finance/business-taxes-and-licenses/seattle-taxes/documents/Departments/CityFinance/Seattle%20Taxes/Payroll%20Expense%20Tax/2026%20Payroll%20Expense%20Tax%20Updates/Q4%202026%20Payroll%20Exp%20Tax%20Presentation.pdf"
+   ],
+   "links_removed": [
+    "https://www.seattle.gov/city-finance/business-taxes-and-licenses/seattle-taxes/documents/Departments/CityFinance/Seattle%20Taxes/Payroll%20Expense%20Tax/2026%20Payroll%20Expense%20Tax%20Updates/Q3%202026%20Payroll%20Expense%20Tax%20Presentation.pdf"
+   ],
+   "significant": true
+  },
+  {
+   "id": "wa-5ff259aacd",
+   "jurisdiction": "WA",
+   "title": "City of Seattle, City Finance -- Social Housing Tax",
+   "url": "https://seattle.gov/city-finance/business-taxes-and-licenses/seattle-taxes/social-housing-tax",
+   "detail": "1 lines added, 7 removed; 1 links added, 1 removed",
+   "figures_added": [],
+   "figures_removed": [
+    "42.56"
+   ],
+   "links_added": [
+    "https://seattle.gov/city-finance/business-taxes-and-licenses/seattle-taxes/documents/Departments/CityFinance/Seattle%20Taxes/Social%20Housing%20Developer%20Tax/2026%20Social%20Housing%20Tax%20Updates/Q4%202026%20Seattle%20Social%20Housing%20Tax%20Training.pdf"
+   ],
+   "links_removed": [
+    "https://seattle.gov/city-finance/business-taxes-and-licenses/seattle-taxes/documents/Departments/CityFinance/Seattle%20Taxes/Social%20Housing%20Developer%20Tax/2026%20Social%20Housing%20Tax%20Updates/2026%20Social%20Housing%20Tax%20Trainings/Q3%202026%20Seattle%20Social%20Housing%20Tax%20Presentation.pdf"
+   ],
+   "significant": true
+  },
+  {
+   "id": "wa-d78f0154e8",
+   "jurisdiction": "WA",
+   "title": "Washington State Department of Labor & Industries -- Local Minimum Wage Rates",
+   "url": "https://lni.wa.gov/workers-rights/wages/minimum-wage/local-minimum-wage-rates",
+   "detail": "1 lines added, 1 removed",
+   "figures_added": [
+    "$19.28",
+    "$20.78",
+    "$21.78"
+   ],
+   "figures_removed": [
+    "$20.63",
+    "$21.63"
+   ],
+   "links_added": [],
+   "links_removed": [],
+   "significant": true
+  },
+  {
+   "id": "wv-b41d566a30",
+   "jurisdiction": "WV",
+   "title": "West Virginia State Tax Department: home page (news and notices)",
+   "url": "https://tax.wv.gov/",
+   "detail": "2 lines added, 0 removed; 1 links added, 0 removed",
+   "figures_added": [],
+   "figures_removed": [],
+   "links_added": [
+    "https://tax.wv.gov/Business/MotorFuel/Pages/DieselFuelExecutiveOrder.aspx"
    ],
    "links_removed": [],
    "significant": true
   }
  ],
- "significant_changes": 5,
+ "significant_changes": 34,
  "broken": [
   "https://www.tuskegeealabama.gov/finance-department/files/occupational-tax-form",
   "https://www.tuskegeealabama.gov/sites/g/files/vyhlif3946/f/uploads/infobrochure_word.pdf"
  ],
- "attention": [],
+ "attention": [
+  {
+   "kind": "missing_from_engine",
+   "title": "KY Whitesville",
+   "url": "",
+   "detail": "the Secretary of State lists this district (entered 2026-10-06; rate '') but KY-occupational-2026.json does not"
+  },
+  {
+   "kind": "missing_from_engine",
+   "title": "WV Chester",
+   "url": "",
+   "detail": "the list shows a $2 per week user fee in Chester, which the data does not have"
+  }
+ ],
  "reconcile": [
+  {
+   "kind": "rate_differs",
+   "severity": "info",
+   "source_id": "al-ed6876d0e5",
+   "jurisdiction": "AL",
+   "code": "",
+   "name": "Opelika",
+   "detail": "the League's survey list says 1.5%; the data has 1% (confirmed from the city's own document: tier primary_source)"
+  },
+  {
+   "kind": "rate_differs",
+   "severity": "info",
+   "source_id": "al-ed6876d0e5",
+   "jurisdiction": "AL",
+   "code": "",
+   "name": "Tuskegee",
+   "detail": "the League's survey list says 2%; the data has 3% (confirmed from the city's own document: tier conflicting_sources)"
+  },
+  {
+   "kind": "missing_from_engine",
+   "severity": "action",
+   "source_id": "ky-df76954a6f",
+   "jurisdiction": "KY",
+   "code": "246",
+   "name": "Whitesville",
+   "detail": "the Secretary of State lists this district (entered 2026-10-06; rate '') but KY-occupational-2026.json does not"
+  },
+  {
+   "kind": "rate_differs",
+   "severity": "info",
+   "source_id": "mi-b2211f9083",
+   "jurisdiction": "MI",
+   "code": "",
+   "name": "Saginaw",
+   "detail": "resident rate table 0.01 vs data 0.015; nonresident rate table 0.005 vs data 0.0075; exemption table 1000 vs data 750 (the data's own note records that this table is wrong for this city)"
+  },
   {
    "kind": "rate_differs",
    "severity": "info",
@@ -163,7 +751,17 @@
    "jurisdiction": "OH",
    "code": "76582",
    "name": "Indian Hill",
-   "detail": "official 0.450% vs engine 0.500% (acknowledged in the data file's own note)"
+   "detail": "official 0.450% vs engine 0.500% (acknowledged in the data file's own note)",
+   "change": {
+    "file": "data/local/OH-municipalities-2026.json",
+    "id_key": "municode",
+    "id": "76582",
+    "key": "rate",
+    "old": 0.005,
+    "new": 0.0045,
+    "effective_from": "2023-01-01",
+    "source_url": "https://thefinder.tax.ohio.gov/api/file-downloads/content?target=https%3A%2F%2Fapi.thefinder.tax.ohio.gov%2Ffinder%2Fapi%2Fv1%2Ftax-rates%2Fdownloads%2FMuni%2FOHMuniRateTable.csv"
+   }
   },
   {
    "kind": "rate_differs",
@@ -172,7 +770,17 @@
    "jurisdiction": "OH",
    "code": "81214",
    "name": "Washington",
-   "detail": "official 1.950% vs engine 1.750% (acknowledged in the data file's own note)"
+   "detail": "official 1.950% vs engine 1.750% (acknowledged in the data file's own note)",
+   "change": {
+    "file": "data/local/OH-municipalities-2026.json",
+    "id_key": "municode",
+    "id": "81214",
+    "key": "rate",
+    "old": 0.0175,
+    "new": 0.0195,
+    "effective_from": "2016-01-01",
+    "source_url": "https://thefinder.tax.ohio.gov/api/file-downloads/content?target=https%3A%2F%2Fapi.thefinder.tax.ohio.gov%2Ffinder%2Fapi%2Fv1%2Ftax-rates%2Fdownloads%2FMuni%2FOHMuniRateTable.csv"
+   }
   },
   {
    "kind": "not_in_official_file",
@@ -236,17 +844,81 @@
    "code": "86492",
    "name": "Woodville",
    "detail": "added by hand; the official rate file has no row for it yet (the Finder's directory lists it as code 86492)"
+  },
+  {
+   "kind": "rate_differs",
+   "severity": "info",
+   "source_id": "pa-dc25d178f2",
+   "jurisdiction": "PA",
+   "code": "510101",
+   "name": "Philadelphia City (Philadelphia)",
+   "detail": "residentEIT official 0.0374 vs engine 0.03735; nonresidentEIT official 0.0343 vs engine 0.03425; totalResidentEIT official 0.0374 vs engine 0.03735 (the entry carries its own note or dated changes)"
+  },
+  {
+   "kind": "not_yet_published",
+   "severity": "info",
+   "source_id": "pa-26b2a164e8",
+   "jurisdiction": "PA",
+   "code": "",
+   "name": "Pennsylvania register 2027",
+   "detail": "only 0 of 2627 rows carry a rate, so the 2027 register is not published yet; nothing to compare"
+  },
+  {
+   "kind": "missing_from_engine",
+   "severity": "action",
+   "source_id": "wv-638a265d37",
+   "jurisdiction": "WV",
+   "code": "",
+   "name": "Chester",
+   "detail": "the list shows a $2 per week user fee in Chester, which the data does not have"
   }
  ],
- "followed_documents": 392,
- "followed_documents_unread": 38,
- "followed_documents_deferred": 0,
- "verified": 616,
- "unverified": 6,
+ "followed_documents": 474,
+ "followed_documents_unread": 6,
+ "followed_documents_deferred": 540,
+ "verified": 1060,
+ "unverified": 44,
  "never_baselined": [
+  "https://birminghamal.hdlgov.com/base64files/TAXES_FORM_4.pdf",
+  "https://cityoffairfieldal.org/wp-content/uploads/2025/02/Ordinance-1019-Occupational-Tax_rotated.pdf",
   "https://www.tuskegeealabama.gov/finance-department/files/occupational-tax-form",
+  "https://www.rbcalabama.com/download/revenue-g-1/?wpdmdl=730&masterkey=60c8bce41072f",
   "https://labor.arkansas.gov/labor/labor-standards/minimum-wage-and-overtime/",
-  "https://pikevilleky.gov/business/"
+  "https://des.az.gov/sites/default/files/dl/UIT-0603A_FY26.pdf",
+  "https://www.auroragov.org/business_services/taxes__licensing/occupational_privilege_tax",
+  "https://www.greenwoodvillage.com/206/Occupational-Privilege-Tax",
+  "https://tax.colorado.gov/DR1098",
+  "https://tax.colorado.gov/news",
+  "https://tax.colorado.gov/withholding-tax",
+  "https://tax.colorado.gov/withholding-tax-guide",
+  "https://does.dc.gov/service/office-wage-hour-compliance-0",
+  "https://otr.cfo.dc.gov/page/withholding-tax-forms-and-publications",
+  "https://www.wilmingtonde.gov/residents/earned-income-tax-and-net-profits-tax",
+  "https://www.ilga.gov/legislation/ilcs/ilcs4.asp?DocName=073500050K12-803",
+  "https://illinoiscomptroller.gov/state-agencies/bulletins-forms/payroll-bulletins/illinois-state-income-tax-exemptions-2026",
+  "https://codelibrary.amlegal.com/codes/augusta/latest/augusta_ky/0-0-0-8998",
+  "https://codelibrary.amlegal.com/codes/elizabethtownky/latest/elizabethtown_ky/0-0-0-3203",
+  "https://codelibrary.amlegal.com/codes/marionky/latest/marion_ky/0-0-0-22684",
+  "https://codelibrary.amlegal.com/codes/mckeeky/latest/mckee_ky/0-0-0-2883",
+  "https://codelibrary.amlegal.com/codes/middlesboroky/latest/middlesboro_ky/0-0-0-5065",
+  "https://codelibrary.amlegal.com/codes/middletownky/latest/middletown_ky/0-0-0-10846",
+  "https://codelibrary.amlegal.com/codes/nortonvilleky/latest/nortonville_ky/0-0-0-3279",
+  "https://codelibrary.amlegal.com/codes/simpsonville/latest/simpsonville_ky/0-0-0-6803",
+  "https://daytonky.com/licenses/",
+  "https://hartfordky.org/notice-of-occupational-license-fees/",
+  "https://library.municode.com/ky/hickman/codes/code_of_ordinances?nodeId=COOR_CH14LIBURE_ARTIIOCLITA",
+  "https://library.municode.com/ky/mayfield/codes/code_of_ordinances?nodeId=COOR_CH9OCLITARE_ARTIIOCLITA_S9-42EANEPRTAPARE",
+  "https://pikevilleky.gov/business/",
+  "https://www.kcmo.gov/city-hall/departments/finance/earnings-tax",
+  "https://www.kcmo.gov/city-hall/departments/finance/tax-home/tax-guides/tax-guide-for-non-resident-businesses",
+  "https://lascruces.gov/wp-content/uploads/2025/09/MinimumWageEng26.pdf",
+  "https://www.dfs.ny.gov/consumers/health_insurance/cobra_and_premium_assistance",
+  "https://legislation.nysenate.gov/api/3/laws/ELN/3-400?key={env:NYSENATE_API_KEY}",
+  "https://legislation.nysenate.gov/api/3/laws/LAB/651?key={env:NYSENATE_API_KEY}",
+  "https://www.ny.gov/sites/default/files/atoms/files/PSL_FAQ_PaidSickLeaveFAQ.pdf",
+  "https://paidfamilyleave.ny.gov/2025",
+  "https://villageofcollegecorner.org/wp-content/uploads/2025/04/Rita-Repeal.pdf",
+  "https://www.wilsonvilleoregon.gov/finance/page/transit-payroll-tax-information"
  ],
- "max_consecutive_failures": 29
+ "max_consecutive_failures": 30
 }
