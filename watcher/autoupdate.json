@@ -1,6 +1,6 @@
 {
   "$comment": "Auto-update is OFF. Turn it on only after reading watcher/autoupdate.py's header. Each rule names one kind of line the watcher may replace: files matching glob, keys listed, new value between min and max, no single change larger than max_abs_change, evidence only from the listed hosts. Anything not matched by a rule cannot be changed automatically; watcher/autoupdate-coverage.json says, for every jurisdiction, what is automatic and what is left to a person and why.",
-  "enabled": false,
+  "enabled": true,
   "max_changes_per_run": 5,
   "max_findings_per_run": 10,
   "min_confirm_gap_seconds": 20,

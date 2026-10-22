@@ -325,9 +325,9 @@ class WhenNothingMayHappen(Base):
             au.apply(acc, self.cfg, self.root, SOURCES, TODAY, verify=[], now=NOW)
         self.assertEqual((self.root / FILE).read_text(), before)
 
-    def test_the_shipped_config_is_off_and_every_rule_is_bounded(self):
+    def test_the_shipped_config_is_on_and_every_rule_is_bounded(self):
         cfg = au.load_config(au.CONFIG)
-        self.assertIs(cfg["enabled"], False)
+        self.assertIs(cfg["enabled"], True)
         for r in cfg["rules"]:
             self.assertTrue(r["glob"].startswith("data/") and r["glob"].endswith(".json"), r)
             self.assertTrue(0 < r["min"] < r["max"] and r["max_abs_change"] > 0 and r["hosts"], r)
