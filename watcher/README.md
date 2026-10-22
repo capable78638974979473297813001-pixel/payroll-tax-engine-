@@ -120,7 +120,35 @@ rate rows appear (Woodville, July 2026), so this catches what the Finder knows
 and the engine doesn't, not what neither knows. For that, the local
 government's own pages are watched (and, with `follow`, their documents).
 
-## Fixing a number on its own (built, switched off)
+## Zero-day problems
+
+A **zero-day problem** is a change in an official source that alters a number
+the engine uses to calculate a paycheck, before the data in this repository has
+caught up. It is the only kind of change the watch ever touches the repository
+for. A new heading on an agency's landing page, a news item, a reworded
+paragraph or a new link is **not** one: those are reported as informational and
+change nothing (`watcher/zero_day.py` defines this, and `test_zero_day.py`
+holds the cases).
+
+| Tier | Meaning | What happens |
+|---|---|---|
+| **Fixed** | The watcher compared an official file or a year-anchored sentence with a number in `data/`, found it wrong, and the fix passed every rule below | One commit to `main`, touching only the file fixed (plus the regenerated bundle and the run's report). The message lists the file, line, old and new value and the source, and says `git revert` to undo it |
+| **Verified** | Same kind of finding, but a rule held the fix back (mid-year date, hand-checked note, dated row to add, too many at once) | A `zero-day` issue with the exact file, line, value and the rule that stopped it; a person makes the change |
+| **Possible** | A document that `data/` cites changed, and the dollar amounts or percentages in it changed with it | Listed in the same issue; a person looks. A page no data file cites, or one that changed without a figure changing, never lands here |
+
+Each daily run writes `reports/zero-day-latest.md` and, when there is anything
+to say, opens an issue labelled `zero-day`. The ordinary "Official sources
+changed" issue is now titled *(informational)*.
+
+**Delivery.** After the watch, the workflow runs `autoupdate.py --apply --commit`:
+every rule below, then `npm run edge:build` and the full test suite, then one
+commit. The commit is checked against its own report (`--guard`) and pushed
+straight to `main`; if the check or the push fails, the commit is discarded and
+the next run retries. **Emergency stop:** set the repository variable
+`AUTOUPDATE_PAUSED` to `true` (the run then only reports); `autoupdate.json` also
+has an `enabled` switch.
+
+## Fixing a number on its own
 
 `autoupdate.py` can correct a number in `data/` without a person typing it, but
 only the smallest thing that is safe to automate: **replace one number on one
@@ -128,12 +156,12 @@ line**. Everything in `data/` feeds a paycheck, so it has no other powers. It
 cannot add or delete a line, entry or file, touch code, tests, the site or
 notes, or change anything that is not a plain `"rate": 0.0125` line.
 
-It ships **off**. `watcher/autoupdate.json` has `"enabled": false` and the
-workflow's `AUTOUPDATE_ENABLED` repository variable is unset. Switched off, it
-still runs every day in check-only mode and writes
-[`reports/autoupdate-latest.md`](reports/autoupdate-latest.md): what it would
-have changed and, for everything else, the rule that kept it from changing it.
-Read that for a few weeks before turning it on.
+It is **on**: `watcher/autoupdate.json` has `"enabled": true`, and a run applies a
+fix only when every rule holds. With `AUTOUPDATE_PAUSED=true` (or `enabled`
+false) it only checks. Either way it writes
+[`reports/autoupdate-latest.md`](reports/autoupdate-latest.md): what it changed
+or would have changed and, for everything else, the rule that kept it from
+changing it.
 
 ### What it covers, state by state
 
@@ -197,24 +225,25 @@ re-checked immediately before writing:
 | Circuit breaker: more than `max_changes_per_run` eligible changes, or more than `max_findings_per_run` disagreements of any kind, applies **nothing** | The official file changing shape, which looks like hundreds of "corrections" |
 | After the write: the generated edge bundle is rebuilt, `git status` may show only the intended file plus that bundle, the diff must be exactly one removed and one added line per change, and the full test suite must pass | Side effects; a change the engine cannot absorb. Any failure restores every touched file |
 
-Applied changes are never committed to the default branch. The workflow puts
-them on `autoupdate/<date>` and opens a pull request whose body lists each file,
-line, old and new value and source. A person reviews and merges it.
+An applied change is committed to the default branch by the workflow (see
+"Zero-day problems" above for the commit, the guard and the way to undo it).
+Nothing else is ever in that commit: `--commit` refuses if any other file is
+changed or staged, and `--guard` re-checks the commit against its own report
+before it is pushed.
 
 Everything it declines goes to the same report and the standing needs-attention
 issue as before. `watcher/autoupdate-log.jsonl` records every decision.
 
-To turn it on: set `"enabled": true` in `autoupdate.json` **and** the repository
-variable `AUTOUPDATE_ENABLED` to `true`, and allow Actions to create pull
-requests (Settings -> Actions -> General). A pull request opened with the
-default token does not trigger other workflows, so run the tests from the
-branch before merging. To widen it, add a rule (a new glob/key with bounds and
+To stop it: set the repository variable `AUTOUPDATE_PAUSED` to `true`. If `main`
+has branch protection that blocks the bot's push, allow the Actions bot to push
+(or the fix is discarded and reported as a failed run). To widen it, add a rule (a new glob/key with bounds and
 hosts) in `autoupdate.json`; there is no way to widen it from a data file or a
 proposal.
 
 ```sh
 python watcher/autoupdate.py             # check and report, write nothing
 python watcher/autoupdate.py --apply     # write too (needs "enabled": true)
+python watcher/autoupdate.py --apply --commit   # and commit exactly the fixed files (the workflow then pushes)
 python -m unittest watcher/test_autoupdate.py
 AUTOUPDATE_E2E=1 python -m unittest watcher.test_autoupdate.AgainstTheRealEngine   # real build + real suite, in a clone
 ```

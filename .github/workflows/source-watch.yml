@@ -70,7 +70,7 @@ jobs:
 
       - name: Self-test (offline)
         if: steps.gate.outputs.run == 'true'
-        run: python -m unittest watcher/test_watch.py watcher/test_autoupdate.py watcher/test_coverage.py
+        run: python -m unittest watcher/test_watch.py watcher/test_autoupdate.py watcher/test_coverage.py watcher/test_zero_day.py
 
       - name: Refresh the source list from data/
         if: steps.gate.outputs.run == 'true'
@@ -121,51 +121,53 @@ jobs:
           done
           echo "::warning::Could not push the watch report."
 
-      # Auto-update (watcher/autoupdate.py). Always runs in check-only mode:
-      # it re-reads the official rate files twice, works out whether any
-      # disagreement is a clean one-number replacement, and writes
-      # watcher/reports/autoupdate-latest.md. It changes data/ only when the
-      # repository variable AUTOUPDATE_ENABLED is 'true' AND
-      # watcher/autoupdate.json has "enabled": true; both ship off. Even then it
-      # never touches the default branch: changes go on autoupdate/<date> and
-      # into a pull request that a person reviews and merges.
-      - name: Set up Node (auto-update verifies with the real test suite)
-        if: steps.gate.outputs.run == 'true' && vars.AUTOUPDATE_ENABLED == 'true'
+      # Zero-day problems (watcher/zero_day.py, watcher/README.md). A zero-day
+      # problem is an official change to a number the engine uses for a
+      # paycheck. watcher/autoupdate.py re-reads the official files twice, applies
+      # every rule, runs the full test suite and makes ONE commit holding only the
+      # fixed data lines, the regenerated bundle and the run report. That commit is
+      # checked against its own report (--guard) and pushed straight to the base
+      # branch. Anything else (headings, news, rewording, links) changes no file.
+      # Emergency stop: set the repository variable AUTOUPDATE_PAUSED to 'true'.
+      - name: Set up Node (the fix is verified with the real test suite)
+        if: steps.gate.outputs.run == 'true'
         uses: actions/setup-node@v5
         with:
           node-version: '22'
 
-      - name: Auto-update
+      - name: Fix zero-day problems on main
+        id: zeroday
         if: steps.gate.outputs.run == 'true'
         continue-on-error: true
         env:
-          GH_TOKEN: ${{ github.token }}
-          AUTOUPDATE_ENABLED: ${{ vars.AUTOUPDATE_ENABLED }}
+          AUTOUPDATE_PAUSED: ${{ vars.AUTOUPDATE_PAUSED }}
         run: |
           git config user.name "source-watch[bot]"
           git config user.email "source-watch[bot]@users.noreply.github.com"
           base="${GITHUB_REF_NAME}"
           today="${{ steps.gate.outputs.today }}"
-          if [ "$AUTOUPDATE_ENABLED" = "true" ]; then
-            git switch -c "autoupdate/$today"
-            python watcher/autoupdate.py --apply
-          else
-            python watcher/autoupdate.py
+          git pull --rebase --autostash origin "$base"
+          start=$(git rev-parse HEAD)
+          python watcher/autoupdate.py --apply --commit
+          if [ "$(git rev-parse HEAD)" != "$start" ]; then
+            if ! python watcher/autoupdate.py --guard HEAD; then
+              echo "::error::The zero-day commit touched files it did not fix; discarding it."
+              git reset --hard "$start"
+              exit 1
+            fi
+            pushed=""
+            for i in 1 2 3 4; do
+              if git pull --rebase origin "$base" && git push origin "HEAD:$base"; then pushed=1; break; fi
+              git rebase --abort 2>/dev/null || true
+              sleep $((i * 5))
+            done
+            if [ -z "$pushed" ]; then
+              echo "::error::Could not push the zero-day fix; discarding it. The next run retries."
+              git reset --hard "$start"
+              exit 1
+            fi
+            echo "fixed_sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
           fi
-          if [ "$AUTOUPDATE_ENABLED" = "true" ] && ! git diff --quiet -- data; then
-            git add -A data supabase watcher
-            git commit -m "auto-update: $today (data/ lines replaced by source watch)"
-            git push origin "HEAD:autoupdate/$today"
-            gh pr create --base "$base" --head "autoupdate/$today" \
-              --title "Auto-update: official source corrections ($today)" \
-              --body "$(cat watcher/reports/autoupdate-latest.md)
-
-          Every change here is one number on one line, re-read from the official file twice and verified with the full test suite. Review the diff before merging; nothing was merged automatically." \
-              || echo "::warning::Could not open the auto-update pull request."
-            git switch "$base"
-          fi
-          # Reports and the log go to the base branch like the daily report.
-          if [ "$(git branch --show-current)" != "$base" ]; then git switch "$base"; fi
           git add watcher/reports/autoupdate-latest.* watcher/autoupdate-log.jsonl 2>/dev/null || true
           if ! git diff --cached --quiet; then
             git commit -m "auto-update report: $today [skip ci]"
@@ -173,6 +175,42 @@ jobs:
               git pull --rebase --autostash origin "$base" && git push origin "HEAD:$base" && break
               sleep $((i * 5))
             done
+          fi
+
+      - name: Zero-day report
+        id: zdreport
+        if: steps.gate.outputs.run == 'true'
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+          FIXED_SHA: ${{ steps.zeroday.outputs.fixed_sha }}
+        run: |
+          python watcher/zero_day.py > /dev/null
+          read fixed verified possible <<<"$(python - <<'PY'
+          import json
+          z = json.load(open("watcher/reports/zero-day-latest.json"))
+          print(len(z["fixed"]), len(z["verified"]), len(z["possible"]))
+          PY
+          )"
+          git config user.name "source-watch[bot]"
+          git config user.email "source-watch[bot]@users.noreply.github.com"
+          git add watcher/reports/zero-day-latest.*
+          if ! git diff --cached --quiet; then
+            git commit -m "zero-day report: ${{ steps.gate.outputs.today }} [skip ci]"
+            for i in 1 2 3 4; do
+              git pull --rebase --autostash origin "${GITHUB_REF_NAME}" && git push origin "HEAD:${GITHUB_REF_NAME}" && break
+              sleep $((i * 5))
+            done
+          fi
+          if [ "$fixed" != "0" ] || [ "$verified" != "0" ] || [ "$possible" != "0" ]; then
+            gh label create zero-day --color D93F0B --description "A change that affects a paycheck" 2>/dev/null || true
+            body=$(cat watcher/reports/zero-day-latest.md)
+            if [ -n "$FIXED_SHA" ]; then body="$body
+
+          Commit: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/commit/${FIXED_SHA}"; fi
+            gh issue create --label zero-day \
+              --title "Zero-day (${{ steps.gate.outputs.today }}): $fixed fixed, $((verified + possible)) need a person" \
+              --body "$body" || echo "::warning::Could not open the zero-day issue."
           fi
 
       # What auto-update declined or only compared: the data disagrees with an
@@ -281,5 +319,5 @@ jobs:
           ... report truncated; full version in watcher/reports/${{ steps.gate.outputs.today }}.md"
           fi
           gh issue create \
-            --title "Official sources changed: ${{ steps.gate.outputs.today }} (${{ steps.watch.outputs.changed }})" \
+            --title "Official sources changed (informational): ${{ steps.gate.outputs.today }} (${{ steps.watch.outputs.changed }})" \
             --body "$body" || echo "::warning::Could not open an issue."
