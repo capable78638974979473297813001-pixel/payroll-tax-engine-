@@ -177,8 +177,11 @@ network with TLS); it refuses every request without the shared secret.
 `npm run verifier:test` runs its tests.
 
 **`PUBLIC_BASE_URL` must be the real `https://` URL.** Checkout return links
-are built from it (never from the request's `Host` header), and an `https`
-value marks the console's session cookie `Secure`.
+use it when it is public https. `render.yaml` is not applied automatically, so
+set `PUBLIC_BASE_URL` in the Render dashboard. In production, if it is missing,
+the server uses the request host (`x-forwarded-proto` and host on Render) and
+refuses localhost instead of creating a Checkout session. An `https` value
+also marks the console's session cookie `Secure`.
 
 Start it: `npm run site` (keep it running under a process manager / systemd).
 
