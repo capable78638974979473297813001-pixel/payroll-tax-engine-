@@ -13,13 +13,17 @@
 <div class="auth">
   <main class="auth-main">
     <a class="mark" href="/">Omnia<span class="dot" aria-hidden="true"></span>tax</a>
-    <h1 class="page" style="margin-top:48px;font-size:34px;line-height:42px">Check your email</h1>
+    <div class="stepper" role="group" aria-label="Signup progress">
+      <div class="stepper-top"><span aria-current="step"><b>Step 2 of 5</b> · Verify email</span></div>
+      <div class="stepper-bar" aria-hidden="true"><i style="width:40%"></i></div>
+    </div>
+    <h1 class="page">Check your email</h1>
     <p class="lead sub" id="lead1"></p>
     <p class="lead fine">The code expires in <span id="ttlMin">15</span> minutes.</p>
     <p class="fine" id="who"></p>
-    <form id="form" style="margin-top:24px">
+    <form id="form" novalidate style="margin-top:24px">
       <label class="lbl" for="c0">Code</label>
-      <div class="codes" id="codes">
+      <div class="codes" id="codes" role="group" aria-label="Code" aria-describedby="codeError">
         <input class="code" id="c0" inputmode="numeric" maxlength="1" autocomplete="one-time-code" aria-label="Digit 1" />
         <input class="code" id="c1" inputmode="numeric" maxlength="1" aria-label="Digit 2" />
         <input class="code" id="c2" inputmode="numeric" maxlength="1" aria-label="Digit 3" />
@@ -28,8 +32,11 @@
         <input class="code" id="c4" inputmode="numeric" maxlength="1" aria-label="Digit 5" />
         <input class="code" id="c5" inputmode="numeric" maxlength="1" aria-label="Digit 6" />
       </div>
-      <p class="err" id="codeError" hidden></p>
-      <button class="btn block" id="submit" type="submit" style="margin-top:24px">Verify email</button>
+      <p class="msg" id="codeError" hidden></p>
+      <div class="actions">
+        <a class="btn secondary btn-back" id="back" href="/signup">Back</a>
+        <button class="btn block" id="submit" type="submit">Verify email</button>
+      </div>
     </form>
     <p id="resendRow" style="margin-top:18px">
       <span>Didn't get it?</span>
@@ -66,17 +73,19 @@
   document.getElementById('who').textContent = email;
   document.getElementById('sheetTo').textContent = email;
   document.getElementById('change').href = '/signup?email=' + encodeURIComponent(email);
+  document.getElementById('back').href = signin ? '/signin' : '/signup?email=' + encodeURIComponent(email);
+  if (signin) document.querySelector('.stepper').hidden = true;
   var ttl = (window.OMNIA && window.OMNIA.codeTtlSec) || 900;
   document.getElementById('ttlMin').textContent = String(Math.round(ttl / 60));
   var lead = document.getElementById('lead1');
   if (signin) {
     lead.innerHTML = pending.emailConfigured
-      ? 'If <b style="color:var(--color-ink)">' + escapeHtml(email) + '</b> has an Omnia.tax account, we sent a 6-digit code.'
-      : 'If <b style="color:var(--color-ink)">' + escapeHtml(email) + '</b> has an account, its sign-in code is in the server log (no email provider is connected yet).';
+      ? 'If <b style="color:var(--ink)">' + escapeHtml(email) + '</b> has an Omnia.tax account, we sent a 6-digit code.'
+      : 'If <b style="color:var(--ink)">' + escapeHtml(email) + '</b> has an account, its sign-in code is in the server log (no email provider is connected yet).';
   } else if (pending.emailSent) {
-    lead.innerHTML = 'We sent a 6-digit code to <b style="color:var(--color-ink)">' + escapeHtml(email) + '</b>.';
+    lead.innerHTML = 'We sent a 6-digit code to <b style="color:var(--ink)">' + escapeHtml(email) + '</b>.';
   } else {
-    lead.innerHTML = 'We couldn’t send the email to <b style="color:var(--color-ink)">' + escapeHtml(email) + '</b> just now. Use “Resend code” in a moment. On a development server the code is in the server log.';
+    lead.innerHTML = 'We couldn’t send the email to <b style="color:var(--ink)">' + escapeHtml(email) + '</b> just now. Use “Resend code” in a moment. On a development server the code is in the server log.';
   }
   function escapeHtml(s) { return String(s).replace(/[&<>"']/g, function (c) { return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]; }); }
 
@@ -90,6 +99,7 @@
       input.value = input.value.replace(/\D/g, '').slice(-1);
       paint();
       if (input.value && inputs[idx + 1]) inputs[idx + 1].focus();
+      else if (value().length === 6 && !document.getElementById('submit').disabled) document.getElementById('form').requestSubmit();
     });
     input.addEventListener('keydown', function (e) {
       if (e.key === 'Backspace' && !input.value && inputs[idx - 1]) {
@@ -105,6 +115,15 @@
       text.split('').forEach(function (ch, i) { if (inputs[i]) inputs[i].value = ch; });
       paint();
       (inputs[Math.min(text.length, 5)] || inputs[5]).focus();
+      if (value().length === 6 && !document.getElementById('submit').disabled) document.getElementById('form').requestSubmit();
+    });
+    input.addEventListener('blur', function () {
+      setTimeout(function () {
+        if (inputs.some(function (i) { return i === document.activeElement; })) return;
+        if (!inputs.some(function (i) { return i.value; })) return;
+        if (value().length !== 6) showError('Enter the 6-digit code.');
+        else clearError();
+      }, 0);
     });
   });
 
@@ -130,8 +149,14 @@
   }
   tick();
 
+  function clearError() {
+    document.getElementById('codes').classList.remove('error');
+    inputs.forEach(function (i) { i.removeAttribute('aria-invalid'); });
+    document.getElementById('codeError').hidden = true;
+  }
   function showError(msg) {
     document.getElementById('codes').classList.add('error');
+    inputs.forEach(function (i) { i.setAttribute('aria-invalid', 'true'); });
     var el = document.getElementById('codeError');
     el.textContent = msg;
     el.hidden = false;
@@ -139,10 +164,9 @@
 
   document.getElementById('form').addEventListener('submit', function (e) {
     e.preventDefault();
-    document.getElementById('codes').classList.remove('error');
-    document.getElementById('codeError').hidden = true;
+    clearError();
     var code = value();
-    if (code.length !== 6) { showError('Enter the 6-digit code.'); return; }
+    if (code.length !== 6) { showError('Enter the 6-digit code.'); inputs[0].focus(); return; }
     var btn = document.getElementById('submit');
     Omnia.setLoading(btn, true);
     Omnia.api('/api/verify-email', {

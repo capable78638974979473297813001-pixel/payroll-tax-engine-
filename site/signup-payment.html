@@ -7,117 +7,81 @@
 <title>Add a payment method — Omnia.tax</title>
 <link rel="icon" href="/logo/favicon.svg" type="image/svg+xml" />
 <link rel="stylesheet" href="/assets/v5.css" />
-<link rel="stylesheet" href="/assets/site.css" />
 <!--OMNIA_CONFIG-->
 </head>
 <body>
-<div class="onboard">
-  <aside class="step-panel">
-    <div class="step-panel-top">
-      <a class="logo" href="/" aria-label="Omnia.tax"><img src="/logo/logo-on-blue.svg" alt="" /></a>
-      <span class="label-mono" style="color:var(--color-on-cobalt-muted);font-weight:400">Onboarding</span>
+<div class="auth">
+  <main class="auth-main">
+    <a class="mark" href="/">Omnia<span class="dot" aria-hidden="true"></span>tax</a>
+    <div class="stepper" role="group" aria-label="Signup progress">
+      <div class="stepper-top"><span aria-current="step"><b>Step 4 of 5</b> · Payment</span></div>
+      <div class="stepper-bar" aria-hidden="true"><i style="width:80%"></i></div>
     </div>
-    <div class="step-num-row">
-      <div class="step-num">04</div>
-      <div class="step-of"><div class="eyebrow">Step</div><div class="of">OF 05</div></div>
-    </div>
-    <div class="step-rule"></div>
-    <div class="panel-head"><span>Summary</span><span>Trial · <span data-trial>14</span> days</span></div>
-    <div class="panel-rule"></div>
-    <div class="panel-rows">
-      <div><span>Plan</span><b>Pay per paycheck</b></div>
-      <div><span>Rate</span><b id="est">TBA</b></div>
-      <div><span>Billing</span><b>Per calculation</b></div>
-    </div>
-    <p id="estNote" style="color:var(--color-on-cobalt-muted);font-size:13px;margin:8px 0 0"></p>
-    <div class="step-rule"></div>
-    <div class="due">
-      <div style="display:flex;justify-content:space-between;align-items:baseline">
-        <span style="font-size:24px;font-weight:700">Due today</span>
-        <span class="zero" style="font-size:28px">Nothing during the trial</span>
+    <h1 class="page">Add a payment method.</h1>
+    <p class="sub">Nothing is charged during the 14-day trial. You’ll add a card or bank account on Stripe, then come back here for your API key.</p>
+    <p class="fine" id="who"></p>
+    <form id="payForm" novalidate>
+      <p class="msg" id="payError" hidden></p>
+      <p class="msg" id="fallback" hidden></p>
+      <p class="hint" id="trialEnd"></p>
+      <div class="actions">
+        <a class="btn secondary btn-back" href="/signup/business">Back</a>
+        <button class="btn block" id="start" type="submit">Go to Stripe</button>
       </div>
-      <p>First charge after your <span data-trial>14</span>-day trial</p>
-      <div class="label-mono" id="trialEnd">—</div>
-    </div>
-    <button class="btn btn-lg btn-white btn-block" id="start" type="button" style="margin-top:32px">Start <span data-trial>14</span>-day trial <span class="btn-icon" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 8h12M10 4l4 4-4 4" stroke="currentColor" stroke-width="2"/></svg></span></button>
-    <p class="field-error" id="payError" hidden style="background:#fff;padding:8px"></p>
-  </aside>
-  <main class="form-col">
-    <div class="form-top"><span class="label-mono">Step 04 of 05</span><span class="who" id="who"></span></div>
-    <ol class="progress">
-      <li class="done"><div class="bar"></div><div class="lbl"><span class="chk"></span> Account</div></li>
-      <li class="done"><div class="bar"></div><div class="lbl"><span class="chk"></span> Verify</div></li>
-      <li class="done"><div class="bar"></div><div class="lbl"><span class="chk"></span> Business</div></li>
-      <li class="current"><div class="bar"></div><div class="lbl"><span class="n">04</span> Payment</div></li>
-      <li><div class="bar"></div><div class="lbl"><span class="n">05</span> API key</div></li>
-    </ol>
-    <h1>Add a payment method.</h1>
-    <div class="banner-ink" style="margin-top:32px;max-width:560px">You won’t be charged for the first <span data-trial>14</span> days.</div>
-    <div id="payBox" style="max-width:560px;margin-top:24px;border:3px solid var(--color-ink);padding:28px">
-      <p style="margin:0 0 8px;font-weight:700;font-size:20px;letter-spacing:-.4px">Add a card or bank account.</p>
-      <p style="margin:0 0 20px;font-size:16px;line-height:1.5;color:#26272B">You&rsquo;ll enter it on Stripe&rsquo;s secure page, then come straight back here to get your API key. Your card or bank number goes to Stripe, not to us.</p>
-      <ul style="margin:0 0 24px;padding-left:20px;font-size:16px;line-height:1.7;color:#0A0A0A">
-        <li>Nothing is charged for the first <span data-trial>14</span> days.</li>
-        <li>After the trial, each live calculation is billed monthly. The rate is to be announced.</li>
-        <li>The terms you just signed apply.</li>
-      </ul>
-      <button class="btn btn-lg btn-primary btn-block" id="start2" type="button">Continue to Stripe <span class="btn-icon" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 8h12M10 4l4 4-4 4" stroke="currentColor" stroke-width="2"/></svg></span></button>
-      <p class="field-error" id="payError2" hidden style="margin-top:16px"></p>
-    </div>
-    <p style="max-width:560px;margin-top:32px;color:var(--color-gray);font-size:13px;display:flex;gap:8px;align-items:flex-start">
-      <svg width="14" height="16" viewBox="0 0 14 16" aria-hidden="true"><rect x="1" y="7" width="12" height="8" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M4 7V4a3 3 0 0 1 6 0v3" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>
-      Payments are processed by Stripe. We never see or store your full card or bank number.
-    </p>
-    <div id="fallback" class="alert alert-error" hidden style="max-width:560px;margin-top:24px"></div>
+    </form>
+    <p class="fine" style="margin-top:18px">Payments are processed by Stripe. We never see or store your full card or bank number. Sandbox calls are not billed.</p>
   </main>
+  <aside class="auth-aside">
+    <h2>Trial</h2>
+    <article><h3>14 days</h3><p>Nothing is charged during the 14-day trial. Sandbox calls are not billed.</p></article>
+    <article><h3>On Stripe</h3><p>Your card or bank number goes to Stripe, not to us. The terms you just signed apply.</p></article>
+  </aside>
 </div>
-<script src="/assets/pricing.js"></script>
 <script src="/assets/session.js"></script>
 <script>
 (function () {
   var session = Omnia.session() || {};
   document.getElementById('who').textContent = session.email || '';
   var qs = new URLSearchParams(location.search);
+  var start = document.getElementById('start');
 
   function fmtDate(iso) {
-    if (!iso) return '—';
-    return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }).toUpperCase();
+    if (!iso) return '';
+    return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
   }
 
   Omnia.api('/api/account', { headers: Omnia.authHeaders() }).then(function (res) {
     if (res.status === 401) { location.href = '/signin'; return; }
     var sub = res.body && res.body.subscription;
-    document.getElementById('est').textContent = 'TBA';
-    document.getElementById('estNote').textContent = 'Per live calculation. No per-employee price.';
-    if (sub && sub.trialEndsAt) document.getElementById('trialEnd').textContent = fmtDate(sub.trialEndsAt);
+    if (res.body && res.body.email) document.getElementById('who').textContent = res.body.email;
+    if (sub && sub.trialEndsAt) {
+      document.getElementById('trialEnd').textContent = 'Trial ends ' + fmtDate(sub.trialEndsAt) + '. Nothing is charged during the trial.';
+    }
   });
 
   function showErr(text) {
-    ['payError', 'payError2'].forEach(function (id) {
-      var el = document.getElementById(id);
-      el.textContent = text;
-      el.hidden = false;
-    });
+    var el = document.getElementById('payError');
+    el.textContent = text;
+    el.hidden = false;
   }
 
   if (qs.get('setup') === 'cancelled') showErr('Checkout was cancelled. You can try again.');
   if (qs.get('setup') === 'ok' && qs.get('session_id')) {
     history.replaceState(null, '', location.pathname);
-    var btn = document.getElementById('start');
-    Omnia.setLoading(btn, true);
+    Omnia.setLoading(start, true);
     Omnia.api('/api/billing/return', {
       method: 'POST', headers: Omnia.authHeaders(),
       body: JSON.stringify({ sessionId: qs.get('session_id') })
     }).then(function (done) {
       if (!done.ok) {
-        Omnia.setLoading(btn, false);
+        Omnia.setLoading(start, false);
         showErr((done.body && done.body.error) || 'We couldn’t confirm your payment method. Try again.');
         return;
       }
       return Omnia.api('/api/issue-key', { method: 'POST', headers: Omnia.authHeaders(), body: '{}' });
     }).then(function (keyRes) {
       if (!keyRes) return;
-      Omnia.setLoading(btn, false);
+      Omnia.setLoading(start, false);
       if (!keyRes.ok) { showErr((keyRes.body && keyRes.body.error) || 'Could not issue a key.'); return; }
       Omnia.setApiKey({ key: keyRes.body.key, prefix: keyRes.body.keyPrefix, plan: keyRes.body.plan, expiresAt: keyRes.body.expiresAt });
       location.href = '/signup/key';
@@ -125,19 +89,18 @@
   }
 
   function startCheckout(btn) {
-    ['payError', 'payError2'].forEach(function (id) { document.getElementById(id).hidden = true; });
+    document.getElementById('payError').hidden = true;
     document.getElementById('fallback').hidden = true;
     Omnia.setLoading(btn, true);
     Omnia.api('/api/payment-setup', { method: 'POST', headers: Omnia.authHeaders(), body: '{}' })
       .then(function (res) {
         if (res.ok && res.body && res.body.checkoutUrl) {
-          location.href = res.body.checkoutUrl; // leaves the page; keep the button busy
+          location.href = res.body.checkoutUrl;
           return;
         }
         Omnia.setLoading(btn, false);
         if (res.status === 501) {
           var fb = document.getElementById('fallback');
-          fb.className = 'alert alert-error';
           fb.textContent = 'Online payment isn’t switched on yet. Your account and signed terms are saved. Email scottholdan@gmail.com and we’ll finish setting you up.';
           fb.hidden = false;
           return;
@@ -150,11 +113,12 @@
         showErr('We couldn’t reach the server. Check your connection and try again.');
       });
   }
-  ['start', 'start2'].forEach(function (id) {
-    document.getElementById(id).addEventListener('click', function () { startCheckout(this); });
+
+  document.getElementById('payForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    startCheckout(start);
   });
 })();
 </script>
-<footer class="legal-line" style="padding:16px 64px;font:12px/1.6 var(--font-mono,monospace);color:var(--color-gray,#6b6e76)">© 2026 OMNIA TAX LLC. All rights reserved. · <a href="/terms">Terms</a> · <a href="/privacy">Privacy</a></footer>
 </body>
 </html>

@@ -29,8 +29,10 @@
   --code-key: #AEB6BB;
   --code-num: #F2A38F;
   --code-rule: #2A2F32;
-  --field: #6B7076;   /* the outline of every place you type: >= 4.5:1 on white and on the page */
-  --field-w: 1.5px;
+  --field: #6B7076;   /* input border: 4.9:1 on white, 4.7:1 on the page */
+  --field-w: 1px;
+  --danger: #B3261E;  /* error text, 6.5:1 on white; accent is short of 4.5:1 at 13px */
+  --focus: #16181A;
   --ok: #2F7D4F;
   --warn: #D9A441;
   --r-sm: 4px;
@@ -207,25 +209,78 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
 .auth-aside article { border-top: 1px solid var(--rule); padding: 18px 0; }
 .auth-aside h3 { font-size: 16px; font-weight: 600; }
 .auth-aside p { color: var(--ink2); font-size: 15px; }
-.field { margin: 0 0 18px; }
-.field label, .lbl { display: block; font-weight: 500; font-size: 14px; margin-bottom: 8px; }
-.field input, .field textarea, .box input {
-  width: 100%; height: 44px; border: var(--field-w) solid var(--field); border-radius: var(--r-sm); background: #fff; padding: 0 14px;
+.field { margin: 0 0 20px; }
+.field label, .lbl { display: block; font-weight: 500; font-size: 14px; line-height: 20px; color: var(--ink); margin-bottom: 6px; }
+.field input:not([type="checkbox"]), .field textarea, .box input {
+  width: 100%; height: 44px; padding: 0 12px; background: #FFFFFF; color: var(--ink);
+  border: 1px solid var(--field); border-radius: 4px; font-size: 16px;
+  transition: border-color .12s, box-shadow .12s;
 }
 .field textarea { height: 140px; padding: 12px 14px; resize: vertical; }
-.field input:hover, .field textarea:hover, .search:hover, .cov-select:hover, .codes input:hover { border-color: var(--ink); }
-.field input:focus, .field textarea:focus { outline: 2px solid var(--ink); outline-offset: 2px; border-color: var(--ink); }
+.field input:not([type="checkbox"]):hover, .field textarea:hover, .search:hover, .cov-select:hover, .codes input:hover { border-color: var(--ink); }
+.field input:not([type="checkbox"]):focus,
+.field textarea:focus,
+.field input:not([type="checkbox"]):focus-visible,
+.field textarea:focus-visible {
+  outline: none; border-color: var(--focus); box-shadow: 0 0 0 3px rgba(22, 24, 26, .18);
+}
 .search:focus-within { border-color: var(--ink); outline: 2px solid var(--ink); outline-offset: 2px; }
-.codes input:focus { border-color: var(--ink); outline: 2px solid var(--ink); outline-offset: 2px; }
+.codes input:focus, .codes input:focus-visible {
+  outline: none; border-color: var(--focus); box-shadow: 0 0 0 3px rgba(22, 24, 26, .18);
+}
 input::placeholder, textarea::placeholder { color: #70757B; opacity: 1; }
-.hint { color: var(--ink3); font-size: 13px; margin-top: 8px; }
-.err { color: var(--accent); font-size: 14px; margin: 8px 0; }
-.check { display: flex; gap: 10px; align-items: flex-start; font-size: 14px; line-height: 22px; margin: 8px 0 18px; }
-.check input { width: 16px; height: 16px; margin-top: 3px; accent-color: var(--ink); }
+.hint { color: var(--ink2); font-size: 13px; line-height: 20px; margin-top: 6px; }
+.err, .msg { color: var(--danger); font-size: 13px; line-height: 20px; margin: 6px 0 0; }
+.msg { display: flex; gap: 6px; }
+.msg[hidden], .err[hidden] { display: none !important; }
+.field.is-error input:not([type="checkbox"]),
+.field input:not([type="checkbox"])[aria-invalid="true"],
+.field.is-error textarea,
+.codes.error input, .codes.is-error input {
+  border-color: var(--danger); box-shadow: 0 0 0 1px var(--danger);
+}
+.field input:disabled, .field textarea:disabled,
+.field.is-disabled input {
+  background: var(--surface); color: var(--ink3); border-color: var(--rule); cursor: not-allowed;
+}
+.field:has(input:disabled) label, .field.is-disabled label { color: var(--ink3); }
+.field label.check, .check { display: flex; gap: 10px; align-items: flex-start; font-size: 14px; line-height: 22px; font-weight: 400; margin: 16px 0 0; }
+.check input, .field .check input {
+  width: 18px; height: 18px; margin-top: 2px; accent-color: #16181A; flex: none;
+}
+.auth-main h1.page { margin-top: 0; font-size: 32px; line-height: 40px; letter-spacing: -0.01em; font-weight: 500; }
+.auth:has(.stepper) .auth-main { padding-top: 32px; }
+.auth-main .sub { margin-top: 10px; font-size: 16px; line-height: 26px; }
+.stepper { margin: 40px 0 28px; }
+.stepper-top { display: flex; justify-content: space-between; font-size: 13px; line-height: 20px; color: var(--ink2); }
+.stepper-top b { color: var(--ink); font-weight: 500; }
+.stepper-bar { height: 4px; background: var(--rule); border-radius: 2px; margin-top: 10px; overflow: hidden; }
+.stepper-bar i { display: block; height: 100%; background: var(--ink); border-radius: 2px; }
+.terms { border: 1px solid var(--rule); border-radius: 6px; padding: 14px 16px; height: 132px; overflow: auto; font-size: 13px; line-height: 20px; color: var(--ink2); background: #fff; }
+.terms h4 { font-size: 13px; font-weight: 500; color: var(--ink); margin: 12px 0 4px; }
+.terms h4:first-child { margin-top: 0; }
+.terms p { margin: 0 0 8px; }
+.actions { display: flex; gap: 12px; align-items: center; margin-top: 28px; }
+.actions .btn.block { flex: 1; width: auto; }
+.btn-back, .actions .btn.secondary { flex: none; background: transparent; color: var(--ink); border: 1px solid var(--rule); }
+.btn-back:hover, .actions .btn.secondary:hover { border-color: var(--ink); background: transparent; }
+.btn.is-loading { color: transparent; position: relative; }
+.btn.is-loading:disabled, .btn.is-loading[aria-disabled="true"] {
+  opacity: 1; background: #16181A; color: transparent; cursor: progress;
+}
+.btn.is-loading::after {
+  content: ""; position: absolute; left: 50%; top: 50%; width: 16px; height: 16px; margin: -8px 0 0 -8px;
+  border: 2px solid #FBFBF9; border-right-color: transparent; border-radius: 50%;
+  animation: signup-spin .7s linear infinite;
+}
+@keyframes signup-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) {
+  .btn.is-loading::after { animation: none; }
+}
 .codes { display: flex; gap: 8px; align-items: center; }
 .codes input {
   width: 52px; height: 64px; text-align: center; font-family: "Martian Mono", ui-monospace, monospace;
-  font-size: 22px; border: var(--field-w) solid var(--field); border-radius: var(--r-sm); background: #fff;
+  font-size: 22px; color: var(--ink); border: 1px solid var(--field); border-radius: 4px; background: #FFFFFF;
 }
 .codes .gap { width: 10px; flex: none; }
 .codes input { flex: 1 1 0; min-width: 0; max-width: 52px; }
@@ -277,8 +332,14 @@ input::placeholder, textarea::placeholder { color: #70757B; opacity: 1; }
   .hero, .band-in, .steps, .dev, .foot-grid, .split, .price-grid, .docs-body, .auth, .legal, .dash, .contact-grid, .statrow {
     grid-template-columns: 1fr;
   }
-  .auth-main { margin: 0 auto; padding: 32px 24px 64px; }
+  .auth-main { margin: 0 auto; padding: 32px 24px 120px; }
   .auth-aside { padding: 40px 24px 64px; }
+  .actions {
+    position: fixed; left: 0; right: 0; bottom: 0; margin: 0;
+    padding: 12px 20px calc(12px + env(safe-area-inset-bottom));
+    background: var(--bg); border-top: 1px solid var(--rule); z-index: 20;
+  }
+  main:has(.actions) { padding-bottom: 120px; }
   h1 { font-size: 34px; line-height: 42px; }
   h1.page { font-size: 32px; line-height: 40px; }
   .cards { grid-template-columns: 1fr; }
