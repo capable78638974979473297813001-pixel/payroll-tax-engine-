@@ -156,7 +156,7 @@ labor department, city page or official notice was also read directly is marked
 sources agreeing is marked `cross_source_confirmed` and says so in `verifiedBy`.
 
 Where the sources disagreed, the disagreement is recorded rather than smoothed over —
-South Dakota's tipped cent, and Washington L&I's Burien and Renton figures correcting a
+South Dakota's tipped cent, and Washington L&I's Renton figure correcting a
 secondary source, are both documented in the files themselves.
 
 Local coverage was canvassed against the UC Berkeley Labor Center's standing inventory of

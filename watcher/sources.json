@@ -6386,6 +6386,16 @@
    "origin": "curated"
   },
   {
+   "id": "wa-10f9d16467",
+   "jurisdiction": "WA",
+   "title": "City of Burien -- Minimum Wage (BMC Chapter 5.16, Administrative Rule 2026-01)",
+   "url": "https://www.burienwa.gov/MinimumWage",
+   "origin": "data",
+   "used_by": [
+    "data/minimum-wage/local/WA-local-2026.json"
+   ]
+  },
+  {
    "id": "wa-ea2845b8a3",
    "jurisdiction": "WA",
    "title": "City of Seattle Office of Labor Standards -- Minimum Wage Ordinance",
