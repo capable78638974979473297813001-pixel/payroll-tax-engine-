@@ -117,6 +117,19 @@ async function readJson<T>(req: IncomingMessage): Promise<T> {
   }
 }
 
+/** Sandbox keys (sk_test_) are never sent to the Stripe meter. */
+function sandboxKey(key: ApiKey): boolean {
+  if (key.mode === 'test') return true;
+  if (key.mode === 'live') return false;
+  return key.prefix.startsWith('sk_test_');
+}
+
+/** Live keys on a metered subscription bill via Stripe. Test keys bill nothing. */
+function chargeFor(key: ApiKey): { sandbox: boolean; metered: boolean } {
+  const sandbox = sandboxKey(key);
+  return { sandbox, metered: !sandbox && meteringConfigured() && Boolean(key.stripeCustomerId) };
+}
+
 /** The bearer token from Authorization: Bearer <key>, or the x-api-key header. */
 function presentedKey(req: IncomingMessage): string {
   const auth = req.headers['authorization'];
@@ -234,10 +247,10 @@ const server = createServer(async (req, res) => {
       const result = calculatePaycheck(input);
       // A key on Stripe metering is charged by the meter. The local ledger
       // is the charge only when metering cannot bill this key. Doing both
-      // collects the same call twice.
-      const metered = meteringConfigured() && Boolean(key.stripeCustomerId);
+      // collects the same call twice. Sandbox keys are not billed either way.
+      const { sandbox, metered } = chargeFor(key);
       // Metered keys queue the Stripe event in the same write as the call.
-      const chargedCents = recordUsage(key.id, { stateCode, statusCode: 200, billable: !metered, meterUnits: metered ? 1 : 0 });
+      const chargedCents = recordUsage(key.id, { stateCode, statusCode: 200, billable: !sandbox && !metered, meterUnits: metered ? 1 : 0 });
       if (metered) flushMeterSoon();
       const balanceDueCents = usageForKey(key.id)?.balanceDueCents ?? 0;
       res.setHeader('X-Charge-Cents', String(chargedCents));
@@ -274,9 +287,17 @@ const server = createServer(async (req, res) => {
         payFrequency: (body.payFrequency ?? 'biweekly') as PayFrequency,
         employees: body.employees,
       });
-      const metered = meteringConfigured() && Boolean(key.stripeCustomerId);
-      recordUsage(key.id, { statusCode: 200, billable: !metered, meterUnits: metered ? 1 : 0 });
-      if (metered) flushMeterSoon();
+      // One meter event per employee paycheck, not one event for the batch.
+      const { sandbox, metered } = chargeFor(key);
+      const calculations = run.paychecks.length;
+      if (calculations === 0) {
+        recordUsage(key.id, { statusCode: 200, billable: false, meterUnits: 0 });
+      } else {
+        for (let i = 0; i < calculations; i++) {
+          recordUsage(key.id, { statusCode: 200, billable: !sandbox && !metered, meterUnits: metered ? 1 : 0 });
+        }
+      }
+      if (metered && calculations > 0) flushMeterSoon();
       return sendJson(res, 200, { ok: true, run });
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Payroll run failed.';
@@ -324,10 +345,10 @@ const server = createServer(async (req, res) => {
       return sendJson(res, 400, { error: err instanceof Error ? err.message : 'Bad request.' });
     }
     const results = payCalc(requests);
-    // Billed the same as /v1/calculate, once per request in the batch —
-    // this endpoint is a translation in front of the same engine call, not
-    // a cheaper one.
-    const metered = meteringConfigured() && Boolean(key.stripeCustomerId);
+    // Billed the same as /v1/calculate, once per successful request in the
+    // batch — this endpoint is a translation in front of the same engine
+    // call, not a cheaper one. Each success is its own meter event.
+    const { sandbox, metered } = chargeFor(key);
     let chargedCents = 0;
     let successes = 0;
     for (const r of results) {
@@ -336,7 +357,7 @@ const server = createServer(async (req, res) => {
       chargedCents += recordUsage(key.id, {
         statusCode: ok ? 200 : 422,
         error: r.error,
-        billable: ok && !metered,
+        billable: ok && !sandbox && !metered,
         meterUnits: ok && metered ? 1 : 0,
       });
     }
@@ -370,10 +391,10 @@ server.listen(PORT, () => {
   console.log(`  Usage:       GET  http://localhost:${PORT}/v1/usage`);
   console.log(`  Save a card: POST http://localhost:${PORT}/v1/billing/setup  -> returns a Stripe Checkout URL`);
   const billingMode = meteringConfigured()
-    ? 'METERED per-call (Stripe usage billing — every call reports $0.09 to Stripe, invoiced monthly)'
+    ? 'METERED per-call (Stripe usage billing — every live calculation reports one unit, invoiced monthly)'
     : billingConfigured()
-      ? 'Stripe manual (STRIPE_SECRET_KEY set; add STRIPE_PRICE_ID + STRIPE_METER_EVENT for per-call metering)'
-      : 'ledger-only (set STRIPE_SECRET_KEY + STRIPE_PRICE_ID + STRIPE_METER_EVENT to bill per call)';
+      ? 'Stripe manual (STRIPE_SECRET_KEY set; add STRIPE_PRICE_ID + STRIPE_METER_EVENT_NAME for per-call metering)'
+      : 'ledger-only (set STRIPE_SECRET_KEY + STRIPE_PRICE_ID + STRIPE_METER_EVENT_NAME to bill per call)';
   console.log(`  Bill a key:  npm run api:key -- --bill <prefix>   (manual path; metered billing auto-invoices)`);
   console.log(`  Billing:     ${billingMode}\n`);
   if (billingConfigured() && !process.env.PUBLIC_BASE_URL) {

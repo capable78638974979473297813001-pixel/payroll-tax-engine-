@@ -30,6 +30,8 @@ services:
         sync: false
       - key: STRIPE_PRICE_ID
         sync: false
+      - key: STRIPE_METER_EVENT_NAME
+        sync: false
       # The large address index behind keyed geocoding. With neither line below
       # set the site still works, on the live address services only. Preferred:
       # ADDRESS_INDEX_URL (a prebuilt address-points.db or .db.gz, minutes to fetch).
@@ -41,8 +43,9 @@ services:
         sync: false
       - key: ADDRESS_INDEX_SHA256
         sync: false
+      # Fallback name if STRIPE_METER_EVENT_NAME is unset. Set in the dashboard; do not commit it.
       - key: STRIPE_METER_EVENT
-        value: omnia_api_call
+        sync: false
       - key: STRIPE_WEBHOOK_SECRET
         sync: false
       - key: RESEND_API_KEY
@@ -55,6 +58,9 @@ services:
       # Cards only until ACH Direct Debit is enabled in Stripe. Remove for card + bank.
       # - key: STRIPE_PAYMENT_METHOD_TYPES
       #   value: card
-      # Leave unset while testing (sk_test_ keys). Set to 1 for sk_live_ keys.
+      # Leave unset while testing (sk_test_ Stripe keys). Set to 1 before using sk_live_.
+      # - key: STRIPE_ALLOW_LIVE
+      #   value: "1"
+      # Leave unset while testing (sk_test_ API keys). Set to 1 for sk_live_ keys.
       # - key: OMNIA_ISSUE_LIVE_KEYS
       #   value: "1"

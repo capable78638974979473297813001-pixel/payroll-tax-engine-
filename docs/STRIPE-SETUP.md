@@ -11,9 +11,12 @@ what is wrong:
 
 ```
 STRIPE_SECRET_KEY=sk_test_...  STRIPE_PRICE_ID=price_...  \
-STRIPE_METER_EVENT=omnia_api_call  STRIPE_WEBHOOK_SECRET=whsec_...  \
+STRIPE_METER_EVENT_NAME=omnia_api_call  STRIPE_WEBHOOK_SECRET=whsec_...  \
 PUBLIC_BASE_URL=https://omniatax.io  npm run check:stripe
 ```
+
+Do this in **test mode**. A live secret key (`sk_live_` or `rk_live_`) is refused
+until `STRIPE_ALLOW_LIVE=1`. Leave that unset while you are on test keys.
 
 ## 1. The billing meter
 
@@ -21,7 +24,7 @@ Stripe dashboard → **Billing → Meters → Create meter**.
 
 | Setting | Value |
 |---|---|
-| Event name | `omnia_api_call` (must equal `STRIPE_METER_EVENT`) |
+| Event name | the value you will put in `STRIPE_METER_EVENT_NAME` (for example `omnia_api_call`) |
 | Aggregation | **Sum** |
 | Value key | `value` (Stripe's default) |
 | Customer mapping | **Customer ID**, payload key `stripe_customer_id` (Stripe's default) |
@@ -38,12 +41,12 @@ price:
 |---|---|
 | Pricing model | **Usage-based**, **Per unit** (not graduated, not volume) |
 | Meter | the meter from step 1 |
-| Price | **$0.09** per unit, USD |
+| Price | set the rate in Stripe. The app does not hardcode or display it |
 | Billing period | **Monthly** |
 
-Copy the **Price ID** (`price_...`): this is `STRIPE_PRICE_ID`. Do not add a
-free trial to the price. The site sets the 14-day trial itself when it creates
-the Checkout session.
+Copy the **Price ID** (`price_...`): this is `STRIPE_PRICE_ID`. Do not commit
+the price id or the amount. Do not add a free trial to the price. The site
+sets the 14-day trial itself when it creates the Checkout session.
 
 ## 3. Payment methods
 
@@ -74,13 +77,23 @@ check your webhook, Webhook endpoints (read).
 | Setting | Value |
 |---|---|
 | Endpoint URL | `https://omniatax.io/api/billing/webhook` |
-| Events | `invoice.payment_failed`, `invoice.paid`, `customer.subscription.deleted` |
+| Events | `checkout.session.completed`, `customer.subscription.updated`, `customer.subscription.deleted`, `invoice.paid`, `invoice.payment_failed` |
 | Optional events | `invoice.payment_succeeded`, `customer.subscription.paused`, `customer.subscription.resumed` |
 
-What each does: a failed invoice or a paused subscription suspends the key
-(`402 account_suspended`); a paid invoice or a resumed subscription reactivates
-it; a deleted subscription cancels the account for good. Copy the **Signing
-secret** (`whsec_...`): this is `STRIPE_WEBHOOK_SECRET`.
+The site verifies `Stripe-Signature` with `STRIPE_WEBHOOK_SECRET` over the **raw**
+body. A bad signature is rejected and changes nothing. Deliveries are idempotent
+on the Stripe event id, so a retry does not apply twice.
+
+What each does:
+
+- `checkout.session.completed` links the Stripe customer and subscription to the account (subscription-mode Checkout on `STRIPE_PRICE_ID`). Success and cancel URLs are built from `PUBLIC_BASE_URL`.
+- `customer.subscription.updated` suspends on `past_due`, `unpaid`, or `paused`, cancels on `canceled`, and clears a payment suspension when the subscription is `active` or `trialing`.
+- `customer.subscription.deleted` cancels the account for good.
+- `invoice.payment_failed` suspends the key (`402 account_suspended`).
+- `invoice.paid` clears that suspension. It does not revive a cancelled subscription.
+
+Copy the **Signing secret** (`whsec_...`): this is `STRIPE_WEBHOOK_SECRET`. Do not
+commit it.
 
 The site has one webhook route. The separate self-hosted API (`npm run api`)
 uses `/v1/billing/webhook` and its own meter. You are not running that on
@@ -91,12 +104,20 @@ Render, so ignore it.
 On Render (Environment tab), or in `.env` locally:
 
 ```
-STRIPE_SECRET_KEY=sk_test_...
-STRIPE_PRICE_ID=price_...
-STRIPE_METER_EVENT=omnia_api_call
-STRIPE_WEBHOOK_SECRET=whsec_...
+STRIPE_SECRET_KEY=
+STRIPE_PRICE_ID=
+STRIPE_METER_EVENT_NAME=
+STRIPE_WEBHOOK_SECRET=
 PUBLIC_BASE_URL=https://omniatax.io
 ```
+
+Paste the real values only in the host environment or a gitignored `.env`.
+`render.yaml` lists the four Stripe keys with `sync: false` so Blueprint
+sync never writes them into git. `STRIPE_METER_EVENT` is still read when
+`STRIPE_METER_EVENT_NAME` is blank.
+
+Leave `STRIPE_ALLOW_LIVE` unset for test mode. Set it to `1` only when you
+intentionally switch `STRIPE_SECRET_KEY` to a live key.
 
 Then run the check with the same values. On Render, open your service's **Shell** tab and run `node scripts/check-stripe.ts`: the shell already has your environment variables, so there is nothing to paste. Locally, `npm run check:stripe`. Fix anything it marks
 `FAIL` before going further. Anything marked `warn` is optional.
@@ -108,9 +129,12 @@ Then run the check with the same values. On Render, open your service's **Shell*
    14-day trial. Pay with test card `4242 4242 4242 4242`, any future date, any
    CVC.
 3. You return to the site, the key is issued, the account shows *trialing*.
-4. Make a few `POST /v1/paycheck` calls from the sandbox. In Stripe → Billing →
-   Meters, usage should appear for that customer. `npm run meter:queue` should
-   show nothing pending.
+4. Make a few `POST /v1/paycheck` calls. A **sandbox** key (`sk_test_`) is not
+   metered. A **live** key (`sk_live_`, issued only when `OMNIA_ISSUE_LIVE_KEYS=1`)
+   sends one Billing Meter event per successful calculation, including each
+   calculation inside a batch, with `value` 1 and a unique identifier. If Stripe
+   is down the API still returns the calculation and the event stays queued.
+   `npm run meter:queue` shows anything not yet delivered.
 5. In Stripe, send a test `invoice.payment_failed` event to the endpoint. The
    key should answer `402 account_suspended`. Send `invoice.paid`: it should work
    again.

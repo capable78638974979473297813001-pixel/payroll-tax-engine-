@@ -5,7 +5,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
 import { createHmac } from 'node:crypto';
-import { mintApiKey, recordUsage, usageForKey, getApiKey, verifyApiKey, setStripeCustomer } from '../api/keys.ts';
+import { mintApiKey, pendingMeterEvents, recordUsage, usageForKey, getApiKey, verifyApiKey, setStripeCustomer } from '../api/keys.ts';
 import { chargeOutstanding, completeCardSetup, handleStripeWebhook, meteringConfigured, reportCall, startCardSetup } from '../api/billing.ts';
 
 // A fake Stripe: route requests by method + path to canned responses.
@@ -31,6 +31,8 @@ before(() => {
 after(() => {
   globalThis.fetch = realFetch;
   delete process.env.STRIPE_SECRET_KEY;
+  delete process.env.STRIPE_ALLOW_LIVE;
+  delete process.env.STRIPE_METER_EVENT_NAME;
   rmSync(dir, { recursive: true, force: true });
 });
 beforeEach(() => {
@@ -225,6 +227,73 @@ describe('Stripe metering durability and cancellation (api/billing.ts)', () => {
     } finally {
       delete process.env.STRIPE_PRICE_ID;
       delete process.env.STRIPE_METER_EVENT;
+    }
+  });
+
+  test('meter events are one per calculation, and a replayed webhook id does not apply twice', async () => {
+    process.env.STRIPE_SECRET_KEY = 'sk_test_fake';
+    process.env.STRIPE_PRICE_ID = 'price_meter';
+    process.env.STRIPE_METER_EVENT_NAME = 'paycheck_calculated';
+    delete process.env.STRIPE_METER_EVENT;
+    process.env.STRIPE_WEBHOOK_SECRET = 'whsec_test';
+    try {
+      assert.equal(meteringConfigured(), true);
+      const { key } = mintApiKey('Batch Co', { mode: 'live' });
+      const id = verifyApiKey(key)!.id;
+      setStripeCustomer(id, 'cus_batch');
+      const events: Array<Record<string, string>> = [];
+      stub('POST', /\/v1\/billing\/meter_events$/, (body) => {
+        events.push(Object.fromEntries(new URLSearchParams(body)));
+        return { json: {} };
+      });
+      recordUsage(id, { statusCode: 200, billable: false, meterUnits: 3 });
+      const queued = pendingMeterEvents().filter((q) => q.keyId === id);
+      assert.equal(queued.length, 3);
+      assert.deepEqual(queued.map((q) => q.value), [1, 1, 1]);
+      assert.equal(new Set(queued.map((q) => q.identifier)).size, 3);
+
+      const out = await reportCall(id);
+      assert.equal(out.ok, true);
+      assert.equal(events[0].event_name, 'paycheck_calculated');
+      assert.equal(events[0]['payload[value]'], '1');
+      assert.equal(events[0]['payload[stripe_customer_id]'], 'cus_batch');
+
+      const sign = (body: string) => {
+        const t = Math.floor(Date.now() / 1000);
+        return `t=${t},v1=${createHmac('sha256', 'whsec_test').update(`${t}.${body}`).digest('hex')}`;
+      };
+      const failBody = JSON.stringify({ id: 'evt_fail', type: 'invoice.payment_failed', data: { object: { customer: 'cus_batch' } } });
+      assert.equal(handleStripeWebhook(failBody, sign(failBody)).action, 'suspended');
+      const paidBody = JSON.stringify({ id: 'evt_paid', type: 'invoice.paid', data: { object: { customer: 'cus_batch' } } });
+      assert.equal(handleStripeWebhook(paidBody, sign(paidBody)).action, 'reactivated');
+      assert.equal(getApiKey(id)!.suspended, false);
+      const replay = handleStripeWebhook(failBody, sign(failBody));
+      assert.equal(replay.action, 'duplicate');
+      assert.equal(getApiKey(id)!.suspended, false);
+      const forged = handleStripeWebhook(failBody, 't=' + Math.floor(Date.now() / 1000) + ',v1=deadbeef');
+      assert.equal(forged.ok, false);
+      assert.equal(forged.reason, 'bad_signature');
+    } finally {
+      delete process.env.STRIPE_PRICE_ID;
+      delete process.env.STRIPE_METER_EVENT_NAME;
+      delete process.env.STRIPE_WEBHOOK_SECRET;
+    }
+  });
+
+  test('a live Stripe secret is refused unless STRIPE_ALLOW_LIVE=1', () => {
+    process.env.STRIPE_SECRET_KEY = 'sk_live_nope';
+    process.env.STRIPE_PRICE_ID = 'price_meter';
+    process.env.STRIPE_METER_EVENT_NAME = 'paycheck_calculated';
+    delete process.env.STRIPE_ALLOW_LIVE;
+    try {
+      assert.equal(meteringConfigured(), false);
+      process.env.STRIPE_ALLOW_LIVE = '1';
+      assert.equal(meteringConfigured(), true);
+    } finally {
+      delete process.env.STRIPE_ALLOW_LIVE;
+      delete process.env.STRIPE_PRICE_ID;
+      delete process.env.STRIPE_METER_EVENT_NAME;
+      delete process.env.STRIPE_SECRET_KEY;
     }
   });
 
