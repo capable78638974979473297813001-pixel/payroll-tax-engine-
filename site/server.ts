@@ -20,7 +20,7 @@ import { ExtrasRefusal, runPaycheckExtras, validatePaycheckExtras } from './lib/
 import { keyLifeFor } from './lib/keylife.ts';
 import { coverage, searchLocal } from './lib/coverage.ts';
 import { verifierConfigured, issueCode, checkCode } from './lib/verifier.ts';
-import { checkoutPaymentMethodTypes, stripeConfigured, stripeKeyRefused } from '../api/stripe.ts';
+import { stripeConfigured, stripeKeyRefused } from '../api/stripe.ts';
 import { hashPassword, verifyPassword, passwordProblem, MAX_PASSWORD } from './lib/password.ts';
 import {
   billingConfigured, meteringConfigured, enqueueMeterEvent, flushMeterQueue,
@@ -1072,36 +1072,26 @@ async function handlePaymentSetup(req: IncomingMessage, res: ServerResponse): Pr
     }
   }
 
-  // Fallback: STRIPE_SECRET_KEY is set but no metered price — save a card
-  // on file (setup mode), same as before. Metering stays off until a price
-  // is configured.
-  const setupForm = (types: string[]) => {
-    const form = new URLSearchParams();
-    form.set('mode', 'setup');
-    form.set('customer_email', sub.billingEmail);
-    types.forEach((t, i) => form.set(`payment_method_types[${i}]`, t));
-    form.set('success_url', successUrl);
-    form.set('cancel_url', cancelUrl);
-    form.set('metadata[omnia_email]', session.email);
-    form.set('metadata[terms_version]', TERMS_VERSION);
-    return form.toString();
-  };
-  const postSetup = async (types: string[]) => {
+  // Fallback: STRIPE_SECRET_KEY is set but no metered price — save a payment
+  // method on file (setup mode). Metering stays off until a price is
+  // configured. payment_method_types is omitted so Checkout uses the
+  // dynamic payment methods enabled in the Stripe Dashboard.
+  const form = new URLSearchParams();
+  form.set('mode', 'setup');
+  form.set('customer_email', sub.billingEmail);
+  form.set('success_url', successUrl);
+  form.set('cancel_url', cancelUrl);
+  form.set('metadata[omnia_email]', session.email);
+  form.set('metadata[terms_version]', TERMS_VERSION);
+
+  try {
     const r = await fetch(`${process.env.STRIPE_API_BASE ?? 'https://api.stripe.com'}/v1/checkout/sessions`, {
       method: 'POST',
       headers: { Authorization: `Bearer ${secret}`, 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: setupForm(types),
+      body: form.toString(),
     });
-    return { ok: r.ok, payload: (await r.json()) as { url?: string; error?: { message?: string } } };
-  };
-
-  try {
-    let { ok, payload } = await postSetup(checkoutPaymentMethodTypes());
-    if ((!ok || !payload.url) && checkoutPaymentMethodTypes().includes('us_bank_account')
-        && /payment method type|us_bank_account|activated|not enabled/i.test(payload.error?.message ?? '')) {
-      console.warn('[payment] Stripe refused bank-account setup; retrying with card only. Enable ACH Direct Debit in Stripe to offer bank accounts.');
-      ({ ok, payload } = await postSetup(['card']));
-    }
+    const payload = (await r.json()) as { url?: string; error?: { message?: string } };
+    const ok = r.ok;
     if (!ok || !payload.url) {
       console.error('[payment] Stripe refused the setup checkout:', payload.error?.message ?? 'no reason given');
       sendJson(res, 502, { error: payload.error?.message ?? 'The processor rejected the setup request.' });

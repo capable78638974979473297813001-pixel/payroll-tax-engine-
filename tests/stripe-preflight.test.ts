@@ -4,7 +4,6 @@ import { spawn } from 'node:child_process';
 import { createServer, type Server } from 'node:http';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { checkoutPaymentMethodTypes } from '../api/stripe.ts';
 
 /**
  * scripts/check-stripe.ts against a stand-in Stripe: a correct setup passes,
@@ -127,20 +126,4 @@ test('a webhook endpoint with the wrong URL or missing events fails', async () =
 
 test('a live key against a test-mode price is called out', async () => {
   assert.match((await run({ STRIPE_SECRET_KEY: 'sk_live_x' })).out, /FAIL .*price is test mode but the key is live mode/);
-});
-
-test('checkout payment methods default to card + bank and can be narrowed', () => {
-  const saved = process.env.STRIPE_PAYMENT_METHOD_TYPES;
-  try {
-    delete process.env.STRIPE_PAYMENT_METHOD_TYPES;
-    assert.deepEqual(checkoutPaymentMethodTypes(), ['card', 'us_bank_account']);
-    process.env.STRIPE_PAYMENT_METHOD_TYPES = 'card';
-    assert.deepEqual(checkoutPaymentMethodTypes(), ['card']);
-    process.env.STRIPE_PAYMENT_METHOD_TYPES = 'card, paypal, bogus';
-    assert.deepEqual(checkoutPaymentMethodTypes(), ['card']);
-    process.env.STRIPE_PAYMENT_METHOD_TYPES = 'nonsense';
-    assert.deepEqual(checkoutPaymentMethodTypes(), ['card', 'us_bank_account']);
-  } finally {
-    if (saved === undefined) delete process.env.STRIPE_PAYMENT_METHOD_TYPES; else process.env.STRIPE_PAYMENT_METHOD_TYPES = saved;
-  }
 });

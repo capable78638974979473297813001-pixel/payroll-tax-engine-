@@ -161,8 +161,8 @@ if (!BASE_URL) {
 
 // ---- things this script cannot see --------------------------------------
 console.log('\nBy hand');
-console.log('  note  Checkout offers card and US bank account (ACH). Enable ACH Direct Debit in');
-console.log('        Stripe -> Settings -> Payment methods, or set STRIPE_PAYMENT_METHOD_TYPES=card.');
+console.log('  note  Checkout uses dynamic payment methods from the Dashboard');
+console.log('        (Stripe -> Settings -> Payment methods). Do not send payment_method_types.');
 console.log('  note  Test mode and live mode are separate: repeat setup and this check with live keys.');
 
 console.log(failures ? `\n${failures} problem(s) to fix.` : '\nAll checks passed.');

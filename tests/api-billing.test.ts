@@ -189,6 +189,45 @@ describe('Stripe billing (api/billing.ts)', () => {
     assert.match(charge.error!, /declined/);
     assert.equal(usageForKey(id)!.balanceDueCents, 7); // NOT settled
   });
+
+  test('setup and subscription checkout omit payment_method_types', async () => {
+    process.env.STRIPE_SECRET_KEY = 'sk_test_fake';
+    process.env.STRIPE_PAYMENT_METHOD_TYPES = 'card,us_bank_account';
+    const savedPrice = process.env.STRIPE_PRICE_ID;
+    const savedName = process.env.STRIPE_METER_EVENT_NAME;
+    const savedEvent = process.env.STRIPE_METER_EVENT;
+    try {
+      delete process.env.STRIPE_PRICE_ID;
+      delete process.env.STRIPE_METER_EVENT_NAME;
+      delete process.env.STRIPE_METER_EVENT;
+      const { key } = mintApiKey('Types Co');
+      const id = verifyApiKey(key)!.id;
+      const bodies: string[] = [];
+      stub('POST', /\/v1\/customers$/, () => ({ json: { id: 'cus_types' } }));
+      stub('POST', /\/v1\/checkout\/sessions$/, (body) => {
+        bodies.push(body);
+        return { json: { id: 'cs_types', url: 'https://checkout.stripe.test/cs_types' } };
+      });
+      assert.equal((await startCardSetup(id, 'https://api.example.com')).ok, true);
+      process.env.STRIPE_PRICE_ID = 'price_meter';
+      process.env.STRIPE_METER_EVENT_NAME = 'payroll_api_call';
+      assert.equal((await startCardSetup(id, 'https://api.example.com')).ok, true);
+      assert.equal(bodies.length, 2);
+      assert.equal(new URLSearchParams(bodies[0]!).get('mode'), 'setup');
+      assert.equal(new URLSearchParams(bodies[1]!).get('mode'), 'subscription');
+      for (const body of bodies) {
+        assert.equal(body.includes('payment_method_types'), false);
+        for (const key of new URLSearchParams(body).keys()) {
+          assert.equal(key === 'payment_method_types' || key.startsWith('payment_method_types['), false);
+        }
+      }
+    } finally {
+      delete process.env.STRIPE_PAYMENT_METHOD_TYPES;
+      if (savedPrice === undefined) delete process.env.STRIPE_PRICE_ID; else process.env.STRIPE_PRICE_ID = savedPrice;
+      if (savedName === undefined) delete process.env.STRIPE_METER_EVENT_NAME; else process.env.STRIPE_METER_EVENT_NAME = savedName;
+      if (savedEvent === undefined) delete process.env.STRIPE_METER_EVENT; else process.env.STRIPE_METER_EVENT = savedEvent;
+    }
+  });
 });
 
 describe('Stripe metering durability and cancellation (api/billing.ts)', () => {

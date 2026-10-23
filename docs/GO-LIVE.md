@@ -146,8 +146,10 @@ SIGNUP_PER_HOUR=10                      # signup code requests per client addres
 SIGNIN_PER_HOUR=10                      # sign-in code requests per client address
 TRUST_PROXY=1                           # behind a reverse proxy: client IP from X-Forwarded-For
 OMNIA_ISSUE_LIVE_KEYS=1                 # mint sk_live_ keys instead of sk_test_
-STRIPE_PAYMENT_METHOD_TYPES=card        # cards only, until ACH Direct Debit is enabled in Stripe
 ```
+
+Checkout does not send `payment_method_types`. Turn methods on in the Stripe
+Dashboard (**Settings → Payment methods**); those are what Checkout offers.
 
 **Metering needs** `STRIPE_SECRET_KEY`, `STRIPE_PRICE_ID` and
 `STRIPE_METER_EVENT_NAME` (or `STRIPE_METER_EVENT`). With only the secret key,

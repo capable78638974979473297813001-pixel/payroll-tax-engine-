@@ -190,6 +190,10 @@ test('checkout, meter events, and the webhook', async () => {
   assert.equal(params.get('line_items[0][price]'), 'price_wire');
   assert.equal(params.get('success_url'), 'https://omniatax.io/signup/payment?setup=ok&session_id={CHECKOUT_SESSION_ID}');
   assert.equal(params.get('cancel_url'), 'https://omniatax.io/signup/payment?setup=cancelled');
+  assert.equal(checkoutBody.includes('payment_method_types'), false);
+  for (const key of params.keys()) {
+    assert.equal(key === 'payment_method_types' || key.startsWith('payment_method_types['), false);
+  }
 
   const postCalc = (path: string, key: string, body: unknown = paycheckBody) =>
     fetch(`${BASE}${path}`, { method: 'POST', headers: { ...bearer(key), 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
@@ -286,4 +290,75 @@ test('checkout, meter events, and the webhook', async () => {
   const again = await fetch(`${BASE}/api/billing/webhook`, { method: 'POST', headers: { 'Stripe-Signature': sign(checkoutEvt) }, body: checkoutEvt });
   assert.equal((await again.json()).duplicate, true);
   assert.equal(db().subscriptions[PENDING_EMAIL].status, 'trialing');
+});
+
+test('setup-mode checkout omits payment_method_types form fields', async () => {
+  const port = await freePort();
+  const base = `http://127.0.0.1:${port}`;
+  const setupDir = mkdtempSync(join(tmpdir(), 'site-setup-checkout-'));
+  writeFileSync(join(setupDir, 'db.json'), JSON.stringify({
+    accounts: { [LIVE_EMAIL]: account(LIVE_EMAIL, 'payment_pending') },
+    scenarios: {}, acceptances: [], paymentMethods: {},
+    subscriptions: { [LIVE_EMAIL]: subscription(LIVE_EMAIL, 'payment_pending', null, null) },
+    keys: {}, usage: [], estimates: [], termsQuotes: {}, meterQueue: [], rateLimits: {}, processedStripeEvents: [],
+  }));
+  let posted = '';
+  const fake = createServer((req, res) => {
+    let raw = '';
+    req.on('data', (c) => { raw += c; });
+    req.on('end', () => {
+      if ((req.url ?? '') === '/v1/checkout/sessions' && req.method === 'POST') posted = raw;
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ id: 'cs_setup', url: 'https://checkout.test/cs_setup' }));
+    });
+  });
+  await new Promise<void>((r) => fake.listen(0, '127.0.0.1', r));
+  const fakeBase = `http://127.0.0.1:${(fake.address() as { port: number }).port}`;
+  const proc = spawn('node', ['site/server.ts'], {
+    cwd: REPO,
+    env: {
+      ...process.env,
+      PORT: String(port),
+      SITE_DB_DIR: setupDir,
+      RATE_LIMIT_PER_MIN: '1000',
+      TRUST_PROXY: '',
+      PUBLIC_BASE_URL: 'https://omniatax.io',
+      STRIPE_SECRET_KEY: 'sk_test_fake',
+      STRIPE_API_BASE: fakeBase,
+      STRIPE_PRICE_ID: '',
+      STRIPE_METER_EVENT_NAME: '',
+      STRIPE_METER_EVENT: '',
+      STRIPE_PAYMENT_METHOD_TYPES: 'card,us_bank_account',
+      STRIPE_WEBHOOK_SECRET: '',
+      STRIPE_ALLOW_LIVE: '',
+      RESEND_API_KEY: '',
+    },
+    stdio: ['ignore', 'pipe', 'pipe'],
+  });
+  let log = '';
+  proc.stdout?.on('data', (d) => { log += d; });
+  proc.stderr?.on('data', (d) => { log += d; });
+  try {
+    let up = false;
+    for (let i = 0; i < 80; i++) {
+      try { if ((await fetch(`${base}/v1/health`)).ok) { up = true; break; } } catch { /* not up */ }
+      await new Promise((r) => setTimeout(r, 150));
+    }
+    assert.equal(up, true, 'setup server did not become healthy\n' + log);
+    const setup = await fetch(`${base}/api/payment-setup`, { method: 'POST', headers: bearer(SESSION) });
+    assert.equal(setup.status, 200, await setup.clone().text());
+    const body = await setup.json() as { metered?: boolean; checkoutUrl?: string };
+    assert.equal(body.metered, false);
+    assert.match(body.checkoutUrl ?? '', /cs_setup/);
+    const params = new URLSearchParams(posted);
+    assert.equal(params.get('mode'), 'setup');
+    assert.equal(posted.includes('payment_method_types'), false);
+    for (const key of params.keys()) {
+      assert.equal(key === 'payment_method_types' || key.startsWith('payment_method_types['), false);
+    }
+  } finally {
+    proc.kill('SIGKILL');
+    fake.close();
+    rmSync(setupDir, { recursive: true, force: true });
+  }
 });

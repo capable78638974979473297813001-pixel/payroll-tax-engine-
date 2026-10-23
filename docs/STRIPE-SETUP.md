@@ -64,14 +64,13 @@ sets the 14-day trial itself when it creates the Checkout session.
 
 ## 3. Payment methods
 
-The site's Checkout asks for a card **or** a US bank account (ACH), because a
-payment method is required up front even during the trial.
+Checkout does not send `payment_method_types`. Stripe API `2026-09-30.endive`
+rejects that parameter. The session uses the dynamic payment methods turned on
+in the Dashboard. A payment method is still required up front, including during
+the trial.
 
-Stripe dashboard → **Settings → Payment methods**: make sure **Cards** and
-**ACH Direct Debit** are enabled. If ACH is not enabled on the account, Stripe
-refuses to create the Checkout session and signup's payment step fails. To launch
-with cards only, set `STRIPE_PAYMENT_METHOD_TYPES=card` on the server and turn
-ACH on later.
+Stripe dashboard → **Settings → Payment methods**: enable the methods you want
+Checkout to offer (for example **Cards** and **ACH Direct Debit**).
 
 ## 4. API key
 

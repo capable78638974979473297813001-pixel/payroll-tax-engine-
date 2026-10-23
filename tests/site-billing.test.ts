@@ -102,28 +102,32 @@ describe('site billing (site/lib/billing.ts)', () => {
     assert.equal(params.get('mode'), 'subscription');
     assert.equal(params.get('customer'), 'cus_1');
     assert.equal(params.get('subscription_data[trial_period_days]'), '14');
+    assert.equal(body.includes('payment_method_types'), false);
+    for (const key of params.keys()) {
+      assert.equal(key === 'payment_method_types' || key.startsWith('payment_method_types['), false);
+    }
   });
 
-  test('a new Stripe account without ACH enabled still gets a working checkout (cards only)', async () => {
+  test('checkout does not send payment_method_types even if the old env var is set', async () => {
     process.env.STRIPE_SECRET_KEY = 'sk_test_x';
     process.env.STRIPE_PRICE_ID = 'price_metered';
-    delete process.env.STRIPE_PAYMENT_METHOD_TYPES;
-    const bodies: string[] = [];
+    process.env.STRIPE_PAYMENT_METHOD_TYPES = 'card,us_bank_account';
+    let calls = 0;
+    let body = '';
     stub('POST', /\/v1\/checkout\/sessions$/, (b) => {
-      bodies.push(b);
-      return bodies.length === 1
-        ? { ok: false, json: { error: { message: 'The payment method type provided: us_bank_account is invalid. Please ensure the provided type is activated in your dashboard.' } } }
-        : { json: { id: 'cs_2', url: 'https://checkout.test/cs_2' } };
+      calls += 1;
+      body = b;
+      return { json: { id: 'cs_2', url: 'https://checkout.test/cs_2' } };
     });
     const out = await startMeteredCheckout({ customerId: 'cus_1', email: 'a@b.co', successUrl: 'https://x/ok', cancelUrl: 'https://x/no', trialDays: 14 });
     assert.equal(out.ok, true);
-    assert.match(out.url!, /cs_2/);
-    assert.equal(bodies.length, 2);
-    const first = new URLSearchParams(bodies[0]);
-    assert.equal(first.get('payment_method_types[1]'), 'us_bank_account');
-    const second = new URLSearchParams(bodies[1]);
-    assert.equal(second.get('payment_method_types[0]'), 'card');
-    assert.equal(second.get('payment_method_types[1]'), null, 'second try is cards only');
+    assert.equal(calls, 1, 'Dashboard dynamic payment methods: one session, no type retry');
+    assert.equal(body.includes('payment_method_types'), false);
+    const params = new URLSearchParams(body);
+    for (const key of params.keys()) {
+      assert.equal(key === 'payment_method_types' || key.startsWith('payment_method_types['), false);
+    }
+    delete process.env.STRIPE_PAYMENT_METHOD_TYPES;
   });
 
   test('other Stripe refusals are not retried, and the reason reaches the caller', async () => {
