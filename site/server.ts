@@ -9,7 +9,7 @@ import { CannotComputeError, UnsupportedTaxYearError } from '../src/registry.ts'
 import { pointSourceOf, resolveEmployee } from '../geocode/index.ts';
 import {
   withDb, readDb, appendUsage, hitStoredLimit,
-  type AccountRecord, type DB, type KeyRecord, type PaymentMethodRecord,
+  type AccountRecord, type AuthSession, type DB, type KeyRecord, type PaymentMethodRecord,
   type SavedScenario, type SubscriptionRecord, type TermsAcceptance, type TermsQuote,
 } from './lib/store.ts';
 import { TRIAL_DAYS, estimate as computePricing } from './lib/pricing.ts';
@@ -67,7 +67,17 @@ const HERE = dirname(fileURLToPath(import.meta.url));
 /** Bumped when the request/response contract changes; stamped on every response. */
 const API_VERSION = '1.0.0';
 
-const SESSION_TTL_MS = 24 * 60 * 60_000;
+/**
+ * A session lasts a year from the last time it was used. The cookie's
+ * Max-Age is the same length, so closing the browser does not drop it.
+ * SESSION_SLIDE_AFTER_MS keeps the renewal from rewriting the store on
+ * every request: the first request after a day extends both the stored
+ * expiry and the cookie by another year.
+ */
+const SESSION_TTL_MS = 365 * 24 * 60 * 60_000;
+const SESSION_SLIDE_AFTER_MS = 24 * 60 * 60_000;
+/** Oldest sessions past this are dropped when a new one is issued. */
+const MAX_SESSIONS_PER_ACCOUNT = 20;
 const CODE_TTL_MS = 15 * 60_000;
 const CODE_COOLDOWN_MS = 30_000;
 /** A terms quote must be accepted within this long of being shown. */
@@ -168,13 +178,28 @@ function sameOrigin(req: IncomingMessage): boolean {
 
 function sendJson(res: ServerResponse, status: number, body: unknown, extraHeaders: Record<string, string> = {}): void {
   const payload = JSON.stringify(body);
-  res.writeHead(status, {
+  // A sliding session sets Set-Cookie before the handler responds. writeHead
+  // must keep that header, and must also keep a Set-Cookie the handler passes
+  // (sign-in, sign-out). Set-Cookie is sent as separate headers, not joined.
+  const cookies: string[] = [];
+  const addCookie = (value: unknown) => {
+    if (value == null || value === '') return;
+    if (Array.isArray(value)) for (const v of value) cookies.push(String(v));
+    else cookies.push(String(value));
+  };
+  addCookie(res.getHeader('Set-Cookie'));
+  addCookie(extraHeaders['Set-Cookie']);
+  const headers: Record<string, string | number | readonly string[]> = {
     'Content-Type': 'application/json; charset=utf-8',
     'Content-Length': Buffer.byteLength(payload),
     'Cache-Control': 'no-store',
     ...SECURITY_HEADERS,
     ...extraHeaders,
-  });
+  };
+  delete headers['Set-Cookie'];
+  if (cookies.length === 1) headers['Set-Cookie'] = cookies[0];
+  else if (cookies.length > 1) headers['Set-Cookie'] = cookies;
+  res.writeHead(status, headers);
   res.end(payload);
 }
 
@@ -567,7 +592,7 @@ async function handleVerifyEmail(req: IncomingMessage, res: ServerResponse): Pro
     acct.code = null;
     acct.codeExpiresAt = null;
     acct.codeAttempts = 0;
-    const token = startSession(acct, 'code');
+    const token = startSession(db, acct, 'code');
     if (acct.stage === 'unverified') acct.stage = 'verified';
 
     return {
@@ -585,22 +610,46 @@ async function handleVerifyEmail(req: IncomingMessage, res: ServerResponse): Pro
     sendJson(res, 401, { error: outcome.error });
     return;
   }
-  // The browser console authenticates with an HttpOnly cookie, so the
-  // session token is never readable by page script (an XSS can't lift
-  // it). The token is also in the body for non-browser API clients, which
-  // send it as a Bearer header; the console no longer stores it.
+  // Verifying the email is what makes the account real, and it signs the
+  // browser in immediately — there is no second login. The cookie is
+  // HttpOnly so page script cannot read the token (an XSS can't lift it).
+  // The token is also in the body for non-browser API clients, which send
+  // it as a Bearer header; the console does not store it.
   sendJson(res, 200, outcome, { 'Set-Cookie': sessionCookie(outcome.sessionToken, SESSION_TTL_MS) });
 }
 
-/** Begin a fresh session on an account (mutates it; call inside withDb). Returns the token. */
-function startSession(acct: AccountRecord, method: 'code' | 'password'): string {
+/**
+ * Begin a fresh session (mutates db; call inside withDb). Other sessions
+ * for this account stay valid: a new sign-in is another device, not a
+ * replacement. The account fields mirror the newest token so older readers
+ * of the store still see one. Returns the token.
+ */
+function startSession(db: DB, acct: AccountRecord, method: 'code' | 'password'): string {
   const token = randomBytes(24).toString('hex');
   const now = Date.now();
+  const issuedAt = new Date(now).toISOString();
+  const expiresAt = new Date(now + SESSION_TTL_MS).toISOString();
+  pruneSessions(db, now);
+  db.sessions[token] = { email: acct.email, expiresAt, issuedAt, method, renewedAt: issuedAt };
+  const live = Object.entries(db.sessions)
+    .filter(([, s]) => s.email === acct.email)
+    .sort((a, b) => new Date(a[1].issuedAt).getTime() - new Date(b[1].issuedAt).getTime());
+  while (live.length > MAX_SESSIONS_PER_ACCOUNT) {
+    const oldest = live.shift();
+    if (oldest) delete db.sessions[oldest[0]];
+  }
   acct.sessionToken = token;
-  acct.sessionExpiresAt = new Date(now + SESSION_TTL_MS).toISOString();
-  acct.sessionIssuedAt = new Date(now).toISOString();
+  acct.sessionExpiresAt = expiresAt;
+  acct.sessionIssuedAt = issuedAt;
   acct.sessionMethod = method;
   return token;
+}
+
+/** Drop expired sessions so the map cannot grow without bound. */
+function pruneSessions(db: DB, now: number): void {
+  for (const [key, s] of Object.entries(db.sessions)) {
+    if (!s.expiresAt || now > new Date(s.expiresAt).getTime()) delete db.sessions[key];
+  }
 }
 
 // Wrong passwords per address per hour before further password attempts are
@@ -665,13 +714,14 @@ async function handleSigninPassword(req: IncomingMessage, res: ServerResponse): 
   const outcome = withDb((db) => {
     const acct = db.accounts[email];
     if (!acct || !acct.emailVerifiedAt) return null;
-    const token = startSession(acct, 'password');
+    const token = startSession(db, acct, 'password');
     return { ok: true as const, sessionToken: token, name: acct.name, email: acct.email, company: acct.company, stage: acct.stage, hasPassword: true };
   });
   if (!outcome) {
     sendJson(res, 401, { error: INVALID });
     return;
   }
+  // Same year-long cookie as the signup verification path.
   sendJson(res, 200, outcome, { 'Set-Cookie': sessionCookie(outcome.sessionToken, SESSION_TTL_MS) });
 }
 
@@ -683,7 +733,7 @@ async function handleSigninPassword(req: IncomingMessage, res: ServerResponse): 
 // ---------------------------------------------------------------------
 
 async function handlePassword(req: IncomingMessage, res: ServerResponse): Promise<void> {
-  const session = requireSession(req);
+  const session = requireSession(req, res);
   if (!session) {
     sendJson(res, 401, { error: 'Sign in first.' });
     return;
@@ -702,19 +752,21 @@ async function handlePassword(req: IncomingMessage, res: ServerResponse): Promis
   }
 
   const now = Date.now();
+  // The reset window belongs to this device's session. A password sign-in
+  // on another device must not take it away, and must not grant it.
+  const recentCode =
+    session.method === 'code' && !!session.issuedAt && now - new Date(session.issuedAt).getTime() < RESET_WINDOW_MS;
   const info = withDb((db) => {
     const rl = hitStoredLimit(db, 'pw-change:' + session.email, 10, HOUR_MS, now);
     if (!rl.allowed) return { limited: true as const, retryAfterSec: rl.retryAfterSec };
     const a = db.accounts[session.email];
-    const recentCode =
-      a?.sessionMethod === 'code' && a.sessionIssuedAt && now - new Date(a.sessionIssuedAt).getTime() < RESET_WINDOW_MS;
-    return { limited: false as const, hash: a?.passwordHash ?? null, recentCode: Boolean(recentCode) };
+    return { limited: false as const, hash: a?.passwordHash ?? null };
   });
   if (info.limited) {
     sendJson(res, 429, { error: 'Too many password changes. Try again later.', code: 'rate_limited' }, { 'Retry-After': String(info.retryAfterSec) });
     return;
   }
-  if (info.hash && !info.recentCode) {
+  if (info.hash && !recentCode) {
     const given = typeof body.currentPassword === 'string' ? body.currentPassword : '';
     if (!given || given.length > MAX_PASSWORD || !(await verifyPassword(given, info.hash))) {
       sendJson(res, 403, { error: 'Enter your current password, or sign in with an emailed code first.', code: 'reauth_required' });
@@ -743,8 +795,10 @@ function cookieSecure(): boolean {
 }
 
 function sessionCookie(token: string, ttlMs: number): string {
-  // SameSite=Lax: sent on same-site requests and top-level navigations
-  // (the Stripe Checkout return), never on cross-site POSTs.
+  // HttpOnly so script cannot read it. SameSite=Lax: sent on same-site
+  // requests and top-level navigations (the Stripe Checkout return), never
+  // on cross-site POSTs. Max-Age (not a session cookie) so it survives a
+  // browser restart. Secure on https, which is how omniatax.io is served.
   return `${SESSION_COOKIE}=${token}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${Math.floor(ttlMs / 1000)}` +
     (cookieSecure() ? '; Secure' : '');
 }
@@ -760,21 +814,35 @@ function cookieToken(req: IncomingMessage): string | null {
 }
 
 // ---------------------------------------------------------------------
-// POST /api/signout -- ends the session server-side and clears the cookie.
+// POST /api/signout -- deletes this device's server session and clears
+// its cookie. Other devices keep their own sessions.
 // ---------------------------------------------------------------------
 
 function handleSignout(req: IncomingMessage, res: ServerResponse): void {
   const token = sessionTokenFrom(req);
   if (token) {
     withDb((db) => {
-      const acct = Object.values(db.accounts).find((a) => a.sessionToken === token);
-      if (acct) {
-        acct.sessionToken = null;
-        acct.sessionExpiresAt = null;
-      }
+      endSession(db, token);
     });
   }
   sendJson(res, 200, { ok: true }, { 'Set-Cookie': sessionCookie('', 0) });
+}
+
+/** Remove one token. The account mirror is cleared only when it is this token. */
+function endSession(db: DB, token: string): void {
+  for (const [key] of Object.entries(db.sessions)) {
+    if (!safeEqual(key, token)) continue;
+    delete db.sessions[key];
+    break;
+  }
+  for (const acct of Object.values(db.accounts)) {
+    if (!acct.sessionToken || !safeEqual(acct.sessionToken, token)) continue;
+    acct.sessionToken = null;
+    acct.sessionExpiresAt = null;
+    acct.sessionIssuedAt = null;
+    acct.sessionMethod = null;
+    break;
+  }
 }
 
 // ---------------------------------------------------------------------
@@ -782,7 +850,7 @@ function handleSignout(req: IncomingMessage, res: ServerResponse): void {
 // ---------------------------------------------------------------------
 
 function handleTerms(req: IncomingMessage, res: ServerResponse): void {
-  const session = requireSession(req);
+  const session = requireSession(req, res);
   if (!session) {
     sendJson(res, 401, { error: 'Verify your email first.' });
     return;
@@ -851,7 +919,7 @@ function handleTerms(req: IncomingMessage, res: ServerResponse): void {
 // ---------------------------------------------------------------------
 
 async function handleAcceptTerms(req: IncomingMessage, res: ServerResponse): Promise<void> {
-  const session = requireSession(req);
+  const session = requireSession(req, res);
   if (!session) {
     sendJson(res, 401, { error: 'Verify your email first.' });
     return;
@@ -1005,7 +1073,7 @@ async function handleAcceptTerms(req: IncomingMessage, res: ServerResponse): Pro
 // ---------------------------------------------------------------------
 
 async function handlePaymentSetup(req: IncomingMessage, res: ServerResponse): Promise<void> {
-  const session = requireSession(req);
+  const session = requireSession(req, res);
   if (!session) {
     sendJson(res, 401, { error: 'Verify your email first.' });
     return;
@@ -1110,7 +1178,7 @@ async function handlePaymentSetup(req: IncomingMessage, res: ServerResponse): Pr
 // ---------------------------------------------------------------------
 
 async function handleBillingReturn(req: IncomingMessage, res: ServerResponse): Promise<void> {
-  const session = requireSession(req);
+  const session = requireSession(req, res);
   if (!session) {
     sendJson(res, 401, { error: 'Sign in first.' });
     return;
@@ -1375,7 +1443,7 @@ async function handleBillingWebhook(req: IncomingMessage, res: ServerResponse): 
 // ---------------------------------------------------------------------
 
 async function handleStartTrial(req: IncomingMessage, res: ServerResponse): Promise<void> {
-  const session = requireSession(req);
+  const session = requireSession(req, res);
   if (!session) {
     sendJson(res, 401, { error: 'Verify your email first.' });
     return;
@@ -1434,7 +1502,7 @@ async function handleStartTrial(req: IncomingMessage, res: ServerResponse): Prom
 // ---------------------------------------------------------------------
 
 function handleAccount(req: IncomingMessage, res: ServerResponse): void {
-  const session = requireSession(req);
+  const session = requireSession(req, res);
   if (!session) {
     sendJson(res, 401, { error: 'Not signed in.' });
     return;
@@ -1470,16 +1538,61 @@ function sessionTokenFrom(req: IncomingMessage): string | null {
   return cookieToken(req) ?? bearerToken(req);
 }
 
-function requireSession(req: IncomingMessage): { email: string; name: string; company: string } | null {
+type AccountSession = {
+  email: string;
+  name: string;
+  company: string;
+  method: 'code' | 'password' | null;
+  issuedAt: string | null;
+};
+
+function findSession(db: DB, token: string, now: number): { key: string; session: AuthSession; account: AccountRecord } | null {
+  for (const [key, session] of Object.entries(db.sessions)) {
+    if (!safeEqual(key, token)) continue;
+    if (!session.expiresAt || now > new Date(session.expiresAt).getTime()) return null;
+    const account = db.accounts[session.email];
+    if (!account?.emailVerifiedAt) return null;
+    return { key, session, account };
+  }
+  return null;
+}
+
+function requireSession(req: IncomingMessage, res?: ServerResponse): AccountSession | null {
   const token = sessionTokenFrom(req);
   if (!token) return null;
-  return readDb((db) => {
-    const acct = Object.values(db.accounts).find((a) => a.sessionToken === token);
-    if (!acct || !acct.sessionExpiresAt || !acct.sessionToken || !safeEqual(acct.sessionToken, token)) return null;
-    if (Date.now() > new Date(acct.sessionExpiresAt).getTime()) return null;
-    if (!acct.emailVerifiedAt) return null; // unverified email gets no session powers
-    return { email: acct.email, name: acct.name, company: acct.company };
+  const now = Date.now();
+  const view = readDb((db) => {
+    const found = findSession(db, token, now);
+    if (!found) return null;
+    return {
+      email: found.account.email,
+      name: found.account.name,
+      company: found.account.company,
+      method: found.session.method,
+      issuedAt: found.session.issuedAt,
+      renewedAt: found.session.renewedAt,
+    };
   });
+  if (!view) return null;
+  // Slide when this session has been quiet for a day. The new Max-Age
+  // replaces the cookie the browser already has, so an active user is
+  // not signed out at the original year's end.
+  if (res && now - new Date(view.renewedAt).getTime() >= SESSION_SLIDE_AFTER_MS) {
+    withDb((db) => {
+      const found = findSession(db, token, Date.now());
+      if (!found) return;
+      const t = Date.now();
+      if (t - new Date(found.session.renewedAt).getTime() < SESSION_SLIDE_AFTER_MS) return;
+      const expiresAt = new Date(t + SESSION_TTL_MS).toISOString();
+      found.session.expiresAt = expiresAt;
+      found.session.renewedAt = new Date(t).toISOString();
+      if (found.account.sessionToken && safeEqual(found.account.sessionToken, token)) {
+        found.account.sessionExpiresAt = expiresAt;
+      }
+    });
+    res.setHeader('Set-Cookie', sessionCookie(token, SESSION_TTL_MS));
+  }
+  return { email: view.email, name: view.name, company: view.company, method: view.method, issuedAt: view.issuedAt };
 }
 
 /**
@@ -1495,7 +1608,7 @@ function paymentOnFile(db: { paymentMethods: Record<string, PaymentMethodRecord 
 // ---------------------------------------------------------------------
 
 async function handleIssueKey(req: IncomingMessage, res: ServerResponse): Promise<void> {
-  const session = requireSession(req);
+  const session = requireSession(req, res);
   if (!session) {
     sendJson(res, 401, { error: 'Sign in first.' });
     return;
@@ -1735,13 +1848,13 @@ function scenarioInputs(raw: unknown): Record<string, unknown> | string {
 }
 
 function handleScenarioList(req: IncomingMessage, res: ServerResponse): void {
-  const session = requireSession(req);
+  const session = requireSession(req, res);
   if (!session) { sendJson(res, 401, { error: 'Sign in to see saved scenarios.', code: 'not_signed_in' }); return; }
   sendJson(res, 200, { scenarios: readDb((db) => db.scenarios[session.email] ?? []), max: MAX_SCENARIOS });
 }
 
 async function handleScenarioSave(req: IncomingMessage, res: ServerResponse): Promise<void> {
-  const session = requireSession(req);
+  const session = requireSession(req, res);
   if (!session) { sendJson(res, 401, { error: 'Sign in to save a scenario.', code: 'not_signed_in' }); return; }
   let body: Record<string, unknown>;
   try {
@@ -1773,7 +1886,7 @@ async function handleScenarioSave(req: IncomingMessage, res: ServerResponse): Pr
 }
 
 async function handleScenarioDelete(req: IncomingMessage, res: ServerResponse): Promise<void> {
-  const session = requireSession(req);
+  const session = requireSession(req, res);
   if (!session) { sendJson(res, 401, { error: 'Sign in first.', code: 'not_signed_in' }); return; }
   let body: Record<string, unknown>;
   try {
@@ -1862,7 +1975,7 @@ function handleMe(req: IncomingMessage, res: ServerResponse): void {
 // ---------------------------------------------------------------------
 
 function handleUsage(req: IncomingMessage, res: ServerResponse): void {
-  const session = requireSession(req);
+  const session = requireSession(req, res);
   if (!session) {
     sendJson(res, 401, { error: 'Sign in first.' });
     return;
@@ -2459,7 +2572,7 @@ async function handleEstimate(req: IncomingMessage, res: ServerResponse): Promis
 // ---------------------------------------------------------------------
 
 function handleBilling(req: IncomingMessage, res: ServerResponse): void {
-  const session = requireSession(req);
+  const session = requireSession(req, res);
   if (!session) {
     sendJson(res, 401, { error: 'Sign in first.' });
     return;

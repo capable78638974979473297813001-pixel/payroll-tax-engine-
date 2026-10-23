@@ -11,8 +11,9 @@ import { hitStoredLimit, type DB } from '../site/lib/store.ts';
  */
 
 const emptyDb = (): DB => ({
-  accounts: {}, acceptances: [], paymentMethods: {}, subscriptions: {}, keys: {},
+  accounts: {}, scenarios: {}, acceptances: [], paymentMethods: {}, subscriptions: {}, keys: {},
   usage: [], estimates: [], termsQuotes: {}, meterQueue: [], rateLimits: {},
+  processedStripeEvents: [], sessions: {},
 });
 
 describe('hitStoredLimit (fixed window per key, kept in the store)', () => {
