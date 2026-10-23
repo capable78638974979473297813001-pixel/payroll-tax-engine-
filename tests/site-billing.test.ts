@@ -94,6 +94,7 @@ describe('site billing (site/lib/billing.ts)', () => {
     process.env.STRIPE_SECRET_KEY = 'sk_test_x';
     process.env.STRIPE_PRICE_ID = 'price_metered';
     let body = '';
+    stub('GET', /\/v1\/prices\/price_metered$/, () => ({ json: { id: 'price_metered', recurring: { usage_type: 'metered' } } }));
     stub('POST', /\/v1\/checkout\/sessions$/, (b) => { body = b; return { json: { id: 'cs_1', url: 'https://checkout.test/cs_1' } }; });
     const out = await startMeteredCheckout({ customerId: 'cus_1', email: 'a@b.co', successUrl: 'https://x/ok', cancelUrl: 'https://x/no', trialDays: 14 });
     assert.equal(out.ok, true);
@@ -102,6 +103,8 @@ describe('site billing (site/lib/billing.ts)', () => {
     assert.equal(params.get('mode'), 'subscription');
     assert.equal(params.get('customer'), 'cus_1');
     assert.equal(params.get('subscription_data[trial_period_days]'), '14');
+    assert.equal(params.get('line_items[0][price]'), 'price_metered');
+    assert.equal(params.get('line_items[0][quantity]'), null);
     assert.equal(body.includes('payment_method_types'), false);
     for (const key of params.keys()) {
       assert.equal(key === 'payment_method_types' || key.startsWith('payment_method_types['), false);
@@ -114,6 +117,7 @@ describe('site billing (site/lib/billing.ts)', () => {
     process.env.STRIPE_PAYMENT_METHOD_TYPES = 'card,us_bank_account';
     let calls = 0;
     let body = '';
+    stub('GET', /\/v1\/prices\/price_metered$/, () => ({ json: { id: 'price_metered', recurring: { usage_type: 'metered' } } }));
     stub('POST', /\/v1\/checkout\/sessions$/, (b) => {
       calls += 1;
       body = b;
@@ -130,10 +134,93 @@ describe('site billing (site/lib/billing.ts)', () => {
     delete process.env.STRIPE_PAYMENT_METHOD_TYPES;
   });
 
+  test('a metered price omits quantity and is retrieved once per process', async () => {
+    process.env.STRIPE_SECRET_KEY = 'sk_test_x';
+    process.env.STRIPE_PRICE_ID = 'price_metered_cached';
+    let gets = 0;
+    const bodies: string[] = [];
+    stub('GET', /\/v1\/prices\/price_metered_cached$/, () => {
+      gets += 1;
+      return { json: { id: 'price_metered_cached', unit_amount: 9, recurring: { usage_type: 'metered' } } };
+    });
+    stub('POST', /\/v1\/checkout\/sessions$/, (b) => {
+      bodies.push(b);
+      return { json: { id: 'cs_m', url: 'https://checkout.test/cs_m' } };
+    });
+    const input = { customerId: 'cus_1', email: 'a@b.co', successUrl: 'https://x/ok', cancelUrl: 'https://x/no', trialDays: 14 };
+    assert.equal((await startMeteredCheckout(input)).ok, true);
+    assert.equal((await startMeteredCheckout(input)).ok, true);
+    assert.equal(gets, 1);
+    assert.equal(bodies.length, 2);
+    for (const body of bodies) {
+      const params = new URLSearchParams(body);
+      assert.equal(params.get('line_items[0][quantity]'), null);
+      assert.equal(body.includes('unit_amount'), false);
+    }
+  });
+
+  test('a licensed price sends quantity 1 and warns that usage will not bill', async () => {
+    process.env.STRIPE_SECRET_KEY = 'sk_test_x';
+    process.env.STRIPE_PRICE_ID = 'price_licensed_checkout';
+    let gets = 0;
+    let body = '';
+    stub('GET', /\/v1\/prices\/price_licensed_checkout$/, () => {
+      gets += 1;
+      return { json: { id: 'price_licensed_checkout', unit_amount: 2500, unit_amount_decimal: '2500', recurring: { usage_type: 'licensed' } } };
+    });
+    stub('POST', /\/v1\/checkout\/sessions$/, (b) => { body = b; return { json: { id: 'cs_lic', url: 'https://checkout.test/cs_lic' } }; });
+    const warnings: string[] = [];
+    const orig = console.warn;
+    console.warn = (...args: unknown[]) => { warnings.push(args.map(String).join(' ')); };
+    try {
+      const input = { customerId: 'cus_1', email: 'a@b.co', successUrl: 'https://x/ok', cancelUrl: 'https://x/no', trialDays: 14 };
+      assert.equal((await startMeteredCheckout(input)).ok, true);
+      assert.equal((await startMeteredCheckout(input)).ok, true);
+    } finally {
+      console.warn = orig;
+    }
+    assert.equal(gets, 1, 'the price lookup is cached for the process');
+    const params = new URLSearchParams(body);
+    assert.equal(params.get('line_items[0][price]'), 'price_licensed_checkout');
+    assert.equal(params.get('line_items[0][quantity]'), '1');
+    assert.equal(body.includes('unit_amount'), false);
+    assert.equal(body.includes('2500'), false);
+    assert.ok(warnings.length >= 1);
+    for (const warning of warnings) {
+      assert.match(warning, /STRIPE_PRICE_ID price_licensed_checkout is not metered/);
+      assert.match(warning, /usage won't bill/);
+      assert.equal(warning.includes('2500'), false);
+    }
+  });
+
+  test('a price retrieve failure is a clear error and does not create Checkout', async () => {
+    process.env.STRIPE_SECRET_KEY = 'sk_test_x';
+    process.env.STRIPE_PRICE_ID = 'price_missing_checkout';
+    let gets = 0;
+    let posts = 0;
+    stub('GET', /\/v1\/prices\/price_missing_checkout$/, () => {
+      gets += 1;
+      return { ok: false, json: { error: { message: 'No such price: price_missing_checkout' } } };
+    });
+    stub('POST', /\/v1\/checkout\/sessions$/, () => { posts += 1; return { json: { id: 'cs', url: 'https://checkout.test/no' } }; });
+    const input = { customerId: 'cus_1', email: 'a@b.co', successUrl: 'x', cancelUrl: 'y', trialDays: 14 };
+    const out = await startMeteredCheckout(input);
+    assert.equal(out.ok, false);
+    assert.equal(out.reason, 'stripe_error');
+    assert.match(out.error!, /Could not read STRIPE_PRICE_ID price_missing_checkout/);
+    assert.match(out.error!, /No such price/);
+    const again = await startMeteredCheckout(input);
+    assert.equal(again.ok, false);
+    assert.match(again.error!, /Could not read STRIPE_PRICE_ID price_missing_checkout/);
+    assert.equal(gets, 2, 'a failed lookup is not cached');
+    assert.equal(posts, 0);
+  });
+
   test('other Stripe refusals are not retried, and the reason reaches the caller', async () => {
     process.env.STRIPE_SECRET_KEY = 'sk_test_x';
     process.env.STRIPE_PRICE_ID = 'price_metered';
     let calls = 0;
+    stub('GET', /\/v1\/prices\/price_metered$/, () => ({ json: { id: 'price_metered', recurring: { usage_type: 'metered' } } }));
     stub('POST', /\/v1\/checkout\/sessions$/, () => { calls++; return { ok: false, json: { error: { message: 'No such price: price_metered' } } }; });
     const out = await startMeteredCheckout({ customerId: 'cus_1', email: 'a@b.co', successUrl: 'x', cancelUrl: 'y', trialDays: 14 });
     assert.equal(out.ok, false);

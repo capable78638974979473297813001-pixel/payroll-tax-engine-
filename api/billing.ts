@@ -60,8 +60,9 @@ export async function startCardSetup(keyId: string, baseUrl: string): Promise<{ 
     successUrl: `${baseUrl}/v1/billing/return?session_id={CHECKOUT_SESSION_ID}`,
     cancelUrl: `${baseUrl}/v1/billing/cancel`,
   };
-  // Preferred: subscription mode, which saves a card AND starts per-call metered
-  // billing in one step. Falls back to card-only setup if no metered price is set.
+  // Preferred: subscription mode. The shared Checkout helper reads the price:
+  // metered omits quantity, licensed sends quantity 1. Falls back to setup
+  // mode when no price is configured.
   const session = meteringConfigured()
     ? await createSubscriptionCheckoutSession({ customerId, apiKeyId: key.id, priceId: process.env.STRIPE_PRICE_ID!, ...urls })
     : await createSetupCheckoutSession({ customerId, apiKeyId: key.id, ...urls });

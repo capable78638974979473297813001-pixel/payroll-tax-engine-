@@ -204,6 +204,7 @@ describe('Stripe billing (api/billing.ts)', () => {
       const id = verifyApiKey(key)!.id;
       const bodies: string[] = [];
       stub('POST', /\/v1\/customers$/, () => ({ json: { id: 'cus_types' } }));
+      stub('GET', /\/v1\/prices\/price_meter$/, () => ({ json: { id: 'price_meter', recurring: { usage_type: 'metered' } } }));
       stub('POST', /\/v1\/checkout\/sessions$/, (body) => {
         bodies.push(body);
         return { json: { id: 'cs_types', url: 'https://checkout.stripe.test/cs_types' } };
@@ -215,6 +216,7 @@ describe('Stripe billing (api/billing.ts)', () => {
       assert.equal(bodies.length, 2);
       assert.equal(new URLSearchParams(bodies[0]!).get('mode'), 'setup');
       assert.equal(new URLSearchParams(bodies[1]!).get('mode'), 'subscription');
+      assert.equal(new URLSearchParams(bodies[1]!).get('line_items[0][quantity]'), null);
       for (const body of bodies) {
         assert.equal(body.includes('payment_method_types'), false);
         for (const key of new URLSearchParams(body).keys()) {
@@ -226,6 +228,53 @@ describe('Stripe billing (api/billing.ts)', () => {
       if (savedPrice === undefined) delete process.env.STRIPE_PRICE_ID; else process.env.STRIPE_PRICE_ID = savedPrice;
       if (savedName === undefined) delete process.env.STRIPE_METER_EVENT_NAME; else process.env.STRIPE_METER_EVENT_NAME = savedName;
       if (savedEvent === undefined) delete process.env.STRIPE_METER_EVENT; else process.env.STRIPE_METER_EVENT = savedEvent;
+    }
+  });
+
+  test('a licensed price sends quantity 1 and a missing price is a clear error', async () => {
+    process.env.STRIPE_SECRET_KEY = 'sk_test_fake';
+    process.env.STRIPE_METER_EVENT_NAME = 'payroll_api_call';
+    delete process.env.STRIPE_METER_EVENT;
+    const { key } = mintApiKey('Licensed Co');
+    const id = verifyApiKey(key)!.id;
+    let body = '';
+    let posts = 0;
+    stub('POST', /\/v1\/customers$/, () => ({ json: { id: 'cus_lic' } }));
+    stub('GET', /\/v1\/prices\/price_licensed_api$/, () => ({
+      json: { id: 'price_licensed_api', unit_amount: 2500, recurring: { usage_type: 'licensed' } },
+    }));
+    stub('GET', /\/v1\/prices\/price_missing_api$/, () => ({ ok: false, json: { error: { message: 'No such price: price_missing_api' } } }));
+    stub('POST', /\/v1\/checkout\/sessions$/, (b) => {
+      posts += 1;
+      body = b;
+      return { json: { id: 'cs_lic', url: 'https://checkout.stripe.test/cs_lic' } };
+    });
+    process.env.STRIPE_PRICE_ID = 'price_licensed_api';
+    const warnings: string[] = [];
+    const orig = console.warn;
+    console.warn = (...args: unknown[]) => { warnings.push(args.map(String).join(' ')); };
+    try {
+      const out = await startCardSetup(id, 'https://api.example.com');
+      assert.equal(out.ok, true);
+      assert.equal(new URLSearchParams(body).get('line_items[0][quantity]'), '1');
+      assert.equal(body.includes('2500'), false);
+      const warning = warnings.join('\n');
+      assert.match(warning, /STRIPE_PRICE_ID price_licensed_api is not metered/);
+      assert.match(warning, /usage won't bill/);
+      assert.equal(warning.includes('2500'), false);
+
+      process.env.STRIPE_PRICE_ID = 'price_missing_api';
+      await assert.rejects(
+        () => startCardSetup(id, 'https://api.example.com'),
+        (err: unknown) => err instanceof Error
+          && /Could not read STRIPE_PRICE_ID price_missing_api/.test(err.message)
+          && /No such price/.test(err.message),
+      );
+      assert.equal(posts, 1, 'checkout is not created when the price cannot be read');
+    } finally {
+      console.warn = orig;
+      delete process.env.STRIPE_PRICE_ID;
+      delete process.env.STRIPE_METER_EVENT_NAME;
     }
   });
 });
