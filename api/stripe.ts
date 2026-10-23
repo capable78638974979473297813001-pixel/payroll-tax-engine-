@@ -31,13 +31,42 @@ export class StripeError extends Error {
   }
 }
 
+function stripeSecret(): string {
+  return (process.env.STRIPE_SECRET_KEY ?? '').trim();
+}
+
+/**
+ * Live-mode Stripe keys (sk_live_ / rk_live_) move real money. They are
+ * refused unless the operator sets STRIPE_ALLOW_LIVE=1. Test mode is the
+ * default for Omnia.tax.
+ */
+export function stripeKeyRefused(): string | null {
+  const k = stripeSecret();
+  if (!k) return null;
+  if (/^(sk|rk)_live_/.test(k) && process.env.STRIPE_ALLOW_LIVE !== '1') {
+    return 'STRIPE_SECRET_KEY is a live-mode key. Set STRIPE_ALLOW_LIVE=1 to use it. Test mode uses an sk_test_ key.';
+  }
+  return null;
+}
+
 export function stripeConfigured(): boolean {
-  return Boolean(process.env.STRIPE_SECRET_KEY);
+  return Boolean(stripeSecret()) && !stripeKeyRefused();
+}
+
+/**
+ * Billing-meter event name. STRIPE_METER_EVENT_NAME is the name the
+ * dashboard meter listens for. STRIPE_METER_EVENT is accepted so existing
+ * deployments keep working.
+ */
+export function configuredMeterEventName(): string {
+  return (process.env.STRIPE_METER_EVENT_NAME || process.env.STRIPE_METER_EVENT || '').trim();
 }
 
 function secretKey(): string {
-  const k = process.env.STRIPE_SECRET_KEY;
+  const k = stripeSecret();
   if (!k) throw new StripeError('STRIPE_SECRET_KEY is not set in this environment.', 0, 'config_error');
+  const refused = stripeKeyRefused();
+  if (refused) throw new StripeError(refused, 0, 'live_key_refused');
   return k;
 }
 

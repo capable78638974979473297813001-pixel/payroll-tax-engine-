@@ -27,6 +27,9 @@ after(() => {
   delete process.env.STRIPE_SECRET_KEY;
   delete process.env.STRIPE_PRICE_ID;
   delete process.env.STRIPE_WEBHOOK_SECRET;
+  delete process.env.STRIPE_METER_EVENT;
+  delete process.env.STRIPE_METER_EVENT_NAME;
+  delete process.env.STRIPE_ALLOW_LIVE;
 });
 beforeEach(() => { routes = []; });
 
@@ -35,6 +38,8 @@ describe('site billing (site/lib/billing.ts)', () => {
     delete process.env.STRIPE_SECRET_KEY;
     delete process.env.STRIPE_PRICE_ID;
     delete process.env.STRIPE_METER_EVENT;
+    delete process.env.STRIPE_METER_EVENT_NAME;
+    delete process.env.STRIPE_ALLOW_LIVE;
     assert.equal(billingConfigured(), false);
     assert.equal(meteringConfigured(), false);
     process.env.STRIPE_SECRET_KEY = 'sk_test_x';
@@ -48,6 +53,9 @@ describe('site billing (site/lib/billing.ts)', () => {
     process.env.STRIPE_METER_EVENT = 'omnia_api_call';
     assert.equal(meteringConfigured(), true);
     delete process.env.STRIPE_METER_EVENT;
+    process.env.STRIPE_METER_EVENT_NAME = 'paycheck_calculated';
+    assert.equal(meteringConfigured(), true);
+    delete process.env.STRIPE_METER_EVENT_NAME;
   });
 
   test('reportCall is a safe no-op without Stripe or a customer, and never throws', async () => {
@@ -59,6 +67,7 @@ describe('site billing (site/lib/billing.ts)', () => {
 
   test('reportCall reports exactly one unit for the customer', async () => {
     process.env.STRIPE_SECRET_KEY = 'sk_test_x';
+    delete process.env.STRIPE_METER_EVENT_NAME;
     let seen: Record<string, string> = {};
     stub('POST', /\/v1\/billing\/meter_events$/, (body) => {
       seen = Object.fromEntries(new URLSearchParams(body));
@@ -197,6 +206,71 @@ describe('site billing (site/lib/billing.ts)', () => {
 
     out = interpretWebhook(evt('charge.refunded'), sign(evt('charge.refunded')));
     assert.equal(out.ok && out.action, 'ignore');
+  });
+
+  test('reportCall uses STRIPE_METER_EVENT_NAME when it is set', async () => {
+    process.env.STRIPE_SECRET_KEY = 'sk_test_x';
+    process.env.STRIPE_METER_EVENT = 'legacy_name';
+    process.env.STRIPE_METER_EVENT_NAME = 'paycheck_calculated';
+    let seen: Record<string, string> = {};
+    stub('POST', /\/v1\/billing\/meter_events$/, (body) => {
+      seen = Object.fromEntries(new URLSearchParams(body));
+      return { json: { identifier: 'evt_1' } };
+    });
+    const out = await reportCall('cus_42', 'calc_1');
+    assert.equal(out.ok, true);
+    assert.equal(seen.event_name, 'paycheck_calculated');
+    assert.equal(seen['payload[stripe_customer_id]'], 'cus_42');
+    assert.equal(seen['payload[value]'], '1');
+    assert.equal(seen.identifier, 'calc_1');
+    delete process.env.STRIPE_METER_EVENT_NAME;
+    delete process.env.STRIPE_METER_EVENT;
+  });
+
+  test('a live Stripe secret is refused unless STRIPE_ALLOW_LIVE=1', async () => {
+    process.env.STRIPE_SECRET_KEY = 'sk_live_refused';
+    process.env.STRIPE_PRICE_ID = 'price_metered';
+    process.env.STRIPE_METER_EVENT_NAME = 'paycheck_calculated';
+    delete process.env.STRIPE_ALLOW_LIVE;
+    assert.equal(billingConfigured(), false);
+    assert.equal(meteringConfigured(), false);
+    const refused = await startMeteredCheckout({ customerId: 'cus_1', email: 'a@b.co', successUrl: 'https://x/ok', cancelUrl: 'https://x/no', trialDays: 14 });
+    assert.equal(refused.ok, false);
+    assert.equal(refused.reason, 'stripe_not_configured');
+    process.env.STRIPE_ALLOW_LIVE = '1';
+    assert.equal(billingConfigured(), true);
+    delete process.env.STRIPE_ALLOW_LIVE;
+    delete process.env.STRIPE_METER_EVENT_NAME;
+    process.env.STRIPE_SECRET_KEY = 'sk_test_x';
+  });
+
+  test('checkout.session.completed and subscription.updated are classified', () => {
+    process.env.STRIPE_WEBHOOK_SECRET = 'whsec_test';
+    const sign = (body: string) => {
+      const t = Math.floor(Date.now() / 1000);
+      const v1 = createHmac('sha256', 'whsec_test').update(`${t}.${body}`).digest('hex');
+      return `t=${t},v1=${v1}`;
+    };
+    const checkout = JSON.stringify({
+      id: 'evt_cs',
+      type: 'checkout.session.completed',
+      data: { object: { id: 'cs_1', status: 'complete', mode: 'subscription', customer: 'cus_1', subscription: 'sub_1', metadata: { omnia_email: 'a@b.co' } } },
+    });
+    const done = interpretWebhook(checkout, sign(checkout));
+    assert.equal(done.ok && done.action, 'checkout_completed');
+    if (done.ok) {
+      assert.equal(done.eventId, 'evt_cs');
+      assert.equal(done.sessionId, 'cs_1');
+      assert.equal(done.subscriptionId, 'sub_1');
+      assert.equal(done.email, 'a@b.co');
+      assert.equal(done.customerId, 'cus_1');
+    }
+    const pastDue = JSON.stringify({ id: 'evt_pd', type: 'customer.subscription.updated', data: { object: { id: 'sub_1', customer: 'cus_1', status: 'past_due' } } });
+    assert.equal(interpretWebhook(pastDue, sign(pastDue)).ok && interpretWebhook(pastDue, sign(pastDue)).action, 'suspend');
+    const active = JSON.stringify({ type: 'customer.subscription.updated', data: { object: { id: 'sub_1', customer: 'cus_1', status: 'active' } } });
+    assert.equal(interpretWebhook(active, sign(active)).ok && interpretWebhook(active, sign(active)).action, 'reactivate');
+    const canceled = JSON.stringify({ type: 'customer.subscription.updated', data: { object: { id: 'sub_1', customer: 'cus_1', status: 'canceled' } } });
+    assert.equal(interpretWebhook(canceled, sign(canceled)).ok && interpretWebhook(canceled, sign(canceled)).action, 'cancel');
   });
 
   test('a forged or unconfigured webhook changes nothing', () => {

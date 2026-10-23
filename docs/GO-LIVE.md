@@ -54,8 +54,10 @@ prints codes in the Render log instead, which is fine for a first test only.
    and branch. It creates one web service (**Starter** plan; a persistent disk
    needs a paid plan) with a 1 GB disk mounted at `/var/data`.
 2. Fill in the secrets the Blueprint marks `sync: false`: `STRIPE_SECRET_KEY`,
-   `STRIPE_PRICE_ID`, `STRIPE_WEBHOOK_SECRET` and `RESEND_API_KEY`. Leave
-   `OMNIA_ISSUE_LIVE_KEYS` unset until test mode has passed.
+   `STRIPE_PRICE_ID`, `STRIPE_METER_EVENT_NAME`, `STRIPE_WEBHOOK_SECRET` and
+   `RESEND_API_KEY`. Leave `STRIPE_ALLOW_LIVE` and `OMNIA_ISSUE_LIVE_KEYS` unset
+   until test mode has passed. The webhook endpoint is
+   `https://omniatax.io/api/billing/webhook`.
 3. Add the domain: the Blueprint lists `omniatax.io` and `www.omniatax.io`.
    Render shows the DNS records to create; add them in GoDaddy DNS (section 0b).
    Render issues the HTTPS certificate once the records resolve.
@@ -132,10 +134,10 @@ SITE_DB_DIR=/var/lib/omnia
 PUBLIC_BASE_URL=https://omniatax.io
 PORT=4323
 
-STRIPE_SECRET_KEY=sk_test_…            # test first, then sk_live_…
-STRIPE_PRICE_ID=price_…                # the flat $0.09 metered price
-STRIPE_METER_EVENT=omnia_api_call       # required: must match the meter exactly
-STRIPE_WEBHOOK_SECRET=whsec_…
+STRIPE_SECRET_KEY=                     # sk_test_… until you set STRIPE_ALLOW_LIVE=1
+STRIPE_PRICE_ID=                       # usage-metered price id; the rate stays in Stripe
+STRIPE_METER_EVENT_NAME=               # required: must match the meter exactly
+STRIPE_WEBHOOK_SECRET=                 # signing secret for https://omniatax.io/api/billing/webhook
 RESEND_API_KEY=…                       # required in production (see below)
 
 # optional
@@ -147,9 +149,13 @@ OMNIA_ISSUE_LIVE_KEYS=1                 # mint sk_live_ keys instead of sk_test_
 STRIPE_PAYMENT_METHOD_TYPES=card        # cards only, until ACH Direct Debit is enabled in Stripe
 ```
 
-**Metering needs all three of** `STRIPE_SECRET_KEY`, `STRIPE_PRICE_ID` and
-`STRIPE_METER_EVENT`. With only the secret key, onboarding saves a card and no
-usage is billed; the server logs a warning at startup saying so.
+**Metering needs** `STRIPE_SECRET_KEY`, `STRIPE_PRICE_ID` and
+`STRIPE_METER_EVENT_NAME` (or `STRIPE_METER_EVENT`). With only the secret key,
+onboarding saves a card and no usage is billed; the server logs a warning at
+startup saying so. An `sk_live_` secret is refused unless `STRIPE_ALLOW_LIVE=1`.
+Sandbox API keys are not metered. Each successful live paycheck calculation,
+including each calculation in a batch, queues one meter event (`value` 1). A
+Stripe outage does not fail the API response.
 
 **Set `RESEND_API_KEY` in production.** Without it the server is in local
 development mode and prints each 6-digit verification code to its console —
@@ -227,15 +233,16 @@ misconfigured in Stripe. Then:
    webhook, or use a card that fails on renewal). Confirm the key then returns
    `402 account_suspended`, and that a test `invoice.paid` reactivates it.
 
-Only once all six pass, swap the four `STRIPE_*` values for **live-mode** ones,
-add a **live** webhook endpoint, and repeat step 1–5 with a real card.
+Only once all six pass, swap the Stripe values for **live-mode** ones, set
+`STRIPE_ALLOW_LIVE=1`, add a **live** webhook endpoint at
+`https://omniatax.io/api/billing/webhook`, and repeat step 1–5 with a real card.
 
 ---
 
 ## 5. Before you take real customers
 
 - [ ] Fill in the legal placeholders — see `docs/LEGAL.md`.
-- [ ] Confirm the Stripe price is exactly $0.09 per unit, matching `site/lib/pricing.ts`.
+- [ ] Confirm `STRIPE_PRICE_ID` is the usage-metered price. The rate is set in Stripe and is not hardcoded in the app.
 - [ ] Back up `SITE_DB_DIR` on a schedule.
 - [ ] Put the app behind HTTPS and a process manager that restarts it.
 - [ ] Decide `OMNIA_ISSUE_LIVE_KEYS` (on for production `sk_live_` keys).

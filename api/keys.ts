@@ -149,15 +149,21 @@ function dbFile(): string {
 interface KeysDB {
   keys: Record<string, ApiKey>;
   meterQueue: PendingMeterEvent[];
+  /** Stripe webhook event ids already applied. Bounded by claimStripeEvent. */
+  processedStripeEvents: string[];
 }
 function emptyDb(): KeysDB {
-  return { keys: {}, meterQueue: [] };
+  return { keys: {}, meterQueue: [], processedStripeEvents: [] };
 }
 // Missing file -> empty. Present but unparseable -> throws (never loads as
 // empty, which would let the next write erase every key and balance).
 function load(): KeysDB {
   const parsed = readJsonFile<Partial<KeysDB>>(dbFile());
-  return { keys: parsed?.keys ?? {}, meterQueue: parsed?.meterQueue ?? [] };
+  return {
+    keys: parsed?.keys ?? {},
+    meterQueue: parsed?.meterQueue ?? [],
+    processedStripeEvents: parsed?.processedStripeEvents ?? [],
+  };
 }
 /** Locked read-modify-write, saved atomically (see api/json-store.ts). */
 function withDb<T>(fn: (db: KeysDB) => T): T {
@@ -386,18 +392,22 @@ export function recordUsage(
     if (k.recent.length > RECENT_LIMIT) k.recent.length = RECENT_LIMIT;
     // Metered keys: queue the Stripe meter event in this same write, so the
     // call can't be recorded locally yet lost to Stripe.
+    // One Stripe meter event per calculation, value 1, its own identifier.
+    // A batch that reports N units becomes N events, not one event of value N.
     const units = Math.floor(call.meterUnits ?? 0);
     if (units > 0 && k.stripeCustomerId) {
-      db.meterQueue.push({
-        identifier: `${k.id}_${randomUUID()}`,
-        keyId: k.id,
-        customerId: k.stripeCustomerId,
-        value: units,
-        at: k.lastUsedAt,
-        attempts: 0,
-        lastAttemptAt: null,
-        lastError: null,
-      });
+      for (let n = 0; n < units; n++) {
+        db.meterQueue.push({
+          identifier: `${k.id}_${randomUUID()}`,
+          keyId: k.id,
+          customerId: k.stripeCustomerId,
+          value: 1,
+          at: k.lastUsedAt,
+          attempts: 0,
+          lastAttemptAt: null,
+          lastError: null,
+        });
+      }
     }
     return chargedCents;
   });
@@ -418,18 +428,39 @@ export function enqueueMeterEvent(keyId: string, units: number): PendingMeterEve
     const k = db.keys[keyId];
     const value = Math.floor(units);
     if (!k?.stripeCustomerId || value <= 0) return null;
-    const item: PendingMeterEvent = {
-      identifier: `${k.id}_${randomUUID()}`,
-      keyId: k.id,
-      customerId: k.stripeCustomerId,
-      value,
-      at: new Date().toISOString(),
-      attempts: 0,
-      lastAttemptAt: null,
-      lastError: null,
-    };
-    db.meterQueue.push(item);
-    return item;
+    const at = new Date().toISOString();
+    let first: PendingMeterEvent | null = null;
+    for (let n = 0; n < value; n++) {
+      const item: PendingMeterEvent = {
+        identifier: `${k.id}_${randomUUID()}`,
+        keyId: k.id,
+        customerId: k.stripeCustomerId,
+        value: 1,
+        at,
+        attempts: 0,
+        lastAttemptAt: null,
+        lastError: null,
+      };
+      db.meterQueue.push(item);
+      first ??= item;
+    }
+    return first;
+  });
+}
+
+const STRIPE_EVENT_MEMORY = 2000;
+
+/**
+ * Record a Stripe event id the first time it is seen. Returns false when
+ * this id was already claimed, so a webhook redelivery is a no-op.
+ */
+export function claimStripeEvent(eventId: string): boolean {
+  return withDb((db) => {
+    const seen = db.processedStripeEvents ?? [];
+    if (seen.includes(eventId)) return false;
+    seen.push(eventId);
+    db.processedStripeEvents = seen.length > STRIPE_EVENT_MEMORY ? seen.slice(seen.length - STRIPE_EVENT_MEMORY) : seen;
+    return true;
   });
 }
 

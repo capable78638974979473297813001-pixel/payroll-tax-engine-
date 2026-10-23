@@ -4,7 +4,7 @@
  * Stripe account can be verified before anyone signs up:
  *
  *   STRIPE_SECRET_KEY=sk_test_... STRIPE_PRICE_ID=price_... \
- *   STRIPE_METER_EVENT=omnia_api_call STRIPE_WEBHOOK_SECRET=whsec_... \
+ *   STRIPE_METER_EVENT_NAME=omnia_api_call STRIPE_WEBHOOK_SECRET=whsec_... \
  *   PUBLIC_BASE_URL=https://omniatax.io npm run check:stripe
  *
  * Read-only: it only issues GET requests. Exits 1 if anything that would
@@ -24,17 +24,17 @@ try {
 const API = process.env.STRIPE_API_BASE ?? 'https://api.stripe.com';
 const KEY = process.env.STRIPE_SECRET_KEY ?? '';
 const PRICE = process.env.STRIPE_PRICE_ID ?? '';
-const METER_EVENT = process.env.STRIPE_METER_EVENT ?? '';
+const METER_EVENT = process.env.STRIPE_METER_EVENT_NAME || process.env.STRIPE_METER_EVENT || '';
 const WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET ?? '';
 const BASE_URL = (process.env.PUBLIC_BASE_URL ?? '').replace(/\/+$/, '');
 
-/** What the site's price must be: cents per call, matching site/lib/pricing.ts. */
-const EXPECTED_UNIT_CENTS = 9;
-/** Events site/lib/billing.ts acts on. */
+/** Events the site webhook acts on. The dollar rate is not checked: it lives on the Stripe price. */
 const REQUIRED_EVENTS = [
-  'invoice.payment_failed',
-  'invoice.paid',
+  'checkout.session.completed',
+  'customer.subscription.updated',
   'customer.subscription.deleted',
+  'invoice.paid',
+  'invoice.payment_failed',
 ];
 const OPTIONAL_EVENTS = [
   'invoice.payment_succeeded',
@@ -67,6 +67,9 @@ if (!KEY) {
 } else {
   live = KEY.includes('_live_');
   ok(`${live ? 'LIVE' : 'test'}-mode key`);
+  if (live && process.env.STRIPE_ALLOW_LIVE !== '1') {
+    fail('live key refused until STRIPE_ALLOW_LIVE=1. Use an sk_test_ key for test mode.');
+  }
   const acct = await get('/v1/balance');
   if (acct.status === 200) ok('key is accepted by Stripe');
   else if (acct.status === 401) fail(`Stripe rejected the key: ${acct.body.error?.message ?? 'invalid key'}`);
@@ -95,11 +98,8 @@ if (!PRICE) {
       : fail(`billing period is ${p.recurring?.interval_count ?? 1} ${p.recurring?.interval}, expected monthly`);
     p.billing_scheme === 'per_unit' && !p.tiers_mode
       ? ok('flat per-unit pricing (no tiers)')
-      : fail('price uses tiers. The site charges one flat rate: use "per unit".');
-    const cents = p.unit_amount_decimal != null ? Number(p.unit_amount_decimal) : p.unit_amount;
-    cents === EXPECTED_UNIT_CENTS
-      ? ok(`${EXPECTED_UNIT_CENTS} cents per unit`)
-      : fail(`unit price is ${cents} cents, expected ${EXPECTED_UNIT_CENTS} (site/lib/pricing.ts)`);
+      : fail('price uses tiers. The site reports one unit per calculation: use "per unit".');
+    ok('unit amount is whatever you set on this price (the app does not hardcode a rate)');
 
     const meterId = p.recurring?.meter;
     console.log('\nBilling meter');
@@ -112,7 +112,7 @@ if (!PRICE) {
       } else {
         const mt = m.body;
         mt.status === 'active' ? ok('meter is active') : fail(`meter status is ${mt.status}`);
-        if (!METER_EVENT) fail('STRIPE_METER_EVENT is not set.');
+        if (!METER_EVENT) fail('STRIPE_METER_EVENT_NAME is not set.');
         else if (mt.event_name === METER_EVENT) ok(`event name "${METER_EVENT}" matches the meter`);
         else fail(`meter listens for "${mt.event_name}" but STRIPE_METER_EVENT is "${METER_EVENT}"`);
         mt.default_aggregation?.formula === 'sum'

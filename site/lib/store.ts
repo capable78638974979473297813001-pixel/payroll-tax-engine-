@@ -279,6 +279,11 @@ export interface DB {
   termsQuotes: Record<string, TermsQuote>;
   meterQueue: MeterQueueItem[];
   rateLimits: Record<string, RateWindow>;
+  /**
+   * Stripe webhook event ids already applied. A redelivery of the same id
+   * is acknowledged and not applied again. Bounded by the webhook handler.
+   */
+  processedStripeEvents: string[];
 }
 
 function emptyDb(): DB {
@@ -294,6 +299,7 @@ function emptyDb(): DB {
     termsQuotes: {},
     meterQueue: [],
     rateLimits: {},
+    processedStripeEvents: [],
   };
 }
 
@@ -318,6 +324,7 @@ function load(): DB {
     termsQuotes: parsed.termsQuotes ?? base.termsQuotes,
     meterQueue: parsed.meterQueue ?? base.meterQueue,
     rateLimits: parsed.rateLimits ?? base.rateLimits,
+    processedStripeEvents: parsed.processedStripeEvents ?? base.processedStripeEvents,
   };
 }
 

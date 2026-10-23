@@ -9,10 +9,10 @@ import { CannotComputeError, UnsupportedTaxYearError } from '../src/registry.ts'
 import { pointSourceOf, resolveEmployee } from '../geocode/index.ts';
 import {
   withDb, readDb, appendUsage, hitStoredLimit,
-  type AccountRecord, type KeyRecord, type PaymentMethodRecord,
+  type AccountRecord, type DB, type KeyRecord, type PaymentMethodRecord,
   type SavedScenario, type SubscriptionRecord, type TermsAcceptance, type TermsQuote,
 } from './lib/store.ts';
-import { CALL_TIERS, TRIAL_DAYS, estimate as computePricing, costForCalls } from './lib/pricing.ts';
+import { TRIAL_DAYS, estimate as computePricing } from './lib/pricing.ts';
 import { TERMS_VERSION, TERM_MONTHS, termsClauses } from './lib/terms.ts';
 import { isEmailConfigured, sendVerificationEmail, sendContactEmail } from './lib/mail.ts';
 import { validatePaycheckInput } from './lib/validate.ts';
@@ -20,7 +20,7 @@ import { ExtrasRefusal, runPaycheckExtras, validatePaycheckExtras } from './lib/
 import { keyLifeFor } from './lib/keylife.ts';
 import { coverage, searchLocal } from './lib/coverage.ts';
 import { verifierConfigured, issueCode, checkCode } from './lib/verifier.ts';
-import { checkoutPaymentMethodTypes } from '../api/stripe.ts';
+import { checkoutPaymentMethodTypes, stripeConfigured, stripeKeyRefused } from '../api/stripe.ts';
 import { hashPassword, verifyPassword, passwordProblem, MAX_PASSWORD } from './lib/password.ts';
 import {
   billingConfigured, meteringConfigured, enqueueMeterEvent, flushMeterQueue,
@@ -1017,6 +1017,13 @@ async function handlePaymentSetup(req: IncomingMessage, res: ServerResponse): Pr
     return;
   }
 
+  const refused = stripeKeyRefused();
+  if (refused) {
+    console.error(`[payment] ${refused}`);
+    sendJson(res, 503, { error: refused, paymentsConfigured: false });
+    return;
+  }
+
   const secret = process.env.STRIPE_SECRET_KEY;
   if (!secret) {
     // Honest 501 rather than a fake success. The UI renders this as
@@ -1204,6 +1211,77 @@ async function handleBillingReturn(req: IncomingMessage, res: ServerResponse): P
 // signature). Suspends a key on a failed invoice, reactivates on payment.
 // ---------------------------------------------------------------------
 
+const STRIPE_EVENT_MEMORY = 2000;
+
+function stripeEventSeen(db: { processedStripeEvents?: string[] }, eventId: string | undefined): boolean {
+  if (!eventId) return false;
+  return (db.processedStripeEvents ?? []).includes(eventId);
+}
+
+function rememberStripeEvent(db: { processedStripeEvents?: string[] }, eventId: string | undefined): void {
+  if (!eventId) return;
+  const seen = db.processedStripeEvents ?? [];
+  if (!seen.includes(eventId)) seen.push(eventId);
+  db.processedStripeEvents = seen.length > STRIPE_EVENT_MEMORY ? seen.slice(seen.length - STRIPE_EVENT_MEMORY) : seen;
+}
+
+/**
+ * Link a finished Checkout to the account Stripe named. A signature-verified
+ * checkout.session.completed does this even if the browser never returns,
+ * so the customer id the meter events need is on the account.
+ */
+function applyCheckoutCompletion(
+  db: DB,
+  done: { email?: string | null; customerId?: string | null; subscriptionId?: string | null; paymentMethod?: { id: string; kind: string; brand: string | null; last4: string | null } | null },
+): string | null {
+  const email = done.email?.trim().toLowerCase() || null;
+  const sub = (email && db.subscriptions[email])
+    || (done.customerId ? Object.values(db.subscriptions).find((s) => s.stripeCustomerId === done.customerId) : undefined);
+  if (!sub) return null;
+  const previousSubId = sub.stripeSubscriptionId ?? null;
+  const resubscribed = Boolean(done.subscriptionId && sub.status === 'cancelled' && done.subscriptionId !== previousSubId);
+  if (done.customerId) sub.stripeCustomerId = done.customerId;
+  if (done.subscriptionId) sub.stripeSubscriptionId = done.subscriptionId;
+  const saved = done.paymentMethod;
+  if (saved) {
+    db.paymentMethods[sub.email] = {
+      email: sub.email,
+      kind: saved.kind,
+      processorRef: saved.id,
+      last4: saved.last4,
+      brand: saved.brand,
+      attachedAt: new Date().toISOString(),
+    };
+  }
+  if (resubscribed && saved) {
+    sub.status = 'active';
+    sub.suspended = false;
+    sub.suspendedReason = null;
+    const acct = db.accounts[sub.email];
+    if (acct) acct.stage = 'active';
+  } else if (saved && sub.status !== 'cancelled' && sub.status !== 'active' && sub.status !== 'trialing') {
+    const now = Date.now();
+    sub.suspended = false;
+    sub.suspendedReason = null;
+    sub.status = 'trialing';
+    sub.trialStartsAt = sub.trialStartsAt ?? new Date(now).toISOString();
+    sub.trialEndsAt = sub.trialEndsAt ?? new Date(now + TRIAL_DAYS * 86_400_000).toISOString();
+    if (!sub.termEndsAt) {
+      sub.termEndsAt = new Date(new Date(now + TRIAL_DAYS * 86_400_000).setMonth(new Date(now).getMonth() + TERM_MONTHS)).toISOString();
+    }
+    const acct = db.accounts[sub.email];
+    if (acct) acct.stage = 'trialing';
+    const life = keyLifeFor(sub, now);
+    for (const k of Object.values(db.keys)) {
+      if (k.ownerEmail === sub.email && k.isActive) {
+        k.plan = life.plan;
+        k.expiresAt = life.expiresAt;
+      }
+    }
+  }
+  return sub.email;
+}
+
 async function handleBillingWebhook(req: IncomingMessage, res: ServerResponse): Promise<void> {
   let rawBody: string;
   try {
@@ -1219,14 +1297,55 @@ async function handleBillingWebhook(req: IncomingMessage, res: ServerResponse): 
     sendJson(res, 400, { error: result.reason });
     return;
   }
+  if (result.eventId && readDb((db) => stripeEventSeen(db, result.eventId))) {
+    sendJson(res, 200, { received: true, duplicate: true });
+    return;
+  }
+
+  if (result.action === 'checkout_completed') {
+    if (!result.sessionId) {
+      withDb((db) => { rememberStripeEvent(db, result.eventId); });
+      sendJson(res, 200, { received: true, action: 'ignore' });
+      return;
+    }
+    const done = await completeMeteredCheckout(result.sessionId);
+    if (!done.ok && done.reason === 'stripe_error') {
+      // Leave the event unclaimed so Stripe's retry can finish the link.
+      sendJson(res, 500, { error: 'Could not confirm the checkout with Stripe.' });
+      return;
+    }
+    const applied = withDb((db) => {
+      if (stripeEventSeen(db, result.eventId)) return 'duplicate' as const;
+      rememberStripeEvent(db, result.eventId);
+      if (!done.ok) return null;
+      return applyCheckoutCompletion(db, {
+        email: done.email ?? result.email,
+        customerId: done.customerId ?? result.customerId,
+        subscriptionId: done.subscriptionId ?? result.subscriptionId,
+        paymentMethod: done.paymentMethod,
+      });
+    });
+    if (applied === 'duplicate') {
+      sendJson(res, 200, { received: true, duplicate: true });
+      return;
+    }
+    console.log(`[billing webhook] checkout_completed customer=${result.customerId} account=${applied ?? 'unknown'}`);
+    sendJson(res, 200, { received: true, action: 'checkout_completed', matched: Boolean(applied) });
+    return;
+  }
+
   if (result.action === 'ignore' || !result.customerId) {
+    withDb((db) => { rememberStripeEvent(db, result.eventId); });
     sendJson(res, 200, { received: true });
     return;
   }
 
   const applied = withDb((db) => {
+    if (stripeEventSeen(db, result.eventId)) return 'duplicate' as const;
+    rememberStripeEvent(db, result.eventId);
     const sub = Object.values(db.subscriptions).find((s) => s.stripeCustomerId === result.customerId);
     if (!sub) return null;
+    if (result.subscriptionId && sub.status !== 'cancelled') sub.stripeSubscriptionId = result.subscriptionId;
     if (result.action === 'cancel') {
       sub.suspended = true;
       sub.suspendedReason = 'subscription_cancelled';
@@ -1250,6 +1369,10 @@ async function handleBillingWebhook(req: IncomingMessage, res: ServerResponse): 
     return sub.email;
   });
 
+  if (applied === 'duplicate') {
+    sendJson(res, 200, { received: true, duplicate: true });
+    return;
+  }
   console.log(`[billing webhook] ${result.action} customer=${result.customerId} account=${applied ?? 'unknown'}`);
   sendJson(res, 200, { received: true, action: result.action, matched: Boolean(applied) });
 }
@@ -2177,7 +2300,7 @@ function handleHealth(res: ServerResponse): void {
     store,
     taxYears: supportedYears(),
     // Which integrations this server has been given keys for. Booleans only.
-    payments: Boolean(process.env.STRIPE_SECRET_KEY),
+    payments: stripeConfigured(),
     metering: meteringConfigured(),
     email: isEmailConfigured() || verifierConfigured(),
     time: new Date().toISOString(),
@@ -2369,16 +2492,15 @@ function handleBilling(req: IncomingMessage, res: ServerResponse): void {
       trialEndsAt,
       daysLeft,
       callsSoFar: calls,
-      costSoFar: Math.round(costForCalls(calls) * 100) / 100,
-      tiers: CALL_TIERS.map((t) => ({ upTo: t.upTo === Infinity ? null : t.upTo, rate: t.rate })),
-        subscription: sub,
+      // The per-calculation rate is not published. It lives on the Stripe price.
+      subscription: sub,
       paymentMethod: pm,
       termMonths: TERM_MONTHS,
       // Real billing state. paymentsConfigured means a card/subscription
       // Checkout can be created; metered means successful calls actually
       // report usage to Stripe; suspended means a failed invoice has paused
       // the key (a paid invoice reactivates it via webhook).
-      paymentsConfigured: billingConfigured() || Boolean(process.env.STRIPE_SECRET_KEY),
+      paymentsConfigured: billingConfigured() || stripeConfigured(),
       metered: meteringConfigured() && Boolean(sub?.stripeCustomerId && sub?.stripeSubscriptionId),
       subscribed: Boolean(sub?.stripeSubscriptionId),
       suspended: Boolean(sub?.suspended),
@@ -2522,12 +2644,15 @@ createServer((req, res) => {
     sendJson(res, 500, { error: 'Internal server error.' });
   });
 }).listen(PORT, () => {
-  if (meteringConfigured()) {
+  const liveRefused = stripeKeyRefused();
+  if (liveRefused) {
+    console.error(`[billing] ${liveRefused}`);
+  } else if (meteringConfigured()) {
     // Retry anything a previous run left queued, then keep retrying.
     flushMeterSoon();
     setInterval(flushMeterSoon, 60_000).unref();
   } else if (process.env.STRIPE_SECRET_KEY) {
-    console.warn('Stripe is connected but metering is OFF: set STRIPE_PRICE_ID (a usage-metered price) and STRIPE_METER_EVENT to bill per call. Onboarding will only save a card.');
+    console.warn('Stripe is connected but metering is OFF: set STRIPE_PRICE_ID (a usage-metered price) and STRIPE_METER_EVENT_NAME to bill per call. Onboarding will only save a card.');
   }
   console.log(`Omnia.tax:           http://localhost:${PORT}`);
   console.log(`Omnia.tax docs:      http://localhost:${PORT}/docs`);

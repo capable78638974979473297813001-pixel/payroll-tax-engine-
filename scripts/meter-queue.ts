@@ -51,7 +51,7 @@ function report(label: string, items: Item[]): void {
 if (only !== 'api') {
   const site = await import('../site/lib/billing.ts');
   if (argv.includes('--flush')) {
-    if (!site.meteringConfigured()) console.log('site: metering is not configured (STRIPE_SECRET_KEY + STRIPE_PRICE_ID + STRIPE_METER_EVENT); nothing sent.');
+    if (!site.meteringConfigured()) console.log('site: metering is not configured (STRIPE_SECRET_KEY + STRIPE_PRICE_ID + STRIPE_METER_EVENT_NAME); nothing sent.');
     else console.log('site flush:', await site.flushMeterQueue({ force: true }));
   }
   report('site', site.pendingMeterEvents());
@@ -61,7 +61,7 @@ if (only !== 'site') {
   const billing = await import('../api/billing.ts');
   const keys = await import('../api/keys.ts');
   if (argv.includes('--flush')) {
-    if (!billing.meteringConfigured()) console.log('api: metering is not configured (STRIPE_SECRET_KEY + STRIPE_PRICE_ID + STRIPE_METER_EVENT); nothing sent.');
+    if (!billing.meteringConfigured()) console.log('api: metering is not configured (STRIPE_SECRET_KEY + STRIPE_PRICE_ID + STRIPE_METER_EVENT_NAME); nothing sent.');
     else console.log('api flush:', await billing.flushMeterQueue({ force: true }));
   }
   report('api', keys.pendingMeterEvents());

@@ -1,10 +1,11 @@
 import {
-  cancelByCustomer, enqueueMeterEvent, getApiKey, pendingMeterEvents, setCardOnFile, setStripeCustomer,
+  cancelByCustomer, claimStripeEvent, enqueueMeterEvent, getApiKey, pendingMeterEvents, setCardOnFile, setStripeCustomer,
   setSubscription, setSuspendedByCustomer, settleBalance, settleMeterEvent,
 } from './keys.ts';
 import { deliverMeterEvent, isDue } from './meter-queue.ts';
 import {
   chargeOffSession,
+  configuredMeterEventName,
   createCustomer,
   createSetupCheckoutSession,
   createSubscriptionCheckoutSession,
@@ -18,7 +19,7 @@ import {
 
 /** Metered per-call billing is on when Stripe is configured AND a metered price + meter event name are set. */
 export function meteringConfigured(): boolean {
-  return stripeConfigured() && Boolean(process.env.STRIPE_PRICE_ID) && Boolean(process.env.STRIPE_METER_EVENT);
+  return stripeConfigured() && Boolean(process.env.STRIPE_PRICE_ID) && Boolean(configuredMeterEventName());
 }
 
 /**
@@ -129,13 +130,36 @@ export function handleStripeWebhook(rawBody: string, signatureHeader: string): {
   if (!secret) return { ok: false, action: 'ignored', reason: 'no_webhook_secret' };
   if (!verifyWebhookSignature(rawBody, signatureHeader, secret)) return { ok: false, action: 'rejected', reason: 'bad_signature' };
 
-  let event: { type?: string; data?: { object?: { customer?: string } } };
+  let event: {
+    id?: string;
+    type?: string;
+    data?: {
+      object?: {
+        id?: string;
+        customer?: string;
+        status?: string;
+        subscription?: string;
+        metadata?: { apiKeyId?: string };
+      };
+    };
+  };
   try {
     event = JSON.parse(rawBody);
   } catch {
     return { ok: false, action: 'rejected', reason: 'bad_json' };
   }
-  const customer = event.data?.object?.customer;
+  if (event.id && !claimStripeEvent(event.id)) return { ok: true, action: 'duplicate' };
+
+  const obj = event.data?.object;
+  const customer = typeof obj?.customer === 'string' ? obj.customer : undefined;
+
+  if (event.type === 'checkout.session.completed') {
+    const keyId = obj?.metadata?.apiKeyId;
+    if (keyId && customer) setStripeCustomer(keyId, customer);
+    if (keyId && obj?.subscription) setSubscription(keyId, obj.subscription);
+    return { ok: true, action: keyId ? 'checkout_completed' : 'ignored', keyId: keyId ?? null, reason: keyId ? undefined : 'no_api_key' };
+  }
+
   if (!customer) return { ok: true, action: 'ignored', reason: 'no_customer' };
 
   switch (event.type) {
@@ -143,6 +167,22 @@ export function handleStripeWebhook(rawBody: string, signatureHeader: string): {
       return { ok: true, action: 'suspended', keyId: setSuspendedByCustomer(customer, true, 'Your latest invoice could not be charged. Update your card to resume.') };
     case 'customer.subscription.deleted':
       return { ok: true, action: 'cancelled', keyId: cancelByCustomer(customer, 'Billing subscription canceled.') };
+    case 'customer.subscription.updated': {
+      const status = obj?.status;
+      if (status === 'canceled' || status === 'incomplete_expired') {
+        return { ok: true, action: 'cancelled', keyId: cancelByCustomer(customer, 'Billing subscription canceled.') };
+      }
+      if (status === 'past_due' || status === 'unpaid' || status === 'paused') {
+        return { ok: true, action: 'suspended', keyId: setSuspendedByCustomer(customer, true, 'Your latest invoice could not be charged. Update your card to resume.') };
+      }
+      if (status === 'active' || status === 'trialing') {
+        const keyId = setSuspendedByCustomer(customer, false, null);
+        const k = keyId ? getApiKey(keyId) : null;
+        if (keyId && obj?.id && !k?.billingCancelledAt) setSubscription(keyId, obj.id);
+        return { ok: true, action: k?.billingCancelledAt ? 'ignored_cancelled' : 'reactivated', keyId };
+      }
+      return { ok: true, action: 'ignored', reason: status ?? event.type };
+    }
     case 'invoice.paid':
     case 'invoice.payment_succeeded': {
       // Settles a failed invoice. Does NOT revive a cancelled subscription.
@@ -184,7 +224,7 @@ export function flushMeterQueue(opts: { only?: string; force?: boolean } = {}): 
   if (!meteringConfigured()) return Promise.resolve({ delivered: 0, failed: 0, dead: 0, pending: pendingMeterEvents().length });
   if (flushing && !opts.only) return flushing;
   const run = (async () => {
-    const eventName = process.env.STRIPE_METER_EVENT!;
+    const eventName = configuredMeterEventName();
     let delivered = 0, failed = 0, dead = 0;
     const now = Date.now();
     for (const item of pendingMeterEvents()) {

@@ -1,4 +1,5 @@
 import {
+  configuredMeterEventName,
   createCustomer,
   createSubscriptionCheckoutSession,
   checkoutPaymentMethodTypes,
@@ -15,10 +16,10 @@ import { readDb, withDb, type DB, type MeterQueueItem } from './store.ts';
  * Metered billing for the Omnia site API, built on the dependency-free
  * Stripe client in api/stripe.ts.
  *
- * The model: each account is a Stripe customer subscribed to a single
- * usage-metered price at a flat $0.09 per unit, mirroring
- * site/lib/pricing.ts. Every successful POST /api/paycheck
- * reports one meter event; Stripe aggregates them and invoices monthly.
+ * The model: each account is a Stripe customer subscribed to the
+ * usage-metered price in STRIPE_PRICE_ID. The rate lives in Stripe and
+ * is not hardcoded here. Every successful paycheck calculation reports
+ * one meter event; Stripe aggregates them and invoices monthly.
  * There is no per-call card charge — that would drown in Stripe's per-
  * charge minimum and fees.
  *
@@ -38,7 +39,7 @@ import { readDb, withDb, type DB, type MeterQueueItem } from './store.ts';
 export const METER_EVENT = process.env.STRIPE_METER_EVENT || 'omnia_api_call';
 
 function meterEventName(): string {
-  return process.env.STRIPE_METER_EVENT || METER_EVENT;
+  return configuredMeterEventName() || METER_EVENT;
 }
 
 /** Can we create customers / subscriptions at all? */
@@ -49,13 +50,14 @@ export function billingConfigured(): boolean {
 /**
  * Do successful calls actually bill? Only when there is a metered price
  * to subscribe customers to (STRIPE_PRICE_ID) AND an explicit meter event
- * name that price's meter listens for (STRIPE_METER_EVENT). A secret key
- * alone is not metering: onboarding then only saves a card, and events
- * sent for a customer with no metered subscription are never invoiced.
- * Same rule as the self-hosted API (api/billing.ts).
+ * name that price's meter listens for (STRIPE_METER_EVENT_NAME, or
+ * STRIPE_METER_EVENT). A secret key alone is not metering: onboarding
+ * then only saves a card, and events sent for a customer with no metered
+ * subscription are never invoiced. Same rule as the self-hosted API
+ * (api/billing.ts).
  */
 export function meteringConfigured(): boolean {
-  return billingConfigured() && Boolean(process.env.STRIPE_METER_EVENT);
+  return billingConfigured() && Boolean(configuredMeterEventName());
 }
 
 export interface ReportResult {
@@ -276,11 +278,30 @@ export async function completeMeteredCheckout(sessionId: string): Promise<Comple
 // Webhooks
 // ---------------------------------------------------------------------
 
-export type WebhookAction = 'suspend' | 'reactivate' | 'cancel' | 'ignore';
+export type WebhookAction = 'suspend' | 'reactivate' | 'cancel' | 'checkout_completed' | 'ignore';
 
 export type WebhookInterpretation =
   | { ok: false; reason: string }
-  | { ok: true; action: WebhookAction; customerId: string | null };
+  | {
+      ok: true;
+      action: WebhookAction;
+      customerId: string | null;
+      /** Present when Stripe sent an event id. Callers dedupe on it. */
+      eventId?: string;
+      sessionId?: string | null;
+      subscriptionId?: string | null;
+      email?: string | null;
+      subscriptionStatus?: string | null;
+    };
+
+function idOf(value: unknown): string | null {
+  if (typeof value === 'string' && value) return value;
+  if (value && typeof value === 'object' && typeof (value as { id?: unknown }).id === 'string') {
+    const id = (value as { id: string }).id;
+    return id || null;
+  }
+  return null;
+}
 
 /**
  * Verify a Stripe webhook signature and classify the event into an action
@@ -294,24 +315,72 @@ export function interpretWebhook(rawBody: string, signatureHeader: string | unde
   if (!signatureHeader || !verifyWebhookSignature(rawBody, signatureHeader, secret)) {
     return { ok: false, reason: 'bad_signature' };
   }
-  let event: { type?: string; data?: { object?: { customer?: string } } };
+  let event: {
+    id?: string;
+    type?: string;
+    data?: {
+      object?: {
+        id?: string;
+        customer?: unknown;
+        status?: string;
+        mode?: string;
+        subscription?: unknown;
+        metadata?: { omnia_email?: string };
+        customer_email?: string | null;
+        customer_details?: { email?: string | null };
+      };
+    };
+  };
   try {
     event = JSON.parse(rawBody);
   } catch {
     return { ok: false, reason: 'bad_payload' };
   }
-  const customerId = event.data?.object?.customer ?? null;
+  const obj = event.data?.object ?? {};
+  const customerId = idOf(obj.customer);
+  const eventId = typeof event.id === 'string' && event.id ? event.id : undefined;
+  const tagged = <T extends { ok: true; action: WebhookAction; customerId: string | null }>(base: T): WebhookInterpretation =>
+    eventId ? { ...base, eventId } : base;
+
   switch (event.type) {
+    case 'checkout.session.completed': {
+      if (obj.status && obj.status !== 'complete') return tagged({ ok: true, action: 'ignore', customerId });
+      const email = obj.metadata?.omnia_email ?? obj.customer_details?.email ?? obj.customer_email ?? null;
+      return {
+        ok: true,
+        action: 'checkout_completed',
+        customerId,
+        ...(eventId ? { eventId } : {}),
+        sessionId: obj.id ?? null,
+        subscriptionId: idOf(obj.subscription),
+        email,
+      };
+    }
+    case 'customer.subscription.updated': {
+      const status = obj.status ?? '';
+      let action: WebhookAction = 'ignore';
+      if (status === 'canceled' || status === 'incomplete_expired') action = 'cancel';
+      else if (status === 'past_due' || status === 'unpaid' || status === 'paused') action = 'suspend';
+      else if (status === 'active' || status === 'trialing') action = 'reactivate';
+      return {
+        ok: true,
+        action,
+        customerId,
+        ...(eventId ? { eventId } : {}),
+        subscriptionId: obj.id ?? null,
+        subscriptionStatus: status || null,
+      };
+    }
     case 'invoice.payment_failed':
     case 'customer.subscription.paused':
-      return { ok: true, action: 'suspend', customerId };
+      return tagged({ ok: true, action: 'suspend', customerId });
     case 'customer.subscription.deleted':
-      return { ok: true, action: 'cancel', customerId };
+      return tagged({ ok: true, action: 'cancel', customerId });
     case 'invoice.paid':
     case 'invoice.payment_succeeded':
     case 'customer.subscription.resumed':
-      return { ok: true, action: 'reactivate', customerId };
+      return tagged({ ok: true, action: 'reactivate', customerId });
     default:
-      return { ok: true, action: 'ignore', customerId };
+      return tagged({ ok: true, action: 'ignore', customerId });
   }
 }

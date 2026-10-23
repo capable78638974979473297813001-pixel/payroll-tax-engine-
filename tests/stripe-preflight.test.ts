@@ -26,7 +26,13 @@ const goodMeter = {
 };
 const goodHook = {
   url: `${BASE}/api/billing/webhook`, status: 'enabled',
-  enabled_events: ['invoice.payment_failed', 'invoice.paid', 'customer.subscription.deleted'],
+  enabled_events: [
+    'checkout.session.completed',
+    'customer.subscription.updated',
+    'customer.subscription.deleted',
+    'invoice.paid',
+    'invoice.payment_failed',
+  ],
 };
 
 const prices: Record<string, unknown> = {
@@ -96,9 +102,6 @@ test('the usual mistakes are each named', async () => {
 
   const licensed = await run({ STRIPE_PRICE_ID: 'price_licensed' });
   assert.match(licensed.out, /FAIL .*not usage-based/);
-
-  const amount = await run({ STRIPE_PRICE_ID: 'price_wrongamt' });
-  assert.match(amount.out, /FAIL .*15 cents, expected 9/);
 
   const meter = await run({ STRIPE_PRICE_ID: 'price_badmeter' });
   assert.match(meter.out, /FAIL .*payroll_api_call.*STRIPE_METER_EVENT/);
