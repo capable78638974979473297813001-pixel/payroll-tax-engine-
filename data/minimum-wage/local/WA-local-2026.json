@@ -1,7 +1,7 @@
 {
   "state": "WA",
   "year": 2026,
-  "asOf": "2026-09-08",
+  "asOf": "2026-10-23",
   "$comment": "Eight Washington local minimum wages, all above the country's highest state rate ($17.13). Two of them -- Renton and Everett -- step MID-YEAR on July 1 for their mid-size employer tier, which is the single most common way a Washington payroll run goes wrong. No Washington jurisdiction, state or local, permits a tip credit.",
   "tipCreditAllowed": false,
   "jurisdictions": [
@@ -47,37 +47,35 @@
       "id": "burien",
       "name": "Burien",
       "level": "city",
-      "hourly": 21.63,
-      "hourlyCents": 2163,
+      "hourly": 21.78,
+      "hourlyCents": 2178,
       "effectiveFrom": "2026-01-01",
       "adjustmentDate": "01-01",
-      "coverage": "Employers with 500 or more employees.",
+      "coverage": "Employers with 501 or more employees.",
       "variants": [
         {
           "id": "midsize",
-          "label": "Employers with 21-499 employees",
-          "hourly": 20.63,
-          "hourlyCents": 2063,
+          "label": "Employers with 16-500 employees",
+          "hourly": 20.78,
+          "hourlyCents": 2078,
           "appliesWhen": {
-            "employeeCountMin": 21,
-            "employeeCountMax": 499
+            "employeeCountMin": 16,
+            "employeeCountMax": 500
           }
         },
         {
           "id": "small",
-          "label": "Employers with 20 or fewer employees",
-          "hourly": null,
-          "hourlyCents": null,
-          "test": "NOT COVERED by the Burien ordinance -- the Washington state rate ($17.13) applies.",
+          "label": "Employers with 15 or fewer employees",
+          "hourly": 19.28,
+          "hourlyCents": 1928,
           "appliesWhen": {
-            "employeeCountMax": 20
-          },
-          "notCovered": true
+            "employeeCountMax": 15
+          }
         }
       ],
-      "note": "Burien's ordinance has been the subject of competing measures and litigation since a February 2025 voter initiative; the figures here are the ones Washington L&I publishes as currently in effect.",
+      "note": "Updated 2026-10-23 to the City of Burien's own published 2026 rates (BMC 5.16 with Administrative Rule 2026-01), which Washington L&I's table now matches. Before that, this entry carried $21.63 / $20.63 with employers of 20 or fewer treated as not covered. The city's phase-in: the medium rate steps up to the large rate and the small rate trails it by a shrinking reduction. The city calls these the 2026 rates, but Ordinance 892 only took effect on 2026-05-27 (it repealed BMC 5.15); whether they apply back to 2026-01-01 was not confirmed, so effectiveFrom keeps the January 1 adjustment date. The ordinance is still the subject of a King County Superior Court request for guidance.",
       "appliesWhen": {
-        "employeeCountMin": 500
+        "employeeCountMin": 501
       }
     },
     {
@@ -241,7 +239,13 @@
       "title": "Washington State Department of Labor & Industries -- Local Minimum Wage Rates",
       "url": "https://lni.wa.gov/workers-rights/wages/minimum-wage/local-minimum-wage-rates",
       "verifiedOn": "2026-09-08",
-      "verifiedBy": "Fetched and read directly this session. L&I's own consolidated table is the primary source for every Washington local rate and tier in this file -- and it CORRECTED two figures that a secondary search had returned wrong (Burien $21.63, not $21.78; Renton's Level 2 mid-year step)."
+      "verifiedBy": "Fetched and read directly this session. L&I's own consolidated table is the primary source for every Washington local rate and tier in this file -- and it corrected a figure that a secondary search had returned wrong (Renton's Level 2 mid-year step). Its Burien row read $21.63 / $20.63 on 2026-09-08; the source watch's 2026-10-22 snapshot shows it changed to $21.78 / $20.78 / $19.28, and the City of Burien's own page confirms those figures (see the next source)."
+    },
+    {
+      "title": "City of Burien -- Minimum Wage (BMC Chapter 5.16, Administrative Rule 2026-01)",
+      "url": "https://www.burienwa.gov/MinimumWage",
+      "verifiedOn": "2026-10-23",
+      "verifiedBy": "Fetched and read directly (page dated October 13, 2026). Lists 2026 hourly rates of $21.78 for large employers (501 or more employees), $20.78 for medium (16-500) and $19.28 for small (15 or fewer), and 2027 rates of $22.49 large and $20.49 small. Its 2027 medium rate is stated as equal to the large rate, which conflicts with the same page's note that medium employers' reduction shrinks by $1 a year; 2027 is therefore not entered here. The companion news post (https://www.burienwa.gov/news_events/city_newsroom/news_announcements/updates_on_buriens_minimum_wage) records Ordinance 892 (approved 2026-05-18, effective 2026-05-27) and that the request for court guidance on BMC 5.16 was unresolved as of May 2026."
     },
     {
       "title": "UC Berkeley Labor Center -- Inventory of US City and County Minimum Wage Ordinances",
@@ -253,7 +257,7 @@
   "confidence": "primary_source_confirmed",
   "knownGaps": [
     "Tacoma repealed its local ordinance in December 2019 once the state rate overtook it; it is deliberately absent rather than carried at $0.",
-    "Burien's ordinance remains subject to litigation arising from competing 2025 ballot measures. L&I's published figures are used; a court ruling could change them mid-year.",
+    "Burien's ordinance remains subject to litigation arising from competing 2025 ballot measures. The city's own published figures (matched by L&I) are used; a court ruling could change them mid-year. Whether the 2026 rates apply back to January 1 or from Ordinance 892's 2026-05-27 effective date was not confirmed, and the city's 2027 medium-employer rate is internally inconsistent on its page, so no 2027 Burien entry exists.",
     "SeaTac's ordinance covers only hospitality and transportation employers; the precise industry test is in the ordinance and is not modelled here."
   ]
 }

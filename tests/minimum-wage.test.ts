@@ -508,7 +508,7 @@ describe('local minimum wages', () => {
     const wa = Object.fromEntries(localMinimumWages('WA', D).map((j) => [j.id, j]));
     assert.equal(wa.seattle!.hourlyCents, 2130);
     assert.equal(wa.tukwila!.hourlyCents, 2165);
-    assert.equal(wa.burien!.hourlyCents, 2163);
+    assert.equal(wa.burien!.hourlyCents, 2178);
     assert.equal(wa.bellingham!.hourlyCents, 1913);
     assert.equal(wa.seatac!.hourlyCents, 2074);
     // Renton's mid-size tier steps UP on July 1 — the single most common
@@ -667,14 +667,26 @@ describe('local minimum wages', () => {
   });
 
   test('an employer below a local size threshold falls back to the state rate', () => {
-    // Burien does not reach employers with 20 or fewer employees at all —
-    // they owe Washington's $17.13, not Burien's $21.63.
+    // Renton does not reach employers with 14 or fewer employees at all —
+    // they owe Washington's $17.13, not Renton's local rate. (Burien used to
+    // work this way; it now sets a rate for every size.)
     const answer = minimumWage({
-      checkDate: D, state: 'WA', locality: 'burien', employeeCount: 5,
+      checkDate: D, state: 'WA', locality: 'renton', employeeCount: 5,
     });
     assert.equal(answer.cents, 1713);
     assert.equal(answer.bindingLevel, 'state');
     assert.match(answer.considered.find((c) => c.level === 'local')!.basis, /not covered/);
+  });
+
+  test('Burien’s three size tiers switch at 15/16 and 500/501 employees', () => {
+    const at = (employeeCount: number) =>
+      minimumWage({ checkDate: D, state: 'WA', locality: 'burien', employeeCount }).cents;
+    assert.equal(at(1), 1928);
+    assert.equal(at(15), 1928);
+    assert.equal(at(16), 2078);
+    assert.equal(at(500), 2078);
+    assert.equal(at(501), 2178);
+    assert.equal(at(5000), 2178);
   });
 
   test('Washington’s local ordinances have no tipped block, but a tipped query still returns the FULL local rate', () => {
@@ -698,12 +710,12 @@ describe('local minimum wages', () => {
     const burienLarge = minimumWage({
       checkDate: D, state: 'WA', locality: 'burien', tipped: true, employeeCount: 600,
     });
-    assert.equal(burienLarge.cents, 2163);
-    const burienUncovered = minimumWage({
+    assert.equal(burienLarge.cents, 2178);
+    const burienSmall = minimumWage({
       checkDate: D, state: 'WA', locality: 'burien', tipped: true, employeeCount: 5,
     });
-    assert.equal(burienUncovered.cents, 1713, 'not covered by Burien -> state rate, still full cash (WA has no credit)');
-    assert.equal(burienUncovered.tipCreditAllowed, false);
+    assert.equal(burienSmall.cents, 1928, 'small Burien tier, still full cash (WA has no credit)');
+    assert.equal(burienSmall.tipCreditAllowed, false);
   });
 
   test('Maryland’s two counties have genuinely DIFFERENT tipped cash wages — one is not derivable from the other', () => {
