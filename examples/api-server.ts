@@ -117,17 +117,9 @@ async function readJson<T>(req: IncomingMessage): Promise<T> {
   }
 }
 
-/** Sandbox keys (sk_test_) are never sent to the Stripe meter. */
-function sandboxKey(key: ApiKey): boolean {
-  if (key.mode === 'test') return true;
-  if (key.mode === 'live') return false;
-  return key.prefix.startsWith('sk_test_');
-}
-
-/** Live keys on a metered subscription bill via Stripe. Test keys bill nothing. */
-function chargeFor(key: ApiKey): { sandbox: boolean; metered: boolean } {
-  const sandbox = sandboxKey(key);
-  return { sandbox, metered: !sandbox && meteringConfigured() && Boolean(key.stripeCustomerId) };
+/** One Stripe unit per paycheck when this key has a Stripe customer. Prefix does not exempt a call. */
+function meterThis(key: ApiKey): boolean {
+  return meteringConfigured() && Boolean(key.stripeCustomerId);
 }
 
 /** The bearer token from Authorization: Bearer <key>, or the x-api-key header. */
@@ -247,10 +239,10 @@ const server = createServer(async (req, res) => {
       const result = calculatePaycheck(input);
       // A key on Stripe metering is charged by the meter. The local ledger
       // is the charge only when metering cannot bill this key. Doing both
-      // collects the same call twice. Sandbox keys are not billed either way.
-      const { sandbox, metered } = chargeFor(key);
+      // collects the same call twice.
+      const metered = meterThis(key);
       // Metered keys queue the Stripe event in the same write as the call.
-      const chargedCents = recordUsage(key.id, { stateCode, statusCode: 200, billable: !sandbox && !metered, meterUnits: metered ? 1 : 0 });
+      const chargedCents = recordUsage(key.id, { stateCode, statusCode: 200, billable: !metered, meterUnits: metered ? 1 : 0 });
       if (metered) flushMeterSoon();
       const balanceDueCents = usageForKey(key.id)?.balanceDueCents ?? 0;
       res.setHeader('X-Charge-Cents', String(chargedCents));
@@ -288,13 +280,13 @@ const server = createServer(async (req, res) => {
         employees: body.employees,
       });
       // One meter event per employee paycheck, not one event for the batch.
-      const { sandbox, metered } = chargeFor(key);
+      const metered = meterThis(key);
       const calculations = run.paychecks.length;
       if (calculations === 0) {
         recordUsage(key.id, { statusCode: 200, billable: false, meterUnits: 0 });
       } else {
         for (let i = 0; i < calculations; i++) {
-          recordUsage(key.id, { statusCode: 200, billable: !sandbox && !metered, meterUnits: metered ? 1 : 0 });
+          recordUsage(key.id, { statusCode: 200, billable: !metered, meterUnits: metered ? 1 : 0 });
         }
       }
       if (metered && calculations > 0) flushMeterSoon();
@@ -348,7 +340,7 @@ const server = createServer(async (req, res) => {
     // Billed the same as /v1/calculate, once per successful request in the
     // batch — this endpoint is a translation in front of the same engine
     // call, not a cheaper one. Each success is its own meter event.
-    const { sandbox, metered } = chargeFor(key);
+    const metered = meterThis(key);
     let chargedCents = 0;
     let successes = 0;
     for (const r of results) {
@@ -357,7 +349,7 @@ const server = createServer(async (req, res) => {
       chargedCents += recordUsage(key.id, {
         statusCode: ok ? 200 : 422,
         error: r.error,
-        billable: ok && !sandbox && !metered,
+        billable: ok && !metered,
         meterUnits: ok && metered ? 1 : 0,
       });
     }

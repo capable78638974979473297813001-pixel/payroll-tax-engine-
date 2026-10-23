@@ -133,8 +133,8 @@ export interface PublicApiKey {
  */
 export const PLAN_PRICING_CENTS: Record<string, number> = {
   free: 0,
-  standard: 9, // $0.09 / call on the self-hosted ledger, the same flat rate the public site bills (site/lib/pricing.ts).
-  pro: 9,
+  standard: 8, // $0.08 / paycheck on the self-hosted ledger, the same flat rate the public site bills (site/lib/pricing.ts).
+  pro: 8,
 };
 
 const RECENT_LIMIT = 25;
