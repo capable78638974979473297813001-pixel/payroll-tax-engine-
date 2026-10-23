@@ -55,9 +55,6 @@ services:
       # The Python email verifier starts by itself once RESEND_API_KEY (or SMTP_HOST)
       # is set, and keeps its own secrets on the disk. Set VERIFIER_SECRET and
       # VERIFIER_PEPPER (32+ chars each) only if you want to choose them.
-      # Cards only until ACH Direct Debit is enabled in Stripe. Remove for card + bank.
-      # - key: STRIPE_PAYMENT_METHOD_TYPES
-      #   value: card
       # Leave unset while testing (sk_test_ Stripe keys). Set to 1 before using sk_live_.
       # - key: STRIPE_ALLOW_LIVE
       #   value: "1"

@@ -133,7 +133,11 @@ export interface StripeCheckoutSession {
   subscription?: string | { id: string; default_payment_method?: string | StripePaymentMethod | null };
   setup_intent?: string | { id: string; payment_method?: string | StripePaymentMethod | null };
 }
-/** A hosted Checkout page in SETUP mode — the customer saves a card, no charge. */
+/**
+ * A hosted Checkout page in SETUP mode — the customer saves a payment method,
+ * no charge. Which methods appear is decided by the Stripe Dashboard. Do not
+ * send payment_method_types; API 2026-09-30.endive rejects it.
+ */
 export function createSetupCheckoutSession(input: {
   customerId: string;
   apiKeyId: string;
@@ -143,7 +147,6 @@ export function createSetupCheckoutSession(input: {
   return stripeRequest<StripeCheckoutSession>('POST', '/v1/checkout/sessions', {
     mode: 'setup',
     customer: input.customerId,
-    payment_method_types: ['card'],
     success_url: input.successUrl,
     cancel_url: input.cancelUrl,
     metadata: { apiKeyId: input.apiKeyId },
@@ -166,19 +169,11 @@ export function retrievePaymentMethod(id: string): Promise<StripePaymentMethod> 
 }
 
 /**
- * Payment methods offered at subscription Checkout. Default is card plus US
- * bank account (ACH). A fresh Stripe account must have ACH Direct Debit
- * enabled before it can be offered, or Checkout creation fails; until then set
- * STRIPE_PAYMENT_METHOD_TYPES=card. Unknown names are ignored.
+ * A hosted Checkout page in SUBSCRIPTION mode — saves a payment method AND
+ * starts metered usage billing. Which methods appear is decided by the
+ * Stripe Dashboard (dynamic payment methods). Checkout Session creation on
+ * API 2026-09-30.endive rejects `payment_method_types`.
  */
-export function checkoutPaymentMethodTypes(): string[] {
-  const raw = process.env.STRIPE_PAYMENT_METHOD_TYPES;
-  if (!raw) return ['card', 'us_bank_account'];
-  const wanted = raw.split(',').map((x) => x.trim()).filter((x) => x === 'card' || x === 'us_bank_account');
-  return wanted.length ? [...new Set(wanted)] : ['card', 'us_bank_account'];
-}
-
-/** A hosted Checkout page in SUBSCRIPTION mode — saves a card AND starts metered usage billing. */
 export function createSubscriptionCheckoutSession(input: {
   customerId: string;
   apiKeyId: string;
@@ -189,8 +184,6 @@ export function createSubscriptionCheckoutSession(input: {
   trialDays?: number;
   /** Extra subscription metadata, merged with apiKeyId. */
   metadata?: Record<string, string>;
-  /** Overrides checkoutPaymentMethodTypes(), e.g. ['card'] when ACH is not enabled. */
-  paymentMethodTypes?: string[];
 }): Promise<StripeCheckoutSession> {
   const subscriptionData: Record<string, unknown> = {
     metadata: { apiKeyId: input.apiKeyId, ...input.metadata },
@@ -200,9 +193,9 @@ export function createSubscriptionCheckoutSession(input: {
     mode: 'subscription',
     customer: input.customerId,
     line_items: [{ price: input.priceId }], // metered price: no quantity, usage is reported per call
-    // A card or bank account is required up front, trial or not.
+    // A payment method is required up front, trial or not. The Dashboard
+    // chooses which methods Checkout offers.
     payment_method_collection: 'always',
-    payment_method_types: input.paymentMethodTypes ?? checkoutPaymentMethodTypes(),
     success_url: input.successUrl,
     cancel_url: input.cancelUrl,
     metadata: { apiKeyId: input.apiKeyId, ...input.metadata },
