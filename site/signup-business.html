@@ -7,90 +7,92 @@
 <title>About your business — Omnia.tax</title>
 <link rel="icon" href="/logo/favicon.svg" type="image/svg+xml" />
 <link rel="stylesheet" href="/assets/v5.css" />
-<link rel="stylesheet" href="/assets/site.css" />
 <!--OMNIA_CONFIG-->
 </head>
 <body>
-<div class="onboard">
-  <aside class="step-panel">
-    <div class="step-panel-top">
-      <a class="logo" href="/" aria-label="Omnia.tax"><img src="/logo/logo-on-blue.svg" alt="" /></a>
-      <span class="label-mono" style="color:var(--color-on-cobalt-muted);font-weight:400">Onboarding</span>
+<div class="auth">
+  <main class="auth-main">
+    <a class="mark" href="/">Omnia<span class="dot" aria-hidden="true"></span>tax</a>
+    <div class="stepper" role="group" aria-label="Signup progress">
+      <div class="stepper-top"><span aria-current="step"><b>Step 3 of 5</b> · Business</span></div>
+      <div class="stepper-bar" aria-hidden="true"><i style="width:60%"></i></div>
     </div>
-    <div class="step-num-row">
-      <div class="step-num">03</div>
-      <div class="step-of"><div class="eyebrow">Step</div><div class="of">OF 05</div></div>
-    </div>
-    <div class="step-rule"></div>
-    <div class="panel-head">
-      <span>Billing</span>
-      <span class="tag tag-solid">Per calculation</span>
-    </div>
-    <div class="panel-rule"></div>
-    <div style="font-weight:700;font-size:18px">Pay per calculation</div>
-    <p class="note-muted">The rate is to be announced. There is no per-employee price. Sandbox calls are not billed. A card on file starts the 14-day trial.</p>
-  </aside>
-  <main class="form-col">
-    <div class="form-top"><span class="label-mono">Step 03 of 05</span><span class="who" id="who"></span></div>
-    <ol class="progress">
-      <li class="done"><div class="bar"></div><div class="lbl"><span class="chk"></span> Account</div></li>
-      <li class="done"><div class="bar"></div><div class="lbl"><span class="chk"></span> Verify</div></li>
-      <li class="current"><div class="bar"></div><div class="lbl"><span class="n">03</span> Business</div></li>
-      <li><div class="bar"></div><div class="lbl"><span class="n">04</span> Payment</div></li>
-      <li><div class="bar"></div><div class="lbl"><span class="n">05</span> API key</div></li>
-    </ol>
-    <h1>About your business.</h1>
-    <p class="lead">Sign the terms before a payment method is added. Billing is per calculation. The rate is to be announced.</p>
-    <form class="form-stack" id="form">
+    <h1 class="page">About your business.</h1>
+    <p class="sub">Nothing is charged during the 14-day trial.</p>
+    <form class="form-stack" id="form" novalidate>
       <div class="field">
-        <label class="field-label" for="company">Business name</label>
-        <input id="company" required />
+        <label for="company">Business name</label>
+        <input id="company" autocomplete="organization" required aria-describedby="companyError" />
+        <p class="msg" id="companyError" hidden></p>
       </div>
       <div class="field">
-        <label class="field-label" for="address">Business address</label>
-        <input id="address" autocomplete="street-address" required />
-        <p class="field-hint">Required to record the terms before a payment method is added.</p>
+        <label for="address">Business address</label>
+        <input id="address" autocomplete="street-address" required aria-describedby="addressHint addressError" />
+        <p class="hint" id="addressHint">Required to record the terms before a payment method is added.</p>
+        <p class="msg" id="addressError" hidden></p>
       </div>
       <div class="field">
-        <label class="field-label" for="sign">Signature</label>
-        <input id="sign" autocomplete="name" required />
-        <p class="field-hint">Type your name. This is the signature stored with the terms.</p>
+        <label for="sign">Signature</label>
+        <input id="sign" autocomplete="name" required aria-describedby="signHint signError" />
+        <p class="hint" id="signHint">Type your name. This is the signature stored with the terms.</p>
+        <p class="msg" id="signError" hidden></p>
       </div>
-      <div class="terms-doc" id="termsDoc">Loading the terms…</div>
-      <label class="checkline"><input type="checkbox" id="agree" /> <span id="agreeText">I agree to the terms above.</span></label>
-      <p class="field-error" id="formError" hidden></p>
-      <button class="btn btn-lg btn-primary btn-block" id="submit" type="submit" style="margin-top:8px">Continue to payment <span class="btn-icon" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 8h12M10 4l4 4-4 4" stroke="currentColor" stroke-width="2"/></svg></span></button>
+      <div class="field">
+        <span class="lbl" id="termsLabel">Terms</span>
+        <div class="terms" id="termsDoc" aria-labelledby="termsLabel">Loading the terms…</div>
+      </div>
+      <div class="field" id="agreeField">
+        <label class="check">
+          <input type="checkbox" id="agree" aria-describedby="agreeError" />
+          <span id="agreeText">I agree to the terms above.</span>
+        </label>
+        <p class="msg" id="agreeError" hidden></p>
+      </div>
+      <p class="msg" id="formError" hidden></p>
+      <div class="actions">
+        <button class="btn block" id="submit" type="submit">Continue to payment</button>
+      </div>
     </form>
   </main>
+  <aside class="auth-aside">
+    <h2>Before payment</h2>
+    <p class="fine" id="who"></p>
+    <article><h3>Sandbox calls are not billed</h3><p>The sandbox key runs the live engine. Nothing is charged for sandbox calls.</p></article>
+    <article><h3>14-day trial</h3><p>Nothing is charged during the 14-day trial. A card on file starts it.</p></article>
+    <article><h3>Federal, state and local tax</h3><p>One call, one line per tax, in cents.</p></article>
+  </aside>
 </div>
-<script src="/assets/pricing.js"></script>
 <script src="/assets/session.js"></script>
 <script>
 (function () {
   var session = Omnia.session() || {};
+  var company = document.getElementById('company');
+  var address = document.getElementById('address');
+  var sign = document.getElementById('sign');
+  var agree = document.getElementById('agree');
+  var submit = document.getElementById('submit');
+
   Omnia.api('/api/account', { headers: Omnia.authHeaders() }).then(function (res) {
     if (!res.ok) { Omnia.setSession(null); location.href = '/signup'; return; }
     session = { email: res.body.email, name: res.body.name, company: res.body.company };
     Omnia.setSession(session);
     document.getElementById('who').textContent = session.email;
-    if (!document.getElementById('company').value) document.getElementById('company').value = session.company || '';
-    if (!document.getElementById('sign').value) document.getElementById('sign').value = session.name || '';
+    if (!company.value) company.value = session.company || '';
+    if (!sign.value) sign.value = session.name || '';
   });
   document.getElementById('who').textContent = session.email || '';
-  document.getElementById('company').value = session.company || '';
-  document.getElementById('sign').value = session.name || '';
+  company.value = session.company || '';
+  sign.value = session.name || '';
 
   function loadTerms() {
     // Pay-per-calculation. Do not send an employee count; the legacy
     // employees_required gate is flagged off in site/server.ts.
     var q = '/api/terms?payFrequency=biweekly&rooftop=false';
-    document.getElementById('submit').disabled = true;
     Omnia.api(q, { headers: Omnia.authHeaders() }).then(function (res) {
       if (!res.ok) {
         document.getElementById('termsDoc').textContent = (res.body && res.body.error) || 'Could not load the terms.';
         return;
       }
-      document.getElementById('submit').disabled = false;
       window.__terms = res.body;
       window.__quoteId = res.body.quoteId || '';
       document.getElementById('termsDoc').innerHTML = (res.body.clauses || []).map(function (c) {
@@ -98,37 +100,73 @@
       }).join('');
       var ends = res.body.trialEndsAt ? new Date(res.body.trialEndsAt).toLocaleDateString() : '';
       document.getElementById('agreeText').textContent =
-        'I agree to the Terms. After the ' + res.body.trialDays + '-day trial ends on ' + ends +
-        ', live calculations may be billed monthly. The rate is to be announced. There is no long contract.';
+        'I agree to the Terms. Nothing is charged during the ' + res.body.trialDays + '-day trial' +
+        (ends ? ' (ends ' + ends + ')' : '') + '.';
     });
   }
   function escapeHtml(s) { return String(s).replace(/[&<>"']/g, function (c) { return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]; }); }
   loadTerms();
 
+  function show(el, msg) {
+    var err = document.getElementById(el.id + 'Error');
+    var field = el.closest('.field');
+    if (msg) {
+      el.setAttribute('aria-invalid', 'true');
+      if (field) field.classList.add('is-error');
+      if (err) { err.textContent = msg; err.hidden = false; }
+    } else {
+      el.removeAttribute('aria-invalid');
+      if (field) field.classList.remove('is-error');
+      if (err) { err.textContent = ''; err.hidden = true; }
+    }
+  }
+  var fields = [
+    { el: company, check: function () { return company.value.trim() ? '' : 'Enter your business name.'; } },
+    { el: address, check: function () { return address.value.trim() ? '' : 'Enter a street address.'; } },
+    { el: sign, check: function () { return sign.value.trim() ? '' : 'Type your full name to sign.'; } },
+    { el: agree, check: function () { return agree.checked ? '' : 'Check the box to accept the Terms.'; } }
+  ];
+  fields.forEach(function (f) {
+    f.el.addEventListener('blur', function () { f.touched = true; show(f.el, f.check()); });
+    f.el.addEventListener(f.el === agree ? 'change' : 'input', function () {
+      if (f.touched || f.el.getAttribute('aria-invalid') === 'true') {
+        var msg = f.check();
+        if (!msg) show(f.el, '');
+      }
+    });
+  });
+
   document.getElementById('form').addEventListener('submit', function (e) {
     e.preventDefault();
     var err = document.getElementById('formError');
     err.hidden = true;
-    if (!document.getElementById('agree').checked) {
-      err.textContent = 'You have to tick the authorization box to continue.';
+    var bad = null;
+    fields.forEach(function (f) {
+      f.touched = true;
+      var msg = f.check();
+      show(f.el, msg);
+      if (msg && !bad) bad = f.el;
+    });
+    if (bad) { bad.focus(); return; }
+    if (!window.__quoteId) {
+      err.textContent = 'The terms are still loading. Try again in a moment.';
       err.hidden = false;
       return;
     }
     var payload = {
       agreed: true,
       quoteId: window.__quoteId,
-      signedName: document.getElementById('sign').value.trim(),
-      legalName: document.getElementById('company').value.trim(),
+      signedName: sign.value.trim(),
+      legalName: company.value.trim(),
       billingEmail: session.email,
-      address: document.getElementById('address').value.trim(),
+      address: address.value.trim(),
       payFrequency: 'biweekly',
       rooftop: false
     };
-    var btn = document.getElementById('submit');
-    Omnia.setLoading(btn, true);
+    Omnia.setLoading(submit, true);
     Omnia.api('/api/accept-terms', { method: 'POST', headers: Omnia.authHeaders(), body: JSON.stringify(payload) })
       .then(function (res) {
-        Omnia.setLoading(btn, false);
+        Omnia.setLoading(submit, false);
         if (!res.ok) {
           err.textContent = (res.body && res.body.error) || 'Could not record your agreement.';
           err.hidden = false;
@@ -136,10 +174,14 @@
         }
         try { sessionStorage.removeItem('omnia_employees'); } catch (x) {}
         location.href = '/signup/payment';
+      })
+      .catch(function () {
+        Omnia.setLoading(submit, false);
+        err.textContent = 'Could not reach the server. Try again.';
+        err.hidden = false;
       });
   });
 })();
 </script>
-<footer class="legal-line" style="padding:16px 64px;font:12px/1.6 var(--font-mono,monospace);color:var(--color-gray,#6b6e76)">© 2026 OMNIA TAX LLC. All rights reserved. · <a href="/terms">Terms</a> · <a href="/privacy">Privacy</a></footer>
 </body>
 </html>

@@ -13,42 +13,51 @@
 <div class="auth">
   <main class="auth-main">
     <a class="mark" href="/">Omnia<span class="dot" aria-hidden="true"></span>tax</a>
-    <h1 class="page" style="margin-top:48px;font-size:34px;line-height:42px">Create your account</h1>
-    <p class="sub">You get a sandbox key once your email is verified and a card is on file. Sandbox calls are not billed, and nothing is charged during the 14-day trial. A password is at least 12 characters.</p>
-    <form id="form" novalidate style="margin-top:28px">
+    <div class="stepper" role="group" aria-label="Signup progress">
+      <div class="stepper-top"><span aria-current="step"><b>Step 1 of 5</b> · Account</span></div>
+      <div class="stepper-bar" aria-hidden="true"><i style="width:20%"></i></div>
+    </div>
+    <h1 class="page">Create your account</h1>
+    <p class="sub">Nothing is charged during the 14-day trial.</p>
+    <form id="form" novalidate>
       <div class="field" id="emailField">
         <label for="email">Work email</label>
-        <input id="email" name="email" type="email" autocomplete="email" placeholder="you@company.com" required />
-        <p class="err" id="emailError" hidden></p>
+        <input id="email" name="email" type="email" autocomplete="email" placeholder="you@company.com" required aria-describedby="emailError" />
+        <p class="msg" id="emailError" hidden></p>
       </div>
-      <div class="field" id="pwField">
+      <div class="field" id="passwordField">
         <label for="password">Password</label>
-        <input id="password" name="password" type="password" autocomplete="new-password" placeholder="At least 12 characters" maxlength="200" required />
-        <p class="hint" id="pwRule">At least 12 characters.</p>
-        <p class="err" id="pwError" hidden></p>
+        <input id="password" name="password" type="password" autocomplete="new-password" placeholder="At least 12 characters" maxlength="200" required aria-describedby="passwordHint passwordError" />
+        <p class="hint" id="passwordHint">At least 12 characters.</p>
         <button type="button" class="text-link" id="pwToggle" aria-controls="password" aria-pressed="false" style="background:none;border:0;padding:0;cursor:pointer">Show</button>
+        <p class="msg" id="passwordError" hidden></p>
       </div>
       <div class="field" id="nameField">
         <label for="name">Your name</label>
-        <input id="name" name="name" autocomplete="name" required />
-        <p class="err" id="nameError" hidden></p>
+        <input id="name" name="name" autocomplete="name" required aria-describedby="nameError" />
+        <p class="msg" id="nameError" hidden></p>
       </div>
       <div class="field" id="companyField">
         <label for="company">Business name</label>
-        <input id="company" name="company" autocomplete="organization" required />
-        <p class="err" id="companyError" hidden></p>
+        <input id="company" name="company" autocomplete="organization" required aria-describedby="companyError" />
+        <p class="msg" id="companyError" hidden></p>
       </div>
       <div class="field" id="phoneField">
         <label for="phone">Phone</label>
-        <input id="phone" name="phone" type="tel" autocomplete="tel" required />
-        <p class="err" id="phoneError" hidden></p>
+        <input id="phone" name="phone" type="tel" autocomplete="tel" required aria-describedby="phoneError" />
+        <p class="msg" id="phoneError" hidden></p>
       </div>
-      <label class="check">
-        <input type="checkbox" id="agree" name="agreeToTerms" />
-        <span>I agree to the <a href="/terms">Terms</a> and <a href="/privacy">Privacy Policy</a>.</span>
-      </label>
-      <p class="err" id="formError" hidden></p>
-      <button class="btn block" id="submit" type="submit" disabled>Create account</button>
+      <div class="field" id="agreeField">
+        <label class="check">
+          <input type="checkbox" id="agree" name="agreeToTerms" aria-describedby="agreeError" />
+          <span>I agree to the <a href="/terms">Terms</a> and <a href="/privacy">Privacy Policy</a>.</span>
+        </label>
+        <p class="msg" id="agreeError" hidden></p>
+      </div>
+      <p class="msg" id="formError" hidden></p>
+      <div class="actions">
+        <button class="btn block" id="submit" type="submit">Create account</button>
+      </div>
     </form>
     <p class="fine" style="margin-top:22px">Already have an account? <a href="/signin">Log in</a></p>
   </main>
@@ -56,7 +65,7 @@
     <h2>What you get</h2>
     <article><h3>A sandbox key to start</h3><p>Runs the live engine. Sandbox calls are not billed. A card is kept on file for the 14-day trial.</p></article>
     <article><h3>Federal, state and local tax</h3><p>One call, one line per tax, in cents.</p></article>
-    <article><h3>Live keys when you're ready</h3><p>14-day trial, then pay per calculation. The rate is to be announced.</p></article>
+    <article><h3>Live keys when you're ready</h3><p>Nothing is charged during the 14-day trial. Sandbox calls are not billed.</p></article>
     <div class="panel" style="margin-top:28px">
       <div class="tabs"><span class="tab-on">POST /v1/paycheck</span><span class="right">Sandbox</span></div>
       <pre><span class="d">// 200 OK</span>
@@ -87,35 +96,61 @@
   function validEmail(v) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v); }
   function refresh() {
     var long = password.value.length >= 12;
-    document.getElementById('pwRule').style.color = long ? 'var(--ink)' : 'var(--ink3)';
-    submit.disabled = !(validEmail(email.value.trim()) && long && name.value.trim() && company.value.trim() && phone.value.trim() && agree.checked);
+    document.getElementById('passwordHint').style.color = long ? 'var(--ink)' : 'var(--ink2)';
   }
-  [email, password, name, company, phone].forEach(function (el) { el.addEventListener('input', refresh); });
-  agree.addEventListener('change', refresh);
+  function show(el, msg) {
+    var err = document.getElementById(el.id + 'Error');
+    var field = el.closest('.field');
+    if (msg) {
+      el.setAttribute('aria-invalid', 'true');
+      if (field) field.classList.add('is-error');
+      if (err) { err.textContent = msg; err.hidden = false; }
+    } else {
+      el.removeAttribute('aria-invalid');
+      if (field) field.classList.remove('is-error');
+      if (err) { err.textContent = ''; err.hidden = true; }
+    }
+  }
+  var fields = [
+    { el: email, check: function () { return validEmail(email.value.trim()) ? '' : 'Enter an email like name@company.com.'; } },
+    { el: password, check: function () { return password.value.length >= 12 ? '' : 'Use at least 12 characters.'; } },
+    { el: name, check: function () { return name.value.trim() ? '' : 'Enter your name.'; } },
+    { el: company, check: function () { return company.value.trim() ? '' : 'Enter your business name.'; } },
+    { el: phone, check: function () { return phone.value.trim() ? '' : 'Enter a phone number.'; } },
+    { el: agree, check: function () { return agree.checked ? '' : 'Check the box to accept the Terms.'; } }
+  ];
+  fields.forEach(function (f) {
+    f.el.addEventListener('blur', function () {
+      f.touched = true;
+      show(f.el, f.check());
+    });
+    var evt = f.el === agree ? 'change' : 'input';
+    f.el.addEventListener(evt, function () {
+      refresh();
+      if (f.touched || f.el.getAttribute('aria-invalid') === 'true') {
+        var msg = f.check();
+        if (!msg) show(f.el, '');
+      }
+    });
+  });
   document.getElementById('pwToggle').addEventListener('click', function () {
-    var show = password.type === 'password';
-    password.type = show ? 'text' : 'password';
-    this.textContent = show ? 'Hide' : 'Show';
-    this.setAttribute('aria-pressed', String(show));
+    var showPw = password.type === 'password';
+    password.type = showPw ? 'text' : 'password';
+    this.textContent = showPw ? 'Hide' : 'Show';
+    this.setAttribute('aria-pressed', String(showPw));
   });
   refresh();
   document.getElementById('form').addEventListener('submit', function (e) {
     e.preventDefault();
-    document.getElementById('emailError').hidden = true;
-    document.getElementById('pwError').hidden = true;
     document.getElementById('formError').hidden = true;
-    if (!agree.checked) {
-      var box0 = document.getElementById('formError');
-      box0.textContent = 'Check “I agree to the Terms” to create an account.';
-      box0.hidden = false;
-      return;
-    }
-    if (!validEmail(email.value.trim())) {
-      var err = document.getElementById('emailError');
-      err.textContent = 'Enter a valid work email.';
-      err.hidden = false;
-      return;
-    }
+    var bad = null;
+    fields.forEach(function (f) {
+      f.touched = true;
+      var msg = f.check();
+      show(f.el, msg);
+      if (msg && !bad) bad = f.el;
+    });
+    if (bad) { bad.focus(); return; }
     var payload = {
       name: name.value.trim(),
       email: email.value.trim(),
@@ -131,11 +166,14 @@
           var msg = (res.body && res.body.error) || 'Could not start signup.';
           var box = document.getElementById('formError');
           if (res.body && res.body.field === 'password') {
-            document.getElementById('pwError').textContent = msg;
-            document.getElementById('pwError').hidden = false;
-          } else if (/email/i.test(msg) && !(res.body && res.body.field === 'agreeToTerms')) {
-            document.getElementById('emailError').textContent = msg;
-            document.getElementById('emailError').hidden = false;
+            show(password, msg);
+            password.focus();
+          } else if (res.body && res.body.field === 'agreeToTerms') {
+            show(agree, msg);
+            agree.focus();
+          } else if (/email/i.test(msg)) {
+            show(email, msg);
+            email.focus();
           } else {
             box.textContent = msg;
             box.hidden = false;
