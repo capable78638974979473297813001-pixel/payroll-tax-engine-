@@ -1,0 +1,528 @@
+{
+ "date": "2026-10-23",
+ "fixed": [],
+ "verified": [
+  {
+   "file": "",
+   "name": "Whitesville",
+   "why_not_automatic": "the Secretary of State lists this district (entered 2026-10-06; rate '') but KY-occupational-2026.json does not",
+   "edits": []
+  },
+  {
+   "file": "",
+   "name": "Chester",
+   "why_not_automatic": "the list shows a $2 per week user fee in Chester, which the data does not have",
+   "edits": []
+  }
+ ],
+ "possible": [],
+ "informational_changes": 14,
+ "blind_spots": [
+  {
+   "jurisdiction": "AL",
+   "title": "City of Birmingham -- Employers Return of Occupational Tax Withheld",
+   "url": "https://birminghamal.hdlgov.com/base64files/TAXES_FORM_4.pdf",
+   "why": "HTTP 403: the site refuses automated requests; a real browser was refused too",
+   "never_read": true,
+   "feeds": [
+    "data/local/AL-municipalities-2025.json",
+    "data/local/AL-municipalities-2026.json",
+    "data/local/AL-municipalities-2027.json"
+   ]
+  },
+  {
+   "jurisdiction": "AL",
+   "title": "Rainbow City -- Form G-1 (Rev 12/20), occupational license fee return",
+   "url": "https://www.rbcalabama.com/download/revenue-g-1/?wpdmdl=730&masterkey=60c8bce41072f",
+   "why": "HTTP 403: the site refuses automated requests; a real browser was refused too",
+   "never_read": true,
+   "feeds": [
+    "data/local/AL-municipalities-2025.json",
+    "data/local/AL-municipalities-2026.json",
+    "data/local/AL-municipalities-2027.json"
+   ]
+  },
+  {
+   "jurisdiction": "AL",
+   "title": "City of Tuskegee -- Occupational Tax Reporting form",
+   "url": "https://www.tuskegeealabama.gov/finance-department/files/occupational-tax-form",
+   "why": "HTTP 404",
+   "never_read": true,
+   "feeds": [
+    "data/local/AL-municipalities-2025.json",
+    "data/local/AL-municipalities-2026.json",
+    "data/local/AL-municipalities-2027.json"
+   ]
+  },
+  {
+   "jurisdiction": "AR",
+   "title": "Arkansas Department of Labor and Licensing -- Minimum Wage and Overtime",
+   "url": "https://labor.arkansas.gov/labor/labor-standards/minimum-wage-and-overtime/",
+   "why": "HTTP 403: the site refuses automated requests; a real browser was refused too",
+   "never_read": true,
+   "feeds": [
+    "data/minimum-wage/states/AR-2026.json"
+   ]
+  },
+  {
+   "jurisdiction": "AZ",
+   "title": "UIT-0603A (FY26), Unemployment Insurance Tax Rate Chart",
+   "url": "https://des.az.gov/sites/default/files/dl/UIT-0603A_FY26.pdf",
+   "why": "HTTP 403: the site refuses automated requests; a real browser was refused too",
+   "never_read": true,
+   "feeds": [
+    "data/states/AZ-2026.json",
+    "data/states/AZ-2027.json"
+   ]
+  },
+  {
+   "jurisdiction": "CO",
+   "title": "Colorado DOR -- DR 1098 Colorado Withholding Worksheet for Employers",
+   "url": "https://tax.colorado.gov/DR1098",
+   "why": "HTTP 403: the site refuses automated requests; a real browser was refused too",
+   "never_read": true,
+   "feeds": [
+    "data/states/CO-2025.json"
+   ]
+  },
+  {
+   "jurisdiction": "CO",
+   "title": "City of Aurora \u2014 Occupational Privilege Tax repeal",
+   "url": "https://www.auroragov.org/business_services/taxes__licensing/occupational_privilege_tax",
+   "why": "HTTP 404",
+   "never_read": true,
+   "feeds": [
+    "data/states/CO-2025.json",
+    "data/states/CO-2026.json",
+    "data/states/CO-2027.json"
+   ]
+  },
+  {
+   "jurisdiction": "CO",
+   "title": "City of Greenwood Village occupational privilege tax",
+   "url": "https://www.greenwoodvillage.com/206/Occupational-Privilege-Tax",
+   "why": "HTTP 404",
+   "never_read": true,
+   "feeds": [
+    "data/states/CO-2025.json",
+    "data/states/CO-2026.json",
+    "data/states/CO-2027.json"
+   ]
+  },
+  {
+   "jurisdiction": "DC",
+   "title": "DC Department of Employment Services -- Office of Wage-Hour Compliance",
+   "url": "https://does.dc.gov/service/office-wage-hour-compliance-0",
+   "why": "HTTP 403: the site refuses automated requests; a real browser was refused too",
+   "never_read": true,
+   "feeds": [
+    "data/minimum-wage/states/DC-2026.json"
+   ]
+  },
+  {
+   "jurisdiction": "IL",
+   "title": "Illinois State Income Tax Exemptions - 2026 (Illinois Office of Comptroller, Payroll Bulletin 1-26)",
+   "url": "https://illinoiscomptroller.gov/state-agencies/bulletins-forms/payroll-bulletins/illinois-state-income-tax-exemptions-2026",
+   "why": "HTTP 500",
+   "never_read": true,
+   "feeds": [
+    "data/states/IL-2026.json",
+    "data/states/IL-2027.json"
+   ]
+  },
+  {
+   "jurisdiction": "IL",
+   "title": "735 ILCS 5/12-803 \u2014 maximum wage deduction: lesser of 15% of GROSS weekly wages, or the amount by which disposable earnings exceed 45x the greater of the state or federal minimum hourly wage",
+   "url": "https://www.ilga.gov/legislation/ilcs/ilcs4.asp?DocName=073500050K12-803",
+   "why": "site's TLS certificate failed verification (unable to get local issuer certificate)",
+   "never_read": true,
+   "feeds": [
+    "data/garnishment/state-overrides-2026.json",
+    "data/garnishment/state-overrides-2027.json"
+   ]
+  },
+  {
+   "jurisdiction": "KY",
+   "title": "City of Augusta Code of Ordinances Sec. 110.02",
+   "url": "https://codelibrary.amlegal.com/codes/augusta/latest/augusta_ky/0-0-0-8998",
+   "why": "HTTP 403: the site refuses automated requests; a real browser was refused too",
+   "never_read": true,
+   "feeds": [
+    "data/local/KY-occupational-2025.json",
+    "data/local/KY-occupational-2026.json",
+    "data/local/KY-occupational-2027.json"
+   ]
+  },
+  {
+   "jurisdiction": "KY",
+   "title": "City of Elizabethtown, KY \u2014 Code of Ordinances Chapter 110, \u00a7 110.03 Occupational License Tax Payment Required",
+   "url": "https://codelibrary.amlegal.com/codes/elizabethtownky/latest/elizabethtown_ky/0-0-0-3203",
+   "why": "HTTP 403: the site refuses automated requests; a real browser was refused too",
+   "never_read": true,
+   "feeds": [
+    "data/local/KY-occupational-2025.json",
+    "data/local/KY-occupational-2026.json",
+    "data/local/KY-occupational-2027.json"
+   ]
+  },
+  {
+   "jurisdiction": "KY",
+   "title": "City of Marion Code of Ordinances Sec. 110.22",
+   "url": "https://codelibrary.amlegal.com/codes/marionky/latest/marion_ky/0-0-0-22684",
+   "why": "HTTP 403: the site refuses automated requests; a real browser was refused too",
+   "never_read": true,
+   "feeds": [
+    "data/local/KY-occupational-2025.json",
+    "data/local/KY-occupational-2026.json",
+    "data/local/KY-occupational-2027.json"
+   ]
+  },
+  {
+   "jurisdiction": "KY",
+   "title": "City of McKee Code of Ordinances \u00a7 110.02 LICENSE REQUIRED; FEES",
+   "url": "https://codelibrary.amlegal.com/codes/mckeeky/latest/mckee_ky/0-0-0-2883",
+   "why": "HTTP 403: the site refuses automated requests; a real browser was refused too",
+   "never_read": true,
+   "feeds": [
+    "data/local/KY-occupational-2025.json",
+    "data/local/KY-occupational-2026.json",
+    "data/local/KY-occupational-2027.json"
+   ]
+  },
+  {
+   "jurisdiction": "KY",
+   "title": "City of Middlesboro Code of Ordinances, Ch. 110 (levy section)",
+   "url": "https://codelibrary.amlegal.com/codes/middlesboroky/latest/middlesboro_ky/0-0-0-5065",
+   "why": "HTTP 403: the site refuses automated requests; a real browser was refused too",
+   "never_read": true,
+   "feeds": [
+    "data/local/KY-occupational-2025.json",
+    "data/local/KY-occupational-2026.json",
+    "data/local/KY-occupational-2027.json"
+   ]
+  },
+  {
+   "jurisdiction": "KY",
+   "title": "City of Middletown Code of Ordinances Sec. 114.23 (Ord. 07-13-2023-B, 10-12-2023-B)",
+   "url": "https://codelibrary.amlegal.com/codes/middletownky/latest/middletown_ky/0-0-0-10846",
+   "why": "HTTP 403: the site refuses automated requests; a real browser was refused too",
+   "never_read": true,
+   "feeds": [
+    "data/local/KY-occupational-2025.json",
+    "data/local/KY-occupational-2026.json",
+    "data/local/KY-occupational-2027.json"
+   ]
+  },
+  {
+   "jurisdiction": "KY",
+   "title": "City of Nortonville Code of Ordinances \u00a7 110.03 OCCUPATIONAL LICENSE FEE PAYMENT REQUIRED",
+   "url": "https://codelibrary.amlegal.com/codes/nortonvilleky/latest/nortonville_ky/0-0-0-3279",
+   "why": "HTTP 403: the site refuses automated requests; a real browser was refused too",
+   "never_read": true,
+   "feeds": [
+    "data/local/KY-occupational-2025.json",
+    "data/local/KY-occupational-2026.json",
+    "data/local/KY-occupational-2027.json"
+   ]
+  },
+  {
+   "jurisdiction": "KY",
+   "title": "City of Simpsonville Code of Ordinances Sec. 110.27",
+   "url": "https://codelibrary.amlegal.com/codes/simpsonville/latest/simpsonville_ky/0-0-0-6803",
+   "why": "HTTP 403: the site refuses automated requests; a real browser was refused too",
+   "never_read": true,
+   "feeds": [
+    "data/local/KY-occupational-2025.json",
+    "data/local/KY-occupational-2026.json",
+    "data/local/KY-occupational-2027.json"
+   ]
+  },
+  {
+   "jurisdiction": "KY",
+   "title": "City of Hartford -- Notice of Occupational License Fees",
+   "url": "https://hartfordky.org/notice-of-occupational-license-fees/",
+   "why": "HTTP 403: the site refuses automated requests; a real browser was refused too",
+   "never_read": true,
+   "feeds": [
+    "data/local/KY-occupational-2025.json",
+    "data/local/KY-occupational-2026.json",
+    "data/local/KY-occupational-2027.json"
+   ]
+  },
+  {
+   "jurisdiction": "KY",
+   "title": "City of Hickman Code of Ordinances Secs. 14-13 and 14-15 (Ord. No. 08-07)",
+   "url": "https://library.municode.com/ky/hickman/codes/code_of_ordinances?nodeId=COOR_CH14LIBURE_ARTIIOCLITA",
+   "why": "HTTP 403: the site refuses automated requests; a real browser was refused too",
+   "never_read": true,
+   "feeds": [
+    "data/local/KY-occupational-2025.json",
+    "data/local/KY-occupational-2026.json",
+    "data/local/KY-occupational-2027.json"
+   ]
+  },
+  {
+   "jurisdiction": "KY",
+   "title": "City of Mayfield Code of Ordinances Sec. 9-42, Earnings and net profits tax payment required",
+   "url": "https://library.municode.com/ky/mayfield/codes/code_of_ordinances?nodeId=COOR_CH9OCLITARE_ARTIIOCLITA_S9-42EANEPRTAPARE",
+   "why": "HTTP 403: the site refuses automated requests; a real browser was refused too",
+   "never_read": true,
+   "feeds": [
+    "data/local/KY-occupational-2025.json",
+    "data/local/KY-occupational-2026.json",
+    "data/local/KY-occupational-2027.json"
+   ]
+  },
+  {
+   "jurisdiction": "KY",
+   "title": "City of Pikeville -- Business Licenses",
+   "url": "https://pikevilleky.gov/business/",
+   "why": "HTTP 403: the site refuses automated requests; a real browser was refused too",
+   "never_read": true,
+   "feeds": [
+    "data/local/KY-occupational-2025.json",
+    "data/local/KY-occupational-2026.json",
+    "data/local/KY-occupational-2027.json"
+   ]
+  },
+  {
+   "jurisdiction": "NM",
+   "title": "City of Las Cruces -- Official Notice, Minimum Wage Ordinance (2026)",
+   "url": "https://lascruces.gov/wp-content/uploads/2025/09/MinimumWageEng26.pdf",
+   "why": "HTTP 403: the site refuses automated requests; a real browser was refused too",
+   "never_read": true,
+   "feeds": [
+    "data/minimum-wage/local/NM-local-2026.json"
+   ]
+  },
+  {
+   "jurisdiction": "NY",
+   "title": "NY Election Law 3-400 via NY Senate Open Legislation API (free key: NYSENATE_API_KEY)",
+   "url": "https://legislation.nysenate.gov/api/3/laws/ELN/3-400?key={env:NYSENATE_API_KEY}",
+   "why": "needs a free API key: add repository secret NYSENATE_API_KEY; a real browser was refused too",
+   "never_read": true,
+   "feeds": [
+    "data/minimum-wage/states/NY-2026.json"
+   ]
+  },
+  {
+   "jurisdiction": "NY",
+   "title": "NY Labor Law 651 via NY Senate Open Legislation API (free key: NYSENATE_API_KEY)",
+   "url": "https://legislation.nysenate.gov/api/3/laws/LAB/651?key={env:NYSENATE_API_KEY}",
+   "why": "needs a free API key: add repository secret NYSENATE_API_KEY; a real browser was refused too",
+   "never_read": true,
+   "feeds": [
+    "data/minimum-wage/states/NY-2026.json"
+   ]
+  },
+  {
+   "jurisdiction": "NY",
+   "title": "NYS Paid Family Leave -- 2025 contribution rate 0.388%, maximum annual contribution $354.53",
+   "url": "https://paidfamilyleave.ny.gov/2025",
+   "why": "HTTP 403: the site refuses automated requests; a real browser was refused too",
+   "never_read": true,
+   "feeds": [
+    "data/states/NY-2025.json"
+   ]
+  },
+  {
+   "jurisdiction": "NY",
+   "title": "NY Department of Financial Services -- COBRA and Premium Assistance",
+   "url": "https://www.dfs.ny.gov/consumers/health_insurance/cobra_and_premium_assistance",
+   "why": "HTTP 403: the site refuses automated requests; a real browser was refused too",
+   "never_read": true,
+   "feeds": [
+    "data/employer-thresholds/NY-2026.json",
+    "data/employer-thresholds/NY-2027.json"
+   ]
+  },
+  {
+   "jurisdiction": "NY",
+   "title": "NY.gov -- New York State Paid Sick Leave FAQ",
+   "url": "https://www.ny.gov/sites/default/files/atoms/files/PSL_FAQ_PaidSickLeaveFAQ.pdf",
+   "why": "HTTP 403: the site refuses automated requests; a real browser was refused too",
+   "never_read": true,
+   "feeds": [
+    "data/employer-thresholds/NY-2026.json",
+    "data/employer-thresholds/NY-2027.json"
+   ]
+  },
+  {
+   "jurisdiction": "OH",
+   "title": "Village of College Corner income tax ordinance (1%) and repeal resolution",
+   "url": "https://villageofcollegecorner.org/wp-content/uploads/2025/04/Rita-Repeal.pdf",
+   "why": "HTTP 403: the site refuses automated requests; a real browser was refused too",
+   "never_read": true,
+   "feeds": [
+    "data/local/OH-municipalities-2025.json"
+   ]
+  },
+  {
+   "jurisdiction": "OR",
+   "title": "City of Wilsonville Transit Payroll Tax Information",
+   "url": "https://www.wilsonvilleoregon.gov/finance/page/transit-payroll-tax-information",
+   "why": "HTTP 404",
+   "never_read": true,
+   "feeds": [
+    "data/states/OR-2025.json",
+    "data/states/OR-2026.json",
+    "data/states/OR-2027.json"
+   ]
+  },
+  {
+   "jurisdiction": "AL",
+   "title": "City of Tuskegee -- business information brochure",
+   "url": "https://www.tuskegeealabama.gov/sites/g/files/vyhlif3946/f/uploads/infobrochure_word.pdf",
+   "why": "HTTP 404",
+   "never_read": false,
+   "feeds": [
+    "data/local/AL-municipalities-2025.json",
+    "data/local/AL-municipalities-2026.json",
+    "data/local/AL-municipalities-2027.json"
+   ]
+  },
+  {
+   "jurisdiction": "MI",
+   "title": "MCL 206.30 \u2014 retirement/pension income deductions (subsection (1)(f) etc.), the basis for MI taxable income tracking federal AGI",
+   "url": "https://www.legislature.mi.gov/Laws/MCL?objectName=MCL-206-30",
+   "why": "HTTP 502",
+   "never_read": false,
+   "feeds": [
+    "data/states/MI-2026.json",
+    "data/states/MI-2027.json"
+   ]
+  },
+  {
+   "jurisdiction": "MI",
+   "title": "MCL 141.631 \u2014 City Income Tax Act, Sec. 31 (personal/dependency exemptions)",
+   "url": "https://www.legislature.mi.gov/Laws/MCL?objectName=mcl-141-631",
+   "why": "HTTP 502",
+   "never_read": false,
+   "feeds": [
+    "data/local/MI-cities-2025.json",
+    "data/local/MI-cities-2026.json",
+    "data/local/MI-cities-2027.json"
+   ]
+  },
+  {
+   "jurisdiction": "MI",
+   "title": "MCL 206.703(2) \u2014 Every employer required under the Internal Revenue Code to withhold on an individual's compensation shall deduct and withhold Michigan tax",
+   "url": "https://www.legislature.mi.gov/Laws/MCL?objectName=mcl-206-703",
+   "why": "HTTP 502",
+   "never_read": false,
+   "feeds": [
+    "data/states/MI-2026.json",
+    "data/states/MI-2027.json"
+   ]
+  },
+  {
+   "jurisdiction": "MN",
+   "title": "Minnesota Paid Leave -- Premium rate and contributions",
+   "url": "https://pl.mn.gov/resources/calculators/premium-rate-and-contributions",
+   "why": "HTTP 405",
+   "never_read": false,
+   "feeds": [
+    "data/states/MN-2026.json",
+    "data/states/MN-2027.json"
+   ]
+  },
+  {
+   "jurisdiction": "NJ",
+   "title": "HHS/ASPE 2026 Poverty Guidelines for the 48 Contiguous States and DC \u2014 household of 1: $15,960; +$5,680 per additional person",
+   "url": "https://aspe.hhs.gov/topics/poverty-economic-mobility/poverty-guidelines",
+   "why": "HTTP 403: the site refuses automated requests; a real browser was refused too",
+   "never_read": false,
+   "feeds": [
+    "data/garnishment/state-overrides-2026.json",
+    "data/garnishment/state-overrides-2027.json"
+   ]
+  },
+  {
+   "jurisdiction": "NJ",
+   "title": "City of Newark Q1 2026 Payroll Tax Booklet",
+   "url": "https://www.newarknj.gov/DocumentCenter/View/2741/Payroll-Tax-Booklet-2026-PDF",
+   "why": "read with a browser last time; a real browser was refused too",
+   "never_read": false,
+   "feeds": [
+    "data/states/NJ-2026.json",
+    "data/states/NJ-2027.json"
+   ]
+  },
+  {
+   "jurisdiction": "OH",
+   "title": "Village of Georgetown -- Income Tax",
+   "url": "https://georgetownohio.gov/income-tax/",
+   "why": "read with a browser last time; a real browser was refused too",
+   "never_read": false,
+   "feeds": [
+    "data/local/OH-municipalities-2025.json"
+   ]
+  },
+  {
+   "jurisdiction": "WI",
+   "title": "Wisconsin Legislature -- Wis. Stat. 104.035 (minimum wage; opportunity employees)",
+   "url": "https://docs.legis.wisconsin.gov/2017/statutes/statutes/104/035/9",
+   "why": "URLError: <urlopen error timed out>",
+   "never_read": false,
+   "feeds": [
+    "data/minimum-wage/states/WI-2026.json"
+   ]
+  },
+  {
+   "jurisdiction": "WI",
+   "title": "Wis. Stat. \u00a7 71.03(13) \u2014 'Wisconsin adjusted gross income' defined",
+   "url": "https://docs.legis.wisconsin.gov/document/statutes/71.03",
+   "why": "URLError: <urlopen error timed out>",
+   "never_read": false,
+   "feeds": [
+    "data/states/WI-2026.json",
+    "data/states/WI-2027.json"
+   ]
+  },
+  {
+   "jurisdiction": "WI",
+   "title": "Wis. Stat. \u00a7 812.34 \u2014 80% of disposable earnings exempt from garnishment (i.e. 20% reachable), further limited by the amount by which disposable earnings exceed 30x the FEDERAL minimum hourly wage",
+   "url": "https://docs.legis.wisconsin.gov/document/statutes/812.34",
+   "why": "URLError: <urlopen error timed out>",
+   "never_read": false,
+   "feeds": [
+    "data/garnishment/state-overrides-2026.json",
+    "data/garnishment/state-overrides-2027.json"
+   ]
+  },
+  {
+   "jurisdiction": "WI",
+   "title": "Wisconsin W-166 withholding guide",
+   "url": "https://www.revenue.wi.gov/DOR%20Publications/pb166.pdf",
+   "why": "URLError: <urlopen error timed out>",
+   "never_read": false,
+   "feeds": [
+    "data/states/WI-2025.json",
+    "data/states/WI-2026.json",
+    "data/states/WI-2027.json"
+   ]
+  },
+  {
+   "jurisdiction": "WI",
+   "title": "DOR Tax Rates FAQ (annual Form 1 individual income tax brackets)",
+   "url": "https://www.revenue.wi.gov/Pages/FAQS/pcs-taxrates.aspx",
+   "why": "URLError: <urlopen error timed out>",
+   "never_read": false,
+   "feeds": [
+    "data/states/WI-2026.json",
+    "data/states/WI-2027.json"
+   ]
+  },
+  {
+   "jurisdiction": "WI",
+   "title": "DOR General Withholding Tax Questions (reciprocity, thresholds, WT-4)",
+   "url": "https://www.revenue.wi.gov/Pages/FAQS/pcs-with.aspx",
+   "why": "URLError: <urlopen error timed out>",
+   "never_read": false,
+   "feeds": [
+    "data/states/WI-2026.json",
+    "data/states/WI-2027.json"
+   ]
+  }
+ ]
+}
