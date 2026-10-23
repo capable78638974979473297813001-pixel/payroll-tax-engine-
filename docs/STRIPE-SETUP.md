@@ -18,6 +18,20 @@ PUBLIC_BASE_URL=https://omniatax.io  npm run check:stripe
 Do this in **test mode**. A live secret key (`sk_live_` or `rk_live_`) is refused
 until `STRIPE_ALLOW_LIVE=1`. Leave that unset while you are on test keys.
 
+## Render env vars Scott must set
+
+Set these on the Render service (Environment). Paste them only there. This doc
+does not contain the values.
+
+- `STRIPE_SECRET_KEY` (`sk_test_` for now)
+- `STRIPE_PRICE_ID`
+- `STRIPE_METER_EVENT_NAME`
+- `STRIPE_WEBHOOK_SECRET`
+
+`PUBLIC_BASE_URL` is already set in `render.yaml`.
+
+`STRIPE_ALLOW_LIVE` must stay unset until a full test payment works.
+
 ## 1. The billing meter
 
 Stripe dashboard → **Billing → Meters → Create meter**.
