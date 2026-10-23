@@ -1,23 +1,24 @@
-# Source watch - 2026-10-22
+# Source watch - 2026-10-23
 
-**34 sources changed**
+**12 sources changed**
 
-**2 items need attention: see "Needs attention" below.** A run with no changes is not an all-clear while this list is not empty.
+**3 items need attention: see "Needs attention" below.** A run with no changes is not an all-clear while this list is not empty.
 
 | Changed | Minor | Unchanged | New | Unstable | Unreachable | Gone (404) | Blocks bots | Total |
 |---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| 34 | 7 | 1002 | 17 | 0 | 5 | 5 | 34 | 1104 |
+| 12 | 2 | 1033 | 2 | 0 | 14 | 5 | 36 | 1104 |
 
-_Run took 2421 s. A change is only reported after a second fetch confirms it._
+_Run took 2486 s. A change is only reported after a second fetch confirms it._
 
-**Coverage: 1060 of 1104 sources were read this run; 44 could not be checked**, and 40 of those have never been read successfully, so nothing about them is being watched.
+**Coverage: 1049 of 1104 sources were read this run; 55 could not be checked**, and 38 of those have never been read successfully, so nothing about them is being watched.
 474 of those are documents linked from pages. 6 other linked documents could not be read (a dead link, or a file the site won't serve) and are not counted above.
-**540 linked documents were not read this run** (the time budget ran out) and will be read first thing in the next run; until then they are not being watched.
+**554 linked documents were not read this run** (the time budget ran out) and will be read first thing in the next run; until then they are not being watched.
 
-## Needs attention (2)
+## Needs attention (3)
 
 | What | Detail |
 |---|---|
+| IN Indiana Departmental Notice #1 (county rates) | could not read the official file to compare with the engine's data (URLError: <urlopen error timed out>) |
 | KY Whitesville | the Secretary of State lists this district (entered 2026-10-06; rate '') but KY-occupational-2026.json does not |
 | WV Chester | the list shows a $2 per week user fee in Chester, which the data does not have |
 
@@ -48,30 +49,6 @@ No change needed, but worth knowing: a variance the data file already explains, 
 
 ## Changed
 
-### AL - Alabama DOR: news
-
-<https://www.revenue.alabama.gov/news>  
-5 lines added, 5 removed; 1 links added, 1 removed
-
-- New link: [MEMO New License Plate (MVD Memo 2026-007)](https://www.revenue.alabama.gov/memo-new-license-plate-mvd-memo-2026-007/)
-- Removed link: [https://www.revenue.alabama.gov/business-license-newsletter-fall-2026/](https://www.revenue.alabama.gov/business-license-newsletter-fall-2026/)
-
-<details><summary>What changed</summary>
-
-```diff
-+October 21, 2026
-+MEMO New License Plate (MVD Memo 2026-007)
-+TO: License Plate Issuing OfficialsSUBJECT: New License PlateDATE: October 21, 2026 A new license plate,...
-+Read More
-+ALDOR Announces Additional Relief for Taxpayers Affected by Hurricane Isaias
--ALDOR Announces Additional Relief for Taxpayers Affected by Hurricane Isaias
--Thursday, Oct. 15, 2026 MONTGOMERY - The Alabama Department of Revenue (ALDOR) is expanding the...
--Read More
--Business License Newsletter, Fall 2026
--September 10, 2026
-```
-</details>
-
 ### AZ - City of Flagstaff -- City of Flagstaff announces minimum wage for 2026
 
 <https://www.flagstaff.az.gov/CivicAlerts.aspx?AID=2165>  
@@ -83,687 +60,17 @@ Used by: `data/minimum-wage/local/AZ-local-2026.json`
 <details><summary>What changed</summary>
 
 ```diff
--Eastbound Lockett Road between Fourth and Patterson closed on Oct. 20
--Homepage News
-+City Manager Joanne Keene Recognized as 2026 Women Achiever of Arizona
++Pedestrian Improvements Complete along Soliere Avenue!
 +Homepage News
+-City Manager Joanne Keene Recognized as 2026 Women Achiever of Arizona
+-Homepage News
 ```
 </details>
 
-### CA - Aviso Legal (Spanish) FY25-26 (linked from City of Santa Monica -- Minimum Wage)
+### CA - 法律聲明 [Traditional Chinese] (linked from City of Santa Monica -- Minimum Wage)
 
-<https://www.santamonica.gov/media/Minimum_Wage/Notifications/25-26%20Notices/2025-26__Notification_Spanish%202025-09-08.pdf>  
-9 lines added, 120 removed
-  
-Used by: `data/minimum-wage/sectoral/CA-sectoral-2026.json`
-
-- Figures now present: none
-- Figures no longer present: $
-17.81, $22.50, 4.62, 4.62, 4.62, 4.63, 4.63
-
-<details><summary>What changed</summary>
-
-```diff
--FIJE DONDE EMPLEADOS PUEDAN LEERLO FACILMENTE - INFRACTORES SUJETOS A SANCIONES
--SALARIO MINIMO DE SANTA MONICA
--NOTIFICACION OFICIAL
--TRABAJO HONESTO. PAGO JUSTO.
--Salario Mínimo de Santa Monica
--hora
--INCUMPLIMIENTO DE PAGAR
--EL SALARIO MÍNIMO
--DE SANTA MONICA
--INCUMPLIMIENTO DE CUMPLIR
--CON LOS REQUISITOS NOTIFICACIÓN,
--PUBLICACIÓN Y REGISTROS
--REPRESALIAS
--Salario Mínimo de Santa Monica
--$
--17.81
--por
--De acuerdo con la Ordenanza del Salario Mínimo de Santa Monica, en el Capítulo 4.62 del Código Municipal, cada
--empleador debe pagar a cada empleado (incluso empleados temporales y de media jornada) quien realiza al menos dos
--horas del trabajo en una semana de trabajo particular dentro de los límites geográficos de la Ciudad de Santa Monica,
--salarios de no menos de las cantidades indicadas en este aviso. La tasa será ajustada anualmente el 1 de julio según el
--siguiente calendario. Algunas excepciones y prórrogas están disponibles.
--Bajo la Ordenanza, los empleados que hacen valer sus derechos para recibir salario mínimo de la Ciudad están protegidos
--contra represalia. Los empleados pueden presentar una demanda civil contra sus empleadores por cualquier violación de
--la Ordenanza. La Ciudad puede investigar posibles violaciones, y puede hacer cumplir los requisitos de salario mínimo.
--Las violaciones de la ley de salario mínimo incluyen, pero no se limitan a:
--PARA MÁS INFORMACIÓN, POR FAVOR CONTACTE LA CIUDAD DE SANTA MONICA
--(310) 458-8281 • minimum.wage@santamonica.gov • santamonica.gov/minimum-wage
--Fechas de Vigencia de las Tasas: 1 de julio de 2025 a 30 de junio de 2026
--FIJE DONDE EMPLEADOS PUEDAN LEERLO FACILMENTE - INFRACTORES SUJETOS A SANCIONES
--SALARIO MINIMO DE SANTA MONICA
--NOTIFICACION OFICIAL
--TRABAJO HONESTO. PAGO JUSTO.
--Salario Mínimo de Santa Monica
--Santa Monica salarios del hotel
--Fechas de Vigencia: 8 de septiembre de 2025 a 30 de junio 2026
--$22.50por hora
--A partir del 1 de julio de 2018, el salario mínimo para trabajadores de hoteles debe coincidir con el salario por
--hora establecido para los trabajadores de hoteles en la Ciudad de Santa Mónica, de acuerdo con la Sección
--4.63.015 del Código Municipal de Santa Mónica
-... 89 more changed lines
-```
-</details>
-
-### CA - Aviso Legal (Spanish) FY26-27 (linked from City of Santa Monica -- Minimum Wage)
-
-<https://www.santamonica.gov/media/Minimum_Wage/Notifications/26-27%20Notices/2026-27_Notification_Spanish%202026-06-09.pdf>  
-9 lines added, 120 removed
-  
-Used by: `data/minimum-wage/sectoral/CA-sectoral-2026.json`
-
-- Figures now present: none
-- Figures no longer present: $
-18.47, $25.00, 4.62, 4.62, 4.62, 4.63, 4.63
-
-<details><summary>What changed</summary>
-
-```diff
--FIJE DONDE EMPLEADOS PUEDAN LEERLO FACILMENTE - INFRACTORES SUJETOS A SANCIONES
--SALARIO MINIMO DE SANTA MONICA
--NOTIFICACION OFICIAL
--TRABAJO HONESTO. PAGO JUSTO.
--Salario Mínimo de Santa Monica
--hora
--INCUMPLIMIENTO DE PAGAR
--EL SALARIO MÍNIMO
--DE SANTA MONICA
--INCUMPLIMIENTO DE CUMPLIR
--CON LOS REQUISITOS NOTIFICACIÓN,
--PUBLICACIÓN Y REGISTROS
--REPRESALIAS
--Salario Mínimo de Santa Monica
--$
--18.47
--por
--De acuerdo con la Ordenanza del Salario Mínimo de Santa Monica, en el Capítulo 4.62 del Código Municipal, cada
--empleador debe pagar a cada empleado (incluso empleados temporales y de media jornada) quien realiza al menos dos
--horas del trabajo en una semana de trabajo particular dentro de los límites geográficos de la Ciudad de Santa Monica,
--salarios de no menos de las cantidades indicadas en este aviso. La tasa será ajustada anualmente el 1 de julio según el
--siguiente calendario. Algunas excepciones y prórrogas están disponibles.
--Bajo la Ordenanza, los empleados que hacen valer sus derechos para recibir salario mínimo de la Ciudad están protegidos
--contra represalia. Los empleados pueden presentar una demanda civil contra sus empleadores por cualquier violación de
--la Ordenanza. La Ciudad puede investigar posibles violaciones, y puede hacer cumplir los requisitos de salario mínimo.
--Las violaciones de la ley de salario mínimo incluyen, pero no se limitan a:
--PARA MÁS INFORMACIÓN, POR FAVOR CONTACTE LA CIUDAD DE SANTA MONICA
--(310) 458-8281 • minimum.wage@santamonica.gov • santamonica.gov/minimum-wage
--Fechas de Vigencia de las Tasas: 1 de julio de 2026 a 30 de junio de 2027
--FIJE DONDE EMPLEADOS PUEDAN LEERLO FACILMENTE - INFRACTORES SUJETOS A SANCIONES
--SALARIO MINIMO DE SANTA MONICA
--NOTIFICACION OFICIAL
--TRABAJO HONESTO. PAGO JUSTO.
--Salario Mínimo de Santa Monica
--Santa Monica salarios del hotel
--Fechas de Vigencia: 1 de julio de 2026 a 30 de junio 2027
--$25.00por hora
--A partir del 1 de julio de 2018, el salario mínimo para trabajadores de hoteles debe coincidir con el salario por
--hora establecido para los trabajadores de hoteles en la Ciudad de Santa Mónica, de acuerdo con la Sección
--4.63.015 del Código Municipal de Santa Mónica
-... 89 more changed lines
-```
-</details>
-
-### CA - Enforcement Guide (linked from City of Santa Monica -- Minimum Wage)
-
-<https://www.santamonica.gov/Media/Minimum_Wage/MinimumWage_Enforcement-Businesses.pdf>  
-9 lines added, 63 removed
-  
-Used by: `data/minimum-wage/sectoral/CA-sectoral-2026.json`
-
-- Figures now present: none
-- Figures no longer present: 310.458, 800.593
-
-<details><summary>What changed</summary>
-
-```diff
--Minimum Wage Law
--EMPLOYER
--guide to complying
--with the Santa Monica
--HONEST WORK. FAIR PAY .
--Santa Monica's Minimum Wage
--The City of Santa Monica is committed to
--providing the resources needed for businesses
--to understand Santa Monica Minimum Wage
--Law requirements.
--• The City's website provides downloadable
--legal notices, answers to frequently asked
--questions, and other resources for businesses.
--(smgov.net/minimumwage)
--More information available at smgov.net/
--minimumwage/education-enforcement.
--The City has partnered with Los Angeles County's
--Department of Consumer and Business Affairs
--(DCBA) to enforce Santa Monica's minimum
--wage law. LA County's wage enforcement unit
--will process claims and perform investigations,
--and will work closely with the Santa Monica
--City Attorney's Office to enforce Santa Monica's
--minimum wage law.
--310.458.8281
--minimum.wage@smgov.net
--www.smgov.net/minimumwage
--Inquiries and Complaints
--What happens if my business or
--nonproﬁ t is contacted by a LA County
--Department of Consumer and
--Business Affairs (DCBA) investigator?
--DCBA will work with you to resolve questions or
--violations of Santa Monica's wage law (including
--Sick Leave, Hotel Living Wage, Service Charge, and
--First-Time Worker provisions) in a timely, fair, and
--effective manner.
--If DCBA receives an inquiry or complaint about
--your business, they will review your payroll records
--and interview your employees. DCBA may issue
-... 32 more changed lines
-```
-</details>
-
-### CA - FAQ (English) (linked from City of Santa Monica -- Minimum Wage)
-
-<https://santamonica.gov/media/Minimum_Wage/MinimumWageFAQ_English2023.pdf>  
-9 lines added, 369 removed
-  
-Used by: `data/minimum-wage/sectoral/CA-sectoral-2026.json`
-
-- Figures now present: none
-- Figures no longer present: $10.00, $10.50, $10.50, $12.00, $12.00, $13.25, $13.25, $14.25, $14.25, $15.00, $15.00, $15.00, $15.66, $15.66, $15.96, $15.96, $15.96, 1.09, 1.09, 100%
-
-<details><summary>What changed</summary>
-
-```diff
--For details on minimum wage and all other provisions,
--visit www.santamonica.gov/minimum-wage
--This is intended as general information only and does not carry the force of legal opinion. The information is provided as a public service.
--TOP FAQ
--Who does th e mi nimum wage law ap ply t o?
--The law applies to any employee that works two (2) hours in a given week in the City of Santa Monica, and who is entitled to
--minimum wage payment under California labor law (Santa Monica Municipal Code Section 4.62.010(c)). This includes full time, part
--time, and temporary workers. There is a separate rate for Hotel Workers.
--Who has to comply with the law?
--All businesses with employees in Santa Monica. This includes small and large businesses. Businesses based outside Santa Monica
--but whose employees work in Santa Monica must also comply with the law.
--Do I count all my employees, or only those in Santa Monica to tell what business size category I fall in?
--Only the employees in Santa Monica. This comes from the Employee definition (employees must work in the City of Santa Monica to
--be eligible for Santa Monica's minimum wage law benefits).
--Do I need to post Santa Monica-specific legal notices? How will I receive them?
--Yes. Businesses must post the Santa Monica Minimum Wage legal notices in English and Spanish, and in any other language that 5%
--or more of the workforce speaks. You can download/ print the legal notices from the City's website at santamonica.gov/minimum-
--wage. The City will not mail notices ou t ; it is business owners' responsibility to print and post notices. Failure to post can result in
--fines.
--What is the curr ent minimum wage rate?
--The current rate is $15.96 per hour for large businesses (26+ employees) and small businesses (25 or less employees). The wage will
--increase annually according to the schedule below.
--Year* Businesses with
--26+ employees
--Businesses under
--25 employees
--2016 $10.50 $10.00**
--2017 $12.00 $10.50
--2018 $13.25 $12.00
--2019 $14.25 $13.25
--2020 $15.00 $14.25
--2021 $15.00 $15.00
--*Rate effective July 1 each year. **CA state minimum wage.
--How many paid sick days does the law require?
--The law requires employers to provide at least the hours below. Employees are eligible for Santa Monica sick leave benefits when
--they work a minimum of 2 hours in a given week in Santa Monica. This applies to full time, part time, and temporary employees.
--2022 $15.96 $15.96
--FAQs Santa Monica's Minimum Wage Page 2
--For details on minimum wage and all other provisions,
--visit www.santamonica.gov/minimum-wage
-... 338 more changed lines
-```
-</details>
-
-### CA - Hotel Wage Fact Sheet (linked from City of Santa Monica -- Minimum Wage)
-
-<https://www.santamonica.gov/Media/Minimum_Wage/SantaMonicaWageLaw-Hotels.pdf>  
-9 lines added, 43 removed
-  
-Used by: `data/minimum-wage/sectoral/CA-sectoral-2026.json`
-
-- Figures now present: none
-- Figures no longer present: 4.63, 4.63
-
-<details><summary>What changed</summary>
-
-```diff
--Notes on Santa Monica Wage Law for Hotels
--SMTT and City staff have received several similar questions about the new minimum wage for hotel
--workers that went into effect July 1, 2016. The hotel worker living wage is set to match that of the City
--of Los Angeles starting July 1, 2017. Moving forward, it will increase annually by CPI.
--Working with City staff, we have put together the following notes to clarify frequent questions related
--to the hotel wage:
--Hotel Definition & Law Application
-- The hotel wage applies to all contractors providing hotel-related services on hotel premises.
--o Examples could include valet, maintenance, cleaning, etc.
--o Employees whose primary place of employment is at one or more Santa Monica hotel
--are eligible.
--o These contractors providing hotel related services on hotel premises must pay their
--qualifying employees the hotel wage.
-- The hotel wage does not apply to contractors providing services offsite.
--o Examples could include an offsite cleaning service whose staff performs all work at a
--location separate from the hotel.
-- The hotel wage provisions may be waived in a collective bargaining agreement (CBA).
--o The waiver must be in a bona fide CBA, must be express, and must be in clear and
--unambiguous terms.
--o The parties to a CBA are free to negotiate any language they desire, and the City will not
--interfere with or participate in the negotiation of such language.
--o Even if the hotel's direct employees are subject to a CBA, contractors who provide on-
--site, hotel-related services must pay the hotel minimum wage, unless a contractor's
--employees are also subject to a CBA.
-- The hotel wage applies to businesses that contract, lease, or sublet premises which operate in
--connection with the hotel.
--o Examples could include a restaurant connected to a hotel that provides room service or
--other amenities to hotel patrons as part of the hotel services.
-- The hotel wage does not apply to businesses that contract or sublet premises from a hotel,
--and operate independently from the hotel.
--o Examples could include a restaurant that provides no services for the hotel or hotel
--guests, and is unconnected to hotel operations.
--Reference: Municipal Code Section 4.63.045
--Hotel Wage and Sick leave
-- Hotel employers must provide the paid sick leave required under the general minimum wage.
-- Paid sick leave goes into effect on January 1, 2017 at 40 hours per year (for businesses with 26
--or more employees). Paid sick leave hours increase to 72 hours on January 1, 2018.
--Reference: Municipal Code Section 4.63.025
--The City has established a website that has a list of Frequently Asked Questions (FAQs), a fact sheet and
--other resource materials such as the legal notices for employers which can be downloaded at:
-... 12 more changed lines
-```
-</details>
-
-### CA - Impressum [German] (linked from City of Santa Monica -- Minimum Wage)
-
-<https://www.santamonica.gov/media/Minimum_Wage/Notifications/26-27%20Notices/2026-27_Notification_German.pdf>  
-9 lines added, 98 removed
-  
-Used by: `data/minimum-wage/sectoral/CA-sectoral-2026.json`
-
-- Figures now present: none
-- Figures no longer present: 01.01, 01.01, 01.07, 01.07, 30.06, 4.62, 4.62, 4.62
-
-<details><summary>What changed</summary>
-
-```diff
--AN EINEM ORT AUFHÄNGEN, WO ES DIE ANGESTELLTEN LEICHT LESEN KÖNNEN - ZUWIDERHANDLUNGEN WERDEN BESTRAFT
--MINDESTLÖHNE IN SANTA MONICA
--AMTLICHE BEKANNTMACHUNG
--FÜR WEITERE INFORMATIONEN NEHMEN SIE BITTE VERBINDUNG MIT DER STADT SANTA MONICA AUF:
--(310) 458-8281 • minimum.wage@santamonica.gov • santamonica.gov/minimum-wage
--EHRLICHE ARBEIT. FAIRE BEZAHLUNG.
--Mindestlöhne In Santa Monica
--NICHTZAHLUNG DES
--MINDESTLOHNS IN
--SANTA MONICA
--NICHTERFÜLLUNG VON PFLICHTEN ZU
--AUSHANG, BENACHRICHTIGUNG UND
--AUFZEICHNUNG
--VERGELTUNG
--Santa Monica Mindestlöhne
--USD18,47
---pro
--Stunde
--Gültig ab: 01.07.2026-30.06.2027
--In Übereinstimmung mit der Mindestlohnverordnung von Santa Monica im Regelwerk der Gemeinde Santa Monica,
--Kapitel 4.62, zahlt jeder Arbeitgeber jedem Arbeitnehmer (einschließlich Zeit- und Teilzeitbeschäftigten), der mindestens
--zwei Arbeitsstunden in einer bestimmten Arbeitswoche innerhalb der geografischen Grenzen der Stadt Santa Monica
--leistet, Löhne von nicht weniger als den Beträgen in dieser Bekanntmachung. Der Kurs wird jährlich am 1. Juli entsprechend
--dem untenstehenden Zeitplan angepasst. Bestimmte Befreiungen und Aufschübe sind möglich.
--Gemäß der Verordnung werden Arbeitnehmer, die ihre Rechte auf den Mindestlohn der Stadt geltend machen, vor
--Vergeltungsmaßnahmen geschützt. Arbeitnehmer können gegen ihre Arbeitgeber eine Zivilklage wegen Verstoßes
--gegen die Verordnung einreichen. Die Stadt kann mögliche Verstöße untersuchen und die Mindestlohnanforderungen
--durchsetzen. Zu den Verstößen gegen das Mindestlohngesetz gehören unter anderem:
--AN EINEM ORT AUFHÄNGEN, WO ES DIE ANGESTELLTEN LEICHT LESEN KÖNNEN - ZUWIDERHANDLUNGEN WERDEN BESTRAFT
--MINDESTLÖHNE IN SANTA MONICA
--AMTLICHE BEKANNTMACHUNG
--FÜR WEITERE INFORMATIONEN NEHMEN SIE BITTE VERBINDUNG MIT DER STADT SANTA MONICA AUF:
--(310) 458-8281 • minimum.wage@santamonica.gov • santamonica.gov/minimum-wage
--EHRLICHE ARBEIT. FAIRE BEZAHLUNG.
--Mindestlöhne In Santa Monica
--Arbeitgeber mit 26
--oder mehr Beschäftigten
--72 Stunden
--Arbeitgeber mit 25
--oder weniger Beschäftigten
-... 67 more changed lines
-```
-</details>
-
-### CA - Legal Notice FY25-26 (linked from City of Santa Monica -- Minimum Wage)
-
-<https://www.santamonica.gov/media/Minimum_Wage/Notifications/25-26%20Notices/2025-26__Notification_English%202025-09-08.pdf>  
-9 lines added, 121 removed
-  
-Used by: `data/minimum-wage/sectoral/CA-sectoral-2026.json`
-
-- Figures now present: none
-- Figures no longer present: $
-17.81, $22.50, 4.62, 4.62, 4.62, 4.63, 4.63
-
-<details><summary>What changed</summary>
-
-```diff
--POST WHERE EMPLOYEES CAN READ EASILY - VIOLATORS SUBJECT TO PENALTIES
--SANTA MONIC A'S MINIMUM WAGE
--OFFICIAL NOTICE
--FAILURE TO
--PAY THE
--SANTA MONICA
--MINIMUM WAGE
--FAILURE TO
--COMPLY WITH NOTICE,
--POSTING, AND
--RECORDS REQUIREMENTS
--RETALIATION
--Santa Monica Minimum Wage
--$
--17.81
--per
--hour
--Rate Effective Dates: July 1, 2025 - June 30, 2026
--In accordance with the Santa Monica Minimum Wage Ordinance in Santa Monica Municipal Code Chapter 4.62, every
--employer shall pay to each employee (including temporary and part-time employees) who performs at least two hours
--of work in a particular work week within the geographic limits of the City of Santa Monica wages of not less than the
--amounts shown in this notice. The rate will be adjusted annually on July 1 according to the schedule below. Certain
--exemptions and deferrals are available.
--Under the Ordinance, employees who assert their rights to receive the City's minimum wage are protected from
--retaliation. Employees may file a civil lawsuit against their employers for any violation of the Ordinance. The City can
--investigate possible violations, and can enforce the minimum wage requirements. Violations of the minimum wage law
--include, but are not limited to:
--FOR MORE INFORMATION, PLEASE CONTACT THE CITY OF SANTA MONICA:
--(310) 458-8281 • minimum.wage@santamonica.gov • santamonica.gov/minimum-wage
--HONEST WORK. FAIR PAY.
--Santa Monica's Minimum Wage
--POST WHERE EMPLOYEES CAN READ EASILY - VIOLATORS SUBJECT TO PENALTIES
--SANTA MONIC A'S MINIMUM WAGE
--OFFICIAL NOTICE
--HONEST WORK. FAIR PAY.
--Santa Monica's Minimum Wage
--Santa Monica Hotel Worker Living Wage
--Rate Effective Dates: September 8, 2025 - June 30, 2026
--$22.50
--p
-... 90 more changed lines
-```
-</details>
-
-### CA - Legal Notice FY26-27 (linked from City of Santa Monica -- Minimum Wage)
-
-<https://www.santamonica.gov/media/Minimum_Wage/Notifications/26-27%20Notices/2026-27_Notification_English%202026-06-09.pdf>  
-9 lines added, 120 removed
-  
-Used by: `data/minimum-wage/sectoral/CA-sectoral-2026.json`
-
-- Figures now present: none
-- Figures no longer present: $
-18.47, $25.00, 4.62, 4.62, 4.62, 4.63, 4.63
-
-<details><summary>What changed</summary>
-
-```diff
--POST WHERE EMPLOYEES CAN READ EASILY - VIOLATORS SUBJECT TO PENALTIES
--SANTA MONIC A'S MINIMUM WAGE
--OFFICIAL NOTICE
--FAILURE TO
--PAY THE
--SANTA MONICA
--MINIMUM WAGE
--FAILURE TO
--COMPLY WITH NOTICE,
--POSTING, AND
--RECORDS REQUIREMENTS
--RETALIATION
--Santa Monica Minimum Wage
--$
--18.47
--per
--hour
--Rate Effective Dates: July 1, 2026 - June 30, 2027
--In accordance with the Santa Monica Minimum Wage Ordinance in Santa Monica Municipal Code Chapter 4.62, every
--employer shall pay to each employee (including temporary and part-time employees) who performs at least two hours
--of work in a particular work week within the geographic limits of the City of Santa Monica wages of not less than the
--amounts shown in this notice. The rate will be adjusted annually on July 1 according to the schedule below. Certain
--exemptions and deferrals are available.
--Under the Ordinance, employees who assert their rights to receive the City's minimum wage are protected from
--retaliation. Employees may file a civil lawsuit against their employers fo r any violation of the Ordinance. The City can
--investigate possible violations, and can enforce the minimum wage requirements. Violations of the minimum wage law
--include, but are not limited to:
--FOR MORE INFORMATION, PLEASE CONTACT THE CITY OF SANTA MONICA:
--(310) 458-8281 • minimum.wage@s antamonica.gov • santamonica.gov/minimum-wage
--HONEST WORK. FAIR PAY.
--Santa Monica's Minimum Wage
--POST WHERE EMPLOYEES CAN READ EASILY - VIOLATORS SUBJECT TO PENALTIES
--SANTA MONIC A'S MINIMUM WAGE
--OFFICIAL NOTICE
--HONEST WORK. FAIR PAY.
--Santa Monica's Minimum Wage
--Santa Monica Hotel Worker Living Wage
--Rate Effective Dates: July 1, 2026 - June 30, 2027
--$25.00
--p
-... 89 more changed lines
-```
-</details>
-
-### CA - Legal na Paunawa [Tagalog] (linked from City of Santa Monica -- Minimum Wage)
-
-<https://www.santamonica.gov/media/Minimum_Wage/Notifications/26-27%20Notices/2026-27_Notification_Tagalog.pdf>  
-9 lines added, 96 removed
-  
-Used by: `data/minimum-wage/sectoral/CA-sectoral-2026.json`
-
-- Figures now present: none
-- Figures no longer present: $
-18.47, 4.62, 4.62, 4.62
-
-<details><summary>What changed</summary>
-
-```diff
--IPASKIL SA LUGAR NA MADALING MABABASA NG MGA EMPLEYADO - MAYROONG KAUKULANG PARUSA SA MGA LALABAG
--MINIMUM NA SUWELDO NG SANTA MONICA
--OPISYAL NA ABISO
--TAPAT NA PAGTATRABAHO. PATAS NA PASAHOD.
--Minimum na Suweldo ng Santa Monica
--oras
--HINDI PAGBABAYAD NG
--MINIMUM NA SUWELDO
--NG SANTA MONICA
--HINDI PAGSUNOD SA MGA
--KAHILINGAN SA ABISO, PASKIL,
--AT MGA REKORD
--PAGGANTI
--Minimum na Suweldo ng Santa Monica
--$
--18.47
--Kada
--Petsa ng Pagpapatupad ng Rate: Hulyo 1, 2026
--Alinsunod sa Minimum Wage Ordinance (Ordinansa sa Minimum na Suweldo) ng Santa Monica, Municipal Code Chapter 4.62, babayaran ng
--bawat employer ang empleyado (kabilang na ang pansamatala at part-time na mga empleyado) na nagtatrabaho ng kahit dalawang oras sa isang
--partikular na sanlinggong trabaho sa loob ng nasasakupan ng Lungsod ng Santa Monica ng suweldong hindi bababa sa mga halagang ipinapakita
--sa ibaba. Babaguhin ang rate taon-taon tuwing Hulyo alinsunod sa iskedyul sa ibaba. May ilang partikular na eksempsyon at pag-aantala.
--Sa ilalim ng Ordinansa, ang mga empleyadong nagsusulong ng kanilang karapatan na tumanggap ng minimum na suweldo ng Lungsod ay
--protektado laban sa pagganti. Maaaring maghabla ng kasong sibil ang mga empleyado laban sa kanilang employer para sa anumang paglabag
--sa Ordinansa. Maaaring mag-imbistiga ang Lungsod ng mga posibleng paglabag, at magpatupad ng mga kahilingang minimum na suweldo.
--Kabilang sa mga paglabag sa minimum na suweldo ang, ngunit hindi limitado sa:
--PARA SA HIGIT PANG IMPORMASYON, MANGYARING MAKIPAG-UGNAYAN SA LUNGSOD NG SANTA MONICA:
--(310) 458-8281 • minimum.wage@santamonica.gov • santamonica.gov/minimum-wage
--IPASKIL SA LUGAR NA MADALING MABABASA NG MGA EMPLEYADO - MAYROONG KAUKULANG PARUSA SA MGA LALABAG
--MINIMUM NA SUWELDO NG SANTA MONICA
--OPISYAL NA ABISO
--TAPAT NA PAGTATRABAHO. PATAS NA PASAHOD.
--Minimum na Suweldo ng Santa Monica
--Paid Sick Leave
--ng Santa Monica
--Petsa ng Pagpapatupad: Enero 1, 2017
--Simula sa Enero 1, 2017, kailangang magbigay ang mga employer ng paid sick time sa kanilang mga empleyado na nagtatrabaho
--sa nasasakupan ng lungsod ng Santa Monica alinsunod sa mga probisyon sa Paid Sick Leave (May Bayad na Pagliban dahil sa
--Pagkakasakit) ng Santa Monica sa Municipal Code Section 4.62.025.
--Mga employer na mayroong 26
-... 65 more changed lines
-```
-</details>
-
-### CA - Paid Sick Leave Checklist (linked from City of Santa Monica -- Minimum Wage)
-
-<https://www.santamonica.gov/Media/Minimum_Wage/PaidSickLeave-ChecklistforBusinesses.pdf>  
-9 lines added, 19 removed
-  
-Used by: `data/minimum-wage/sectoral/CA-sectoral-2026.json`
-
-
-<details><summary>What changed</summary>
-
-```diff
--For details on minimum wage and all other provisions,
--visit smgov.net/minimumwage.
--Santa Monica's Sick Leave Requirements Page 2
--For details on minimum wage and all other provisions,
--visit smgov.net/minimumwage.
--
--
--
--
--
--
--
--
--
--
--
--
--
--
-+Pardon Our Interruption
-+As you were browsing something about your browser made us think you were a bot. There are a few reasons this might happen:
-+You're a power user moving through this website with super-human speed.
-+You've disabled cookies in your web browser.
-+A third-party browser plugin, such as Ghostery or NoScript, is preventing JavaScript from running. Additional information is available in this support article.
-+To regain access, please make sure that cookies and JavaScript are enabled before reloading the page.
-+Please stand by
-+We're getting everything ready for you. The page is loading, and you'll be on your way in just a few moments.
-+Thanks for your patience!
-```
-</details>
-
-### CA - Paid Sick Leave Tips (linked from City of Santa Monica -- Minimum Wage)
-
-<https://www.santamonica.gov/Media/Minimum_Wage/PaidSickLeaveTips-Employees.pdf>  
-9 lines added, 39 removed
-  
-Used by: `data/minimum-wage/sectoral/CA-sectoral-2026.json`
-
-
-<details><summary>What changed</summary>
-
-```diff
--SANTA MONICA PAID SICK LEAVE
--For hours & more information visit smgov.net/minimumwage
--26.2
--HONEST WORK. FAIR PAY .
--Santa Monica's Minimum Wage
--Work Hard. Be Well.
--Identify your employer size.
--Check your pay stub. This should show the number of hours you have earned.
--You can use paid sick leave hours for yourself or a family member. Find more
--detail at https://www.dir.ca.gov/DLSE/Paid_Sick_Leave.htm under "For what
--purposes can an employee take paid sick leave".
--PAID SICK LEAVE IN SANTA MONICA
--72 hours
--40 hours
--Large businesses
--Small businesses
--HONEST WORK. FAIR PAY .
--Santa Monica's Minimum Wage
--Other questions? Visit smgov.net/minimumwage or email minimum.wage@smgov.net
--Large = 26+ employees
--Small = 1-25 employees
--26 or more employees in Santa Monica: large employer/ 72 hours
--25 or fewer employees in Santa Monica: small employer/ 40 hours
--If you're not sure, check with your manager or supervisor.
--You can earn 1 hour for every 30 hours worked OR
--Your employer may opt to provide all hours at the start of the year
--HOW MUCH TIME CAN I EARN?1)
--HOW CAN I USE IT?2)
--WHAT IF I HAVE QUESTIONS?3)
--If you're not sure you're receiving the right amount of paid sick leave, contact
--Santa Monica's enforcement team at LA County's Department of Consumer and
--Business Affairs (DCBA) at (800) 593-8222 or wagehelp@dcba.lacounty.gov.
--Earning by Hour: It can take more than one
--year to earn the full amount. Any unused
--amount rolls over to the next year.
--Full Amount at Start of Year: Employees receive
--the full amount in one year. Unused leave goes
--away at the end of the year.
--ANNUAL AMOUNTS
-+Pardon Our Interruption
-... 8 more changed lines
-```
-</details>
-
-### CA - Paid Sick Leave: Must do/ Should do (linked from City of Santa Monica -- Minimum Wage)
-
-<https://www.santamonica.gov/Media/Minimum_Wage/MinimumWagePostcard_MustShouldDo.pdf>  
-9 lines added, 35 removed
-  
-Used by: `data/minimum-wage/sectoral/CA-sectoral-2026.json`
-
-
-<details><summary>What changed</summary>
-
-```diff
--Post the required Santa Monica Minimum Wage Legal Notice available online at
--www.smgov.net/minimumwage
--Make sure you know whether you are a Large or Small employer for the
--appropriate wage rateand sick leave benefits.
--Large=26 or more employees. Small=25 or fewer employees.
--Track accrued and used Paid Sick Leave properly.
--Make sure staff know how much is in their 'bank' each payroll cycle.
--Keep adequate records.
--For a minimum of three years.
--HONEST WORK. FAIR PAY .
--Santa Monica's Minimum Wage
--Four things all businesses
--must do to comply with the
--Santa Monica Minimum Wage Law:
--4
--3
--2
--1
--Santa Monica Minimum Wage Law
--Things all businesses should do
--HONEST WORK. FAIR PAY .
--Santa Monica's Minimum Wage
--Helping to make compliance clearer, simpler, and easier
--4
--3
--2
--1 Train your managers and staff on the Law.
--The most important part!
--Review your Employee Handbook.
--Make sure your policies and procedures are compliant.
--Ensure your overall Policies, Procedures, and Practices are compliant with
--the Law.
--If in doubt, consult with your legal counsel and HR Team.
--If unsure or confused, ask us! We are here to help!
--Contact City Staff at minimum.wage@smgov.net
-+Pardon Our Interruption
-+As you were browsing something about your browser made us think you were a bot. There are a few reasons this might happen:
-+You're a power user moving through this website with super-human speed.
-+You've disabled cookies in your web browser.
-+A third-party browser plugin, such as Ghostery or NoScript, is preventing JavaScript from running. Additional information is available in this support article.
-... 4 more changed lines
-```
-</details>
-
-### CA - Thông báo pháp lý [Vietnamese] (linked from City of Santa Monica -- Minimum Wage)
-
-<https://www.santamonica.gov/media/Minimum_Wage/Notifications/26-27%20Notices/2026-27_Notification_Vietnamese.pdf>  
-9 lines added, 92 removed
+<https://www.santamonica.gov/media/Minimum_Wage/Notifications/26-27%20Notices/2026-27_Notification_Traditional_Chinese.pdf>  
+9 lines added, 65 removed
   
 Used by: `data/minimum-wage/sectoral/CA-sectoral-2026.json`
 
@@ -773,430 +80,128 @@ Used by: `data/minimum-wage/sectoral/CA-sectoral-2026.json`
 <details><summary>What changed</summary>
 
 ```diff
--LÀM VIỆC TRUNG THỰC, HƯỞNG LƯƠNG CÔNG BẰNG.
--Mức lương tối thiểu tại Santa Monica
--ĐĂNG TẠI NHỮNG NƠI NGƯỜI LAO ĐỘNG CÓ THỂ ĐỌC DỄ DÀNG - NHỮNG NGƯỜI VI PHẠM SẼ BỊ PHẠT
--Mức lương tối thiểu tại Santa Monica
--Ngày hiệu lực: 1 tháng 7, 2026
--Theo Chương 4.62 Điều lệ Thành phố, Sắc lệnh về Tiền lương tối thiểu của Santa Monica, mỗi người sử dụng lao động
--sẽ trả cho người lao động (bao gồm cả người lao động tạm thời và bán thời gian) làm việc ít nhất hai giờ trong một tuần
--làm việc cụ thể tại địa phận thành phố Santa Monica mức lương không thấp hơn mức thể hiện trong thông báo này.
--Mức lương sẽ được điều chỉnh vào ngày 1.7 hàng năm theo lịch dưới đây.
--Theo quy định của Sắc lệnh, người lao động có đủ quyền hưởng mức lương tối thiểu của Thành phố và được bảo
--vệ tránh sự trả đũa. Người lao động có thể khởi kiện dân sự người sử dụng lao động về bất kỳ vi phạm nào với
--Sắc lệnh. Thành phố có thể điều tra các vi phạm đã có thể xảy ra và có thể buộc thi hành các yêu cầu về lương tối
--thiểu. Các vi phạm về luật lương tối thiểu bao gồm nhưng không giới hạn:
--ĐỂ BIẾT THÊM THÔNG TIN, VUI LÒNG LIÊN HỆ THÀNH PHỐ SANTA MONICA:
+-張貼于顯眼處以便從業人員閱覽；違者將受到處罰
+-聖莫尼卡市最低工資
+-$18.47 每小時
+-依據《聖莫尼卡市市政法》第 4.62 章最低工資條例，雇主應向在聖莫尼卡市地理範圍內某一具體工
+-作周中完成不低於兩個小時工作的從業人員（包括臨時和兼職從業人員）支付不低於本通知中顯示
+-的金額。這項最低工資標準將於每年7月根據以下的時間表進行調整。可能存在一定的豁免和延期。
+-依據該條例，雇主不得對維護自己獲得本市最低工資權利的從業人員進行打擊報復。從業人員可對
+-違反本條例的雇主提起民事訴訟。本市有權調查違規嫌疑，並強制執行最低工資要求。違反最低工
+-資法律的行為包括但不限於：
+-如需更多資訊，請聯繫聖莫尼卡市：
 -(310) 458-8281 • minimum.wage@santamonica.gov • santamonica.gov/minimum-wage
--KHÔNG THANH TOÁN
--MỨC LƯƠNG TỐI THIỂU
--Ở SANTA MONICA
--KHÔNG TUÂN THỦ CÁC
--YÊU CẦU THÔNG BÁO,
--ĐĂNG TẢI VÀ GHI NHẬN
--SỰ TRẢ ĐŨA
--$18.47 g
--Mỗi
--iờ
--MỨC LƯƠNG TỐI THIỂU TẠI SANTA MONICA
--THÔNG BÁO CHÍNH THỨC
--ĐĂNG TẠI NHỮNG NƠI NGƯỜI LAO ĐỘNG CÓ THỂ ĐỌC DỄ DÀNG - NHỮNG NGƯỜI VI PHẠM SẼ BỊ PHẠT
--Nghỉ ốm có hưởng
--lương tại Santa Monica
--Ngày hiệu lực: 1 tháng 1, 2017
--Bắt đầu từ ngày 1 tháng 1, 2017 , người sử dụng lao động phải cung cấp chế độ nghỉ ốm có hưởng lương cho người lao
--động làm việc tại địa phận thành phố Santa Monica theo quy định tại các điều khoản về Nghỉ ốm có hưởng lương của Santa
--Monica trong Mục 4.62.025 Điều lệ Thành phố.
--Người sử dụng lao động có từ
--26 nhân viên trở lên
--Người sử dụng lao động có
--25 nhân viên hoặc ít hơn
--72 giờ 40 giờ
--Người lao động sẽ được hưởng quyền lợi nghỉ ốm có hưởng lương nếu làm việc ít nhất 2 giờ trong một tuần làm việc cụ thể
-... 61 more changed lines
-```
-</details>
-
-### CA - Официальное уведомление [Russian] (linked from City of Santa Monica -- Minimum Wage)
-
-<https://www.santamonica.gov/media/Minimum_Wage/Notifications/26-27%20Notices/2026-27_Notification_Russian.pdf>  
-9 lines added, 107 removed
-  
-Used by: `data/minimum-wage/sectoral/CA-sectoral-2026.json`
-
-- Figures now present: none
-- Figures no longer present: 18.47, 4.62, 4.62, 4.62
-
-<details><summary>What changed</summary>
-
-```diff
--Минимальная заработная плата в Санта-Монике
--РАЗМЕСТИТЕ НА ВИДНОМ ДЛЯ РАБОТНИКОВ МЕСТЕ ВО ИЗБЕЖАНИЕ ШТРАФА
--МИНИМАЛЬНАЯ ЗАРАБОТНАЯ ПЛАТА В САНТА-МОНИКЕ
--В соответствии с Постановлением о минимальной заработной плате в Санта-Монике, раздел 4.62
--Муниципального кодекса, каждый работодатель обязан оплачивать труд каждого работника (включая
--временно трудоустроенных и занятых неполный рабочий день), выполняющего свои трудовые обязанности
--не менее двух часов в конкретную рабочую неделю в пределах городской черты Санта-Моники, по ставке
--не ниже указанной в настоящем уведомлении. Размер ставки подлежит ежегодному повышению с 1 июля в
--соответствии с приведенным ниже графиком. В некоторых случаях могут применяться исключения и отсрочки.
--Согласно Постановлению, преследование за отстаивание прав на получение установленной в городе
--минимальной заработной платы запрещено. Работники могут подавать гражданские иски против
--работодателей за любое нарушение данного Постановления. Городские власти могут расследовать
--возможные нарушения и требовать исполнения Постановления о минимальной заработной плате.
--Нарушения минимальной заработной платы включают, но не ограничиваются следующим:
--ЗА ДОПОЛНИТЕЛЬНОЙ ИНФОРМАЦИЕЙ ОБРАЩАЙТЕСЬ В АДМИНИСТРАЦИЮ САНТА-МОНИКИ:
--(310) 458-8281 • minimum.wage@santamonica.gov • santamonica.gov/minimum-wage
--ДО
--БРО
--СОВЕСТНАЯ РАБОТА. СПРАВЕДЛИВАЯ ОПЛАТА.
--НЕВЫПЛАТА МИНИМАЛЬНОЙ
--ЗАРАБОТНОЙ ПЛАТЫ,
--УСТАНОВЛЕННОЙ
--В САНТА-МОНИКЕ
--НАРУШЕНИЕ ТРЕБОВАНИЙ
--ОБ УВЕДОМЛЕНИЯХ,
--ОБЪЯВЛЕНИЯХ И
--ДОКУМЕНТАЦИИ
--ПРЕСЛЕДОВАНИЕ
--В час
--$
--Ставка действует с 1 июля 2026 г.
--18.47
--МИНИМАЛЬНАЯ ЗАРАБОТНАЯ ПЛАТА В САНТА-МОНИКЕ
--ОФИЦИАЛЬНОЕ УВЕДОМЛЕНИЕ
--РАЗМЕСТИТЕ НА ВИДНОМ ДЛЯ РАБОТНИКОВ МЕСТЕ ВО ИЗБЕЖАНИЕ ШТРАФА
--ОПЛАТА ОТПУСКА ПО БОЛЕЗНИ
--В САНТА-МОНИКЕ
--Действует с 1 января 2017 г.
--Начиная с 1 января 2017 года, работодатели обязаны предоставлять своим работникам, занятым в пределах городской
--черты Санта-Моники, оплачиваемый отпуск по болезни, регламентируемый соответствующими положениями раздела
-... 76 more changed lines
-```
-</details>
-
-### CA - Իրավական ծանուցում [Armenian] (linked from City of Santa Monica -- Minimum Wage)
-
-<https://www.santamonica.gov/media/Minimum_Wage/Notifications/26-27%20Notices/2026-27_Notification_Armenian.pdf>  
-9 lines added, 103 removed
-  
-Used by: `data/minimum-wage/sectoral/CA-sectoral-2026.json`
-
-- Figures now present: none
-- Figures no longer present: $18.47, 4.62, 4.62, 4.62
-
-<details><summary>What changed</summary>
-
-```diff
--ԱԶՆԻՎ ԱՇԽԱՏԱՆՔ, ԱՐԴԱՐ ՎՃԱՐ
--Santa Monica- ի Նվազագույն աշխատավարձ
--ՓԱԿՑՐԵՔ ԱՇԽԱՏԱԿԻՑՆԵՐԻ ՀԱՄԱՐ ՏԵՍԱՆԵԼԻ ՎԱՅՐԵՐՈՒՄ։ ՕՐԻՆԱԽԱԽՏՆԵՐԸ ԿԵՆԹԱՐԿՎԵՆ ՏՈՒԳԱՆՔՆԵՐԻ
--Santa Monica-ի Նվազագույն աշխատավարձ
--$18.47
--Դրույքաչափի ուժի մեջ մտնելու օրը՝ հուլիսի 1, 2026թ.
--Համաձայն Santa Monica-ի Նվազագույն աշխատավարձի վերաբերյալ որոշման՝ Մունիցիպալ օրենսգրքի Գլուխ 4.62, սկսած
--2016թ. հուլիսի 1-ից՝ յուրաքանչյուր գործատու պարտավոր է յուրաքանչյուր աշխատակցին (ներառյալ ժամանակավոր և կես
--դրույքով աշխատակիցները), որը Santa Monica քաղաքի աշխարհագրական սահմաններում ցանկացած աշխատանքային
--շաբաթվա ընթացքում իրականացնում է առնվազն երկու ժամվա աշխատանք, վճարել այս ծանուցման մեջ նշված
--գումարներից ոչ պակաս աշխատավարձ։ Դրույքաչափը կճշգրտվի յուրաքանչյուր տարի՝ հուլիսի 1-ին, համաձայն ստորև
--նշված ժամանակացույցի։ Գոյություն ունեն որոշակի բացառություններ և հետաձգումներ։
--Համաձայն Որոշման՝ այն աշխատակիցները, ովքեր կպաշտպանեն իրենց իրավունքները՝ պահանջելով Քաղաքի նվազագույն
--աշխատավարձը, պաշտպանված են հետապնդումից։ Աշխատակիցները կարող են քաղաքացիական հայց ներկայացնել
--ընդդեմ իրենց գործատուների՝ Որոշման ցանկացած խախտման պատճառով։ Քաղաքը կարող է հետաքննել հնարավոր
--խախտումները և կարող է պարտադրել նվազագույն աշխատավարձի պահանջները։ Նվազագույն աշխատավարձի մասին
--օրենքի խախտումները ներառում են, սակայն չեն սահմանափակվում հետևյալով՝
--ԼՐԱՑՈՒՑԻՉ ՏԵՂԵԿՈՒԹՅՈՒՆՆԵՐԻ ՀԱՄԱՐ ԽՆԴՐՈՒՄ ԵՆՔ ԿԱՊՎԵԼ SANTA MONICA ՔԱՂԱՔԻ ՀԵՏ՝
--(310) 458-8281 • minimum.wage@santamonica.gov • santamonica.gov/minimum-wage
--SANTA MONICA- Ի ՆՎԱԶԱԳՈՒՅՆ
--ԱՇԽԱՏԱՎԱՐՁԻ ՉՎՃԱՐՈՒՄ
--ԾԱՆՈՒՑՄԱՆ, ՓԱԿՑՆԵԼՈՒ
--և ՏԵՂԵԿՈՒԹՅՈՒՆՆԵՐԻ
--ՊԱՀԱՆՋՆԵՐԻՆ ՉԵՆԹԱՐԿՈՒՄ
--ՀԵՏԱՊՆԴՈՒՄ
--Ժամում
--SANTA MONICA- Ի ՆՎԱԶԱԳՈՒՅՆ ԱՇԽԱՏԱՎԱՐՁ
--ՊԱՇՏՈՆԱԿԱՆ ԾԱՆՈՒՑՈՒՄ
--ԱԶՆԻՎ ԱՇԽԱՏԱՆՔ, ԱՐԴԱՐ ՎՃԱՐ
--Santa Monica- ի Նվազագույն աշխատավարձ
--ՓԱԿՑՐԵՔ ԱՇԽԱՏԱԿԻՑՆԵՐԻ ՀԱՄԱՐ ՏԵՍԱՆԵԼԻ ՎԱՅՐԵՐՈՒՄ։ ՕՐԻՆԱԽԱԽՏՆԵՐԸ ԿԵՆԹԱՐԿՎԵՆ ՏՈՒԳԱՆՔՆԵՐԻ
--Santa Monica-ի Վճարովի արձակուրդ՝
--հիվանդության պատճառով
--Ուժի մեջ մտնելու օրը՝ հունվարի 1, 2017թ.
--Սկսած 2017թ հունվարի 1-ից՝ գործատուները պարտավոր են Santa Monica քաղաքի տարածքում աշխատող իրենց
--աշխատակիցներին տրամադրել վճարովի արձակուրդ՝ հիվանդության պատճառով՝ համաձայն հիվանդության պատճառով
--վճարովի արձակուրդի վերաբերյալ Santa Monica-ի Մունիցիպալ օրենսգրքի Գլուխ 4.62.025-ի։
--Գործատուներ՝ 26 կամ ավելի
--աշխատակիցներով
--Գործատուներ՝ 25 կամ պակաս
-... 72 more changed lines
-```
-</details>
-
-### CA - คำบอกกล่าวทางกฎหมาย [Thai] (linked from City of Santa Monica -- Minimum Wage)
-
-<https://www.santamonica.gov/media/Minimum_Wage/Notifications/26-27%20Notices/2026-27_Notification_Thai.pdf>  
-9 lines added, 76 removed
-  
-Used by: `data/minimum-wage/sectoral/CA-sectoral-2026.json`
-
-- Figures now present: none
-- Figures no longer present: $18.47, 4.62, 4.62, 4.62
-
-<details><summary>What changed</summary>
-
-```diff
--งานที่ซื่อสัตย์ การจ่ายอย่างเป ็ นธรรม
--ค่าจ้างขั้นต�่าของซานตาโมนิกา
--ป ิ ดประกาศในที่ที่ลูกจ้างอ่านได้ง่าย - ผ ู้ละเมิดจะต้องได้รับโทษ
--ค่าจ้างขั้นต�่าของซานตาโมนิกา
--$18.47
--วันที่อัตรามีผล: 1 กรกฏาคม 2026
--"ตามค�าสั่งค่าจ้างขั้นต�่าซานตาโมนิกา กฎเทศบาลบทที่ 4.62 นายจ้างทุกคนจะจ ่ายค่าจ ้างไม่น้อยกว่าที่ปรากฏในประกาศนี้ให้ลูกจ้างแต่ละคน (รวมถึงลูกจ้างชั ่วคราวและ
--พาร์ทไทม์) ที่ท�างานอย่างน้อยสองชั่วโมงในบางสัปดาห์ภายในขอบเขตทางภูมิศาสตร์ ของเมืองซานตาโมนิกา อัตราจะถูกปรับเป็ นรายป ี ในวันที่ 1 กรกฎาคมตามก�าหนดการ
--ด้านล่าง"
--ภายใต้ค�าสั่งนี้ ลูกจ้างที่ใช้สิทธิรับค่าจ้างขั้นต�่าของเมืองได้รับการคุ้มครองจากการแก้แค้น
--ลูกจ้างสามารถฟ ้ องร้องคดีความทางแพ่งกับนายจ้างส�าหรับการละเมิดค�าสั่ง
--เมืองสามารถสอบสวนการละเมิดที่อาจเกิดขึ้นและสามารถบังคับใช้ข้อก�าหนดเกี่ยวกับค่าจ้างขั้นต�่าได้
--การละเมิดกฎหมายค่าจ้างขั้นต�่าประกอบด้วย แต่ไม่จ�ากัดที่:
--:
--ส�าหรับข้ อมูลเพิ่มเติม โปรดติดต่อเมืองซานตาโมนิกา
--(310) 458-8281 • minimum.wage@santamonica.gov • santamonica.gov/minimum-wage
--การไม่จ่ายค่าจ้างขั้นต่�าของซานตาโมนิกา การไม่ปฏิบัติตามประกาศ
--การติดประกาศและข้อก�าหนดว่าด้วยการบันทึก การแก้แค้น
--ต่อชั่วโมง
--ค่าจ้างขั้นต�่าของซานตาโมนิกา
--ประกาศเป ็ นทางการ
--ป ิ ดประกาศในที่ที่ลูกจ้างอ่านได้ง่าย - ผ ู้ละเมิดจะต้องได้รับโทษ
--การลาป ่ วยแบบได้รับค่าจ้างของซานตาโมนิกา
--วันที่มีผล: 1 มกราคม 2017
--ตั้งแต่วันที่ 1 มกราคม 2017 นายจ้างต้องอนุญาตให้ลูกจ้างที่ท� างานในขอบเขตเมืองซานตาโมนิกาลาป ่ วยแบบได้รับค่าจ้างตามข้อก�าหนดการลาป ่ วยแบบได้ร ับค่าจ้าง
--ในประมวลกฎหมายเทศบาล ข้อ 4.62.025
--นายจ้างที่มีลูกจ้าง 26
--คนหรือมากกว่านั้น
--นายจ้างที่มีลูกจ้าง 25
--คนหรือน้อยกว
--่านั้น
--72 ชั่วโมง 40 ชั่วโมง
--ลูกจ้างมีสิทธิลาป่ วยแบบได้รับค่าจ้างหากพวกเขาท�างานอย่างน้อยสองชั่วโมงในสัปดาห์งานหน่ึงในขอบเขตเมืองซานตาโมนิกาและมีคุณสมบัติเป็ นลูกจ้างที่ได้รับ
--สิทธิการจ่ายค่าจ้างข้ันต่�าจากนายจ้างภายใต้ประมวลกฎหมายแรงงานแคลิฟอร์เนียและค�าส่ังค่าจ้างที่ประกาศโดยคณะกรรมาธิการสวัสดิการอุตสาหกรรมแคลิฟอร์เนีย
--ลูกจ้างสามารถใช้การลาป่ วยตามกฎหมายสถานที่ท�างานที่ดีต่อสุขภาพและครอบครัวที่สุขภาพดีในแคลิฟอร์เนียปี 2014
--การลาป่ วยแบบได้รับค่าจ้างจะเร่ิมสะสมต้ังแต่การเร่ิมการจ้างงานของลูกจ้าง
--ลูกจ้างสามารถใช้การลาป่ วยแบบได้รับค่าจ้างสะสมหลังการจ้างงาน 90 วันแรกหรือตามนโยบายของนายจ้าง ข้ึนอยู่กับว่าอะไรเกิดข้ึนก่อน
--ส�าหรับการท�างานทุก 30 ชั่วโมง ลูกจ้างจะสะสมการลาป่ วยแบบได้รับค่าจ้างหน่ึงช่ัวโมง
--นายจ้างสามารถเลือกให้สวัสดิการการลาป่ วยมากกว่าน้ีได้
--การลาป่ วยแบบได้รับค่าจ้างสะสมของลูกจ้างยกไปปี ถัดไปได้ (ปี ปฏิทิน ปี งบประมาณหรือปี การจ้างงาน) จนถึงขีดจ�ากัดสะสมที่ปรากฏด้านบน ยกเว้นเมื่อมีการ
-... 45 more changed lines
-```
-</details>
-
-### CA - 法律声明 [Simplified Chinese] (linked from City of Santa Monica -- Minimum Wage)
-
-<https://www.santamonica.gov/media/Minimum_Wage/Notifications/26-27%20Notices/2026-27_Notification_Simplified_Chinese.pdf>  
-9 lines added, 67 removed
-  
-Used by: `data/minimum-wage/sectoral/CA-sectoral-2026.json`
-
-- Figures now present: none
-- Figures no longer present: $
-18.47, 4.62, 4.62, 4.62
-
-<details><summary>What changed</summary>
-
-```diff
--张贴于显眼处以便从业人员阅览；违者将受到处罚
--圣莫尼卡市最低工资
+-誠信做事，報酬公平。
+-聖莫尼卡市最低工資
+-未及時支付聖莫尼卡市最低工資 未遵守通知、公告及檔記錄規定 報復從業人員
+-聖莫尼卡市最低工資
 -官方公告
--未及时支付圣莫尼卡市最低工资 未遵守通知、公告及文件记录规定 报复从业人员
--圣莫尼卡市最低工资
--$
--18.47每小时
--费率生效日期：2026年7月1日
--依据《圣莫尼卡市市政法》第 4.62 章最低工资条例，雇主应向在圣莫尼卡市地理范围内某一具体工作周
--中完成不低于两个小时工作的从业人员（包括临时和兼职从业人员）支付不低于本通知中显示的金额。
--这项最低工资标准将于每年 7月根据以下的时间表进行调整。可能存在一定的豁免和延期。
--依据该条例，雇主不得对维护自己获得本市最低工资权利的从业人员进行打击报复。从业人员可对违反
--本条例的雇主提起民事诉讼。本市有权调查违规嫌疑，并强制执行最低工资要求。违反最低工资法律的
--行为包括但不限于：
--如需更多信息，请联系圣莫尼卡市：
--(31 0
--) 458 -82 81 • minimum.wage@s antamonica.gov • santamonica.gov/minimum-wage
--诚信做事，报酬公平。
--圣莫尼卡市最低工资
--张贴于显眼处以便从业人员阅览；违者将受到处罚
--圣莫尼卡市最低工资
--官方公告
--诚信做事，报酬公平。
--圣莫尼卡市最低工资
--圣莫尼卡市带薪病假
+-費率生效日期：2026年7月1日
+-張貼于顯眼處以便從業人員閱覽；違者將受到處罰
+-聖莫尼卡市帶薪病假
 -生效日期：2017年1月1日
--自2017年1月1日起，依照《圣莫尼卡市市政法》第 4.62.025 节带薪病假规定，雇主必须向在圣莫尼卡市
--区范围内工作的从业人员提供带薪病假待遇。
--从业人员人数 26
+-自2017年1月1日起，依照《聖莫尼卡市市政法》第 4.62.025 節帶薪病假規定，雇主必須向在聖莫尼卡市
+-區範圍內工作的從業人員提供帶薪病假待遇。
+-從業人員人數 26
 -人或以上的雇主
--从业人员人数 25
+-從業人員人數 25
 -人或以下的雇主
--72 小时 40 小时
--任何在圣莫尼卡地理范围内某一具体工作周中完成至少两个小时工作的从业人员有资格享受带薪病假待
--遇，并有资格作为从业人员享受由雇主支付《加州劳动法》规定的、加州工业福利委员会颁布的工资决
--议规定的最低工资。从业人员享有的病假权利遵守《2014 年加州卫生工作场所和家庭健康法案》。
--带薪病假自从业人员入职开始累计。从业人员可在就业 90 天后或依据雇主政策（以时间短者为准）使
--用累计带薪病假。
--从业人员每工作 30 小时累计一小时带薪病假。雇主可以选择提供更优厚的病假福利。未经使用的带薪
--病假将逐年延续累计到下一年（日历年、财政年度或者就业年），直至到达累计上限为止。雇主在每日
-... 36 more changed lines
-```
-</details>
-
-### CA - 법적 고지 [Korean] (linked from City of Santa Monica -- Minimum Wage)
-
-<https://www.santamonica.gov/media/Minimum_Wage/Notifications/26-27%20Notices/2026-27_Notification_Korean.pdf>  
-9 lines added, 81 removed
-  
-Used by: `data/minimum-wage/sectoral/CA-sectoral-2026.json`
-
-- Figures now present: none
-- Figures no longer present: $18.47, 4.62, 4.62, 4.62
-
-<details><summary>What changed</summary>
-
-```diff
--종업원들이 쉽게 볼 수 있는 장소에 비치해주십시오. 위반 시 처벌받을 수 있습니다.
--산타모니카 최저 임금
--공식적인 통지
--산타모니카의
--최저 임금
--지불 불이행
--통지, 비치 및
--기록의 요구
--준수 불이행
--보복
--산타모니카의 최저 임금
--$18.47
--시간당
--임금 요율 유효일: 2026년 7월 1일
--산타모니카 최저 임금 조례, Municipal Code Chapter 4.62 에 따르면 모든 고용주는 7월 1일부터 산타모니카
--시의 지리적 영역 내에서 특정 작업주 (work week) 에 최소 2시간 이상 일을 수행한 종업원에게(임시
--및 파트타임 종업원 포함) 이 통지서에 기재된 금액 이상의 임금을 지불하여야 합니다. 특정 예외
--및 유예도 적용될 수 있습니다.
--조례 하에 시의 최저 임금을 받을 권리가 있다고 주장하는 종업원은 보복으로부터 보호를 받습니다.
--종업원은 조례 위반을 한 고용주에 대해 민사 소송을 제기할 수 있습니다. 시는 위반에 대해 조사하고
--최저 임금 집행을 요구할 수 있습니다. 최저 임금법의 위반은 다음을 포함하지만 그에 제한되지
--않습니다.
--더 많은 정보가 필요하시면 산타모니카 시에 연락해주십시오.
+-72小時 40小時
+-任何在聖莫尼卡地理範圍內某一具體工作周中完成至少兩個小時工作的從業人員有資格享受帶薪病假待
+-遇，並有資格作為從業人員享受由雇主支付《加州勞動法》規定的、加州工業福利委員會頒佈的工資決
+-議規定的最低工資。從業人員享有的病假權利遵守《2014 年加州衛生工作場所和家庭健康法案》。
+-帶薪病假自從業人員入職開始累計。從業人員可在就業 90 天后或依據雇主政策（以時間短者為准）使
+-用累計帶薪病假。
+-從業人員每工作 30 小時累計一小時帶薪病假。雇主可以選擇提供更優厚的病假福利。未經使用的帶薪
+-病假將逐年延續累計到下一年（日曆年、財政年度或者就業年），直至到達累計上限為止。雇主在每日
+-歷年、財政年或就業年初所提供的必要全額休假不得累計或延轉。
+-依據該條例，雇主不得對維護自己獲得帶薪病假權利的從業人員進行打擊報復。從業人員可對違反帶薪
+-病假規定的雇主提起民事訴訟。本市有權調查違規嫌疑，並有權強制執行帶薪病假規定。補償措施包括
+-但不限於從業人員複職、非法扣留帶薪病假薪金的支付，以及罰款。
+-若需更多資訊，請聯繫聖莫尼卡市：
 -(310) 458-8281 • minimum.wage@santamonica.gov • santamonica.gov/minimum-wage
--정직한 근무, 공정한 지불
--산타모니카의 최저 임금
--종업원들이 쉽게 볼 수 있는 장소에 비치해주십시오. 위반 시 처벌받을 수 있습니다.
--산타모니카 최저 임금
--공식적인 통지
--정직한 근무, 공정한 지불
--산타모니카의 최저 임금
--산타모니카
--유급 병가
--유효일: 2017년 1월 1일
--2017년 1월 1일부터 고용주들은 산타모니카의 Municipal Code Section 4.62.025 의 유급 병가 조항에 따라
--산타모니카 시 영역 안의 종업원들에게 유급 병가를 제공하여야 합니다.
--26명 이상의 종업원이 있는 고용주 25명 이하의 종업원이 있는 고용주
--72 시간 40 시간
--산타모니카 시의 지리적 영역 내에서 특정 작업주 (work week) 에 최소 2 시간 이상 일을 수행한
--종업원들은 유급 병가를 받을 자격이 되며, 캘리포니아 노동법 하의 모든 고용주로부터 캘리포니아
-... 50 more changed lines
+... 34 more changed lines
 ```
 </details>
 
-### KS - K.S.A. § 60-2310 — wage garnishment: maximum part of earnings subject to garnishment is the lesser of 25% of aggregate disposable earnings, or the amount by which disposable earnings exceed 30 times the federal minimum hourly wage
+### DE - Delaware Division of Revenue: home (announcements)
 
-<https://www.ksrevisor.gov/statutes/chapters/ch60/060_023_0010.html>  
+<https://revenue.delaware.gov/>  
+0 lines added, 1 removed
+
+
+<details><summary>What changed</summary>
+
+```diff
+-Effective August 15, 2026, HS 2 for HB 187 w/ HA2 permits wine producers with a valid license in Delaware or another state to ship wine directly to consumers through a common carrier with a carrier permit. It requires wine producers to ...
+```
+</details>
+
+### KY - Kentucky DOR: news
+
+<https://revenue.ky.gov/News/Pages/default.aspx>  
 1 lines added, 0 removed; 1 links added, 0 removed
+
+- New link: [FAQs for Agriculture Exemption Renewal Program](https://revenue.ky.gov/News/Pages/FAQs-for-Agriculture-Exemption-Renewal-Program.aspx)
+
+<details><summary>What changed</summary>
+
+```diff
++FAQs for Agriculture Exemption Renewal Program
+```
+</details>
+
+### NM - City of Albuquerque -- Albuquerque Minimum Wage Information
+
+<https://www.cabq.gov/legal/albuquerque-minimum-wage-information>  
+1 lines added, 1 removed
   
-Used by: `data/garnishment/state-overrides-2026.json`, `data/garnishment/state-overrides-2027.json`
+Used by: `data/minimum-wage/local/NM-local-2026.json`
 
-- New link: [Meeting Notice](https://www.ksrevisor.gov/statutes/chapters/ch60/docs/LCC_Packet20261106/LCC Notice November 6, 2026.pdf)
-
-<details><summary>What changed</summary>
-
-```diff
-+Meeting Notice
-```
-</details>
-
-### KY - Kentucky withholding
-
-<https://revenue.ky.gov/Business/Pages/Employer-Payroll-Withholding.aspx>  
-1 lines added, 1 removed; 3 links added, 3 removed
-
-- New link: [​](https://revenue.ky.gov/Business/PublishingImages/Pages/Employer-Payroll-Withholding/2024%20Withholding%20Calculator%20%28Team%20KY%29-%20Final%20version%20to%20publish.xlsx)
-- New link: [2025 Specifications for Electronic Submission of 1099 and W​2G](https://revenue.ky.gov/Forms/2025%20Specifications%20for%20Electronic%20Submission%20of%201099B%2c%201099DIV%2c%201099G%2c%201099INT%2c%201099K%2c%201099MISC%2c%201099NEC%2c%201099OID%2c%201099R%20and%20W2G%20Tax%20Information%20on%20CD%20or%20MyTaxes.ky.gov.pdf)
-- New link: [h​​e​​re](https://revenue.ky.gov/Forms/2026%20Specifications%20for%20Electronic%20Submission%20of%20Annual%20wage%20and%20Tax%20Information%20Via%20Electronic%20Media%20or%20Web.pdf)
-- Removed link: [​](https://revenue.ky.gov/Business/PublishingImages/Pages/Employer-Payroll-Withholding/2024%20Withholding%20Calculator%20(Team%20KY)-%20Final%20version%20to%20publish.xlsx)
-- Removed link: [2025 Specifications for Electronic Submission of 1099 and W​2G](https://revenue.ky.gov/Forms/2025%20Specifications%20for%20Electronic%20Submission%20of%201099B,%201099DIV,%201099G,%201099INT,%201099K,%201099MISC,%201099NEC,%201099OID,%201099R%20and%20W2G%20Tax%20Information%20on%20CD%20or%20MyTaxes.ky.gov.pdf)
-- Removed link: [h​​e​​re](https://revenue.ky.gov/Forms/2025%20Specifications%20for%20Electronic%20Submission%20of%20Annual%20wage%20and%20Tax%20Information%20Via%20Electronic%20Media%20or%20Web.pdf)
 
 <details><summary>What changed</summary>
 
 ```diff
--2025 Specifications for Electronic Submission of Annual Wage and Tax Information via Electronic Media or Web (11/20/2025)
-+2026 Specifications for Electronic Submission of Annual Wage and Tax Information via Electronic Media or Web (10/20/2026)
+-Theory of Change
++Theory of Change [PDF]
 ```
 </details>
 
-### ME - Maine Revenue Services: home (announcements)
+### NM - New Mexico Taxation and Revenue: news
 
-<https://www.maine.gov/revenue/>  
-1 lines added, 2 removed; 0 links added, 1 removed
+<https://www.tax.newmexico.gov/news/>  
+1 lines added, 0 removed; 1 links added, 0 removed
 
-- Removed link: [Free Tax Practitioner Webinar: Forms 700-SOV & 706ME - August 18th 2026](https://www.maine.gov/revenue/mtpwebinarschedule)
+- New link: [800 delinquent properties to be auctioned in Luna County this week](https://www.tax.newmexico.gov/wp-content/uploads/2026/10/20261020_800-delinquent-properties-to-be-auctioned-in-Luna-County-this-week.pdf)
 
 <details><summary>What changed</summary>
 
 ```diff
--Free Tax Practitioner Webinar: Forms 700-SOV & 706ME - August 18th 2026
--Maine Tax Alert - October 2026 (PDF)
-+Maine Tax Alert - October 2026 - #2 (PDF)
++800 delinquent properties to be auctioned in Luna County this week
 ```
 </details>
 
-### MN - City of Saint Paul -- Minimum Wage Increases for Small and Micro Businesses (effective July 1, 2026)
+### NM - Santa Fe County -- Living Wage Ordinance and 2026 living wage adjustment announcement
 
-<https://www.stpaul.gov/news/city-saint-paul-minimum-wage-increases-small-and-micro-businesses>  
-12 lines added, 12 removed
+<https://www.santafecountynm.gov/livingwage>  
+2 lines added, 1 removed
   
-Used by: `data/minimum-wage/local/MN-local-2026.json`
+Used by: `data/minimum-wage/local/NM-local-2026.json`
 
 
 <details><summary>What changed</summary>
 
 ```diff
-+Saint Paul City Council Votes 6-0 to Advance Coordinated Encampment Resolution Plan Resolution establishes 60-day services-first approach, temporary winter shelter, and pathway to permanent low-barrier shelter
-+City Council
-+Saint Paul City Council today voted 6-0 to approve Resolution 26-1765 supporting a coordinated response to unsheltered homelessness that centers services before encampment closures.
-+Read More
-+Saint Paul To Test Snow Emergency Text Alerts on October 21
-+Public Works
-+Early text messaging alerts reminds residents to get ready for winter
-+Read More
-+CORRECTION: Clarification on Wednesday Press Conference on Encampment Resolution
-+City Council
-+Wednesday's press conference on encampment resolution is a Ward 5 event, not a full Saint Paul City Council event.
-+Read More
--Read More
--From Golf Course to Community Gathering Place: New Park Breaks Ground at The Heights
--Parks & Recreation
--The City of Saint Paul Parks and Recreation Department and project partners will celebrate the groundbreaking of a new five-acre community park within The Heights, the site of the former Hillcrest Golf Course on Saint Paul's Greater Eas...
--Read More
--Saint Paul Begins Annual Residential Fall Sweep on October 19
--Public Works
--Saint Paul Public Works will sweep more than 530 miles of residential streets starting October 19
--Read More
--Saint Paul Celebrates the new Kellogg-3rd Street Bridge with a Community Celebration on Saturday, October 24
--Public Works
--Ribbon cutting ceremony to reconnect downtown Saint Paul and the East Side
+-ðŸ"ˆ Adjusted annually by CPI (Western Region, Urban Wage Earners & Clerical Workers) ðŸ" Unincorporated Santa Fe County only
++Adjusted annually by CPI (Western Region, Urban Wage Earners & Clerical Workers) Unincorporated Santa Fe County only
++Previous Living Wage Rates
 ```
 </details>
 
 ### NY - fact sheet PDF (linked from IRS -- Determining if an employer is an applicable)
 
 <http://www.treasury.gov/press-center/press-releases/Documents/Fact%20Sheet%20021014.pdf>  
-4 lines added, 5 removed
+5 lines added, 4 removed
   
 Used by: `data/employer-thresholds/NY-2026.json`, `data/employer-thresholds/NY-2027.json`
 
@@ -1205,275 +210,163 @@ Used by: `data/employer-thresholds/NY-2026.json`, `data/employer-thresholds/NY-2
 
 ```diff
 +October 22, 2026
-+The Trump Administration is Making Homeownership More Affordable
-+October 21, 2026
-+Operation Economic Outcast Targets Iran's Shadow Fleet Networks
++Treasury Issues Proposed Rule to Implement Comprehensive Outbound Investment National Security Act
++October 22, 2026
++Readouts
++READOUT: Secretary of the Treasury Scott Bessent's Meeting with President Santiago Peña of Paraguay
 -October 13, 2026
--Readouts
--READOUT: Secretary of the Treasury Scott Bessent's Introductory Call with Republic of Korea Deputy Prime Minister Lee Hyoung-il
--October 9, 2026
--United States Department of the Treasury Announces New Appointment
-```
-</details>
-
-### OH - RITA (Regional Income Tax Agency): news and updates (municipal rate and law changes)
-
-<https://www.ritaohio.com/Resources/News>  
-1 lines added, 1 removed
-
-
-<details><summary>What changed</summary>
-
-```diff
--Annual Interest Rate for Calendar Year 2026 is 9%
-+Annual Interest Rate for Calendar Year 2027 is 9%
+-U.S. Treasury Announces Record Enforcement Actions Against Bank of America
+-October 13, 2026
+-Treasury Targets Cartel del Noreste's Horse Racing Enterprise and Expansive Criminal Network
 ```
 </details>
 
 ### OR - Oregon Department of Revenue: news
 
 <https://www.oregon.gov/dor/news/Pages/default.aspx>  
-30 lines added, 29 removed; 6 links added, 4 removed
+44 lines added, 44 removed; 9 links added, 10 removed
 
-- Figures now present: none
-- Figures no longer present: $2.5
-- New link: [https://apps.oregon.gov/oregon-newsroom/OR/DCBS/Posts/Post/2026-community-bank-week](https://apps.oregon.gov/oregon-newsroom/OR/DCBS/Posts/Post/2026-community-bank-week)
-- New link: [https://apps.oregon.gov/oregon-newsroom/OR/DCBS/Posts/Post/2610-media-contest](https://apps.oregon.gov/oregon-newsroom/OR/DCBS/Posts/Post/2610-media-contest)
-- New link: [https://apps.oregon.gov/oregon-newsroom/OR/OPRD/Posts/Post/ATV-advisory-committee-Nov-4](https://apps.oregon.gov/oregon-newsroom/OR/OPRD/Posts/Post/ATV-advisory-committee-Nov-4)
-- New link: [Oregon State Treasury](https://apps.oregon.gov/oregon-newsroom/OR/OST/Posts)
-- New link: [https://apps.oregon.gov/oregon-newsroom/OR/OST/Posts/Post/OIC-Reviews-Fund-Benchmarks-and-Reports-Strong-Performance-of-SAIF](https://apps.oregon.gov/oregon-newsroom/OR/OST/Posts/Post/OIC-Reviews-Fund-Benchmarks-and-Reports-Strong-Performance-of-SAIF)
-- New link: [October 21, 2026](https://apps.oregon.gov/oregon-newsroom/OR/Posts/Search?from=10%2F21%2F2026&to=10%2F21%2F2026)
-- Removed link: [https://apps.oregon.gov/oregon-newsroom/OR/DCBS/Posts/Post/2610-ppfp-conference](https://apps.oregon.gov/oregon-newsroom/OR/DCBS/Posts/Post/2610-ppfp-conference)
-- Removed link: [https://apps.oregon.gov/oregon-newsroom/OR/DCBS/Posts/Post/settlement-with-crypto-kiosk-operator](https://apps.oregon.gov/oregon-newsroom/OR/DCBS/Posts/Post/settlement-with-crypto-kiosk-operator)
-- Removed link: [State Agencies Share Community Support and Healing Resources Following Bend Tragedy](https://apps.oregon.gov/oregon-newsroom/OR/OEM/Posts/Post/Support-Bend)
-- Removed link: [10/16/26](https://apps.oregon.gov/oregon-newsroom/OR/Posts/Search?from=10%2F16%2F2026&to=10%2F16%2F2026)
+- New link: [Dept. of Revenue](https://apps.oregon.gov/oregon-newsroom/OR/DOR/Posts)
+- New link: [Taxpayer Advocate urges Oregonians to volunteer to help low-income families receive millions in unclaimed tax benefits](https://apps.oregon.gov/oregon-newsroom/OR/DOR/Posts/Post/Taxpayer-Advocate-urges-Oregonians-to-volunteer-to-help-low-income-families)
+- New link: [https://apps.oregon.gov/oregon-newsroom/OR/ODHS/Posts/Post/blog-snap-ed-closes-due-to-federal-budget-cuts](https://apps.oregon.gov/oregon-newsroom/OR/ODHS/Posts/Post/blog-snap-ed-closes-due-to-federal-budget-cuts)
+- New link: [https://apps.oregon.gov/oregon-newsroom/OR/ODHS/Posts/Post/oregon-program-offers-free-help-to-compare-plans-save-on-costs-during-medicare-open-enrollment](https://apps.oregon.gov/oregon-newsroom/OR/ODHS/Posts/Post/oregon-program-offers-free-help-to-compare-plans-save-on-costs-during-medicare-open-enrollment)
+- New link: [https://apps.oregon.gov/oregon-newsroom/OR/ODHS/Posts/Post/un-programa-de-oregon-ofrece-ayuda-gratuita-para-comparar-planes-y-ahorrar-en-costos-durante-el-periodo-de-inscripcion-abierta-de-medicare](https://apps.oregon.gov/oregon-newsroom/OR/ODHS/Posts/Post/un-programa-de-oregon-ofrece-ayuda-gratuita-para-comparar-planes-y-ahorrar-en-costos-durante-el-periodo-de-inscripcion-abierta-de-medicare)
+- New link: [SPIRE Program Delivers Utility Terrain Vehicles to Strengthen Emergency Response Across Oregon](https://apps.oregon.gov/oregon-newsroom/OR/OEM/Posts/Post/SPIRE-UTVs-2026)
+- New link: [https://apps.oregon.gov/oregon-newsroom/OR/OEM/Posts/Post/oem-helps-launch-ecso-911-system](https://apps.oregon.gov/oregon-newsroom/OR/OEM/Posts/Post/oem-helps-launch-ecso-911-system)
+- New link: [Spanish](https://apps.oregon.gov/oregon-newsroom/OR/Posts/Search?cat=Spanish)
+- New link: [October 22, 2026](https://apps.oregon.gov/oregon-newsroom/OR/Posts/Search?from=10%2F22%2F2026&to=10%2F22%2F2026)
+- Removed link: [https://apps.oregon.gov/oregon-newsroom/OR/DCBS/Posts/Post/2026-community-bank-week](https://apps.oregon.gov/oregon-newsroom/OR/DCBS/Posts/Post/2026-community-bank-week)
+- Removed link: [https://apps.oregon.gov/oregon-newsroom/OR/DCBS/Posts/Post/2610-media-contest](https://apps.oregon.gov/oregon-newsroom/OR/DCBS/Posts/Post/2610-media-contest)
+- Removed link: [Building better human services starts with people](https://apps.oregon.gov/oregon-newsroom/OR/ODHS/Posts/Post/blog-building-better-human-services-starts-with-people)
+- Removed link: [It’s National School Bus Safety Week!](https://apps.oregon.gov/oregon-newsroom/OR/OEM/Posts/Post/Bus-Safety-week-2026)
+- Removed link: [A Little Prep, a Lot of Treats: Halloween Safety Tips](https://apps.oregon.gov/oregon-newsroom/OR/OEM/Posts/Post/Halloween-2026)
+- Removed link: [https://apps.oregon.gov/oregon-newsroom/OR/OEM/Posts/Post/Ready-for-the-Wave](https://apps.oregon.gov/oregon-newsroom/OR/OEM/Posts/Post/Ready-for-the-Wave)
+- Removed link: [October Is Cybersecurity Awareness Month](https://apps.oregon.gov/oregon-newsroom/OR/OEM/Posts/Post/Stay-cyber-safe-2026)
+- Removed link: [https://apps.oregon.gov/oregon-newsroom/OR/OPRD/Posts/Post/ATV-advisory-committee-Nov-4](https://apps.oregon.gov/oregon-newsroom/OR/OPRD/Posts/Post/ATV-advisory-committee-Nov-4)
+- Removed link: [Technology](https://apps.oregon.gov/oregon-newsroom/OR/Posts/Search?cat=Technology)
+- Removed link: [Oct 19](https://apps.oregon.gov/oregon-newsroom/OR/Posts/Search?from=10%2F19%2F2026&to=10%2F19%2F2026)
 
 <details><summary>What changed</summary>
 
 ```diff
+-Business
+-October 21, 2026
+-Oregon Investment Council Reviews Fund Benchmarks and Reports Strong Performance of State Accident Insurance Fund
+-Oregon State Treasury
++Social Services
++October 22, 2026
++Oregon program offers free help to compare plans, save on costs during Medicare Open Enrollment
++Oregon Department of Human Services
 -Veteran
--October 20, 2026
+-Oct 20
 -Oregonians Invited to Honor Generations of Service at Statewide Veterans Day Ceremony Nov. 11
--Department of Veterans' Affairs
-+Business
-+October 21, 2026
-+Oregon Investment Council Reviews Fund Benchmarks and Reports Strong Performance of State Accident Insurance Fund
-+Oregon State Treasury
-+Veteran
-+Oct 20
-+Oregonians Invited to Honor Generations of Service at Statewide Veterans Day Ceremony Nov. 11
-+Dept. of Veterans' Affairs
-+·
-+Pr. Release
--Oct 19
-+·
+-Dept. of Veterans' Affairs
++911
++Oct 22
++Oregon Department of Emergency Management Highlights Role in ECSO 911 Radio System Go Live
++Oregon Dept. of Emergency Management
 -Emergency
--·
--State Agencies Share Community Support and Healing Resources Following Bend Tragedy
+-Oct 19
+-Ready for the Wave: Free Webinar Helps Oregonians Prepare for Earthquakes and Tsunamis
 -Oregon Dept. of Emergency Management
 -·
--Pr. Release
--(923)
-+(924)
--(264)
-+(265)
--Media Advisory / Event
--October 20, 2026
--Portland event will offer educational opportunities to increase worker safety, health in pulp, paper, forest products, and other industries
-+Consumer Information
-+October 21, 2026
-+Oregon Gov. Tina Kotek proclaims Oct. 19-23 Community Bank Week
-+·
-+Press Release
+-Article
+-·
+-Building better human services starts with people
++Oct 22
++SNAP-Ed closes due to federal budget cuts
+-It's National School Bus Safety Week!
++SPIRE Program Delivers Utility Terrain Vehicles to Strengthen Emergency Response Across Oregon
+-Article
+-Preparedness
++Pr. Release
++Taxes
+-A Little Prep, a Lot of Treats: Halloween Safety Tips
+-Oregon Dept. of Emergency Management
++Taxpayer Advocate urges Oregonians to volunteer to help low-income families receive millions in unclaimed tax benefits
++Dept. of Revenue
+-Article
+-Technology
++Pr. Release
 +Business
-+October 21, 2026
-+Oregon Investment Council Reviews Fund Benchmarks and Reports Strong Performance of State Accident Insurance Fund
-+OST
-+·
-+Press Release
-... 19 more changed lines
+... 48 more changed lines
 ```
 </details>
 
-### PA - Pennsylvania Department of Revenue: newsroom
+### UT - Utah Pub 14 page
 
-<https://www.pa.gov/agencies/revenue/newsroom>  
-1 lines added, 0 removed; 1 links added, 0 removed
+<https://tax.utah.gov/forms-pubs/pub-14/>  
+0 lines added, 3 removed
 
-- New link: [Shapiro Administration Provides Free Legal Support on Tax Issues to Pennsylvanians through Low Income Taxpayer Clinics](https://www.pa.gov/agencies/revenue/newsroom/shapiro-administration-provides-free-legal-support-on-tax-issues-to-pennsylvanians-through-low-income-taxpayer-clinics)
 
 <details><summary>What changed</summary>
 
 ```diff
-+Shapiro Administration Provides Free Legal Support on Tax Issues to Pennsylvanians through Low Income Taxpayer Clinics
+-(opens in a new tab)
+-(opens in a new tab)
+-(opens in a new tab)
 ```
 </details>
 
-### PA - Pennsylvania employer withholding
+### UT - Utah State Tax Commission: news releases
 
-<https://www.pa.gov/agencies/revenue/resources/tax-types-and-information/employer-withholding>  
-1 lines added, 0 removed; 1 links added, 0 removed
+<https://tax.utah.gov/news/>  
+0 lines added, 1 removed
 
-- New link: [Shapiro Administration Provides Free Legal Support on Tax Issues to Pennsylvanians through Low Income Taxpayer Clinics](https://www.pa.gov/agencies/revenue/newsroom/shapiro-administration-provides-free-legal-support-on-tax-issues-to-pennsylvanians-through-low-income-taxpayer-clinics)
 
 <details><summary>What changed</summary>
 
 ```diff
-+Shapiro Administration Provides Free Legal Support on Tax Issues to Pennsylvanians through Low Income Taxpayer Clinics
+-(opens in a new tab)
 ```
 </details>
 
-### US - IRS draft tax forms: payroll forms only (W-4, W-4P/R, Pub 15/15-T, 940/941/944, W-2/W-3)
+### UT - Utah State Tax Commission: tax bulletins
 
-<https://www.irs.gov/draft-tax-forms>  
-read with a headless browser; 3 lines added, 2 removed; 2 links added, 1 removed
+<https://tax.utah.gov/tax-bulletins/>  
+0 lines added, 2 removed
 
-- New link: [Instruction 944](https://www.irs.gov/pub/irs-dft/i944--dft.pdf)
-- New link: [Publication 15](https://www.irs.gov/pub/irs-dft/p15--dft.pdf)
-- Removed link: [Instruction 940](https://www.irs.gov/pub/irs-dft/i940--dft.pdf)
 
 <details><summary>What changed</summary>
 
 ```diff
--Product Number Instruction 940
--Title Instructions for Form 940, Employer's Annual Federal Unemployment (FUTA) Tax Return
-+Product Number Instruction 944
-+Title Instructions for Form 944, Employer's ANNUAL Federal Tax Return
-+Product Number Publication 15
+-(opens in a new tab)
+-(opens in a new tab)
 ```
 </details>
 
-### WA - City of Seattle, City Finance -- Payroll expense tax (2025 thresholds and rates)
-
-<https://www.seattle.gov/city-finance/business-taxes-and-licenses/seattle-taxes/payroll-expense-tax>  
-1 lines added, 7 removed; 1 links added, 1 removed
-  
-Used by: `data/states/WA-2025.json`, `data/states/WA-2026.json`, `data/states/WA-2027.json`
-
-- Figures now present: none
-- Figures no longer present: 42.56
-- New link: [View the presentation from the October 21, 2026, Seattle Payroll Expense Tax webinar](https://www.seattle.gov/city-finance/business-taxes-and-licenses/seattle-taxes/documents/Departments/CityFinance/Seattle%20Taxes/Payroll%20Expense%20Tax/2026%20Payroll%20Expense%20Tax%20Updates/Q4%202026%20Payroll%20Exp%20Tax%20Presentation.pdf)
-- Removed link: [View the presentation from the July 21, 2026, Seattle Payroll Expense Tax webinar.](https://www.seattle.gov/city-finance/business-taxes-and-licenses/seattle-taxes/documents/Departments/CityFinance/Seattle%20Taxes/Payroll%20Expense%20Tax/2026%20Payroll%20Expense%20Tax%20Updates/Q3%202026%20Payroll%20Expense%20Tax%20Presentation.pdf)
-
-<details><summary>What changed</summary>
-
-```diff
--Register for the Q4 2026 Seattle Payroll Expense Tax webinar (10/21/2026 at PT) here.
--Find out who is subject to the tax.
--Learn how to determine your tax liability.
--Understand tax filing requirements.
--Have the chance to ask questions about the filing and payment process.
--Please be aware that written communications and webinar registration information - including email addresses, names, and business affiliations - are potentially subject to public disclosure, in whole or in part, pursuant to the Washingt...
--View the presentation from the July 21, 2026, Seattle Payroll Expense Tax webinar.
-+View the presentation from the October 21, 2026, Seattle Payroll Expense Tax webinar.
-```
-</details>
-
-### WA - City of Seattle, City Finance -- Social Housing Tax
-
-<https://seattle.gov/city-finance/business-taxes-and-licenses/seattle-taxes/social-housing-tax>  
-1 lines added, 7 removed; 1 links added, 1 removed
-  
-Used by: `data/states/WA-2025.json`, `data/states/WA-2026.json`, `data/states/WA-2027.json`
-
-- Figures now present: none
-- Figures no longer present: 42.56
-- New link: [View the presentation from the October 21, 2026, Social Housing Tax webinar here.](https://seattle.gov/city-finance/business-taxes-and-licenses/seattle-taxes/documents/Departments/CityFinance/Seattle%20Taxes/Social%20Housing%20Developer%20Tax/2026%20Social%20Housing%20Tax%20Updates/Q4%202026%20Seattle%20Social%20Housing%20Tax%20Training.pdf)
-- Removed link: [View the presentation from the July 21, 2026, Social Housing Tax webinar.](https://seattle.gov/city-finance/business-taxes-and-licenses/seattle-taxes/documents/Departments/CityFinance/Seattle%20Taxes/Social%20Housing%20Developer%20Tax/2026%20Social%20Housing%20Tax%20Updates/2026%20Social%20Housing%20Tax%20Trainings/Q3%202026%20Seattle%20Social%20Housing%20Tax%20Presentation.pdf)
-
-<details><summary>What changed</summary>
-
-```diff
--Register for the Q4 2026 Social Housing Tax webinar (10/21/2026 at PT) here.
--Find out who is subject to the tax.
--Learn how to determine your tax liability.
--Understand tax filing requirements.
--Have the chance to ask questions about the filing and payment process.
--Please be aware that written communications and webinar registration information - including email addresses, names, and business affiliations - are potentially subject to public disclosure, in whole or in part, pursuant to the Washingt...
--View the presentation from the July 21, 2026, Social Housing Tax webinar.
-+View the presentation from the October 21, 2026, Social Housing Tax webinar here.
-```
-</details>
-
-### WA - Washington State Department of Labor & Industries -- Local Minimum Wage Rates
-
-<https://lni.wa.gov/workers-rights/wages/minimum-wage/local-minimum-wage-rates>  
-1 lines added, 1 removed
-  
-Used by: `data/minimum-wage/local/WA-local-2026.json`
-
-- Figures now present: $19.28, $20.78, $21.78
-- Figures no longer present: $20.63, $21.63
-
-<details><summary>What changed</summary>
-
-```diff
--Burien: $21.63/hour for employers with 500 or more employees, and $20.63/hour for employers with 21 to 499 employees. Employers with 20 or fewer employees are not covered.
-+Burien: $21.78/hour for large employers with 501 or more employees, $20.78/hour for medium employers with 16 to 500 employees, and $19.28/hour for small employers with 15 or fewer employees.
-```
-</details>
-
-### WV - West Virginia State Tax Department: home page (news and notices)
-
-<https://tax.wv.gov/>  
-2 lines added, 0 removed; 1 links added, 0 removed
-
-- New link: [Read More](https://tax.wv.gov/Business/MotorFuel/Pages/DieselFuelExecutiveOrder.aspx)
-
-<details><summary>What changed</summary>
-
-```diff
-+Emergency Diesel Fuel Relief
-+Read More
-```
-</details>
-
-## Minor changes: link lists and headlines only (7)
+## Minor changes: link lists and headlines only (2)
 
 Recorded, but only the text of links to other pages changed (news boxes, menus).
 
 <details><summary>Show</summary>
 
-### AL - City of Opelika -- announcement of the occupational tax cut
-
-<https://www.opelika-al.gov/CivicAlerts.aspx?AID=1092>  
-2 lines added, 2 removed (link lists / headlines only)
-  
-Used by: `data/local/AL-municipalities-2025.json`, `data/local/AL-municipalities-2026.json`, `data/local/AL-municipalities-2027.json`
-
-
-<details><summary>What changed</summary>
-
-```diff
-+RENTAL TAX ORDINANCE PROPOSAL FACT SHEET
-+Home
--Home
--RENTAL TAX ORDINANCE PROPOSAL FACT SHEET
-```
-</details>
-
 ### MI - Michigan LEO -- Michigan's Minimum Wage Set to Increase on Jan. 1, 2026
 
 <https://www.michigan.gov/leo/news/2025/12/08/michigans-minimum-wage-set-to-increase-on-jan-1-2026>  
-1 lines added, 1 removed (link lists / headlines only)
+3 lines added, 3 removed (link lists / headlines only)
   
 Used by: `data/minimum-wage/states/MI-2026.json`
 
-- Figures now present: none
-- Figures no longer present: $1.5
+- Figures now present: $1.7
+- Figures no longer present: $1
 
 <details><summary>What changed</summary>
 
 ```diff
-+Michigan spotlights pathways to in-demand opportunities during Careers in Energy Week
--General Motors invests $1.5M to advance STEM education in Michigan
++Michigan Rehabilitation Services honors Michiganders and businesses during 18th annual Champion Awards ceremony
++Gov. Whitmer awards $1.7M to launch 12 Advanced Air Mobility projects statewide
++Unemployment agency promotes online safety during Cybersecurity Awareness Month
+-Unemployment agency promotes online safety during Cybersecurity Awareness Month
+-New Youth Employment Permit Portal Helps Protect Michigan's Young Workers
+-$1M investment helps 10 Michigan communities navigate industry transitions, prepare for future
 ```
 </details>
 
 ### MI - Other Michigan cities with income tax (City of Grand Rapids rate table)
 
 <https://www.grandrapidsmi.gov/departments/fiscal-services/income-tax/other-michigan-cities-with-income-tax/>  
-1 lines added, 1 removed (link lists / headlines only)
+0 lines added, 1 removed (link lists / headlines only)
   
 Used by: `data/local/MI-cities-2025.json`, `data/local/MI-cities-2026.json`, `data/local/MI-cities-2027.json`
 
@@ -1481,104 +374,19 @@ Used by: `data/local/MI-cities-2025.json`, `data/local/MI-cities-2026.json`, `da
 <details><summary>What changed</summary>
 
 ```diff
--InfoSend Customer Portal Frequently Asked Questions
-+Utility Billing Customer Portal Frequently Asked Questions
-```
-</details>
-
-### MO - St. Louis: earnings tax department
-
-<https://www.stlouis-mo.gov/government/departments/collector/earnings-tax/index.cfm>  
-1 lines added, 1 removed (link lists / headlines only)
-
-
-<details><summary>What changed</summary>
-
-```diff
-+Individual Earnings Tax Information
--Individual Earnings Tax Information
-```
-</details>
-
-### NC - NCDOR -- Withholding Tax Frequently Asked Questions
-
-<https://www.ncdor.gov/withholding-tax-frequently-asked-questions>  
-0 lines added, 25 removed (link lists / headlines only)
-  
-Used by: `data/states/NC-2026.json`, `data/states/NC-2027.json`
-
-
-<details><summary>What changed</summary>
-
-```diff
--Refunds
--File & Pay
--Taxes & Forms
--Individual Income Tax
--Sales and Use Tax
--Corporate Income & Franchise Tax
--Motor Carrier Tax (IFTA/IN)
--Privilege License Tax
--Motor Fuels Tax
--Alcoholic Beverages Tax
--Tobacco Products Tax
--Partnership Tax
--Property Tax
--Business Registration
--Information for Tax Professionals
--Policies
--Order Tax Forms and Instructions
--Other Taxes And Fees
--Frequently Asked Questions About Traditional and Web Fill-In Forms
--Business & Income Tax Seminars
--Power of Attorney
--Received a Notice
--News
--About Us
--Contact Us
-```
-</details>
-
-### PA - PA Department of Revenue -- Employer Withholding (reciprocal agreements)
-
-<https://www.pa.gov/en/agencies/revenue/resources/tax-types-and-information/employer-withholding.html>  
-1 lines added, 0 removed (link lists / headlines only)
-  
-Used by: `data/states/PA-2025.json`, `data/states/PA-2026.json`, `data/states/PA-2027.json`
-
-
-<details><summary>What changed</summary>
-
-```diff
-+Shapiro Administration Provides Free Legal Support on Tax Issues to Pennsylvanians through Low Income Taxpayer Clinics
-```
-</details>
-
-### PA - PA Department of Revenue -- Personal Income Tax (3.07%)
-
-<https://www.pa.gov/agencies/revenue/resources/tax-types-and-information/personal-income-tax>  
-1 lines added, 0 removed (link lists / headlines only)
-  
-Used by: `data/states/PA-2025.json`
-
-
-<details><summary>What changed</summary>
-
-```diff
-+Shapiro Administration Provides Free Legal Support on Tax Issues to Pennsylvanians through Low Income Taxpayer Clinics
+-ArtPrize
 ```
 </details>
 
 </details>
 
-## Never read successfully - no baseline, so changes here go unnoticed (40)
+## Never read successfully - no baseline, so changes here go unnoticed (38)
 
 Each of these has failed on every run so far. Replace the URL, or check the document by hand.
 
 | Jurisdiction | Source | Detail |
 |---|---|---|
 | AL | [City of Birmingham -- Employers Return of Occupational Tax Withheld](https://birminghamal.hdlgov.com/base64files/TAXES_FORM_4.pdf) | HTTP 403: the site refuses automated requests; a real browser was refused too |
-| AL | [City of Fairfield -- Ordinance 1019, Occupational Tax](https://cityoffairfieldal.org/wp-content/uploads/2025/02/Ordinance-1019-Occupational-Tax_rotated.pdf) | HTTP 429: the site refuses automated requests; a real browser was refused too |
 | AL | [City of Tuskegee -- Occupational Tax Reporting form](https://www.tuskegeealabama.gov/finance-department/files/occupational-tax-form) | HTTP 404 |
 | AL | [Rainbow City -- Form G-1 (Rev 12/20), occupational license fee return](https://www.rbcalabama.com/download/revenue-g-1/?wpdmdl=730&masterkey=60c8bce41072f) | HTTP 403: the site refuses automated requests; a real browser was refused too |
 | AR | [Arkansas Department of Labor and Licensing -- Minimum Wage and Overtime](https://labor.arkansas.gov/labor/labor-standards/minimum-wage-and-overtime/) | HTTP 403: the site refuses automated requests; a real browser was refused too |
@@ -1595,7 +403,6 @@ Each of these has failed on every run so far. Replace the URL, or check the docu
 | IL | [735 ILCS 5/12-803 — maximum wage deduction: lesser of 15% of GROSS weekly wages, or the am](https://www.ilga.gov/legislation/ilcs/ilcs4.asp?DocName=073500050K12-803) | site's TLS certificate failed verification (unable to get local issuer certificate) |
 | IL | [Illinois State Income Tax Exemptions - 2026 (Illinois Office of Comptroller, Payroll Bulle](https://illinoiscomptroller.gov/state-agencies/bulletins-forms/payroll-bulletins/illinois-state-income-tax-exemptions-2026) | HTTP 500 |
 | KY | [City of Augusta Code of Ordinances Sec. 110.02](https://codelibrary.amlegal.com/codes/augusta/latest/augusta_ky/0-0-0-8998) | HTTP 403: the site refuses automated requests; a real browser was refused too |
-| KY | [City of Dayton -- License and Fee Information](https://daytonky.com/licenses/) | HTTP 500 |
 | KY | [City of Elizabethtown, KY — Code of Ordinances Chapter 110, § 110.03 Occupational License ](https://codelibrary.amlegal.com/codes/elizabethtownky/latest/elizabethtown_ky/0-0-0-3203) | HTTP 403: the site refuses automated requests; a real browser was refused too |
 | KY | [City of Hartford -- Notice of Occupational License Fees](https://hartfordky.org/notice-of-occupational-license-fees/) | HTTP 403: the site refuses automated requests; a real browser was refused too |
 | KY | [City of Hickman Code of Ordinances Secs. 14-13 and 14-15 (Ord. No. 08-07)](https://library.municode.com/ky/hickman/codes/code_of_ordinances?nodeId=COOR_CH14LIBURE_ARTIIOCLITA) | HTTP 403: the site refuses automated requests; a real browser was refused too |
@@ -1618,7 +425,7 @@ Each of these has failed on every run so far. Replace the URL, or check the docu
 | OH | [Village of College Corner income tax ordinance (1%) and repeal resolution](https://villageofcollegecorner.org/wp-content/uploads/2025/04/Rita-Repeal.pdf) | HTTP 403: the site refuses automated requests; a real browser was refused too |
 | OR | [City of Wilsonville Transit Payroll Tax Information](https://www.wilsonvilleoregon.gov/finance/page/transit-payroll-tax-information) | HTTP 404 |
 
-## Broken - failing for 3+ runs (2)
+## Broken - failing for 3+ runs (7)
 
 These URLs need replacing in `watcher/sources.json` (or the site blocks automated fetches).
 
@@ -1626,61 +433,48 @@ These URLs need replacing in `watcher/sources.json` (or the site blocks automate
 |---|---|---|
 | AL | [City of Tuskegee -- Occupational Tax Reporting form](https://www.tuskegeealabama.gov/finance-department/files/occupational-tax-form) | HTTP 404 |
 | AL | [City of Tuskegee -- business information brochure](https://www.tuskegeealabama.gov/sites/g/files/vyhlif3946/f/uploads/infobrochure_word.pdf) | HTTP 404 |
-
-## Gone (404) (3)
-
-A 404 on an official document often means a new version was published at a new address.
-
-| Jurisdiction | Source | Detail |
-|---|---|---|
 | CO | [City of Aurora — Occupational Privilege Tax repeal](https://www.auroragov.org/business_services/taxes__licensing/occupational_privilege_tax) | HTTP 404 |
 | CO | [City of Greenwood Village occupational privilege tax](https://www.greenwoodvillage.com/206/Occupational-Privilege-Tax) | HTTP 404 |
-| OR | [City of Wilsonville Transit Payroll Tax Information](https://www.wilsonvilleoregon.gov/finance/page/transit-payroll-tax-information) | HTTP 404 |
-
-## Unreachable this run (5)
-
-| Jurisdiction | Source | Detail |
-|---|---|---|
 | IL | [735 ILCS 5/12-803 — maximum wage deduction: lesser of 15% of GROSS weekly wages, or the am](https://www.ilga.gov/legislation/ilcs/ilcs4.asp?DocName=073500050K12-803) | site's TLS certificate failed verification (unable to get local issuer certificate) |
 | IL | [Illinois State Income Tax Exemptions - 2026 (Illinois Office of Comptroller, Payroll Bulle](https://illinoiscomptroller.gov/state-agencies/bulletins-forms/payroll-bulletins/illinois-state-income-tax-exemptions-2026) | HTTP 500 |
-| KY | [City of Dayton -- License and Fee Information](https://daytonky.com/licenses/) | HTTP 500 |
-| MN | [Minnesota Paid Leave -- Premium rate and contributions](https://pl.mn.gov/resources/calculators/premium-rate-and-contributions) | HTTP 405 |
-| NM | [New Mexico Taxation and Revenue: news](https://www.tax.newmexico.gov/news/) | HTTP 504 |
+| OR | [City of Wilsonville Transit Payroll Tax Information](https://www.wilsonvilleoregon.gov/finance/page/transit-payroll-tax-information) | HTTP 404 |
 
-## New (first snapshot taken) (17)
+## Unreachable this run (12)
 
 | Jurisdiction | Source | Detail |
 |---|---|---|
-| AL | [Town of Notasulga -- Occupational License (Ordinance No. 97-11-01)](https://notasulgaal.com/occupational-license) | read with a headless browser; first snapshot (352 words, html) |
-| AZ | [City of Tucson -- Tucson Minimum Wage Act (Proposition 206, November 2021)](https://www.tucsonaz.gov/Departments/Business-Services-Department/Tucson-Minimum-Wage-Act) | read with a headless browser; first snapshot (1474 words, html) |
-| HI | [Haw. Rev. Stat. § 652-1 — MARGINAL brackets on monthly disposable earnings: 5% of the firs](https://www.capitol.hawaii.gov/hrscurrent/Vol13_Ch0601-0676/HRS0652/HRS_0652-0001.htm) | read with a headless browser; first snapshot (2156 words, html) |
-| MA | [Mass. DOR -- Massachusetts 4% Surtax on Taxable Income](https://www.mass.gov/info-details/massachusetts-4-surtax-on-taxable-income) | read with a headless browser; first snapshot (2613 words, html) |
-| MA | [Massachusetts Circular M (2026, effective January 1)](https://www.mass.gov/doc/massachusetts-circular-m-income-tax-withholding-tables-at-50-effective-january-1-2026/download) | read with a headless browser; first snapshot (10088 words, pdf) |
-| MA | [Massachusetts DOR withholding tax forms (new Circular M editions are listed here)](https://www.mass.gov/lists/dor-withholding-tax-forms) | read with a headless browser; first snapshot (584 words, html) |
-| MA | [Massachusetts Department of Revenue: home (news and notices)](https://www.mass.gov/orgs/massachusetts-department-of-revenue) | read with a headless browser; first snapshot (477 words, html) |
-| NJ | [City of Newark Q1 2026 Payroll Tax Booklet](https://www.newarknj.gov/DocumentCenter/View/2741/Payroll-Tax-Booklet-2026-PDF) | read with a headless browser; first snapshot (1700 words, pdf) |
-| NY | [29 U.S.C. 2611(4)(A)(i)-(ii)](https://www.dol.gov/agencies/whd/fmla) | read with a headless browser; first snapshot (1771 words, html) |
-| NY | [U.S. DOL -- COBRA Continuation Coverage](https://www.dol.gov/general/topic/health-plans/cobra) | read with a headless browser; first snapshot (397 words, html) |
-| NY | [U.S. DOL Wage and Hour Opinion Letter (1986-05-07) on county-appointed poll workers](https://www.dol.gov/agencies/whd/compliance-assistance/handy-reference-guide-flsa) | read with a headless browser; first snapshot (5077 words, html) |
-| NY | [data/minimum-wage/federal-2026.json (this engine's own federal minimum wage file)](https://www.dol.gov/agencies/whd/flsa) | read with a headless browser; first snapshot (960 words, html) |
-| RI | [Reciprocity check (Rhode Island has NONE with Massachusetts or Connecticut, its only borde](https://www.mass.gov/info-details/learn-about-the-income-tax-paid-to-another-jurisdiction-credit) | read with a headless browser; first snapshot (1630 words, html) |
-| WI | [2026 Tax Rate Schedule for Employers (DWD, full Schedule D reserve-percentage rate table)](https://dwd.wisconsin.gov/ui/employers/taxrates.htm) | read with a headless browser; first snapshot (821 words, html) |
-| WI | [Wis. Stat. § 71.03(13) — 'Wisconsin adjusted gross income' defined](https://docs.legis.wisconsin.gov/document/statutes/71.03) | first snapshot (5077 words, html) |
-| WI | [Wis. Stat. § 812.34 — 80% of disposable earnings exempt from garnishment (i.e. 20% reachab](https://docs.legis.wisconsin.gov/document/statutes/812.34) | first snapshot (2983 words, html) |
-| WI | [Wisconsin Legislature -- Wis. Stat. 104.035 (minimum wage; opportunity employees)](https://docs.legis.wisconsin.gov/2017/statutes/statutes/104/035/9) | first snapshot (2439 words, html) |
+| MI | [MCL 141.631 — City Income Tax Act, Sec. 31 (personal/dependency exemptions)](https://www.legislature.mi.gov/Laws/MCL?objectName=mcl-141-631) | HTTP 502 |
+| MI | [MCL 206.30 — retirement/pension income deductions (subsection (1)(f) etc.), the basis for ](https://www.legislature.mi.gov/Laws/MCL?objectName=MCL-206-30) | HTTP 502 |
+| MI | [MCL 206.703(2) — Every employer required under the Internal Revenue Code to withhold on an](https://www.legislature.mi.gov/Laws/MCL?objectName=mcl-206-703) | HTTP 502 |
+| MN | [Minnesota Paid Leave -- Premium rate and contributions](https://pl.mn.gov/resources/calculators/premium-rate-and-contributions) | HTTP 405 |
+| WI | [DOR General Withholding Tax Questions (reciprocity, thresholds, WT-4)](https://www.revenue.wi.gov/Pages/FAQS/pcs-with.aspx) | URLError: <urlopen error timed out> |
+| WI | [DOR Tax Rates FAQ (annual Form 1 individual income tax brackets)](https://www.revenue.wi.gov/Pages/FAQS/pcs-taxrates.aspx) | URLError: <urlopen error timed out> |
+| WI | [Wis. Stat. § 71.03(13) — 'Wisconsin adjusted gross income' defined](https://docs.legis.wisconsin.gov/document/statutes/71.03) | URLError: <urlopen error timed out> |
+| WI | [Wis. Stat. § 812.34 — 80% of disposable earnings exempt from garnishment (i.e. 20% reachab](https://docs.legis.wisconsin.gov/document/statutes/812.34) | URLError: <urlopen error timed out> |
+| WI | [Wisconsin Department of Revenue: news](https://www.revenue.wi.gov/Pages/News/home.aspx) | URLError: <urlopen error timed out> |
+| WI | [Wisconsin Legislature -- Wis. Stat. 104.035 (minimum wage; opportunity employees)](https://docs.legis.wisconsin.gov/2017/statutes/statutes/104/035/9) | URLError: <urlopen error timed out> |
+| WI | [Wisconsin W-166 withholding guide](https://www.revenue.wi.gov/DOR%20Publications/pb166.pdf) | URLError: <urlopen error timed out> |
+| WI | [Wisconsin withholding](https://www.revenue.wi.gov/Pages/Withholding/home.aspx) | URLError: <urlopen error timed out> |
 
-## Redirected (81)
+## New (first snapshot taken) (2)
+
+| Jurisdiction | Source | Detail |
+|---|---|---|
+| AL | [City of Fairfield -- Ordinance 1019, Occupational Tax](https://cityoffairfieldal.org/wp-content/uploads/2025/02/Ordinance-1019-Occupational-Tax_rotated.pdf) | first snapshot (9 words, pdf) |
+| KY | [City of Dayton -- License and Fee Information](https://daytonky.com/licenses/) | first snapshot (550 words, html) |
+
+## Redirected (80)
 
 These still work but redirect elsewhere; consider updating the URL in data/ or curated.json.
 
 | Jurisdiction | Source | Detail |
 |---|---|---|
 | AL | [Alabama DOR: local tax (rates and codes for cities and counties)](https://www.revenue.alabama.gov/local-tax/) | -> https://www.revenue.alabama.gov/sales-use/local-tax-liaisons/ |
-| AL | [City of Opelika -- announcement of the occupational tax cut](https://www.opelika-al.gov/CivicAlerts.aspx?AID=1092) | 2 lines added, 2 removed (link lists / headlines only) |
+| AL | [City of Opelika -- announcement of the occupational tax cut](https://www.opelika-al.gov/CivicAlerts.aspx?AID=1092) | -> https://www.opelika-al.gov/m/newsflash/home/detail/1092 |
 | AR | [Arkansas DFA: news](https://www.dfa.arkansas.gov/news/) | -> https://www.dfa.arkansas.gov/about/news/ |
 | AZ | [City of Flagstaff -- City of Flagstaff announces minimum wage for 2026](https://www.flagstaff.az.gov/CivicAlerts.aspx?AID=2165) | 2 lines added, 2 removed |
 | CA | [California Employer's Guide (DE 44), Rev. 52 (4-26) -- "How to Withhold PIT on Supplementa](https://www.edd.ca.gov/siteassets/files/pdf_pub_ctr/de44.pdf) | -> https://edd.ca.gov:443/siteassets/files/pdf_pub_ctr/de44.pdf |
-| CA | [FAQ (English) (linked from City of Santa Monica -- Minimum Wage)](https://santamonica.gov/media/Minimum_Wage/MinimumWageFAQ_English2023.pdf) | 9 lines added, 369 removed |
+| CA | [FAQ (English) (linked from City of Santa Monica -- Minimum Wage)](https://santamonica.gov/media/Minimum_Wage/MinimumWageFAQ_English2023.pdf) | a one-off difference the confirming fetch didn't reproduce |
 | CA | [FAQ (Spanish) (linked from City of Santa Monica -- Minimum Wage)](https://santamonica.gov/media/Minimum_Wage/MinimumWageFAQ_Spanish2023.pdf) | -> https://www.santamonica.gov/media/Minimum_Wage/MinimumWageFAQ_Spanish2023.pdf |
 | CA | [form FL-435 (linked from Cal. Civ. Proc. Code § 706.050 — ordinary garnishm)](https://www.courts.ca.gov/documents/fl435.pdf) | -> https://courts.ca.gov/sites/default/files/courts/default/2024-11/fl435.pdf |
 | CA | [form WG-002 (linked from Cal. Civ. Proc. Code § 706.050 — ordinary garnishm)](https://www.courts.ca.gov/documents/wg002.pdf) | -> https://courts.ca.gov/system/files?file=2025-07/wg002.pdf |
@@ -1705,11 +499,11 @@ These still work but redirect elsewhere; consider updating the URL in data/ or c
 | KY | [City of Hopkinsville -- Occupational License application form](https://cms2files.revize.com/hopkinsvilleky/document_center/Finance/Tax_Forms/OCCUPATIONAL_LIC___APPLICATION_FORM.pdf) | -> https://cms2.revize.com/revize/hopkinsvilleky/document_center/Finance/Tax_Forms/OCCUPATIONAL_LIC___APPLICATION_FORM.pdf |
 | KY | [City of Vanceburg -- Annual Reconciliation of License Fee](https://www.cityofvanceburg.com/_files/ugd/2ae91a_8e635f8b0a724e379859934219b43aac.pdf) | -> https://44f532c8-0c02-45ec-afd7-8fe00fe64156.filesusr.com/ugd/2ae91a_8e635f8b0a724e379859934219b43aac.pdf |
 | KY | [City of Vanceburg -- Employee Quarterly Return](https://www.cityofvanceburg.com/_files/ugd/2ae91a_5d54392ffbe34c1ba805a5216c0afd9e.pdf) | -> https://44f532c8-0c02-45ec-afd7-8fe00fe64156.filesusr.com/ugd/2ae91a_5d54392ffbe34c1ba805a5216c0afd9e.pdf |
-| MA | [Massachusetts DOR withholding tax forms (new Circular M editions are listed here)](https://www.mass.gov/lists/dor-withholding-tax-forms) | read with a headless browser; first snapshot (584 words, html) |
+| MA | [Massachusetts DOR withholding tax forms (new Circular M editions are listed here)](https://www.mass.gov/lists/dor-withholding-tax-forms) | read with a headless browser |
 | MD | [Maryland Comptroller (marylandtaxes.gov): home (announcements)](https://www.marylandtaxes.gov/) | -> https://www.marylandcomptroller.gov/ |
 | MD | [Maryland Comptroller: business taxes](https://www.marylandtaxes.gov/business/index.php) | -> https://www.marylandcomptroller.gov/businesses/tax-services.html |
 | MD | [Montgomery County, MD tipped-employee cash wage ($4.00/hr, Montgomery County Code Sec. 27-](https://www.montgomerycountymd.gov/humanrights/min-wage.html) | -> https://www.montgomerycountymd.gov/office-human-rights |
-| ME | [City of Portland, Maine minimum wage -- November 2025 voter-approved schedule](https://www.portlandmaine.gov/1016/Minimum-Wage) | read with a headless browser; a one-off difference the confirming fetch didn't reproduce |
+| ME | [City of Portland, Maine minimum wage -- November 2025 voter-approved schedule](https://www.portlandmaine.gov/1016/Minimum-Wage) | read with a headless browser |
 | MI | [City of Saginaw — What is the tax rate for City of Saginaw Income Tax? (FAQ)](https://www.saginaw-mi.com/FAQ.aspx?QID=131) | -> https://www.saginaw-mi.com/m/faq?cat=24#question-131 |
 | MI | [Revenue Administrative Bulletin 1988-27 — Section 125 cafeteria plan benefits excluded fro](https://michigan.gov/treasury/0,4679,7-121-44402_44415_44416-7351--,00.html) | -> https://www.michigan.gov/en/treasury/reference/rab/content/1988/revenue-administrative-bulletin-1988-27 |
 | MN | [Minnesota Department of Labor and Industry -- Minimum wage in Minnesota](https://www.dli.mn.gov/business/employment-practices/minimum-wage-minnesota) | -> https://www.dli.mn.gov/minwage |
@@ -1720,7 +514,7 @@ These still work but redirect elsewhere; consider updating the URL in data/ or c
 | NC | [Form NC-BN, Request to Close Tax Account (linked from NCDOR -- Withholding Tax Frequently ](https://www.ncdor.gov/documents/nc-bn-out-business-notification) | -> https://www.ncdor.gov/taxes-forms/sales-and-use-tax/sales-and-use-tax-forms-and-certificates/miscellaneous-forms/nc-bn-request-close-tax-account |
 | NC | [Form NC-BR (linked from NCDOR -- Withholding Tax Frequently Asked Question)](https://www.ncdor.gov/documents/form-nc-br-webfill-business-registration-application-income-tax-withholding-sales-and-use-tax-and) | -> https://www.ncdor.gov/taxes-forms/sales-and-use-tax/sales-and-use-tax-forms-and-certificates/sales-and-use-tax-registration-applications/nc-br-business-regis |
 | NC | [NC-30, North Carolina Income Tax Withholding Tables and Instructions f (linked from NCDOR ](https://www.ncdor.gov/documents/2017-income-tax-withholding-tables-and-instructions-employers) | -> https://www.ncdor.gov/taxes-forms/withholding-tax/withholding-tax-forms-and-instructions/nc-30-income-tax-withholding-tables-and-instructions-employers |
-| NC | [NCDOR -- Withholding Tax Frequently Asked Questions](https://www.ncdor.gov/withholding-tax-frequently-asked-questions) | 0 lines added, 25 removed (link lists / headlines only) |
+| NC | [NCDOR -- Withholding Tax Frequently Asked Questions](https://www.ncdor.gov/withholding-tax-frequently-asked-questions) | -> https://www.ncdor.gov/taxes-forms/withholding-tax/withholding-tax-frequently-asked-questions |
 | NC | [Publication NC-30 (linked from NCDOR -- Withholding Tax Frequently Asked Question)](https://www.ncdor.gov/documents/income-tax-withholding-tables-and-instructions-employers) | -> https://www.ncdor.gov/taxes-forms/withholding-tax/withholding-tax-forms-and-instructions/nc-30-income-tax-withholding-tables-and-instructions-employers |
 | NE | [Biweekly Payroll Period (linked from Nebraska withholding)](https://revenue.nebraska.gov/sites/revenue.nebraska.gov/files/doc/business/Cir_En_2026/2027_biweekly.pdf) | -> https://revenue.nebraska.gov/sites/default/files/doc/business/Cir_En_2026/2027_biweekly.pdf |
 | NE | [Daily Payroll Period (linked from Nebraska withholding)](https://revenue.nebraska.gov/sites/revenue.nebraska.gov/files/doc/business/Cir_En_2026/2027_daily.pdf) | -> https://revenue.nebraska.gov/sites/default/files/doc/business/Cir_En_2026/2027_daily.pdf |
@@ -1737,11 +531,12 @@ These still work but redirect elsewhere; consider updating the URL in data/ or c
 | NE | [Required Special Income Tax Withholding Procedures (linked from Nebraska withholding)](https://revenue.nebraska.gov/sites/revenue.nebraska.gov/files/doc/business/Cir_En_2026/2027_letter_only.pdf) | -> https://revenue.nebraska.gov/sites/default/files/doc/business/Cir_En_2026/2027_letter_only.pdf |
 | NE | [Semimonthly Payroll Period (linked from Nebraska withholding)](https://revenue.nebraska.gov/sites/revenue.nebraska.gov/files/doc/business/Cir_En_2026/2027_semimonthly.pdf) | -> https://revenue.nebraska.gov/sites/default/files/doc/business/Cir_En_2026/2027_semimonthly.pdf |
 | NE | [Weekly Payroll Period (linked from Nebraska withholding)](https://revenue.nebraska.gov/sites/revenue.nebraska.gov/files/doc/business/Cir_En_2026/2027_weekly.pdf) | -> https://revenue.nebraska.gov/sites/default/files/doc/business/Cir_En_2026/2027_weekly.pdf |
+| NM | [New Mexico Taxation and Revenue: news](https://www.tax.newmexico.gov/news/) | 1 lines added, 0 removed; 1 links added, 0 removed |
 | NM | [Texas Workforce Commission cross-reference for New Mexico UI figures -- New Mexico DWS 'Ho](https://www.dws.state.nm.us/Unemployment/Unemployment-for-a-Business/Unemployment-Insurance-Tax-Information/How-UI-Tax-Rates-Are-Calculated) | -> https://www.dws.nm.gov/Unemployment/Unemployment-for-a-Business/Unemployment-Insurance-Tax-Information/How-UI-Tax-Rates-Are-Calculated |
 | NY | [DOL -- Employer Contribution Rate Table](https://dol.ny.gov/employer-contribution-rate-table) | -> https://dol.ny.gov/bizserve/ui/prg/rate/ratetables |
 | NY | [New York State Department of Labor -- Home Care Aide Minimum Wage Fact Sheet (P105)](https://dol.ny.gov/home-care-aide-minimum-wage-fact-sheet-p105) | -> https://dol.ny.gov/system/files/documents/2024/12/p105-home-health-aide-10-23-24.pdf |
 | NY | [New York State Department of Labor -- Minimum Wage (rates effective 01/01/2026)](https://dol.ny.gov/minimum-wage-0) | -> https://dol.ny.gov/minimum-wage |
-| NY | [fact sheet PDF (linked from IRS -- Determining if an employer is an applicable)](http://www.treasury.gov/press-center/press-releases/Documents/Fact%20Sheet%20021014.pdf) | 4 lines added, 5 removed |
+| NY | [fact sheet PDF (linked from IRS -- Determining if an employer is an applicable)](http://www.treasury.gov/press-center/press-releases/Documents/Fact%20Sheet%20021014.pdf) | 5 lines added, 4 removed |
 | OH | [Combined Form IT 4 — Employee's Withholding Exemption Certificate (post-2020-12-07 combine](https://tax.ohio.gov/static/forms/employer_withholding/generic/wth-it4-combined-fi.pdf) | -> https://dam.assets.ohio.gov/image/upload/tax.ohio.gov/forms/employer_withholding/generic/wth-it4-combined-fi.pdf |
 | OH | [Excel File Generator Tool (linked from Ohio Department of Taxation: municipal income tax )](https://tax.ohio.gov/static/muni-net-profit/ascii%20and%20xml/oh%20muni%20ascii%20dev%20v017%202_19_2020.xls) | -> https://dam.assets.ohio.gov/raw/upload/tax.ohio.gov/muni-net-profit/ascii%20and%20xml/oh%20muni%20ascii%20dev%20v017%202_19_2020.xls |
 | OH | [MNP10 Tax Return (linked from Ohio Department of Taxation: municipal income tax )](https://tax.ohio.gov/static/muni-net-profit/ascii%20and%20xml/ascii%20-%20mnp10%20return%208-21-18.xlsx) | -> https://dam.assets.ohio.gov/raw/upload/tax.ohio.gov/muni-net-profit/ascii%20and%20xml/ascii%20-%20mnp10%20return%208-21-18.xlsx |
@@ -1750,14 +545,12 @@ These still work but redirect elsewhere; consider updating the URL in data/ or c
 | OH | [Ohio Department of Taxation: municipal income tax (state page for municipalities and emplo](https://tax.ohio.gov/business/municipalities) | -> https://tax.ohio.gov/business/municipal-net-profit-tax |
 | OH | [Ohio Dept of Taxation: school district income tax list](https://tax.ohio.gov/static/tax_analysis/tax_data_series/school_district_data/SDIT_LIST.pdf) | -> https://dam.assets.ohio.gov/image/upload/tax.ohio.gov/tax_analysis/tax_data_series/school_district_data/SDIT_LIST.pdf |
 | OH | [Ohio Form IT 4NR — Employee's Statement of Residency in a Reciprocity State (Rev. 5/07), O](https://tax.ohio.gov/static/forms/employer_withholding/generic/wth_it4nr.pdf) | -> https://dam.assets.ohio.gov/image/upload/tax.ohio.gov/forms/employer_withholding/generic/wth_it4nr.pdf |
-| OR | [Oregon Department of Revenue: news](https://www.oregon.gov/dor/news/Pages/default.aspx) | 30 lines added, 29 removed; 6 links added, 4 removed |
-| PA | [PA Department of Revenue -- Employer Withholding (reciprocal agreements)](https://www.pa.gov/en/agencies/revenue/resources/tax-types-and-information/employer-withholding.html) | 1 lines added, 0 removed (link lists / headlines only) |
-| WI | [2026 Tax Rate Schedule for Employers (DWD, full Schedule D reserve-percentage rate table)](https://dwd.wisconsin.gov/ui/employers/taxrates.htm) | read with a headless browser; first snapshot (821 words, html) |
-| WI | [Wis. Stat. § 71.03(13) — 'Wisconsin adjusted gross income' defined](https://docs.legis.wisconsin.gov/document/statutes/71.03) | first snapshot (5077 words, html) |
-| WI | [Wis. Stat. § 812.34 — 80% of disposable earnings exempt from garnishment (i.e. 20% reachab](https://docs.legis.wisconsin.gov/document/statutes/812.34) | first snapshot (2983 words, html) |
-| WV | [West Virginia State Tax Department: home page (news and notices)](https://tax.wv.gov/) | 2 lines added, 0 removed; 1 links added, 0 removed |
+| OR | [Oregon Department of Revenue: news](https://www.oregon.gov/dor/news/Pages/default.aspx) | 44 lines added, 44 removed; 9 links added, 10 removed |
+| PA | [PA Department of Revenue -- Employer Withholding (reciprocal agreements)](https://www.pa.gov/en/agencies/revenue/resources/tax-types-and-information/employer-withholding.html) | -> https://www.pa.gov/agencies/revenue/resources/tax-types-and-information/employer-withholding |
+| WI | [2026 Tax Rate Schedule for Employers (DWD, full Schedule D reserve-percentage rate table)](https://dwd.wisconsin.gov/ui/employers/taxrates.htm) | read with a headless browser |
+| WV | [West Virginia State Tax Department: home page (news and notices)](https://tax.wv.gov/) | -> https://tax.wv.gov/Pages/default.aspx |
 
-## Sites that block automated checks (34)
+## Sites that block automated checks (36)
 
 These can't be watched by a script (bot protection or JavaScript-only pages). Check them by hand now and then, or find the same document at an address that allows it.
 
@@ -1766,7 +559,6 @@ These can't be watched by a script (bot protection or JavaScript-only pages). Ch
 | Jurisdiction | Source | Detail |
 |---|---|---|
 | AL | [City of Birmingham -- Employers Return of Occupational Tax Withheld](https://birminghamal.hdlgov.com/base64files/TAXES_FORM_4.pdf) | HTTP 403: the site refuses automated requests; a real browser was refused too |
-| AL | [City of Fairfield -- Ordinance 1019, Occupational Tax](https://cityoffairfieldal.org/wp-content/uploads/2025/02/Ordinance-1019-Occupational-Tax_rotated.pdf) | HTTP 429: the site refuses automated requests; a real browser was refused too |
 | AL | [Rainbow City -- Form G-1 (Rev 12/20), occupational license fee return](https://www.rbcalabama.com/download/revenue-g-1/?wpdmdl=730&masterkey=60c8bce41072f) | HTTP 403: the site refuses automated requests; a real browser was refused too |
 | AR | [Arkansas Department of Labor and Licensing -- Minimum Wage and Overtime](https://labor.arkansas.gov/labor/labor-standards/minimum-wage-and-overtime/) | HTTP 403: the site refuses automated requests; a real browser was refused too |
 | AZ | [UIT-0603A (FY26), Unemployment Insurance Tax Rate Chart](https://des.az.gov/sites/default/files/dl/UIT-0603A_FY26.pdf) | HTTP 403: the site refuses automated requests; a real browser was refused too |
@@ -1791,6 +583,7 @@ These can't be watched by a script (bot protection or JavaScript-only pages). Ch
 | KY | [City of Simpsonville Code of Ordinances Sec. 110.27](https://codelibrary.amlegal.com/codes/simpsonville/latest/simpsonville_ky/0-0-0-6803) | HTTP 403: the site refuses automated requests; a real browser was refused too |
 | MO | [Kansas City, MO: earnings tax](https://www.kcmo.gov/city-hall/departments/finance/earnings-tax) | HTTP 403: the site refuses automated requests; a real browser was refused too |
 | MO | [Kansas City, MO: tax guide for non-resident businesses (employer withholding of the earnin](https://www.kcmo.gov/city-hall/departments/finance/tax-home/tax-guides/tax-guide-for-non-resident-businesses) | HTTP 403: the site refuses automated requests; a real browser was refused too |
+| NJ | [City of Newark Q1 2026 Payroll Tax Booklet](https://www.newarknj.gov/DocumentCenter/View/2741/Payroll-Tax-Booklet-2026-PDF) | read with a browser last time; a real browser was refused too |
 | NJ | [HHS/ASPE 2026 Poverty Guidelines for the 48 Contiguous States and DC — household of 1: $15](https://aspe.hhs.gov/topics/poverty-economic-mobility/poverty-guidelines) | HTTP 403: the site refuses automated requests; a real browser was refused too |
 | NM | [City of Las Cruces -- Official Notice, Minimum Wage Ordinance (2026)](https://lascruces.gov/wp-content/uploads/2025/09/MinimumWageEng26.pdf) | HTTP 403: the site refuses automated requests; a real browser was refused too |
 | NY | [NY Department of Financial Services -- COBRA and Premium Assistance](https://www.dfs.ny.gov/consumers/health_insurance/cobra_and_premium_assistance) | HTTP 403: the site refuses automated requests; a real browser was refused too |
@@ -1799,15 +592,18 @@ These can't be watched by a script (bot protection or JavaScript-only pages). Ch
 | NY | [NY.gov -- New York State Paid Sick Leave FAQ](https://www.ny.gov/sites/default/files/atoms/files/PSL_FAQ_PaidSickLeaveFAQ.pdf) | HTTP 403: the site refuses automated requests; a real browser was refused too |
 | NY | [NYS Paid Family Leave -- 2025 contribution rate 0.388%, maximum annual contribution $354.5](https://paidfamilyleave.ny.gov/2025) | HTTP 403: the site refuses automated requests; a real browser was refused too |
 | OH | [Village of College Corner income tax ordinance (1%) and repeal resolution](https://villageofcollegecorner.org/wp-content/uploads/2025/04/Rita-Repeal.pdf) | HTTP 403: the site refuses automated requests; a real browser was refused too |
+| OH | [Village of Georgetown -- Income Tax](https://georgetownohio.gov/income-tax/) | read with a browser last time; a real browser was refused too |
+| US | [IRS draft tax forms: payroll forms only (W-4, W-4P/R, Pub 15/15-T, 940/941/944, W-2/W-3)](https://www.irs.gov/draft-tax-forms) | read with a browser last time; a real browser was refused too |
 
 </details>
 
-## Unchanged (1002)
+## Unchanged (1033)
 
 <details><summary>Show all</summary>
 
 - AL - [Alabama DOR withholding tax](https://www.revenue.alabama.gov/individual-corporate/withholding-tax-2/) (last changed: 2026-10-15)
 - AL - [Alabama DOR: local tax (rates and codes for cities and counties)](https://www.revenue.alabama.gov/local-tax/) (last changed: 2026-10-18)
+- AL - [Alabama DOR: news](https://www.revenue.alabama.gov/news) (last changed: 2026-10-22)
 - AL - [Alabama Department of Labor -- 2026 UI wage base and rate figures (cross-source)](https://www2.labor.alabama.gov/) (last changed: 2026-10-17)
 - AL - [Alabama Department of Revenue -- NOTICE: Overtime Exemption Ends June 30, 2025](https://www.revenue.alabama.gov/notice-overtime-exemption-ends-june-30-2025/) (last changed: 2026-10-16)
 - AL - [Alabama League of Municipalities: municipal tax rates (occupational tax survey list)](https://almonline.org/TaxRates.aspx) (last changed: 2026-10-20)
@@ -1816,6 +612,7 @@ These can't be watched by a script (bot protection or JavaScript-only pages). Ch
 - AL - [City of Glencoe -- Form G-1, Employer's Monthly/Quarterly Return of Occupational Tax Withheld (Ordin](https://cityofglencoe.org/wp-content/uploads/2021/09/Glencoe-Occupational-Tax-Form.pdf) (last changed: 2026-10-20)
 - AL - [City of Irondale -- Occupational License Fee](https://cityofirondaleal.gov/occupational-license-fee/) (last changed: 2026-09-30)
 - AL - [City of Leeds -- Occupational Tax](https://www.leedsalabama.gov/471/Occupational-Tax) (last changed: 2026-09-30)
+- AL - [City of Opelika -- announcement of the occupational tax cut](https://www.opelika-al.gov/CivicAlerts.aspx?AID=1092) (last changed: 2026-10-22)
 - AL - [City of Southside -- Occupational Tax Return (06/30/2022)](https://cityofsouthside.com/wp-content/uploads/2023/02/Occupational-Tax-Return.pdf) (last changed: 2026-10-20)
 - AL - [City of Tarrant -- occupational license fee ordinance (Municode)](https://mcclibraryfunctions.azurewebsites.us/api/ordinanceDownload/10178/1047327/pdf) (last changed: 2026-09-30)
 - AL - [Download a pdf of this notice (linked from Alabama Department of Revenue -- NOTICE: Overtime )](https://www.revenue.alabama.gov/wp-content/uploads/2025/06/250529_NOTICE_IT_OvertimeExemptionSunset.pdf) (last changed: 2026-10-20)
@@ -1836,6 +633,7 @@ These can't be watched by a script (bot protection or JavaScript-only pages). Ch
 - AL - [Operating a Business in Alabama: Resources for Starting a New Business (linked from Alabama League o](https://www.revenue.alabama.gov/wp-content/uploads/2022/06/220616_BEST_ResourcesStartingNewBusiness.pdf) (last changed: 2026-10-20)
 - AL - [Ordinance 2018-10c (linked from City of Irondale -- Occupational License Fee)](https://cityofirondaleal.gov/wp-content/uploads/Ordinance-2018-10c.pdf) (last changed: 2026-10-20)
 - AL - [Ordinance 2022-14 – Amendment to the Occupational License Fee Ordinanc (linked from City of Irondale](https://cityofirondaleal.gov/wp-content/uploads/Ordinance-2022-14-Amendment-to-the-Occupational-License-Fee-Ordinance.pdf) (last changed: 2026-10-20)
+- AL - [Town of Notasulga -- Occupational License (Ordinance No. 97-11-01)](https://notasulgaal.com/occupational-license) (last changed: 2026-10-22)
 - AL - [USDA National Finance Center -- Alabama State Income Tax Withholding (NFC-22-1666037747, still the c](https://help.nfc.usda.gov/bulletins/2022/1666037747.htm?taxmap=true) (last changed: 2026-09-24)
 - AL - [Withholding Tax Tables and Instructions for Employers and Withholding Agents (Rev. 01/26)](https://www.revenue.alabama.gov/wp-content/uploads/2026/01/whbooklet_0126.pdf) (last changed: 2026-09-24)
 - AL - [here (linked from Alabama League of Municipalities: municipal tax ra)](https://almonline.org/Assets/Files/TrainingAndResources/TaxRates/Revformc-PDF.pdf) (last changed: 2026-10-20)
@@ -1862,8 +660,11 @@ These can't be watched by a script (bot protection or JavaScript-only pages). Ch
 - AZ - [Arizona DOR: news](https://azdor.gov/news) (last changed: 2026-10-20)
 - AZ - [Arizona Form A-4 (2025)](https://azdor.gov/sites/default/files/document/FORMS_WITHHOLDING_2025_A-4_f.pdf) (last changed: 2026-10-20)
 - AZ - [Arizona Withholding Tax Ruling (WTR) 16-4 (linked from Arizona DOR withholding)](https://azdor.gov/sites/default/files/2023-03/RULINGS_WTHOLD_2016_wtr-16-4.pdf) (last changed: 2026-10-20)
+- AZ - [City of Tucson -- Tucson Minimum Wage Act (Proposition 206, November 2021)](https://www.tucsonaz.gov/Departments/Business-Services-Department/Tucson-Minimum-Wage-Act) (last changed: 2026-10-22)
 - AZ - [NAICS Code and Descriptions (linked from Arizona DOR withholding)](https://www.aztaxes.gov/PDF/NAICS_11_24_2015.pdf) (last changed: 2026-10-20)
 - CA - [2026 Withholding Schedules - Method A – Wage Bracket Table Method (PDF (linked from California EDD r](https://edd.ca.gov/siteassets/files/pdf_pub_ctr/26metha.pdf) (last changed: 2026-10-20)
+- CA - [Aviso Legal (Spanish) FY25-26 (linked from City of Santa Monica -- Minimum Wage)](https://www.santamonica.gov/media/Minimum_Wage/Notifications/25-26%20Notices/2025-26__Notification_Spanish%202025-09-08.pdf) (last changed: 2026-10-22)
+- CA - [Aviso Legal (Spanish) FY26-27 (linked from City of Santa Monica -- Minimum Wage)](https://www.santamonica.gov/media/Minimum_Wage/Notifications/26-27%20Notices/2026-27_Notification_Spanish%202026-06-09.pdf) (last changed: 2026-10-22)
 - CA - [Cal. Civ. Proc. Code § 706.050 — ordinary garnishment limited to the lesser of 20% of disposable ear](https://selfhelp.courts.ca.gov/guide-earnings-withholding-orders-employers) (last changed: 2026-10-20)
 - CA - [California DE 44 employer's guide](https://edd.ca.gov/siteassets/files/pdf_pub_ctr/de44.pdf) (last changed: 2026-10-20)
 - CA - [California Department of Industrial Relations -- Fast Food Minimum Wage Frequently Asked Questions](https://www.dir.ca.gov/dlse/Fast-Food-Minimum-Wage-FAQ.htm) (last changed: 2026-10-20)
@@ -1879,20 +680,31 @@ These can't be watched by a script (bot protection or JavaScript-only pages). Ch
 - CA - [City of Santa Monica -- Minimum Wage](https://www.santamonica.gov/minimum-wage) (last changed: 2026-10-20)
 - CA - [EDD -- California Withholding Schedules for 2025, Method B (Exact Calculation Method)](https://edd.ca.gov/siteassets/files/pdf_pub_ctr/25methb.pdf) (last changed: 2026-10-20)
 - CA - [Enforcement Guide (linked from City of Santa Monica -- Minimum Wage)](https://www.santamonica.gov/Media/Minimum_Wage/MinimumWage_Enforcement-Employees.pdf) (last changed: 2026-10-20)
+- CA - [Enforcement Guide (linked from City of Santa Monica -- Minimum Wage)](https://www.santamonica.gov/Media/Minimum_Wage/MinimumWage_Enforcement-Businesses.pdf) (last changed: 2026-10-22)
+- CA - [FAQ (English) (linked from City of Santa Monica -- Minimum Wage)](https://santamonica.gov/media/Minimum_Wage/MinimumWageFAQ_English2023.pdf) (last changed: 2026-10-22)
 - CA - [FAQ (Spanish) (linked from City of Santa Monica -- Minimum Wage)](https://santamonica.gov/media/Minimum_Wage/MinimumWageFAQ_Spanish2023.pdf) (last changed: 2026-10-20)
 - CA - [Form DE 4, Employee's Withholding Allowance Certificate, Rev. 56 (1-26)](https://edd.ca.gov/siteassets/files/pdf_pub_ctr/de4.pdf) (last changed: 2026-10-20)
 - CA - [Health Care Minimum Wage Supplement to the minimum wage order (linked from California Department of ](https://www.dir.ca.gov/iwc/MW-2025-SUPPLEMENT-health-care.pdf) (last changed: 2026-10-20)
+- CA - [Hotel Wage Fact Sheet (linked from City of Santa Monica -- Minimum Wage)](https://www.santamonica.gov/Media/Minimum_Wage/SantaMonicaWageLaw-Hotels.pdf) (last changed: 2026-10-22)
+- CA - [Impressum [German] (linked from City of Santa Monica -- Minimum Wage)](https://www.santamonica.gov/media/Minimum_Wage/Notifications/26-27%20Notices/2026-27_Notification_German.pdf) (last changed: 2026-10-22)
 - CA - [Information Sheet: California System of Experience Rating (DE 231Z) (P (linked from California EDD r](https://edd.ca.gov/siteassets/files/pdf_pub_ctr/de231z.pdf) (last changed: 2026-10-20)
 - CA - [Information Sheet: Taxability of Employee Benefits (DE 231EB) Rev. 12 (6-17)](https://edd.ca.gov/siteassets/files/pdf_pub_ctr/de231eb.pdf) (last changed: 2026-10-20)
 - CA - [Information Sheet: Types of Payments (DE 231TP) Rev. 1 (6-16)](https://edd.ca.gov/siteassets/files/pdf_pub_ctr/de231tp.pdf) (last changed: 2026-10-20)
+- CA - [Legal Notice FY25-26 (linked from City of Santa Monica -- Minimum Wage)](https://www.santamonica.gov/media/Minimum_Wage/Notifications/25-26%20Notices/2025-26__Notification_English%202025-09-08.pdf) (last changed: 2026-10-22)
+- CA - [Legal Notice FY26-27 (linked from City of Santa Monica -- Minimum Wage)](https://www.santamonica.gov/media/Minimum_Wage/Notifications/26-27%20Notices/2026-27_Notification_English%202026-06-09.pdf) (last changed: 2026-10-22)
+- CA - [Legal na Paunawa [Tagalog] (linked from City of Santa Monica -- Minimum Wage)](https://www.santamonica.gov/media/Minimum_Wage/Notifications/26-27%20Notices/2026-27_Notification_Tagalog.pdf) (last changed: 2026-10-22)
 - CA - [Method A – Wage Bracket Table Method (PDF) (linked from California EDD rates and withholding)](https://edd.ca.gov/siteassets/files/pdf_pub_ctr/25metha.pdf) (last changed: 2026-10-20)
 - CA - [Method A – Wage Bracket Table Method (PDF) (linked from California EDD rates and withholding)](https://edd.ca.gov/siteassets/files/pdf_pub_ctr/23metha.pdf) (last changed: 2026-10-20)
 - CA - [Method A – Wage Bracket Table Method (PDF) (linked from California EDD rates and withholding)](https://edd.ca.gov/siteassets/files/pdf_pub_ctr/24metha.pdf) (last changed: 2026-10-20)
 - CA - [Method B – Exact Calculation Method (PDF) (linked from California EDD rates and withholding)](https://edd.ca.gov/siteassets/files/pdf_pub_ctr/24methb.pdf) (last changed: 2026-10-20)
 - CA - [Method B – Exact Calculation Method (PDF) (linked from California EDD rates and withholding)](https://edd.ca.gov/siteassets/files/pdf_pub_ctr/23methb.pdf) (last changed: 2026-10-20)
+- CA - [Paid Sick Leave Checklist (linked from City of Santa Monica -- Minimum Wage)](https://www.santamonica.gov/Media/Minimum_Wage/PaidSickLeave-ChecklistforBusinesses.pdf) (last changed: 2026-10-22)
+- CA - [Paid Sick Leave Tips (linked from City of Santa Monica -- Minimum Wage)](https://www.santamonica.gov/Media/Minimum_Wage/PaidSickLeaveTips-Employees.pdf) (last changed: 2026-10-22)
+- CA - [Paid Sick Leave: Must do/ Should do (linked from City of Santa Monica -- Minimum Wage)](https://www.santamonica.gov/Media/Minimum_Wage/MinimumWagePostcard_MustShouldDo.pdf) (last changed: 2026-10-22)
 - CA - [Rules and Regulations (linked from City of Santa Monica -- Minimum Wage)](https://www.santamonica.gov/Media/Minimum_Wage/City%20of%20Santa%20Monica%20Minimum%20Wage%20Rules%20and%20Regulations-1.pdf) (last changed: 2026-10-20)
 - CA - [Supplement for Fast Food Restaurant Employees (linked from California Department of Industrial Relat](https://www.dir.ca.gov/iwc/MW-2024-FF-SUPPLEMENT.pdf) (last changed: 2026-10-20)
 - CA - [Tax Rates, Wage Limits, and Value of Meals and Lodging (DE 3395) (PDF) (linked from California EDD r](https://edd.ca.gov/siteassets/files/pdf_pub_ctr/de3395.pdf) (last changed: 2026-10-20)
+- CA - [Thông báo pháp lý [Vietnamese] (linked from City of Santa Monica -- Minimum Wage)](https://www.santamonica.gov/media/Minimum_Wage/Notifications/26-27%20Notices/2026-27_Notification_Vietnamese.pdf) (last changed: 2026-10-22)
 - CA - [Unincorporated Los Angeles County minimum wage, July 1, 2025 step ($17.81)](https://dcba.lacounty.gov/newsroom/new-worker-protections-for-july-1-2025/) (last changed: 2026-10-20)
 - CA - [Wage Order 5 (linked from California Department of Industrial Relations -- F)](https://www.dir.ca.gov/IWC/IWCArticle05.pdf) (last changed: 2026-10-20)
 - CA - [Wage Order 7 (linked from California Department of Industrial Relations -- F)](https://www.dir.ca.gov/IWC/IWCArticle07.pdf) (last changed: 2026-10-20)
@@ -1910,7 +722,11 @@ These can't be watched by a script (bot protection or JavaScript-only pages). Ch
 - CA - [here (linked from California Department of Industrial Relations — st)](https://www.dir.ca.gov/dlse/Waiver-Application.pdf) (last changed: 2026-10-20)
 - CA - [list (linked from California Department of Industrial Relations -- H)](https://hcai.ca.gov/wp-content/uploads/2024/10/SB-525-Fact-Sheet-HCAI-Hospital-Lists-10_10_24.pdf) (last changed: 2026-10-20)
 - CA - [the application is available here (linked from California Department of Industrial Relations -- H)](https://www.dir.ca.gov/dlse/Waiver-Application.pdf) (last changed: 2026-10-20)
-- CA - [法律聲明 [Traditional Chinese] (linked from City of Santa Monica -- Minimum Wage)](https://www.santamonica.gov/media/Minimum_Wage/Notifications/26-27%20Notices/2026-27_Notification_Traditional_Chinese.pdf) (last changed: 2026-10-20)
+- CA - [Официальное уведомление [Russian] (linked from City of Santa Monica -- Minimum Wage)](https://www.santamonica.gov/media/Minimum_Wage/Notifications/26-27%20Notices/2026-27_Notification_Russian.pdf) (last changed: 2026-10-22)
+- CA - [Իրավական ծանուցում [Armenian] (linked from City of Santa Monica -- Minimum Wage)](https://www.santamonica.gov/media/Minimum_Wage/Notifications/26-27%20Notices/2026-27_Notification_Armenian.pdf) (last changed: 2026-10-22)
+- CA - [คำบอกกล่าวทางกฎหมาย [Thai] (linked from City of Santa Monica -- Minimum Wage)](https://www.santamonica.gov/media/Minimum_Wage/Notifications/26-27%20Notices/2026-27_Notification_Thai.pdf) (last changed: 2026-10-22)
+- CA - [法律声明 [Simplified Chinese] (linked from City of Santa Monica -- Minimum Wage)](https://www.santamonica.gov/media/Minimum_Wage/Notifications/26-27%20Notices/2026-27_Notification_Simplified_Chinese.pdf) (last changed: 2026-10-22)
+- CA - [법적 고지 [Korean] (linked from City of Santa Monica -- Minimum Wage)](https://www.santamonica.gov/media/Minimum_Wage/Notifications/26-27%20Notices/2026-27_Notification_Korean.pdf) (last changed: 2026-10-22)
 - CO - [Boulder County -- Local Minimum Wage](https://bouldercounty.gov/departments/commissioners/local-minimum-wage/) (last changed: 2026-10-20)
 - CO - [Boulder District Attorney’s website (linked from Boulder County -- Local Minimum Wage)](https://assets.bouldercounty.gov/wp-content/uploads/2023/11/Wage-Theft-English-2022.pdf) (last changed: 2026-10-20)
 - CO - [City and County of Denver -- Denver Local Minimum Wage Adjusts to $19.29 per Hour for 2026](https://www.denvergov.org/Government/Agencies-Departments-Offices/Agencies-Departments-Offices-Directory/Department-of-Finance/News/2025/Denver-Local-Minimum-Wage-Adjusts-to-19.29-per-Hour-for-2026) (last changed: 2026-10-20)
@@ -1970,7 +786,6 @@ These can't be watched by a script (bot protection or JavaScript-only pages). Ch
 - DE - [Daily (linked from Delaware withholding forms and guide)](https://revenuefiles.delaware.gov/docs/daily14.pdf) (last changed: 2026-10-20)
 - DE - [Delaware Department of Labor -- Employer Services / Unemployment Insurance Tax (Merit Rate Table)](https://labor.delaware.gov/divisions/unemployment-insurance/employer-services/) (last changed: 2026-10-20)
 - DE - [Delaware Division of Revenue -- Employer's Guide (Withholding Tables)](https://revenue.delaware.gov/employers-guide-withholding-tables/) (last changed: 2026-10-20)
-- DE - [Delaware Division of Revenue: home (announcements)](https://revenue.delaware.gov/) (last changed: 2026-10-20)
 - DE - [Delaware House Bill 13 (153rd General Assembly) + House Substitute No. 2 for HB13 -- bracket-restruc](https://legis.delaware.gov/BillDetail?LegislationId=141813) (last changed: 2026-10-20)
 - DE - [Delaware withholding forms and guide](https://revenue.delaware.gov/employers-guide-withholding-regulations-employers-duties/) (last changed: 2026-10-20)
 - DE - [Employer Handbook (linked from Delaware Department of Labor -- Employer Services )](https://laborfiles.delaware.gov/main/dui/handbook/UI%20Employer%20Handbook.pdf) (last changed: 2026-10-20)
@@ -2013,6 +828,7 @@ These can't be watched by a script (bot protection or JavaScript-only pages). Ch
 - GA - [Governor Brian Kemp -- press release, HB 463 signed 2026-05-11](https://gov.georgia.gov/press-releases/2026-05-11/gov-kemp-signs-legislation-lowering-taxes-and-supporting-economic-growth) (last changed: 2026-09-24)
 - GA - [Search for all Withholding Tax Forms (linked from Georgia DOR withholding)](https://dor.georgia.gov/documents/forms/type/withholding) (last changed: 2026-10-20)
 - GA - [USDA National Finance Center -- Georgia State Income Tax Withholding bulletin (2026)](https://help.nfc.usda.gov/bulletins/2026/1784643404.htm) (last changed: 2026-09-24)
+- HI - [Haw. Rev. Stat. § 652-1 — MARGINAL brackets on monthly disposable earnings: 5% of the first $100/mon](https://www.capitol.hawaii.gov/hrscurrent/Vol13_Ch0601-0676/HRS0652/HRS_0652-0001.htm) (last changed: 2026-10-22)
 - HI - [Hawaii DLIR Disability Compensation Division -- 2025 Maximum Weekly Wage Base and Maximum Weekly Ben](https://labor.hawaii.gov/dcd/files/2023/05/2025-Max-Weekly-Wage-Base-Rev-2025.03.pdf) (last changed: 2026-10-20)
 - HI - [Hawaii DOTAX withholding](https://tax.hawaii.gov/geninfo/a2_b2_4empl_whhold/) (last changed: 2026-10-20)
 - HI - [Hawaii Department of Taxation -- Booklet A, Employer's Tax Guide (Rev. 2025)](https://files.hawaii.gov/tax/news/pubs/25BkltA.pdf) (last changed: 2026-10-20)
@@ -2145,6 +961,7 @@ These can't be watched by a script (bot protection or JavaScript-only pages). Ch
 - IN - [Withholding Information for Part-Time Employees (linked from Indiana DOR withholding)](https://www.in.gov/dA/f205e0a637/ib52.pdf?language_id=1) (last changed: 2026-10-18)
 - IN - [electronic methods and options for filing Withholding (linked from Indiana DOR withholding)](https://www.in.gov/dA/8abea3ed05/dor-efile-methods-bulk.pdf?language_id=1) (last changed: 2026-10-18)
 - KS - [Form 200, Local Intangibles Tax Return (Rev. 9-23-25)](https://www.ksrevenue.gov/pdf/20026.pdf) (last changed: 2026-10-20)
+- KS - [K.S.A. § 60-2310 — wage garnishment: maximum part of earnings subject to garnishment is the lesser o](https://www.ksrevisor.gov/statutes/chapters/ch60/060_023_0010.html) (last changed: 2026-10-22)
 - KS - [KW-100, Kansas Withholding Tax Guide (Rev. 10-24) -- SUPPLEMENTAL WAGES section, page 8](https://ksrevenue.gov/pdf/kw100.pdf) (last changed: 2026-10-20)
 - KS - [Kansas Department of Revenue: press releases](https://www.ksrevenue.gov/pressreleases.html) (last changed: 2026-10-20)
 - KS - [Kansas withholding tax guide KW-100](https://www.ksrevenue.gov/pdf/kw100.pdf) (last changed: 2026-10-20)
@@ -2263,10 +1080,10 @@ These can't be watched by a script (bot protection or JavaScript-only pages). Ch
 - KY - [Kentucky DOR -- 2025 Form K-4](https://revenue.ky.gov/Documents/42A804%20(K-4)%20(2025).pdf) (last changed: 2026-09-30)
 - KY - [Kentucky DOR -- 2025 Kentucky Withholding Tax Formula](https://revenue.ky.gov/Forms/Withholding%20Computer%20Formula.pdf) (last changed: 2026-09-30)
 - KY - [Kentucky DOR -- Kentucky DOR Announces 2025 Standard Deduction](https://revenue.ky.gov/News/pages/kentucky-dor-announces-2025-standard-deduction.aspx) (last changed: 2026-09-30)
-- KY - [Kentucky DOR: news](https://revenue.ky.gov/News/Pages/default.aspx) (last changed: 2026-10-18)
 - KY - [Kentucky OUI Employer Guide to Unemployment Insurance 2026 (rate schedules, taxable wage base): ui.k](https://ui.ky.gov/Documents/KY-OUI_Employer%20Guide_2026.pdf) (last changed: 2026-10-18)
 - KY - [Kentucky Secretary of State: occupational tax districts (spreadsheet of every district)](https://web.sos.ky.gov/occupationaltax/) (last changed: 2026-09-24)
 - KY - [Kentucky Unemployment Insurance self-service site (employer notices)](https://ui.ky.gov/Redesign/home.aspx) (last changed: 2026-10-18)
+- KY - [Kentucky withholding](https://revenue.ky.gov/Business/Pages/Employer-Payroll-Withholding.aspx) (last changed: 2026-10-22)
 - KY - [License Fee Regulations – 5th edition – Issued Dec. 1, 2000 (linked from City of Lexington -- Occupa](https://content.lexingtonky.gov/sites/default/files/migrated-files/sites/default/files/2016-08/License%2520Fee%2520Regulations.pdf) (last changed: 2026-10-20)
 - KY - [Louisville Metro Revenue Commission -- W-1KJC Instructions and Louisville Metro Code Sec. 110.02](https://louisvilleky.gov/sites/default/files/2024-12/w-1kjc_instructions_2025.pdf) (last changed: 2026-09-24)
 - KY - [Need to update or cancel a business account? (linked from Kentucky withholding)](http://revenue.ky.gov/Forms/10A104.pdf) (last changed: 2026-10-18)
@@ -2315,7 +1132,11 @@ These can't be watched by a script (bot protection or JavaScript-only pages). Ch
 - LA - [R-1306 (1/26) -- Louisiana Withholding Tables and Formulas, effective on or after January 1, 2026](https://dam.ldr.la.gov/taxforms/1306-1-26.pdf) (last changed: 2026-10-20)
 - LA - [USDA National Finance Center -- Louisiana State Income Tax Withholding bulletin (2025)](https://help.nfc.usda.gov/bulletins/2025/1740487316.htm) (last changed: 2026-10-20)
 - MA - [Form M-4, Massachusetts Employee's Withholding Exemption Certificate (Rev. 11/19)](https://www.miltonma.gov/DocumentCenter/View/6586/Massachusetts-Withholding-Form--M-4) (last changed: 2026-10-20)
+- MA - [Mass. DOR -- Massachusetts 4% Surtax on Taxable Income](https://www.mass.gov/info-details/massachusetts-4-surtax-on-taxable-income) (last changed: 2026-10-22)
+- MA - [Massachusetts Circular M (2026, effective January 1)](https://www.mass.gov/doc/massachusetts-circular-m-income-tax-withholding-tables-at-50-effective-january-1-2026/download) (last changed: 2026-10-22)
 - MA - [Massachusetts Constitution, Article LXXXIX (Home Rule Amendment), Section 7 — Limitations on Local P](https://malegislature.gov/Laws/Constitution) (last changed: 2026-10-20)
+- MA - [Massachusetts DOR withholding tax forms (new Circular M editions are listed here)](https://www.mass.gov/lists/dor-withholding-tax-forms) (last changed: 2026-10-22)
+- MA - [Massachusetts Department of Revenue: home (news and notices)](https://www.mass.gov/orgs/massachusetts-department-of-revenue) (last changed: 2026-10-22)
 - MA - [Massachusetts General Laws Chapter 175M, Section 6 — PFML Contributions](https://malegislature.gov/Laws/GeneralLaws/PartI/TitleXXII/Chapter175M/Section6) (last changed: 2026-10-20)
 - MA - [Massachusetts General Laws Chapter 62B, Section 2 — Duty of employer to withhold](https://malegislature.gov/Laws/GeneralLaws/PartI/TitleIX/Chapter62B/Section2) (last changed: 2026-10-20)
 - MA - [USDA National Finance Center — Massachusetts State Income Tax Withholding (NFC-26-1769797447)](https://help.nfc.usda.gov/bulletins/2026/1769797447.htm) (last changed: 2026-10-20)
@@ -2353,6 +1174,7 @@ These can't be watched by a script (bot protection or JavaScript-only pages). Ch
 - ME - [Maine Revenue Services -- 2025 Withholding Tables for Individual Income Tax (revised October 2024)](https://www.maine.gov/revenue/sites/maine.gov.revenue/files/inline-files/25_wh_tab_instr.pdf) (last changed: 2026-10-20)
 - ME - [Maine Revenue Services — 2026 Withholding Tables, Revised August 2026 (26_wh_tab_instr_August2026.pd](https://www.maine.gov/revenue/sites/maine.gov.revenue/files/inline-files/26_wh_tab_instr_August2026.pdf) (last changed: 2026-10-20)
 - ME - [Maine Revenue Services — Withholding Tables for Individual Income Tax (2026)](https://www.maine.gov/revenue/sites/maine.gov.revenue/files/inline-files/26_wh_tab_instr.pdf) (last changed: 2026-10-20)
+- ME - [Maine Revenue Services: home (announcements)](https://www.maine.gov/revenue/) (last changed: 2026-10-22)
 - ME - [Maine withholding tables](https://www.maine.gov/revenue/taxes/income-estate-tax/employer-withholding) (last changed: 2026-10-20)
 - ME - [Service Provider Tax Repeal Notice (PDF) (linked from Maine Revenue Services: home (announcements))](https://www.maine.gov/revenue/sites/maine.gov.revenue/files/inline-files/SPT%20Repeal_Notice_FINAL_11212025_0.pdf) (last changed: 2026-10-20)
 - ME - [USDA National Finance Center — Maine State Income Tax Withholding (NFC-26-1771620053)](https://help.nfc.usda.gov/bulletins/2026/1771620053.htm) (last changed: 2026-10-20)
@@ -2363,9 +1185,6 @@ These can't be watched by a script (bot protection or JavaScript-only pages). Ch
 - MI - [5469 (Rev. 05-24) — 2025 City of Detroit Income Tax Withholding Guide (Treasury administers Detroit ](https://www.michigan.gov/taxes/-/media/Project/Websites/taxes/Forms/City-Withholding/TY2025/5469_ty2025.pdf) (last changed: 2026-09-24)
 - MI - [Application for State Real Estate Transfer Tax (SRETT) Refund (linked from Michigan Treasury: taxes ](https://www.michigan.gov/taxes/-/media/Project/Websites/treasury/Forms/Misc/2796.pdf) (last changed: 2026-10-18)
 - MI - [City of Saginaw — What is the tax rate for City of Saginaw Income Tax? (FAQ)](https://www.saginaw-mi.com/FAQ.aspx?QID=131) (last changed: 2026-10-20)
-- MI - [MCL 141.631 — City Income Tax Act, Sec. 31 (personal/dependency exemptions)](https://www.legislature.mi.gov/Laws/MCL?objectName=mcl-141-631) (last changed: 2026-09-26)
-- MI - [MCL 206.30 — retirement/pension income deductions (subsection (1)(f) etc.), the basis for MI taxable](https://www.legislature.mi.gov/Laws/MCL?objectName=MCL-206-30) (last changed: 2026-09-26)
-- MI - [MCL 206.703(2) — Every employer required under the Internal Revenue Code to withhold on an individua](https://www.legislature.mi.gov/Laws/MCL?objectName=mcl-206-703) (last changed: 2026-09-26)
 - MI - [MCL 600.4012 and Michigan's own garnishment procedure — tracks the federal CCPA floor (25%/30x-feder](https://www.legislature.mi.gov/Laws/MCL?objectName=mcl-600-4012) (last changed: 2026-10-18)
 - MI - [MI-W4 (Rev. 12-20) — Employee's Michigan Withholding Exemption Certificate](https://www.michigan.gov/-/media/Project/Websites/taxes/Forms/All-Years/MIW4.pdf) (last changed: 2026-09-24)
 - MI - [Michigan LEO/UIA — Taxable Wage Base FAQ](https://www.michigan.gov/leo/bureaus-agencies/uia/employers/forms/accordion/taxable-wage-base) (last changed: 2026-09-24)
@@ -2383,6 +1202,7 @@ These can't be watched by a script (bot protection or JavaScript-only pages). Ch
 - MN - [2026 Form W-4MN, Section 2 -- Exemption From Minnesota Withholding](https://www.revenue.state.mn.us/sites/default/files/2026-04/w-4mn.pdf) (last changed: 2026-10-20)
 - MN - [2026 Minnesota Withholding Tax Instructions and Tables (wh-inst-26)](https://www.revenue.state.mn.us/sites/default/files/2025-12/wh-inst-26.pdf) (last changed: 2026-10-20)
 - MN - [City of Minneapolis -- Minimum wage increases to $16.37 for all employers](https://www.minneapolismn.gov/news/2025/december/minimum-wage/) (last changed: 2026-10-20)
+- MN - [City of Saint Paul -- Minimum Wage Increases for Small and Micro Businesses (effective July 1, 2026)](https://www.stpaul.gov/news/city-saint-paul-minimum-wage-increases-small-and-micro-businesses) (last changed: 2026-10-22)
 - MN - [Form MWR, Minnesota Reciprocity Exemption /Affidavit of Residency (linked from Minnesota Department ](https://www.revenue.state.mn.us/sites/default/files/2025-12/mwr.pdf) (last changed: 2026-10-20)
 - MN - [Minn. R. 8002.0200 (administrative rule implementing 290.081's reciprocity exclusion)](https://www.revisor.mn.gov/rules/8002.0200/) (last changed: 2026-10-20)
 - MN - [Minn. Stat. § 268B.14 (Premium rates)](https://www.revisor.mn.gov/statutes/cite/268B.14) (last changed: 2026-10-20)
@@ -2411,6 +1231,7 @@ These can't be watched by a script (bot protection or JavaScript-only pages). Ch
 - MO - [Missouri Department of Revenue: news](https://dor.mo.gov/news/) (last changed: 2026-10-20)
 - MO - [Missouri unemployment insurance 2026 rate/wage-base reporting (Bloomberg Tax, Vensure, MO DOLIR's ow](https://labor.mo.gov/des/employers/tax-rates) (last changed: 2026-10-20)
 - MO - [Missouri withholding](https://dor.mo.gov/taxation/business/tax-types/withholding/) (last changed: 2026-10-20)
+- MO - [St. Louis: earnings tax department](https://www.stlouis-mo.gov/government/departments/collector/earnings-tax/index.cfm) (last changed: 2026-10-22)
 - MO - [St. Louis: employer withholding and payroll expense tax information](https://www.stlouis-mo.gov/government/departments/collector/earnings-tax/payroll-tax-info.cfm) (last changed: 2026-10-20)
 - MO - [W-10/P-10 Forms (Fillable) (linked from St. Louis: earnings tax department)](https://www.stlouis-mo.gov/government/departments/collector/earnings-tax/documents/p-10-w-10-form-fillable.cfm) (last changed: 2026-10-20)
 - MO - [W-3 Reconciliation (linked from St. Louis: employer withholding and payroll expens)](https://www.stlouis-mo.gov/government/departments/collector/earnings-tax/documents/w-3-form.cfm) (last changed: 2026-10-20)
@@ -2460,6 +1281,7 @@ These can't be watched by a script (bot protection or JavaScript-only pages). Ch
 - NC - [NC Division of Employment Security -- Tax Rate Information](https://www.des.nc.gov/employers/tax-rate-information) (last changed: 2026-10-20)
 - NC - [NC-30 (Web 11-25) -- 2026 Income Tax Withholding Tables and Instructions for Employers](https://www.ncdor.gov/income-tax-withholding-tables-and-instructions-employers/open) (last changed: 2026-10-20)
 - NC - [NC-30, North Carolina Income Tax Withholding Tables and Instructions f (linked from NCDOR -- Withhol](https://www.ncdor.gov/documents/2017-income-tax-withholding-tables-and-instructions-employers) (last changed: 2026-10-20)
+- NC - [NCDOR -- Withholding Tax Frequently Asked Questions](https://www.ncdor.gov/withholding-tax-frequently-asked-questions) (last changed: 2026-10-22)
 - NC - [North Carolina Department of Revenue: news](https://www.ncdor.gov/news) (last changed: 2026-10-20)
 - NC - [North Carolina withholding](https://www.ncdor.gov/taxes-forms/withholding-tax) (last changed: 2026-10-20)
 - NC - [Publication NC-30 (linked from NCDOR -- Withholding Tax Frequently Asked Question)](https://www.ncdor.gov/documents/income-tax-withholding-tables-and-instructions-employers) (last changed: 2026-10-20)
@@ -2543,7 +1365,6 @@ These can't be watched by a script (bot protection or JavaScript-only pages). Ch
 - NM - [Albuquerque resident indicted on felony tax fraud charges (linked from New Mexico Taxation and Reven](https://www.tax.newmexico.gov/wp-content/uploads/2026/07/20260722_Albuquerque-resident-indicted-on-felony-tax-fraud-charges.pdf) (last changed: 2026-10-20)
 - NM - [Amended Living Wage Ordinance (Spanish)* (linked from Santa Fe County -- Living Wage Ordinance and 2](https://www.santafecountynm.gov/userfiles/AmendedLivingWageOrdinanceSpanish6-2014.pdf) (last changed: 2026-10-20)
 - NM - [Assign a Third Party Administrator Guide (linked from Texas Workforce Commission cross-reference for](https://www.dws.nm.gov/Portals/0/DM/UI/Assign_a_Third_Party_Administrator_Guide042018.pdf) (last changed: 2026-10-20)
-- NM - [City of Albuquerque -- Albuquerque Minimum Wage Information](https://www.cabq.gov/legal/albuquerque-minimum-wage-information) (last changed: 2026-10-20)
 - NM - [City of Santa Fe -- Living Wage Ordinance notice (Municipal Code Sec. 28-1 SFCC 1987)](https://santafenm.gov/media/news_pdf/2025_Living_Wage_Ordinance.pdf) (last changed: 2026-10-20)
 - NM - [Delinquent property tax auctions scheduled in January (linked from New Mexico Taxation and Revenue: ](https://www.tax.newmexico.gov/wp-content/uploads/2026/01/20260112_Delinquent-property-tax-auctions-scheduled-in-January-1.pdf) (last changed: 2026-10-20)
 - NM - [Delinquent property tax auctions scheduled in March (linked from New Mexico Taxation and Revenue: ne](https://www.tax.newmexico.gov/wp-content/uploads/2026/02/20260223_Delinquent-property-tax-auctions-scheduled-in-March-2.pdf) (last changed: 2026-10-20)
@@ -2567,7 +1388,6 @@ These can't be watched by a script (bot protection or JavaScript-only pages). Ch
 - NM - [Payment Allocation File Format (linked from Texas Workforce Commission cross-reference for New)](https://www.dws.nm.gov/Portals/0/DM/Business/Payment_Allocation_File_Formatv10.pdf) (last changed: 2026-10-20)
 - NM - [Payment Due File Format (linked from Texas Workforce Commission cross-reference for New)](https://www.dws.nm.gov/Portals/0/DM/Business/Passive_Role_Assignment_File_Formatv10.pdf) (last changed: 2026-10-20)
 - NM - [Reminder: Income tax returns due April 15 (linked from New Mexico Taxation and Revenue: news)](https://www.tax.newmexico.gov/wp-content/uploads/2026/03/20260315_Reminder-Income-tax-returns-due-April-15.pdf) (last changed: 2026-10-20)
-- NM - [Santa Fe County -- Living Wage Ordinance and 2026 living wage adjustment announcement](https://www.santafecountynm.gov/livingwage) (last changed: 2026-10-20)
 - NM - [Santa Fe city and county living wage figures in effect through February 2026](https://www.santafecountynm.gov/news/detail/santa-fe-county-announces-living-wage-increase-effective-march-1-2025) (last changed: 2026-10-20)
 - NM - [State encourages mailing important documents early to avoid missing de (linked from New Mexico Taxat](https://www.tax.newmexico.gov/wp-content/uploads/2026/01/20260116_USPS-Postmark-Prodecure-Changes.pdf) (last changed: 2026-10-20)
 - NM - [State schedules five property tax auctions in August (linked from New Mexico Taxation and Revenue: n](https://www.tax.newmexico.gov/wp-content/uploads/2026/08/20260806_State-schedules-five-property-tax-auctions-in-August.pdf) (last changed: 2026-10-20)
@@ -2579,7 +1399,7 @@ These can't be watched by a script (bot protection or JavaScript-only pages). Ch
 - NM - [State to auction properties in Taos, Torrance Counties (linked from New Mexico Taxation and Revenue:](https://www.tax.newmexico.gov/wp-content/uploads/2026/04/20260422_State-to-auction-properties-in-Taos-Torrance-Counties-1.pdf) (last changed: 2026-10-20)
 - NM - [Tax Department grants extensions for flood-harmed taxpayers (linked from New Mexico Taxation and Rev](https://www.tax.newmexico.gov/wp-content/uploads/2026/10/20261008_Tax-Department-grants-extensions-for-flood-affected-taxpayers.pdf) (last changed: 2026-10-20)
 - NM - [Texas Workforce Commission cross-reference for New Mexico UI figures -- New Mexico DWS 'How UI Tax R](https://www.dws.state.nm.us/Unemployment/Unemployment-for-a-Business/Unemployment-Insurance-Tax-Information/How-UI-Tax-Rates-Are-Calculated) (last changed: 2026-10-20)
-- NM - [Theory of Change (linked from City of Albuquerque -- Albuquerque Minimum Wage In)](https://www.cabq.gov/mayor/documents/2026-8-15-theory-of-change-final-pdf.pdf) (last changed: 2026-10-20)
+- NM - [Theory of Change [PDF] (linked from City of Albuquerque -- Albuquerque Minimum Wage In)](https://www.cabq.gov/mayor/documents/2026-8-15-theory-of-change-final-pdf.pdf) (last changed: 2026-10-20)
 - NM - [USDA National Finance Center -- New Mexico State Income Tax Withholding bulletin (2025)](https://help.nfc.usda.gov/bulletins/2025/1741189057.htm) (last changed: 2026-10-20)
 - NM - [Vehicle registration fees, weight-distance tax to increase July 1 (linked from New Mexico Taxation a](https://www.tax.newmexico.gov/wp-content/uploads/2026/06/20260629_Increased-vehicle-registration-fees-to-take-effect-July-1.pdf) (last changed: 2026-10-20)
 - NM - [Wage Reports Confirmation File Format (linked from Texas Workforce Commission cross-reference for Ne](https://www.dws.nm.gov/Portals/0/DM/Business/Wage_Reports_Confirmation_File_Formatv20.pdf) (last changed: 2026-10-20)
@@ -2589,6 +1409,7 @@ These can't be watched by a script (bot protection or JavaScript-only pages). Ch
 - NM - [Wage Reports XML File Specification (linked from Texas Workforce Commission cross-reference for New)](https://www.dws.nm.gov/Portals/0/DM/Business/Wage_Reports%20_XML_File_Formatv21.pdf) (last changed: 2026-10-20)
 - NM - [here (linked from Santa Fe city and county living wage figures in ef)](https://www.santafecountynm.gov/documents/ordinances/Ordinance2014-1.pdf) (last changed: 2026-10-20)
 - NM - [investigation request form (linked from Santa Fe County -- Living Wage Ordinance and 2026 )](https://www.santafecountynm.gov/uploads/documents/LivingWageComplaintForm_2026.pdf) (last changed: 2026-10-20)
+- NY - [29 U.S.C. 2611(4)(A)(i)-(ii)](https://www.dol.gov/agencies/whd/fmla) (last changed: 2026-10-22)
 - NY - [DOL -- Calculating an Employer's UI Contribution Rate](https://dol.ny.gov/calculating-employers-ui-contribution-rate) (last changed: 2026-10-20)
 - NY - [DOL -- Employer Contribution Rate Table](https://dol.ny.gov/employer-contribution-rate-table) (last changed: 2026-10-20)
 - NY - [DOL -- Subsidiary Contribution Rate Table](https://dol.ny.gov/subsidiary-rate-table) (last changed: 2026-10-20)
@@ -2610,7 +1431,10 @@ These can't be watched by a script (bot protection or JavaScript-only pages). Ch
 - NY - [New York withholding tax](https://www.tax.ny.gov/bus/wt/wtidx.htm) (last changed: 2026-10-20)
 - NY - [Notice 2013-45 PDF (linked from IRS -- Determining if an employer is an applicable)](https://www.irs.gov/pub/irs-drop/n-13-45.PDF) (last changed: 2026-10-20)
 - NY - [Publication 5208 PDF (linked from IRS -- Determining if an employer is an applicable)](https://www.irs.gov/pub/irs-pdf/p5208.pdf) (last changed: 2026-10-20)
+- NY - [U.S. DOL -- COBRA Continuation Coverage](https://www.dol.gov/general/topic/health-plans/cobra) (last changed: 2026-10-22)
+- NY - [U.S. DOL Wage and Hour Opinion Letter (1986-05-07) on county-appointed poll workers](https://www.dol.gov/agencies/whd/compliance-assistance/handy-reference-guide-flsa) (last changed: 2026-10-22)
 - NY - [Yonkers withholding tax tables and methods (NYS-50-T-Y)](https://www.tax.ny.gov/pdf/publications/withholding/nys50_t_y.pdf) (last changed: 2026-10-20)
+- NY - [data/minimum-wage/federal-2026.json (this engine's own federal minimum wage file)](https://www.dol.gov/agencies/whd/flsa) (last changed: 2026-10-22)
 - NY - [eCFR 29 CFR 553.106 amendment history - official API](https://www.ecfr.gov/api/versioner/v1/versions/title-29.json?section=553.106) (last changed: 2026-10-20)
 - OH - [https://www.ccaohio.gov/member-municipalities](https://www.ccaohio.gov/member-municipalities) (last changed: 2026-10-13)
 - OH - [https://www.ritaohio.com/municipalities](https://www.ritaohio.com/municipalities) (last changed: 2026-10-20)
@@ -2648,6 +1472,7 @@ These can't be watched by a script (bot protection or JavaScript-only pages). Ch
 - OH - [Ohio Unemployment Contribution Rates for Calendar Year 2023-2026](https://jfs.ohio.gov/unemployment-services/for-employers/file-unemployment-taxes/tax-resources/contribution-rates) (last changed: 2026-10-15)
 - OH - [Ohio employer withholding](https://tax.ohio.gov/business/employer-withholding) (last changed: 2026-10-07)
 - OH - [R.C. 2716.02 — maximum garnishment is the lesser of 25% of disposable earnings, or the amount by whi](https://codes.ohio.gov/ohio-revised-code/section-2716.02) (last changed: 2026-10-18)
+- OH - [RITA (Regional Income Tax Agency): news and updates (municipal rate and law changes)](https://www.ritaohio.com/Resources/News) (last changed: 2026-10-22)
 - OH - [RITA -- Tax Rates Table, 2025 new municipalities and tax rate changes](https://www.ritaohio.com/TaxRatesTable) (last changed: 2026-10-20)
 - OH - [RITA member page (the JEDD's administering agency) -- Recent Tax and Credit History](https://www.ritaohio.com/Municipalities/Home/MemberPage?id=047) (last changed: 2026-10-20)
 - OH - [RITA member page (the JEDD's administering agency) -- Recent Tax and Credit History](https://www.ritaohio.com/Municipalities/Home/MemberPage?id=247) (last changed: 2026-10-20)
@@ -2667,7 +1492,6 @@ These can't be watched by a script (bot protection or JavaScript-only pages). Ch
 - OH - [RITA: tax professionals news](https://www.ritaohio.com/TaxProfessionals/News) (last changed: 2026-10-20)
 - OH - [The Finder: directory of every Ohio municipality (a new entry here is a new jurisdiction)](https://thefinder.tax.ohio.gov/api/file-downloads?type=municipality) (last changed: 2026-10-17)
 - OH - [The Finder: directory of every Ohio school district](https://thefinder.tax.ohio.gov/api/file-downloads?type=schoolDistrict) (last changed: 2026-10-18)
-- OH - [Village of Georgetown -- Income Tax](https://georgetownohio.gov/income-tax/) (last changed: 2026-10-04)
 - OH - [Village of Indian Hill -- Tax](https://indianhill.gov/departments/tax/) (last changed: 2026-09-30)
 - OH - [Village of Woodville -- Important Tax Notification (1% local municipal income tax from July 1, 2026,](https://www.villageofwoodville.com/_files/ugd/ef2ef5_5f60f5fa78e64495b52690728f655b41.pdf) (last changed: 2026-10-20)
 - OH - [Village of Woodville -- Ordinance No. 1-2026, passed 02-09-2026: levies the village income tax, 'beg](https://www.villageofwoodville.com/_files/ugd/ef2ef5_fc1ed5429f25479b939fd57201b684f7.pdf) (last changed: 2026-10-20)
@@ -2704,12 +1528,17 @@ These can't be watched by a script (bot protection or JavaScript-only pages). Ch
 - PA - [PA Department of Labor & Industry -- UC Computation of Rates](https://www.pa.gov/agencies/dli/resources/for-employers-and-educators/how-to-file/uc-tax/computation-of-rates) (last changed: 2026-10-02)
 - PA - [PA Department of Labor & Industry -- UC employee withholding (0.07% since 2018)](https://www.pa.gov/agencies/dli/resources/for-employers-and-educators/how-to-file/uc-tax/employee-withholding) (last changed: 2026-09-24)
 - PA - [PA Department of Labor & Industry -- Yearly Tax Highlights (UC)](https://www.pa.gov/agencies/dli/resources/for-employers-and-educators/how-to-file/uc-tax/yearly-tax-highlights) (last changed: 2026-10-07)
+- PA - [PA Department of Revenue -- Employer Withholding (reciprocal agreements)](https://www.pa.gov/en/agencies/revenue/resources/tax-types-and-information/employer-withholding.html) (last changed: 2026-10-22)
+- PA - [PA Department of Revenue -- Personal Income Tax (3.07%)](https://www.pa.gov/agencies/revenue/resources/tax-types-and-information/personal-income-tax) (last changed: 2026-10-22)
+- PA - [Pennsylvania Department of Revenue: newsroom](https://www.pa.gov/agencies/revenue/newsroom) (last changed: 2026-10-22)
+- PA - [Pennsylvania employer withholding](https://www.pa.gov/agencies/revenue/resources/tax-types-and-information/employer-withholding) (last changed: 2026-10-22)
 - PA - [REV-415 (SU) 01-23 -- Employer Withholding Information Guide](https://www.pa.gov/content/dam/copapwp-pagov/en/revenue/documents/formsandpublications/formsforbusinesses/employerwithholding/documents/rev-415.pdf) (last changed: 2026-09-24)
 - PA - [REV-419 (EX) 09-20, instructions REV-419 IN (EX) 03-24 -- Employee's Nonwithholding Application Cert](https://www.pa.gov/content/dam/copapwp-pagov/en/revenue/documents/formsandpublications/formsforbusinesses/employerwithholding/documents/rev-419.pdf) (last changed: 2026-09-24)
 - PA - [UC-748 (REV 09-25) -- Contribution Rates Effective January 1, 2026](https://www.pa.gov/content/dam/copapwp-pagov/en/dli/documents/uc/employer/uc-tax-rates/uc-748%20rev%2009-25.pdf) (last changed: 2026-09-24)
 - RI - [2026 Rhode Island Employer's Income Tax Withholding Tables (RI Division of Taxation)](https://tax.ri.gov/sites/g/files/xkgbur541/files/2025-12/2026%20Withholding%20Tax%20Booklet.pdf) (last changed: 2026-10-20)
 - RI - [RI DLT -- 2025 Tax Rates for Unemployment Insurance and Temporary Disability Insurance (2024-12-20)](https://dlt.ri.gov/press-releases/2025-tax-rates-unemployment-insurance-and-temporary-disability-insurance) (last changed: 2026-10-20)
 - RI - [RI Department of Labor & Training: 2026 TDI/TCI and UI Tax Rates](https://dlt.ri.gov/press-releases/2026-tax-rates-unemployment-insurance-and-temporary-disability-insurance) (last changed: 2026-10-20)
+- RI - [Reciprocity check (Rhode Island has NONE with Massachusetts or Connecticut, its only bordering state](https://www.mass.gov/info-details/learn-about-the-income-tax-paid-to-another-jurisdiction-credit) (last changed: 2026-10-22)
 - RI - [Rhode Island Division of Taxation -- 2025 Rhode Island Withholding Tax Booklet](https://tax.ri.gov/sites/g/files/xkgbur541/files/2024-12/2025%20Withholding%20Tax%20Booklet_0.pdf) (last changed: 2026-10-20)
 - RI - [Rhode Island Division of Taxation: news](https://tax.ri.gov/news) (last changed: 2026-10-20)
 - RI - [Rhode Island withholding](https://tax.ri.gov/tax-sections/withholding-tax) (last changed: 2026-10-20)
@@ -2756,13 +1585,10 @@ These can't be watched by a script (bot protection or JavaScript-only pages). Ch
 - US - [US Railroad Retirement Board, Program Letter 2025-01](https://www.rrb.gov/Employers/Publications/ProgramAndCircularLetters/PL25-01) (last changed: 2026-09-30)
 - US - [eCFR 29 CFR 870 amendment history (garnishment limits) - official API](https://www.ecfr.gov/api/versioner/v1/versions/title-29.json?part=870) (last changed: 2026-09-24)
 - US - [eCFR 34 CFR 34 amendment history (administrative wage garnishment) - official API](https://www.ecfr.gov/api/versioner/v1/versions/title-34.json?part=34) (last changed: 2026-09-24)
-- UT - [Utah Pub 14 page](https://tax.utah.gov/forms-pubs/pub-14/) (last changed: 2026-09-24)
 - UT - [Utah Publication 14 (withholding)](https://files.tax.utah.gov/tax/forms/pubs/pub-14.pdf) (last changed: 2026-09-24)
 - UT - [Utah State Tax Commission -- Publication 14 Rev. 4/24, Withholding Tax Guide](https://files.tax.utah.gov/tax/forms/2024/pub-14.pdf) (last changed: 2026-09-30)
 - UT - [Utah State Tax Commission -- Publication 14 Rev. 4/25, Withholding Tax Guide](https://files.tax.utah.gov/tax/forms/2025/pub-14.pdf) (last changed: 2026-09-30)
 - UT - [Utah State Tax Commission UI wage base / tax rate page](https://jobs.utah.gov/ui/employer/Public/Questions/TaxRates.aspx) (last changed: 2026-09-24)
-- UT - [Utah State Tax Commission: news releases](https://tax.utah.gov/news/) (last changed: 2026-10-18)
-- UT - [Utah State Tax Commission: tax bulletins](https://tax.utah.gov/tax-bulletins/) (last changed: 2026-10-18)
 - VA - [Form VA-4, Employee's Virginia Income Tax Withholding Exemption Certificate (Rev. 04/26) + Personal ](https://www.tax.virginia.gov/sites/default/files/taxforms/withholding/any/va-4-any.pdf) (last changed: 2026-10-20)
 - VA - [Va. Code Ann. § 34-29 — ordinary garnishment limited to the lesser of 25% of disposable earnings, or](https://law.lis.virginia.gov/vacode/title34/chapter4/section34-29/) (last changed: 2026-10-20)
 - VA - [Virginia Department of Labor and Industry — 2026 minimum wage $12.77/hr effective 2026-01-01](https://doli.virginia.gov/2025/07/29/virginia-minimum-wage-rate-increasing-effective-january-1-2026/) (last changed: 2026-10-20)
@@ -2778,6 +1604,8 @@ These can't be watched by a script (bot protection or JavaScript-only pages). Ch
 - VT - [Vermont Department of Taxes: news](https://tax.vermont.gov/news) (last changed: 2026-10-20)
 - VT - [Vermont withholding](https://tax.vermont.gov/business/withholding) (last changed: 2026-10-20)
 - WA - [City of Seattle Office of Labor Standards -- Minimum Wage Ordinance](https://www.seattle.gov/laborstandards/ordinances/minimum-wage) (last changed: 2026-10-20)
+- WA - [City of Seattle, City Finance -- Payroll expense tax (2025 thresholds and rates)](https://www.seattle.gov/city-finance/business-taxes-and-licenses/seattle-taxes/payroll-expense-tax) (last changed: 2026-10-22)
+- WA - [City of Seattle, City Finance -- Social Housing Tax](https://seattle.gov/city-finance/business-taxes-and-licenses/seattle-taxes/social-housing-tax) (last changed: 2026-10-22)
 - WA - [ESD — Paid Family and Medical Leave premium rate increases to 1.13% in 2026](https://esd.wa.gov/about-us/news-release/2025/paid-family-medical-leave-premium-rate-increases-113-2026) (last changed: 2026-10-20)
 - WA - [Employer Wage Reporting and Premiums Toolkit (v25.1, June 2026)](https://paidleave.wa.gov/app/uploads/2021/12/Employer-Wage-Reporting-and-Premiums-Toolkit-v25.1-2026.06.26.pdf) (last changed: 2026-10-20)
 - WA - [L&I — Paid Family & Medical Leave (exempt employer/employee categories)](https://www.lni.wa.gov/workers-rights/leave/paid-family-and-medical-leave) (last changed: 2026-10-20)
@@ -2789,15 +1617,12 @@ These can't be watched by a script (bot protection or JavaScript-only pages). Ch
 - WA - [Washington Department of Revenue: news releases](https://dor.wa.gov/about/news-releases) (last changed: 2026-10-20)
 - WA - [Washington ESD -- Paid Family & Medical Leave premiums to increase in 2025 (2024-10-23)](https://esd.wa.gov/about-us/news-release/2024/paid-family-medical-leave-premiums-increase-2025) (last changed: 2026-10-20)
 - WA - [Washington Paid Leave premium rates](https://paidleave.wa.gov/employers/) (last changed: 2026-10-20)
+- WA - [Washington State Department of Labor & Industries -- Local Minimum Wage Rates](https://lni.wa.gov/workers-rights/wages/minimum-wage/local-minimum-wage-rates) (last changed: 2026-10-22)
 - WA - [Washington State Department of Labor & Industries -- Washington's minimum wage going up to $17.13 an](https://www.lni.wa.gov/news-events/article/25-27) (last changed: 2026-10-20)
 - WA - [Washington State Department of Labor & Industries — 2026 minimum wage ($17.13/hr effective 2026-01-0](https://ofm.wa.gov/wp-content/uploads/sites/default/files/public/legacy/policy/25.60.pdf) (last changed: 2026-10-20)
 - WA - [Washington State's Paid Family and Medical Leave — Estimate your Paid Leave payments](https://paidleave.wa.gov/estimate-your-paid-leave-payments/) (last changed: 2026-10-20)
-- WI - [DOR General Withholding Tax Questions (reciprocity, thresholds, WT-4)](https://www.revenue.wi.gov/Pages/FAQS/pcs-with.aspx) (last changed: 2026-10-20)
-- WI - [DOR Tax Rates FAQ (annual Form 1 individual income tax brackets)](https://www.revenue.wi.gov/Pages/FAQS/pcs-taxrates.aspx) (last changed: 2026-10-20)
+- WI - [2026 Tax Rate Schedule for Employers (DWD, full Schedule D reserve-percentage rate table)](https://dwd.wisconsin.gov/ui/employers/taxrates.htm) (last changed: 2026-10-22)
 - WI - [UCT-1-E, 2026 Wisconsin Employer's Quarterly Contribution Report (SUTA initial rates)](https://dwd.wisconsin.gov/dwd/forms/ui/pdf/uct-1-e-2026.pdf) (last changed: 2026-10-20)
-- WI - [Wisconsin Department of Revenue: news](https://www.revenue.wi.gov/Pages/News/home.aspx) (last changed: 2026-10-20)
-- WI - [Wisconsin W-166 withholding guide](https://www.revenue.wi.gov/DOR%20Publications/pb166.pdf) (last changed: 2026-10-20)
-- WI - [Wisconsin withholding](https://www.revenue.wi.gov/Pages/Withholding/home.aspx) (last changed: 2026-10-20)
 - WV - [City of Charleston, WV: city service fee overview](https://www.charlestonwv.gov/sites/default/files/documents/2022-12/CITY%20SERVICE%20FEE%20OVERVIEW%2012.22%20%282%29.pdf) (last changed: 2026-10-20)
 - WV - [W. Va. Code § 38-5A-3 — ordinary (consumer credit sale/consumer loan judgment) garnishment limited t](https://code.wvlegislature.gov/38-5A-3/) (last changed: 2026-10-18)
 - WV - [WV IT-100.2A -- Tables for Percentage Method of Withholding (March 2026 revision)](https://tax.wv.gov/Documents/Withholding/it100.2a.pdf) (last changed: 2026-09-24)
@@ -2805,6 +1630,7 @@ These can't be watched by a script (bot protection or JavaScript-only pages). Ch
 - WV - [WV/IT-104 -- Employee's Withholding Exemption Certificate (Rev. 03/2023) + WV/IT-104NR Certificate o](https://tax.wv.gov/Documents/Withholding/it104.pdf) (last changed: 2026-09-24)
 - WV - [WVU Shared Services: West Virginia city user fee ordinances (every city's fee)](https://sharedservices.wvu.edu/west-virginia-city-user-fee-ordinances) (last changed: 2026-10-20)
 - WV - [West Virginia Division of Labor -- Minimum Wage](https://labor.wv.gov/wage-hour/jobs-act/minimum-wage) (last changed: 2026-09-24)
+- WV - [West Virginia State Tax Department: home page (news and notices)](https://tax.wv.gov/) (last changed: 2026-10-22)
 - WV - [West Virginia Tax Division -- 2026 Income Tax Rate Cut](https://tax.wv.gov/Individuals/Pages/PersonalIncomeTaxReductionBill.aspx) (last changed: 2026-09-30)
 - WV - [West Virginia withholding](https://tax.wv.gov/Business/Withholding/Publications/Pages/WithholdingPublications.aspx) (last changed: 2026-09-24)
 - WV - [West Virginia withholding forms](https://tax.wv.gov/business/withholding/pages/withholdingtaxforms.aspx) (last changed: 2026-09-30)
