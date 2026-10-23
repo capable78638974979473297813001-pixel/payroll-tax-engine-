@@ -106,3 +106,25 @@ class TheRulesThemselves(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class BlindSpots(unittest.TestCase):
+    def spots(self, state):
+        return zd.classify({"date": "2026-10-22", "changed": []}, {}, SOURCES, state)["blind_spots"]
+
+    def test_a_paycheck_source_that_cannot_be_read_is_named(self):
+        got = self.spots({"in-dn1": {"failures": 2, "last_ok": "2026-10-01", "last_error": "HTTP 403"}, "ky-krs": {"last_ok": "2026-10-22", "failures": 0}})
+        self.assertEqual([(b["url"], b["never_read"], b["why"]) for b in got], [(GUIDE["url"], False, "HTTP 403")])
+
+    def test_a_source_never_read_comes_first(self):
+        got = self.spots({"in-dn1": {"failures": 1, "last_ok": "2026-10-01"}})
+        self.assertEqual([b["never_read"] for b in got], [True, False])
+
+    def test_pages_no_paycheck_number_depends_on_are_not_blind_spots(self):
+        self.assertEqual({b["url"] for b in self.spots({})}, {GUIDE["url"], STATUTE["url"]})
+
+    def test_a_clean_report_says_what_it_could_not_see(self):
+        text = zd.markdown(zd.classify({"date": "2026-10-22", "changed": []}, {}, SOURCES, {"in-dn1": {"failures": 3}}))
+        self.assertIn("None in the sources that could be read.", text)
+        self.assertIn("## Not being read", text)
+        self.assertIn("None. A paycheck-affecting change", zd.markdown(zd.classify({"date": "x", "changed": []}, {}, SOURCES, {s["id"]: {"last_ok": "d"} for s in SOURCES})))

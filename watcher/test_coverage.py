@@ -83,6 +83,33 @@ class EveryTaxingJurisdictionIsWatched(unittest.TestCase):
             self.assertGreaterEqual(len(pages), 2, f"{code}: only {len(pages)} curated page(s); add its news or notices page")
 
 
+# Prior-year files that cite only frozen web.archive.org copies. The live document
+# is watched through the same state's current-year file, so these have no source
+# of their own. Anything else in data/ that feeds a paycheck must be cited.
+ARCHIVE_ONLY = {"data/states/KS-2025.json", "data/states/WV-2025.json", "data/local/IN-counties-2025.json"}
+PAYCHECK_DATA = ("states", "federal", "local", "minimum-wage", "garnishment", "employer-thresholds")
+
+
+class EveryPaycheckFileHasASource(unittest.TestCase):
+    def test_every_data_file_a_paycheck_uses_is_cited_by_a_watched_source(self):
+        cited = {u for s in SOURCES.values() for u in s.get("used_by", [])}
+        uncited = set()
+        for d in PAYCHECK_DATA:
+            for f in sorted((REPO / "data" / d).glob("*.json")):
+                m = re.match(r"([A-Z]{2})-", f.name)
+                if m and m.group(1) in SCOPE["excluded"]:
+                    continue
+                rel = f"data/{d}/{f.name}"
+                if rel not in cited:
+                    uncited.add(rel)
+        self.assertEqual(uncited, ARCHIVE_ONLY, "a data file has no source in the watch (cite its official page in the file, then run build_sources.py)")
+
+    def test_each_archive_only_file_has_a_watched_current_year_twin(self):
+        cited = {u for s in SOURCES.values() for u in s.get("used_by", [])}
+        for rel in ARCHIVE_ONLY:
+            self.assertIn(re.sub(r"-2025\.json$", "-2026.json", rel), cited, rel)
+
+
 class LocalGovernmentSitesAreWatched(unittest.TestCase):
     """A city or county page on a .org or .com site is as official as one on
     .gov; the data cites dozens, and none were being watched."""
