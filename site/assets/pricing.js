@@ -1,5 +1,5 @@
 /* Prices on the page come from window.OMNIA, injected by site/server.ts
-   from site/lib/pricing.ts. Do not hardcode a per-call rate here. */
+   from site/lib/pricing.ts. The displayed rate is that config, not a second copy. */
 (function (w) {
   'use strict';
   var cfg = w.OMNIA || {
@@ -79,10 +79,11 @@
 
   function apply(root) {
     var scope = root || document;
-    // The public site shows the rate as TBA. Dollar figures are not written
-    // into the page from this file.
     var days = String(cfg.trialDays);
-    scope.querySelectorAll('[data-rate]').forEach(function (el) { el.textContent = 'TBA'; });
+    var rate = headlineRate();
+    scope.querySelectorAll('[data-rate]').forEach(function (el) {
+      if (rate) el.textContent = formatRate(rate);
+    });
     scope.querySelectorAll('[data-trial]').forEach(function (el) { el.textContent = days; });
   }
 

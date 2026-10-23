@@ -2161,8 +2161,7 @@ async function handlePaycheck(req: IncomingMessage, res: ServerResponse): Promis
 // jurisdictions and the certificate facts a paycheck needs, so the caller
 // resolves an employee once and reuses the result on every pay run:
 //   workState: { code: <state>, certificate: <certificate> }
-// Billed as one unit when at least one address matched; an address that
-// can't be matched costs nothing.
+// Not a paycheck calculation: the lookup is recorded and is not metered.
 // ---------------------------------------------------------------------
 
 async function handleAddress(req: IncomingMessage, res: ServerResponse): Promise<void> {

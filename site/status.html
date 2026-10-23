@@ -60,7 +60,7 @@
     $('checked').textContent = 'Checked ' + new Date(h.time).toLocaleTimeString();
     var calc = ok ? 'Operational' : 'Degraded';
     rows.appendChild(row('Paycheck API (POST /v1/paycheck)', calc, h.states + ' jurisdictions loaded'));
-    rows.appendChild(row('Sandbox', calc, 'Tax years ' + (h.taxYears || []).join(', ')));
+    rows.appendChild(row('Console', calc, 'Tax years ' + (h.taxYears || []).join(', ')));
     rows.appendChild(row('Dashboard and sign-in', h.store === 'ok' ? 'Operational' : 'Degraded', 'Account store ' + (h.store === 'ok' ? 'readable' : 'unreadable')));
     rows.appendChild(row('Verification email', h.email ? 'Configured' : 'Not configured', h.email ? 'Codes are emailed' : 'Codes print to the server log'));
     rows.appendChild(row('Billing', h.payments ? (h.metering ? 'Configured, metered' : 'Configured, card on file only') : 'Not configured', h.payments ? 'Stripe connected' : 'No payment processor connected'));

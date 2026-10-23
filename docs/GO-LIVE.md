@@ -55,8 +55,9 @@ prints codes in the Render log instead, which is fine for a first test only.
    needs a paid plan) with a 1 GB disk mounted at `/var/data`.
 2. Fill in the secrets the Blueprint marks `sync: false`: `STRIPE_SECRET_KEY`,
    `STRIPE_PRICE_ID`, `STRIPE_METER_EVENT_NAME`, `STRIPE_WEBHOOK_SECRET` and
-   `RESEND_API_KEY`. Leave `STRIPE_ALLOW_LIVE` and `OMNIA_ISSUE_LIVE_KEYS` unset
-   until test mode has passed. The webhook endpoint is
+   `RESEND_API_KEY`. Leave `STRIPE_ALLOW_LIVE` unset until test mode has passed.
+   Customer API keys are always `sk_live_`. `OMNIA_ISSUE_LIVE_KEYS` is not read.
+   The webhook endpoint is
    `https://omniatax.io/api/billing/webhook`.
 3. Add the domain: the Blueprint lists `omniatax.io` and `www.omniatax.io`.
    Render shows the DNS records to create; add them in GoDaddy DNS (section 0b).
@@ -145,8 +146,10 @@ RATE_LIMIT_PER_MIN=120
 SIGNUP_PER_HOUR=10                      # signup code requests per client address
 SIGNIN_PER_HOUR=10                      # sign-in code requests per client address
 TRUST_PROXY=1                           # behind a reverse proxy: client IP from X-Forwarded-For
-OMNIA_ISSUE_LIVE_KEYS=1                 # mint sk_live_ keys instead of sk_test_
 ```
+
+Issued customer keys are always `sk_live_`. `OMNIA_ISSUE_LIVE_KEYS` is not read.
+A stored `sk_test_` key is rejected with `401 key_not_accepted` and is not metered.
 
 Checkout does not send `payment_method_types`. Turn methods on in the Stripe
 Dashboard (**Settings → Payment methods**); those are what Checkout offers.
@@ -154,10 +157,12 @@ Dashboard (**Settings → Payment methods**); those are what Checkout offers.
 **Metering needs** `STRIPE_SECRET_KEY`, `STRIPE_PRICE_ID` and
 `STRIPE_METER_EVENT_NAME` (or `STRIPE_METER_EVENT`). With only the secret key,
 onboarding saves a card and no usage is billed; the server logs a warning at
-startup saying so. An `sk_live_` secret is refused unless `STRIPE_ALLOW_LIVE=1`.
-Sandbox API keys are not metered. Each successful live paycheck calculation,
-including each calculation in a batch, queues one meter event (`value` 1). A
-Stripe outage does not fail the API response.
+startup saying so. An `sk_live_` Stripe secret is refused unless `STRIPE_ALLOW_LIVE=1`.
+Each successful paycheck calculation, including each paycheck in a batch and
+including calculations during the 14-day trial, queues one meter event (`value` 1).
+Stripe does not bill usage recorded during `trial_period_days` (see
+`docs/STRIPE-SETUP.md`, "Trial usage on the metered price"). A Stripe outage
+does not fail the API response.
 
 **Set `RESEND_API_KEY` in production.** Without it the server is in local
 development mode and prints each 6-digit verification code to its console —
@@ -228,7 +233,7 @@ misconfigured in Stripe. Then:
    [test card](https://stripe.com/docs/testing) (`4242 4242 4242 4242`).
 4. On return to `/signup/payment`, the page finalizes via `/api/billing/return`,
    issues the key, and opens `/signup/key`. The account shows *trialing*.
-5. Make a few `POST /v1/paycheck` calls from `/sandbox` with the key. In Stripe → Billing →
+5. Make a few `POST /v1/paycheck` calls from `/console` with the key. In Stripe → Billing →
    Meters, confirm meter events are arriving for the customer, and that
    `node scripts/meter-queue.ts` shows `0 pending`.
 6. Simulate a failed payment (Stripe → send a test `invoice.payment_failed`
@@ -247,7 +252,7 @@ Only once all six pass, swap the Stripe values for **live-mode** ones, set
 - [ ] Confirm `STRIPE_PRICE_ID` is the usage-metered price. The rate is set in Stripe and is not hardcoded in the app.
 - [ ] Back up `SITE_DB_DIR` on a schedule.
 - [ ] Put the app behind HTTPS and a process manager that restarts it.
-- [ ] Decide `OMNIA_ISSUE_LIVE_KEYS` (on for production `sk_live_` keys).
+- [ ] Confirm issued keys are `sk_live_` and an old `sk_test_` key returns `key_not_accepted`.
 - [ ] Alert on `[meter]` errors in the server log, and check
       `node scripts/meter-queue.ts` for `dead` items at least monthly.
 - [ ] Test the suspend/reactivate webhook path in live mode once.
@@ -308,12 +313,12 @@ Only once all six pass, swap the Stripe values for **live-mode** ones, set
   next deploy. A state whose local list the data itself calls incomplete (AL, WV, CO) is marked
   "partial" in the table.
 - **`/dashboard`** reads `GET /api/usage` (30-day calls per day, errors, every key the account has held,
-  live vs sandbox counts) and `GET /api/billing`. Its **Replace my key** button calls `POST /api/issue-key`.
+  paycheck calculations vs address lookups) and `GET /api/billing`. Its **Replace my key** button calls `POST /api/issue-key`.
 - **`/status`** polls `GET /v1/health` and reports only what that server can see: jurisdictions loaded,
   account store readable, whether email and Stripe keys are present.
 - **`/contact`** posts to `POST /api/contact` (Resend, `CONTACT_TO`, five messages an hour per network,
   hidden-field honeypot) and falls back to `mailto:` when no email provider is configured.
 - **Docs host.** The `curl` examples in `/docs` use `PUBLIC_BASE_URL` (the deployed origin), not a fixed host.
-- **Only live keys bill.** With metering configured, a key that starts `sk_test_` is never reported to
-  Stripe, so "sandbox calls are not billed" holds. Until `OMNIA_ISSUE_LIVE_KEYS=1`, every issued key is a
-  sandbox key and nothing is metered.
+- **Every issued key is real.** With metering configured, each successful paycheck on a subscription
+  (including a trial) is reported to Stripe. Stripe does not bill usage recorded during the free-trial
+  period. A stored `sk_test_` key is rejected and is not metered. `OMNIA_ISSUE_LIVE_KEYS` is not read.

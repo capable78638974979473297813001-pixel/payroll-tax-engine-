@@ -212,7 +212,7 @@ export async function createSubscriptionCheckoutSession(input: {
   priceId: string;
   successUrl: string;
   cancelUrl: string;
-  /** Free-trial length; Stripe won't invoice until it elapses. */
+  /** Free-trial length. Usage sent during trial_period_days is not billed. */
   trialDays?: number;
   /** Extra subscription metadata, merged with apiKeyId. */
   metadata?: Record<string, string>;

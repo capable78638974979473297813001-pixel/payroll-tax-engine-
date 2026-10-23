@@ -15,16 +15,16 @@ import { fileURLToPath } from 'node:url';
  */
 
 const REPO = join(dirname(fileURLToPath(import.meta.url)), '..');
-const PLAINTEXT_KEY = 'sk_test_e2e_integration_key_abcdef';
+const PLAINTEXT_KEY = 'sk_live_e2e_integration_key_abcdef';
 const KEY_HASH = createHash('sha256').update(PLAINTEXT_KEY).digest('hex');
 // A second key whose account carries a Stripe subscription, for the
 // suspend/reactivate (billing webhook) tests.
-const BILL_KEY = 'sk_test_e2e_billing_key_ghijkl';
+const BILL_KEY = 'sk_live_e2e_billing_key_ghijkl';
 const BILL_HASH = createHash('sha256').update(BILL_KEY).digest('hex');
 const BILL_CUSTOMER = 'cus_e2e_billing';
 const WEBHOOK_SECRET = 'whsec_e2e_secret';
 // A key whose account never saved a card or bank account.
-const NOPAY_KEY = 'sk_test_e2e_nopay_key_mnopqr';
+const NOPAY_KEY = 'sk_live_e2e_nopay_key_mnopqr';
 const NOPAY_HASH = createHash('sha256').update(NOPAY_KEY).digest('hex');
 const PORT = 4600 + Math.floor(Math.random() * 300);
 const BASE = `http://127.0.0.1:${PORT}`;

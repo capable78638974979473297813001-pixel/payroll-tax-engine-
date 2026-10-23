@@ -12,8 +12,8 @@ import { fileURLToPath } from 'node:url';
 /**
  * Stripe metered billing on the site, against a fake Stripe:
  * subscription Checkout from STRIPE_PRICE_ID, one meter event per
- * successful /api/paycheck and /v1/paycheck, no meter for a sandbox key
- * or a failed calculation, a Stripe outage that does not fail the
+ * successful /api/paycheck and /v1/paycheck, rejection of a stored
+ * sk_test_ key, no meter for a failed calculation, a Stripe outage that does not fail the
  * response, and webhook signature pass/fail plus event-id idempotency.
  */
 
@@ -192,6 +192,8 @@ test('checkout, meter events, and the webhook', async () => {
   assert.equal(params.get('customer'), 'cus_live');
   assert.equal(params.get('line_items[0][price]'), 'price_wire');
   assert.equal(params.get('line_items[0][quantity]'), null);
+  assert.equal(params.get('subscription_data[trial_period_days]'), '14');
+  assert.equal(params.get('payment_method_collection'), 'always');
   assert.equal(params.get('success_url'), 'https://omniatax.io/signup/payment?setup=ok&session_id={CHECKOUT_SESSION_ID}');
   assert.equal(params.get('cancel_url'), 'https://omniatax.io/signup/payment?setup=cancelled');
   assert.equal(checkoutBody.includes('payment_method_types'), false);
@@ -225,11 +227,14 @@ test('checkout, meter events, and the webhook', async () => {
   await new Promise((r) => setTimeout(r, 200));
   assert.equal(meterEvents.length, 2, 'a failed calculation is not metered');
 
-  const sandbox = await postCalc('/api/paycheck', TEST_KEY);
-  assert.equal(sandbox.status, 200);
-  assert.equal(sandbox.headers.get('omnia-mode'), 'test');
+  const retired = await postCalc('/api/paycheck', TEST_KEY);
+  assert.equal(retired.status, 401);
+  const retiredBody = await retired.json() as { code?: string; error?: string };
+  assert.equal(retiredBody.code, 'key_not_accepted');
+  assert.match(retiredBody.error ?? '', /no longer accepted/);
+  assert.equal((retiredBody.error ?? '').includes(TEST_KEY), false);
   await new Promise((r) => setTimeout(r, 200));
-  assert.equal(meterEvents.length, 2, 'a sandbox key is not metered');
+  assert.equal(meterEvents.length, 2, 'a retired key is not metered');
   assert.equal(db().meterQueue.length, 0);
 
   meterDown = true;
