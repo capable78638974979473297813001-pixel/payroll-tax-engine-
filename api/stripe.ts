@@ -168,13 +168,45 @@ export function retrievePaymentMethod(id: string): Promise<StripePaymentMethod> 
   return stripeRequest('GET', `/v1/payment_methods/${encodeURIComponent(id)}`);
 }
 
+type PriceUsage = 'metered' | 'licensed';
+
+/** usage_type only. The price amount stays in Stripe and is never stored here. */
+const priceUsageCache = new Map<string, PriceUsage>();
+
 /**
- * A hosted Checkout page in SUBSCRIPTION mode — saves a payment method AND
- * starts metered usage billing. Which methods appear is decided by the
- * Stripe Dashboard (dynamic payment methods). Checkout Session creation on
- * API 2026-09-30.endive rejects `payment_method_types`.
+ * Read STRIPE_PRICE_ID's usage type. Cached for the life of the process so
+ * signup doesn't retrieve the same price on every Checkout.
  */
-export function createSubscriptionCheckoutSession(input: {
+async function priceUsage(priceId: string): Promise<PriceUsage> {
+  const cached = priceUsageCache.get(priceId);
+  if (cached) return cached;
+  let price: { recurring?: { usage_type?: string } | null };
+  try {
+    price = await stripeRequest('GET', `/v1/prices/${encodeURIComponent(priceId)}`);
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    const status = err instanceof StripeError ? err.status : 0;
+    throw new StripeError(`Could not read STRIPE_PRICE_ID ${priceId}: ${message}`, status, 'price_lookup_failed');
+  }
+  const usage = price.recurring?.usage_type;
+  if (usage !== 'metered' && usage !== 'licensed') {
+    throw new StripeError(
+      `STRIPE_PRICE_ID ${priceId} is not a metered or licensed recurring price, so Checkout cannot be created.`,
+      0,
+      'price_usage_unknown',
+    );
+  }
+  priceUsageCache.set(priceId, usage);
+  return usage;
+}
+
+/**
+ * A hosted Checkout page in SUBSCRIPTION mode. Which payment methods appear
+ * is decided by the Stripe Dashboard. A metered price omits quantity (usage
+ * is reported per calculation). A licensed price sends quantity 1, because
+ * Checkout requires it, and warns that usage will not bill.
+ */
+export async function createSubscriptionCheckoutSession(input: {
   customerId: string;
   apiKeyId: string;
   priceId: string;
@@ -185,6 +217,12 @@ export function createSubscriptionCheckoutSession(input: {
   /** Extra subscription metadata, merged with apiKeyId. */
   metadata?: Record<string, string>;
 }): Promise<StripeCheckoutSession> {
+  const usage = await priceUsage(input.priceId);
+  const lineItem: Record<string, unknown> = { price: input.priceId };
+  if (usage === 'licensed') {
+    lineItem.quantity = 1;
+    console.warn(`[billing] STRIPE_PRICE_ID ${input.priceId} is not metered, so usage won't bill. Checkout is sending quantity 1. Use a usage-based metered price to bill each calculation.`);
+  }
   const subscriptionData: Record<string, unknown> = {
     metadata: { apiKeyId: input.apiKeyId, ...input.metadata },
   };
@@ -192,7 +230,7 @@ export function createSubscriptionCheckoutSession(input: {
   return stripeRequest<StripeCheckoutSession>('POST', '/v1/checkout/sessions', {
     mode: 'subscription',
     customer: input.customerId,
-    line_items: [{ price: input.priceId }], // metered price: no quantity, usage is reported per call
+    line_items: [lineItem],
     // A payment method is required up front, trial or not. The Dashboard
     // chooses which methods Checkout offers.
     payment_method_collection: 'always',
