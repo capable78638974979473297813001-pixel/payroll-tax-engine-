@@ -121,7 +121,14 @@ before(async () => {
         return send(200, {
           id: 'cs_pending', status: 'complete', customer: 'cus_pending',
           metadata: { omnia_email: PENDING_EMAIL },
-          subscription: { id: 'sub_pending', default_payment_method: { id: 'pm_pending', type: 'card', card: { brand: 'visa', last4: '1111' } } },
+          subscription: { id: 'sub_pending', status: 'trialing', default_payment_method: { id: 'pm_pending', type: 'card', card: { brand: 'visa', last4: '1111' } } },
+        });
+      }
+      if (url.startsWith('/v1/checkout/sessions/cs_old')) {
+        return send(200, {
+          id: 'cs_old', status: 'complete', customer: 'cus_live',
+          metadata: { omnia_email: LIVE_EMAIL },
+          subscription: { id: 'sub_old', status: 'canceled', default_payment_method: { id: 'pm_old', type: 'card', card: { brand: 'visa', last4: '0001' } } },
         });
       }
       if (url === '/v1/billing/meter_events' && req.method === 'POST') {
@@ -281,6 +288,29 @@ test('checkout, meter events, and the webhook', async () => {
   const clear = JSON.stringify({ id: 'evt_clear', type: 'customer.subscription.updated', data: { object: { id: 'sub_live', customer: 'cus_live', status: 'active' } } });
   await fetch(`${BASE}/api/billing/webhook`, { method: 'POST', headers: { 'Stripe-Signature': sign(clear) }, body: clear });
   assert.equal(db().subscriptions[LIVE_EMAIL].suspended, false);
+
+  // Late events for a subscription this account no longer holds change nothing.
+  const post = (obj: unknown) => {
+    const body = JSON.stringify(obj);
+    return fetch(`${BASE}/api/billing/webhook`, { method: 'POST', headers: { 'Stripe-Signature': sign(body) }, body });
+  };
+  const staleCancel = await post({ id: 'evt_stale_del', type: 'customer.subscription.deleted', data: { object: { id: 'sub_old', customer: 'cus_live' } } });
+  assert.equal((await staleCancel.json()).action, 'ignored_stale_subscription');
+  const staleInvoice = await post({ id: 'evt_stale_inv', type: 'invoice.payment_failed', data: { object: { customer: 'cus_live', subscription: 'sub_old' } } });
+  assert.equal((await staleInvoice.json()).action, 'ignored_stale_subscription');
+  const staleActive = await post({ id: 'evt_stale_act', type: 'customer.subscription.updated', data: { object: { id: 'sub_old', customer: 'cus_live', status: 'active' } } });
+  assert.equal((await staleActive.json()).action, 'ignored_stale_subscription');
+  const live = db().subscriptions[LIVE_EMAIL];
+  assert.equal(live.status, 'trialing');
+  assert.equal(live.suspended, false);
+  assert.equal(live.stripeSubscriptionId, 'sub_live');
+
+  // Reopening an old Checkout return cannot swap in a cancelled subscription.
+  const oldReturn = await fetch(`${BASE}/api/billing/return`, {
+    method: 'POST', headers: { ...bearer(SESSION), 'Content-Type': 'application/json' }, body: JSON.stringify({ sessionId: 'cs_old' }),
+  });
+  assert.equal(oldReturn.status, 502, await oldReturn.clone().text());
+  assert.equal(db().subscriptions[LIVE_EMAIL].stripeSubscriptionId, 'sub_live');
 
   const checkoutEvt = JSON.stringify({
     id: 'evt_cs',

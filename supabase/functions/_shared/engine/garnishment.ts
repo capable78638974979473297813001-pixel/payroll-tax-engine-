@@ -624,6 +624,30 @@ function studentLoanCap(
 }
 
 /**
+ * Split `total` cents across orders in proportion to what each demands, so
+ * the shares add up to exactly `total`. Rounding each share on its own can
+ * land a cent over the ceiling or a cent short of it; instead each share is
+ * floored and the leftover cents go to the largest fractional remainders
+ * (earlier order first on a tie).
+ */
+function prorate(demands: Cents[], total: Cents): Cents[] {
+  const demanded = demands.reduce((s, d) => s + d, 0);
+  if (demanded <= 0 || total <= 0) return demands.map(() => 0);
+  const exact = demands.map((d) => (d * total) / demanded);
+  const shares = exact.map((x) => Math.floor(x + 1e-9));
+  let leftover = total - shares.reduce((s, x) => s + x, 0);
+  const byRemainder = exact
+    .map((x, i) => ({ i, rem: x - shares[i] }))
+    .sort((a, b) => b.rem - a.rem || a.i - b.i);
+  for (const { i } of byRemainder) {
+    if (leftover <= 0) break;
+    shares[i] += 1;
+    leftover -= 1;
+  }
+  return shares;
+}
+
+/**
  * Compute what may lawfully be withheld from ONE paycheck across every
  * garnishment order in effect, applying the CCPA ceilings (federal, plus
  * any researched state override for ordinary garnishment) and the
@@ -680,9 +704,9 @@ export function calculateGarnishments(input: GarnishmentInput): GarnishmentResul
       `(${supportingOtherFamily ? 'supporting another spouse/child' : 'not supporting another spouse/child'}` +
       `${inArrears ? ', 12+ weeks in arrears' : ''}) on ${fmt(disposable)} disposable`;
 
-    for (const order of supportOrders) {
-      const share =
-        demandedTotal > 0 ? roundHalfUp((order.amountOrdered / demandedTotal) * withheldTotal) : 0;
+    const shares = prorate(supportOrders.map((o) => o.amountOrdered), withheldTotal);
+    for (const [i, order] of supportOrders.entries()) {
+      const share = shares[i];
       lines.push({
         orderId: order.id,
         type: 'child_support',

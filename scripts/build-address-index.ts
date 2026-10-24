@@ -8,7 +8,7 @@ import { Readable } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
 
 import {
-  INSERT_POINT_SQL, OPENADDRESSES_REGIONS, ensureIndexSchema, openAddressesRegionUrl, parseOpenAddressesLine, sourceFor, toMicro,
+  OPENADDRESSES_REGIONS, ensureIndexSchema, openAddressesRegionUrl, parseOpenAddressesLine, sourceFor, toMicro,
 } from './address-index-lib.ts';
 
 /**
@@ -46,6 +46,10 @@ import {
  * `.building` file is deleted, the existing index is left exactly as it was, and
  * the process exits 1 naming what failed. `--allow-partial` publishes what was
  * ingested anyway (and still exits 1 so a script notices).
+ *
+ * DUPLICATES ARE DROPPED. A county file that lists a point twice (same cell,
+ * coordinates, number, street, unit, city and ZIP) contributes it once; each file
+ * is staged in a temporary table and copied in with SELECT DISTINCT.
  *
  * REPEAT IMPORTS ARE SAFE. Each county file is loaded in ONE transaction and
  * recorded in `sources.rows` when it commits, so a file already in the index is
@@ -140,8 +144,8 @@ async function ingestEntry(
   zipPath: string,
   entry: string,
   state: string,
-  insert: ReturnType<DatabaseSync['prepare']>,
-): Promise<number | null> {
+  stage: ReturnType<DatabaseSync['prepare']>,
+): Promise<{ added: number; duplicates: number } | null> {
   const src = sourceFor(db, `OpenAddresses ${entry.replace(/^us\//, '').replace(/\.csv$/, '')}`);
   if (src.imported) return null;
 
@@ -156,10 +160,11 @@ async function ingestEntry(
   });
   const lines = createInterface({ input: child.stdout, crlfDelay: Infinity });
   const stateCode = state.toUpperCase();
-  let n = 0;
+  let read = 0;
   let first = true;
   db.exec('BEGIN');
   try {
+    db.exec('DELETE FROM stage');
     for await (const line of lines) {
       if (first) {
         first = false;
@@ -167,20 +172,29 @@ async function ingestEntry(
       }
       const row = parseOpenAddressesLine(line);
       if (!row) continue;
-      insert.run(row.cell, toMicro(row.lat), toMicro(row.lon), row.number, row.street, row.unit, row.city, stateCode, src.id, row.zip);
-      n++;
+      stage.run(row.cell, toMicro(row.lat), toMicro(row.lon), row.number, row.street, row.unit, row.city, stateCode, src.id, row.zip);
+      read++;
     }
     const code = await exited;
     // A truncated or corrupt entry makes the reader exit non-zero after emitting a prefix of its rows.
     if (code !== 0) throw new Error(`could not read ${entry} from ${zipPath} (exit ${code})`);
-    db.prepare('UPDATE sources SET rows = ? WHERE id = ?').run(n, src.id);
+    // A county file can list the same point twice. SELECT DISTINCT keeps one
+    // (NULLs compare equal there), and the staging table keeps memory flat.
+    const added = Number(
+      db.prepare(
+        `INSERT INTO points (cell,lat,lon,number,street,unit,city,state,source,zip)
+         SELECT DISTINCT cell,lat,lon,number,street,unit,city,state,source,zip FROM stage`,
+      ).run().changes,
+    );
+    db.prepare('UPDATE sources SET rows = ? WHERE id = ?').run(added, src.id);
+    db.exec('DELETE FROM stage');
     db.exec('COMMIT');
+    return { added, duplicates: read - added };
   } catch (err) {
     child.kill();
     db.exec('ROLLBACK');
     throw err;
   }
-  return n;
 }
 
 async function downloadRegion(region: string): Promise<string> {
@@ -216,7 +230,12 @@ async function main(): Promise<void> {
   }
 
   const db = openDb(outPath, !args.append);
-  const insert = db.prepare(INSERT_POINT_SQL);
+  // Each county file is staged here, then copied into `points` without its duplicates.
+  db.exec(`CREATE TEMP TABLE IF NOT EXISTS stage (
+    cell INTEGER, lat INTEGER, lon INTEGER, number TEXT, street TEXT, unit TEXT, city TEXT, state TEXT, source INTEGER, zip INTEGER
+  )`);
+  const stage = db.prepare('INSERT INTO stage (cell,lat,lon,number,street,unit,city,state,source,zip) VALUES (?,?,?,?,?,?,?,?,?,?)');
+  let duplicatesDropped = 0;
   let grand = 0;
   let alreadyImported = 0;
   const failures: string[] = [];
@@ -249,7 +268,9 @@ async function main(): Promise<void> {
       if (args.states && !args.states.has(state)) continue;
       let n: number | null;
       try {
-        n = await ingestEntry(db, zipPath, entry, state, insert);
+        const out = await ingestEntry(db, zipPath, entry, state, stage);
+        n = out === null ? null : out.added;
+        if (out) duplicatesDropped += out.duplicates;
       } catch (err) {
         console.error(`\n  ${entry}: ${(err as Error).message}; FAILED`);
         failures.push(`${entry}: ${(err as Error).message}`);
@@ -275,6 +296,7 @@ async function main(): Promise<void> {
   db.exec('PRAGMA wal_checkpoint(TRUNCATE)');
   db.close();
 
+  if (duplicatesDropped > 0) console.log(`${duplicatesDropped.toLocaleString()} duplicate row(s) inside county files were dropped.`);
   if (alreadyImported > 0) console.log(`${alreadyImported} county file(s) were already in the index and were skipped.`);
   const incomplete = failures.length > 0;
   if (incomplete) {

@@ -1409,6 +1409,10 @@ async function handleBillingWebhook(req: IncomingMessage, res: ServerResponse): 
     rememberStripeEvent(db, result.eventId);
     const sub = Object.values(db.subscriptions).find((s) => s.stripeCustomerId === result.customerId);
     if (!sub) return null;
+    // Events arrive late and out of order. One about a subscription this
+    // account no longer holds (an earlier one it replaced) must not cancel,
+    // suspend, revive or overwrite the current one.
+    if (result.subscriptionId && sub.stripeSubscriptionId && result.subscriptionId !== sub.stripeSubscriptionId) return 'stale' as const;
     if (result.subscriptionId && sub.status !== 'cancelled') sub.stripeSubscriptionId = result.subscriptionId;
     if (result.action === 'cancel') {
       sub.suspended = true;
@@ -1435,6 +1439,11 @@ async function handleBillingWebhook(req: IncomingMessage, res: ServerResponse): 
 
   if (applied === 'duplicate') {
     sendJson(res, 200, { received: true, duplicate: true });
+    return;
+  }
+  if (applied === 'stale') {
+    console.log(`[billing webhook] ignored ${result.action} for superseded subscription ${result.subscriptionId} customer=${result.customerId}`);
+    sendJson(res, 200, { received: true, action: 'ignored_stale_subscription' });
     return;
   }
   console.log(`[billing webhook] ${result.action} customer=${result.customerId} account=${applied ?? 'unknown'}`);

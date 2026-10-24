@@ -121,6 +121,20 @@ describe('runPaycheckExtras()', () => {
     assert.deepEqual(m.considered.map((c) => c.level), ['federal', 'state', 'local']);
   });
 
+  test('minimum wage: American Samoa is refused without an industry, and judged against that industry\'s own rate with one', () => {
+    const as = input('AS');
+    const pc = calculatePaycheck(input('OH')); // the paycheck itself is not the point; only the wage floor is
+    assert.throws(
+      () => runPaycheckExtras(as, pc, ok({ minimumWageCheck: { hourlyRate: 700 } }, 'AS')),
+      (err: unknown) => err instanceof ExtrasRefusal && /industry/.test(err.message),
+    );
+    assert.ok(errors({ minimumWageCheck: { hourlyRate: 700, industry: '' } }, 'AS').some((e) => e.path === 'minimumWageCheck.industry'));
+    const m = runPaycheckExtras(as, pc, ok({ minimumWageCheck: { hourlyRate: 600, industry: 'garment' } }, 'AS')).minimumWage!;
+    assert.equal(m.requiredHourlyRate, 578);
+    assert.equal(m.compliant, true);
+    assert.equal(m.bindingLevel, 'state');
+  });
+
   test('minimum wage: a locality that is not recorded is reported as a caveat, not silently treated as "no ordinance"', () => {
     const wa = input('WA');
     const m = runPaycheckExtras(wa, calculatePaycheck(wa), ok({ minimumWageCheck: { hourlyRate: 1500, locality: 'atlantis' } }, 'WA')).minimumWage!;

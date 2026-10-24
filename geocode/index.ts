@@ -498,6 +498,8 @@ async function geocodeAndResolve(address: string, checkDate: string, options?: G
   matched: true;
   matchQuality: MatchQuality;
   schoolDistrictLookupFailed: boolean;
+  /** Plain-language notes for boundary lookups that failed and were quietly replaced by a fallback (see geocodeAndResolve). */
+  boundaryLookupNotes: string[];
   coordinates: { x: number; y: number };
   geographies: { incorporatedPlaces: string[]; counties: string[] };
   precision: 'rooftop' | 'rooftop-osm' | 'neighbor' | 'parcel-centroid' | 'interpolated';
@@ -510,6 +512,7 @@ async function geocodeAndResolve(address: string, checkDate: string, options?: G
   matched: false;
   matchQuality: null;
   schoolDistrictLookupFailed: false;
+  boundaryLookupNotes: string[];
   coordinates: null;
   geographies: null;
   precision: 'interpolated';
@@ -575,6 +578,7 @@ async function geocodeAndResolve(address: string, checkDate: string, options?: G
       matched: false,
       matchQuality: null,
       schoolDistrictLookupFailed: false,
+      boundaryLookupNotes: [],
       coordinates: null,
       geographies: null,
       precision: 'interpolated',
@@ -595,6 +599,7 @@ async function geocodeAndResolve(address: string, checkDate: string, options?: G
   let schoolDistrictName: string | undefined;
   let schoolDistrictLookupFailed = false;
   let historicalVintage = false;
+  const boundaryLookupNotes: string[] = [];
 
   // An authoritative point is only worth having if the jurisdictions get
   // re-asked AT it — the geocoder's own geographies describe the curb
@@ -610,6 +615,8 @@ async function geocodeAndResolve(address: string, checkDate: string, options?: G
       schoolDistrictName = at.result.schoolDistrict ?? undefined;
       point = rooftop.point;
       precision = precisionForTier(rooftop.tier!);
+    } else {
+      boundaryLookupNotes.push('A rooftop point was found for this address, but the Census boundary lookup at that point failed, so the jurisdictions below describe the geocoder\'s interpolated position instead. Retry resolveAddress() to try again.');
     }
   }
 
@@ -625,6 +632,8 @@ async function geocodeAndResolve(address: string, checkDate: string, options?: G
       geographies = at.result.geographies;
       schoolDistrictName = at.result.schoolDistrict ?? undefined;
       historicalVintage = true;
+    } else {
+      boundaryLookupNotes.push(`The boundaries in force for a ${checkDate.slice(0, 4)} check date could not be fetched, so the jurisdictions below use Census's CURRENT boundaries. Cities annex land and districts merge, so near a boundary this can differ. Retry resolveAddress() to try again.`);
     }
   }
 
@@ -649,6 +658,7 @@ async function geocodeAndResolve(address: string, checkDate: string, options?: G
     matched: true,
     matchQuality: geocoded.matchQuality,
     schoolDistrictLookupFailed,
+    boundaryLookupNotes,
     coordinates: geocoded.coordinates,
     geographies: {
       incorporatedPlaces: geographies.incorporatedPlaces,
@@ -738,6 +748,7 @@ export async function resolveAddress(
     matched,
     matchQuality,
     schoolDistrictLookupFailed,
+    boundaryLookupNotes,
     coordinates,
     geographies,
     precision,
@@ -840,6 +851,7 @@ export async function resolveAddress(
   ) {
     lowConfidenceReasons.push(`Census interpolated this address within a wide address range (${matchQuality.addressRangeWidth} addresses on this block face) — less positionally precise than a narrow range, worth a second look if this address is near a jurisdiction boundary.`);
   }
+  lowConfidenceReasons.push(...boundaryLookupNotes);
   if (schoolDistrictLookupFailed) {
     lowConfidenceReasons.push('The school-district lookup (a separate Census service from the main geocoder) failed after retries — municipality/county resolution above is unaffected, but the Ohio schoolDistrictCode / Kentucky school-board tax district was not resolved this call. Retry resolveAddress() to try again.');
   }

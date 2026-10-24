@@ -199,6 +199,19 @@ describe('the two bulk importers build one index (scripts/)', () => {
     assert.equal(rowCount(e.ADDRESS_INDEX_PATH), 2);
   });
 
+  test('a point listed twice inside one county file is stored once', () => {
+    const e = env('dupes');
+    mkdirSync(e.ADDRESS_INDEX_RAW_DIR, { recursive: true });
+    makeZip(join(e.ADDRESS_INDEX_RAW_DIR, 'us_south.zip'), {
+      'us/pa/allegheny.csv': `${OA_HEADER}\n${OA_ROW}\n${OA_ROW}\n-79.99,40.43,601,GRANT ST,,PITTSBURGH,,PA,15219,a,c\n-79.99,40.43,601,GRANT ST,2,PITTSBURGH,,PA,15219,a,d\n`,
+    });
+    const r = run('build-address-index.ts', [], e);
+    assert.equal(r.status, 0, r.stderr);
+    assert.match(r.stdout, /1 duplicate row/);
+    // 600 once, 601 once, and 601 unit 2 is a different address.
+    assert.equal(rowCount(e.ADDRESS_INDEX_PATH), 3);
+  });
+
   test('a quoted comma in a county file lands in the right columns end to end', () => {
     const e = env('quoted');
     mkdirSync(e.ADDRESS_INDEX_RAW_DIR, { recursive: true });

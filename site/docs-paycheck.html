@@ -46,7 +46,7 @@
         <tr><td class="mono">federalW4 <span class="fine">object</span></td><td>required</td><td>All six fields are required: filingStatus, multipleJobs, dependentCredit, otherIncome, deductions, extraWithholding. Dollar fields are cents.</td></tr>
         <tr><td class="mono">ytd <span class="fine">object</span></td><td>required</td><td>Year-to-date socialSecurity, medicare, and futa wages, in cents. Send zeros at the start of the year.</td></tr>
         <tr><td class="mono">workState <span class="fine">object</span></td><td>required</td><td>{ code, certificate }. Pennsylvania uses workPSD and residencePSD.</td></tr>
-        <tr><td class="mono">minimumWageCheck <span class="fine">object</span></td><td></td><td>{ hourlyRate } in cents, compared with wage floors on the same call.</td></tr>
+        <tr><td class="mono">minimumWageCheck <span class="fine">object</span></td><td></td><td>{ hourlyRate } in cents, compared with wage floors on the same call. Optional: locality, employeeCount, tipped, region, occupation. American Samoa has no single minimum wage, so it also needs <code>industry</code> (for example <code>garment</code>); without it the check is refused.</td></tr>
         <tr><td class="mono">garnishments <span class="fine">array</span></td><td></td><td>Orders: consumer_creditor, child_support, federal_student_loan_default. amountOrdered is cents.</td></tr>
       </tbody>
     </table></div>

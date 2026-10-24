@@ -243,7 +243,7 @@ describe('site billing (site/lib/billing.ts)', () => {
     stub('GET', /\/v1\/checkout\/sessions\/cs_1/, () => ({
       json: {
         id: 'cs_1', status: 'complete', customer: 'cus_9', metadata: { omnia_email: 'a@b.co' },
-        subscription: { id: 'sub_9', default_payment_method: { id: 'pm_9', type: 'card', card: { brand: 'visa', last4: '4242' } } },
+        subscription: { id: 'sub_9', status: 'active', default_payment_method: { id: 'pm_9', type: 'card', card: { brand: 'visa', last4: '4242' } } },
       },
     }));
     const out = await completeMeteredCheckout('cs_1');
@@ -252,6 +252,30 @@ describe('site billing (site/lib/billing.ts)', () => {
     assert.equal(out.subscriptionId, 'sub_9');
     assert.equal(out.email, 'a@b.co');
     assert.deepEqual(out.paymentMethod, { id: 'pm_9', kind: 'card', brand: 'visa', last4: '4242' });
+  });
+
+  test('completeMeteredCheckout refuses a session whose subscription has since ended (expanded or bare id)', async () => {
+    process.env.STRIPE_SECRET_KEY = 'sk_test_x';
+    stub('GET', /\/v1\/checkout\/sessions\/cs_old1/, () => ({
+      json: { id: 'cs_old1', status: 'complete', customer: 'cus_9', metadata: { omnia_email: 'a@b.co' }, subscription: { id: 'sub_old', status: 'canceled' } },
+    }));
+    const expanded = await completeMeteredCheckout('cs_old1');
+    assert.deepEqual([expanded.ok, expanded.reason], [false, 'subscription_not_active']);
+
+    stub('GET', /\/v1\/checkout\/sessions\/cs_old2/, () => ({
+      json: { id: 'cs_old2', status: 'complete', customer: 'cus_9', metadata: { omnia_email: 'a@b.co' }, subscription: 'sub_old2' },
+    }));
+    stub('GET', /\/v1\/subscriptions\/sub_old2/, () => ({ json: { id: 'sub_old2', status: 'incomplete_expired' } }));
+    const bare = await completeMeteredCheckout('cs_old2');
+    assert.deepEqual([bare.ok, bare.reason], [false, 'subscription_not_active']);
+
+    // A lookup that fails is a retryable error, not a guess either way.
+    stub('GET', /\/v1\/checkout\/sessions\/cs_old3/, () => ({
+      json: { id: 'cs_old3', status: 'complete', customer: 'cus_9', metadata: { omnia_email: 'a@b.co' }, subscription: 'sub_gone' },
+    }));
+    stub('GET', /\/v1\/subscriptions\/sub_gone/, () => ({ ok: false, json: { error: { message: 'No such subscription' } } }));
+    const failed = await completeMeteredCheckout('cs_old3');
+    assert.deepEqual([failed.ok, failed.reason], [false, 'stripe_error']);
   });
 
   test('completeMeteredCheckout reads a bank account saved in setup mode', async () => {
@@ -298,6 +322,26 @@ describe('site billing (site/lib/billing.ts)', () => {
 
     out = interpretWebhook(evt('charge.refunded'), sign(evt('charge.refunded')));
     assert.equal(out.ok && out.action, 'ignore');
+  });
+
+  test('interpretWebhook names the subscription each event is about', () => {
+    process.env.STRIPE_WEBHOOK_SECRET = 'whsec_test';
+    const sign = (body: string) => {
+      const t = Math.floor(Date.now() / 1000);
+      return `t=${t},v1=${createHmac('sha256', 'whsec_test').update(`${t}.${body}`).digest('hex')}`;
+    };
+    const read = (type: string, object: Record<string, unknown>) => {
+      const body = JSON.stringify({ id: 'evt_x', type, data: { object: { customer: 'cus_1', ...object } } });
+      const out = interpretWebhook(body, sign(body));
+      assert.equal(out.ok, true);
+      return out.ok ? out.subscriptionId : undefined;
+    };
+    assert.equal(read('customer.subscription.deleted', { id: 'sub_a' }), 'sub_a');
+    assert.equal(read('customer.subscription.paused', { id: 'sub_b' }), 'sub_b');
+    assert.equal(read('customer.subscription.resumed', { id: 'sub_c' }), 'sub_c');
+    assert.equal(read('invoice.payment_failed', { subscription: 'sub_d' }), 'sub_d');
+    assert.equal(read('invoice.paid', { subscription: 'sub_e' }), 'sub_e');
+    assert.equal(read('invoice.paid', {}), undefined);
   });
 
   test('reportCall uses STRIPE_METER_EVENT_NAME when it is set', async () => {

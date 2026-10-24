@@ -101,6 +101,27 @@ Progress is in `/var/data/address-index/index-build.log` (Render shell). The dis
 is 30 GB; a Render disk can be grown but never shrunk. Keep `/var/data/address-index`
 out of your off-box backups: it is rebuildable and 13.8 GB.
 
+How the build behaves, so a log can be read correctly:
+
+- **It publishes only a complete build.** A region that fails to download, an
+  archive that cannot be read, or a county file that stops partway makes the run
+  exit 1, deletes the half-built `.building` file and leaves the index already
+  on disk untouched. The log names what failed; rerun the job. `--allow-partial`
+  publishes what was ingested anyway (the exit code is still 1).
+- **Repeat runs are safe.** Each county file is loaded in one transaction and
+  recorded, so `--append` skips files already in the index and an interrupted
+  file leaves nothing behind. A point listed twice inside one county file is
+  stored once.
+- **NAD is optional and goes second.** `node scripts/build-nad-index.ts` (with
+  the extract at `NAD_ZIP_PATH`) appends the National Address Database's bulk
+  file to the same format-2 index. Run it after the OpenAddresses build, which
+  publishes a fresh file. A finished import is recorded and a second run does
+  nothing; an interrupted one needs `--restart`. It refuses a format-1 file.
+- **ZIPs.** The index now stores each point's ZIP, and a point whose ZIP differs
+  from the address's is never matched. A file built before this still reads, but
+  without ZIPs the check falls back to comparing city names; rebuild to get the
+  ZIP check.
+
 ---
 
 ## 1. Persistent storage

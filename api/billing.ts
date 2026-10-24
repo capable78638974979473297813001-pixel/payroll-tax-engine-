@@ -164,6 +164,8 @@ export function handleStripeWebhook(rawBody: string, signatureHeader: string): {
 interface StripeEventShape {
   id?: string;
   type?: string;
+  /** Unix seconds Stripe created the event — the order events happened in, whatever order they arrive. */
+  created?: number;
   data?: {
     object?: {
       id?: string;
@@ -181,8 +183,18 @@ function applyStripeEvent(event: StripeEventShape): { ok: boolean; action: strin
 
   if (event.type === 'checkout.session.completed') {
     const keyId = obj?.metadata?.apiKeyId;
+    // A late event for an older Checkout session (the customer subscribed again
+    // since) must not put the older subscription back. The event's own creation
+    // time, not its arrival time, says which came first.
+    const held = keyId ? getApiKey(keyId) : null;
+    if (
+      held && obj?.subscription && held.stripeSubscriptionId && held.stripeSubscriptionId !== obj.subscription &&
+      held.stripeSubscriptionSetAt && typeof event.created === 'number' && event.created * 1000 < Date.parse(held.stripeSubscriptionSetAt)
+    ) {
+      return { ok: true, action: 'ignored_stale_checkout', keyId };
+    }
     if (keyId && customer) setStripeCustomer(keyId, customer);
-    if (keyId && obj?.subscription) setSubscription(keyId, obj.subscription);
+    if (keyId && obj?.subscription) setSubscription(keyId, obj.subscription, typeof event.created === 'number' ? event.created * 1000 : undefined);
     return { ok: true, action: keyId ? 'checkout_completed' : 'ignored', keyId: keyId ?? null, reason: keyId ? undefined : 'no_api_key' };
   }
 
