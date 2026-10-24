@@ -30,7 +30,10 @@
   <main>
     <div class="row-between">
       <h1 class="page">Overview</h1>
-      <a class="btn secondary sm" href="/sandbox">Open sandbox</a>
+      <div style="display:flex;gap:12px;align-items:center">
+        <button class="btn secondary sm" id="signout" type="button">Sign out</button>
+        <a class="btn secondary sm" href="/sandbox">Open sandbox</a>
+      </div>
     </div>
     <div class="banner" style="margin-top:24px">
       <span id="trial">Loading your account.</span>
@@ -79,7 +82,6 @@
         <tr><td>Terms accepted</td><td id="a-terms">—</td></tr>
       </tbody>
     </table></div>
-    <p style="margin-top:16px"><button class="btn secondary sm" id="signout" type="button">Sign out</button></p>
   </main>
 </div>
 <script src="/assets/session.js"></script>
