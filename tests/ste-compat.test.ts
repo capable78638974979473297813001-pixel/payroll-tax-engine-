@@ -214,4 +214,50 @@ describe('STE-shaped compatibility layer (api/ste-compat.ts)', () => {
       assert.match(results[0].error ?? '', /Unrecognized Frequency/);
     });
   });
+
+  describe('payCalc() regressions', () => {
+    const W4 = { filingStatus: 'single', multipleJobs: false, dependentCredit: 0, otherIncome: 0, deductions: 0, extraWithholding: 0 } as const;
+    const YTD = { socialSecurity: 0, medicare: 0, futa: 0 };
+
+    test('a residence city id (Detroit resident working in Detroit) matches the native workCity + residenceCity calculation', () => {
+      const entries = listUniqueTaxIds(CHECK_DATE);
+      const miState = entries.find((e) => e.state === 'MI' && e.type === 'state')!;
+      const detroit = entries.find((e) => e.state === 'MI' && e.type === 'city' && e.name === 'Detroit')!;
+      const [result] = payCalc([
+        { checkDate: CHECK_DATE, frequency: 'biweekly', grossPay: 3000, workUniqueTaxIds: [miState.uniqueTaxId, detroit.uniqueTaxId], liveUniqueTaxIds: [miState.uniqueTaxId, detroit.uniqueTaxId] },
+      ]);
+      const direct = calculatePaycheck({
+        checkDate: CHECK_DATE,
+        payFrequency: 'biweekly',
+        earnings: [{ code: 'REG', category: 'regular', amount: 300_000 }],
+        deductions: [],
+        federalW4: { ...W4 },
+        ytd: { ...YTD },
+        workState: { code: 'MI', certificate: { workCity: 'Detroit', residenceCity: 'Detroit' } },
+      });
+      assert.equal(result.error, undefined);
+      assert.equal(result.netPay, direct.netPay / 100);
+    });
+
+    test('local tax lines come back with a null id, not the state-level id', () => {
+      const entries = listUniqueTaxIds(CHECK_DATE);
+      const ohState = entries.find((e) => e.state === 'OH' && e.type === 'state')!;
+      const columbus = entries.find((e) => e.state === 'OH' && e.type === 'city' && e.name === 'Columbus')!;
+      const [result] = payCalc([{ checkDate: CHECK_DATE, frequency: 'biweekly', grossPay: 3000, workUniqueTaxIds: [ohState.uniqueTaxId, columbus.uniqueTaxId] }]);
+      const local = result.taxJurisdictionParms.find((l) => l.description === 'Ohio Municipal Income Tax')!;
+      assert.ok(local, 'expected the Columbus municipal line');
+      assert.equal(local.uniqueTaxId, null);
+      assert.equal(local.locationCode, null);
+      const stateLine = result.taxJurisdictionParms.find((l) => l.description === 'Ohio Income Tax')!;
+      assert.equal(stateLine.uniqueTaxId, ohState.uniqueTaxId);
+    });
+
+    test('reported grossPay is the pay actually calculated from when earnings are supplied', () => {
+      const ohState = listUniqueTaxIds(CHECK_DATE).find((e) => e.state === 'OH' && e.type === 'state')!;
+      const [result] = payCalc([
+        { checkDate: CHECK_DATE, frequency: 'biweekly', grossPay: 3000, earnings: [{ code: 'REG', category: 'regular', amount: 100_000 }], workUniqueTaxIds: [ohState.uniqueTaxId] },
+      ]);
+      assert.equal(result.grossPay, 1000);
+    });
+  });
 });

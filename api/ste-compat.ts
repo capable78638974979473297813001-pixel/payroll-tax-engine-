@@ -402,7 +402,15 @@ function applyEntry(
   // the field a work location writes. The same id on the live (residence)
   // profile is the employee's residence PSD — pennsylvaniaLocalTax reads
   // that from the work certificate's residencePSD, not from workPSD.
-  const field = isState ? 'state' : role === 'residence' && entry.field === 'workPSD' ? 'residencePSD' : entry.field;
+  // Likewise a city id on the live profile is the employee's residence city:
+  // the city taxes read residenceCity, not workCity, for where they live.
+  const field = isState
+    ? 'state'
+    : role === 'residence' && entry.field === 'workPSD'
+      ? 'residencePSD'
+      : role === 'residence' && entry.field === 'workCity'
+        ? 'residenceCity'
+        : entry.field;
   const prior = acc.setBy.get(field);
   if (prior && prior.value !== entry.value) {
     throw new Error(
@@ -466,9 +474,13 @@ export function payCalc(requests: PayCalcRequest[]): PayCalcResult[] {
 
       const certificate: Partial<StateCertificate> = { ...work.certificate };
       const residenceCertificate: Partial<StateCertificate> = { ...live.certificate };
-      // Local PA tax reads both PSD codes off the WORK certificate.
+      // Local taxes read the residence-side fields off the WORK certificate
+      // (PA's residence PSD, the MI/OH/KY residence city).
       if (residenceCertificate.residencePSD && !certificate.residencePSD) {
         certificate.residencePSD = residenceCertificate.residencePSD;
+      }
+      if (residenceCertificate.residenceCity && !certificate.residenceCity) {
+        certificate.residenceCity = residenceCertificate.residenceCity;
       }
 
       for (const parm of req.taxJurisdictionParms ?? []) {
@@ -509,9 +521,9 @@ export function payCalc(requests: PayCalcRequest[]): PayCalcResult[] {
       // risking a WRONG id on a real dollar amount — the safer failure
       // here is an honest null, not a confident guess.
       const taxJurisdictionParms: PayCalcResultLine[] = result.taxes.map((line) => {
-        const catalogEntry = [...catalogFor(req.checkDate).entries].find(
-          (e) => e.state === work.stateCode && line.id.startsWith(`${work.stateCode}_`) && e.type === 'state',
-        );
+        const catalogEntry = line.jurisdiction === 'state'
+          ? catalogFor(req.checkDate).entries.find((e) => e.state === work.stateCode && line.id.startsWith(`${work.stateCode}_`) && e.type === 'state')
+          : undefined;
         return {
           uniqueTaxId: line.jurisdiction === 'federal' ? FEDERAL_UNIQUE_TAX_ID : catalogEntry?.uniqueTaxId ?? null,
           locationCode: line.jurisdiction === 'federal' ? FEDERAL_UNIQUE_TAX_ID : catalogEntry?.uniqueTaxId ?? null,
@@ -524,7 +536,9 @@ export function payCalc(requests: PayCalcRequest[]): PayCalcResult[] {
       return {
         employeeId: req.employeeId,
         checkDate: req.checkDate,
-        grossPay: req.grossPay,
+        // What the paycheck was calculated from: when earnings are supplied they
+        // win over the separate grossPay figure, and the result must say so.
+        grossPay: centsToDecimalDollars(result.grossPay),
         netPay: centsToDecimalDollars(result.netPay),
         employeeTaxTotal: centsToDecimalDollars(result.employeeTaxTotal),
         employerTaxTotal: centsToDecimalDollars(result.employerTaxTotal),

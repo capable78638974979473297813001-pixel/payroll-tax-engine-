@@ -1,6 +1,6 @@
 import {
-  cancelByCustomer, claimStripeEvent, enqueueMeterEvent, getApiKey, pendingMeterEvents, setCardOnFile, setStripeCustomer,
-  setSubscription, setSuspendedByCustomer, settleBalance, settleMeterEvent,
+  cancelByCustomer, claimStripeEvent, enqueueMeterEvent, getApiKey, keyByStripeCustomer, pendingMeterEvents, setCardOnFile, setStripeCustomer,
+  setSubscription, setSuspendedByCustomer, settleBalance, settleMeterEvent, stripeEventSeen,
 } from './keys.ts';
 import { deliverMeterEvent, isDue } from './meter-queue.ts';
 import {
@@ -14,6 +14,7 @@ import {
   retrieveSubscription,
   stripeConfigured,
   StripeError,
+  type StripeSubscription,
   verifyWebhookSignature,
 } from './stripe.ts';
 
@@ -75,29 +76,40 @@ export async function completeCardSetup(sessionId: string): Promise<{ ok: boolea
   const session = await retrieveCheckoutSession(sessionId);
   const apiKeyId = session.metadata?.apiKeyId;
   if (!apiKeyId) return { ok: false, reason: 'no_api_key_in_session' };
-  if (session.customer && typeof session.customer === 'string') setStripeCustomer(apiKeyId, session.customer);
+  const sessionCustomer = typeof session.customer === 'string' ? session.customer : null;
 
   // Subscription mode (metered per-call billing): store the subscription id and
   // read the card off the subscription's default payment method for display.
+  // The subscription is read BEFORE anything is stored: this URL can be
+  // reopened long after Checkout, and an old session must not put a dead
+  // subscription in place of the one the key has now.
   const sub = session.subscription;
   const subscriptionId = typeof sub === 'string' ? sub : sub?.id ?? null;
   if (subscriptionId) {
-    setSubscription(apiKeyId, subscriptionId);
     let brand: string | null = null;
     let last4: string | null = null;
     let paymentMethodId: string | null = null;
+    let current: StripeSubscription | null = null;
     try {
-      const s = await retrieveSubscription(subscriptionId);
-      const pm = s.default_payment_method;
-      if (typeof pm === 'object' && pm) {
-        paymentMethodId = pm.id;
-        brand = pm.card?.brand ?? null;
-        last4 = pm.card?.last4 ?? null;
-      } else if (typeof pm === 'string') {
-        paymentMethodId = pm;
-      }
+      current = await retrieveSubscription(subscriptionId);
     } catch {
-      /* display-only */
+      /* status unknown; handled below */
+    }
+    if (current && (current.status === 'canceled' || current.status === 'incomplete_expired')) {
+      return { ok: false, reason: 'subscription_not_active' };
+    }
+    const existing = getApiKey(apiKeyId)?.stripeSubscriptionId;
+    // Status couldn't be read: only fill an empty slot, never replace a subscription we already hold.
+    if (!current && existing && existing !== subscriptionId) return { ok: false, reason: 'subscription_unverified' };
+    if (sessionCustomer) setStripeCustomer(apiKeyId, sessionCustomer);
+    setSubscription(apiKeyId, subscriptionId);
+    const pm = current?.default_payment_method;
+    if (typeof pm === 'object' && pm) {
+      paymentMethodId = pm.id;
+      brand = pm.card?.brand ?? null;
+      last4 = pm.card?.last4 ?? null;
+    } else if (typeof pm === 'string') {
+      paymentMethodId = pm;
     }
     if (paymentMethodId) setCardOnFile(apiKeyId, { paymentMethodId, brand, last4 });
     return { ok: true, brand, last4, metered: true };
@@ -108,6 +120,7 @@ export async function completeCardSetup(sessionId: string): Promise<{ ok: boolea
   const rawPm = typeof si === 'object' && si ? si.payment_method : null;
   const paymentMethodId = typeof rawPm === 'string' ? rawPm : rawPm?.id ?? null;
   if (!paymentMethodId) return { ok: false, reason: 'no_payment_method' };
+  if (sessionCustomer) setStripeCustomer(apiKeyId, sessionCustomer);
   let brand: string | null = null;
   let last4: string | null = null;
   try {
@@ -131,26 +144,38 @@ export function handleStripeWebhook(rawBody: string, signatureHeader: string): {
   if (!secret) return { ok: false, action: 'ignored', reason: 'no_webhook_secret' };
   if (!verifyWebhookSignature(rawBody, signatureHeader, secret)) return { ok: false, action: 'rejected', reason: 'bad_signature' };
 
-  let event: {
-    id?: string;
-    type?: string;
-    data?: {
-      object?: {
-        id?: string;
-        customer?: string;
-        status?: string;
-        subscription?: string;
-        metadata?: { apiKeyId?: string };
-      };
-    };
-  };
+  let event: StripeEventShape;
   try {
     event = JSON.parse(rawBody);
   } catch {
     return { ok: false, action: 'rejected', reason: 'bad_json' };
   }
-  if (event.id && !claimStripeEvent(event.id)) return { ok: true, action: 'duplicate' };
+  if (event.id && stripeEventSeen(event.id)) return { ok: true, action: 'duplicate' };
 
+  const result = applyStripeEvent(event);
+  // Record the id only now that the changes are saved: if applying threw or the
+  // process died first, Stripe's retry is processed instead of skipped as a
+  // duplicate. Every handler below sets state to a value, so applying an event
+  // twice is harmless.
+  if (event.id) claimStripeEvent(event.id);
+  return result;
+}
+
+interface StripeEventShape {
+  id?: string;
+  type?: string;
+  data?: {
+    object?: {
+      id?: string;
+      customer?: string;
+      status?: string;
+      subscription?: string;
+      metadata?: { apiKeyId?: string };
+    };
+  };
+}
+
+function applyStripeEvent(event: StripeEventShape): { ok: boolean; action: string; keyId?: string | null; reason?: string } {
   const obj = event.data?.object;
   const customer = typeof obj?.customer === 'string' ? obj.customer : undefined;
 
@@ -162,6 +187,17 @@ export function handleStripeWebhook(rawBody: string, signatureHeader: string): {
   }
 
   if (!customer) return { ok: true, action: 'ignored', reason: 'no_customer' };
+
+  // Events are delivered late and out of order. One about a subscription the key
+  // no longer holds (an old one it replaced) must not suspend, cancel or
+  // revive the current one. Subscription events carry the subscription as
+  // their own id; invoice events name it in `subscription`. An event naming no
+  // subscription, or a key holding none, is applied as before.
+  const eventSubscription = event.type?.startsWith('customer.subscription.') ? obj?.id : typeof obj?.subscription === 'string' ? obj.subscription : undefined;
+  const heldKey = keyByStripeCustomer(customer);
+  if (eventSubscription && heldKey?.stripeSubscriptionId && heldKey.stripeSubscriptionId !== eventSubscription) {
+    return { ok: true, action: 'ignored_stale_subscription', keyId: heldKey.id };
+  }
 
   switch (event.type) {
     case 'invoice.payment_failed':
@@ -281,7 +317,9 @@ export async function chargeOutstanding(keyId: string): Promise<ChargeResult> {
     if (intent.status !== 'succeeded') {
       return { ok: false, chargedCents: 0, reason: 'charge_incomplete', error: intent.status, paymentIntentId: intent.id };
     }
-    settleBalance(key.id); // zero the ledger only now that Stripe confirmed
+    // Take off only what Stripe collected: usage recorded while the charge was
+    // in flight is a new balance, not part of this payment.
+    settleBalance(key.id, amount);
     return { ok: true, chargedCents: amount, paymentIntentId: intent.id };
   } catch (err) {
     const message = err instanceof StripeError ? err.message : err instanceof Error ? err.message : 'charge failed';

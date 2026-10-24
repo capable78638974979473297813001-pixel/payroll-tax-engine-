@@ -1,11 +1,11 @@
 import { test, describe, before, after, beforeEach } from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtempSync, rmSync } from 'node:fs';
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
 import { createHmac } from 'node:crypto';
-import { mintApiKey, pendingMeterEvents, recordUsage, usageForKey, getApiKey, verifyApiKey, setStripeCustomer } from '../api/keys.ts';
+import { mintApiKey, pendingMeterEvents, recordUsage, usageForKey, getApiKey, verifyApiKey, setStripeCustomer, setSubscription, setCardOnFile } from '../api/keys.ts';
 import { chargeOutstanding, completeCardSetup, handleStripeWebhook, meteringConfigured, reportCall, startCardSetup } from '../api/billing.ts';
 
 // A fake Stripe: route requests by method + path to canned responses.
@@ -404,4 +404,89 @@ describe('Stripe metering durability and cancellation (api/billing.ts)', () => {
       delete process.env.STRIPE_WEBHOOK_SECRET;
     }
   });
+});
+
+describe('billing race and replay safety (api/billing.ts)', () => {
+  const sign = (body: string) => {
+    const t = Math.floor(Date.now() / 1000);
+    return `t=${t},v1=${createHmac('sha256', 'whsec_test').update(`${t}.${body}`).digest('hex')}`;
+  };
+  const withSecret = async (fn: () => void | Promise<void>) => {
+    process.env.STRIPE_WEBHOOK_SECRET = 'whsec_test';
+    try { await fn(); } finally { delete process.env.STRIPE_WEBHOOK_SECRET; }
+  };
+
+  test('usage added while Stripe is confirming a charge stays on the balance', async () => {
+    process.env.STRIPE_SECRET_KEY = 'sk_test_fake';
+    const { key } = mintApiKey('Race Co', { pricePerCallCents: 100 });
+    const id = verifyApiKey(key)!.id;
+    setStripeCustomer(id, 'cus_race');
+    setCardOnFile(id, { paymentMethodId: 'pm_race' });
+    recordUsage(id, { statusCode: 200 }); // $1.00 due
+    stub('POST', /\/v1\/payment_intents$/, () => {
+      recordUsage(id, { statusCode: 200 }); // another $1.00 lands while the charge is in flight
+      return { json: { id: 'pi_race', status: 'succeeded' } };
+    });
+    const out = await chargeOutstanding(id);
+    assert.equal(out.ok, true);
+    assert.equal(out.chargedCents, 100);
+    assert.equal(usageForKey(id)!.balanceDueCents, 100); // the second dollar is still owed
+  });
+
+  test('a delayed event for an old subscription does not suspend or cancel the current one', () => withSecret(() => {
+    const { key } = mintApiKey('Stale Co');
+    const id = verifyApiKey(key)!.id;
+    setStripeCustomer(id, 'cus_stale');
+    setSubscription(id, 'sub_new');
+    const cancelOld = JSON.stringify({ id: 'evt_old_del', type: 'customer.subscription.deleted', data: { object: { id: 'sub_old', customer: 'cus_stale' } } });
+    assert.equal(handleStripeWebhook(cancelOld, sign(cancelOld)).action, 'ignored_stale_subscription');
+    const failOld = JSON.stringify({ id: 'evt_old_upd', type: 'customer.subscription.updated', data: { object: { id: 'sub_old', customer: 'cus_stale', status: 'past_due' } } });
+    assert.equal(handleStripeWebhook(failOld, sign(failOld)).action, 'ignored_stale_subscription');
+    const activeOld = JSON.stringify({ id: 'evt_old_act', type: 'customer.subscription.updated', data: { object: { id: 'sub_old', customer: 'cus_stale', status: 'active' } } });
+    assert.equal(handleStripeWebhook(activeOld, sign(activeOld)).action, 'ignored_stale_subscription');
+    const invOld = JSON.stringify({ id: 'evt_old_inv', type: 'invoice.payment_failed', data: { object: { customer: 'cus_stale', subscription: 'sub_old' } } });
+    assert.equal(handleStripeWebhook(invOld, sign(invOld)).action, 'ignored_stale_subscription');
+    const k = getApiKey(id)!;
+    assert.equal(k.suspended, false);
+    assert.equal(k.billingCancelledAt ?? null, null);
+    assert.equal(k.stripeSubscriptionId, 'sub_new');
+    // the current subscription's own events still apply
+    const cancelNew = JSON.stringify({ id: 'evt_new_del', type: 'customer.subscription.deleted', data: { object: { id: 'sub_new', customer: 'cus_stale' } } });
+    assert.equal(handleStripeWebhook(cancelNew, sign(cancelNew)).action, 'cancelled');
+  }));
+
+  test('reopening an old Checkout return cannot replace the current subscription with a cancelled one', async () => {
+    process.env.STRIPE_SECRET_KEY = 'sk_test_fake';
+    const { key } = mintApiKey('Return Co');
+    const id = verifyApiKey(key)!.id;
+    setStripeCustomer(id, 'cus_ret');
+    setSubscription(id, 'sub_new');
+    stub('GET', /\/v1\/checkout\/sessions\/cs_old/, () => ({ json: { id: 'cs_old', customer: 'cus_ret', metadata: { apiKeyId: id }, subscription: 'sub_old' } }));
+    stub('GET', /\/v1\/subscriptions\/sub_old/, () => ({ json: { id: 'sub_old', status: 'canceled' } }));
+    const out = await completeCardSetup('cs_old');
+    assert.equal(out.ok, false);
+    assert.equal(out.reason, 'subscription_not_active');
+    assert.equal(getApiKey(id)!.stripeSubscriptionId, 'sub_new');
+  });
+
+  test('a webhook whose changes did not land is applied on retry, not skipped as a duplicate', () => withSecret(() => {
+    const { key } = mintApiKey('Crash Co');
+    const id = verifyApiKey(key)!.id;
+    setStripeCustomer(id, 'cus_crash');
+    const body = JSON.stringify({ id: 'evt_crash', type: 'invoice.payment_failed', data: { object: { customer: 'cus_crash' } } });
+    // Simulate a failure mid-apply: a corrupt key entry makes the customer lookup throw.
+    const dbFile = join(dir, 'api-keys.json');
+    const corrupt = JSON.parse(readFileSync(dbFile, 'utf8'));
+    corrupt.keys = { broken: null, ...corrupt.keys }; // first, so the customer lookup hits it
+    writeFileSync(dbFile, JSON.stringify(corrupt));
+    assert.throws(() => handleStripeWebhook(body, sign(body)));
+    const repaired = JSON.parse(readFileSync(dbFile, 'utf8')); // keeps whatever the failed delivery left behind
+    delete repaired.keys.broken;
+    writeFileSync(dbFile, JSON.stringify(repaired));
+    // The failed delivery must not have been recorded as processed.
+    const retry = handleStripeWebhook(body, sign(body));
+    assert.notEqual(retry.action, 'duplicate');
+    assert.equal(getApiKey(id)!.suspended, true);
+    assert.equal(handleStripeWebhook(body, sign(body)).action, 'duplicate'); // once applied, a redelivery is a no-op
+  }));
 });
