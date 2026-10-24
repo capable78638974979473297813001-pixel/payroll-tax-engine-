@@ -142,12 +142,14 @@ Then run the check with the same values. On Render, open your service's **Shell*
    14-day trial. Pay with test card `4242 4242 4242 4242`, any future date, any
    CVC.
 3. You return to the site, the key is issued, the account shows *trialing*.
-4. Make a few `POST /v1/paycheck` calls. A **sandbox** key (`sk_test_`) is not
-   metered. A **live** key (`sk_live_`, issued only when `OMNIA_ISSUE_LIVE_KEYS=1`)
-   sends one Billing Meter event per successful calculation, including each
-   calculation inside a batch, with `value` 1 and a unique identifier. If Stripe
-   is down the API still returns the calculation and the event stays queued.
-   `npm run meter:queue` shows anything not yet delivered.
+4. Make a few `POST /v1/paycheck` calls. Every issued key is `sk_live_` and
+   returns real calculations. A stored `sk_test_` key is rejected with
+   `401 key_not_accepted` and is not metered. Each successful paycheck,
+   including each paycheck inside `POST /v1/payCalc` and `POST /v1/payroll/run`,
+   sends one Billing Meter event with `value` 1 and a unique identifier,
+   including during the 14-day trial. Address lookups are not metered.
+   If Stripe is down the API still returns the calculation and the event
+   stays queued. `npm run meter:queue` shows anything not yet delivered.
 5. In Stripe, send a test `invoice.payment_failed` event to the endpoint. The
    key should answer `402 account_suspended`. Send `invoice.paid`: it should work
    again.
@@ -156,8 +158,25 @@ Then run the check with the same values. On Render, open your service's **Shell*
 
 Repeat sections 1, 2, 4 and 5 in **live mode** (new meter, new price, new
 webhook endpoint, live keys), swap all four values on the server together, run
-`npm run check:stripe` with the live values, set `OMNIA_ISSUE_LIVE_KEYS=1` to
-issue `sk_live_` keys, and walk through section 7 once with a real card.
+`npm run check:stripe` with the live values, and walk through section 7 once
+with a real card. Issued customer keys are already `sk_live_`. `OMNIA_ISSUE_LIVE_KEYS`
+is not read.
+
+## Trial usage on the metered price
+
+Checkout creates the subscription with `subscription_data[trial_period_days]=14`
+and `payment_method_collection=always`. The price is `STRIPE_PRICE_ID` (8¢ per
+unit in test mode; the site copy says $0.08). The app keeps sending one meter
+event per successful paycheck during the trial.
+
+Stripe's free trial period does not bill usage recorded during the trial.
+After the trial, billing resumes for usage recorded after the trial ends.
+That is why trial usage is $0 on this integration. Do not switch this to a
+Stripe Trial Offer: a trial offer can bill metered usage at an introductory
+price, and Checkout support for trial offers is a private preview.
+
+- https://docs.stripe.com/billing/subscriptions/trials/free-trials — "Trials with usage-based billing"
+- https://docs.stripe.com/billing/subscriptions/trials/compare — free trial period row
 
 ## Starting over
 

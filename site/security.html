@@ -24,8 +24,8 @@
   <div class="prose" style="margin-top:28px;max-width:760px">
     <h2>API keys</h2>
     <p>Keys are stored as hashes. The full key is shown once, when it is issued. A key can be set to expire. After that the API returns <span class="mono">expired_key</span>.</p>
-    <h2>Sandbox and live</h2>
-    <p>Sandbox keys start with <span class="mono">sk_test_</span>. Live keys start with <span class="mono">sk_live_</span>. They are separate. Every response says which mode answered, in the <span class="mono">Omnia-Mode</span> response header.</p>
+    <h2>One API key</h2>
+    <p>Issued keys start with <span class="mono">sk_live_</span> and return real calculations. An older key that is no longer accepted returns <span class="mono">401 key_not_accepted</span>. Sign in to the console and issue a new key. Responses from an accepted key include <span class="mono">Omnia-Mode: live</span>.</p>
     <h2>Rate limits</h2>
     <p>Calls are rate limited per key. When you hit the limit the API returns 429 <span class="mono">rate_limited</span> and a <span class="mono">Retry-After</span> header.</p>
     <h2>Passwords and sessions</h2>

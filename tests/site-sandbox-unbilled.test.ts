@@ -9,10 +9,9 @@ import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 /**
- * The terms and the pricing page promise that sandbox calls are not billed.
- * With Stripe metering switched ON but live keys off (the default), every key
- * is an sk_test_ sandbox key, and no call on it may reach the Stripe meter.
- * Also checks the usage endpoint the dashboard reads.
+ * Issued keys are sk_live_ and paycheck calculations are metered during the
+ * trial. The usage endpoint the dashboard reads counts paychecks, not a
+ * separate unbilled key mode.
  */
 
 const REPO = join(dirname(fileURLToPath(import.meta.url)), '..');
@@ -86,7 +85,7 @@ after(() => {
   rmSync(dir, { recursive: true, force: true });
 });
 
-test('a sandbox key is never metered, and the usage endpoint counts it as sandbox', async () => {
+test('an issued key is sk_live_ and trial paycheck calculations are metered', async () => {
   await post('/api/signup', { name: 'Sandy Box', email: EMAIL, company: 'Sandbox Payroll', phone: '555-000-2222', agreeToTerms: true });
   const code = /^(\d{6}) /.exec(mailed.at(-1)!.subject)![1];
   const v = await post('/api/verify-email', { email: EMAIL, code });
@@ -96,25 +95,27 @@ test('a sandbox key is never metered, and the usage endpoint counts it as sandbo
   assert.equal(acc.status, 200);
   assert.equal((await post('/api/billing/return', { sessionId: 'cs_ok' }, bearer(session))).status, 200);
   const issued = await (await post('/api/issue-key', {}, bearer(session))).json();
-  assert.match(issued.key, /^sk_test_/);
+  assert.match(issued.key, /^sk_live_/);
+  assert.equal(String(issued.key).includes('sk_test_'), false);
 
   for (let i = 0; i < 2; i++) {
     const r = await fetch(`${BASE}/v1/paycheck`, { method: 'POST', headers: { ...bearer(issued.key), 'Content-Type': 'application/json' }, body: JSON.stringify(paycheckBody) });
     assert.equal(r.status, 200);
-    assert.equal(r.headers.get('omnia-mode'), 'test');
+    assert.equal(r.headers.get('omnia-mode'), 'live');
   }
-  await new Promise((r) => setTimeout(r, 300));
-  assert.equal(db().meterQueue.length, 0, 'nothing queued for Stripe');
-  assert.equal(meterEvents.length, 0, 'nothing sent to Stripe');
+  for (let i = 0; i < 40 && meterEvents.length < 2; i++) await new Promise((r) => setTimeout(r, 50));
+  assert.equal(meterEvents.length, 2, 'trial paycheck calculations are reported');
+  assert.equal(db().meterQueue.length, 0, 'delivered events leave the queue');
+  assert.equal(db().subscriptions[EMAIL].status, 'trialing');
 
   const usage = await (await fetch(`${BASE}/api/usage`, { headers: bearer(session) })).json();
   assert.equal(usage.callsLast30, 2);
   assert.equal(usage.callsTodayOk, 2);
-  assert.equal(usage.billing.sandboxCalls, 2);
-  assert.equal(usage.billing.liveCalculations, 0);
+  assert.equal(usage.billing.paycheckCalculations, 2);
+  assert.equal(usage.billing.sandboxCalls, undefined);
   assert.equal(usage.daily.length, 30);
   assert.equal(usage.daily.at(-1).calls, 2);
   assert.equal(usage.keys.length, 1);
-  assert.equal(usage.keys[0].mode, 'test');
+  assert.equal(usage.keys[0].mode, 'live');
   assert.equal(usage.keys[0].totalCalls, 2);
 });

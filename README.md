@@ -44,7 +44,7 @@ Money is integer cents. `dollars(3.07)` is 307.
 | `supabase/functions/` | Edge-function copy of `src/`. Regenerate it with `npm run edge:build` after changing `src/` |
 | `docs/` | Rounding, geocoding coverage, payments, and the go-live runbook |
 
-Two billing paths exist on purpose. The public site reports each successful live paycheck calculation to a Stripe billing meter. The price is the Stripe price in `STRIPE_PRICE_ID`; the app does not hardcode a rate. The self-hosted API in `examples/api-server.ts` charges the key's own `pricePerCallCents` on a local ledger, and switches to the Stripe meter (one unit per successful calculation) when that key has a Stripe customer and metering is configured. It does not do both. Sandbox keys are not metered.
+Two billing paths exist on purpose. The public site reports each successful paycheck calculation to a Stripe billing meter, including during the 14-day trial. The price id is `STRIPE_PRICE_ID` (the published rate is $0.08 per paycheck). The self-hosted API in `examples/api-server.ts` charges the key's own `pricePerCallCents` on a local ledger, and switches to the Stripe meter (one event per successful paycheck, including each paycheck in a batch) when that key has a Stripe customer and metering is configured. It does not do both. The site rejects stored `sk_test_` customer keys.
 
 ## Requirements
 

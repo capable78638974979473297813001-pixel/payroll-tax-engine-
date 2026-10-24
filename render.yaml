@@ -58,6 +58,4 @@ services:
       # Leave unset while testing (sk_test_ Stripe keys). Set to 1 before using sk_live_.
       # - key: STRIPE_ALLOW_LIVE
       #   value: "1"
-      # Leave unset while testing (sk_test_ API keys). Set to 1 for sk_live_ keys.
-      # - key: OMNIA_ISSUE_LIVE_KEYS
-      #   value: "1"
+      # Customer API keys are always sk_live_. OMNIA_ISSUE_LIVE_KEYS is not read.
