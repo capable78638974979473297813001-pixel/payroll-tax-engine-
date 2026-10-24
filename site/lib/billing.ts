@@ -184,8 +184,9 @@ export async function startMeteredCheckout(input: {
   if (!stripeConfigured()) return { ok: false, reason: 'stripe_not_configured' };
   if (!priceId) return { ok: false, reason: 'no_price_configured' };
   try {
-    // Do not send payment_method_types. Stripe API 2026-09-30.endive rejects
-    // it; Checkout uses the dynamic payment methods enabled in the Dashboard.
+    // createSubscriptionCheckoutSession reads the price (cached per process).
+    // Metered prices omit quantity. A licensed price sends quantity 1 and
+    // warns that usage will not bill. The price amount is never read here.
     const session = await createSubscriptionCheckoutSession({
       customerId: input.customerId,
       apiKeyId: input.email,

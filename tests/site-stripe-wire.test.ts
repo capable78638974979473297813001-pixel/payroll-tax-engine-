@@ -110,6 +110,9 @@ before(async () => {
         res.writeHead(status, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify(body));
       };
+      if (req.method === 'GET' && url.startsWith('/v1/prices/')) {
+        return send(200, { id: 'price_wire', recurring: { usage_type: 'metered' } });
+      }
       if (url === '/v1/checkout/sessions' && req.method === 'POST') {
         checkoutBody = raw;
         return send(200, { id: 'cs_new', url: 'https://checkout.test/cs_new' });
@@ -188,6 +191,7 @@ test('checkout, meter events, and the webhook', async () => {
   assert.equal(params.get('mode'), 'subscription');
   assert.equal(params.get('customer'), 'cus_live');
   assert.equal(params.get('line_items[0][price]'), 'price_wire');
+  assert.equal(params.get('line_items[0][quantity]'), null);
   assert.equal(params.get('success_url'), 'https://omniatax.io/signup/payment?setup=ok&session_id={CHECKOUT_SESSION_ID}');
   assert.equal(params.get('cancel_url'), 'https://omniatax.io/signup/payment?setup=cancelled');
   assert.equal(checkoutBody.includes('payment_method_types'), false);
