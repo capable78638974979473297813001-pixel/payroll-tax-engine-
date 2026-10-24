@@ -1,4 +1,4 @@
-# Auto-update: 2026-10-23
+# Auto-update: 2026-10-24
 
 Mode: **check only**.
 
