@@ -128,7 +128,7 @@ describe('accounts survive a restart', () => {
     await start();
     const me = await fetch(`${base}/v1/me`, { headers: { Authorization: `Bearer ${key}` } });
     assert.equal(me.status, 200);
-    assert.equal((await me.json()).mode, 'test');
+    assert.equal((await me.json()).mode, 'live', 'site-issued keys are always live');
     // The returning customer can sign in again with an emailed code.
     assert.equal((await post('/api/signin', { email: EMAIL })).status, 200);
     const v = await post('/api/verify-email', { email: EMAIL, code: db().accounts[EMAIL].code });
