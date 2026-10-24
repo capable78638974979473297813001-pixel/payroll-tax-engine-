@@ -1,6 +1,8 @@
 /* Display profile for this tab only. The session token is an HttpOnly cookie
-   set by POST /api/verify-email, so page script never stores it. The one-time
-   API key stays in sessionStorage and is not written to localStorage. */
+   set by email verification and by password sign-in, so page script never
+   stores it. The cookie lasts a year and is renewed while the account is in
+   use. The one-time API key stays in sessionStorage and is not written to
+   localStorage. */
 (function (w) {
   'use strict';
   var PROFILE = 'omnia_profile';
