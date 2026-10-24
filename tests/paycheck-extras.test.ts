@@ -139,7 +139,7 @@ describe('runPaycheckExtras()', () => {
 // ---------------------------------------------------------------------------
 
 const REPO = join(dirname(fileURLToPath(import.meta.url)), '..');
-const KEY = 'sk_test_extras_e2e_key_abcdef';
+const KEY = 'sk_live_extras_e2e_key_abcdef';
 const KEY_HASH = createHash('sha256').update(KEY).digest('hex');
 const PORT = 5200 + Math.floor(Math.random() * 300);
 const BASE = `http://127.0.0.1:${PORT}`;

@@ -103,6 +103,7 @@ describe('site billing (site/lib/billing.ts)', () => {
     assert.equal(params.get('mode'), 'subscription');
     assert.equal(params.get('customer'), 'cus_1');
     assert.equal(params.get('subscription_data[trial_period_days]'), '14');
+    assert.equal(params.get('payment_method_collection'), 'always');
     assert.equal(params.get('line_items[0][price]'), 'price_metered');
     assert.equal(params.get('line_items[0][quantity]'), null);
     assert.equal(body.includes('payment_method_types'), false);

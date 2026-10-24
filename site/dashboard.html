@@ -32,7 +32,7 @@
       <h1 class="page">Overview</h1>
       <div style="display:flex;gap:12px;align-items:center">
         <button class="btn secondary sm" id="signout" type="button">Sign out</button>
-        <a class="btn secondary sm" href="/sandbox">Open sandbox</a>
+        <a class="btn secondary sm" href="/console">Open console</a>
       </div>
     </div>
     <div class="banner" style="margin-top:24px">
@@ -43,13 +43,13 @@
       <div><span>Calls, last 30 days</span><b id="st-30">—</b></div>
       <div><span>Calls, last 24 hours</span><b id="st-day">—</b></div>
       <div><span>Error rate, last 30 days</span><b id="st-err">—</b></div>
-      <div><span>Rate per calculation</span><b>TBA</b></div>
+      <div><span>Rate per paycheck calculation</span><b>$0.08</b></div>
     </div>
     <h2 style="font-size:16px" id="usage">Calls per day</h2>
     <p class="fine">Last 30 days, UTC. Counts successful calls on your keys that the usage log still retains.</p>
     <div class="bars" id="bars" role="img" aria-label="Calculations per day for the last 30 days"></div>
     <h2 style="font-size:16px;margin-top:36px" id="keys">API keys</h2>
-    <p class="fine">A key is shown in full once, when it is issued. Sandbox keys start with sk_test_ and live keys with sk_live_.</p>
+    <p class="fine">A key is shown in full once, when it is issued. Issued keys start with sk_live_.</p>
     <div class="table-wrap"><table>
       <thead><tr><th>Key</th><th>Mode</th><th>Status</th><th>Created</th><th>Last used</th><th class="num">Calls</th></tr></thead>
       <tbody id="keyRows"><tr><td colspan="6">Loading.</td></tr></tbody>
@@ -67,12 +67,11 @@
     <div class="table-wrap"><table>
       <thead><tr><th>Item</th><th class="num">Quantity</th><th class="num">Amount</th></tr></thead>
       <tbody>
-        <tr><td>Calculations (live, including min. wage and garnishment checks)</td><td class="num" id="b-live">0</td><td class="num">Rate TBA</td></tr>
-        <tr><td>Address lookups, matched (live)</td><td class="num" id="b-addr">0</td><td class="num">Rate TBA</td></tr>
-        <tr><td>Sandbox calls</td><td class="num" id="b-sandbox">0</td><td class="num">Not billed</td></tr>
+        <tr><td>Paycheck calculations (min. wage and garnishment on the same paycheck included)</td><td class="num" id="b-live">0</td><td class="num">$0.08 after the trial</td></tr>
+        <tr><td>Address lookups</td><td class="num" id="b-addr">0</td><td class="num">Not a paycheck charge</td></tr>
       </tbody>
     </table></div>
-    <p class="fine" id="payline" style="margin-top:16px">Payment method is shown after you add a card. The rate per calculation is TBA.</p>
+    <p class="fine" id="payline" style="margin-top:16px">Payment method is shown after you add a card. 14-day free trial, then $0.08 per paycheck calculation, pay as you go.</p>
     <h2 style="font-size:16px;margin-top:36px" id="settings">Settings</h2>
     <div class="table-wrap"><table>
       <tbody>
@@ -106,10 +105,10 @@
       $('trial').textContent = bb.suspended
         ? 'Your key is paused because a payment failed. Update your card to switch it back on.'
         : (days == null || bb.status === 'active'
-          ? 'Signed in. Live calculations are billed per call. The rate is TBA.'
-          : 'Trial: ' + days + ' day' + (days === 1 ? '' : 's') + ' left. After that, each live calculation is billed. No contract. Rate TBA.');
+          ? 'Signed in. 14-day free trial, then $0.08 per paycheck calculation, pay as you go.'
+          : 'Trial: ' + days + ' day' + (days === 1 ? '' : 's') + ' left. Then $0.08 per paycheck calculation, pay as you go.');
       var pm = bb.paymentMethod;
-      if (pm && pm.last4) $('payline').textContent = (pm.brand || pm.kind || 'Card') + ' ending ' + pm.last4 + '. Amount due is the rate to be announced, times live calculations.';
+      if (pm && pm.last4) $('payline').textContent = (pm.brand || pm.kind || 'Card') + ' ending ' + pm.last4 + '. 14-day free trial, then $0.08 per paycheck calculation, pay as you go.';
     });
   });
 
@@ -142,13 +141,14 @@
       body.textContent = '';
       u.keys.forEach(function (k) {
         var tr = document.createElement('tr');
-        td(tr, k.keyMasked.replace(/•+$/, '••••'), 'mono'); td(tr, k.mode === 'live' ? 'Live' : 'Sandbox'); td(tr, k.active ? 'Active' : 'Replaced');
+        td(tr, k.keyMasked.replace(/•+$/, '••••'), 'mono'); td(tr, k.mode === 'live' ? 'Live' : 'Retired'); td(tr, k.active ? 'Active' : 'Replaced');
         td(tr, when(k.createdAt)); td(tr, when(k.lastUsedAt)); td(tr, k.totalCalls.toLocaleString('en-US'), 'num');
         body.appendChild(tr);
       });
-      $('b-live').textContent = u.billing.liveCalculations.toLocaleString('en-US');
-      $('b-addr').textContent = u.billing.liveAddressLookups.toLocaleString('en-US');
-      $('b-sandbox').textContent = u.billing.sandboxCalls.toLocaleString('en-US');
+      var paychecks = u.billing.paycheckCalculations != null ? u.billing.paycheckCalculations : u.billing.liveCalculations;
+      var lookups = u.billing.addressLookups != null ? u.billing.addressLookups : u.billing.liveAddressLookups;
+      $('b-live').textContent = paychecks.toLocaleString('en-US');
+      $('b-addr').textContent = lookups.toLocaleString('en-US');
     });
   }
   loadUsage();

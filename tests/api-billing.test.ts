@@ -102,7 +102,7 @@ describe('Stripe billing (api/billing.ts)', () => {
     process.env.STRIPE_METER_EVENT = 'payroll_api_call';
     try {
       assert.equal(meteringConfigured(), true);
-      const { key } = mintApiKey('Metered Co'); // default $0.09/call
+      const { key } = mintApiKey('Metered Co'); // default $0.08/paycheck
       const id = verifyApiKey(key)!.id;
       setStripeCustomer(id, 'cus_meter'); // pretend they subscribed
 

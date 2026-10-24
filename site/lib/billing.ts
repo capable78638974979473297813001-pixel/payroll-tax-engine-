@@ -132,8 +132,14 @@ export function flushMeterQueue(opts: { force?: boolean } = {}): Promise<FlushRe
     const eventName = meterEventName();
     const now = Date.now();
     let delivered = 0, failed = 0, dead = 0;
-    for (const item of pendingMeterEvents()) {
-      if (item.deadAt || (!opts.force && !isDue(item, now))) continue;
+    // A call made while this run is in flight shares it (below), so an event
+    // queued mid-run must be picked up by this run, not left for the next
+    // sweep: keep going until every due event has been tried once.
+    const tried = new Set<string>();
+    for (;;) {
+      const item = pendingMeterEvents().find((q) => !tried.has(q.identifier) && !q.deadAt && (opts.force || isDue(q, now)));
+      if (!item) break;
+      tried.add(item.identifier);
       const out = await deliverMeterEvent(item, eventName, now);
       withDb((db) => {
         const i = db.meterQueue.findIndex((q) => q.identifier === item.identifier);

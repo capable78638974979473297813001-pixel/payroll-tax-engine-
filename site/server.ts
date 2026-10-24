@@ -1632,10 +1632,10 @@ async function handleIssueKey(req: IncomingMessage, res: ServerResponse): Promis
     return;
   }
 
-  const isLive = process.env.OMNIA_ISSUE_LIVE_KEYS === '1';
-  const key = (isLive ? 'sk_live_' : 'sk_test_') + randomBytes(24).toString('base64url');
+  // Every issued key is a real key. OMNIA_ISSUE_LIVE_KEYS no longer chooses the prefix.
+  const key = 'sk_live_' + randomBytes(24).toString('base64url');
   const keyHash = sha256Hex(key);
-  const keyPrefix = key.slice(0, (isLive ? 'sk_live_' : 'sk_test_').length + 6);
+  const keyPrefix = key.slice(0, 'sk_live_'.length + 6);
   const now = Date.now();
 
   const life = withDb((db) => {
@@ -1933,6 +1933,14 @@ function keyMode(k: { keyPrefix: string }): 'test' | 'live' {
   return k.keyPrefix.startsWith('sk_live_') ? 'live' : 'test';
 }
 
+/** Shown when a stored sk_test_ key is presented. Does not echo the key. */
+const RETIRED_KEY_ERROR = 'This API key is no longer accepted. Sign in to the console and issue a new API key. The new key returns real calculations.';
+
+function retiredCustomerKey(presented: string, record: { keyPrefix: string } | undefined): boolean {
+  if (!record) return false;
+  return presented.startsWith('sk_test_') || record.keyPrefix.startsWith('sk_test_');
+}
+
 function callsInLastDay(db: { usage: { keyHash: string; at: string; statusCode: number }[] }, keyHash: string): number {
   const dayAgo = Date.now() - 24 * 60 * 60_000;
   return db.usage.filter((u) => u.keyHash === keyHash && u.statusCode === 200 && new Date(u.at).getTime() >= dayAgo).length;
@@ -1956,6 +1964,10 @@ function handleMe(req: IncomingMessage, res: ServerResponse): void {
     if (!k) return null;
     return { k, callsToday: callsInLastDay(db, keyHash) };
   });
+  if (info && retiredCustomerKey(key, info.k)) {
+    sendJson(res, 401, { error: RETIRED_KEY_ERROR, code: 'key_not_accepted' });
+    return;
+  }
   if (!info || !info.k.isActive) {
     sendJson(res, 401, { error: 'Invalid or inactive API key.', code: 'invalid_key' });
     return;
@@ -2014,16 +2026,12 @@ function handleUsage(req: IncomingMessage, res: ServerResponse): void {
       if (u.statusCode === 200) bucket.calls += 1;
       else bucket.errors += 1;
     }
-    const modeOf = new Map(ownKeys.map((k) => [k.keyHash, keyMode(k)]));
-    let liveCalculations = 0;
-    let liveAddressLookups = 0;
-    let sandboxCalls = 0;
+    let paycheckCalculations = 0;
+    let addressLookups = 0;
     for (const u of db.usage) {
-      const mode = modeOf.get(u.keyHash);
-      if (!mode || u.statusCode !== 200) continue;
-      if (mode === 'test') sandboxCalls += 1;
-      else if (u.kind === 'address') liveAddressLookups += u.matched ? 1 : 0;
-      else liveCalculations += 1;
+      if (!ownHashes.has(u.keyHash) || u.statusCode !== 200) continue;
+      if (u.kind === 'address') addressLookups += 1;
+      else paycheckCalculations += 1;
     }
     const callsLast30 = daily.reduce((n, d) => n + d.calls, 0);
     const errorsLast30 = daily.reduce((n, d) => n + d.errors, 0);
@@ -2062,7 +2070,7 @@ function handleUsage(req: IncomingMessage, res: ServerResponse): void {
       errorsLast30,
       errorRate: callsLast30 + errorsLast30 ? errorsLast30 / (callsLast30 + errorsLast30) : 0,
       daily,
-      billing: { liveCalculations, liveAddressLookups, sandboxCalls },
+      billing: { paycheckCalculations, addressLookups, liveCalculations: paycheckCalculations, liveAddressLookups: addressLookups },
       keys,
       recent,
     });
@@ -2117,6 +2125,10 @@ function authenticateKey(req: IncomingMessage, res: ServerResponse, limiter: str
   });
   const keyRecord = auth.keyRecord;
 
+  if (retiredCustomerKey(key, keyRecord)) {
+    sendJson(res, 401, { error: RETIRED_KEY_ERROR, code: 'key_not_accepted', requestId }, baseHeaders);
+    return null;
+  }
   if (!keyRecord || !keyRecord.isActive) {
     sendJson(res, 401, { error: 'Invalid or inactive API key.', code: 'invalid_key', requestId }, baseHeaders);
     return null;
@@ -2157,10 +2169,10 @@ function authenticateKey(req: IncomingMessage, res: ServerResponse, limiter: str
     );
     return null;
   }
-  // Only a live key bills. A sandbox (sk_test_) key never reaches Stripe, however
-  // the account is set up: the terms and the pricing page promise sandbox calls
-  // are not billed.
-  return { requestId, keyHash, rlHeaders, customerId: auth.customerId, meteredSubscription: auth.meteredSubscription && mode === 'live' };
+  // Every accepted key is real. A trialing subscription still has a Stripe
+  // subscription id, so paycheck usage during the trial is reported. Stripe
+  // does not bill usage recorded during trial_period_days.
+  return { requestId, keyHash, rlHeaders, customerId: auth.customerId, meteredSubscription: auth.meteredSubscription };
 }
 
 async function handlePaycheck(req: IncomingMessage, res: ServerResponse): Promise<void> {
@@ -2268,8 +2280,7 @@ async function handlePaycheck(req: IncomingMessage, res: ServerResponse): Promis
 // jurisdictions and the certificate facts a paycheck needs, so the caller
 // resolves an employee once and reuses the result on every pay run:
 //   workState: { code: <state>, certificate: <certificate> }
-// Billed as one unit when at least one address matched; an address that
-// can't be matched costs nothing.
+// Not a paycheck calculation: the lookup is recorded and is not metered.
 // ---------------------------------------------------------------------
 
 async function handleAddress(req: IncomingMessage, res: ServerResponse): Promise<void> {
@@ -2315,10 +2326,8 @@ async function handleAddress(req: IncomingMessage, res: ServerResponse): Promise
     const matched = Boolean(r.work?.matched || r.residence?.matched);
     const state = (r.work?.matched ? r.work.resolved?.state : null) ?? (r.residence?.matched ? r.residence.resolved?.state : null) ?? null;
     const homeState = r.residence?.matched ? r.residence.resolved?.state ?? null : null;
-    const meter = matched && meteringConfigured() && ctx.meteredSubscription && ctx.customerId
-      ? { customerId: ctx.customerId, identifier: requestId }
-      : null;
-    recordUsage(keyHash, 200, null, null, meter, 'address', matched);
+    // An address lookup is not a paycheck calculation and is not metered.
+    recordUsage(keyHash, 200, null, null, null, 'address', matched);
     sendJson(res, 200, {
       matched,
       state,
@@ -2332,7 +2341,6 @@ async function handleAddress(req: IncomingMessage, res: ServerResponse): Promise
       fullyResolved: r.fullyResolved,
       requestId,
     }, rlHeaders);
-    if (meter) flushMeterSoon();
   } catch (err) {
     console.error(`[address ${requestId}] lookup failed:`, err instanceof Error ? err.message : err);
     recordUsage(keyHash, 502, 'geocode_unavailable', null);

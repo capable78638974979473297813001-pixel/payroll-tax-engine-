@@ -25,52 +25,52 @@
 <main class="wrap">
   <div class="page-head">
     <p class="eyebrow">Pricing</p>
-    <h1 class="page">Pay per calculation.</h1>
-    <p class="sub">Pay for each calculation with your API key. No long contract, no setup fee.</p>
+    <h1 class="page">Pay per paycheck calculation.</h1>
+    <p class="sub">14-day free trial, then $0.08 per paycheck calculation, pay as you go.</p>
   </div>
   <div class="price-grid">
     <article class="plan">
       <p style="font-weight:500">Per calculation</p>
-      <p class="rate">Rate to be announced</p>
-      <p style="color:var(--ink2)">Billed monthly per live calculation.</p>
+      <p class="rate">$0.08</p>
+      <p style="color:var(--ink2)">Per paycheck calculation, after the trial. Billed monthly.</p>
       <ul>
         <li>Federal, state and local payroll tax</li>
-        <li>Address to jurisdiction lookups</li>
-        <li>Minimum wage checks</li>
-        <li>Wage garnishment limits</li>
-        <li>Sandbox and live API keys</li>
+        <li>Address lookups are not a paycheck charge</li>
+        <li>Minimum wage checks on the same paycheck</li>
+        <li>Wage garnishment limits on the same paycheck</li>
+        <li>One API key that returns real calculations</li>
         <li>Usage and invoices in the dashboard</li>
       </ul>
       <a class="btn block" href="/signup">Start free trial</a>
-      <p class="fine">14-day trial. A card on file is required.</p>
+      <p class="fine">14-day free trial, then $0.08 per paycheck calculation, pay as you go. A card is required at signup.</p>
     </article>
     <div class="faq">
       <h2 style="font-size:15px;font-weight:500;margin-bottom:8px">Questions</h2>
       <article>
         <h3>What counts as a calculation?</h3>
-        <p>One successful POST /v1/paycheck call. Minimum wage and garnishment checks are included in that same calculation. A POST /v1/address call that matches an address is counted the same way as one calculation; a lookup that doesn't match isn't billed.</p>
+        <p>One successful paycheck calculation. A batch counts each paycheck that succeeds. Minimum wage and garnishment checks on that same paycheck are included. An address lookup is not a paycheck charge.</p>
       </article>
       <article>
         <h3>Is there a contract?</h3>
-        <p>No. Usage is billed monthly. Stop using your key and billing stops.</p>
+        <p>No. Usage is billed monthly, pay as you go. Stop using your key and billing for new paycheck calculations stops.</p>
       </article>
       <article>
         <h3>Why do you need a card for the trial?</h3>
-        <p>Live keys bill per call once the trial ends. A card or bank account on file lets your integration keep running without a gap.</p>
+        <p>The trial is 14 days and a card is required at signup. Paycheck calculations during the trial are recorded and are not charged. After that, each paycheck calculation is $0.08.</p>
       </article>
       <article>
-        <h3>Is the sandbox free?</h3>
-        <p>Sandbox calls run the same engine and are not billed.</p>
+        <h3>What happens to an older key?</h3>
+        <p>Sign in to the console and issue a new API key. The new key returns real calculations.</p>
       </article>
     </div>
   </div>
   <div class="dev">
     <div>
-      <h2>Start in the sandbox.</h2>
-      <p>Run a paycheck with a sandbox key. Sandbox calls are not billed. Go live and pay per calculation, with no long contract.</p>
+      <h2>Start the 14-day trial.</h2>
+      <p>14-day free trial, then $0.08 per paycheck calculation, pay as you go. A card is required at signup.</p>
     </div>
     <div class="dev-actions">
-      <a class="btn" href="/signup">Get a sandbox key</a>
+      <a class="btn" href="/signup">Start free trial</a>
       <a class="btn secondary" href="/docs/paycheck">API reference</a>
     </div>
   </div>

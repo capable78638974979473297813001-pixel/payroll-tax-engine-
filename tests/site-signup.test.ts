@@ -99,7 +99,7 @@ describe('signup: a key needs a card or bank account on file', () => {
     assert.equal(r.status, 200);
     const created = db().accounts[EMAIL];
     assert.ok(created.termsAcceptedAt);
-    assert.equal(created.termsVersion, '2026-10-19.2');
+    assert.equal(created.termsVersion, '2026-10-23.1');
     const code = created.code;
     assert.match(code, /^\d{6}$/);
     const v = await post('/api/verify-email', { email: EMAIL, code });
@@ -158,7 +158,7 @@ describe('signup: a key needs a card or bank account on file', () => {
     const k = await post('/api/issue-key', {}, session);
     assert.equal(k.status, 200);
     key = (await k.json()).key;
-    assert.match(key, /^sk_test_/);
+    assert.match(key, /^sk_live_/);
   });
 
   test('every console example calculates with the new key', async () => {
@@ -171,7 +171,7 @@ describe('signup: a key needs a card or bank account on file', () => {
       });
       const body = await r.json();
       assert.equal(r.status, 200, `${ex.id}: ${JSON.stringify(body).slice(0, 300)}`);
-      assert.equal(r.headers.get('omnia-mode'), 'test');
+      assert.equal(r.headers.get('omnia-mode'), 'live');
       assert.ok(body.result.netPay > 0, ex.id);
     }
   });
@@ -180,7 +180,7 @@ describe('signup: a key needs a card or bank account on file', () => {
     const r = await fetch(`${BASE}/v1/me`, { headers: { Authorization: `Bearer ${key}` } });
     assert.equal(r.status, 200);
     const j = await r.json();
-    assert.equal(j.mode, 'test');
+    assert.equal(j.mode, 'live');
     assert.equal(j.callsToday, examples.length);
     assert.equal((await fetch(`${BASE}/v1/me`)).status, 401);
   });
@@ -549,10 +549,10 @@ describe('signup pages: contrast, labels, and step chrome', () => {
       await capture('05-key-focus');
       assert.equal(await evaluate(`document.getElementById('missing').hidden`), false);
       await capture('05-key-error');
-      await evaluate(`sessionStorage.setItem('omnia_session_key', JSON.stringify({ key: 'sk_test_4242424242424242' }))`);
+      await evaluate(`sessionStorage.setItem('omnia_session_key', JSON.stringify({ key: 'sk_live_4242424242424242' }))`);
       await goto(`${BASE}/signup/key`);
       await evaluate(`document.getElementById('reveal').click()`);
-      assert.match(String(await evaluate(`document.getElementById('keyText').textContent`)), /sk_test_4242424242424242/);
+      assert.match(String(await evaluate(`document.getElementById('keyText').textContent`)), /sk_live_4242424242424242/);
       await capture('05-key-filled');
     } finally {
       try { ws.close(); } catch { /* socket already closed */ }
