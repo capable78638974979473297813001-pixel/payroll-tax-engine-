@@ -257,6 +257,23 @@ export interface EstimateEvent {
   at: string;
 }
 
+/**
+ * One signed-in browser or API client. The cookie (or Bearer header) holds
+ * the token; this record is what makes that token mean something. An
+ * account keeps one record per device, so signing out of one leaves the
+ * others signed in. Lives in the same file as the account, never in
+ * process memory.
+ */
+export interface AuthSession {
+  email: string;
+  /** Absolute expiry. A later request extends it (sliding renewal). */
+  expiresAt: string;
+  issuedAt: string;
+  method: 'code' | 'password';
+  /** When the expiry was last extended. */
+  renewedAt: string;
+}
+
 /** One calculator setup an account saved from the home page. */
 export interface SavedScenario {
   id: string;
@@ -284,6 +301,14 @@ export interface DB {
    * is acknowledged and not applied again. Bounded by the webhook handler.
    */
   processedStripeEvents: string[];
+  /**
+   * Sign-in sessions keyed by the token the browser holds. A Render
+   * redeploy restarts the process and leaves this file on the disk, so
+   * the sessions survive. Absent on stores written before sessions were
+   * split out of the account record; load() copies the old single token
+   * in.
+   */
+  sessions: Record<string, AuthSession>;
 }
 
 function emptyDb(): DB {
@@ -300,6 +325,7 @@ function emptyDb(): DB {
     meterQueue: [],
     rateLimits: {},
     processedStripeEvents: [],
+    sessions: {},
   };
 }
 
@@ -312,7 +338,7 @@ function load(): DB {
   const parsed = readJsonFile<Partial<DB>>(FILE);
   const base = emptyDb();
   if (!parsed) return base;
-  return {
+  const db: DB = {
     accounts: parsed.accounts ?? base.accounts,
     scenarios: parsed.scenarios ?? base.scenarios,
     acceptances: parsed.acceptances ?? base.acceptances,
@@ -325,7 +351,23 @@ function load(): DB {
     meterQueue: parsed.meterQueue ?? base.meterQueue,
     rateLimits: parsed.rateLimits ?? base.rateLimits,
     processedStripeEvents: parsed.processedStripeEvents ?? base.processedStripeEvents,
+    sessions: parsed.sessions ?? base.sessions,
   };
+  // Stores written when an account held a single sessionToken still sign
+  // that browser in. The copy is in memory until the next write.
+  for (const acct of Object.values(db.accounts)) {
+    if (!acct.sessionToken || !acct.sessionExpiresAt) continue;
+    if (db.sessions[acct.sessionToken]) continue;
+    const issued = acct.sessionIssuedAt ?? acct.createdAt;
+    db.sessions[acct.sessionToken] = {
+      email: acct.email,
+      expiresAt: acct.sessionExpiresAt,
+      issuedAt: issued,
+      method: acct.sessionMethod === 'password' ? 'password' : 'code',
+      renewedAt: issued,
+    };
+  }
+  return db;
 }
 
 /**
