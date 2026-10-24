@@ -2438,6 +2438,34 @@ function stateYears(code: string): number[] {
   return STATE_YEARS.get(code.toUpperCase()) ?? [];
 }
 
+function percentText(rate: number): string {
+  return `${(Math.round(rate * 10000) / 100).toFixed(2)}%`;
+}
+
+/** Short withholding phrase for the sandbox. Comes from the ruleset, not a hardcoded rate. */
+function stateRateLabel(raw: { method?: string; flatRate?: { rate?: number } }): string {
+  if (raw.method === 'no_income_tax') return 'no income tax';
+  const rate = raw.flatRate && typeof raw.flatRate.rate === 'number' ? raw.flatRate.rate : null;
+  if (rate != null) return `a flat ${percentText(rate)}`;
+  return 'withholding tables';
+}
+
+function paidLeaveNote(raw: Record<string, unknown>): string {
+  const name = String(raw.name ?? 'This state');
+  const hasLeave = raw.statePaidLeaveEmployee != null;
+  const hasDisability = raw.stateDisabilityEmployee != null;
+  const leave = raw.paidLeave as { program?: unknown } | undefined;
+  const program = leave && typeof leave.program === 'string' ? leave.program : '';
+  const family = raw.paidFamilyMedicalLeave as { status?: unknown } | undefined;
+  const status = family && typeof family.status === 'string' ? family.status : '';
+  if (hasLeave && hasDisability) return `${name} withholds state paid leave and disability insurance on this check.`;
+  if (hasLeave) return `${name} withholds state paid leave on this check.`;
+  if (hasDisability) return `${name} withholds state disability insurance on this check.`;
+  if (program) return program.endsWith('.') ? program : `${program}.`;
+  if (status.startsWith('no_program')) return `${name} has no state paid-leave or disability program, so nothing applies to this check.`;
+  return `${name} has no state paid-leave or disability withholding in this build, so nothing applies to this check.`;
+}
+
 function handleStates(res: ServerResponse, rawUrl: string): void {
   const dir = join(HERE, '..', 'data', 'states');
   const asked = Number(new URL(rawUrl, 'http://x').searchParams.get('year'));
@@ -2445,8 +2473,20 @@ function handleStates(res: ServerResponse, rawUrl: string): void {
   const states = readdirSync(dir)
     .filter((f) => f.endsWith(`-${year}.json`))
     .map((f) => {
-      const raw = JSON.parse(readFileSync(join(dir, f), 'utf8')) as { code: string; name: string };
-      return { code: raw.code, name: raw.name };
+      const raw = JSON.parse(readFileSync(join(dir, f), 'utf8')) as {
+        code: string;
+        name: string;
+        method?: string;
+        flatRate?: { rate?: number };
+        reciprocity?: { reciprocalStates?: string[] };
+      };
+      return {
+        code: raw.code,
+        name: raw.name,
+        rateLabel: stateRateLabel(raw),
+        reciprocalStates: Array.isArray(raw.reciprocity?.reciprocalStates) ? raw.reciprocity.reciprocalStates : [],
+        paidLeaveNote: paidLeaveNote(raw as unknown as Record<string, unknown>),
+      };
     })
     .sort((a, b) => a.name.localeCompare(b.name));
   sendJson(res, 200, { year, states });

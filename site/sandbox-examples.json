@@ -117,6 +117,31 @@
         "workState": { "code": "PA" },
         "residenceState": { "code": "NJ", "certificate": { "filingStatus": "single" } }
       }
+    },
+    {
+      "id": "pa-nj-reciprocity",
+      "title": "Philadelphia worker, lives in New Jersey",
+      "blurb": "Real engine run: PA work, NJ residence, reciprocity swap, Philadelphia nonresident wage tax.",
+      "request": {
+        "checkDate": "2026-09-15",
+        "payFrequency": "biweekly",
+        "hoursWorked": 84,
+        "earnings": [
+          { "code": "REG", "category": "regular", "amount": 320000 },
+          { "code": "OT", "category": "regular", "amount": 22500, "overtime": true },
+          { "code": "BONUS", "category": "supplemental", "amount": 50000 }
+        ],
+        "deductions": [
+          { "code": "401K", "category": "deferral_401k", "amount": 19200 },
+          { "code": "MED", "category": "section125", "amount": 8500 },
+          { "code": "HSA", "category": "hsa", "amount": 5000 }
+        ],
+        "federalW4": { "filingStatus": "married_joint", "multipleJobs": false, "dependentCredit": 200000, "otherIncome": 0, "deductions": 0, "extraWithholding": 0 },
+        "ytd": { "socialSecurity": 6120000, "medicare": 6120000, "futa": 700000, "stateUnemployment": { "PA": 6120000 } },
+        "workState": { "code": "PA", "certificate": { "workPSD": "510101", "residencePSD": "88000" } },
+        "residenceState": { "code": "NJ", "certificate": { "filingStatus": "mfj", "allowances": 2 } },
+        "employer": { "stateUnemploymentRate": { "PA": 0.0365 } }
+      }
     }
   ]
 }
