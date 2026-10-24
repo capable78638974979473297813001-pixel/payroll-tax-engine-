@@ -745,7 +745,9 @@ function applyEmploymentCategory(
         : line;
     }
 
-    // Clergy: every federal line goes to zero.
+    // Clergy: every federal line goes to zero. Only clergy reaches here; an
+    // unknown category must not inherit that exemption.
+    if (category !== 'clergy') throw new Error(`Unrecognized employmentCategory ${JSON.stringify(category)}.`);
     if (isIncomeTax && voluntary) return line;
     return zeroOut(
       line,

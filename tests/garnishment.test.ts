@@ -517,6 +517,31 @@ describe('child support / alimony withholding orders', () => {
   });
 });
 
+describe('support-order proration rounding', () => {
+  test('rounded shares never add up to more than the combined ceiling', () => {
+    // $50.01 disposable, 60% ceiling = $30.01 (3001 cents, from 3000.6). Two
+    // equal $100 orders split it 1500.5 / 1500.5; rounding each half up gave 3002.
+    const r = run(paycheckOf(5001, 0), [
+      order({ id: 'S1', type: 'child_support', amountOrdered: dollars(100), supportingOtherFamily: false }),
+      order({ id: 'S2', type: 'child_support', amountOrdered: dollars(100), supportingOtherFamily: false }),
+    ]);
+    assert.equal(r.aggregateCeiling, 3001);
+    assert.equal(r.totalWithheld, 3001);
+    for (const l of r.lines) assert.ok(l.withheld === 1500 || l.withheld === 1501);
+  });
+
+  test('rounded shares never fall short of the ceiling when orders demand more than it', () => {
+    // 3 equal orders over a 10-cent ceiling: 3.33 each rounds to 9; all 10 are owed.
+    const r = run(paycheckOf(17, 0), [
+      order({ id: 'S1', type: 'child_support', amountOrdered: dollars(100), supportingOtherFamily: false }),
+      order({ id: 'S2', type: 'child_support', amountOrdered: dollars(100), supportingOtherFamily: false }),
+      order({ id: 'S3', type: 'child_support', amountOrdered: dollars(100), supportingOtherFamily: false }),
+    ]);
+    assert.equal(r.aggregateCeiling, 10);
+    assert.equal(r.totalWithheld, 10);
+  });
+});
+
 describe('stacking a support order with an ordinary garnishment', () => {
   test('the ordinary garnishment only gets what room the support ceiling leaves behind', () => {
     // $1000 disposable, 60% support ceiling = $600. Support order takes

@@ -1,5 +1,6 @@
 import { readFileSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
+import { isRealIsoDate } from './validate.ts';
 
 const DATA_ROOT = join(import.meta.dirname, '..', 'data');
 
@@ -86,6 +87,8 @@ export class RulesetNotFoundError extends Error {
 export function yearOf(checkDate: string): number {
   const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(checkDate);
   if (!m) throw new Error(`checkDate must be ISO yyyy-mm-dd, got: ${checkDate}`);
+  // The format alone admits 2026-02-30 and 2026-99-99.
+  if (!isRealIsoDate(checkDate)) throw new Error(`checkDate must be a real calendar date, got: ${checkDate}`);
   return Number(m[1]);
 }
 

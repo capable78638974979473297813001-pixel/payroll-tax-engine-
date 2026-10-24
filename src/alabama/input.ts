@@ -2,6 +2,7 @@ import { dollars } from '../money.ts';
 import type { Cents } from '../money.ts';
 import { alCountyRuleset, alMunicipalityRuleset, hasStateRuleset, stateRuleset } from '../registry.ts';
 import { PERIODS_PER_YEAR } from '../types.ts';
+import { EMPLOYMENT_CATEGORIES, isRealIsoDate } from '../validate.ts';
 import type {
   Deduction,
   Earning,
@@ -45,16 +46,6 @@ const FILING_STATUSES: readonly FilingStatus[] = [
   'married_joint',
   'married_separate',
   'head_of_household',
-];
-
-const EMPLOYMENT_CATEGORIES: readonly EmploymentCategory[] = [
-  'standard',
-  'clergy',
-  'statutory_employee',
-  'household',
-  'agricultural',
-  'railroad',
-  'election_worker',
 ];
 
 const PRETAX_CATEGORIES: readonly PretaxCategory[] = [
@@ -108,6 +99,18 @@ function requireMoney(
   return dollars(value);
 }
 
+/**
+ * A flag must be a real boolean or absent. A string like "false" is truthy,
+ * so reading it with a bare `if` would switch the flag ON — for an exempt
+ * flag that zeroes a tax — which is why the core engine rejects it too.
+ */
+function requireBoolean(problems: string[], label: string, value: unknown): boolean {
+  if (value === undefined || value === null) return false;
+  if (value === true || value === false) return value;
+  problems.push(`${label} must be true or false (a real boolean), got ${JSON.stringify(value)}`);
+  return false;
+}
+
 function pushEarning(
   into: Earning[],
   code: string,
@@ -136,7 +139,7 @@ export function buildAlabamaEngineInput(input: AlabamaPaycheckInput): AlabamaBui
   // --- check date -------------------------------------------------------
   if (typeof input.checkDate !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(input.checkDate)) {
     problems.push(`checkDate must be an ISO yyyy-mm-dd string, got ${JSON.stringify(input.checkDate)}`);
-  } else if (Number.isNaN(Date.parse(input.checkDate))) {
+  } else if (!isRealIsoDate(input.checkDate)) {
     problems.push(`checkDate ${input.checkDate} is not a real date`);
   } else if (!hasStateRuleset('AL', input.checkDate)) {
     problems.push(
@@ -231,6 +234,7 @@ export function buildAlabamaEngineInput(input: AlabamaPaycheckInput): AlabamaBui
     problems.push(`a4.dependents must be a non-negative whole number, got ${JSON.stringify(a4.dependents)}`);
   }
   const additionalWithholding = requireMoney(problems, 'a4.additionalWithholding', a4.additionalWithholding);
+  const a4Exempt = requireBoolean(problems, 'a4.exempt', a4.exempt);
 
   // --- residency --------------------------------------------------------
   const residency = input.residency ?? {};
@@ -273,8 +277,13 @@ export function buildAlabamaEngineInput(input: AlabamaPaycheckInput): AlabamaBui
     );
   }
 
+  const w4MultipleJobs = requireBoolean(problems, 'federalW4.multipleJobs', w4.multipleJobs);
+  const w4Exempt = requireBoolean(problems, 'federalW4.exempt', w4.exempt);
+  const w4NonresidentAlien = requireBoolean(problems, 'federalW4.nonresidentAlien', w4.nonresidentAlien);
+
   // --- severance exemption ---------------------------------------------
   const sev = input.severanceExemption;
+  const severanceApprovalOnFile = requireBoolean(problems, 'severanceExemption.approvalOnFile', sev?.approvalOnFile);
   const severanceRequested =
     sev?.exemptThisPeriod !== undefined
       ? requireMoney(problems, 'severanceExemption.exemptThisPeriod', sev.exemptThisPeriod)
@@ -288,6 +297,16 @@ export function buildAlabamaEngineInput(input: AlabamaPaycheckInput): AlabamaBui
 
   // --- employer ---------------------------------------------------------
   const employer = input.employer ?? {};
+  const useFivePercentSupplementalRate = requireBoolean(
+    problems,
+    'employer.useFivePercentSupplementalRate',
+    employer.useFivePercentSupplementalRate,
+  );
+  const agriculturalFutaLiable =
+    employer.agriculturalFutaLiable === undefined
+      ? undefined
+      : requireBoolean(problems, 'employer.agriculturalFutaLiable', employer.agriculturalFutaLiable);
+  const roundToWholeDollars = requireBoolean(problems, 'options.roundToWholeDollars', input.options?.roundToWholeDollars);
   if (
     employer.unemploymentRate !== undefined &&
     (!Number.isFinite(employer.unemploymentRate) ||
@@ -330,7 +349,7 @@ export function buildAlabamaEngineInput(input: AlabamaPaycheckInput): AlabamaBui
     dependents,
   };
   if (additionalWithholding > 0) certificate.additionalWithholding = additionalWithholding;
-  if (a4.exempt) {
+  if (a4Exempt) {
     certificate.exempt = true;
     if (a4.exemptReason) certificate.exemptReason = a4.exemptReason;
   }
@@ -349,7 +368,7 @@ export function buildAlabamaEngineInput(input: AlabamaPaycheckInput): AlabamaBui
   }
   if (severanceRequested > 0) {
     certificate.severanceExemptWages = severanceRequested;
-    certificate.severanceApprovalOnFile = sev?.approvalOnFile === true;
+    certificate.severanceApprovalOnFile = severanceApprovalOnFile;
     certificate.severanceExemptYtd = dollars(sev?.alreadyExemptedThisYear ?? 0);
   }
 
@@ -361,13 +380,13 @@ export function buildAlabamaEngineInput(input: AlabamaPaycheckInput): AlabamaBui
     deductions,
     federalW4: {
       filingStatus,
-      multipleJobs: w4.multipleJobs === true,
+      multipleJobs: w4MultipleJobs,
       dependentCredit: dollars(w4.dependentCredit ?? 0),
       otherIncome: dollars(w4.otherIncome ?? 0),
       deductions: dollars(w4.deductions ?? 0),
       extraWithholding: dollars(w4.extraWithholding ?? 0),
-      ...(w4.exempt ? { exempt: true } : {}),
-      ...(w4.nonresidentAlien ? { nonresidentAlien: true } : {}),
+      ...(w4Exempt ? { exempt: true } : {}),
+      ...(w4NonresidentAlien ? { nonresidentAlien: true } : {}),
     },
     ytd: {
       socialSecurity: dollars(ytd.socialSecurity ?? 0),
@@ -389,7 +408,7 @@ export function buildAlabamaEngineInput(input: AlabamaPaycheckInput): AlabamaBui
       ...(employer.unemploymentRate !== undefined
         ? { stateUnemploymentRate: { AL: employer.unemploymentRate } }
         : {}),
-      ...(employer.useFivePercentSupplementalRate
+      ...(useFivePercentSupplementalRate
         ? { supplementalFlatRateElection: { AL: true } }
         : {}),
       ...(employer.householdQuarterlyCashWages !== undefined
@@ -398,8 +417,8 @@ export function buildAlabamaEngineInput(input: AlabamaPaycheckInput): AlabamaBui
       ...(employer.agriculturalTotalWages !== undefined
         ? { agriculturalTotalWages: dollars(employer.agriculturalTotalWages) }
         : {}),
-      ...(employer.agriculturalFutaLiable !== undefined
-        ? { agriculturalFutaLiable: employer.agriculturalFutaLiable }
+      ...(agriculturalFutaLiable !== undefined
+        ? { agriculturalFutaLiable }
         : {}),
       ...(employer.railroadUnemploymentRate !== undefined
         ? { railroadUnemploymentRate: employer.railroadUnemploymentRate }
@@ -408,7 +427,7 @@ export function buildAlabamaEngineInput(input: AlabamaPaycheckInput): AlabamaBui
     ...(employmentCategory !== 'standard' ? { employmentCategory } : {}),
     workState: { code: 'AL', certificate },
     residenceState: { code: residenceState },
-    ...(input.options?.roundToWholeDollars ? { roundToWholeDollars: true } : {}),
+    ...(roundToWholeDollars ? { roundToWholeDollars: true } : {}),
   };
 
   warnings.push(...advisoryWarnings(input, { isNonresident, days, severanceCents, rules }));

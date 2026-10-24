@@ -113,7 +113,9 @@ export function buildAlabamaOutput(
       explanation,
     },
 
-    warnings: built.warnings,
+    // The adapter's own warnings, then the engine's (provisional rules, negative
+    // net pay, ...), which describe the same paycheck and must not be dropped.
+    warnings: [...new Set([...built.warnings, ...(result.warnings ?? [])])],
     raw: result.taxes,
   };
 }

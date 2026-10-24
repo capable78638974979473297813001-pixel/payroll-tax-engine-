@@ -471,14 +471,17 @@ describe('territories', () => {
     }
   });
 
-  test('a query against American Samoa refuses to invent a single rate', () => {
-    const answer = minimumWage({ checkDate: D, state: 'AS' });
-    const state = answer.considered.find((c) => c.level === 'state')!;
-    assert.equal(state.cents, undefined);
-    assert.match(state.caveat!, /18 industry-specific/);
-    // The federal $7.25 is the only figure left standing, and the caveat
-    // is what stops a caller from believing it.
-    assert.equal(answer.bindingLevel, 'federal');
+  test('a query against American Samoa without an industry is refused, not answered with $7.25', () => {
+    assert.throws(() => minimumWage({ checkDate: D, state: 'AS' }), /no single minimum wage.*18 industry-specific/s);
+    assert.throws(() => minimumWage({ checkDate: D, state: 'AS', industry: 'not_an_industry' }), /Unknown American Samoa industry/);
+  });
+
+  test('with an industry, American Samoa answers that industry\'s own rate, below $7.25', () => {
+    const garment = minimumWage({ checkDate: D, state: 'AS', industry: 'garment' });
+    assert.equal(garment.cents, 578);
+    assert.equal(garment.bindingLevel, 'state');
+    assert.ok(!garment.considered.some((c) => c.level === 'federal'));
+    assert.equal(minimumWage({ checkDate: D, state: 'AS', industry: 'shipping_a' }).cents, 719);
   });
 
   test('the other four territories', () => {
