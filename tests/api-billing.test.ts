@@ -455,6 +455,29 @@ describe('billing race and replay safety (api/billing.ts)', () => {
     assert.equal(handleStripeWebhook(cancelNew, sign(cancelNew)).action, 'cancelled');
   }));
 
+  test('a late checkout.session.completed for an older session does not put the older subscription back', () => withSecret(() => {
+    const { key } = mintApiKey('Late Co');
+    const id = verifyApiKey(key)!.id;
+    setStripeCustomer(id, 'cus_late');
+    const now = Math.floor(Date.now() / 1000);
+    const completed = (evt: string, sub: string, created: number) => JSON.stringify({
+      id: evt, type: 'checkout.session.completed', created,
+      data: { object: { customer: 'cus_late', subscription: sub, metadata: { apiKeyId: id } } },
+    });
+    // The newer subscription is recorded first...
+    const newer = completed('evt_cs_new', 'sub_new', now);
+    assert.equal(handleStripeWebhook(newer, sign(newer)).action, 'checkout_completed');
+    assert.equal(getApiKey(id)!.stripeSubscriptionId, 'sub_new');
+    // ...then the older session's event arrives late.
+    const older = completed('evt_cs_old', 'sub_old', now - 3600);
+    assert.equal(handleStripeWebhook(older, sign(older)).action, 'ignored_stale_checkout');
+    assert.equal(getApiKey(id)!.stripeSubscriptionId, 'sub_new');
+    // A genuinely newer one still replaces it.
+    const replacement = completed('evt_cs_repl', 'sub_repl', now + 60);
+    assert.equal(handleStripeWebhook(replacement, sign(replacement)).action, 'checkout_completed');
+    assert.equal(getApiKey(id)!.stripeSubscriptionId, 'sub_repl');
+  }));
+
   test('reopening an old Checkout return cannot replace the current subscription with a cancelled one', async () => {
     process.env.STRIPE_SECRET_KEY = 'sk_test_fake';
     const { key } = mintApiKey('Return Co');

@@ -1,3 +1,4 @@
+import { findChrome } from './helpers/chrome.ts';
 import { test, before, after } from 'node:test';
 import assert from 'node:assert/strict';
 import { spawn, type ChildProcess } from 'node:child_process';
@@ -146,11 +147,15 @@ test('every certificate key is named, and every option passes the engine', () =>
   }
 });
 
-test('every step keeps a visible field border and a near-black primary', { timeout: 180_000 }, async () => {
-  const shots = '/opt/cursor/artifacts/sandbox';
+test('every step keeps a visible field border and a near-black primary', { timeout: 180_000, skip: findChrome() ? false : 'no Chrome/Chromium found (set CHROME_BIN)' }, async () => {
+  let shots = join(tmpdir(), 'sandbox-shots');
+  try {
+    mkdirSync('/opt/cursor/artifacts/sandbox', { recursive: true });
+    shots = '/opt/cursor/artifacts/sandbox';
+  } catch { /* artifacts dir is not writable here */ }
   mkdirSync(shots, { recursive: true });
   const userDir = mkdtempSync(join(tmpdir(), 'sandbox-chrome-'));
-  const chrome = spawn('google-chrome', [
+  const chrome = spawn(findChrome()!, [
     '--headless=new', '--no-sandbox', '--disable-gpu', '--disable-dev-shm-usage',
     '--remote-debugging-port=0', `--user-data-dir=${userDir}`,
     '--no-first-run', '--no-default-browser-check', '--disable-extensions',

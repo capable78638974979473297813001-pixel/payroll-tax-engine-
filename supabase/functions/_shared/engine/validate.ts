@@ -1,3 +1,5 @@
+import type { EmploymentCategory } from './types.ts';
+
 /**
  * Shared input-validation helpers for optional caller-supplied fields that
  * flow in as loosely-typed data (a state's own `certificate: Record<string,
@@ -33,4 +35,42 @@ export function resolveCertBoolean(cert: Record<string, unknown>, field: string)
     `Unrecognized certificate.${field} ${JSON.stringify(raw)} — expected a real boolean (true/false), not a ` +
       `string or other value that merely LOOKS like one.`,
   );
+}
+
+/** Every value of PaycheckInput.employmentCategory. */
+export const EMPLOYMENT_CATEGORIES: readonly EmploymentCategory[] = [
+  'standard',
+  'clergy',
+  'statutory_employee',
+  'household',
+  'agricultural',
+  'railroad',
+  'election_worker',
+];
+
+/**
+ * employmentCategory selects whole sets of federal and state rules, and the
+ * last branch of the federal category logic is the clergy exemption, which
+ * zeroes every federal line. A misspelled value must therefore stop the
+ * calculation, never fall into a branch by default.
+ */
+export function assertEmploymentCategory(value: unknown): void {
+  if (value === undefined || value === null) return;
+  if (!EMPLOYMENT_CATEGORIES.includes(value as EmploymentCategory)) {
+    throw new Error(
+      `Unrecognized employmentCategory ${JSON.stringify(value)} — expected one of ${EMPLOYMENT_CATEGORIES.join(', ')}, or omit it for 'standard'.`,
+    );
+  }
+}
+
+/** True for a yyyy-mm-dd string that names a real calendar day (not 2026-02-30 or 2026-99-99). */
+export function isRealIsoDate(value: unknown): value is string {
+  if (typeof value !== 'string') return false;
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
+  if (!m) return false;
+  const [y, mo, d] = [Number(m[1]), Number(m[2]), Number(m[3])];
+  const date = new Date(Date.UTC(y, mo - 1, d));
+  // Date.UTC maps years 0-99 to 1900-1999, so compare the year via setUTCFullYear too.
+  date.setUTCFullYear(y);
+  return date.getUTCFullYear() === y && date.getUTCMonth() === mo - 1 && date.getUTCDate() === d;
 }

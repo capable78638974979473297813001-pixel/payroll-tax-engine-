@@ -130,7 +130,7 @@ export interface StripeCheckoutSession {
   status?: string;
   mode?: string;
   customer?: string;
-  subscription?: string | { id: string; default_payment_method?: string | StripePaymentMethod | null };
+  subscription?: string | { id: string; status?: string; default_payment_method?: string | StripePaymentMethod | null };
   setup_intent?: string | { id: string; payment_method?: string | StripePaymentMethod | null };
 }
 /** Production is NODE_ENV=production, or any process Render itself started (RENDER is set). */

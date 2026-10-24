@@ -1,3 +1,4 @@
+import { findChrome } from './helpers/chrome.ts';
 import { test, describe, before, after } from 'node:test';
 import assert from 'node:assert/strict';
 import { spawn, type ChildProcess } from 'node:child_process';
@@ -288,7 +289,7 @@ describe('signup pages: contrast, labels, and step chrome', () => {
     assert.match(css, /position:\s*fixed/);
   });
 
-  test('rendered steps keep a visible border and an on-screen primary', { timeout: 180_000 }, async () => {
+  test('rendered steps keep a visible border and an on-screen primary', { timeout: 180_000, skip: findChrome() ? false : 'no Chrome/Chromium found (set CHROME_BIN)' }, async () => {
     let shots = join(tmpdir(), 'signup-shots');
     try {
       mkdirSync('/opt/cursor/artifacts/signup', { recursive: true });
@@ -296,7 +297,7 @@ describe('signup pages: contrast, labels, and step chrome', () => {
     } catch { /* artifacts dir is not writable here */ }
     mkdirSync(shots, { recursive: true });
     const userDir = mkdtempSync(join(tmpdir(), 'signup-chrome-'));
-    const chrome = spawn('google-chrome', [
+    const chrome = spawn(findChrome()!, [
       '--headless=new', '--no-sandbox', '--disable-gpu', '--disable-dev-shm-usage',
       '--remote-debugging-port=0', `--user-data-dir=${userDir}`,
       '--no-first-run', '--no-default-browser-check', '--disable-extensions',

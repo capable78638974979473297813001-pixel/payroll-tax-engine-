@@ -61,6 +61,8 @@ export interface ApiKey {
   stripePaymentMethodId: string | null;
   /** Metered-billing subscription — set when the customer starts usage billing; each call reports one unit to it. */
   stripeSubscriptionId: string | null;
+  /** When stripeSubscriptionId was last set (ISO). A late checkout event older than this is about a superseded session. */
+  stripeSubscriptionSetAt?: string | null;
   /**
    * Set when Stripe reports the subscription deleted. A cancelled key stays
    * suspended: a later invoice.paid (e.g. the final invoice) settles a debt,
@@ -270,7 +272,7 @@ export function setCardOnFile(id: string, card: { paymentMethodId: string; brand
 }
 
 /** Attach the metered-billing subscription id for a key. A new subscription lifts a cancellation. */
-export function setSubscription(id: string, subscriptionId: string): void {
+export function setSubscription(id: string, subscriptionId: string, atMs: number = Date.now()): void {
   withDb((db) => {
     const k = db.keys[id];
     if (!k) return;
@@ -280,6 +282,7 @@ export function setSubscription(id: string, subscriptionId: string): void {
       k.suspendedReason = null;
     }
     k.stripeSubscriptionId = subscriptionId;
+    k.stripeSubscriptionSetAt = new Date(atMs).toISOString();
   });
 }
 

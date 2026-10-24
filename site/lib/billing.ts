@@ -4,6 +4,7 @@ import {
   createSubscriptionCheckoutSession,
   retrieveCheckoutSession,
   reportMeterEvent,
+  retrieveSubscription,
   verifyWebhookSignature,
   stripeConfigured,
   type StripePaymentMethod,
@@ -250,6 +251,16 @@ export async function completeMeteredCheckout(sessionId: string): Promise<Comple
     if (s.status !== 'complete') return { ok: false, reason: 'checkout_not_complete' };
     const sub = s.subscription;
     const subscriptionId = typeof sub === 'string' ? sub : sub?.id ?? null;
+    // A completed session can be reopened long after Checkout (the return URL,
+    // or a late webhook). If its subscription has since ended, linking it would
+    // overwrite the account's current subscription with a dead one and, for a
+    // cancelled account, revive it. The expanded subscription carries its
+    // status; a bare id is looked up. A failed lookup is a retryable error,
+    // not a guess.
+    if (subscriptionId) {
+      const status = typeof sub === 'object' && sub ? sub.status : (await retrieveSubscription(subscriptionId)).status;
+      if (status === 'canceled' || status === 'incomplete_expired') return { ok: false, reason: 'subscription_not_active' };
+    }
     const si = s.setup_intent;
     const raw = (typeof sub === 'object' && sub ? sub.default_payment_method : null)
       ?? (typeof si === 'object' && si ? si.payment_method : null);
@@ -332,6 +343,7 @@ export function interpretWebhook(rawBody: string, signatureHeader: string | unde
   const eventId = typeof event.id === 'string' && event.id ? event.id : undefined;
   const tagged = <T extends { ok: true; action: WebhookAction; customerId: string | null }>(base: T): WebhookInterpretation =>
     eventId ? { ...base, eventId } : base;
+  const forSubscription = (id: string | null | undefined) => (id ? { subscriptionId: id } : {});
 
   switch (event.type) {
     case 'checkout.session.completed': {
@@ -362,15 +374,20 @@ export function interpretWebhook(rawBody: string, signatureHeader: string | unde
         subscriptionStatus: status || null,
       };
     }
+    // Every one of these names the subscription it is about (a subscription
+    // event's own id; an invoice's `subscription`), so the caller can tell an
+    // event for the subscription an account holds from a late one for an old one.
     case 'invoice.payment_failed':
+      return tagged({ ok: true, action: 'suspend', customerId, ...forSubscription(idOf(obj.subscription)) });
     case 'customer.subscription.paused':
-      return tagged({ ok: true, action: 'suspend', customerId });
+      return tagged({ ok: true, action: 'suspend', customerId, ...forSubscription(obj.id) });
     case 'customer.subscription.deleted':
-      return tagged({ ok: true, action: 'cancel', customerId });
+      return tagged({ ok: true, action: 'cancel', customerId, ...forSubscription(obj.id) });
     case 'invoice.paid':
     case 'invoice.payment_succeeded':
+      return tagged({ ok: true, action: 'reactivate', customerId, ...forSubscription(idOf(obj.subscription)) });
     case 'customer.subscription.resumed':
-      return tagged({ ok: true, action: 'reactivate', customerId });
+      return tagged({ ok: true, action: 'reactivate', customerId, ...forSubscription(obj.id) });
     default:
       return tagged({ ok: true, action: 'ignore', customerId });
   }
