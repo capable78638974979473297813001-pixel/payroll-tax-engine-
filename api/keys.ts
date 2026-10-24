@@ -450,9 +450,16 @@ export function enqueueMeterEvent(keyId: string, units: number): PendingMeterEve
 
 const STRIPE_EVENT_MEMORY = 2000;
 
+/** True when this Stripe event id was already applied (see claimStripeEvent). */
+export function stripeEventSeen(eventId: string): boolean {
+  return (load().processedStripeEvents ?? []).includes(eventId);
+}
+
 /**
  * Record a Stripe event id the first time it is seen. Returns false when
- * this id was already claimed, so a webhook redelivery is a no-op.
+ * this id was already claimed, so a webhook redelivery is a no-op. Call it
+ * only AFTER the event's changes are saved: claiming first would make the
+ * retry of a delivery that crashed mid-apply look like a duplicate.
  */
 export function claimStripeEvent(eventId: string): boolean {
   return withDb((db) => {
@@ -510,8 +517,10 @@ export function usageForKey(id: string): {
 
 /**
  * Settle a key's outstanding balance — i.e. "charge them the amount we have."
- * This zeroes balanceDueCents and returns the amount that was owed, so the
- * caller can hand that amount to a payment processor.
+ * With no amount it zeroes balanceDueCents and returns what was owed, so the
+ * caller can hand that amount to a payment processor. Pass `amountCents` (what
+ * the processor actually collected) to take off only that much: usage recorded
+ * while the charge was in flight stays on the balance.
  *
  * NOTE — this moves NO real money by itself. Actually charging a card needs a
  * payment processor (Stripe et al.): create a Customer + PaymentMethod at
@@ -521,12 +530,12 @@ export function usageForKey(id: string): {
  * charge happened when no processor is connected). Until a processor is wired,
  * treat a returned amount as "invoice this", not "money collected".
  */
-export function settleBalance(idOrPrefix: string): { ok: boolean; name?: string; chargedCents: number } {
+export function settleBalance(idOrPrefix: string, amountCents?: number): { ok: boolean; name?: string; chargedCents: number } {
   return withDb((db) => {
     const k = db.keys[idOrPrefix] ?? Object.values(db.keys).find((x) => x.prefix === idOrPrefix);
     if (!k) return { ok: false, chargedCents: 0 };
-    const chargedCents = k.balanceDueCents;
-    k.balanceDueCents = 0;
+    const chargedCents = amountCents === undefined ? k.balanceDueCents : Math.min(k.balanceDueCents, Math.max(0, Math.round(amountCents)));
+    k.balanceDueCents -= chargedCents;
     return { ok: true, name: k.name, chargedCents };
   });
 }
