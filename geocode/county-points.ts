@@ -37,7 +37,7 @@
 import type { FetchOptions } from './census.ts';
 import type { AddressPoint } from './rooftop.ts';
 import { parseAddressParts } from './rooftop.ts';
-import { streetKey, streetKeyWithoutDirectionals, STREET_TYPES } from './buildings.ts';
+import { hasStreetType, streetDirectionals, streetKey, streetKeyWithoutDirectionals, STREET_TYPES } from './buildings.ts';
 
 interface SourceBase {
   /** Short stable id, used in tests and logs. */
@@ -459,6 +459,26 @@ async function querySocrata(src: SocrataPointSource, lat: number, lon: number, r
   return (body as Record<string, unknown>[]).map((row) => socrataRowToPoint(src, row)).filter((p): p is AddressPoint => p !== null);
 }
 
+/**
+ * Whether a locator candidate's street is the street that was asked for.
+ *
+ * The name must match; the directionals must be the SAME set (a locator
+ * returns "E KANAWHA BLVD E" for "Kanawha Blvd E": one direction written
+ * twice, which is one direction); and the street type may differ only by being
+ * absent on one side. Comparing the name alone, as this once did, accepted a
+ * candidate on the opposite side of a divided street ("S Main St" for "N Main
+ * St") or a different street ("Main Ave" for "Main St"), and the caller then
+ * stamped the target's spelling on it so nothing downstream could object.
+ */
+export function sameLocatorStreet(candidate: string, target: string): boolean {
+  if (coreStreet(candidate) !== coreStreet(target)) return false;
+  if (streetDirectionals(candidate).join() !== streetDirectionals(target).join()) return false;
+  if (hasStreetType(candidate) && hasStreetType(target)) {
+    return streetKeyWithoutDirectionals(candidate) === streetKeyWithoutDirectionals(target);
+  }
+  return true;
+}
+
 /** Street name stripped of directionals and a trailing street-type word, so "KANAWHA BLVD E" and "Kanawha Blvd" compare. */
 function coreStreet(street: string): string {
   const tokens = streetKeyWithoutDirectionals(street).split(' ');
@@ -502,10 +522,10 @@ async function queryGeocoder(
     if ((c.score ?? 0) < src.minScore) continue;
     if (str(a.AddNum) !== parts.houseNumber) continue;
     const candidateStreet = [a.StPreDir, a.StPreType, a.StName, a.StType, a.StDir].map(str).filter(Boolean).join(' ');
-    if (coreStreet(candidateStreet) !== coreStreet(parts.street)) continue;
+    if (!sameLocatorStreet(candidateStreet, parts.street)) continue;
     out.push({
       houseNumber: parts.houseNumber,
-      // The geocoder's own match was just validated against the target, so the point carries the target's street spelling; this keeps matchAddressPoint's directional guards from tripping on the service's own "E KANAWHA BLVD E" duplication.
+      // The candidate was just checked against the target on name, directional and type (sameLocatorStreet), so it carries the target's spelling; this keeps matchAddressPoint's directional guards from tripping on the service's own "E KANAWHA BLVD E" duplication.
       street: parts.street,
       unit: null,
       city: str(a.City) || null,

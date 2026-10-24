@@ -26,21 +26,15 @@
  * caller from looping over many at once.
  */
 
+import { createThrottle } from './throttle.ts';
+
 const NOMINATIM_SEARCH = 'https://nominatim.openstreetmap.org/search';
 const USER_AGENT =
   'payroll-tax-engine geocode cross-check (github.com/capable78638974979473297813001-pixel/payroll-tax-engine-)';
 const DEFAULT_MIN_INTERVAL_MS = 1100; // Nominatim's policy caps at 1 req/sec; pad slightly.
 
-let lastRequestAt = 0;
-
-/** Module-level throttle state, deliberately shared across calls (that's the point — it enforces the cap regardless of how many callers exist). Tests pass minIntervalMs: 0 so the RATE-LIMITING LOGIC is exercised without the real suite paying real wall-clock time for it — the same fix already applied to census.ts's retry backoff. */
-async function throttle(minIntervalMs: number): Promise<void> {
-  const elapsed = Date.now() - lastRequestAt;
-  if (elapsed < minIntervalMs) {
-    await new Promise((resolve) => setTimeout(resolve, minIntervalMs - elapsed));
-  }
-  lastRequestAt = Date.now();
-}
+/** Module-level throttle state, deliberately shared across calls (that's the point — it enforces the cap regardless of how many callers exist, including concurrent ones; see throttle.ts). Tests pass minIntervalMs: 0 so the RATE-LIMITING LOGIC is exercised without the real suite paying real wall-clock time for it. */
+const throttle = createThrottle();
 
 export interface NominatimResult {
   matched: boolean;

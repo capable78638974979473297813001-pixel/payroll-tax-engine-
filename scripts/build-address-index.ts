@@ -7,7 +7,9 @@ import { spawn, spawnSync } from 'node:child_process';
 import { Readable } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
 
-import { INDEX_FORMAT, OPENADDRESSES_REGIONS, openAddressesRegionUrl, parseOpenAddressesLine, toMicro } from './address-index-lib.ts';
+import {
+  INSERT_POINT_SQL, OPENADDRESSES_REGIONS, ensureIndexSchema, openAddressesRegionUrl, parseOpenAddressesLine, sourceFor, toMicro,
+} from './address-index-lib.ts';
 
 /**
  * Turn the OpenAddresses bulk extracts into a local, queryable address
@@ -39,10 +41,21 @@ import { INDEX_FORMAT, OPENADDRESSES_REGIONS, openAddressesRegionUrl, parseOpenA
  * Rows stream from each zip entry line by line, so memory stays flat no
  * matter how large a county is.
  *
+ * AN INCOMPLETE BUILD IS NEVER PUBLISHED. A download that fails, an archive that
+ * cannot be read, or an entry that stops partway marks the run failed: the
+ * `.building` file is deleted, the existing index is left exactly as it was, and
+ * the process exits 1 naming what failed. `--allow-partial` publishes what was
+ * ingested anyway (and still exits 1 so a script notices).
+ *
+ * REPEAT IMPORTS ARE SAFE. Each county file is loaded in ONE transaction and
+ * recorded in `sources.rows` when it commits, so a file already in the index is
+ * skipped on the next run (--append twice does not double a county) and a file
+ * interrupted mid-way leaves nothing behind.
+ *
  * node:sqlite is a Node 22+ built-in, so this adds no npm dependency. Python
  * is used only as a zip reader (Node has no built-in zip).
  *
- *   node scripts/build-address-index.ts [--states MI,PA,HI] [--download] [--keep] [--append]
+ *   node scripts/build-address-index.ts [--states MI,PA,HI] [--download] [--keep] [--append] [--allow-partial]
  *
  *   --download   fetch each regional zip from data.openaddresses.io, ingest it,
  *                then delete it (--keep leaves the zips in place)
@@ -57,13 +70,12 @@ const RAW_DIR =
   process.env.ADDRESS_INDEX_RAW_DIR ??
   (process.env.ADDRESS_INDEX_PATH ? join(dirname(DB_PATH), 'raw') : join(HERE, '..', 'data', 'address-points', 'raw'));
 
-const BATCH_ROWS = 50_000;
-
 interface Args {
   states: Set<string> | null;
   append: boolean;
   download: boolean;
   keep: boolean;
+  allowPartial: boolean;
 }
 
 function parseArgs(): Args {
@@ -74,6 +86,7 @@ function parseArgs(): Args {
     append: argv.includes('--append'),
     download: argv.includes('--download'),
     keep: argv.includes('--keep'),
+    allowPartial: argv.includes('--allow-partial'),
   };
 }
 
@@ -112,78 +125,61 @@ function openDb(path: string, fresh: boolean): DatabaseSync {
     db.exec('DROP TABLE IF EXISTS sources');
     db.exec('DROP TABLE IF EXISTS meta');
   }
-  const existing = db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='meta'").get();
-  if (!fresh && !existing && db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='points'").get()) {
-    throw new Error(`${path} is an older format-1 index; rebuild it instead of appending (drop --append).`);
-  }
-  db.exec(`
-    CREATE TABLE IF NOT EXISTS meta (key TEXT PRIMARY KEY, value TEXT NOT NULL);
-    CREATE TABLE IF NOT EXISTS sources (id INTEGER PRIMARY KEY, name TEXT NOT NULL UNIQUE);
-    CREATE TABLE IF NOT EXISTS points (
-      cell   INTEGER NOT NULL,
-      lat    INTEGER NOT NULL,
-      lon    INTEGER NOT NULL,
-      number TEXT,
-      street TEXT,
-      unit   TEXT,
-      city   TEXT,
-      state  TEXT NOT NULL,
-      source INTEGER NOT NULL
-    );
-  `);
-  db.prepare("INSERT OR REPLACE INTO meta (key, value) VALUES ('format', ?)").run(String(INDEX_FORMAT));
+  ensureIndexSchema(db, path);
   return db;
 }
 
-/** source name -> id, creating the row the first time a county file is seen. */
-function sourceIdFor(db: DatabaseSync, cache: Map<string, number>, name: string): number {
-  const hit = cache.get(name);
-  if (hit !== undefined) return hit;
-  db.prepare('INSERT OR IGNORE INTO sources (name) VALUES (?)').run(name);
-  const row = db.prepare('SELECT id FROM sources WHERE name = ?').get(name) as { id: number };
-  cache.set(name, row.id);
-  return row.id;
-}
-
-/** Stream one CSV out of a zip, line by line, without unpacking the archive or holding it in memory. */
+/**
+ * Stream one CSV out of a zip, line by line, without unpacking the archive or
+ * holding it in memory. The whole entry is ONE transaction: it either commits
+ * complete (and is recorded in `sources.rows`) or leaves nothing. Returns the
+ * rows added, or null when the source was already imported.
+ */
 async function ingestEntry(
   db: DatabaseSync,
-  sourceCache: Map<string, number>,
   zipPath: string,
   entry: string,
   state: string,
   insert: ReturnType<DatabaseSync['prepare']>,
-): Promise<number> {
+): Promise<number | null> {
+  const src = sourceFor(db, `OpenAddresses ${entry.replace(/^us\//, '').replace(/\.csv$/, '')}`);
+  if (src.imported) return null;
+
   const child = spawn(
     PYTHON,
     ['-c', 'import zipfile,sys,shutil\nz=zipfile.ZipFile(sys.argv[1])\nshutil.copyfileobj(z.open(sys.argv[2]), sys.stdout.buffer)', zipPath, entry],
     { stdio: ['ignore', 'pipe', 'ignore'] },
   );
+  const exited = new Promise<number | null>((resolve) => {
+    child.on('error', () => resolve(-1));
+    child.on('close', (code) => resolve(code));
+  });
   const lines = createInterface({ input: child.stdout, crlfDelay: Infinity });
-  const sourceId = sourceIdFor(db, sourceCache, `OpenAddresses ${entry.replace(/^us\//, '').replace(/\.csv$/, '')}`);
   const stateCode = state.toUpperCase();
   let n = 0;
   let first = true;
-  let inTx = false;
-  for await (const line of lines) {
-    if (first) {
-      first = false;
-      continue;
+  db.exec('BEGIN');
+  try {
+    for await (const line of lines) {
+      if (first) {
+        first = false;
+        continue;
+      }
+      const row = parseOpenAddressesLine(line);
+      if (!row) continue;
+      insert.run(row.cell, toMicro(row.lat), toMicro(row.lon), row.number, row.street, row.unit, row.city, stateCode, src.id, row.zip);
+      n++;
     }
-    const row = parseOpenAddressesLine(line);
-    if (!row) continue;
-    if (!inTx) {
-      db.exec('BEGIN');
-      inTx = true;
-    }
-    insert.run(row.cell, toMicro(row.lat), toMicro(row.lon), row.number, row.street, row.unit, row.city, stateCode, sourceId);
-    n++;
-    if (n % BATCH_ROWS === 0) {
-      db.exec('COMMIT');
-      inTx = false;
-    }
+    const code = await exited;
+    // A truncated or corrupt entry makes the reader exit non-zero after emitting a prefix of its rows.
+    if (code !== 0) throw new Error(`could not read ${entry} from ${zipPath} (exit ${code})`);
+    db.prepare('UPDATE sources SET rows = ? WHERE id = ?').run(n, src.id);
+    db.exec('COMMIT');
+  } catch (err) {
+    child.kill();
+    db.exec('ROLLBACK');
+    throw err;
   }
-  if (inTx) db.exec('COMMIT');
   return n;
 }
 
@@ -220,11 +216,10 @@ async function main(): Promise<void> {
   }
 
   const db = openDb(outPath, !args.append);
-  const insert = db.prepare(
-    'INSERT INTO points (cell,lat,lon,number,street,unit,city,state,source) VALUES (?,?,?,?,?,?,?,?,?)',
-  );
-  const sourceCache = new Map<string, number>();
+  const insert = db.prepare(INSERT_POINT_SQL);
   let grand = 0;
+  let alreadyImported = 0;
+  const failures: string[] = [];
   const perState: Record<string, number> = {};
 
   const sources: { label: string; resolve: () => Promise<string>; disposable: boolean }[] = args.download
@@ -237,19 +232,33 @@ async function main(): Promise<void> {
       console.log(`\n=== ${src.label}${args.download ? ' (downloading)' : ''}`);
       zipPath = await src.resolve();
     } catch (err) {
-      console.error(`  ${(err as Error).message}; skipped`);
+      console.error(`  ${(err as Error).message}; FAILED`);
+      failures.push(`${src.label}: ${(err as Error).message}`);
       continue;
     }
     console.log(`  ${Math.round(statSync(zipPath).size / 1024 / 1024)} MB`);
     const listed = listZipEntries(zipPath);
     if (listed === null) {
-      console.log('  unreadable; skipped');
+      console.error('  unreadable; FAILED');
+      failures.push(`${src.label}: archive could not be read`);
+      if (src.disposable) rmSync(zipPath, { force: true });
       continue;
     }
     for (const entry of listed.filter((e) => e.startsWith('us/') && e.endsWith('.csv') && !e.startsWith('summary/'))) {
       const state = entry.split('/')[1];
       if (args.states && !args.states.has(state)) continue;
-      const n = await ingestEntry(db, sourceCache, zipPath, entry, state, insert);
+      let n: number | null;
+      try {
+        n = await ingestEntry(db, zipPath, entry, state, insert);
+      } catch (err) {
+        console.error(`\n  ${entry}: ${(err as Error).message}; FAILED`);
+        failures.push(`${entry}: ${(err as Error).message}`);
+        continue;
+      }
+      if (n === null) {
+        alreadyImported++;
+        continue;
+      }
       if (n > 0) {
         grand += n;
         perState[state.toUpperCase()] = (perState[state.toUpperCase()] ?? 0) + n;
@@ -266,12 +275,24 @@ async function main(): Promise<void> {
   db.exec('PRAGMA wal_checkpoint(TRUNCATE)');
   db.close();
 
-  if (grand === 0 && !args.append) {
-    rmSync(outPath, { force: true });
-    console.error('no points were ingested; nothing was written');
-    process.exit(1);
+  if (alreadyImported > 0) console.log(`${alreadyImported} county file(s) were already in the index and were skipped.`);
+  const incomplete = failures.length > 0;
+  if (incomplete) {
+    console.error(`\n${failures.length} source(s) failed:\n${failures.map((f) => `  - ${f}`).join('\n')}`);
   }
+
   if (!args.append) {
+    // Publish only a complete build: a failed region would otherwise replace a
+    // good index with one that silently lacks it.
+    if (grand === 0 || (incomplete && !args.allowPartial)) {
+      for (const f of [outPath, `${outPath}-wal`, `${outPath}-shm`]) rmSync(f, { force: true });
+      console.error(
+        grand === 0
+          ? 'no points were ingested; nothing was written'
+          : `build incomplete; the existing index at ${DB_PATH} was left untouched (rerun, or pass --allow-partial to publish what was ingested)`,
+      );
+      process.exit(1);
+    }
     for (const f of [`${outPath}-wal`, `${outPath}-shm`]) rmSync(f, { force: true });
     renameSync(outPath, DB_PATH);
   }
@@ -280,6 +301,7 @@ async function main(): Promise<void> {
   for (const [st, n] of Object.entries(perState).sort((a, b) => b[1] - a[1])) console.log(`  ${st}  ${n.toLocaleString()}`);
   console.log(`\ntotal: ${grand.toLocaleString()} points -> ${DB_PATH}`);
   console.log(`db size: ${Math.round(statSync(DB_PATH).size / 1024 / 1024)} MB`);
+  if (incomplete) process.exit(1);
 }
 
 await main();

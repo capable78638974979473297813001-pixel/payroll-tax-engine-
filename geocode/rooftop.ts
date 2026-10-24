@@ -51,7 +51,7 @@
  *   - This is positional precision, not address VALIDATION. A typo'd or
  *     nonexistent address doesn't become valid because no point matched.
  */
-import { streetKey, streetKeyCapitolNormalized, streetKeyWithoutDirectionals, streetKeyWithoutType } from './buildings.ts';
+import { hasStreetType, streetKey, streetKeyCapitolNormalized, streetKeyWithoutDirectionals, streetKeyWithoutType } from './buildings.ts';
 import type { FetchOptions } from './census.ts';
 import { searchStructuredAddressSafe } from './nominatim.ts';
 import { resolveParcelCentroid, type ParcelCentroidResult } from './parcel.ts';
@@ -290,12 +290,23 @@ export interface AddressParts {
   postalcode: string | null;
 }
 
+/**
+ * A leading house number: plain digits ("90") or the hyphenated form some
+ * places use ("12-34", Queens). Reading only the digits before the hyphen
+ * would turn "12-34 Main St" into number 12 on street "-34 Main St".
+ */
+const HOUSE_NUMBER = /^\s*(\d+(?:-\d+)?)(?=\s|$)/;
+const HOUSE_NUMBER_PREFIX = /^\s*\d+(?:-\d+)?\s*/;
+
+/** A trailing unit designator in a street segment: "Apt 4B", "Unit 12", "Ste 300", "#4B", "# 4B". The `#` has no word boundary in front of it, so a plain \\b before the alternation never matched it. */
+const TRAILING_UNIT = /(?:^|[\s,])(?:(?:apt|apartment|unit|ste|suite|fl|floor|rm|room)\b\.?\s*|#\s*)[A-Za-z0-9-]+\s*$/i;
+
 /** Split a one-line US address into the fields a structured geocoder wants. Deliberately simple — it handles the shape this project's own callers use ("90 W Broad St, Columbus, OH 43215") and returns nulls rather than guessing when a piece isn't there. */
 export function parseAddressParts(oneLineAddress: string): AddressParts {
   const segments = oneLineAddress.split(',').map((s) => s.trim()).filter(Boolean);
   const streetSegment = segments[0] ?? '';
-  const houseNumber = /^\s*(\d+)/.exec(streetSegment)?.[1] ?? null;
-  const street = streetSegment.replace(/^\s*\d+\s*/, '').trim() || null;
+  const houseNumber = HOUSE_NUMBER.exec(streetSegment)?.[1] ?? null;
+  const street = streetSegment.replace(HOUSE_NUMBER_PREFIX, '').trim() || null;
 
   const last = segments[segments.length - 1] ?? '';
   const stateZip = /^([A-Za-z]{2})\s+(\d{5})(?:-\d{4})?$/.exec(last);
@@ -309,7 +320,7 @@ export function parseAddressParts(oneLineAddress: string): AddressParts {
 
 /** The unit designator written into a one-line address ("123 Main St Apt 4B" -> "4B"), used to pick between per-unit points when a building has one point per unit. Null when the address names no unit. */
 export function extractUnit(oneLineAddress: string): string | null {
-  const m = /\b(?:apt|apartment|unit|ste|suite|rm|room|#)\.?\s*([A-Za-z0-9-]+)/i.exec(oneLineAddress);
+  const m = /(?<![A-Za-z0-9])(?:(?:apt|apartment|unit|ste|suite|rm|room)\b\.?\s*|#\s*)([A-Za-z0-9-]+)/i.exec(oneLineAddress);
   return m ? m[1] : null;
 }
 
@@ -331,6 +342,36 @@ export interface RooftopMatch {
   streetTypeFallback: boolean;
 }
 
+/** City names as written differ in case, punctuation, a "City of" prefix and a "city"/"township" suffix; reduce them to what actually distinguishes two places. */
+function cityKey(city: string): string {
+  return city
+    .toLowerCase()
+    .replace(/[.,']/g, '')
+    .replace(/^(?:city|village|town|borough|township|twp) of\s+/, '')
+    .replace(/\s+(?:city|village|town|borough|township|twp)$/, '')
+    .replace(/^saint\s/, 'st ')
+    .replace(/^mount\s/, 'mt ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+/**
+ * Whether a candidate point can be in the place the address names. Number and
+ * street alone are not an address: nearby municipalities repeat street names,
+ * and a border street carries the same number on both sides.
+ *
+ * ZIP decides when both sides state one (a postal city and a municipality
+ * legitimately differ in name, but not in ZIP). With no ZIP to compare, a
+ * stated city on both sides must agree. A side that states neither cannot
+ * disagree, so a point with no place data still matches as before.
+ */
+function samePlace(p: AddressPoint, city: string | null, postalcode: string | null): boolean {
+  const pointZip = p.zip ? p.zip.trim().slice(0, 5) : null;
+  if (postalcode && pointZip && /^\d{5}$/.test(pointZip)) return pointZip === postalcode;
+  if (city && p.city) return cityKey(city) === cityKey(p.city);
+  return true;
+}
+
 /**
  * Pure — pick the authoritative point for an address out of a fetched
  * batch. Matching is on house number plus street, with the street
@@ -344,18 +385,19 @@ export interface RooftopMatch {
  * tight cluster from a group that isn't one place at all.
  */
 export function matchAddressPoint(oneLineAddress: string, points: AddressPoint[]): RooftopMatch | null {
-  const targetNumber = /^\s*(\d+)/.exec(oneLineAddress)?.[1] ?? null;
   const firstSegment = oneLineAddress.split(',')[0] ?? '';
-  const targetStreetRaw = firstSegment.replace(/^\s*\d+\s*/, '').trim();
+  const targetNumber = HOUSE_NUMBER.exec(firstSegment)?.[1] ?? null;
+  // The written street may still carry a unit designator ("Main St Apt 4B",
+  // "Main St #4B"); NAD keeps units in their own column, so compare street
+  // names without it. Every fallback below compares the unit-free street too.
+  const targetStreetRaw = firstSegment.replace(HOUSE_NUMBER_PREFIX, '').replace(TRAILING_UNIT, '').trim();
   if (!targetNumber || targetStreetRaw.length === 0) return null;
+  const targetStreet = streetKey(targetStreetRaw);
 
-  // The written street may still carry a unit designator ("Main St Apt 4B");
-  // NAD keeps units in their own column, so compare street names without it.
-  const targetStreet = streetKey(
-    targetStreetRaw.replace(/\s*\b(?:apt|apartment|unit|ste|suite|fl|floor|rm|room|#)\.?\s*[A-Za-z0-9-]+\s*$/i, ''),
+  const place = parseAddressParts(oneLineAddress);
+  const sameNumber = points.filter(
+    (p) => p.houseNumber === targetNumber && p.street !== null && samePlace(p, place.city, place.postalcode),
   );
-
-  const sameNumber = points.filter((p) => p.houseNumber === targetNumber && p.street !== null);
   let matches = sameNumber.filter((p) => streetKey(p.street!) === targetStreet);
   let directionalFallback = false;
 
@@ -405,7 +447,13 @@ export function matchAddressPoint(oneLineAddress: string, points: AddressPoint[]
   let streetTypeFallback = false;
   if (matches.length === 0) {
     const targetCore = streetKeyWithoutType(targetStreetRaw);
-    const loose = sameNumber.filter((p) => streetKeyWithoutType(p.street!) === targetCore);
+    // One side must have NO street type. "St Antoine" vs "St Antoine St" is a
+    // missing type; "Main St" vs "Main Ave" are two streets, and a lone wrong
+    // candidate passes the cluster check below trivially (a cluster of one).
+    const targetHasType = hasStreetType(targetStreetRaw);
+    const loose = sameNumber.filter(
+      (p) => streetKeyWithoutType(p.street!) === targetCore && (!targetHasType || !hasStreetType(p.street!)),
+    );
     if (loose.length > 0) {
       const looseCentre = {
         lat: loose.reduce((sum, p) => sum + p.lat, 0) / loose.length,
@@ -490,10 +538,11 @@ export interface NeighborBracket {
  * one block.
  */
 export function neighborBracket(oneLineAddress: string, points: AddressPoint[]): NeighborBracket | null {
-  const { houseNumber, street } = parseAddressParts(oneLineAddress);
+  const { houseNumber, street, city, postalcode } = parseAddressParts(oneLineAddress);
   if (!houseNumber || !street) return null;
   const target = Number(houseNumber);
   if (!Number.isFinite(target)) return null;
+  points = points.filter((p) => samePlace(p, city, postalcode));
 
   const targetStreet = streetKey(street);
   let onStreet = points
@@ -674,6 +723,37 @@ export async function resolveRooftop(
     ambiguous: false,
   };
 
+  // The LOCAL index is a file read, so it is consulted before any network
+  // request is started. An exact match there is already the authoritative
+  // answer; waiting on NAD's and the counties' services (30-second timeouts,
+  // retried) to learn the same thing made a local hit as slow as the slowest
+  // outage. Anything looser than an exact street match, or a spread-out
+  // group, still goes on to be merged with the live services below.
+  const local = readLocal(interpolated.lat, interpolated.lon, radiusMeters);
+  if (local.length > 0) {
+    const localMatch = matchAddressPoint(oneLineAddress, dedupePoints(local));
+    if (
+      localMatch &&
+      !localMatch.directionalFallback &&
+      !localMatch.capitolFallback &&
+      !localMatch.streetTypeFallback &&
+      localMatch.spreadMeters <= IMPLAUSIBLE_SPREAD_METERS
+    ) {
+      return {
+        attempted: true,
+        found: true,
+        tier: 'authoritative',
+        point: localMatch.point,
+        match: localMatch,
+        neighbors: null,
+        osm: null,
+        parcel: null,
+        metersFromInterpolated: metersBetween(interpolated, localMatch.point),
+        ambiguous: false,
+      };
+    }
+  }
+
   // NAD and the county/city address-point services (county-points.ts) are
   // independent hosts, so they are asked at the same time rather than one
   // after the other.
@@ -694,7 +774,6 @@ export async function resolveRooftop(
   // published this address, with no extra branching.
   //
   // Absent index = empty array = behaviour identical to before it existed.
-  const local = readLocal(interpolated.lat, interpolated.lon, radiusMeters);
   // `county` (fetched above) is merged the same way, so the exact-match and
   // neighbour tiers below see whichever government actually published this address.
   const points = dedupePoints([...(fetched.ok ? fetched.points : []), ...local, ...county]);

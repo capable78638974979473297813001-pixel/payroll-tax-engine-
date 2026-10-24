@@ -18,6 +18,7 @@ import {
   type CensusGeographies,
 } from '../geocode/resolve.ts';
 import {
+  clearVintageLayerCache,
   fetchSchoolDistrictAtPointSafe,
   geocodeAddress,
   matchedAddressDifferences,
@@ -801,11 +802,33 @@ describe('census.ts — match quality, retries, and the secondary-unit fallback 
       assert.equal(result.ok, false);
     });
 
-    test('a genuine "no district here" result still comes back as {ok: true, district: null}, distinct from a failure', async () => {
-      const fakeFetch = (async () => new Response(JSON.stringify({ results: [] }), { status: 200 })) as typeof fetch;
+    /** A TIGERweb stand-in: layer metadata for `?f=json` calls, `identifyBody` for identify. */
+    const tigerweb = (identifyBody: unknown) =>
+      (async (url: string) => {
+        if (String(url).includes('/identify')) return new Response(JSON.stringify(identifyBody), { status: 200 });
+        return new Response(JSON.stringify({ layers: [{ id: 3, name: 'Unified School Districts' }, { id: 1, name: 'States' }] }), { status: 200 });
+      }) as unknown as typeof fetch;
 
-      const result = await fetchSchoolDistrictAtPointSafe(-83.0, 40.0, fakeFetch);
+    test('a genuine "no district here" result still comes back as {ok: true, district: null}, distinct from a failure', async () => {
+      clearVintageLayerCache();
+      const result = await fetchSchoolDistrictAtPointSafe(-83.0, 40.0, tigerweb({ results: [] }));
       assert.deepEqual(result, { ok: true, district: null });
+    });
+
+    test('an ArcGIS error returned with HTTP 200 is a failed lookup, not an empty result', async () => {
+      clearVintageLayerCache();
+      const result = await fetchSchoolDistrictAtPointSafe(
+        -83.0, 40.0, tigerweb({ error: { code: 500, message: 'Service temporarily unavailable' } }), { baseBackoffMs: 0 },
+      );
+      assert.equal(result.ok, false);
+    });
+
+    test('an ArcGIS error on the layer-metadata call is a failure and is not cached', async () => {
+      clearVintageLayerCache();
+      const broken = (async () => new Response(JSON.stringify({ error: { code: 503, message: 'busy' } }), { status: 200 })) as unknown as typeof fetch;
+      assert.equal((await fetchSchoolDistrictAtPointSafe(-83.0, 40.0, broken, { baseBackoffMs: 0 })).ok, false);
+      // The next call, against a healthy service, works: the failure did not poison the cache.
+      assert.deepEqual(await fetchSchoolDistrictAtPointSafe(-83.0, 40.0, tigerweb({ results: [] })), { ok: true, district: null });
     });
   });
 });

@@ -48,6 +48,7 @@
  * signal at all from this. It's a real, additive signal, not a
  * replacement for anything else this module already does.
  */
+import { createThrottle } from './throttle.ts';
 import { stripSecondaryUnit, type FetchOptions } from './census.ts';
 
 /** census.ts's own options, plus the request-spacing cap and the availability state this module needs. Declared here rather than widened in census.ts, which has neither concept (nominatim.ts carries its own minIntervalMs for the same reason). */
@@ -114,16 +115,8 @@ const OVERPASS_RETRIES = 2;
  */
 const DEFAULT_MIN_INTERVAL_MS = 1100;
 
-let lastRequestAt = 0;
-
-/** Module-level throttle state, deliberately shared across calls (that's the point). Tests pass minIntervalMs: 0 so the request LOGIC is exercised without the suite paying real wall-clock time. */
-async function throttle(minIntervalMs: number): Promise<void> {
-  const elapsed = Date.now() - lastRequestAt;
-  if (elapsed < minIntervalMs) {
-    await new Promise((resolve) => setTimeout(resolve, minIntervalMs - elapsed));
-  }
-  lastRequestAt = Date.now();
-}
+/** Module-level throttle state, deliberately shared across calls (that's the point — it enforces the cap regardless of how many callers exist, including concurrent ones; see throttle.ts). Tests pass minIntervalMs: 0 so the RATE-LIMITING LOGIC is exercised without the real suite paying real wall-clock time for it. */
+const throttle = createThrottle();
 
 /** Honour a server-sent Retry-After (seconds, or an HTTP date) when there is one — a rate-limited service telling you exactly how long to wait is better information than any backoff curve. Capped so a hostile or garbled value can't hang a resolution. */
 function retryAfterMs(res: Response): number | null {
@@ -436,6 +429,15 @@ export function streetKeyWithoutDirectionals(street: string): string {
   return tokens.join(' ');
 }
 
+/** The directional words (north, south, ...) at either end of a street name, expanded, as a sorted unique list: "E Kanawha Blvd E" -> ["east"], "Main St" -> []. */
+export function streetDirectionals(street: string): string[] {
+  const tokens = streetKey(street).split(' ');
+  const found = new Set<string>();
+  if (tokens.length > 1 && EXPANDED_DIRECTIONALS.has(tokens[0])) found.add(tokens[0]);
+  if (tokens.length > 1 && EXPANDED_DIRECTIONALS.has(tokens[tokens.length - 1])) found.add(tokens[tokens.length - 1]);
+  return [...found].sort();
+}
+
 /** Every street-type word in the fully-expanded form streetKey() produces ("street", "avenue", ...) — used to compare street names when one source writes the type and the other doesn't. */
 const EXPANDED_STREET_TYPES = new Set(Object.values(STREET_TYPES));
 
@@ -459,6 +461,13 @@ export function streetKeyWithoutType(street: string): string {
   const tokens = streetKey(street).split(' ');
   while (tokens.length > 1 && EXPANDED_STREET_TYPES.has(tokens[tokens.length - 1])) tokens.pop();
   return tokens.join(' ');
+}
+
+/** True when the street name ends in a street-type word at all ("Main St" yes, "St Antoine" no). */
+export function hasStreetType(street: string): boolean {
+  // Past any directional: "Kanawha Blvd E" has a type even though its last word is "E".
+  const tokens = streetKeyWithoutDirectionals(street).split(' ');
+  return tokens.length > 1 && EXPANDED_STREET_TYPES.has(tokens[tokens.length - 1]);
 }
 
 /**
@@ -496,7 +505,7 @@ export function streetKeyCapitolNormalized(street: string): string {
 
 /** Extract the leading house number from a one-line address string (e.g. "90 W Broad St, Columbus, OH" -> "90"). Returns null when the address doesn't start with a number. */
 export function extractHouseNumber(oneLineAddress: string): string | null {
-  const m = /^\s*(\d+)/.exec(oneLineAddress);
+  const m = /^\s*(\d+(?:-\d+)?)(?=\s)/.exec(oneLineAddress) ?? /^\s*(\d+)/.exec(oneLineAddress);
   return m ? m[1] : null;
 }
 
