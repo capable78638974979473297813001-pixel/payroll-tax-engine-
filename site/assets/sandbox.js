@@ -81,10 +81,13 @@ const LOCAL = {
   AL: [
     { key: 'workCity', label: 'Work city' },
     { key: 'residenceCity', label: 'Residence city' },
+    { key: 'workCounty', label: 'Work county' },
   ],
   KY: [
     { key: 'workCity', label: 'Work city' },
     { key: 'residenceCity', label: 'Residence city' },
+    { key: 'workCounty', label: 'Work county' },
+    { key: 'residenceCounty', label: 'Residence county' },
     { key: 'workSchoolDistrict', label: 'Work school district' },
     { key: 'residenceSchoolDistrict', label: 'Residence school district' },
   ],
@@ -94,6 +97,9 @@ const LOCAL = {
     { key: 'nycResident', label: 'New York City resident', type: 'boolean' },
     { key: 'yonkersResident', label: 'Yonkers resident', type: 'boolean' },
     { key: 'yonkersNonresidentWorker', label: 'Yonkers nonresident worker', type: 'boolean' },
+    { key: 'nycExemptions', label: 'NYC exemptions', type: 'count' },
+    { key: 'additionalWithholdingNYC', label: 'Extra NYC withholding, per check', type: 'money' },
+    { key: 'additionalWithholdingYonkers', label: 'Extra Yonkers withholding, per check', type: 'money' },
   ],
   OR: [
     { key: 'metroDistrict', label: 'Metro district', type: 'boolean' },
@@ -261,17 +267,18 @@ function certBlock(which, code) {
   return certIntro(code) + main + adv;
 }
 
-function localBlock(code, which, skip) {
+function localBlock(code, skip) {
   const fields = LOCAL[code];
   const name = stateLabel(code);
   if (!fields) {
     return `<div class="nsb"><div class="nsb-h"><b>Local tax · ${esc(name)}</b> <span class="tag tag-ip">In progress</span></div><p>Local tax for ${esc(name)} is in progress.</p></div>`;
   }
-  const prefix = which === 'home' ? 'residenceState.certificate' : 'workState.certificate';
+  // Local taxes, including residence-side codes, are read from the work certificate only.
+  const prefix = 'workState.certificate';
   const shown = fields.filter((f) => !skip.has(f.key));
   shown.forEach((f) => skip.add(f.key));
   if (!shown.length) return '';
-  return `<h2>Local · ${esc(name)}</h2>` + shown.map((f) => certControl(which, f, `${prefix}.${f.key}`)).join('');
+  return `<h2>Local · ${esc(name)}</h2>` + shown.map((f) => certControl('work', f, `${prefix}.${f.key}`)).join('');
 }
 
 function genericCertAdvanced(which, code) {
@@ -284,11 +291,14 @@ function genericCertAdvanced(which, code) {
   if (!hasExtra) bits.push(certControl(which, { key: 'additionalWithholding', label: 'Extra state withholding, per check', type: 'money' }, `${prefix}.additionalWithholding`));
   bits.push(certControl(which, { key: 'reducedWithholding', label: 'Reduced withholding, per check', type: 'money' }, `${prefix}.reducedWithholding`));
   bits.push(certControl(which, { key: 'nonresidentAlien', label: 'Nonresident alien', type: 'boolean' }, `${prefix}.nonresidentAlien`));
-  if (code === 'MD' || code === 'DE') bits.push(certControl(which, { key: 'nonresident', label: 'Nonresident', type: 'boolean' }, `${prefix}.nonresident`));
-  if (code === 'PA') bits.push(certControl(which, { key: 'lstAlreadyWithheldElsewhere', label: 'Local services tax already withheld elsewhere', type: 'boolean' }, `${prefix}.lstAlreadyWithheldElsewhere`));
-  bits.push(certControl(which, { key: 'dailyCommuter', label: 'Daily commuter', type: 'boolean' }, `${prefix}.dailyCommuter`));
-  bits.push(certControl(which, { key: 'nonresidentDeMinimisEligible', label: 'Nonresident de minimis eligible', type: 'boolean' }, `${prefix}.nonresidentDeMinimisEligible`));
-  bits.push(certControl(which, { key: 'nonresidentCreditEligible', label: 'Nonresident credit eligible', type: 'boolean' }, `${prefix}.nonresidentCreditEligible`));
+  if (which === 'work' && (code === 'MD' || code === 'DE')) bits.push(certControl(which, { key: 'nonresident', label: 'Nonresident', type: 'boolean' }, `${prefix}.nonresident`));
+  if (which === 'work' && code === 'PA') bits.push(certControl(which, { key: 'lstAlreadyWithheldElsewhere', label: 'Local services tax already withheld elsewhere', type: 'boolean' }, `${prefix}.lstAlreadyWithheldElsewhere`));
+  // The field map lists all three on the work certificate. The engine reads the first two from the home certificate.
+  if (which === 'home') {
+    bits.push(certControl(which, { key: 'dailyCommuter', label: 'Daily commuter', type: 'boolean' }, `${prefix}.dailyCommuter`));
+    bits.push(certControl(which, { key: 'nonresidentCreditEligible', label: 'Nonresident credit eligible', type: 'boolean' }, `${prefix}.nonresidentCreditEligible`));
+  }
+  if (which === 'work') bits.push(certControl(which, { key: 'nonresidentDeMinimisEligible', label: 'Nonresident de minimis eligible', type: 'boolean' }, `${prefix}.nonresidentDeMinimisEligible`));
   return advanced(`${which}-more`, 'Advanced', `${bits.length} fields`, bits.join(''));
 }
 
@@ -408,7 +418,7 @@ function step4() {
       ${homeDifferent ? `<h2>${esc(home)} certificate</h2>${certBlock('home', model.homeCode)}${genericCertAdvanced('home', model.homeCode)}` : ''}
     </div>
     ${withholding}
-    <div class="blk">${localBlock(model.workCode, 'work', skip)}${homeDifferent ? localBlock(model.homeCode, 'home', skip) : ''}</div>`;
+    <div class="blk">${localBlock(model.workCode, skip)}${homeDifferent ? localBlock(model.homeCode, skip) : ''}</div>`;
 }
 
 function earnTypeValue(row) {
@@ -479,7 +489,7 @@ function step6() {
   ];
   const local = model.ytdExtra.localIncomeTax || {};
   const localId = Object.keys(local)[0] || '';
-  extraBits.push(wrap('ytd.localIncomeTax', 'Local income tax, year to date', `<div class="grid g2"><input class="inp" data-bind="localid" placeholder="Tax id" value="${esc(localId)}">${moneyInput('localamt', localId ? local[localId] : null, true)}</div>`));
+  extraBits.push(wrap(localId ? `ytd.localIncomeTax.${localId}` : 'ytd.localIncomeTax.{id}', 'Local income tax, year to date', `<div class="grid g2"><input class="inp" data-bind="localid" placeholder="Tax id" value="${esc(localId)}">${moneyInput('localamt', localId ? local[localId] : null, true)}</div>`));
   extraBits.push(nest('section402gAggregate', 'Section 402(g) deferrals'));
   extraBits.push(nest('deferral457', '457 deferrals'));
   extraBits.push(nest('simple', 'SIMPLE deferrals'));
@@ -527,10 +537,11 @@ function step7() {
   const frac = model.employerExtra.paidLeaveEmployeeShareFraction && model.workCode ? model.employerExtra.paidLeaveEmployeeShareFraction[model.workCode] : null;
   bits.push(wrap(`employer.paidLeaveEmployeeShareFraction.${model.workCode || 'ST'}`, 'Employee share of paid leave', `<input class="inp" inputmode="decimal" data-bind="edec:paidLeaveEmployeeShareFraction" value="${frac == null ? '' : esc(String(frac))}">`, 'A fraction from 0 to the state ceiling. Blank omits it.'));
   bits.push(certControl('work', { key: 'paidLeaveExempt', label: 'Paid leave exempt', type: 'boolean' }, 'workState.certificate.paidLeaveExempt'));
+  bits.push(certControl('work', { key: 'employerLiableForPaidLeaveShare', label: 'Employer pays the paid-leave share', type: 'boolean' }, 'workState.certificate.employerLiableForPaidLeaveShare'));
+  const leaveRate = model.workCert.paidLeaveEmployeeRateOverride;
+  bits.push(wrap('workState.certificate.paidLeaveEmployeeRateOverride', 'Paid leave employee rate', pctInput('certdec:work:paidLeaveEmployeeRateOverride', leaveRate == null ? '' : decimalToPercent(leaveRate))));
   if (model.workCode === 'WA') {
     bits.push(certControl('work', { key: 'wacaresExempt', label: 'WA Cares exempt', type: 'boolean' }, 'workState.certificate.wacaresExempt'));
-    const rate = model.workCert.paidLeaveEmployeeRateOverride;
-    bits.push(wrap('workState.certificate.paidLeaveEmployeeRateOverride', 'Paid leave employee rate', pctInput('certdec:work:paidLeaveEmployeeRateOverride', rate == null ? '' : decimalToPercent(rate))));
   }
   if (model.employmentCategory === 'agricultural') {
     bits.push(`<label class="chk"><input class="tick" type="checkbox" data-bind="ebool1:agriculturalFutaLiable"${model.employerExtra.agriculturalFutaLiable ? ' checked' : ''}><span><span class="cl">Agricultural FUTA applies</span><span class="path">employer.agriculturalFutaLiable</span></span></label>`);
@@ -568,7 +579,8 @@ function step7() {
 
 function garnRow(g, i) {
   const types = ['consumer_creditor', 'child_support', 'federal_student_loan_default'];
-  const max = g.amount === Number.MAX_SAFE_INTEGER;
+  const ordered = g.amountOrdered != null ? g.amountOrdered : g.amount;
+  const max = ordered === Number.MAX_SAFE_INTEGER;
   const sof = g.supportingOtherFamily;
   const support = g.type === 'child_support' ? `<div class="f${errClass(`garnishments[${i}].supportingOtherFamily`)}" data-path="garnishments[${i}].supportingOtherFamily"><div class="lab"><label>Supports another family</label></div>
       <label class="rad"><input class="dot" type="radio" name="sof-${i}" data-bind="garn:${i}:supportingOtherFamily" value="true"${sof === true ? ' checked' : ''}><span>Yes</span></label>
@@ -578,7 +590,7 @@ function garnRow(g, i) {
       ${wrap(`garnishments[${i}].id`, 'Id', `<input class="inp" data-bind="garn:${i}:id" value="${esc(g.id || '')}">`)}
       ${wrap(`garnishments[${i}].type`, 'Type', `<select class="inp" data-bind="garn:${i}:type">${types.map((t) => `<option value="${t}"${g.type === t ? ' selected' : ''}>${t}</option>`).join('')}</select>`)}
     </div>
-    ${wrap(`garnishments[${i}].amount`, 'Amount ordered, per check', moneyInput(`garn:${i}:amount`, max ? 0 : (g.amount || 0)) + `<label class="chk"><input class="tick" type="checkbox" data-bind="garn:${i}:max"${max ? ' checked' : ''}><span>Maximum the law allows</span></label>`)}
+    ${wrap(`garnishments[${i}].amountOrdered`, 'Amount ordered, per check', moneyInput(`garn:${i}:amountOrdered`, max ? 0 : (ordered || 0)) + `<label class="chk"><input class="tick" type="checkbox" data-bind="garn:${i}:max"${max ? ' checked' : ''}><span>Maximum the law allows</span></label>`)}
     ${support}
     <div class="grid g2">
       ${wrap(`garnishments[${i}].priority`, 'Priority', `<input class="inp" inputmode="numeric" data-bind="garn:${i}:priority" value="${g.priority == null ? '' : esc(String(g.priority))}">`)}
@@ -587,8 +599,10 @@ function garnRow(g, i) {
       ${wrap(`garnishments[${i}].expectedAnnualEarnings`, 'Expected annual earnings', moneyInput(`garn:${i}:expectedAnnualEarnings`, g.expectedAnnualEarnings == null ? null : g.expectedAnnualEarnings, true))}
       ${wrap(`garnishments[${i}].garnishedThisYearForThisOrder`, 'Already garnished this year for this order', moneyInput(`garn:${i}:garnishedThisYearForThisOrder`, g.garnishedThisYearForThisOrder == null ? null : g.garnishedThisYearForThisOrder, true))}
     </div>
-    <label class="chk"><input class="tick" type="checkbox" data-bind="garn:${i}:arrearsOver12Weeks" value="true"${g.arrearsOver12Weeks ? ' checked' : ''}><span>Arrears over 12 weeks</span></label>
-    <label class="chk"><input class="tick" type="checkbox" data-bind="garn:${i}:headOfFamily" value="true"${g.headOfFamily ? ' checked' : ''}><span>Head of family</span></label>
+    <label class="chk"><input class="tick" type="checkbox" data-bind="garn:${i}:arrearsOver12Weeks" value="true"${g.arrearsOver12Weeks ? ' checked' : ''}><span><span class="cl">Arrears over 12 weeks</span><span class="path">garnishments[${i}].arrearsOver12Weeks</span></span></label>
+    <label class="chk"><input class="tick" type="checkbox" data-bind="garn:${i}:headOfFamily" value="true"${g.headOfFamily ? ' checked' : ''}><span><span class="cl">Head of family</span><span class="path">garnishments[${i}].headOfFamily</span></span></label>
+    <label class="chk"><input class="tick" type="checkbox" data-bind="garn:${i}:wageExemptionWaivedInWriting" value="true"${g.wageExemptionWaivedInWriting ? ' checked' : ''}><span><span class="cl">Wage exemption waived in writing</span><span class="path">garnishments[${i}].wageExemptionWaivedInWriting</span></span></label>
+    <label class="chk"><input class="tick" type="checkbox" data-bind="garn:${i}:soleHouseholdSupport" value="true"${g.soleHouseholdSupport ? ' checked' : ''}><span><span class="cl">Sole household support</span><span class="path">garnishments[${i}].soleHouseholdSupport</span></span></label>
     <button type="button" class="x" data-action="garn-remove" data-i="${i}">Remove</button></div>`;
 }
 function minWageFields() {
@@ -845,10 +859,15 @@ function applyBind(el) {
     const g = model.garnishments[Number(parts[1])];
     const field = parts[2];
     if (!g) return;
-    if (field === 'max') g.amount = el.checked ? Number.MAX_SAFE_INTEGER : 0;
-    else if (field === 'amount') { if (g.amount !== Number.MAX_SAFE_INTEGER) g.amount = dollarsToCents(el.value) || 0; }
+    if (field === 'max') {
+      delete g.amount;
+      g.amountOrdered = el.checked ? Number.MAX_SAFE_INTEGER : 0;
+    } else if (field === 'amountOrdered' || field === 'amount') {
+      delete g.amount;
+      if (g.amountOrdered !== Number.MAX_SAFE_INTEGER) g.amountOrdered = dollarsToCents(el.value) || 0;
+    }
     else if (field === 'supportingOtherFamily') g.supportingOtherFamily = el.value === 'true';
-    else if (field === 'arrearsOver12Weeks' || field === 'headOfFamily') {
+    else if (field === 'arrearsOver12Weeks' || field === 'headOfFamily' || field === 'wageExemptionWaivedInWriting' || field === 'soleHouseholdSupport') {
       if (el.checked) g[field] = true;
       else delete g[field];
     } else if (field === 'priority' || field === 'dependents' || field === 'householdSize') {
@@ -1277,7 +1296,7 @@ function onClick(ev) {
   if (action === 'garn-on' || action === 'garn-add') {
     if (!Array.isArray(model.garnishments)) model.garnishments = [];
     const n = model.garnishments.length + 1;
-    model.garnishments.push({ id: 'G' + n, type: 'consumer_creditor', amount: 0 });
+    model.garnishments.push({ id: 'G' + n, type: 'consumer_creditor', amountOrdered: 0 });
     setAdv('garn', true);
     render();
     return;

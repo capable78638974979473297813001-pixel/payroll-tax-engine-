@@ -27,7 +27,8 @@ export const CERT_KEYS = new Set([
   'workCityIsPrincipalWorkplace', 'newarkResidentApportionmentExcluded', 'lstAlreadyWithheldElsewhere',
   'dailyCommuter', 'nonresidentDeMinimisEligible', 'nonresidentCreditEligible', 'daysWorkedInStateThisYear',
   'nonresident', 'exempt', 'exemptReason', 'additionalWithholding', 'reducedWithholding',
-  'nonresidentAlien', 'voluntaryWithholdingAgreement', 'allowances', 'exemptions',
+  'nonresidentAlien', 'voluntaryWithholdingAgreement', 'allowances', 'regularAllowances',
+  'estimatedDeductionAllowances', 'exemptions',
   'totalAllowanceAmount', 'personalAllowances', 'formVintage', 'spouseHasEarnedIncome',
   'dependents', 'exemptWages', 'maritalStatus', 'georgiaMaritalStatus', 'louisianaBlockA',
   'filingStatus', 'hawaiiMaritalStatus', 'withholdingCode', 'allowanceRate', 'rateTableOverride',
@@ -60,6 +61,15 @@ const FREQS = new Set(['weekly', 'biweekly', 'semimonthly', 'monthly', 'quarterl
 
 export function clone(v) {
   return v == null ? v : JSON.parse(JSON.stringify(v));
+}
+
+/** The engine reads amountOrdered. A leftover `amount` key is not a garnishment field. */
+function normalizeGarnishment(g) {
+  if (!g || typeof g !== 'object') return g;
+  const next = { ...g };
+  if (next.amountOrdered == null && next.amount != null) next.amountOrdered = next.amount;
+  delete next.amount;
+  return next;
 }
 
 export function dollarsToCents(s) {
@@ -317,7 +327,7 @@ export function loadRequest(model, request) {
     model.suiRate = '';
   }
   model.employerExtra = employer;
-  model.garnishments = Array.isArray(req.garnishments) ? clone(req.garnishments) : null;
+  model.garnishments = Array.isArray(req.garnishments) ? clone(req.garnishments).map(normalizeGarnishment) : null;
   model.minimumWage = req.minimumWageCheck && typeof req.minimumWageCheck === 'object' ? clone(req.minimumWageCheck) : null;
   return model;
 }
@@ -427,7 +437,9 @@ export function serialize(model) {
     if (employer[k] && typeof employer[k] === 'object' && !Array.isArray(employer[k]) && Object.keys(employer[k]).length === 0) delete employer[k];
   }
   if (Object.keys(employer).length) out.employer = employer;
-  if (Array.isArray(model.garnishments) && model.garnishments.length) out.garnishments = clone(model.garnishments);
+  if (Array.isArray(model.garnishments) && model.garnishments.length) {
+    out.garnishments = clone(model.garnishments).map(normalizeGarnishment);
+  }
   if (model.minimumWage && typeof model.minimumWage === 'object' && model.minimumWage.hourlyRate != null) {
     out.minimumWageCheck = clone(model.minimumWage);
   }

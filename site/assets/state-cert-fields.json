@@ -16,6 +16,7 @@
       { "value": "hoh", "label": "Head of household" }
     ]},
     { "key": "dependents", "label": "Dependents", "type": "count" },
+    { "key": "exemptions", "label": "Exemptions", "type": "count" },
     { "key": "lowIncomeElection", "label": "Low income tax tables", "type": "boolean", "advanced": true }
   ],
   "AZ": [
@@ -36,7 +37,8 @@
       { "value": "married_one_income", "label": "Married, one income" },
       { "value": "hoh", "label": "Head of household" }
     ]},
-    { "key": "allowances", "label": "Allowances", "type": "count" }
+    { "key": "regularAllowances", "label": "Regular allowances", "type": "count" },
+    { "key": "estimatedDeductionAllowances", "label": "Estimated deduction allowances", "type": "count" }
   ],
   "CO": [
     { "key": "filingStatus", "label": "Filing status", "options": [
@@ -59,7 +61,7 @@
       { "value": "mfs", "label": "Married filing separately" },
       { "value": "mfj", "label": "Married filing jointly" }
     ]},
-    { "key": "allowances", "label": "Allowances", "type": "count" }
+    { "key": "exemptions", "label": "Exemptions", "type": "count" }
   ],
   "GA": [
     { "key": "georgiaMaritalStatus", "label": "Filing status", "options": [
@@ -101,7 +103,8 @@
       { "value": "single", "label": "Single" },
       { "value": "joint", "label": "Joint" }
     ]},
-    { "key": "allowances", "label": "Allowances", "type": "count" }
+    { "key": "personalAllowances", "label": "Personal allowances", "type": "count" },
+    { "key": "dependents", "label": "Dependents", "type": "count" }
   ],
   "LA": [
     { "key": "louisianaBlockA", "label": "Block A claim", "type": "code", "options": [
@@ -127,7 +130,8 @@
     { "key": "filingStatus", "label": "Filing status", "options": [
       { "value": "single", "label": "Single" },
       { "value": "mfjHoh", "label": "Married filing jointly or head of household" }
-    ]}
+    ]},
+    { "key": "exemptions", "label": "Exemptions", "type": "count" }
   ],
   "ME": [
     { "key": "maritalStatus", "label": "Marital status", "options": [
@@ -194,7 +198,8 @@
       { "value": "married_withhold_as_single", "label": "Married, withhold at the single rate" },
       { "value": "mfj", "label": "Married filing jointly" },
       { "value": "married", "label": "Married" }
-    ]}
+    ]},
+    { "key": "allowances", "label": "Allowances", "type": "count" }
   ],
   "NJ": [
     { "key": "filingStatus", "label": "Filing status", "options": [
@@ -204,7 +209,7 @@
       { "value": "hoh", "label": "Head of household" },
       { "value": "qw", "label": "Qualifying widow or widower" }
     ]},
-    { "key": "allowances", "label": "Allowances", "type": "count" },
+    { "key": "exemptions", "label": "Exemptions", "type": "count" },
     { "key": "rateTableOverride", "label": "Rate table", "advanced": true, "options": [
       { "value": "A", "label": "A" },
       { "value": "B", "label": "B" },
@@ -228,14 +233,18 @@
       { "value": "married", "label": "Married" },
       { "value": "married_withhold_as_single", "label": "Married, withhold at the single rate" }
     ]},
-    { "key": "allowances", "label": "Allowances", "type": "count" }
+    { "key": "exemptions", "label": "Exemptions", "type": "count" }
+  ],
+  "OH": [
+    { "key": "exemptions", "label": "Exemptions", "type": "count" }
   ],
   "OK": [
     { "key": "filingStatus", "label": "Filing status", "options": [
       { "value": "single", "label": "Single" },
       { "value": "married", "label": "Married" },
       { "value": "married_withhold_as_single", "label": "Married, withhold at the single rate" }
-    ]}
+    ]},
+    { "key": "allowances", "label": "Allowances", "type": "count" }
   ],
   "OR": [
     { "key": "maritalStatus", "label": "Marital status", "options": [
@@ -243,6 +252,9 @@
       { "value": "married", "label": "Married" }
     ]},
     { "key": "allowances", "label": "Allowances", "type": "count" }
+  ],
+  "RI": [
+    { "key": "exemptions", "label": "Exemptions", "type": "count" }
   ],
   "UT": [
     { "key": "maritalStatus", "label": "Marital status", "options": [
@@ -258,12 +270,23 @@
       { "value": "married_withhold_as_single", "label": "Married, withhold at the single rate" },
       { "value": "mfj", "label": "Married filing jointly" },
       { "value": "married", "label": "Married" }
-    ]}
+    ]},
+    { "key": "allowances", "label": "Allowances", "type": "count" }
+  ],
+  "DC": [
+    { "key": "allowances", "label": "Allowances", "type": "count" }
+  ],
+  "SC": [
+    { "key": "allowances", "label": "Allowances", "type": "count" }
   ],
   "WI": [
     { "key": "maritalStatus", "label": "Marital status", "options": [
       { "value": "single", "label": "Single" },
       { "value": "married", "label": "Married" }
-    ]}
+    ]},
+    { "key": "exemptions", "label": "Exemptions", "type": "count" }
+  ],
+  "WV": [
+    { "key": "exemptions", "label": "Exemptions", "type": "count" }
   ]
 }

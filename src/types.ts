@@ -338,6 +338,10 @@ export interface StateCertificate {
   voluntaryWithholdingAgreement?: boolean;
   /** Personal/dependency allowance count on this state's own W-4-equivalent (PA/MI/KY-family flatRate() states, Maine, North Carolina, and others using the same allowanceAmount × count shape). */
   allowances?: number;
+  /** California Form DE 4 withholding allowances. californiaWithholding() reads this, not `allowances`. */
+  regularAllowances?: number;
+  /** California Form DE 4 estimated deduction allowances. californiaWithholding() reads this, not `allowances`. */
+  estimatedDeductionAllowances?: number;
   /** NY/NJ-style raw exemption count (distinct from `allowances` in the states that use this name instead). */
   exemptions?: number;
   /** Iowa/Pennsylvania-adjacent "caller supplies the already-computed number" allowance figure (Iowa's 2024+ IA W-4 Line 7 total dollar allowance amount). */
