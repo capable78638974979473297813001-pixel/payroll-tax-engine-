@@ -133,6 +133,112 @@ export interface StripeCheckoutSession {
   subscription?: string | { id: string; default_payment_method?: string | StripePaymentMethod | null };
   setup_intent?: string | { id: string; payment_method?: string | StripePaymentMethod | null };
 }
+/** Production is NODE_ENV=production, or any process Render itself started (RENDER is set). */
+export function checkoutInProduction(): boolean {
+  return process.env.NODE_ENV === 'production' || Boolean((process.env.RENDER ?? '').trim());
+}
+
+function headerFirst(value: string | string[] | undefined): string {
+  const raw = Array.isArray(value) ? value[0] : value;
+  return (raw ?? '').split(',')[0].trim();
+}
+
+function isLocalHostname(hostname: string): boolean {
+  const host = hostname.toLowerCase().replace(/^\[|\]$/g, '').replace(/\.$/, '');
+  if (host === 'localhost' || host.endsWith('.localhost')) return true;
+  if (host === '::1' || host === '0.0.0.0') return true;
+  if (/^127(?:\.\d{1,3}){3}$/.test(host)) return true;
+  return false;
+}
+
+/**
+ * A Checkout return URL is usable in production only when it is https and
+ * its host is not localhost. The amount of a price is irrelevant here and
+ * is never read.
+ */
+export function isPublicHttpsUrl(value: string): boolean {
+  try {
+    const url = new URL(value);
+    if (url.protocol !== 'https:') return false;
+    if (url.username || url.password) return false;
+    if (isLocalHostname(url.hostname)) return false;
+    return Boolean(url.hostname);
+  } catch {
+    return false;
+  }
+}
+
+export interface CheckoutOriginRequest {
+  headers: {
+    host?: string | string[];
+    'x-forwarded-host'?: string | string[];
+    'x-forwarded-proto'?: string | string[];
+  };
+  socket?: { encrypted?: boolean };
+}
+
+export type CheckoutOriginResult = { ok: true; origin: string } | { ok: false; error: string };
+
+const PUBLIC_BASE_URL_HELP = 'Set PUBLIC_BASE_URL to the public https origin in the Render dashboard. render.yaml is not applied automatically.';
+
+/**
+ * Origin for Checkout success_url and cancel_url.
+ * In production, never localhost. PUBLIC_BASE_URL wins when it is https and
+ * public. Otherwise the request host is used, and on Render (or TRUST_PROXY=1)
+ * that host comes from x-forwarded-proto and x-forwarded-host / Host.
+ * Development keeps the localhost fallback.
+ */
+export function resolveCheckoutOrigin(req: CheckoutOriginRequest | undefined, fallbackPort: number): CheckoutOriginResult {
+  const configured = (process.env.PUBLIC_BASE_URL ?? '').trim().replace(/\/+$/, '');
+  if (!checkoutInProduction()) {
+    if (configured) return { ok: true, origin: configured };
+    return { ok: true, origin: `http://localhost:${fallbackPort}` };
+  }
+  if (configured) {
+    if (!isPublicHttpsUrl(configured)) {
+      return {
+        ok: false,
+        error: `PUBLIC_BASE_URL cannot be used for Checkout in production: it must be https and must not be localhost. ${PUBLIC_BASE_URL_HELP}`,
+      };
+    }
+    return { ok: true, origin: configured };
+  }
+  const derived = originFromRequest(req);
+  if (derived && isPublicHttpsUrl(derived)) return { ok: true, origin: derived };
+  return {
+    ok: false,
+    error: `Checkout return URLs cannot be localhost in production. ${PUBLIC_BASE_URL_HELP}`,
+  };
+}
+
+function trustForwardedHeaders(): boolean {
+  return Boolean((process.env.RENDER ?? '').trim()) || process.env.TRUST_PROXY === '1';
+}
+
+function originFromRequest(req: CheckoutOriginRequest | undefined): string | null {
+  if (!req) return null;
+  const trust = trustForwardedHeaders();
+  const forwardedHost = trust ? headerFirst(req.headers['x-forwarded-host']) : '';
+  const host = forwardedHost || headerFirst(req.headers.host);
+  if (!host || /[\s/]/.test(host)) return null;
+  let proto = trust ? headerFirst(req.headers['x-forwarded-proto']).toLowerCase() : '';
+  if (proto !== 'https' && proto !== 'http') proto = req.socket?.encrypted ? 'https' : 'http';
+  try {
+    return new URL(`${proto}://${host}`).origin;
+  } catch {
+    return null;
+  }
+}
+
+const CHECKOUT_URL_REFUSAL = `Refusing to create a Checkout Session: success_url and cancel_url must be https and must not be localhost in production. ${PUBLIC_BASE_URL_HELP}`;
+
+/** Throws before any Stripe call when production return URLs are not public https. */
+export function assertProductionCheckoutUrls(successUrl: string, cancelUrl: string): void {
+  if (!checkoutInProduction()) return;
+  if (isPublicHttpsUrl(successUrl) && isPublicHttpsUrl(cancelUrl)) return;
+  throw new StripeError(CHECKOUT_URL_REFUSAL, 0, 'checkout_origin_invalid');
+}
+
 /**
  * A hosted Checkout page in SETUP mode — the customer saves a payment method,
  * no charge. Which methods appear is decided by the Stripe Dashboard. Do not
@@ -144,6 +250,7 @@ export function createSetupCheckoutSession(input: {
   successUrl: string;
   cancelUrl: string;
 }): Promise<StripeCheckoutSession> {
+  assertProductionCheckoutUrls(input.successUrl, input.cancelUrl);
   return stripeRequest<StripeCheckoutSession>('POST', '/v1/checkout/sessions', {
     mode: 'setup',
     customer: input.customerId,
@@ -168,13 +275,45 @@ export function retrievePaymentMethod(id: string): Promise<StripePaymentMethod> 
   return stripeRequest('GET', `/v1/payment_methods/${encodeURIComponent(id)}`);
 }
 
+type PriceUsage = 'metered' | 'licensed';
+
+/** usage_type only. The price amount stays in Stripe and is never stored here. */
+const priceUsageCache = new Map<string, PriceUsage>();
+
 /**
- * A hosted Checkout page in SUBSCRIPTION mode — saves a payment method AND
- * starts metered usage billing. Which methods appear is decided by the
- * Stripe Dashboard (dynamic payment methods). Checkout Session creation on
- * API 2026-09-30.endive rejects `payment_method_types`.
+ * Read STRIPE_PRICE_ID's usage type. Cached for the life of the process so
+ * signup doesn't retrieve the same price on every Checkout.
  */
-export function createSubscriptionCheckoutSession(input: {
+async function priceUsage(priceId: string): Promise<PriceUsage> {
+  const cached = priceUsageCache.get(priceId);
+  if (cached) return cached;
+  let price: { recurring?: { usage_type?: string } | null };
+  try {
+    price = await stripeRequest('GET', `/v1/prices/${encodeURIComponent(priceId)}`);
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    const status = err instanceof StripeError ? err.status : 0;
+    throw new StripeError(`Could not read STRIPE_PRICE_ID ${priceId}: ${message}`, status, 'price_lookup_failed');
+  }
+  const usage = price.recurring?.usage_type;
+  if (usage !== 'metered' && usage !== 'licensed') {
+    throw new StripeError(
+      `STRIPE_PRICE_ID ${priceId} is not a metered or licensed recurring price, so Checkout cannot be created.`,
+      0,
+      'price_usage_unknown',
+    );
+  }
+  priceUsageCache.set(priceId, usage);
+  return usage;
+}
+
+/**
+ * A hosted Checkout page in SUBSCRIPTION mode. Which payment methods appear
+ * is decided by the Stripe Dashboard. A metered price omits quantity (usage
+ * is reported per calculation). A licensed price sends quantity 1, because
+ * Checkout requires it, and warns that usage will not bill.
+ */
+export async function createSubscriptionCheckoutSession(input: {
   customerId: string;
   apiKeyId: string;
   priceId: string;
@@ -185,6 +324,13 @@ export function createSubscriptionCheckoutSession(input: {
   /** Extra subscription metadata, merged with apiKeyId. */
   metadata?: Record<string, string>;
 }): Promise<StripeCheckoutSession> {
+  assertProductionCheckoutUrls(input.successUrl, input.cancelUrl);
+  const usage = await priceUsage(input.priceId);
+  const lineItem: Record<string, unknown> = { price: input.priceId };
+  if (usage === 'licensed') {
+    lineItem.quantity = 1;
+    console.warn(`[billing] STRIPE_PRICE_ID ${input.priceId} is not metered, so usage won't bill. Checkout is sending quantity 1. Use a usage-based metered price to bill each calculation.`);
+  }
   const subscriptionData: Record<string, unknown> = {
     metadata: { apiKeyId: input.apiKeyId, ...input.metadata },
   };
@@ -192,7 +338,7 @@ export function createSubscriptionCheckoutSession(input: {
   return stripeRequest<StripeCheckoutSession>('POST', '/v1/checkout/sessions', {
     mode: 'subscription',
     customer: input.customerId,
-    line_items: [{ price: input.priceId }], // metered price: no quantity, usage is reported per call
+    line_items: [lineItem],
     // A payment method is required up front, trial or not. The Dashboard
     // chooses which methods Checkout offers.
     payment_method_collection: 'always',
