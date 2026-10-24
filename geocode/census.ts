@@ -106,8 +106,13 @@ async function layerIdsFor(
   const pending = (async () => {
     const res = await fetchWithRetry(`${TIGERWEB_BASE}/${service}/MapServer?f=json`, fetchImpl, retryOptions);
     if (!res.ok) throw new Error(`TIGERweb ${service} metadata returned HTTP ${res.status}`);
-    const body = (await res.json()) as { layers?: { id: number; name: string }[] };
-    const byName = new Map((body.layers ?? []).map((l) => [l.name, l.id]));
+    const body = (await res.json()) as { layers?: { id: number; name: string }[]; error?: { code?: number; message?: string } };
+    // An HTTP 200 carrying an ArcGIS error has no `layers`; caching that as "this
+    // service has none of the layers" would disable every lookup until restart.
+    if (body.error || !Array.isArray(body.layers)) {
+      throw new Error(`TIGERweb ${service} metadata error: ${body.error?.message ?? 'no layers listed'}`);
+    }
+    const byName = new Map(body.layers.map((l) => [l.name, l.id]));
     const ids: Partial<Record<LayerKey, number>> = {};
     for (const [key, name] of Object.entries(LAYER_NAMES) as [LayerKey, string][]) {
       const id = byName.get(name);
@@ -420,8 +425,13 @@ async function identifyAt(
   if (!res.ok) {
     throw new Error(`TIGERweb identify returned HTTP ${res.status} for (${x}, ${y})`);
   }
-  const body = (await res.json()) as { results?: IdentifyResult[] };
-  return body.results ?? [];
+  const body = (await res.json()) as { results?: IdentifyResult[]; error?: { code?: number; message?: string } };
+  // ArcGIS reports many failures as HTTP 200 with an `error` object and no
+  // `results`. Reading that as "no results" would look like a point inside no
+  // school district (or any geography) instead of a lookup that failed.
+  if (body.error) throw new Error(`TIGERweb identify error${body.error.code ? ` ${body.error.code}` : ''}: ${body.error.message ?? 'unspecified'}`);
+  if (!Array.isArray(body.results)) throw new Error('TIGERweb identify returned no results array');
+  return body.results;
 }
 
 /**

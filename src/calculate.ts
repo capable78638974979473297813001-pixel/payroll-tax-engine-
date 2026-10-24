@@ -35,6 +35,7 @@ import { assertTaxYearCovered, CannotComputeError, federalRuleset, provisionalYe
 import { federalTaxes } from './taxes/federal.ts';
 import { stateIncomeTax } from './taxes/state.ts';
 import { inputContractWarnings } from './contracts.ts';
+import { assertEmploymentCategory } from './validate.ts';
 import {
   capElectiveDeferrals,
   cashEarnings,
@@ -55,6 +56,7 @@ export function calculatePaycheck(input: PaycheckInput): PaycheckResult {
   if (!periodsPerYear) {
     throw new Error(`Unknown pay frequency: ${input.payFrequency}`);
   }
+  assertEmploymentCategory(input.employmentCategory);
   // 2025 is covered for federal tax and only some states; a paycheck
   // touching any other state that year is refused, not computed federal-only.
   assertTaxYearCovered(input.checkDate, [input.workState?.code, input.residenceState?.code]);

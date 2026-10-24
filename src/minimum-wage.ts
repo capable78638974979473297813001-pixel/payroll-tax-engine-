@@ -71,6 +71,12 @@ export interface MinimumWageQuery {
    */
   region?: string;
   /**
+   * American Samoa only: the employer's industry, by its id in the ruleset's
+   * `industryRates` (e.g. 'garment', 'shipping_a'). American Samoa has no
+   * single minimum wage, so a query for it without this is refused.
+   */
+  industry?: string;
+  /**
    * New York alone splits TIPPED employees into two differently-credited
    * occupation categories per region — 'food_service' (restaurant workers)
    * and 'service_employee' (hotel/other hospitality). Meaningful only when
@@ -348,14 +354,29 @@ export function minimumWage(query: MinimumWageQuery): MinimumWageAnswer {
   const state = stateMinimumWageRuleset(query.state, query.checkDate);
   if (state.standard === null) {
     // American Samoa: the federal floor there is 18 industry rates, and no
-    // single number is a correct answer. Refuse rather than pick one.
+    // single number is a correct answer. Refuse rather than pick one. The
+    // industry rate REPLACES the $7.25 federal row (FLSA 6(a)(3)), which does
+    // not apply there, so it must not stay in the comparison and win.
+    const rates = state.industryRates ?? [];
+    const ids = rates.map((r) => r.id).join(', ');
+    if (!query.industry) {
+      throw new Error(
+        `${state.jurisdiction.name} has no single minimum wage: it has ${rates.length} industry-specific rates ` +
+          `($5.78 to $7.19). Pass the employer's industry as 'industry' (one of: ${ids}).`,
+      );
+    }
+    const rate = rates.find((r) => r.id === query.industry);
+    if (!rate) {
+      throw new Error(`Unknown ${state.jurisdiction.name} industry '${query.industry}' — expected one of: ${ids}.`);
+    }
+    considered.length = 0;
     considered.push({
       level: 'state',
       jurisdiction: state.jurisdiction.name,
-      basis: 'No single rate exists',
-      caveat:
-        'American Samoa has 18 industry-specific federal minimum wages ranging from $5.78 to ' +
-        '$7.19; read industryRates from its ruleset and pick the employer’s own industry.',
+      cents: tipped ? tippedCents(state.tipped) ?? toCents(rate) : toCents(rate),
+      basis: tipped
+        ? `Federal tipped cash wage; the tip credit is measured against the ${rate.label} industry rate`
+        : `Federal industry minimum wage — ${rate.label}`,
     });
   } else if (tipped) {
     let cents = tippedCents(state.tipped);

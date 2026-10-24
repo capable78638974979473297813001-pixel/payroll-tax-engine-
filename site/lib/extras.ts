@@ -25,6 +25,8 @@ export interface MinimumWageCheckInput {
   /** Compare against the tipped CASH floor rather than the standard rate. */
   tipped?: boolean;
   region?: string;
+  /** American Samoa only: its employer's industry id (it has no single minimum wage). */
+  industry?: string;
   occupation?: 'food_service' | 'service_employee';
 }
 
@@ -128,11 +130,11 @@ export function validatePaycheckExtras(body: Record<string, unknown>, workStateC
     const path = 'minimumWageCheck';
     const m = body.minimumWageCheck;
     if (!isObject(m)) {
-      err(path, 'must be an object { hourlyRate, locality?, employeeCount?, tipped?, region?, occupation? } when present.');
+      err(path, 'must be an object { hourlyRate, locality?, employeeCount?, tipped?, region?, industry?, occupation? } when present.');
     } else {
       if (!workStateCode) err(path, 'needs workState.code: the state decides which minimum wage applies.');
       intCents(m.hourlyRate, `${path}.hourlyRate`);
-      for (const key of ['locality', 'region']) {
+      for (const key of ['locality', 'region', 'industry']) {
         if (m[key] !== undefined && (typeof m[key] !== 'string' || (m[key] as string).trim() === '' || (m[key] as string).length > 120)) {
           err(`${path}.${key}`, 'must be a non-empty string when present.');
         }
@@ -193,6 +195,7 @@ export function runPaycheckExtras(input: PaycheckInput, paycheck: PaycheckResult
       ...(c.employeeCount !== undefined ? { employeeCount: c.employeeCount } : {}),
       ...(c.tipped !== undefined ? { tipped: c.tipped } : {}),
       ...(c.region !== undefined ? { region: c.region } : {}),
+      ...(c.industry !== undefined ? { industry: c.industry } : {}),
       ...(c.occupation !== undefined ? { occupation: c.occupation } : {}),
     };
     try {

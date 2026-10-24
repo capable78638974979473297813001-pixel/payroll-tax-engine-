@@ -1,5 +1,5 @@
 import { DatabaseSync } from 'node:sqlite';
-import { existsSync } from 'node:fs';
+import { statSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -63,9 +63,13 @@ function recheckMs(): number {
 
 let db: DatabaseSync | null = null;
 let openedPath: string | null = null;
+/** Identity of the file behind `db` (device + inode + birth time). A new index is renamed into place, which changes it, so a long-running server stops reading the old file. */
+let openedIdentity: string | null = null;
 let lastLookAt = 0;
-/** 1 = text cell, REAL coordinates, text source (the original layout and build-nad-index.ts). 2 = see scripts/address-index-lib.ts. Read once per open. */
+/** 1 = text cell, REAL coordinates, text source (the original layout). 2 = see scripts/address-index-lib.ts. Read once per open. */
 let format = 1;
+/** Format 2 files built after ZIP was added carry a `zip` column; older ones do not. */
+let hasZip = false;
 let sourceNames: Map<number, string> | null = null;
 
 function detectFormat(h: DatabaseSync): number {
@@ -77,20 +81,84 @@ function detectFormat(h: DatabaseSync): number {
   }
 }
 
+const REQUIRED_COLUMNS = ['cell', 'lat', 'lon', 'number', 'street', 'unit', 'city', 'state', 'source'];
+
+/**
+ * Whether an opened file really is an address index: a `points` table with
+ * every column the queries read, and, for format 2, the `sources` table.
+ * Opening a SQLite file succeeds for any SQLite file, so "it opened" says
+ * nothing; a wrong-schema database would otherwise report itself available
+ * and then throw "no such table" in the middle of a lookup.
+ */
+function validate(h: DatabaseSync, fmt: number): { ok: boolean; zip: boolean } {
+  try {
+    const cols = (h.prepare('PRAGMA table_info(points)').all() as { name: string }[]).map((c) => c.name);
+    if (!REQUIRED_COLUMNS.every((c) => cols.includes(c))) return { ok: false, zip: false };
+    if (fmt !== 1 && fmt !== 2) return { ok: false, zip: false };
+    if (fmt === 2) h.prepare('SELECT 1 FROM sources LIMIT 1').all();
+    return { ok: true, zip: cols.includes('zip') };
+  } catch {
+    return { ok: false, zip: false };
+  }
+}
+
+function identityOf(path: string): string | null {
+  try {
+    const st = statSync(path);
+    return `${st.dev}:${st.ino}:${st.birthtimeMs}`;
+  } catch {
+    return null;
+  }
+}
+
+function closeHandle(): void {
+  try {
+    db?.close();
+  } catch {
+    /* already closed */
+  }
+  db = null;
+  openedIdentity = null;
+  sourceNames = null;
+}
+
 function handle(): DatabaseSync | null {
   const path = dbPath();
-  if (db && openedPath === path) return db;
+  const identity = identityOf(path);
+  if (db && openedPath === path) {
+    // Still the same file on disk? A rebuilt index is renamed over the old
+    // path, and this handle would otherwise keep reading the old file's
+    // (unlinked) contents for the life of the process.
+    if (identity !== null && identity === openedIdentity) return db;
+    closeHandle();
+    lastLookAt = 0;
+  }
   const now = Date.now();
-  if (now - lastLookAt < recheckMs() && lastLookAt !== 0 && openedPath === path) return null;
+  if (!db && now - lastLookAt < recheckMs() && lastLookAt !== 0 && openedPath === path) return null;
   lastLookAt = now;
   openedPath = path;
-  db = null;
-  if (!existsSync(path)) return null;
+  closeHandle();
+  if (identity === null) return null;
+  let opened: DatabaseSync | null = null;
   try {
-    db = new DatabaseSync(path, { readOnly: true });
-    format = detectFormat(db);
+    opened = new DatabaseSync(path, { readOnly: true });
+    const fmt = detectFormat(opened);
+    const check = validate(opened, fmt);
+    if (!check.ok) {
+      opened.close();
+      return null;
+    }
+    db = opened;
+    format = fmt;
+    hasZip = check.zip;
+    openedIdentity = identity;
     sourceNames = null;
   } catch {
+    try {
+      opened?.close();
+    } catch {
+      /* not open */
+    }
     db = null;
   }
   return db;
@@ -99,7 +167,8 @@ function handle(): DatabaseSync | null {
 /** Format 2 stores a small id; the names live in `sources` (a few thousand rows), loaded once per open. */
 function sourceNameOf(h: DatabaseSync, id: number | string): string {
   if (typeof id === 'string') return id;
-  if (!sourceNames) {
+  // A source added by an append after this handle opened is not in the cache; reload once on a miss.
+  if (!sourceNames || !sourceNames.has(id)) {
     sourceNames = new Map();
     for (const r of h.prepare('SELECT id, name FROM sources').all() as { id: number; name: string }[]) sourceNames.set(r.id, r.name);
   }
@@ -108,16 +177,11 @@ function sourceNameOf(h: DatabaseSync, id: number | string): string {
 
 /** Forget any open handle and the recheck timer. For tests, and for a process told the index was just replaced. */
 export function resetLocalAddressIndexCache(): void {
-  try {
-    db?.close();
-  } catch {
-    /* already closed */
-  }
-  db = null;
+  closeHandle();
   openedPath = null;
   lastLookAt = 0;
   format = 1;
-  sourceNames = null;
+  hasZip = false;
 }
 
 /** Whether a local index is available at all — for a caller that wants to report which tiers are live. */
@@ -134,15 +198,20 @@ export interface LocalIndexStats {
 export function localAddressIndexStats(): LocalIndexStats {
   const h = handle();
   if (!h) return { available: false, totalPoints: 0, states: [] };
-  const total = h.prepare('SELECT COUNT(*) AS c FROM points').get() as { c: number };
-  const rows = h
-    .prepare('SELECT state, COUNT(*) AS c FROM points GROUP BY state ORDER BY c DESC')
-    .all() as { state: string; c: number }[];
-  return {
-    available: true,
-    totalPoints: total.c,
-    states: rows.map((r) => ({ state: r.state, points: r.c })),
-  };
+  try {
+    const total = h.prepare('SELECT COUNT(*) AS c FROM points').get() as { c: number };
+    const rows = h
+      .prepare('SELECT state, COUNT(*) AS c FROM points GROUP BY state ORDER BY c DESC')
+      .all() as { state: string; c: number }[];
+    return {
+      available: true,
+      totalPoints: total.c,
+      states: rows.map((r) => ({ state: r.state, points: r.c })),
+    };
+  } catch {
+    closeHandle();
+    return { available: false, totalPoints: 0, states: [] };
+  }
 }
 
 /**
@@ -174,24 +243,34 @@ export function localAddressPointsNear(
 
   const placeholders = cells.map(() => '?').join(',');
   const scale = format === 2 ? MICRO : 1;
-  const rows = h
-    .prepare(
-      `SELECT lat, lon, number, street, unit, city, state, source
-         FROM points
-        WHERE cell IN (${placeholders})
-          AND lat BETWEEN ? AND ? AND lon BETWEEN ? AND ?`,
-    )
-    .all(...cells, (lat - dLat) * scale, (lat + dLat) * scale, (lon - dLon) * scale, (lon + dLon) * scale) as {
-      lat: number; lon: number; number: string | null; street: string | null;
-      unit: string | null; city: string | null; state: string; source: number | string;
-    }[];
+  let rows: {
+    lat: number; lon: number; number: string | null; street: string | null;
+    unit: string | null; city: string | null; state: string; source: number | string; zip?: number | null;
+  }[];
+  try {
+    rows = h
+      .prepare(
+        `SELECT lat, lon, number, street, unit, city, state, source${hasZip ? ', zip' : ''}
+           FROM points
+          WHERE cell IN (${placeholders})
+            AND lat BETWEEN ? AND ? AND lon BETWEEN ? AND ?`,
+      )
+      .all(...cells, (lat - dLat) * scale, (lat + dLat) * scale, (lon - dLon) * scale, (lon + dLon) * scale) as typeof rows;
+  } catch {
+    // A file that passed validation but fails to read (truncated, replaced
+    // mid-query) is an absent tier for this call, not an exception in the
+    // middle of a paycheck; the next lookup re-validates from scratch.
+    closeHandle();
+    lastLookAt = 0;
+    return [];
+  }
 
   return rows.map((r) => ({
     houseNumber: r.number,
     street: r.street,
     unit: r.unit,
     city: r.city,
-    zip: null,
+    zip: r.zip ? String(r.zip).padStart(5, '0') : null,
     // The shared points table has no Placement column — both builders
     // (OpenAddresses per-county extracts, NAD's own bulk text file) leave
     // it unstated here rather than guessed at, the same honesty NAD itself

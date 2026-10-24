@@ -442,7 +442,11 @@ export function stateIncomeTax(
   // comment. Independent of, and gated off by, the reciprocity mechanisms
   // above (a caller-elected courtesy never overrides a statute-driven
   // exemption or swap for the same pay period).
-  lines.push(...residenceStateWithholdingLine(input, ctx, rules, reciprocityReason));
+  // Skipped when the resident-working-elsewhere credit above already produced
+  // the residence state's withholding (Kansas): that line is the residence
+  // tax net of what this state withheld, so adding the full residence tax as
+  // well would withhold it twice.
+  if (!residentCredit) lines.push(...residenceStateWithholdingLine(input, ctx, rules, reciprocityReason));
 
   return lines;
 }
@@ -472,7 +476,18 @@ function residenceIncomeLines(
   ctx: ComputeContext,
   residenceRules: StateRuleset,
 ): TaxLine[] {
-  const lines = incomeTaxLines(virtualInput, ctx, residenceRules).filter((l) => l.payer === 'employee');
+  let lines = incomeTaxLines(virtualInput, ctx, residenceRules).filter((l) => l.payer === 'employee');
+  // The employee's elections on the RESIDENCE certificate (exempt, extra,
+  // reduced withholding) apply exactly as they do to a work-state line.
+  // virtualInput's work state IS the residence state, so the shared helpers
+  // read the residence certificate.
+  lines = applyStateWithholdingExemption(virtualInput, residenceRules, lines);
+  lines = applyAdditionalStateWithholding(virtualInput, residenceRules, lines);
+  lines = applyReducedStateWithholding(virtualInput, residenceRules, lines);
+  if (residenceRules.roundFinalToWholeDollar) {
+    const primaryId = `${residenceRules.code}_SIT`;
+    lines = lines.map((line) => (line.id === primaryId ? { ...line, amount: toWholeDollars(line.amount) } : line));
+  }
   for (const extra of [
     nycLocalTax(virtualInput, ctx, residenceRules),
     nycSupplementalTax(virtualInput, ctx, residenceRules),
