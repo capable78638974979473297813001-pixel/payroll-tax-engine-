@@ -1,4 +1,4 @@
-# Zero-day problems: 2026-10-23
+# Zero-day problems: 2026-10-24
 
 ## Verified, needs a person (2)
 
@@ -7,8 +7,14 @@ The official source disagrees with a number in `data/`, but a rule stopped the a
 - Whitesville: the Secretary of State lists this district (entered 2026-10-06; rate '') but KY-occupational-2026.json does not
 - Chester: the list shows a $2 per week user fee in Chester, which the data does not have
 
-14 other source change(s) were informational only and changed nothing.
-## Not being read (45; 31 never read)
+## Possible, a person looks (1)
+
+A document the data cites changed and its dollar amounts or percentages changed with it:
+
+- WA [City of Seattle, City Finance -- Payroll expense tax (2025 thresholds and rates)](https://www.seattle.gov/city-finance/business-taxes-and-licenses/seattle-taxes/payroll-expense-tax): figures $182,385, $189,371, $189,385, $194,452, $504,989, $518,537.99, $8,837,302, $9,074,409; feeds `data/states/WA-2025.json`, `data/states/WA-2026.json`, `data/states/WA-2027.json`
+
+18 other source change(s) were informational only and changed nothing.
+## Not being read (44; 31 never read)
 
 A change on these pages cannot be caught until they can be read. Replace the address, or check them by hand:
 
@@ -43,14 +49,14 @@ A change on these pages cannot be caught until they can be read. Replace the add
 - NY [NY.gov -- New York State Paid Sick Leave FAQ](https://www.ny.gov/sites/default/files/atoms/files/PSL_FAQ_PaidSickLeaveFAQ.pdf): HTTP 403: the site refuses automated requests; a real browser was refused too; feeds `data/employer-thresholds/NY-2026.json`, `data/employer-thresholds/NY-2027.json`
 - OH [Village of College Corner income tax ordinance (1%) and repeal resolution](https://villageofcollegecorner.org/wp-content/uploads/2025/04/Rita-Repeal.pdf): HTTP 403: the site refuses automated requests; a real browser was refused too; feeds `data/local/OH-municipalities-2025.json`
 - OR [City of Wilsonville Transit Payroll Tax Information](https://www.wilsonvilleoregon.gov/finance/page/transit-payroll-tax-information): HTTP 404; feeds `data/states/OR-2025.json`, `data/states/OR-2026.json`, `data/states/OR-2027.json`
+- AL [City of Fairfield -- Ordinance 1019, Occupational Tax](https://cityoffairfieldal.org/wp-content/uploads/2025/02/Ordinance-1019-Occupational-Tax_rotated.pdf): HTTP 429: the site refuses automated requests; a real browser was refused too; feeds `data/local/AL-municipalities-2025.json`, `data/local/AL-municipalities-2026.json`, `data/local/AL-municipalities-2027.json`
 - AL [City of Tuskegee -- business information brochure](https://www.tuskegeealabama.gov/sites/g/files/vyhlif3946/f/uploads/infobrochure_word.pdf): HTTP 404; feeds `data/local/AL-municipalities-2025.json`, `data/local/AL-municipalities-2026.json`, `data/local/AL-municipalities-2027.json`
-- MI [MCL 206.30 — retirement/pension income deductions (subsection (1)(f) etc.), the basis for ](https://www.legislature.mi.gov/Laws/MCL?objectName=MCL-206-30): HTTP 502; feeds `data/states/MI-2026.json`, `data/states/MI-2027.json`
-- MI [MCL 141.631 — City Income Tax Act, Sec. 31 (personal/dependency exemptions)](https://www.legislature.mi.gov/Laws/MCL?objectName=mcl-141-631): HTTP 502; feeds `data/local/MI-cities-2025.json`, `data/local/MI-cities-2026.json`, `data/local/MI-cities-2027.json`
-- MI [MCL 206.703(2) — Every employer required under the Internal Revenue Code to withhold on an](https://www.legislature.mi.gov/Laws/MCL?objectName=mcl-206-703): HTTP 502; feeds `data/states/MI-2026.json`, `data/states/MI-2027.json`
+- IN [Indiana Unemployment for Employers: New Employer Premium Rate (DWD)](https://www.in.gov/dwd/indiana-unemployment/employers/employer-guide/rate-computation/new-employer-premium-rate/): URLError: <urlopen error [Errno 111] Connection refused>; feeds `data/states/IN-2026.json`, `data/states/IN-2027.json`
+- KY [City of Georgetown, KY — Taxes and license fees (occupational license tax: net profits vs ](https://www.georgetownky.gov/2167/Taxes-License-Fees): read with a browser last time; a real browser was refused too; feeds `data/local/KY-occupational-2025.json`, `data/local/KY-occupational-2026.json`, `data/local/KY-occupational-2027.json`
 - MN [Minnesota Paid Leave -- Premium rate and contributions](https://pl.mn.gov/resources/calculators/premium-rate-and-contributions): HTTP 405; feeds `data/states/MN-2026.json`, `data/states/MN-2027.json`
+- ND [Form NDW-R -- Reciprocity Exemption from Withholding for Qualifying Minnesota and Montana ](https://www.tax.nd.gov/sites/www/files/documents/forms/business/ndwrfillable.pdf): TimeoutError: The read operation timed out; feeds `data/states/ND-2026.json`, `data/states/ND-2027.json`
+- ND [2026 Income Tax Withholding Rates and Instructions (North Dakota Office of State Tax Commi](https://www.tax.nd.gov/sites/www/files/documents/forms/individual/2026-iit/2026-income-tax-withholding-rates-booklet.pdf): TimeoutError: The read operation timed out; feeds `data/states/ND-2026.json`, `data/states/ND-2027.json`
+- ND [North Dakota Office of State Tax Commissioner -- Income Tax Withholding Rates and Instruct](https://www.tax.nd.gov/sites/www/files/documents/misc-discuss-folder/Final_2025%20Income%20Tax%20Withholding%20Rates%20%20Instructions.pdf): TimeoutError: The read operation timed out; feeds `data/states/ND-2025.json`
 - NJ [HHS/ASPE 2026 Poverty Guidelines for the 48 Contiguous States and DC — household of 1: $15](https://aspe.hhs.gov/topics/poverty-economic-mobility/poverty-guidelines): HTTP 403: the site refuses automated requests; a real browser was refused too; feeds `data/garnishment/state-overrides-2026.json`, `data/garnishment/state-overrides-2027.json`
-- NJ [City of Newark Q1 2026 Payroll Tax Booklet](https://www.newarknj.gov/DocumentCenter/View/2741/Payroll-Tax-Booklet-2026-PDF): read with a browser last time; a real browser was refused too; feeds `data/states/NJ-2026.json`, `data/states/NJ-2027.json`
-- OH [Village of Georgetown -- Income Tax](https://georgetownohio.gov/income-tax/): read with a browser last time; a real browser was refused too; feeds `data/local/OH-municipalities-2025.json`
-- WI [Wisconsin Legislature -- Wis. Stat. 104.035 (minimum wage; opportunity employees)](https://docs.legis.wisconsin.gov/2017/statutes/statutes/104/035/9): URLError: <urlopen error timed out>; feeds `data/minimum-wage/states/WI-2026.json`
-- ... and 5 more (see zero-day-latest.json)
+- ... and 4 more (see zero-day-latest.json)
 

@@ -1,5 +1,5 @@
 {
- "date": "2026-10-23",
+ "date": "2026-10-24",
  "fixed": [],
  "verified": [
   {
@@ -15,8 +15,29 @@
    "edits": []
   }
  ],
- "possible": [],
- "informational_changes": 14,
+ "possible": [
+  {
+   "jurisdiction": "WA",
+   "title": "City of Seattle, City Finance -- Payroll expense tax (2025 thresholds and rates)",
+   "url": "https://www.seattle.gov/city-finance/business-taxes-and-licenses/seattle-taxes/payroll-expense-tax",
+   "figures": [
+    "$182,385",
+    "$189,371",
+    "$189,385",
+    "$194,452",
+    "$504,989",
+    "$518,537.99",
+    "$8,837,302",
+    "$9,074,409"
+   ],
+   "feeds": [
+    "data/states/WA-2025.json",
+    "data/states/WA-2026.json",
+    "data/states/WA-2027.json"
+   ]
+  }
+ ],
+ "informational_changes": 18,
  "blind_spots": [
   {
    "jurisdiction": "AL",
@@ -371,6 +392,18 @@
   },
   {
    "jurisdiction": "AL",
+   "title": "City of Fairfield -- Ordinance 1019, Occupational Tax",
+   "url": "https://cityoffairfieldal.org/wp-content/uploads/2025/02/Ordinance-1019-Occupational-Tax_rotated.pdf",
+   "why": "HTTP 429: the site refuses automated requests; a real browser was refused too",
+   "never_read": false,
+   "feeds": [
+    "data/local/AL-municipalities-2025.json",
+    "data/local/AL-municipalities-2026.json",
+    "data/local/AL-municipalities-2027.json"
+   ]
+  },
+  {
+   "jurisdiction": "AL",
    "title": "City of Tuskegee -- business information brochure",
    "url": "https://www.tuskegeealabama.gov/sites/g/files/vyhlif3946/f/uploads/infobrochure_word.pdf",
    "why": "HTTP 404",
@@ -382,37 +415,26 @@
    ]
   },
   {
-   "jurisdiction": "MI",
-   "title": "MCL 206.30 \u2014 retirement/pension income deductions (subsection (1)(f) etc.), the basis for MI taxable income tracking federal AGI",
-   "url": "https://www.legislature.mi.gov/Laws/MCL?objectName=MCL-206-30",
-   "why": "HTTP 502",
+   "jurisdiction": "IN",
+   "title": "Indiana Unemployment for Employers: New Employer Premium Rate (DWD)",
+   "url": "https://www.in.gov/dwd/indiana-unemployment/employers/employer-guide/rate-computation/new-employer-premium-rate/",
+   "why": "URLError: <urlopen error [Errno 111] Connection refused>",
    "never_read": false,
    "feeds": [
-    "data/states/MI-2026.json",
-    "data/states/MI-2027.json"
+    "data/states/IN-2026.json",
+    "data/states/IN-2027.json"
    ]
   },
   {
-   "jurisdiction": "MI",
-   "title": "MCL 141.631 \u2014 City Income Tax Act, Sec. 31 (personal/dependency exemptions)",
-   "url": "https://www.legislature.mi.gov/Laws/MCL?objectName=mcl-141-631",
-   "why": "HTTP 502",
+   "jurisdiction": "KY",
+   "title": "City of Georgetown, KY \u2014 Taxes and license fees (occupational license tax: net profits vs gross receipts)",
+   "url": "https://www.georgetownky.gov/2167/Taxes-License-Fees",
+   "why": "read with a browser last time; a real browser was refused too",
    "never_read": false,
    "feeds": [
-    "data/local/MI-cities-2025.json",
-    "data/local/MI-cities-2026.json",
-    "data/local/MI-cities-2027.json"
-   ]
-  },
-  {
-   "jurisdiction": "MI",
-   "title": "MCL 206.703(2) \u2014 Every employer required under the Internal Revenue Code to withhold on an individual's compensation shall deduct and withhold Michigan tax",
-   "url": "https://www.legislature.mi.gov/Laws/MCL?objectName=mcl-206-703",
-   "why": "HTTP 502",
-   "never_read": false,
-   "feeds": [
-    "data/states/MI-2026.json",
-    "data/states/MI-2027.json"
+    "data/local/KY-occupational-2025.json",
+    "data/local/KY-occupational-2026.json",
+    "data/local/KY-occupational-2027.json"
    ]
   },
   {
@@ -424,6 +446,38 @@
    "feeds": [
     "data/states/MN-2026.json",
     "data/states/MN-2027.json"
+   ]
+  },
+  {
+   "jurisdiction": "ND",
+   "title": "Form NDW-R -- Reciprocity Exemption from Withholding for Qualifying Minnesota and Montana Residents",
+   "url": "https://www.tax.nd.gov/sites/www/files/documents/forms/business/ndwrfillable.pdf",
+   "why": "TimeoutError: The read operation timed out",
+   "never_read": false,
+   "feeds": [
+    "data/states/ND-2026.json",
+    "data/states/ND-2027.json"
+   ]
+  },
+  {
+   "jurisdiction": "ND",
+   "title": "2026 Income Tax Withholding Rates and Instructions (North Dakota Office of State Tax Commissioner)",
+   "url": "https://www.tax.nd.gov/sites/www/files/documents/forms/individual/2026-iit/2026-income-tax-withholding-rates-booklet.pdf",
+   "why": "TimeoutError: The read operation timed out",
+   "never_read": false,
+   "feeds": [
+    "data/states/ND-2026.json",
+    "data/states/ND-2027.json"
+   ]
+  },
+  {
+   "jurisdiction": "ND",
+   "title": "North Dakota Office of State Tax Commissioner -- Income Tax Withholding Rates and Instructions, 2025 Calendar Year",
+   "url": "https://www.tax.nd.gov/sites/www/files/documents/misc-discuss-folder/Final_2025%20Income%20Tax%20Withholding%20Rates%20%20Instructions.pdf",
+   "why": "TimeoutError: The read operation timed out",
+   "never_read": false,
+   "feeds": [
+    "data/states/ND-2025.json"
    ]
   },
   {
@@ -449,79 +503,35 @@
    ]
   },
   {
-   "jurisdiction": "OH",
-   "title": "Village of Georgetown -- Income Tax",
-   "url": "https://georgetownohio.gov/income-tax/",
-   "why": "read with a browser last time; a real browser was refused too",
+   "jurisdiction": "WA",
+   "title": "RCW 1.90.100 \u2014 Personal Income Tax Prohibition",
+   "url": "https://app.leg.wa.gov/RCW/default.aspx?cite=1.90.100",
+   "why": "TimeoutError: The read operation timed out",
    "never_read": false,
    "feeds": [
-    "data/local/OH-municipalities-2025.json"
+    "data/states/WA-2026.json",
+    "data/states/WA-2027.json"
    ]
   },
   {
-   "jurisdiction": "WI",
-   "title": "Wisconsin Legislature -- Wis. Stat. 104.035 (minimum wage; opportunity employees)",
-   "url": "https://docs.legis.wisconsin.gov/2017/statutes/statutes/104/035/9",
-   "why": "URLError: <urlopen error timed out>",
+   "jurisdiction": "WA",
+   "title": "RCW 36.65.030 \u2014 Tax on net income prohibited",
+   "url": "https://app.leg.wa.gov/RCW/default.aspx?cite=36.65.030",
+   "why": "TimeoutError: The read operation timed out",
    "never_read": false,
    "feeds": [
-    "data/minimum-wage/states/WI-2026.json"
+    "data/states/WA-2026.json",
+    "data/states/WA-2027.json"
    ]
   },
   {
-   "jurisdiction": "WI",
-   "title": "Wis. Stat. \u00a7 71.03(13) \u2014 'Wisconsin adjusted gross income' defined",
-   "url": "https://docs.legis.wisconsin.gov/document/statutes/71.03",
-   "why": "URLError: <urlopen error timed out>",
+   "jurisdiction": "WA",
+   "title": "WA Cares Fund premium, RCW 50B.04.080 -- 0.58% of wages since 2023-07-01, unchanged through 2026",
+   "url": "https://app.leg.wa.gov/RCW/default.aspx?cite=50B.04.080",
+   "why": "TimeoutError: The read operation timed out",
    "never_read": false,
    "feeds": [
-    "data/states/WI-2026.json",
-    "data/states/WI-2027.json"
-   ]
-  },
-  {
-   "jurisdiction": "WI",
-   "title": "Wis. Stat. \u00a7 812.34 \u2014 80% of disposable earnings exempt from garnishment (i.e. 20% reachable), further limited by the amount by which disposable earnings exceed 30x the FEDERAL minimum hourly wage",
-   "url": "https://docs.legis.wisconsin.gov/document/statutes/812.34",
-   "why": "URLError: <urlopen error timed out>",
-   "never_read": false,
-   "feeds": [
-    "data/garnishment/state-overrides-2026.json",
-    "data/garnishment/state-overrides-2027.json"
-   ]
-  },
-  {
-   "jurisdiction": "WI",
-   "title": "Wisconsin W-166 withholding guide",
-   "url": "https://www.revenue.wi.gov/DOR%20Publications/pb166.pdf",
-   "why": "URLError: <urlopen error timed out>",
-   "never_read": false,
-   "feeds": [
-    "data/states/WI-2025.json",
-    "data/states/WI-2026.json",
-    "data/states/WI-2027.json"
-   ]
-  },
-  {
-   "jurisdiction": "WI",
-   "title": "DOR Tax Rates FAQ (annual Form 1 individual income tax brackets)",
-   "url": "https://www.revenue.wi.gov/Pages/FAQS/pcs-taxrates.aspx",
-   "why": "URLError: <urlopen error timed out>",
-   "never_read": false,
-   "feeds": [
-    "data/states/WI-2026.json",
-    "data/states/WI-2027.json"
-   ]
-  },
-  {
-   "jurisdiction": "WI",
-   "title": "DOR General Withholding Tax Questions (reciprocity, thresholds, WT-4)",
-   "url": "https://www.revenue.wi.gov/Pages/FAQS/pcs-with.aspx",
-   "why": "URLError: <urlopen error timed out>",
-   "never_read": false,
-   "feeds": [
-    "data/states/WI-2026.json",
-    "data/states/WI-2027.json"
+    "data/states/WA-2025.json"
    ]
   }
  ]
