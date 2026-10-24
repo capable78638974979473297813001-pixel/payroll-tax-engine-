@@ -133,6 +133,112 @@ export interface StripeCheckoutSession {
   subscription?: string | { id: string; default_payment_method?: string | StripePaymentMethod | null };
   setup_intent?: string | { id: string; payment_method?: string | StripePaymentMethod | null };
 }
+/** Production is NODE_ENV=production, or any process Render itself started (RENDER is set). */
+export function checkoutInProduction(): boolean {
+  return process.env.NODE_ENV === 'production' || Boolean((process.env.RENDER ?? '').trim());
+}
+
+function headerFirst(value: string | string[] | undefined): string {
+  const raw = Array.isArray(value) ? value[0] : value;
+  return (raw ?? '').split(',')[0].trim();
+}
+
+function isLocalHostname(hostname: string): boolean {
+  const host = hostname.toLowerCase().replace(/^\[|\]$/g, '').replace(/\.$/, '');
+  if (host === 'localhost' || host.endsWith('.localhost')) return true;
+  if (host === '::1' || host === '0.0.0.0') return true;
+  if (/^127(?:\.\d{1,3}){3}$/.test(host)) return true;
+  return false;
+}
+
+/**
+ * A Checkout return URL is usable in production only when it is https and
+ * its host is not localhost. The amount of a price is irrelevant here and
+ * is never read.
+ */
+export function isPublicHttpsUrl(value: string): boolean {
+  try {
+    const url = new URL(value);
+    if (url.protocol !== 'https:') return false;
+    if (url.username || url.password) return false;
+    if (isLocalHostname(url.hostname)) return false;
+    return Boolean(url.hostname);
+  } catch {
+    return false;
+  }
+}
+
+export interface CheckoutOriginRequest {
+  headers: {
+    host?: string | string[];
+    'x-forwarded-host'?: string | string[];
+    'x-forwarded-proto'?: string | string[];
+  };
+  socket?: { encrypted?: boolean };
+}
+
+export type CheckoutOriginResult = { ok: true; origin: string } | { ok: false; error: string };
+
+const PUBLIC_BASE_URL_HELP = 'Set PUBLIC_BASE_URL to the public https origin in the Render dashboard. render.yaml is not applied automatically.';
+
+/**
+ * Origin for Checkout success_url and cancel_url.
+ * In production, never localhost. PUBLIC_BASE_URL wins when it is https and
+ * public. Otherwise the request host is used, and on Render (or TRUST_PROXY=1)
+ * that host comes from x-forwarded-proto and x-forwarded-host / Host.
+ * Development keeps the localhost fallback.
+ */
+export function resolveCheckoutOrigin(req: CheckoutOriginRequest | undefined, fallbackPort: number): CheckoutOriginResult {
+  const configured = (process.env.PUBLIC_BASE_URL ?? '').trim().replace(/\/+$/, '');
+  if (!checkoutInProduction()) {
+    if (configured) return { ok: true, origin: configured };
+    return { ok: true, origin: `http://localhost:${fallbackPort}` };
+  }
+  if (configured) {
+    if (!isPublicHttpsUrl(configured)) {
+      return {
+        ok: false,
+        error: `PUBLIC_BASE_URL cannot be used for Checkout in production: it must be https and must not be localhost. ${PUBLIC_BASE_URL_HELP}`,
+      };
+    }
+    return { ok: true, origin: configured };
+  }
+  const derived = originFromRequest(req);
+  if (derived && isPublicHttpsUrl(derived)) return { ok: true, origin: derived };
+  return {
+    ok: false,
+    error: `Checkout return URLs cannot be localhost in production. ${PUBLIC_BASE_URL_HELP}`,
+  };
+}
+
+function trustForwardedHeaders(): boolean {
+  return Boolean((process.env.RENDER ?? '').trim()) || process.env.TRUST_PROXY === '1';
+}
+
+function originFromRequest(req: CheckoutOriginRequest | undefined): string | null {
+  if (!req) return null;
+  const trust = trustForwardedHeaders();
+  const forwardedHost = trust ? headerFirst(req.headers['x-forwarded-host']) : '';
+  const host = forwardedHost || headerFirst(req.headers.host);
+  if (!host || /[\s/]/.test(host)) return null;
+  let proto = trust ? headerFirst(req.headers['x-forwarded-proto']).toLowerCase() : '';
+  if (proto !== 'https' && proto !== 'http') proto = req.socket?.encrypted ? 'https' : 'http';
+  try {
+    return new URL(`${proto}://${host}`).origin;
+  } catch {
+    return null;
+  }
+}
+
+const CHECKOUT_URL_REFUSAL = `Refusing to create a Checkout Session: success_url and cancel_url must be https and must not be localhost in production. ${PUBLIC_BASE_URL_HELP}`;
+
+/** Throws before any Stripe call when production return URLs are not public https. */
+export function assertProductionCheckoutUrls(successUrl: string, cancelUrl: string): void {
+  if (!checkoutInProduction()) return;
+  if (isPublicHttpsUrl(successUrl) && isPublicHttpsUrl(cancelUrl)) return;
+  throw new StripeError(CHECKOUT_URL_REFUSAL, 0, 'checkout_origin_invalid');
+}
+
 /**
  * A hosted Checkout page in SETUP mode — the customer saves a payment method,
  * no charge. Which methods appear is decided by the Stripe Dashboard. Do not
@@ -144,6 +250,7 @@ export function createSetupCheckoutSession(input: {
   successUrl: string;
   cancelUrl: string;
 }): Promise<StripeCheckoutSession> {
+  assertProductionCheckoutUrls(input.successUrl, input.cancelUrl);
   return stripeRequest<StripeCheckoutSession>('POST', '/v1/checkout/sessions', {
     mode: 'setup',
     customer: input.customerId,
@@ -217,6 +324,7 @@ export async function createSubscriptionCheckoutSession(input: {
   /** Extra subscription metadata, merged with apiKeyId. */
   metadata?: Record<string, string>;
 }): Promise<StripeCheckoutSession> {
+  assertProductionCheckoutUrls(input.successUrl, input.cancelUrl);
   const usage = await priceUsage(input.priceId);
   const lineItem: Record<string, unknown> = { price: input.priceId };
   if (usage === 'licensed') {

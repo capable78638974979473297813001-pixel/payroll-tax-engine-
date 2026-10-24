@@ -20,7 +20,7 @@ import { ExtrasRefusal, runPaycheckExtras, validatePaycheckExtras } from './lib/
 import { keyLifeFor } from './lib/keylife.ts';
 import { coverage, searchLocal } from './lib/coverage.ts';
 import { verifierConfigured, issueCode, checkCode } from './lib/verifier.ts';
-import { stripeConfigured, stripeKeyRefused } from '../api/stripe.ts';
+import { resolveCheckoutOrigin, stripeConfigured, stripeKeyRefused } from '../api/stripe.ts';
 import { hashPassword, verifyPassword, passwordProblem, MAX_PASSWORD } from './lib/password.ts';
 import {
   billingConfigured, meteringConfigured, enqueueMeterEvent, flushMeterQueue,
@@ -1039,7 +1039,13 @@ async function handlePaymentSetup(req: IncomingMessage, res: ServerResponse): Pr
     return;
   }
 
-  const origin = (process.env.PUBLIC_BASE_URL ?? `http://localhost:${PORT}`).replace(/\/+$/, '');
+  const originResult = resolveCheckoutOrigin(req, PORT);
+  if (!originResult.ok) {
+    console.error(`[payment] ${originResult.error}`);
+    sendJson(res, 500, { error: originResult.error, code: 'checkout_origin_invalid' });
+    return;
+  }
+  const origin = originResult.origin;
   const successUrl = `${origin}/signup/payment?setup=ok&session_id={CHECKOUT_SESSION_ID}`;
   const cancelUrl = `${origin}/signup/payment?setup=cancelled`;
 

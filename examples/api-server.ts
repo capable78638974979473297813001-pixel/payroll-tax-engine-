@@ -7,6 +7,7 @@ import { calculatePaycheck } from '../src/calculate.ts';
 import type { PaycheckInput } from '../src/types.ts';
 import { mintApiKey, recordUsage, usageForKey, verifyApiKey, type ApiKey } from '../api/keys.ts';
 import { billingConfigured, completeCardSetup, flushMeterQueue, handleStripeWebhook, meteringConfigured, startCardSetup } from '../api/billing.ts';
+import { checkoutInProduction, resolveCheckoutOrigin } from '../api/stripe.ts';
 import { runEmbeddedPayroll, type PlatformEmployeeInput } from '../payroll/platform.ts';
 import type { PayFrequency } from '../src/types.ts';
 import { listUniqueTaxIds, payCalc, resolveUniqueTaxId, type PayCalcRequest } from '../api/ste-compat.ts';
@@ -74,15 +75,11 @@ function sendHtml(res: ServerResponse, status: number, title: string, message: s
 
 /**
  * Where this API is publicly reachable — for building Checkout return URLs.
- * Never derived from the request's Host header: that is caller-controlled,
- * and a forged Host would make Stripe send the customer back to an
- * attacker's site. Without PUBLIC_BASE_URL it is plain localhost, which is
- * only right for local development (startup warns when billing is on).
+ * In production this is PUBLIC_BASE_URL when that is public https, otherwise
+ * the request host (x-forwarded-proto and host on Render). Local development
+ * falls back to localhost. A production origin that is still localhost is
+ * refused before Checkout is created.
  */
-function baseUrl(): string {
-  if (process.env.PUBLIC_BASE_URL) return process.env.PUBLIC_BASE_URL.replace(/\/$/, '');
-  return `http://localhost:${PORT}`;
-}
 
 /** Deliver queued Stripe meter events off the response path; failures stay queued for the next flush. */
 function flushMeterSoon(): void {
@@ -189,8 +186,13 @@ const server = createServer(async (req, res) => {
   // Start saving a card: returns a hosted Stripe Checkout URL for this customer.
   if (method === 'POST' && path === '/v1/billing/setup') {
     if (!billingConfigured()) return sendJson(res, 503, { error: 'Billing is not configured on this server (no STRIPE_SECRET_KEY).' });
+    const origin = resolveCheckoutOrigin(req, PORT);
+    if (!origin.ok) {
+      console.error(`[billing] ${origin.error}`);
+      return sendJson(res, 500, { error: origin.error, code: 'checkout_origin_invalid' });
+    }
     try {
-      const out = await startCardSetup(key.id, baseUrl());
+      const out = await startCardSetup(key.id, origin.origin);
       if (out.ok) return sendJson(res, 200, { url: out.url });
       return sendJson(res, 400, { error: `Could not start card setup (${out.reason}).` });
     } catch (err) {
@@ -390,6 +392,8 @@ server.listen(PORT, () => {
   console.log(`  Bill a key:  npm run api:key -- --bill <prefix>   (manual path; metered billing auto-invoices)`);
   console.log(`  Billing:     ${billingMode}\n`);
   if (billingConfigured() && !process.env.PUBLIC_BASE_URL) {
-    console.warn('  WARNING: PUBLIC_BASE_URL is not set, so Stripe Checkout returns to http://localhost. Set it to this API\'s public https URL in production.\n');
+    console.warn(checkoutInProduction()
+      ? '  WARNING: PUBLIC_BASE_URL is not set. Production Checkout will not use localhost. Set it to the public https URL in the Render dashboard. render.yaml is not applied automatically.\n'
+      : '  WARNING: PUBLIC_BASE_URL is not set, so Stripe Checkout returns to http://localhost. Set it to this API\'s public https URL before production.\n');
   }
 });

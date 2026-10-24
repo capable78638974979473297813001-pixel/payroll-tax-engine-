@@ -28,7 +28,7 @@ does not contain the values.
 - `STRIPE_METER_EVENT_NAME`
 - `STRIPE_WEBHOOK_SECRET`
 
-`PUBLIC_BASE_URL` is already set in `render.yaml`.
+`PUBLIC_BASE_URL` is listed in `render.yaml` as `https://omniatax.io`, but that file is not applied automatically. Set `PUBLIC_BASE_URL` in the Render dashboard to the public https origin. In production (`NODE_ENV=production`, or when `RENDER` is set), Checkout `success_url` and `cancel_url` are never localhost. A valid `PUBLIC_BASE_URL` is used. If it is missing, the server uses the request host, including `x-forwarded-proto` and host on Render. If neither is a public https origin, Checkout is refused and no session is created. Local development still falls back to localhost.
 
 `STRIPE_ALLOW_LIVE` must stay unset until a full test payment works.
 
