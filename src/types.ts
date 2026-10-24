@@ -358,6 +358,18 @@ export interface StateCertificate {
   // <STATE> certificate.<field>" errors for the authoritative list) ---
   /** Reused across many states for that state's own marital-status categories (e.g. WI/OR/ND 'single'|'married'; NY, MT, ID, IA, ME each with their own set). */
   maritalStatus?: string;
+  /**
+   * Georgia Form G-4 Line 3 letter. A = single, B = married filing jointly
+   * with both spouses working (or married filing separately), C = married
+   * filing jointly with one spouse working, D = head of household.
+   * georgiaWithholding() reads this exact key.
+   */
+  georgiaMaritalStatus?: string;
+  /**
+   * Louisiana Form L-4 Block A claim: 0 (no deduction), 1, or 2.
+   * louisianaWithholding() reads this exact key.
+   */
+  louisianaBlockA?: number;
   /** Reused across many states for that state's own filing-status categories (e.g. NJ 'single'|'mfs'|'mfj'|'hoh'|'qw'; MD 'single'|'mfjHoh'; OK 'single'|'married'|'married_withhold_as_single'). */
   filingStatus?: string;
   /** Hawaii's own marital-status set — kept separate from `maritalStatus` because Hawaii doesn't allow the ordinary certificate.exempt-style exemption these other states share. */
