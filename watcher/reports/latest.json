@@ -1,107 +1,54 @@
 {
- "date": "2026-10-24",
+ "date": "2026-10-25",
  "counts": {
-  "unchanged": 1222,
-  "changed": 19,
-  "blocked": 37,
-  "gone": 5,
-  "unreachable": 12,
-  "unstable": 1,
-  "new": 1
+  "unchanged": 1055,
+  "blocked": 29,
+  "gone": 6,
+  "changed": 6,
+  "new": 5,
+  "unreachable": 4
  },
- "total": 1297,
+ "total": 1105,
  "changed": [
   {
-   "id": "ar-ae6960acd2",
-   "jurisdiction": "AR",
-   "title": "Arkansas DFA: news",
-   "url": "https://www.dfa.arkansas.gov/news/",
-   "detail": "5 lines added, 3 removed; 1 links added, 1 removed",
+   "id": "co-002adac414~dff18f71",
+   "jurisdiction": "CO",
+   "title": "Commissioners\u2019 Agenda (linked from Boulder County -- Local Minimum Wage)",
+   "url": "https://assets.bouldercounty.gov/wp-content/uploads/2017/08/bocc-advance-agenda.pdf",
+   "detail": "79 lines added, 86 removed",
+   "figures_added": [],
+   "figures_removed": [],
+   "links_added": [],
+   "links_removed": [],
+   "significant": true
+  },
+  {
+   "id": "in-f3e8cf456b~78e8bd47",
+   "jurisdiction": "IN",
+   "title": "ACH Debit Block Information (linked from Indiana DOR withholding)",
+   "url": "https://intime.dor.in.gov/eServices/WebFiles/ACHDebitBlockGuide.pdf",
+   "detail": "5 lines added, 17 removed",
+   "figures_added": [],
+   "figures_removed": [],
+   "links_added": [],
+   "links_removed": [],
+   "significant": true
+  },
+  {
+   "id": "in-f3e8cf456b",
+   "jurisdiction": "IN",
+   "title": "Indiana DOR withholding",
+   "url": "https://www.in.gov/dor/i-am-a/business-corp/withholding/",
+   "detail": "1 links added, 1 removed",
    "figures_added": [],
    "figures_removed": [],
    "links_added": [
-    "https://www.dfa.arkansas.gov/news/brad-nye-named-dfa-chief-of-staff/"
+    "https://www.in.gov/dor/files/iris-2026-tax-year-guide.pdf"
    ],
    "links_removed": [
-    "https://www.dfa.arkansas.gov/news/june-2026-general-revenue-report-posted/"
+    "https://www.in.gov/dor/files/IRIS-2026-Tax-Year-Guide.pdf"
    ],
    "significant": true
-  },
-  {
-   "id": "az-b66098e04c",
-   "jurisdiction": "AZ",
-   "title": "City of Flagstaff -- City of Flagstaff announces minimum wage for 2026",
-   "url": "https://www.flagstaff.az.gov/CivicAlerts.aspx?AID=2165",
-   "detail": "2 lines added, 2 removed",
-   "figures_added": [],
-   "figures_removed": [],
-   "links_added": [],
-   "links_removed": [],
-   "significant": true
-  },
-  {
-   "id": "ia-0cdcab3179",
-   "jurisdiction": "IA",
-   "title": "Iowa Department of Revenue: press releases",
-   "url": "https://revenue.iowa.gov/press-releases",
-   "detail": "1 lines added, 0 removed; 1 links added, 0 removed",
-   "figures_added": [],
-   "figures_removed": [],
-   "links_added": [
-    "https://revenue.iowa.gov/taxes/tax-guidance/sales-use-excise-tax/local-option-sales-tax-lost/special-census-adoption"
-   ],
-   "links_removed": [],
-   "significant": true
-  },
-  {
-   "id": "ia-81aa5600bf",
-   "jurisdiction": "IA",
-   "title": "Iowa withholding",
-   "url": "https://revenue.iowa.gov/taxes/tax-guidance/withholding-tax",
-   "detail": "1 lines added, 0 removed; 1 links added, 0 removed",
-   "figures_added": [],
-   "figures_removed": [],
-   "links_added": [
-    "https://revenue.iowa.gov/taxes/tax-guidance/sales-use-excise-tax/local-option-sales-tax-lost/special-census-adoption"
-   ],
-   "links_removed": [],
-   "significant": true
-  },
-  {
-   "id": "il-584349fcaf~c372ba64",
-   "jurisdiction": "IL",
-   "title": "Publication 110 (linked from Illinois withholding income tax)",
-   "url": "https://tax.illinois.gov/content/dam/soi/en/web/tax/research/publications/pubs/documents/pub-110.pdf",
-   "detail": "49 lines added, 36 removed",
-   "figures_added": [],
-   "figures_removed": [],
-   "links_added": [],
-   "links_removed": [],
-   "significant": true
-  },
-  {
-   "id": "il-3574699e38~c372ba64",
-   "jurisdiction": "IL",
-   "title": "Publication 110, W-2, W-2c, W-2G, and 1099 Filing and Storage Requirem (linked from Pub-130, Withholding Illinois Income Tax for My Em)",
-   "url": "https://tax.illinois.gov/content/dam/soi/en/web/tax/research/publications/pubs/documents/pub-110.pdf",
-   "detail": "49 lines added, 36 removed",
-   "figures_added": [],
-   "figures_removed": [],
-   "links_added": [],
-   "links_removed": [],
-   "significant": true
-  },
-  {
-   "id": "ky-7e972afa2c",
-   "jurisdiction": "KY",
-   "title": "City of Nicholasville, KY \u2014 Tax Office",
-   "url": "https://nicholasville.org/tax-office/",
-   "detail": "1 lines added, 1 removed (link lists / headlines only)",
-   "figures_added": [],
-   "figures_removed": [],
-   "links_added": [],
-   "links_removed": [],
-   "significant": false
   },
   {
    "id": "mi-c62e8170b0",
@@ -110,224 +57,60 @@
    "url": "https://www.michigan.gov/leo/news/2025/12/08/michigans-minimum-wage-set-to-increase-on-jan-1-2026",
    "detail": "1 lines added, 1 removed (link lists / headlines only)",
    "figures_added": [],
-   "figures_removed": [
-    "$4"
-   ],
+   "figures_removed": [],
    "links_added": [],
    "links_removed": [],
    "significant": false
   },
   {
-   "id": "mi-e2e29c90f4",
-   "jurisdiction": "MI",
-   "title": "Michigan Treasury: taxes home (notices and withholding news)",
-   "url": "https://www.michigan.gov/taxes",
-   "detail": "1 lines added, 1 removed; 1 links added, 1 removed",
-   "figures_added": [],
-   "figures_removed": [],
-   "links_added": [
-    "https://www.michigan.gov/taxes/mitreasuryeservices"
-   ],
-   "links_removed": [
-    "https://www.michigan.gov/treasury/about/treasury-outreach/outreach"
-   ],
-   "significant": true
-  },
-  {
-   "id": "mo-3cae079bc7",
+   "id": "mo-2d09c4e722",
    "jurisdiction": "MO",
-   "title": "Missouri Department of Revenue: news",
-   "url": "https://dor.mo.gov/news/",
-   "detail": "2 lines added, 0 removed; 1 links added, 0 removed",
+   "title": "St. Louis: earnings tax department",
+   "url": "https://www.stlouis-mo.gov/government/departments/collector/earnings-tax/index.cfm",
+   "detail": "1 lines added, 1 removed (link lists / headlines only)",
    "figures_added": [],
-   "figures_removed": [],
-   "links_added": [
-    "https://dor.mo.gov/news/newsitem/uuid/7c6f5326-31ff-4bc5-baac-af1d25f7b0cf"
-   ],
-   "links_removed": [],
-   "significant": true
-  },
-  {
-   "id": "oh-5eceaa717d~85b31e76",
-   "jurisdiction": "OH",
-   "title": "2026 EFW2 Upload Specifications (linked from Ohio employer withholding)",
-   "url": "https://dam.assets.ohio.gov/image/upload/tax.ohio.gov/employer_withholding/2026-2027%20NYP%20Updates/2026_W2_Specs_V1.pdf",
-   "detail": "305 lines added, 168 removed",
-   "figures_added": [
-    "20%",
-    "20%"
-   ],
    "figures_removed": [],
    "links_added": [],
    "links_removed": [],
-   "significant": true
+   "significant": false
   },
   {
    "id": "or-f5c7c2d0d9",
    "jurisdiction": "OR",
    "title": "Oregon Department of Revenue: news",
    "url": "https://www.oregon.gov/dor/news/Pages/default.aspx",
-   "detail": "32 lines added, 32 removed; 5 links added, 7 removed",
-   "figures_added": [
-    "$7",
+   "detail": "7 lines added, 7 removed; 2 links added, 0 removed",
+   "figures_added": [],
+   "figures_removed": [
     "$7"
    ],
-   "figures_removed": [],
    "links_added": [
-    "https://apps.oregon.gov/oregon-newsroom/OR/ODHS/Posts/Post/aviso-publico-y-solicitud-de-comentarios-sobre-los-cambios-a-las-exenciones-de-medicaid-de-odds-10-2026",
-    "https://apps.oregon.gov/oregon-newsroom/OR/ODHS/Posts/Post/public-notice-and-request-for-comment-on-odds-medicaid-waiver-updates-10-2026",
-    "https://apps.oregon.gov/oregon-newsroom/OR/OST/Posts/Post/Treasury-to-Return-7-Million-Directly-to-Oregonians",
-    "https://apps.oregon.gov/oregon-newsroom/OR/Posts/Search?from=10%2F23%2F2026&to=10%2F23%2F2026",
-    "https://apps.oregon.gov/oregon-newsroom/OR/SOS/Posts/Post/drop-box-update-from-oregon-secretary-tobias-read"
+    "https://apps.oregon.gov/oregon-newsroom/OR/GOV/Posts/Post/governor-kotek-community-leaders-discuss-need-to-expand-affordable-childcare-and-preschool",
+    "https://apps.oregon.gov/oregon-newsroom/OR/Posts/Search?from=10%2F24%2F2026&to=10%2F24%2F2026"
    ],
-   "links_removed": [
-    "https://apps.oregon.gov/oregon-newsroom/OR/ODHS/Posts/Post/un-programa-de-oregon-ofrece-ayuda-gratuita-para-comparar-planes-y-ahorrar-en-costos-durante-el-periodo-de-inscripcion-abierta-de-medicare",
-    "https://apps.oregon.gov/oregon-newsroom/OR/ODVA/Posts",
-    "https://apps.oregon.gov/oregon-newsroom/OR/ODVA/Posts/Post/oregonians-invited-to-honor-generations-of-service-at-statewide-veterans-day-ceremony-nov-11",
-    "https://apps.oregon.gov/oregon-newsroom/OR/OST/Posts/Post/OIC-Reviews-Fund-Benchmarks-and-Reports-Strong-Performance-of-SAIF",
-    "https://apps.oregon.gov/oregon-newsroom/OR/Posts/Search?cat=Veteran",
-    "https://apps.oregon.gov/oregon-newsroom/OR/Posts/Search?from=10%2F20%2F2026&to=10%2F20%2F2026",
-    "https://apps.oregon.gov/oregon-newsroom/OR/Posts/Search?from=10%2F21%2F2026&to=10%2F21%2F2026"
-   ],
-   "significant": true
-  },
-  {
-   "id": "pa-da0fba1e41",
-   "jurisdiction": "PA",
-   "title": "PA Department of Revenue -- Employer Withholding (reciprocal agreements)",
-   "url": "https://www.pa.gov/en/agencies/revenue/resources/tax-types-and-information/employer-withholding.html",
-   "detail": "1 lines added, 1 removed (link lists / headlines only)",
-   "figures_added": [],
-   "figures_removed": [],
-   "links_added": [],
    "links_removed": [],
-   "significant": false
-  },
-  {
-   "id": "pa-19b2687c65",
-   "jurisdiction": "PA",
-   "title": "PA Department of Revenue -- Personal Income Tax (3.07%)",
-   "url": "https://www.pa.gov/agencies/revenue/resources/tax-types-and-information/personal-income-tax",
-   "detail": "1 lines added, 1 removed (link lists / headlines only)",
-   "figures_added": [],
-   "figures_removed": [],
-   "links_added": [],
-   "links_removed": [],
-   "significant": false
-  },
-  {
-   "id": "pa-a6cda778f7",
-   "jurisdiction": "PA",
-   "title": "Pennsylvania Department of Revenue: newsroom",
-   "url": "https://www.pa.gov/agencies/revenue/newsroom",
-   "detail": "1 lines added, 1 removed; 1 links added, 1 removed",
-   "figures_added": [],
-   "figures_removed": [],
-   "links_added": [
-    "https://www.pa.gov/agencies/revenue/tax-resolution-options/requesting-a-closing-agreement"
-   ],
-   "links_removed": [
-    "https://www.pa.gov/agencies/revenue/get-assistance/requesting-a-closing-agreement"
-   ],
-   "significant": true
-  },
-  {
-   "id": "pa-8251b0b3ee",
-   "jurisdiction": "PA",
-   "title": "Pennsylvania employer withholding",
-   "url": "https://www.pa.gov/agencies/revenue/resources/tax-types-and-information/employer-withholding",
-   "detail": "1 lines added, 1 removed; 1 links added, 1 removed",
-   "figures_added": [],
-   "figures_removed": [],
-   "links_added": [
-    "https://www.pa.gov/agencies/revenue/tax-resolution-options/requesting-a-closing-agreement"
-   ],
-   "links_removed": [
-    "https://www.pa.gov/agencies/revenue/get-assistance/requesting-a-closing-agreement"
-   ],
-   "significant": true
-  },
-  {
-   "id": "us-ed3b1bc80a",
-   "jurisdiction": "US",
-   "title": "Federal Register: SSA yearly wage base notice (Cost-of-Living Increase and Other Determinations) - official API",
-   "url": "https://www.federalregister.gov/api/v1/documents.json?per_page=20&order=newest&fields%5B%5D=document_number&fields%5B%5D=title&fields%5B%5D=type&fields%5B%5D=publication_date&fields%5B%5D=effective_on&fields%5B%5D=html_url&conditions%5Bagencies%5D%5B%5D=social-security-administration&conditions%5Bterm%5D=%22cost-of-living+increase+and+other+determinations%22",
-   "detail": "9 lines added, 9 removed",
-   "figures_added": [],
-   "figures_removed": [],
-   "links_added": [],
-   "links_removed": [],
-   "significant": true
-  },
-  {
-   "id": "wa-78ec5c3b87",
-   "jurisdiction": "WA",
-   "title": "City of Seattle, City Finance -- Payroll expense tax (2025 thresholds and rates)",
-   "url": "https://www.seattle.gov/city-finance/business-taxes-and-licenses/seattle-taxes/payroll-expense-tax",
-   "detail": "9 lines added, 8 removed; 1 links added, 1 removed",
-   "figures_added": [
-    "$189,385",
-    "$194,452",
-    "$194,452",
-    "$194,452",
-    "$194,452",
-    "$194,452",
-    "$518,537.99",
-    "$518,537.99",
-    "$9,074,409",
-    "$9,074,409",
-    "$9,074,409",
-    "$9,074,409",
-    "$9,074,409"
-   ],
-   "figures_removed": [
-    "$182,385",
-    "$189,371",
-    "$189,371",
-    "$189,371",
-    "$504,989",
-    "$8,837,302",
-    "$8,837,302",
-    "$8,837,302",
-    "$8,837,302"
-   ],
-   "links_added": [
-    "https://www.seattle.gov/city-finance/business-taxes-and-licenses/seattle-taxes/documents/Departments/CityFinance/Seattle%20Taxes/Payroll%20Expense%20Tax/2026%20Payroll%20Expense%20Tax%20Updates/Q4%202026%20Payroll%20Expense%20Tax%20Training.pdf"
-   ],
-   "links_removed": [
-    "https://www.seattle.gov/city-finance/business-taxes-and-licenses/seattle-taxes/documents/Departments/CityFinance/Seattle%20Taxes/Payroll%20Expense%20Tax/2026%20Payroll%20Expense%20Tax%20Updates/Q4%202026%20Payroll%20Exp%20Tax%20Presentation.pdf"
-   ],
-   "significant": true
-  },
-  {
-   "id": "wa-5ff259aacd",
-   "jurisdiction": "WA",
-   "title": "City of Seattle, City Finance -- Social Housing Tax",
-   "url": "https://seattle.gov/city-finance/business-taxes-and-licenses/seattle-taxes/social-housing-tax",
-   "detail": "1 links added, 1 removed",
-   "figures_added": [],
-   "figures_removed": [],
-   "links_added": [
-    "https://seattle.gov/city-finance/business-taxes-and-licenses/seattle-taxes/documents/Departments/CityFinance/Seattle%20Taxes/Social%20Housing%20Developer%20Tax/2026%20Social%20Housing%20Tax%20Updates/2026%20Social%20Housing%20Tax%20Trainings/Q4%202026%20Seattle%20Social%20Housing%20Tax%20Training.pdf"
-   ],
-   "links_removed": [
-    "https://seattle.gov/city-finance/business-taxes-and-licenses/seattle-taxes/documents/Departments/CityFinance/Seattle%20Taxes/Social%20Housing%20Developer%20Tax/2026%20Social%20Housing%20Tax%20Updates/Q4%202026%20Seattle%20Social%20Housing%20Tax%20Training.pdf"
-   ],
    "significant": true
   }
  ],
- "significant_changes": 15,
+ "significant_changes": 4,
  "broken": [
   "https://www.tuskegeealabama.gov/finance-department/files/occupational-tax-form",
   "https://www.tuskegeealabama.gov/sites/g/files/vyhlif3946/f/uploads/infobrochure_word.pdf",
   "https://www.auroragov.org/business_services/taxes__licensing/occupational_privilege_tax",
   "https://www.greenwoodvillage.com/206/Occupational-Privilege-Tax",
+  "https://tax.colorado.gov/news",
   "https://www.ilga.gov/legislation/ilcs/ilcs4.asp?DocName=073500050K12-803",
   "https://illinoiscomptroller.gov/state-agencies/bulletins-forms/payroll-bulletins/illinois-state-income-tax-exemptions-2026",
   "https://pl.mn.gov/resources/calculators/premium-rate-and-contributions",
   "https://www.wilsonvilleoregon.gov/finance/page/transit-payroll-tax-information"
  ],
  "attention": [
+  {
+   "kind": "unreadable",
+   "title": "IN Indiana Departmental Notice #1 (county rates)",
+   "url": "",
+   "detail": "could not read the official file to compare with the engine's data (URLError: <urlopen error [Errno 111] Connection refused>)"
+  },
   {
    "kind": "missing_from_engine",
    "title": "KY Whitesville",
@@ -359,6 +142,15 @@
    "code": "",
    "name": "Tuskegee",
    "detail": "the League's survey list says 2%; the data has 3% (confirmed from the city's own document: tier conflicting_sources)"
+  },
+  {
+   "kind": "unreadable",
+   "severity": "action",
+   "source_id": "in-86066aa1c0",
+   "jurisdiction": "IN",
+   "code": "",
+   "name": "Indiana Departmental Notice #1 (county rates)",
+   "detail": "could not read the official file to compare with the engine's data (URLError: <urlopen error [Errno 111] Connection refused>)"
   },
   {
    "kind": "missing_from_engine",
@@ -507,11 +299,11 @@
    "detail": "the list shows a $2 per week user fee in Chester, which the data does not have"
   }
  ],
- "followed_documents": 666,
+ "followed_documents": 474,
  "followed_documents_unread": 6,
- "followed_documents_deferred": 363,
- "verified": 1243,
- "unverified": 54,
+ "followed_documents_deferred": 556,
+ "verified": 1066,
+ "unverified": 39,
  "never_baselined": [
   "https://birminghamal.hdlgov.com/base64files/TAXES_FORM_4.pdf",
   "https://www.tuskegeealabama.gov/finance-department/files/occupational-tax-form",
@@ -523,7 +315,6 @@
   "https://tax.colorado.gov/DR1098",
   "https://tax.colorado.gov/news",
   "https://tax.colorado.gov/withholding-tax",
-  "https://tax.colorado.gov/withholding-tax-guide",
   "https://does.dc.gov/service/office-wage-hour-compliance-0",
   "https://otr.cfo.dc.gov/page/withholding-tax-forms-and-publications",
   "https://www.wilmingtonde.gov/residents/earned-income-tax-and-net-profits-tax",
@@ -533,10 +324,6 @@
   "https://codelibrary.amlegal.com/codes/elizabethtownky/latest/elizabethtown_ky/0-0-0-3203",
   "https://codelibrary.amlegal.com/codes/marionky/latest/marion_ky/0-0-0-22684",
   "https://codelibrary.amlegal.com/codes/mckeeky/latest/mckee_ky/0-0-0-2883",
-  "https://codelibrary.amlegal.com/codes/middlesboroky/latest/middlesboro_ky/0-0-0-5065",
-  "https://codelibrary.amlegal.com/codes/middletownky/latest/middletown_ky/0-0-0-10846",
-  "https://codelibrary.amlegal.com/codes/nortonvilleky/latest/nortonville_ky/0-0-0-3279",
-  "https://codelibrary.amlegal.com/codes/simpsonville/latest/simpsonville_ky/0-0-0-6803",
   "https://hartfordky.org/notice-of-occupational-license-fees/",
   "https://library.municode.com/ky/hickman/codes/code_of_ordinances?nodeId=COOR_CH14LIBURE_ARTIIOCLITA",
   "https://library.municode.com/ky/mayfield/codes/code_of_ordinances?nodeId=COOR_CH9OCLITARE_ARTIIOCLITA_S9-42EANEPRTAPARE",
@@ -552,5 +339,5 @@
   "https://villageofcollegecorner.org/wp-content/uploads/2025/04/Rita-Repeal.pdf",
   "https://www.wilsonvilleoregon.gov/finance/page/transit-payroll-tax-information"
  ],
- "max_consecutive_failures": 32
+ "max_consecutive_failures": 33
 }
