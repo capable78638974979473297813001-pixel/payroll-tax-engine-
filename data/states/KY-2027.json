@@ -6,7 +6,15 @@
     "status": "carry-forward-from-2026",
     "createdOn": "2026-10-13",
     "basedOn": "data/states/KY-2026.json",
-    "note": "Carried forward from the 2026 file on 2026-10-13. Not yet checked against the 2027 official source: every figure is 2026's unless listed in updatedFor2027. Remove this block only after each figure has been re-verified against its 2027 source."
+    "note": "Carried forward from the 2026 file on 2026-10-13. Not yet checked against the 2027 official source: every figure is 2026's unless listed in updatedFor2027. Remove this block only after each figure has been re-verified against its 2027 source.",
+    "updatedFor2027": [
+      {
+        "path": "flatRate.deductionAmount",
+        "from": 3360.0,
+        "to": 3470.0,
+        "source": "Kentucky Department of Revenue, 'Kentucky DOR Announces 2027 Standard Deduction' (Sept 11, 2026): 'the standard deduction for 2027 is $3,470.00, an increase of $110.00', https://revenue.ky.gov/News/Pages/Kentucky-DOR-Announces-2027-Standard-Deduction.aspx, read directly 2026-10-25"
+      }
+    ]
   },
   "method": "flat_rate_fixed_deduction",
   "$methodComment": "AUDIT PASS (2026-08-13): the original version of this file used method 'flat_rate' and documented a footgun (callers must remember to pass certificate.allowances=1). That footgun is now CLOSED, not just disclosed: src/taxes/state.ts gained a dedicated flatRateFixedDeduction() method that subtracts a flat annual deductionAmount with no certificate-driven multiplier at all, matching Form K-4's actual shape (fetched and read directly: no personal/dependent exemption count field exists anywhere on it). Verified against the DOR's own 2026 Withholding Tax Formula worked examples — see tests/engine.test.ts, describe('Kentucky').",
@@ -68,8 +76,9 @@
   ],
   "flatRate": {
     "rate": 0.035,
-    "deductionAmount": 3360.0,
-    "comment": "3.5% flat rate for 2026, applied to annual wages less the $3,360 standard deduction, subtracted ONCE regardless of dependents (Kentucky has no personal/dependent exemption count mechanism at all — confirmed by K-4's own field list). Formula and both figures read directly from the DOR's own 2026 Withholding Tax Formula document. HB 8 (2022) set up automatic phased rate cuts gated on state revenue-growth and reserve-fund triggers (path so far: 5% in 2018 (HB 366) -> 4.5% (2023-24) -> 4.0% (2025) -> 3.5% (2026)); further cuts are NOT scheduled/automatic on a calendar, they depend on the trigger being met each year, so this rate should not be assumed to auto-decrement for 2027 without a fresh check."
+    "deductionAmount": 3470.0,
+    "comment": "3.5% flat rate for 2026, applied to annual wages less the $3,360 standard deduction, subtracted ONCE regardless of dependents (Kentucky has no personal/dependent exemption count mechanism at all — confirmed by K-4's own field list). Formula and both figures read directly from the DOR's own 2026 Withholding Tax Formula document. HB 8 (2022) set up automatic phased rate cuts gated on state revenue-growth and reserve-fund triggers (path so far: 5% in 2018 (HB 366) -> 4.5% (2023-24) -> 4.0% (2025) -> 3.5% (2026)); further cuts are NOT scheduled/automatic on a calendar, they depend on the trigger being met each year, so this rate should not be assumed to auto-decrement for 2027 without a fresh check.",
+    "comment2027": "deductionAmount is the Department of Revenue's announced 2027 standard deduction ($3,470, KRS 141.081); the comment above describes the 2026 file this was carried from. The 2027 RATE is still 2026's 3.5%: Kentucky's scheduled further reduction depends on a revenue trigger and was not confirmed here."
   },
   "supplementalTreatment": {
     "$comment": "AUDIT PASS FINDING (replaces the prior version's guessed 'supplementalRate: 0.035' field, which implied a Wisconsin-style separate flat line — WRONG, see below).",

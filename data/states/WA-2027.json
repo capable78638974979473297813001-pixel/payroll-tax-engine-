@@ -6,7 +6,27 @@
     "status": "carry-forward-from-2026",
     "createdOn": "2026-10-13",
     "basedOn": "data/states/WA-2026.json",
-    "note": "Carried forward from the 2026 file on 2026-10-13. Not yet checked against the 2027 official source: every figure is 2026's unless listed in updatedFor2027. Remove this block only after each figure has been re-verified against its 2027 source."
+    "note": "Carried forward from the 2026 file on 2026-10-13. Not yet checked against the 2027 official source: every figure is 2026's unless listed in updatedFor2027. Remove this block only after each figure has been re-verified against its 2027 source.",
+    "updatedFor2027": [
+      {
+        "path": "statePaidLeaveEmployer.totalRate",
+        "from": 0.0113,
+        "to": 0.012,
+        "source": "Washington ESD news release 2026-10-16, https://esd.wa.gov/about-us/news-release/2026/paid-family-medical-leave-premium-rate-increases-12-2027 and paidleave.wa.gov/updates, read directly 2026-10-25"
+      },
+      {
+        "path": "statePaidLeaveEmployer.employeeShareFraction",
+        "from": 0.7143,
+        "to": 0.707,
+        "source": "Same ESD release: employers pay 29.3% and employees 70.7% of the total premium (SSHB 2345 changes how contributions are distributed between the family and medical components, not the employee/employer split of the total)"
+      },
+      {
+        "path": "statePaidLeaveEmployee.rate",
+        "from": 0.00807159,
+        "to": 0.008484,
+        "source": "= 0.012 x 0.707"
+      }
+    ]
   },
   "method": "no_income_tax",
   "$scopeNote": "NO state or local income tax on wages -- Washington has no personal income tax at all, and RCW 1.90.100 (amended 2026, fetched and read directly) plus the older RCW 36.65.030 (1984, also fetched directly) both PROHIBIT any state, county, city, or local jurisdiction from taxing personal income, statutorily foreclosing the whole category, not just a 'none exist yet' observation. Washington DOES have three genuinely distinct WAGE-BASED payroll levies modelled here despite having no income tax: Paid Family & Medical Leave (PFML, employee AND employer shares) and the WA Cares Fund long-term-care premium (employee only, uncapped). Washington's Capital Gains Tax (chapter 82A.04 RCW, the specific carve-out RCW 1.90.100(2) references) is a RETURN-level excise tax on investment gains above a ~$1,000,000 threshold, not a payroll withholding -- out of scope, same convention as every other return-level tax already disclosed in this project (e.g. Connecticut's out-of-state credit, Iowa's school district surtax). Seattle's JumpStart payroll tax (an EMPLOYER-only tax on total payroll expense, ~0.746%-2.557% by tiered thresholds around $9M total payroll and a $194,452+ individual-wage trigger) is a REAL, separate, not-yet-modelled item -- structurally similar to Newark's payroll tax in this project (employer-aggregate, not per-paycheck) but genuinely more complex (multi-tier rate matrix, not one flat rate) -- flagged in knownGaps as a natural follow-up, not built this pass.",
@@ -63,14 +83,14 @@
     }
   ],
   "statePaidLeaveEmployee": {
-    "rate": 0.00807159,
+    "rate": 0.008484,
     "wageBase": "ssWageBase",
-    "$comment": "= 0.0113 (total PFML rate) x 0.7143 (employee share fraction), stored at full precision so applyRate()'s single rounding reproduces Washington's own 'gross wages x 0.0113 x 0.7143, round once' formula exactly (not two independently-rounded multiplications chained together, which can drift by a cent). Wage base is the federal Social Security wage base ($184,500 for 2026) -- Washington's own toolkit states this by reference ('up to the Social Security cap') rather than publishing an independent dollar figure. CORRECTED 2026-09-06: this used to be a hand-copied literal 184500 with a comment warning it 'must be kept in sync ... or this file will silently drift stale' -- a real, disclosed drift risk with no enforcement, the same anti-pattern Kentucky's capAtSSWageBase mechanism was already built to avoid for a different tax. Now the 'ssWageBase' sentinel string, resolved LIVE from data/federal/2026.json's own socialSecurity.wageBase by resolvePaidLeaveWageBase() in src/taxes/state.ts -- this can no longer drift, by construction, whatever year's federal figure applies. (Connecticut and Massachusetts's own Paid Leave programs share this exact SS-cap-linked design and got the same fix the same pass; NEW YORK's own PFL cap is NOT SS-linked at all -- it's 52x NY's own average weekly wage, a coincidentally-similar-shaped but functionally unrelated figure -- so an earlier version of this note incorrectly grouped NY into this pattern; corrected here.)",
+    "$comment": "= 0.012 (2027 total PFML rate) x 0.707 (employee share fraction) = 0.008484, stored at full precision so applyRate()'s single rounding reproduces Washington's own 'gross wages x total rate x employee share, round once' formula. 2027 figures: ESD news release of 2026-10-16 ('Starting Jan. 1, 2027: The premium rate will be 1.2%... Employers will pay 29.3% of the total premium and employees will pay 70.7%'). Wage base stays the live federal Social Security wage base ('ssWageBase'). The 2026 derivation (0.0113 x 0.7143) was replaced.",
     "exemptPretax": []
   },
   "statePaidLeaveEmployer": {
-    "totalRate": 0.0113,
-    "employeeShareFraction": 0.7143,
+    "totalRate": 0.012,
+    "employeeShareFraction": 0.707,
     "wageBase": "ssWageBase",
     "exemptPretax": []
   },
