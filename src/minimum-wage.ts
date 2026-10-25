@@ -7,6 +7,7 @@ import {
   type MinimumWageAmount,
   type MinimumWageJurisdiction,
   type TippedMinimumWage,
+  minimumWageProvisionalNotes,
 } from './registry.ts';
 import { resolveCertBoolean } from './validate.ts';
 
@@ -108,6 +109,8 @@ export interface MinimumWageAnswer {
   tipCreditAllowed: boolean;
   /** Every level considered, in federal → state → local order, including the ones that lost. */
   considered: MinimumWageCandidate[];
+  /** Present when the answer rests on a provisional carry-forward file (a year not yet re-read against its sources). */
+  warnings?: string[];
 }
 
 /** Cents can carry a half-cent in exactly one place: South Dakota's $5.925 tipped wage. */
@@ -623,5 +626,11 @@ export function minimumWage(query: MinimumWageQuery): MinimumWageAnswer {
     bindingJurisdiction: binding.jurisdiction,
     tipCreditAllowed,
     considered,
+    ...provisionalWarnings(query),
   };
+}
+
+function provisionalWarnings(query: MinimumWageQuery): { warnings?: string[] } {
+  const warnings = minimumWageProvisionalNotes(query.state, query.checkDate);
+  return warnings.length > 0 ? { warnings } : {};
 }

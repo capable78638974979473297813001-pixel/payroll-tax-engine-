@@ -6,7 +6,15 @@
     "status": "carry-forward-from-2026",
     "createdOn": "2026-10-13",
     "basedOn": "data/states/MS-2026.json",
-    "note": "Carried forward from the 2026 file on 2026-10-13. Not yet checked against the 2027 official source: every figure is 2026's unless listed in updatedFor2027. Remove this block only after each figure has been re-verified against its 2027 source."
+    "note": "Carried forward from the 2026 file on 2026-10-13. Not yet checked against the 2027 official source: every figure is 2026's unless listed in updatedFor2027. Remove this block only after each figure has been re-verified against its 2027 source.",
+    "updatedFor2027": [
+      {
+        "path": "bracketStatusDeduction.rate",
+        "from": 0.04,
+        "to": 0.0375,
+        "source": "Miss. Code Ann. 27-7-5 as amended by the Build-Up Mississippi Act (H.B. 1, 2025 Regular Session, signed 2025-03-27, effective 2025-07-01 and applicable from 2027-01-01): 'For calendar year 2027, taxable income in excess of $10,000 will be taxed at the rate of 3.75%' (4.0% before 2027). Read via Thomson Reuters Checkpoint summary https://tax.thomsonreuters.com/news/mississippi-governor-signs-legislation-phasing-out-individual-income-tax/ and National Taxpayers Union table https://www.ntu.org/foundation/detail/mississippi-moves-to-end-individual-income-taxheres-what-taxpayers-need-to-know on 2026-10-25. The $10,000 zero bracket is unchanged. MS DOR has not yet issued the 2027 edition of Pub 89-700 (normally December): recheck the standard deduction and exemption amounts then."
+      }
+    ]
   },
   "method": "mississippi_bracket_deduction",
   "sources": [
@@ -49,7 +57,7 @@
   ],
   "bracketStatusDeduction": {
     "$comment": "Reverse-derived from Pub 89-700's own Table A (Single) wage-bracket cells, not transcribed from a formula page (none exists in the source document) -- verified against 3 cells exactly before trusting it. Annual formula: annualWages - standardDeduction[status] - totalExemptionClaimed, then 0% on the first $10,000 of that and 4.0% on the excess.",
-    "rate": 0.04,
+    "rate": 0.0375,
     "bracketThresholdAnnual": 10000.0,
     "bracketComment": "Pub 89-700's own summary box, read WITHOUT -layout after an initial -layout extraction scrambled the two rows: 'Income Tax Rates / Taxable Income (Tax Year 2026): First $10,000 -> 0% / Remaining balance (excess of $10,000) -> 4.0%.' This directly CONTRADICTS the 4.1% figure repeated, uncited, across several secondary payroll-blog aggregators (Rippling, Halfpricesoft) found during this pass -- the primary document, and this file's own 3-cell reproduction against Table A, both confirm 4.0% for 2026. Trusted the primary quote plus independent reproduction over the repeated secondary figure, consistent with this project's standing practice.",
     "standardDeductionAnnual": {

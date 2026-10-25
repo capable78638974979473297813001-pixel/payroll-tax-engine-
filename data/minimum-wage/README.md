@@ -188,3 +188,20 @@ absent rather than carried at zero.
 - **Effective dates that fall just after this file's `asOf`** are carried in
   `scheduledChanges` rather than applied — most urgently Florida's step to $15.00 on
   2026-09-30, three weeks after this database was compiled.
+
+## 2027 files (provisional)
+
+`*-2027.json` sits beside every 2026 file. A 2027 query used to fail with "No ruleset
+at data/minimum-wage/federal-2027.json", and so did a New York or DC consumer-creditor
+garnishment on a 2027 check (those statutes take their floor from this dataset). The
+2027 files are carry-forwards stamped `provisional`, with each figure that has a 2027
+source listed in `provisional.updatedFor2027`. The answer's `warnings` says so.
+
+Checked 2026-10-25 against the agency's own announcement or statute: WA, CA, CT, NJ (and
+its small-employer, agricultural and long-term-care tiers), CO, ME, MN, OH, VA, NE, SD,
+RI, MI, FL, and the federal EO 13658 contractor rate ($14.05 from 2027-01-06). New York
+does not index in 2027. Montana ($11.20) is from a snippet of the DLI page and Arizona
+($15.65) from press reports of the Industrial Commission's notice; both are marked
+`cross_source_confirmed`. **Not yet updated:** Vermont (no 2027 rate announced), every
+local ordinance in `local/` (Denver $19.84, Minneapolis $17.02 and others step on 1 January
+2027), the sectoral files, and the territories.

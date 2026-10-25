@@ -6,7 +6,14 @@
     "status": "carry-forward-from-2026",
     "createdOn": "2026-10-13",
     "basedOn": "data/states/MT-2026.json",
-    "note": "Carried forward from the 2026 file on 2026-10-13. Not yet checked against the 2027 official source: every figure is 2026's unless listed in updatedFor2027. Remove this block only after each figure has been re-verified against its 2027 source."
+    "note": "Carried forward from the 2026 file on 2026-10-13. Not yet checked against the 2027 official source: every figure is 2026's unless listed in updatedFor2027. Remove this block only after each figure has been re-verified against its 2027 source.",
+    "pendingStatutoryChanges": [
+      {
+        "change": "HB 337 (2025): for tax year 2027 the top ordinary-income rate falls from 5.65% to 5.4% and the 4.7% bracket widens to $65,000 single / $97,500 HoH / $130,000 MFJ taxable income (2026: $47,500 / $71,250 / $95,000).",
+        "source": "Montana DOR, 'HB337: 2026-2027 Montana Individual Income Tax Changes', https://revenue.mt.gov/news/recent-news/HB-337 (read 2026-10-25): 'The department will adjust the wage withholding tables and formulas for the upcoming years as needed.'",
+        "status": "NOT APPLIED. The 2027 withholding tables/formulas are not published. bracketPerPeriodGross is Montana's per-period W = A + B x (G - C) schedule, so it cannot be derived from the return brackets without guessing the department's table construction; it still carries 2026's 5.65% schedule, which over-withholds at higher wages in 2027. Replace when the 2027 Employer Guide/Publication 1 appears."
+      }
+    ]
   },
   "method": "bracket_per_period_gross",
   "$methodComment": "Genuinely different shape from every other state in this project: Montana's own formula (W = A + B x (G - C)) applies DIRECTLY to the PER-PERIOD GROSS wage, with SEPARATE bracket tables published for each of 6 pay frequencies x 3 filing-status groups -- no annualize-then-bracket-then-deannualize step the way federal/WI/MN/KY all use, and no separate standard-deduction-subtraction step either (the guide's own worked examples plug raw per-period wages straight into the bracket lookup; the standard deduction is baked into each schedule's own 0%-rate first bracket). Verified this is structurally a close cousin of federal's OWN percentage method: MT's zero-band thresholds equal EXACTLY (this project's own federal/2026.json standardSchedules 0%-band ceiling + step1StandardAdjustment) for every filing status -- single $7,500+$8,600=$16,100, HOH $15,550+$8,600=$24,150, MFJ $19,300+$12,900=$32,200, all exact matches -- and the 'both spouses working' schedule reuses the SAME thresholds as single/MFS (not a separately-halved fourth table). Montana's 2026 method (HB337) was explicitly redesigned to mirror the federal Form W-4 percentage method, confirmed directly: 2026 Publication 1 states 'the filing status you use on your federal Form 1040... determine[s] the standard deduction and tax rates used to compute your wage withholding.' Corroboration, not the source of truth -- the bracket tables below were transcribed directly from the primary PDF.",

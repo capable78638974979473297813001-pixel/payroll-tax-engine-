@@ -59,10 +59,13 @@ function everyAmount(node: unknown, out: { hourly: number; hourlyCents: number }
 describe('minimum wage data integrity', () => {
   test('every file parses and carries a source trail', () => {
     const files = everyFile();
-    assert.ok(files.length >= 60, `expected the full database, found ${files.length} files`);
+    assert.ok(files.length >= 120, `expected the full database, found ${files.length} files`);
     for (const f of files) {
       const parsed = JSON.parse(readFileSync(f, 'utf8')) as Record<string, unknown>;
-      assert.equal(parsed.year, 2026, `${f} is not a 2026 ruleset`);
+      const fileYear = Number(/-(\d{4})\.json$/.exec(f)?.[1]);
+      assert.equal(parsed.year, fileYear, `${f} carries the wrong year`);
+      assert.ok([2026, 2027].includes(fileYear), `${f} is not a 2026 or 2027 ruleset`);
+      if (fileYear === 2027) assert.ok(parsed.provisional, `${f} is a 2027 carry-forward and must say so`);
       const hasOwnSources = Array.isArray(parsed.sources) && parsed.sources.length > 0;
       const hasPerEntrySources =
         Array.isArray(parsed.jurisdictions) &&
@@ -165,12 +168,12 @@ describe('minimum wage data integrity', () => {
   });
 
   test('all 50 states, DC and 5 territories are present', () => {
-    const states = readdirSync(join(DATA_ROOT, 'states')).filter((f) => f.endsWith('.json'));
-    assert.equal(states.length, 51, 'expected 50 states + DC');
-    const territories = readdirSync(join(DATA_ROOT, 'territories')).filter((f) =>
-      f.endsWith('.json'),
-    );
-    assert.equal(territories.length, 5, 'expected PR, VI, GU, AS and CNMI');
+    for (const year of ['2026', '2027']) {
+      const states = readdirSync(join(DATA_ROOT, 'states')).filter((f) => f.endsWith(`-${year}.json`));
+      assert.equal(states.length, 51, `expected 50 states + DC for ${year}`);
+      const territories = readdirSync(join(DATA_ROOT, 'territories')).filter((f) => f.endsWith(`-${year}.json`));
+      assert.equal(territories.length, 5, `expected PR, VI, GU, AS and CNMI for ${year}`);
+    }
     for (const code of ['AL', 'CA', 'NY', 'TX', 'WY', 'DC']) {
       assert.equal(stateMinimumWageRuleset(code, D).jurisdiction.code, code);
     }
@@ -179,7 +182,7 @@ describe('minimum wage data integrity', () => {
   test('no state ruleset falls below the federal floor without saying why', () => {
     const federal = federalMinimumWageRuleset(D).standard.hourlyCents;
     const states = readdirSync(join(DATA_ROOT, 'states'))
-      .filter((f) => f.endsWith('.json'))
+      .filter((f) => f.endsWith('-2026.json'))
       .map((f) => f.slice(0, 2));
     for (const code of states) {
       const s = stateMinimumWageRuleset(code, D);

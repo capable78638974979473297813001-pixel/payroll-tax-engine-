@@ -6,7 +6,14 @@
     "status": "carry-forward-from-2026",
     "createdOn": "2026-10-13",
     "basedOn": "data/states/SC-2026.json",
-    "note": "Carried forward from the 2026 file on 2026-10-13. Not yet checked against the 2027 official source: every figure is 2026's unless listed in updatedFor2027. Remove this block only after each figure has been re-verified against its 2027 source."
+    "note": "Carried forward from the 2026 file on 2026-10-13. Not yet checked against the 2027 official source: every figure is 2026's unless listed in updatedFor2027. Remove this block only after each figure has been re-verified against its 2027 source.",
+    "pendingStatutoryChanges": [
+      {
+        "change": "Act 110 of 2026 (H. 4216): tax-year brackets are 1.99% to $29,999 and 5.21% less $966 above (previously 0/3/6%); from 2027 the top rate falls further if the Board of Economic Advisors' revenue trigger is met, with the amount set by February 15.",
+        "source": "SCDOR Information Letter #26-20 (2026-08-31) https://dor.sc.gov/sites/dor/files/policies/IL26-20.pdf and https://dor.sc.gov/news/information-about-h-4216 (read 2026-10-25): 'The SCDOR will consult with the Revenue and Fiscal Affairs Office to adjust the income tax withholding tables.'",
+        "status": "NOT APPLIED. SCDOR has not published revised withholding tables (WH-1603F is the 2026 formula with the old 0/3/6% brackets). Replace when SCDOR issues the 2027 formula."
+      }
+    ]
   },
   "method": "south_carolina_allowance_deduction",
   "sources": [

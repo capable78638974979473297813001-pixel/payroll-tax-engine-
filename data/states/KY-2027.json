@@ -13,6 +13,12 @@
         "from": 3360.0,
         "to": 3470.0,
         "source": "Kentucky Department of Revenue, 'Kentucky DOR Announces 2027 Standard Deduction' (Sept 11, 2026): 'the standard deduction for 2027 is $3,470.00, an increase of $110.00', https://revenue.ky.gov/News/Pages/Kentucky-DOR-Announces-2027-Standard-Deduction.aspx, read directly 2026-10-25"
+      },
+      {
+        "path": "flatRate.rate",
+        "from": 0.035,
+        "to": 0.035,
+        "source": "CONFIRMED UNCHANGED: KRS 141.020(2)(f)-(g), https://apps.legislature.ky.gov/law/statutes/statute.aspx?id=56339 (read 2026-10-25); HB 13 (2026 RS) status https://apps.legislature.ky.gov/record/26rs/hb13.html"
       }
     ]
   },
@@ -78,7 +84,7 @@
     "rate": 0.035,
     "deductionAmount": 3470.0,
     "comment": "3.5% flat rate for 2026, applied to annual wages less the $3,360 standard deduction, subtracted ONCE regardless of dependents (Kentucky has no personal/dependent exemption count mechanism at all — confirmed by K-4's own field list). Formula and both figures read directly from the DOR's own 2026 Withholding Tax Formula document. HB 8 (2022) set up automatic phased rate cuts gated on state revenue-growth and reserve-fund triggers (path so far: 5% in 2018 (HB 366) -> 4.5% (2023-24) -> 4.0% (2025) -> 3.5% (2026)); further cuts are NOT scheduled/automatic on a calendar, they depend on the trigger being met each year, so this rate should not be assumed to auto-decrement for 2027 without a fresh check.",
-    "comment2027": "deductionAmount is the Department of Revenue's announced 2027 standard deduction ($3,470, KRS 141.081); the comment above describes the 2026 file this was carried from. The 2027 RATE is still 2026's 3.5%: Kentucky's scheduled further reduction depends on a revenue trigger and was not confirmed here."
+    "comment2027": "deductionAmount is the Department of Revenue's announced 2027 standard deduction ($3,470, KRS 141.081); the comment above describes the 2026 file this was carried from. RATE VERIFIED 2026-10-25: 3.5% stays for 2027. KRS 141.020(2)(f) sets 3.5% for taxable years beginning on or after 2026-01-01; (2)(g) lets the rate fall for 2027 only if the General Assembly acts ('the department shall maintain the rate in paragraph (f) ... for the taxable year beginning January 1, 2027' otherwise, and 'The department shall not implement an income tax rate reduction without an action by the General Assembly'). The statute as published (effective 2025-06-27) contains no 2027 reduction, and the one 2026 bill on the rate, HB 13, never left committee (last action 2026-01-13). A later enactment would need a new data change."
   },
   "supplementalTreatment": {
     "$comment": "AUDIT PASS FINDING (replaces the prior version's guessed 'supplementalRate: 0.035' field, which implied a Wisconsin-style separate flat line — WRONG, see below).",

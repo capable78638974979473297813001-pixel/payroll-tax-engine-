@@ -762,7 +762,7 @@
      "why": "The data carries dated rows or overlays (rates that differ before and after a mid-year date). Adding or changing a dated row is a structural edit, which auto-update never makes."
     },
     {
-     "what": "City service fees (Charleston, Huntington, Morgantown, Parkersburg, Wheeling, Weirton, Fairmont, Madison, Romney, Montgomery, Glen Dale)",
+     "what": "City service fees (Charleston, Huntington, Morgantown, Parkersburg, Wheeling, Weirton, Fairmont, Madison, Romney, Montgomery, Glen Dale, Chester)",
      "why": "Each city sets a flat weekly fee by ordinance. WVU Shared Services' list of every city's fee ordinance is compared with the data city by city every day (it already shows Chester's $2 fee, which the data lacks) and Charleston's own overview is read for its $3; the list gives no effective dates, so nothing is applied."
     }
    ]

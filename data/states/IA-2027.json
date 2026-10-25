@@ -6,7 +6,15 @@
     "status": "carry-forward-from-2026",
     "createdOn": "2026-10-13",
     "basedOn": "data/states/IA-2026.json",
-    "note": "Carried forward from the 2026 file on 2026-10-13. Not yet checked against the 2027 official source: every figure is 2026's unless listed in updatedFor2027. Remove this block only after each figure has been re-verified against its 2027 source."
+    "note": "Carried forward from the 2026 file on 2026-10-13. Not yet checked against the 2027 official source: every figure is 2026's unless listed in updatedFor2027. Remove this block only after each figure has been re-verified against its 2027 source.",
+    "updatedFor2027": [
+      {
+        "path": "suiEmployer.wageBase",
+        "from": 20400,
+        "to": 21100,
+        "source": "Iowa Workforce Development, 2026-06-30 release: 'The taxable wage base for Calendar Year 2027 will be $21,100' https://workforce.iowa.gov/announcement/2026-06-30/iowans-unemployment-benefits-increase-starting-july-5 (read 2026-10-25)"
+      }
+    ]
   },
   "method": "flat_rate_marital_deduction",
   "$scopeNote": "STATE income tax only. Iowa has no local income tax anywhere. Iowa's ~297 school districts DO levy a school district surtax (up to 20% of state tax owed, average ~0.3%) but it is confirmed a RETURN-level mechanism, not employer-withheld -- the IA W-4's own Line 8 instructions tell an employee who owes surtax to compensate by reducing allowances or adding extra withholding on the SAME state withholding line, rather than the employer computing a separate per-district amount. This mirrors Connecticut's out-of-state credit and every other return-level (not withholding-level) mechanism already disclosed elsewhere in this project. No employee-paid unemployment, disability, or paid-leave program exists in Iowa.",
@@ -79,8 +87,8 @@
   ],
   "suiEmployer": {
     "$comment": "Normalized employer-side unemployment parameters — the shape src/taxes/state.ts reads. The detailed unemploymentInsurance block above stays the record of research; this exists because that block's shape varies too much between states to compute from directly (wage bases as objects, industry-keyed rate maps, differently-named keys).",
-    "wageBase": 20400,
-    "wageBaseSource": "2026 taxable wage bases cross-checked against EY's published 2026 state-by-state table; where this file already carried a numeric wage base, the two agreed unless noted in wageBaseNote.",
+    "wageBase": 21100,
+    "wageBaseSource": "Iowa Workforce Development, 2026-06-30 release: 'The taxable wage base for Calendar Year 2027 will be $21,100' https://workforce.iowa.gov/announcement/2026-06-30/iowans-unemployment-benefits-increase-starting-july-5 (read 2026-10-25)",
     "newEmployerRate": 0.01,
     "newEmployerRateSource": "Iowa Workforce Development's 2026 rate announcement — Table D, new non-construction employers at Rank 4 (1.0%), construction at Rank 9 (5.4%).",
     "experienceRange": {

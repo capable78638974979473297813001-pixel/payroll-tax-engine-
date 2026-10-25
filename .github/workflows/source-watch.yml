@@ -70,7 +70,7 @@ jobs:
 
       - name: Self-test (offline)
         if: steps.gate.outputs.run == 'true'
-        run: python -m unittest watcher/test_watch.py watcher/test_autoupdate.py watcher/test_coverage.py watcher/test_zero_day.py
+        run: python -m unittest watcher/test_watch.py watcher/test_autoupdate.py watcher/test_coverage.py watcher/test_zero_day.py watcher/test_verify_citations.py
 
       - name: Refresh the source list from data/
         if: steps.gate.outputs.run == 'true'

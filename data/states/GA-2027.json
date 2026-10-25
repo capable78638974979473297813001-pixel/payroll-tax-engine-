@@ -6,7 +6,14 @@
     "status": "carry-forward-from-2026",
     "createdOn": "2026-10-13",
     "basedOn": "data/states/GA-2026.json",
-    "note": "Carried forward from the 2026 file on 2026-10-13. Not yet checked against the 2027 official source: every figure is 2026's unless listed in updatedFor2027. Remove this block only after each figure has been re-verified against its 2027 source."
+    "note": "Carried forward from the 2026 file on 2026-10-13. Not yet checked against the 2027 official source: every figure is 2026's unless listed in updatedFor2027. Remove this block only after each figure has been re-verified against its 2027 source.",
+    "pendingStatutoryChanges": [
+      {
+        "change": "HB 463 (2026, signed 2026-05-11): from 2027-01-01 the 4.99% rate is to fall by 0.125 percentage point a year until 3.99%; the standard deduction rises $375 a year for single (to $18,000) and $750 a year for joint (to $36,000); the dependent allowance rises $125 a year (to $6,000). Each step is delayed unless state revenue triggers are met.",
+        "source": "Georgia Municipal Association bill summary https://billtracker.gacities.com/legislation/70350 ; Gov. Kemp press release https://gov.georgia.gov/press-releases/2026-05-11/gov-kemp-signs-legislation-lowering-taxes-and-supporting-economic-growth (both read 2026-10-25)",
+        "status": "NOT APPLIED. Whether the 2027 trigger is met, and so the 2027 rate (4.865% if met) and deductions, is for Georgia DOR to announce and publish in the 2027 employer guide/G-4 tables. File carries 2026's 4.99% rate and 2026 deductions."
+      }
+    ]
   },
   "method": "georgia_status_deduction",
   "sources": [

@@ -6,7 +6,15 @@
     "status": "carry-forward-from-2026",
     "createdOn": "2026-10-13",
     "basedOn": "data/states/DE-2026.json",
-    "note": "Carried forward from the 2026 file on 2026-10-13. Not yet checked against the 2027 official source: every figure is 2026's unless listed in updatedFor2027. Remove this block only after each figure has been re-verified against its 2027 source."
+    "note": "Carried forward from the 2026 file on 2026-10-13. Not yet checked against the 2027 official source: every figure is 2026's unless listed in updatedFor2027. Remove this block only after each figure has been re-verified against its 2027 source.",
+    "updatedFor2027": [
+      {
+        "path": "suiEmployer.wageBase",
+        "from": 14500,
+        "to": 16500,
+        "source": "Delaware H.B. 433 (2024) fixes the taxable wage base at $16,500 from 2027 ($14,500 in 2026): https://legis.delaware.gov/BillDetail/141505 ; EY Tax Alert 2025-0647. DDOL's 2027 calculator page also lists the new tax system. Read 2026-10-25."
+      }
+    ]
   },
   "method": "bracket_annual_exemption_credit",
   "$methodComment": "Genuinely new shape in this project: annualize wages, subtract a FLAT standard deduction by filing status (single/MFS $3,250, MFJ $6,500 -- a fixed dollar figure, not Wisconsin's income-phased-out band), look up a 7-bracket progressive schedule, THEN subtract a flat $110-per-exemption CREDIT AGAINST THE COMPUTED TAX -- the first state in this project where the exemption amount is a post-bracket tax credit rather than a pre-bracket wage deduction (Ohio/Wisconsin/Michigan/Indiana/Illinois all reduce the taxable base before the bracket lookup). Delaware also annualizes DAILY pay at x300, not this engine's generic 260-workday PERIODS_PER_YEAR convention -- the same class of per-frequency-divisor mismatch New Jersey's daily table hit at x365 -- so delawareWithholding() uses its own annualizeMultiplier map instead of ctx.periodsPerYear. Verified against all THREE of the Employer's Guide's own worked examples (single/1 exemption, MFJ/3 exemptions, MFS/2 exemptions), each reproduced across all four published per-period divisors (weekly/biweekly/semi-monthly/monthly) -- see tests/engine.test.ts, describe('Delaware').",
@@ -160,7 +168,7 @@
   "unemploymentInsurance": {
     "$comment": "Employer-only (SUTA) -- no employee contribution, so not wired into the calc engine, matching every other state's employer-only SUTA in this project.",
     "administeredBy": "Delaware Department of Labor, Division of Unemployment Insurance",
-    "wageBase": 14500.0,
+    "wageBase": 16500.0,
     "newEmployerRate": 0.01,
     "newConstructionRate": 0.01,
     "experiencedRateRange": {
@@ -186,8 +194,8 @@
   ],
   "suiEmployer": {
     "$comment": "Normalized employer-side unemployment parameters — the shape src/taxes/state.ts reads. The detailed unemploymentInsurance block above stays the record of research; this exists because that block's shape varies too much between states to compute from directly (wage bases as objects, industry-keyed rate maps, differently-named keys).",
-    "wageBase": 14500,
-    "wageBaseSource": "2026 taxable wage bases cross-checked against EY's published 2026 state-by-state table; where this file already carried a numeric wage base, the two agreed unless noted in wageBaseNote.",
+    "wageBase": 16500,
+    "wageBaseSource": "Delaware H.B. 433 (2024) fixes the taxable wage base at $16,500 from 2027 ($14,500 in 2026): https://legis.delaware.gov/BillDetail/141505 ; EY Tax Alert 2025-0647. DDOL's 2027 calculator page also lists the new tax system. Read 2026-10-25.",
     "newEmployerRate": 0.01,
     "newEmployerRateSource": "This state's own unemploymentInsurance block above, researched in an earlier pass — kept in preference to any aggregate table.",
     "experienceRange": {
