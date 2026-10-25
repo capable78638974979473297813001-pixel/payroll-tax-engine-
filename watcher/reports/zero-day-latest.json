@@ -1,7 +1,13 @@
 {
- "date": "2026-10-24",
+ "date": "2026-10-25",
  "fixed": [],
  "verified": [
+  {
+   "file": "",
+   "name": "Indiana Departmental Notice #1 (county rates)",
+   "why_not_automatic": "could not read the official file to compare with the engine's data (URLError: <urlopen error [Errno 111] Connection refused>)",
+   "edits": []
+  },
   {
    "file": "",
    "name": "Whitesville",
@@ -15,29 +21,8 @@
    "edits": []
   }
  ],
- "possible": [
-  {
-   "jurisdiction": "WA",
-   "title": "City of Seattle, City Finance -- Payroll expense tax (2025 thresholds and rates)",
-   "url": "https://www.seattle.gov/city-finance/business-taxes-and-licenses/seattle-taxes/payroll-expense-tax",
-   "figures": [
-    "$182,385",
-    "$189,371",
-    "$189,385",
-    "$194,452",
-    "$504,989",
-    "$518,537.99",
-    "$8,837,302",
-    "$9,074,409"
-   ],
-   "feeds": [
-    "data/states/WA-2025.json",
-    "data/states/WA-2026.json",
-    "data/states/WA-2027.json"
-   ]
-  }
- ],
- "informational_changes": 18,
+ "possible": [],
+ "informational_changes": 6,
  "blind_spots": [
   {
    "jurisdiction": "AL",
@@ -212,54 +197,6 @@
   },
   {
    "jurisdiction": "KY",
-   "title": "City of Middlesboro Code of Ordinances, Ch. 110 (levy section)",
-   "url": "https://codelibrary.amlegal.com/codes/middlesboroky/latest/middlesboro_ky/0-0-0-5065",
-   "why": "HTTP 403: the site refuses automated requests; a real browser was refused too",
-   "never_read": true,
-   "feeds": [
-    "data/local/KY-occupational-2025.json",
-    "data/local/KY-occupational-2026.json",
-    "data/local/KY-occupational-2027.json"
-   ]
-  },
-  {
-   "jurisdiction": "KY",
-   "title": "City of Middletown Code of Ordinances Sec. 114.23 (Ord. 07-13-2023-B, 10-12-2023-B)",
-   "url": "https://codelibrary.amlegal.com/codes/middletownky/latest/middletown_ky/0-0-0-10846",
-   "why": "HTTP 403: the site refuses automated requests; a real browser was refused too",
-   "never_read": true,
-   "feeds": [
-    "data/local/KY-occupational-2025.json",
-    "data/local/KY-occupational-2026.json",
-    "data/local/KY-occupational-2027.json"
-   ]
-  },
-  {
-   "jurisdiction": "KY",
-   "title": "City of Nortonville Code of Ordinances \u00a7 110.03 OCCUPATIONAL LICENSE FEE PAYMENT REQUIRED",
-   "url": "https://codelibrary.amlegal.com/codes/nortonvilleky/latest/nortonville_ky/0-0-0-3279",
-   "why": "HTTP 403: the site refuses automated requests; a real browser was refused too",
-   "never_read": true,
-   "feeds": [
-    "data/local/KY-occupational-2025.json",
-    "data/local/KY-occupational-2026.json",
-    "data/local/KY-occupational-2027.json"
-   ]
-  },
-  {
-   "jurisdiction": "KY",
-   "title": "City of Simpsonville Code of Ordinances Sec. 110.27",
-   "url": "https://codelibrary.amlegal.com/codes/simpsonville/latest/simpsonville_ky/0-0-0-6803",
-   "why": "HTTP 403: the site refuses automated requests; a real browser was refused too",
-   "never_read": true,
-   "feeds": [
-    "data/local/KY-occupational-2025.json",
-    "data/local/KY-occupational-2026.json",
-    "data/local/KY-occupational-2027.json"
-   ]
-  },
-  {
-   "jurisdiction": "KY",
    "title": "City of Hartford -- Notice of Occupational License Fees",
    "url": "https://hartfordky.org/notice-of-occupational-license-fees/",
    "why": "HTTP 403: the site refuses automated requests; a real browser was refused too",
@@ -416,25 +353,14 @@
   },
   {
    "jurisdiction": "IN",
-   "title": "Indiana Unemployment for Employers: New Employer Premium Rate (DWD)",
-   "url": "https://www.in.gov/dwd/indiana-unemployment/employers/employer-guide/rate-computation/new-employer-premium-rate/",
+   "title": "WH-4, State Form 48845",
+   "url": "https://www.in.gov/dor/tax-forms/withholding-tax-forms/",
    "why": "URLError: <urlopen error [Errno 111] Connection refused>",
    "never_read": false,
    "feeds": [
+    "data/states/IN-2025.json",
     "data/states/IN-2026.json",
     "data/states/IN-2027.json"
-   ]
-  },
-  {
-   "jurisdiction": "KY",
-   "title": "City of Georgetown, KY \u2014 Taxes and license fees (occupational license tax: net profits vs gross receipts)",
-   "url": "https://www.georgetownky.gov/2167/Taxes-License-Fees",
-   "why": "read with a browser last time; a real browser was refused too",
-   "never_read": false,
-   "feeds": [
-    "data/local/KY-occupational-2025.json",
-    "data/local/KY-occupational-2026.json",
-    "data/local/KY-occupational-2027.json"
    ]
   },
   {
@@ -449,38 +375,6 @@
    ]
   },
   {
-   "jurisdiction": "ND",
-   "title": "Form NDW-R -- Reciprocity Exemption from Withholding for Qualifying Minnesota and Montana Residents",
-   "url": "https://www.tax.nd.gov/sites/www/files/documents/forms/business/ndwrfillable.pdf",
-   "why": "TimeoutError: The read operation timed out",
-   "never_read": false,
-   "feeds": [
-    "data/states/ND-2026.json",
-    "data/states/ND-2027.json"
-   ]
-  },
-  {
-   "jurisdiction": "ND",
-   "title": "2026 Income Tax Withholding Rates and Instructions (North Dakota Office of State Tax Commissioner)",
-   "url": "https://www.tax.nd.gov/sites/www/files/documents/forms/individual/2026-iit/2026-income-tax-withholding-rates-booklet.pdf",
-   "why": "TimeoutError: The read operation timed out",
-   "never_read": false,
-   "feeds": [
-    "data/states/ND-2026.json",
-    "data/states/ND-2027.json"
-   ]
-  },
-  {
-   "jurisdiction": "ND",
-   "title": "North Dakota Office of State Tax Commissioner -- Income Tax Withholding Rates and Instructions, 2025 Calendar Year",
-   "url": "https://www.tax.nd.gov/sites/www/files/documents/misc-discuss-folder/Final_2025%20Income%20Tax%20Withholding%20Rates%20%20Instructions.pdf",
-   "why": "TimeoutError: The read operation timed out",
-   "never_read": false,
-   "feeds": [
-    "data/states/ND-2025.json"
-   ]
-  },
-  {
    "jurisdiction": "NJ",
    "title": "HHS/ASPE 2026 Poverty Guidelines for the 48 Contiguous States and DC \u2014 household of 1: $15,960; +$5,680 per additional person",
    "url": "https://aspe.hhs.gov/topics/poverty-economic-mobility/poverty-guidelines",
@@ -489,49 +383,6 @@
    "feeds": [
     "data/garnishment/state-overrides-2026.json",
     "data/garnishment/state-overrides-2027.json"
-   ]
-  },
-  {
-   "jurisdiction": "NJ",
-   "title": "City of Newark Q1 2026 Payroll Tax Booklet",
-   "url": "https://www.newarknj.gov/DocumentCenter/View/2741/Payroll-Tax-Booklet-2026-PDF",
-   "why": "read with a browser last time; a real browser was refused too",
-   "never_read": false,
-   "feeds": [
-    "data/states/NJ-2026.json",
-    "data/states/NJ-2027.json"
-   ]
-  },
-  {
-   "jurisdiction": "WA",
-   "title": "RCW 1.90.100 \u2014 Personal Income Tax Prohibition",
-   "url": "https://app.leg.wa.gov/RCW/default.aspx?cite=1.90.100",
-   "why": "TimeoutError: The read operation timed out",
-   "never_read": false,
-   "feeds": [
-    "data/states/WA-2026.json",
-    "data/states/WA-2027.json"
-   ]
-  },
-  {
-   "jurisdiction": "WA",
-   "title": "RCW 36.65.030 \u2014 Tax on net income prohibited",
-   "url": "https://app.leg.wa.gov/RCW/default.aspx?cite=36.65.030",
-   "why": "TimeoutError: The read operation timed out",
-   "never_read": false,
-   "feeds": [
-    "data/states/WA-2026.json",
-    "data/states/WA-2027.json"
-   ]
-  },
-  {
-   "jurisdiction": "WA",
-   "title": "WA Cares Fund premium, RCW 50B.04.080 -- 0.58% of wages since 2023-07-01, unchanged through 2026",
-   "url": "https://app.leg.wa.gov/RCW/default.aspx?cite=50B.04.080",
-   "why": "TimeoutError: The read operation timed out",
-   "never_read": false,
-   "feeds": [
-    "data/states/WA-2025.json"
    ]
   }
  ]

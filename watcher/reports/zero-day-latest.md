@@ -1,20 +1,15 @@
-# Zero-day problems: 2026-10-24
+# Zero-day problems: 2026-10-25
 
-## Verified, needs a person (2)
+## Verified, needs a person (3)
 
 The official source disagrees with a number in `data/`, but a rule stopped the automatic fix:
 
+- Indiana Departmental Notice #1 (county rates): could not read the official file to compare with the engine's data (URLError: <urlopen error [Errno 111] Connection refused>)
 - Whitesville: the Secretary of State lists this district (entered 2026-10-06; rate '') but KY-occupational-2026.json does not
 - Chester: the list shows a $2 per week user fee in Chester, which the data does not have
 
-## Possible, a person looks (1)
-
-A document the data cites changed and its dollar amounts or percentages changed with it:
-
-- WA [City of Seattle, City Finance -- Payroll expense tax (2025 thresholds and rates)](https://www.seattle.gov/city-finance/business-taxes-and-licenses/seattle-taxes/payroll-expense-tax): figures $182,385, $189,371, $189,385, $194,452, $504,989, $518,537.99, $8,837,302, $9,074,409; feeds `data/states/WA-2025.json`, `data/states/WA-2026.json`, `data/states/WA-2027.json`
-
-18 other source change(s) were informational only and changed nothing.
-## Not being read (44; 31 never read)
+6 other source change(s) were informational only and changed nothing.
+## Not being read (32; 27 never read)
 
 A change on these pages cannot be caught until they can be read. Replace the address, or check them by hand:
 
@@ -33,10 +28,6 @@ A change on these pages cannot be caught until they can be read. Replace the add
 - KY [City of Elizabethtown, KY — Code of Ordinances Chapter 110, § 110.03 Occupational License ](https://codelibrary.amlegal.com/codes/elizabethtownky/latest/elizabethtown_ky/0-0-0-3203): HTTP 403: the site refuses automated requests; a real browser was refused too; feeds `data/local/KY-occupational-2025.json`, `data/local/KY-occupational-2026.json`, `data/local/KY-occupational-2027.json`
 - KY [City of Marion Code of Ordinances Sec. 110.22](https://codelibrary.amlegal.com/codes/marionky/latest/marion_ky/0-0-0-22684): HTTP 403: the site refuses automated requests; a real browser was refused too; feeds `data/local/KY-occupational-2025.json`, `data/local/KY-occupational-2026.json`, `data/local/KY-occupational-2027.json`
 - KY [City of McKee Code of Ordinances § 110.02 LICENSE REQUIRED; FEES](https://codelibrary.amlegal.com/codes/mckeeky/latest/mckee_ky/0-0-0-2883): HTTP 403: the site refuses automated requests; a real browser was refused too; feeds `data/local/KY-occupational-2025.json`, `data/local/KY-occupational-2026.json`, `data/local/KY-occupational-2027.json`
-- KY [City of Middlesboro Code of Ordinances, Ch. 110 (levy section)](https://codelibrary.amlegal.com/codes/middlesboroky/latest/middlesboro_ky/0-0-0-5065): HTTP 403: the site refuses automated requests; a real browser was refused too; feeds `data/local/KY-occupational-2025.json`, `data/local/KY-occupational-2026.json`, `data/local/KY-occupational-2027.json`
-- KY [City of Middletown Code of Ordinances Sec. 114.23 (Ord. 07-13-2023-B, 10-12-2023-B)](https://codelibrary.amlegal.com/codes/middletownky/latest/middletown_ky/0-0-0-10846): HTTP 403: the site refuses automated requests; a real browser was refused too; feeds `data/local/KY-occupational-2025.json`, `data/local/KY-occupational-2026.json`, `data/local/KY-occupational-2027.json`
-- KY [City of Nortonville Code of Ordinances § 110.03 OCCUPATIONAL LICENSE FEE PAYMENT REQUIRED](https://codelibrary.amlegal.com/codes/nortonvilleky/latest/nortonville_ky/0-0-0-3279): HTTP 403: the site refuses automated requests; a real browser was refused too; feeds `data/local/KY-occupational-2025.json`, `data/local/KY-occupational-2026.json`, `data/local/KY-occupational-2027.json`
-- KY [City of Simpsonville Code of Ordinances Sec. 110.27](https://codelibrary.amlegal.com/codes/simpsonville/latest/simpsonville_ky/0-0-0-6803): HTTP 403: the site refuses automated requests; a real browser was refused too; feeds `data/local/KY-occupational-2025.json`, `data/local/KY-occupational-2026.json`, `data/local/KY-occupational-2027.json`
 - KY [City of Hartford -- Notice of Occupational License Fees](https://hartfordky.org/notice-of-occupational-license-fees/): HTTP 403: the site refuses automated requests; a real browser was refused too; feeds `data/local/KY-occupational-2025.json`, `data/local/KY-occupational-2026.json`, `data/local/KY-occupational-2027.json`
 - KY [City of Hickman Code of Ordinances Secs. 14-13 and 14-15 (Ord. No. 08-07)](https://library.municode.com/ky/hickman/codes/code_of_ordinances?nodeId=COOR_CH14LIBURE_ARTIIOCLITA): HTTP 403: the site refuses automated requests; a real browser was refused too; feeds `data/local/KY-occupational-2025.json`, `data/local/KY-occupational-2026.json`, `data/local/KY-occupational-2027.json`
 - KY [City of Mayfield Code of Ordinances Sec. 9-42, Earnings and net profits tax payment requir](https://library.municode.com/ky/mayfield/codes/code_of_ordinances?nodeId=COOR_CH9OCLITARE_ARTIIOCLITA_S9-42EANEPRTAPARE): HTTP 403: the site refuses automated requests; a real browser was refused too; feeds `data/local/KY-occupational-2025.json`, `data/local/KY-occupational-2026.json`, `data/local/KY-occupational-2027.json`
@@ -51,12 +42,7 @@ A change on these pages cannot be caught until they can be read. Replace the add
 - OR [City of Wilsonville Transit Payroll Tax Information](https://www.wilsonvilleoregon.gov/finance/page/transit-payroll-tax-information): HTTP 404; feeds `data/states/OR-2025.json`, `data/states/OR-2026.json`, `data/states/OR-2027.json`
 - AL [City of Fairfield -- Ordinance 1019, Occupational Tax](https://cityoffairfieldal.org/wp-content/uploads/2025/02/Ordinance-1019-Occupational-Tax_rotated.pdf): HTTP 429: the site refuses automated requests; a real browser was refused too; feeds `data/local/AL-municipalities-2025.json`, `data/local/AL-municipalities-2026.json`, `data/local/AL-municipalities-2027.json`
 - AL [City of Tuskegee -- business information brochure](https://www.tuskegeealabama.gov/sites/g/files/vyhlif3946/f/uploads/infobrochure_word.pdf): HTTP 404; feeds `data/local/AL-municipalities-2025.json`, `data/local/AL-municipalities-2026.json`, `data/local/AL-municipalities-2027.json`
-- IN [Indiana Unemployment for Employers: New Employer Premium Rate (DWD)](https://www.in.gov/dwd/indiana-unemployment/employers/employer-guide/rate-computation/new-employer-premium-rate/): URLError: <urlopen error [Errno 111] Connection refused>; feeds `data/states/IN-2026.json`, `data/states/IN-2027.json`
-- KY [City of Georgetown, KY — Taxes and license fees (occupational license tax: net profits vs ](https://www.georgetownky.gov/2167/Taxes-License-Fees): read with a browser last time; a real browser was refused too; feeds `data/local/KY-occupational-2025.json`, `data/local/KY-occupational-2026.json`, `data/local/KY-occupational-2027.json`
+- IN [WH-4, State Form 48845](https://www.in.gov/dor/tax-forms/withholding-tax-forms/): URLError: <urlopen error [Errno 111] Connection refused>; feeds `data/states/IN-2025.json`, `data/states/IN-2026.json`, `data/states/IN-2027.json`
 - MN [Minnesota Paid Leave -- Premium rate and contributions](https://pl.mn.gov/resources/calculators/premium-rate-and-contributions): HTTP 405; feeds `data/states/MN-2026.json`, `data/states/MN-2027.json`
-- ND [Form NDW-R -- Reciprocity Exemption from Withholding for Qualifying Minnesota and Montana ](https://www.tax.nd.gov/sites/www/files/documents/forms/business/ndwrfillable.pdf): TimeoutError: The read operation timed out; feeds `data/states/ND-2026.json`, `data/states/ND-2027.json`
-- ND [2026 Income Tax Withholding Rates and Instructions (North Dakota Office of State Tax Commi](https://www.tax.nd.gov/sites/www/files/documents/forms/individual/2026-iit/2026-income-tax-withholding-rates-booklet.pdf): TimeoutError: The read operation timed out; feeds `data/states/ND-2026.json`, `data/states/ND-2027.json`
-- ND [North Dakota Office of State Tax Commissioner -- Income Tax Withholding Rates and Instruct](https://www.tax.nd.gov/sites/www/files/documents/misc-discuss-folder/Final_2025%20Income%20Tax%20Withholding%20Rates%20%20Instructions.pdf): TimeoutError: The read operation timed out; feeds `data/states/ND-2025.json`
 - NJ [HHS/ASPE 2026 Poverty Guidelines for the 48 Contiguous States and DC — household of 1: $15](https://aspe.hhs.gov/topics/poverty-economic-mobility/poverty-guidelines): HTTP 403: the site refuses automated requests; a real browser was refused too; feeds `data/garnishment/state-overrides-2026.json`, `data/garnishment/state-overrides-2027.json`
-- ... and 4 more (see zero-day-latest.json)
 
