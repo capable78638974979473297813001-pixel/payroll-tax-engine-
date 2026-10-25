@@ -5,13 +5,17 @@ import { fileURLToPath } from 'node:url';
 import { dirname, join, resolve } from 'node:path';
 
 import { calculatePaycheck } from '../src/calculate.ts';
+import type { PayFrequency } from '../src/types.ts';
 import { CannotComputeError, UnsupportedTaxYearError } from '../src/registry.ts';
+import { listUniqueTaxIds, payCalc, resolveUniqueTaxId, type PayCalcRequest } from '../api/ste-compat.ts';
+import { runEmbeddedPayroll, type PlatformEmployeeInput } from '../payroll/platform.ts';
 import { pointSourceOf, resolveEmployee } from '../geocode/index.ts';
 import {
-  withDb, readDb, appendUsage, hitStoredLimit,
+  withDb, readDb, hitStoredLimit,
   type AccountRecord, type AuthSession, type DB, type KeyRecord, type PaymentMethodRecord,
   type SavedScenario, type SubscriptionRecord, type TermsAcceptance, type TermsQuote,
 } from './lib/store.ts';
+import { dashboardUsage, recordAccountUsage, type RecordUsageInput } from './lib/usage.ts';
 import { TRIAL_DAYS, estimate as computePricing } from './lib/pricing.ts';
 import { TERMS_VERSION, TERM_MONTHS, termsClauses } from './lib/terms.ts';
 import { isEmailConfigured, sendVerificationEmail, sendContactEmail } from './lib/mail.ts';
@@ -23,7 +27,7 @@ import { verifierConfigured, issueCode, checkCode } from './lib/verifier.ts';
 import { resolveCheckoutOrigin, stripeConfigured, stripeKeyRefused } from '../api/stripe.ts';
 import { hashPassword, verifyPassword, passwordProblem, MAX_PASSWORD } from './lib/password.ts';
 import {
-  billingConfigured, meteringConfigured, enqueueMeterEvent, flushMeterQueue,
+  billingConfigured, meteringConfigured, flushMeterQueue,
   createBillingCustomer, startMeteredCheckout, completeMeteredCheckout, interpretWebhook,
 } from './lib/billing.ts';
 
@@ -2008,82 +2012,11 @@ function handleUsage(req: IncomingMessage, res: ServerResponse): void {
     return;
   }
 
-  readDb((db) => {
-    const keyRecord = Object.values(db.keys).find((k) => k.ownerEmail === session.email && k.isActive);
-    if (!keyRecord) {
-      sendJson(res, 200, { hasKey: false });
-      return;
-    }
-
-    const events = db.usage.filter((u) => u.keyHash === keyRecord.keyHash);
-    const dayAgo = Date.now() - 24 * 60 * 60_000;
-    const monthAgo = Date.now() - 30 * 24 * 60 * 60_000;
-    const callsToday = events.filter((e) => new Date(e.at).getTime() >= dayAgo).length;
-    const callsThisMonth = events.filter((e) => new Date(e.at).getTime() >= monthAgo).length;
-
-    // Every key this account has held, newest first, and one bucket per UTC
-    // day for the last 30 days across all of them (what the usage log still
-    // retains; it is trimmed to MAX_USAGE_EVENTS).
-    const ownKeys = Object.values(db.keys).filter((k) => k.ownerEmail === session.email);
-    const ownHashes = new Set(ownKeys.map((k) => k.keyHash));
-    const windowEvents = db.usage.filter((u) => ownHashes.has(u.keyHash) && new Date(u.at).getTime() >= monthAgo);
-    const daily: { date: string; calls: number; errors: number }[] = [];
-    for (let i = 29; i >= 0; i--) daily.push({ date: new Date(Date.now() - i * 86_400_000).toISOString().slice(0, 10), calls: 0, errors: 0 });
-    for (const u of windowEvents) {
-      const bucket = daily.find((d) => d.date === u.at.slice(0, 10));
-      if (!bucket) continue;
-      if (u.statusCode === 200) bucket.calls += 1;
-      else bucket.errors += 1;
-    }
-    let paycheckCalculations = 0;
-    let addressLookups = 0;
-    for (const u of db.usage) {
-      if (!ownHashes.has(u.keyHash) || u.statusCode !== 200) continue;
-      if (u.kind === 'address') addressLookups += 1;
-      else paycheckCalculations += 1;
-    }
-    const callsLast30 = daily.reduce((n, d) => n + d.calls, 0);
-    const errorsLast30 = daily.reduce((n, d) => n + d.errors, 0);
-    const keys = ownKeys
-      .slice()
-      .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
-      .map((k) => ({
-        keyMasked: maskKey(k.keyPrefix),
-        mode: k.keyPrefix.startsWith('sk_live_') ? 'live' : 'test',
-        active: k.isActive,
-        createdAt: k.createdAt,
-        expiresAt: k.expiresAt,
-        lastUsedAt: k.lastUsedAt,
-        totalCalls: k.totalCalls ?? 0,
-      }));
-    const recent = events
-      .slice()
-      .sort((a, b) => new Date(b.at).getTime() - new Date(a.at).getTime())
-      .slice(0, 15);
-
-    sendJson(res, 200, {
-      hasKey: true,
-      keyPrefix: keyRecord.keyPrefix,
-      keyMasked: maskKey(keyRecord.keyPrefix),
-      plan: keyRecord.plan,
-      issuedAt: keyRecord.createdAt,
-      expiresAt: keyRecord.expiresAt,
-      lastUsedAt: keyRecord.lastUsedAt,
-      // Durable meter (survives usage-log trimming); falls back to the
-      // retained-window count for keys minted before the counter existed.
-      totalCalls: keyRecord.totalCalls ?? events.length,
-      callsToday,
-      callsThisMonth,
-      callsTodayOk: events.filter((e) => e.statusCode === 200 && new Date(e.at).getTime() >= dayAgo).length,
-      callsLast30,
-      errorsLast30,
-      errorRate: callsLast30 + errorsLast30 ? errorsLast30 / (callsLast30 + errorsLast30) : 0,
-      daily,
-      billing: { paycheckCalculations, addressLookups, liveCalculations: paycheckCalculations, liveAddressLookups: addressLookups },
-      keys,
-      recent,
-    });
-  });
+  // Counts come from the site store, not from Stripe. Trial rows, $0 rows,
+  // and rows whose meter event failed are included. Another account's keys
+  // are not.
+  const summary = readDb((db) => dashboardUsage(db, session.email, { metering: meteringConfigured() }));
+  sendJson(res, 200, summary);
 }
 
 // ---------------------------------------------------------------------
@@ -2184,10 +2117,62 @@ function authenticateKey(req: IncomingMessage, res: ServerResponse, limiter: str
   return { requestId, keyHash, rlHeaders, customerId: auth.customerId, meteredSubscription: auth.meteredSubscription };
 }
 
+function idempotencyKeyOf(req: IncomingMessage): string | null {
+  const raw = req.headers['idempotency-key'];
+  const value = Array.isArray(raw) ? raw[0] : raw;
+  if (typeof value !== 'string') return null;
+  const trimmed = value.trim();
+  if (!trimmed || trimmed.length > 200 || !/^[\w.:-]+$/.test(trimmed)) return null;
+  return trimmed;
+}
+
+function endpointOf(req: IncomingMessage): string {
+  const path = (req.url ?? '/').split('?')[0];
+  return `${req.method ?? 'POST'} ${path}`;
+}
+
+/** Meter when this key's account has a metered subscription. Trial subscriptions qualify. */
+function wantMeter(auth: KeyContext): boolean {
+  return meteringConfigured() && auth.meteredSubscription && Boolean(auth.customerId);
+}
+
+/**
+ * Write the local usage row (and any meter queue items) before the response.
+ * Stripe is not called here. A retry with the same Idempotency-Key does not
+ * write a second row.
+ */
+function noteUsage(
+  ctx: KeyContext,
+  req: IncomingMessage,
+  input: {
+    statusCode: number;
+    error: string | null;
+    checkDate: string | null;
+    kind: RecordUsageInput['kind'];
+    paychecks: number;
+    matched?: boolean;
+  },
+): { recorded: boolean } {
+  return recordAccountUsage({
+    keyHash: ctx.keyHash,
+    statusCode: input.statusCode,
+    error: input.error,
+    checkDate: input.checkDate,
+    endpoint: endpointOf(req),
+    requestId: ctx.requestId,
+    idempotencyKey: idempotencyKeyOf(req),
+    kind: input.kind,
+    paychecks: input.paychecks,
+    ...(input.matched === undefined ? {} : { matched: input.matched }),
+    meterCustomerId: ctx.customerId,
+    wantMeter: wantMeter(ctx),
+  });
+}
+
 async function handlePaycheck(req: IncomingMessage, res: ServerResponse): Promise<void> {
   const ctx = authenticateKey(req, res, 'paycheck');
   if (!ctx) return;
-  const { requestId, keyHash, rlHeaders } = ctx;
+  const { requestId, rlHeaders } = ctx;
   const auth = ctx;
 
   // --- parse ------------------------------------------------------------
@@ -2195,6 +2180,7 @@ async function handlePaycheck(req: IncomingMessage, res: ServerResponse): Promis
   try {
     raw = await readJson<unknown>(req);
   } catch (err) {
+    noteUsage(ctx, req, { statusCode: 400, error: 'invalid_json', checkDate: null, kind: 'paycheck', paychecks: 0 });
     sendJson(res, 400, { error: (err as Error).message, code: 'invalid_json', requestId }, rlHeaders);
     return;
   }
@@ -2206,7 +2192,13 @@ async function handlePaycheck(req: IncomingMessage, res: ServerResponse): Promis
     stateHasYear: (code, year) => stateYears(code).includes(year),
   });
   if (!validation.ok) {
-    recordUsage(keyHash, 422, 'validation_failed', (raw as { checkDate?: string } | null)?.checkDate ?? null);
+    noteUsage(ctx, req, {
+      statusCode: 422,
+      error: 'validation_failed',
+      checkDate: (raw as { checkDate?: string } | null)?.checkDate ?? null,
+      kind: 'paycheck',
+      paychecks: 0,
+    });
     sendJson(
       res,
       422,
@@ -2225,7 +2217,7 @@ async function handlePaycheck(req: IncomingMessage, res: ServerResponse): Promis
   // Answered in this same call and billed as this same call.
   const extrasCheck = validatePaycheckExtras(raw as Record<string, unknown>, validation.value.workState?.code);
   if (!extrasCheck.ok) {
-    recordUsage(keyHash, 422, 'validation_failed', validation.value.checkDate);
+    noteUsage(ctx, req, { statusCode: 422, error: 'validation_failed', checkDate: validation.value.checkDate, kind: 'paycheck', paychecks: 0 });
     sendJson(
       res,
       422,
@@ -2270,17 +2262,19 @@ async function handlePaycheck(req: IncomingMessage, res: ServerResponse): Promis
           };
   }
 
-  // A billable call on a metered subscription queues its Stripe meter
-  // event in the same store write that records the call, so the two are
-  // saved together; delivery happens off the response path and a failure
-  // stays queued for retry (flushMeterQueue) rather than being lost.
-  // requestId is Stripe's idempotency identifier for the event.
-  const meter = status === 200 && meteringConfigured() && auth.meteredSubscription && auth.customerId
-    ? { customerId: auth.customerId, identifier: requestId }
-    : null;
-  recordUsage(keyHash, status, usageError, validation.value.checkDate, meter);
+  // The usage row and its meter events are one store write. Stripe is
+  // called afterwards, off the response path. A failed or skipped meter
+  // event leaves the row in place. One successful paycheck is one unit.
+  // requestId is Stripe's idempotency identifier for a single paycheck.
+  const recorded = noteUsage(ctx, req, {
+    statusCode: status,
+    error: usageError,
+    checkDate: validation.value.checkDate,
+    kind: 'paycheck',
+    paychecks: status === 200 ? 1 : 0,
+  });
   sendJson(res, status, responseBody, rlHeaders);
-  if (meter) flushMeterSoon();
+  if (recorded.recorded && status === 200 && wantMeter(auth)) flushMeterSoon();
 }
 
 // ---------------------------------------------------------------------
@@ -2295,12 +2289,13 @@ async function handlePaycheck(req: IncomingMessage, res: ServerResponse): Promis
 async function handleAddress(req: IncomingMessage, res: ServerResponse): Promise<void> {
   const ctx = authenticateKey(req, res, 'address');
   if (!ctx) return;
-  const { requestId, keyHash, rlHeaders } = ctx;
+  const { requestId, rlHeaders } = ctx;
 
   let body: Record<string, unknown>;
   try {
     body = await readJson<Record<string, unknown>>(req);
   } catch (err) {
+    noteUsage(ctx, req, { statusCode: 400, error: 'invalid_json', checkDate: null, kind: 'address', paychecks: 0 });
     sendJson(res, 400, { error: (err as Error).message, code: 'invalid_json', requestId }, rlHeaders);
     return;
   }
@@ -2314,7 +2309,7 @@ async function handleAddress(req: IncomingMessage, res: ServerResponse): Promise
     : body.checkDate !== undefined && !/^\d{4}-\d{2}-\d{2}$/.test(checkDate) ? 'checkDate must be ISO yyyy-mm-dd.'
     : null;
   if (problem) {
-    recordUsage(keyHash, 422, 'validation_failed', null);
+    noteUsage(ctx, req, { statusCode: 422, error: 'validation_failed', checkDate: null, kind: 'address', paychecks: 0 });
     sendJson(res, 422, { error: problem, code: 'invalid_input', requestId }, rlHeaders);
     return;
   }
@@ -2336,7 +2331,7 @@ async function handleAddress(req: IncomingMessage, res: ServerResponse): Promise
     const state = (r.work?.matched ? r.work.resolved?.state : null) ?? (r.residence?.matched ? r.residence.resolved?.state : null) ?? null;
     const homeState = r.residence?.matched ? r.residence.resolved?.state ?? null : null;
     // An address lookup is not a paycheck calculation and is not metered.
-    recordUsage(keyHash, 200, null, null, null, 'address', matched);
+    noteUsage(ctx, req, { statusCode: 200, error: null, checkDate: null, kind: 'address', paychecks: 0, matched });
     sendJson(res, 200, {
       matched,
       state,
@@ -2352,31 +2347,9 @@ async function handleAddress(req: IncomingMessage, res: ServerResponse): Promise
     }, rlHeaders);
   } catch (err) {
     console.error(`[address ${requestId}] lookup failed:`, err instanceof Error ? err.message : err);
-    recordUsage(keyHash, 502, 'geocode_unavailable', null);
+    noteUsage(ctx, req, { statusCode: 502, error: 'geocode_unavailable', checkDate: null, kind: 'address', paychecks: 0 });
     sendJson(res, 502, { error: 'The address lookup is unavailable right now. Retry shortly; nothing was billed.', code: 'geocode_unavailable', requestId }, rlHeaders);
   }
-}
-
-/** One place that appends a bounded usage event and updates the key's meter. */
-function recordUsage(
-  keyHash: string,
-  statusCode: number,
-  error: string | null,
-  checkDate: string | null,
-  meter: { customerId: string; identifier: string } | null = null,
-  kind: 'paycheck' | 'address' = 'paycheck',
-  matched?: boolean,
-): void {
-  withDb((db) => {
-    const at = new Date().toISOString();
-    appendUsage(db, { keyHash, at, statusCode, error, checkDate, kind, ...(matched === undefined ? {} : { matched }) });
-    const stored = db.keys[keyHash];
-    if (stored) {
-      stored.lastUsedAt = at;
-      if (statusCode === 200) stored.totalCalls = (stored.totalCalls ?? 0) + 1;
-    }
-    if (meter) enqueueMeterEvent(db, { ...meter, at });
-  });
 }
 
 /** Deliver queued meter events now, off the response path. Failures stay queued. */
@@ -2386,6 +2359,140 @@ function flushMeterSoon(): void {
       if (r.failed || r.dead) console.error(`[meter] ${r.failed} failed, ${r.dead} past Stripe's window; ${r.pending} still queued`);
     })
     .catch((err) => console.error('[meter] flush error:', err instanceof Error ? err.message : err));
+}
+
+const PAY_FREQUENCIES = new Set<PayFrequency>(['weekly', 'biweekly', 'semimonthly', 'monthly', 'quarterly', 'semiannual', 'annual']);
+
+/**
+ * POST /v1/payCalc — one meter unit per successful paycheck in the batch.
+ * The HTTP status stays 200 when the batch was parsed, matching the
+ * self-hosted adapter. The usage row's status is 422 when every paycheck
+ * in the batch failed, so a failed batch is not billed.
+ */
+async function handlePayCalc(req: IncomingMessage, res: ServerResponse): Promise<void> {
+  const ctx = authenticateKey(req, res, 'payCalc');
+  if (!ctx) return;
+  const { requestId, rlHeaders } = ctx;
+
+  let requests: PayCalcRequest[];
+  try {
+    const body = await readJson<PayCalcRequest[] | { payCalc: PayCalcRequest[] }>(req);
+    requests = Array.isArray(body) ? body : body.payCalc;
+    if (!Array.isArray(requests)) throw new Error('Request body must be an array of PayCalcRequest, or { "payCalc": [...] }.');
+  } catch (err) {
+    noteUsage(ctx, req, { statusCode: 400, error: 'invalid_json', checkDate: null, kind: 'payCalc', paychecks: 0 });
+    sendJson(res, 400, { error: err instanceof Error ? err.message : 'Bad request.', code: 'invalid_json', requestId }, rlHeaders);
+    return;
+  }
+
+  let results;
+  try {
+    results = payCalc(requests);
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'calculation_error';
+    console.error(`[payCalc ${requestId}] failed:`, message);
+    noteUsage(ctx, req, { statusCode: 422, error: 'calculation_error', checkDate: null, kind: 'payCalc', paychecks: 0 });
+    sendJson(res, 422, { error: 'The calculation could not be completed for the input provided.', code: 'calculation_error', requestId }, rlHeaders);
+    return;
+  }
+
+  const successes = results.filter((row) => !row.error).length;
+  const failed = results.length - successes;
+  const usageStatus = successes === 0 && failed > 0 ? 422 : 200;
+  const recorded = noteUsage(ctx, req, {
+    statusCode: usageStatus,
+    error: failed > 0 ? `${failed} of ${results.length} paychecks failed` : null,
+    checkDate: null,
+    kind: 'payCalc',
+    paychecks: successes,
+  });
+  sendJson(res, 200, { payCalc: results }, rlHeaders);
+  if (recorded.recorded && successes > 0 && wantMeter(ctx)) flushMeterSoon();
+}
+
+/**
+ * POST /v1/payroll/run — one usage unit per employee paycheck, not one
+ * unit for the HTTP request. The request itself is counted separately.
+ */
+async function handlePayrollRun(req: IncomingMessage, res: ServerResponse): Promise<void> {
+  const ctx = authenticateKey(req, res, 'payroll');
+  if (!ctx) return;
+  const { requestId, rlHeaders } = ctx;
+
+  let body: { companyId?: string; checkDate?: string; payFrequency?: string; employees?: PlatformEmployeeInput[] };
+  try {
+    body = await readJson(req);
+  } catch (err) {
+    noteUsage(ctx, req, { statusCode: 400, error: 'invalid_json', checkDate: null, kind: 'payroll', paychecks: 0 });
+    sendJson(res, 400, { error: err instanceof Error ? err.message : 'Bad request.', code: 'invalid_json', requestId }, rlHeaders);
+    return;
+  }
+  const frequency = body.payFrequency ?? 'biweekly';
+  if (!body.employees?.length || !body.checkDate || !PAY_FREQUENCIES.has(frequency as PayFrequency)) {
+    noteUsage(ctx, req, { statusCode: 400, error: 'validation_failed', checkDate: body.checkDate ?? null, kind: 'payroll', paychecks: 0 });
+    sendJson(res, 400, { error: 'checkDate, payFrequency, and a non-empty employees[] are required.', code: 'invalid_input', requestId }, rlHeaders);
+    return;
+  }
+  try {
+    const run = await runEmbeddedPayroll({
+      companyId: body.companyId ?? 'company',
+      checkDate: body.checkDate,
+      payFrequency: frequency as PayFrequency,
+      employees: body.employees,
+    });
+    const paychecks = run.paychecks.length;
+    const recorded = noteUsage(ctx, req, {
+      statusCode: 200,
+      error: null,
+      checkDate: body.checkDate,
+      kind: 'payroll',
+      paychecks,
+    });
+    sendJson(res, 200, { ok: true, run }, rlHeaders);
+    if (recorded.recorded && paychecks > 0 && wantMeter(ctx)) flushMeterSoon();
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Payroll run failed.';
+    console.error(`[payroll ${requestId}] failed:`, message);
+    noteUsage(ctx, req, { statusCode: 422, error: 'calculation_error', checkDate: body.checkDate, kind: 'payroll', paychecks: 0 });
+    sendJson(res, 422, { error: 'The payroll run could not be completed for the input provided.', code: 'calculation_error', requestId }, rlHeaders);
+  }
+}
+
+function catalogCheckDate(req: IncomingMessage): string {
+  const raw = new URL(req.url ?? '/', 'http://localhost').searchParams.get('checkDate');
+  return raw && /^\d{4}-\d{2}-\d{2}$/.test(raw) ? raw : new Date().toISOString().slice(0, 10);
+}
+
+/** GET /v1/uniqueTaxIds — a keyed catalog read. Recorded, not a paycheck charge. */
+function handleUniqueTaxIds(req: IncomingMessage, res: ServerResponse): void {
+  const ctx = authenticateKey(req, res, 'catalog');
+  if (!ctx) return;
+  const checkDate = catalogCheckDate(req);
+  try {
+    const entries = listUniqueTaxIds(checkDate);
+    noteUsage(ctx, req, { statusCode: 200, error: null, checkDate, kind: 'catalog', paychecks: 0 });
+    sendJson(res, 200, { checkDate, count: entries.length, entries }, ctx.rlHeaders);
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Bad request.';
+    noteUsage(ctx, req, { statusCode: 400, error: 'invalid_input', checkDate, kind: 'catalog', paychecks: 0 });
+    sendJson(res, 400, { error: message, code: 'invalid_input', requestId: ctx.requestId }, ctx.rlHeaders);
+  }
+}
+
+function handleUniqueTaxId(req: IncomingMessage, res: ServerResponse, path: string): void {
+  const ctx = authenticateKey(req, res, 'catalog');
+  if (!ctx) return;
+  const prefix = path.startsWith('/api/') ? '/api/uniqueTaxIds/' : '/v1/uniqueTaxIds/';
+  const id = decodeURIComponent(path.slice(prefix.length));
+  const checkDate = catalogCheckDate(req);
+  const entry = resolveUniqueTaxId(id, checkDate);
+  if (!entry) {
+    noteUsage(ctx, req, { statusCode: 404, error: 'not_found', checkDate, kind: 'catalog', paychecks: 0 });
+    sendJson(res, 404, { error: `No such uniqueTaxId for ${checkDate}.`, code: 'not_found', requestId: ctx.requestId }, ctx.rlHeaders);
+    return;
+  }
+  noteUsage(ctx, req, { statusCode: 200, error: null, checkDate, kind: 'catalog', paychecks: 0 });
+  sendJson(res, 200, entry, ctx.rlHeaders);
 }
 
 // ---------------------------------------------------------------------
@@ -2784,6 +2891,10 @@ createServer((req, res) => {
     if (method === 'GET' && url === '/api/usage') return handleUsage(req, res);
     if (method === 'GET' && (url === '/api/me' || url === '/v1/me')) return handleMe(req, res);
     if (method === 'POST' && (url === '/api/paycheck' || url === '/v1/paycheck')) return handlePaycheck(req, res);
+    if (method === 'POST' && (url === '/api/payCalc' || url === '/v1/payCalc')) return handlePayCalc(req, res);
+    if (method === 'POST' && (url === '/api/payroll/run' || url === '/v1/payroll/run')) return handlePayrollRun(req, res);
+    if (method === 'GET' && (url === '/api/uniqueTaxIds' || url === '/v1/uniqueTaxIds')) return handleUniqueTaxIds(req, res);
+    if (method === 'GET' && (url.startsWith('/api/uniqueTaxIds/') || url.startsWith('/v1/uniqueTaxIds/'))) return handleUniqueTaxId(req, res, url);
     if (method === 'GET' && (url === '/api/health' || url === '/v1/health' || url === '/healthz')) return handleHealth(res);
     if (method === 'GET' && (url === '/api/states' || url === '/v1/states')) return handleStates(res, req.url ?? url);
     if (method === 'GET' && (url === '/api/coverage' || url === '/v1/coverage')) return handleCoverage(res);
