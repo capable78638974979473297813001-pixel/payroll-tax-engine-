@@ -230,5 +230,23 @@ class HttpTest(unittest.TestCase):
         self.assertEqual(mode & 0o077, 0)
 
 
+class FromAndLogTest(unittest.TestCase):
+    def test_bare_resend_from_is_named(self) -> None:
+        self.assertEqual(ev.normalise_from("verify@omniatax.io"), "Omnia.tax <verify@omniatax.io>")
+        self.assertEqual(ev.normalise_from("  'verify@omniatax.io'  "), "Omnia.tax <verify@omniatax.io>")
+        self.assertEqual(
+            ev.normalise_from("Omnia.tax <verify@omniatax.io>"),
+            "Omnia.tax <verify@omniatax.io>",
+        )
+
+    def test_scrub_log_removes_keys_and_codes(self) -> None:
+        text = ev.scrub_log("fail re_AbCdEf123456 code 654321 Bearer secret\nnext")
+        self.assertNotIn("re_AbCdEf123456", text)
+        self.assertNotIn("654321", text)
+        self.assertNotIn("\n", text)
+        self.assertIn("[redacted]", text)
+        self.assertIn("[code]", text)
+
+
 if __name__ == "__main__":
     unittest.main()

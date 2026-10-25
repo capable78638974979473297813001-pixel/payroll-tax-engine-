@@ -179,16 +179,16 @@ Dashboard (**Settings → Payment methods**); those are what Checkout offers.
 `STRIPE_METER_EVENT_NAME` (or `STRIPE_METER_EVENT`). With only the secret key,
 onboarding saves a card and no usage is billed; the server logs a warning at
 startup saying so. An `sk_live_` Stripe secret is refused unless `STRIPE_ALLOW_LIVE=1`.
-Each successful paycheck calculation, including each paycheck in a batch and
-including calculations during the 14-day trial, queues one meter event (`value` 1).
+Each successful paycheck calculation, including calculations during the
+14-day trial, queues one meter event (`value` 1). There is no batch route.
 Stripe does not bill usage recorded during `trial_period_days` (see
 `docs/STRIPE-SETUP.md`, "Trial usage on the metered price"). A Stripe outage
 does not fail the API response.
 
-**Set `RESEND_API_KEY` in production.** Without it the server is in local
-development mode and prints each 6-digit verification code to its console —
-a working sign-in credential for anyone who can read the logs. With it set,
-codes are only emailed and never logged.
+**Set `RESEND_API_KEY` in production.** Without it, signup and sign-in cannot
+email a code, and production does not print the code. A development server
+with no email provider prints the code to its console so signup can be
+finished locally. With the key set, codes are only emailed and never logged.
 
 **The Python email verifier.** On Render it runs automatically (section 0c). To run it
 yourself, `npm run verifier` starts

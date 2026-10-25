@@ -20,7 +20,7 @@ import { ExtrasRefusal, runPaycheckExtras, validatePaycheckExtras } from './lib/
 import { keyLifeFor } from './lib/keylife.ts';
 import { coverage, searchLocal } from './lib/coverage.ts';
 import { verifierConfigured, issueCode, checkCode } from './lib/verifier.ts';
-import { resolveCheckoutOrigin, stripeConfigured, stripeKeyRefused } from '../api/stripe.ts';
+import { checkoutInProduction, resolveCheckoutOrigin, stripeConfigured, stripeKeyRefused } from '../api/stripe.ts';
 import { hashPassword, verifyPassword, passwordProblem, MAX_PASSWORD } from './lib/password.ts';
 import {
   billingConfigured, meteringConfigured, enqueueMeterEvent, flushMeterQueue,
@@ -42,7 +42,7 @@ try {
  *
  * The signup flow is staged deliberately, in this order:
  *
- *   1. POST /api/signup        name, work email, business, phone
+ *   1. POST /api/signup        name, work email, business, optional phone
  *   2. POST /api/verify-email  6-digit code proves they own the address
  *   3. GET  /api/terms         the exact clauses + figures they must see
  *   4. POST /api/accept-terms  typed signature, stored immutably
@@ -110,13 +110,65 @@ const HOUR_MS = 60 * 60_000;
 const signinPerHour = () => Number(process.env.SIGNIN_PER_HOUR ?? 10);
 const signupPerHour = () => Number(process.env.SIGNUP_PER_HOUR ?? 10);
 
+/** Production is NODE_ENV=production, or a process Render itself started. */
+function inProduction(): boolean {
+  return checkoutInProduction();
+}
+
 /**
- * Print verification codes to the console only when no email provider is
- * configured (local development). With email on, a code in the logs is a
- * working sign-in credential for anyone who can read them.
+ * Print verification codes to the console only in development, and only
+ * when no email provider is configured. A code in a production log is a
+ * working sign-in credential. The verify page mentions the log only when
+ * this is true.
  */
 function logCodesToConsole(): boolean {
-  return !isEmailConfigured();
+  return !isEmailConfigured() && !verifierConfigured() && !inProduction();
+}
+
+type CodeDelivery =
+  | { limited: true; retryAfterSec: number }
+  | { limited: false; emailSent: boolean; cooldown: boolean; devCodeHint: boolean };
+
+/**
+ * Send a signup or sign-in code. Failures are logged without the code,
+ * the address, or any API key. A verifier cooldown means a code was just
+ * sent, so the caller treats it as delivered.
+ */
+async function deliverCodeEmail(
+  where: 'signup' | 'sign-in',
+  acct: { name: string; email: string; code: string; codeExpiresAt: string },
+): Promise<CodeDelivery> {
+  if (verifierConfigured()) {
+    const issued = await issueCode(acct.email, acct.name);
+    if (issued.status === 429) return { limited: true, retryAfterSec: issued.retryAfterSec ?? 3600 };
+    const cooldown = issued.cooldown === true;
+    const emailSent = issued.sent || cooldown;
+    if (!issued.ok) console.error(`[${where}] verifier could not issue a code`);
+    else if (!emailSent) console.error(`[${where}] verification email failed`);
+    return { limited: false, emailSent, cooldown, devCodeHint: false };
+  }
+  if (logCodesToConsole()) {
+    console.log('');
+    console.log(`+- Omnia ${where} code (dev: no email provider) -`);
+    console.log(`|  ${acct.email}`);
+    console.log(`|  CODE: ${acct.code}`);
+    console.log(`|  expires ${acct.codeExpiresAt}`);
+    console.log('+--------------------------------------------------');
+    console.log('');
+    return { limited: false, emailSent: false, cooldown: false, devCodeHint: true };
+  }
+  if (!isEmailConfigured()) {
+    console.error(`[${where}] verification email failed: no email provider is configured`);
+    return { limited: false, emailSent: false, cooldown: false, devCodeHint: false };
+  }
+  const result = await sendVerificationEmail({
+    name: acct.name,
+    email: acct.email,
+    code: acct.code,
+    expiresAt: acct.codeExpiresAt,
+  });
+  if (!result.sent) console.error(`[${where}] verification email failed: ${result.reason ?? 'unknown error'}`);
+  return { limited: false, emailSent: result.sent, cooldown: false, devCodeHint: false };
 }
 
 const SESSION_COOKIE = 'omnia_session';
@@ -341,8 +393,10 @@ async function handleSignup(req: IncomingMessage, res: ServerResponse): Promise<
   const company = (body.company ?? '').trim();
   const phone = (body.phone ?? '').trim();
 
-  if (!name || !isValidEmail(email) || !company || !phone) {
-    sendJson(res, 400, { error: 'Name, a valid work email, business name and phone are all required.' });
+  // Phone is stored when the visitor types one. Nothing else reads it:
+  // no texts, no billing, no display. An empty phone is a valid signup.
+  if (!name || !isValidEmail(email) || !company) {
+    sendJson(res, 400, { error: 'Name, a valid work email, and a business name are required.' });
     return;
   }
   if (name.length > 200 || email.length > 254 || company.length > 200 || phone.length > 40) {
@@ -429,39 +483,24 @@ async function handleSignup(req: IncomingMessage, res: ServerResponse): Promise<
     return record;
   });
 
-  let emailSent = false;
-  if (verifierConfigured()) {
-    // The Python verifier owns the code: it mints, mails and later checks it.
-    const issued = await issueCode(email, account.name);
-    if (issued.status === 429) {
-      sendJson(res, 429, { error: 'Too many codes requested for this address. Try again later.', code: 'rate_limited' }, { 'Retry-After': String(issued.retryAfterSec ?? 3600) });
-      return;
-    }
-    emailSent = issued.sent;
-    if (!issued.ok) console.error('[signup] verifier could not issue a code');
-  } else if (logCodesToConsole()) {
-    // Local development only: no email provider, so the code has to be
-    // readable somewhere. Never taken when RESEND_API_KEY is set.
-    console.log('');
-    console.log('+- Omnia verification code (dev: no email provider) -');
-    console.log(`|  ${email}`);
-    console.log(`|  CODE: ${account.code}`);
-    console.log(`|  expires ${account.codeExpiresAt}`);
-    console.log('+--------------------------------------------------');
-    console.log('');
-  } else {
-    const result = await sendVerificationEmail({
-      name: account.name,
-      email,
-      code: account.code!,
-      expiresAt: account.codeExpiresAt!,
-    });
-    emailSent = result.sent;
-    // Never the code, and no personal details: just that delivery failed.
-    if (!result.sent) console.error(`[signup] verification email failed: ${result.reason}`);
+  const delivery = await deliverCodeEmail('signup', {
+    name: account.name,
+    email,
+    code: account.code ?? '',
+    codeExpiresAt: account.codeExpiresAt ?? '',
+  });
+  if (delivery.limited) {
+    sendJson(res, 429, { error: 'Too many codes requested for this address. Try again later.', code: 'rate_limited' }, { 'Retry-After': String(delivery.retryAfterSec) });
+    return;
   }
 
-  sendJson(res, 200, { ok: true, emailSent, alreadyVerified: Boolean(account.emailVerifiedAt) });
+  sendJson(res, 200, {
+    ok: true,
+    emailSent: delivery.emailSent,
+    cooldown: delivery.cooldown,
+    devCodeHint: delivery.devCodeHint,
+    alreadyVerified: Boolean(account.emailVerifiedAt),
+  });
 }
 
 /** Drop never-verified signups past retention (and their dangling state). */
@@ -515,19 +554,36 @@ async function handleSignin(req: IncomingMessage, res: ServerResponse): Promise<
     return;
   }
 
+  const configured = isEmailConfigured() || verifierConfigured();
+  // No account: the same JSON as a successful send, so this route cannot
+  // be used to learn who is a customer. A real account whose mail fails
+  // does say so (emailSent false). That differs only while delivery is down.
   const acct = outcome.acct;
-  if (acct && verifierConfigured()) {
-    const issued = await issueCode(acct.email, acct.name);
-    if (!issued.ok) console.error('[sign-in] verifier could not issue a code');
-  } else if (acct) {
-    if (logCodesToConsole()) {
-      console.log(`[sign-in code, dev: no email provider] ${acct.email}: ${acct.code} (expires ${acct.codeExpiresAt})`);
-    } else {
-      const result = await sendVerificationEmail({ name: acct.name, email: acct.email, code: acct.code, expiresAt: acct.codeExpiresAt });
-      if (!result.sent) console.error(`[sign-in] verification email failed: ${result.reason}`);
-    }
+  if (!acct) {
+    sendJson(res, 200, {
+      ok: true,
+      emailConfigured: configured,
+      emailSent: configured,
+      cooldown: false,
+      devCodeHint: !configured && !inProduction(),
+    });
+    return;
   }
-  sendJson(res, 200, { ok: true, emailConfigured: isEmailConfigured() || verifierConfigured() });
+  const delivery = await deliverCodeEmail('sign-in', acct);
+  // A 429 here would exist only for addresses that have accounts (unknown
+  // addresses never reach the mailer). Report it as a failed send instead.
+  if (delivery.limited) {
+    console.error('[sign-in] verifier refused another code');
+    sendJson(res, 200, { ok: true, emailConfigured: configured, emailSent: false, cooldown: false, devCodeHint: false });
+    return;
+  }
+  sendJson(res, 200, {
+    ok: true,
+    emailConfigured: configured,
+    emailSent: delivery.emailSent,
+    cooldown: delivery.cooldown,
+    devCodeHint: delivery.devCodeHint,
+  });
 }
 
 // ---------------------------------------------------------------------
@@ -791,7 +847,11 @@ function safeEqual(a: string, b: string): boolean {
 }
 
 function cookieSecure(): boolean {
-  return (process.env.PUBLIC_BASE_URL ?? '').startsWith('https://') || process.env.COOKIE_SECURE === '1';
+  // Render serves the site over https and talks to this process over http.
+  // The Secure flag has to follow the public site, not the hop in front of it.
+  return (process.env.PUBLIC_BASE_URL ?? '').startsWith('https://')
+    || process.env.COOKIE_SECURE === '1'
+    || Boolean((process.env.RENDER ?? '').trim());
 }
 
 function sessionCookie(token: string, ttlMs: number): string {
@@ -1923,11 +1983,23 @@ async function handleScenarioDelete(req: IncomingMessage, res: ServerResponse): 
 }
 
 // Address of the caller, for per-address limits.
+/**
+ * Trust X-Forwarded-For when TRUST_PROXY is on, or when Render started the
+ * process (it always sits behind its proxy). An explicit TRUST_PROXY=0
+ * wins, so a direct deployment can refuse the header. render.yaml sets
+ * TRUST_PROXY=1; this default covers a service that did not sync that file.
+ */
+function trustProxy(): boolean {
+  const flag = (process.env.TRUST_PROXY ?? '').trim().toLowerCase();
+  if (flag === '0' || flag === 'false' || flag === 'no') return false;
+  if (flag === '1' || flag === 'true' || flag === 'yes') return true;
+  return Boolean((process.env.RENDER ?? '').trim());
+}
+
 function clientAddress(req: IncomingMessage): string {
-  // Behind a proxy that sets it (the hosted deployment), the first
-  // X-Forwarded-For hop is the client. Only trusted when TRUST_PROXY=1, so
-  // a direct caller can't pick its own address to dodge the limit.
-  if (process.env.TRUST_PROXY === '1') {
+  // The first X-Forwarded-For hop is the client. Only trusted behind a
+  // proxy, so a direct caller can't pick its own address to dodge the limit.
+  if (trustProxy()) {
     const fwd = String(req.headers['x-forwarded-for'] ?? '').split(',')[0].trim();
     if (fwd) return fwd;
   }

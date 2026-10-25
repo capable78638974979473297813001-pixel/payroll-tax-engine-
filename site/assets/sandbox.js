@@ -130,6 +130,8 @@ let errors = {};
 let banner = '';
 let bannerHref = '';
 let bannerKind = 'bad';
+let bannerLinkLabel = '';
+let bannerExample = false;
 let busy = false;
 let lookupBusy = false;
 let returnToReview = false;
@@ -191,11 +193,64 @@ function advanced(id, title, count, inner) {
   const open = advMap()[id] ? ' open' : '';
   return `<div class="adv${open}"><button type="button" class="adv-h" data-action="adv" data-adv="${id}"><span class="chev"></span>${esc(title)}<span class="cnt">${esc(count)}</span></button><div class="adv-b">${inner}</div></div>`;
 }
+function exampleOutputHtml() {
+  return `<div class="sample"><p>Example output. This is not your calculation.</p><pre>{
+  "grossPay": 140000,
+  "employeeTaxTotal": 27035,
+  "netPay": 112965,
+  "taxes": [ "…one line per tax, in cents" ]
+}</pre></div>`;
+}
+function hasApiKey() {
+  const key = window.Omnia && Omnia.apiKey && Omnia.apiKey();
+  return !!(key && key.key);
+}
+function signedIn() {
+  return !!(window.Omnia && Omnia.session && Omnia.session() && Omnia.session().email);
+}
+function clearBanner() {
+  banner = '';
+  bannerHref = '';
+  bannerKind = 'bad';
+  bannerLinkLabel = '';
+  bannerExample = false;
+}
+function setKeyGate(forLookup) {
+  bannerKind = 'bad';
+  bannerExample = !signedIn();
+  if (!signedIn()) {
+    banner = forLookup
+      ? 'Sign up to get an API key before an address can be looked up. This page does not issue a key.'
+      : 'Sign up to get an API key before this calculation can run. This page does not issue a key.';
+    bannerHref = '/signup';
+    bannerLinkLabel = 'Create an account';
+    return;
+  }
+  banner = forLookup
+    ? 'Create an API key in your account, then paste it here, before an address can be looked up.'
+    : 'Create an API key in your account, then paste it here, before this calculation can run.';
+  bannerHref = '/dashboard';
+  bannerLinkLabel = 'Open your account';
+  bannerExample = false;
+}
+function keyGateHtml() {
+  if (hasApiKey() || banner) return '';
+  const prev = { banner, bannerHref, bannerKind, bannerLinkLabel, bannerExample };
+  setKeyGate(false);
+  const html = bannerHtml();
+  banner = prev.banner;
+  bannerHref = prev.bannerHref;
+  bannerKind = prev.bannerKind;
+  bannerLinkLabel = prev.bannerLinkLabel;
+  bannerExample = prev.bannerExample;
+  return html;
+}
 function bannerHtml() {
   if (!banner) return '';
   const cls = bannerKind === 'warn' ? 'banner-warn' : 'banner-bad';
-  const link = bannerHref ? ` <a href="${esc(bannerHref)}">Open your account</a>.` : '';
-  return `<div class="banner ${cls}" role="alert">${esc(banner)}${link}</div>`;
+  const link = bannerHref ? ` <a href="${esc(bannerHref)}">${esc(bannerLinkLabel || 'Open your account')}</a>.` : '';
+  const example = bannerExample ? exampleOutputHtml() : '';
+  return `<div class="banner ${cls}" role="alert">${esc(banner)}${link}${example}</div>`;
 }
 function residentNote() {
   if (!model.homeCode || !model.workCode || model.homeCode === model.workCode) return '';
@@ -629,7 +684,7 @@ function oneLine(n) {
 function step8() {
   const rows = STEPS.filter((s) => s.n < 8).map((s) => `<div class="rv"><div><b>${esc(s.name)}</b><p>${esc(oneLine(s.n))}</p></div><button type="button" class="lnk" data-action="edit" data-step="${s.n}">Edit</button></div>`).join('');
   const localGap = !LOCAL[model.workCode] ? stateLabel(model.workCode) : '';
-  return `<p class="eyebrow">Step 8 of 8</p><h1>Review and run</h1><p class="sub">Check the request, then run it against the engine.</p>${bannerHtml()}
+  return `<p class="eyebrow">Step 8 of 8</p><h1>Review and run</h1><p class="sub">Check the request, then run it against the engine.</p>${banner ? bannerHtml() : keyGateHtml()}
     <div class="rev">${rows}</div>
     <div class="note note-info"><b>Not included.</b> Split work locations, pre-2020 W-4 allowances, tips, and an employer FUTA rate. Unsupported items are left off the request.${localGap ? ' ' + esc(`Local tax for ${localGap} is in progress.`) : ''}</div>`;
 }
@@ -979,6 +1034,8 @@ function showErrors(details) {
   banner = list.length ? `${list.length} fields need a fix` : '';
   bannerHref = '';
   bannerKind = 'bad';
+  bannerLinkLabel = '';
+  bannerExample = false;
   if (list[0] && list[0].path) {
     step = stepForPath(list[0].path);
     visited.add(step);
@@ -1054,9 +1111,7 @@ async function runCalc() {
     busy = false;
     if (res.status === 422 && Array.isArray(body.details)) { showErrors(body.details); return; }
     if (res.status === 401) {
-      banner = 'Add your API key to run a calculation.';
-      bannerHref = '/dashboard';
-      bannerKind = 'bad';
+      setKeyGate(false);
       view = 'wizard';
       render();
       return;
@@ -1064,6 +1119,8 @@ async function runCalc() {
     if (res.status === 402) {
       banner = body.error || 'This account cannot run a calculation yet.';
       bannerHref = '/dashboard';
+      bannerLinkLabel = 'Open your account';
+      bannerExample = false;
       bannerKind = 'bad';
       view = 'wizard';
       render();
@@ -1071,6 +1128,9 @@ async function runCalc() {
     }
     if (res.status === 429) {
       banner = 'Too many calculations. Try again in a minute.';
+      bannerHref = '';
+      bannerLinkLabel = '';
+      bannerExample = false;
       bannerKind = 'warn';
       view = 'wizard';
       render();
@@ -1078,6 +1138,9 @@ async function runCalc() {
     }
     if (!res.ok) {
       banner = `Something went wrong on our side. Request id ${body.requestId || 'unknown'}.`;
+      bannerHref = '';
+      bannerLinkLabel = '';
+      bannerExample = false;
       bannerKind = 'bad';
       view = 'wizard';
       render();
@@ -1088,6 +1151,9 @@ async function runCalc() {
   } catch {
     busy = false;
     banner = 'Something went wrong on our side. Request id unknown.';
+    bannerHref = '';
+    bannerLinkLabel = '';
+    bannerExample = false;
     bannerKind = 'bad';
     view = 'wizard';
     render();
@@ -1122,13 +1188,13 @@ async function runLookup() {
     model.homeDirty = false;
     model.workDirty = false;
     if (res.status === 401) {
-      banner = 'Add your API key to look up addresses';
-      bannerHref = '/dashboard';
-      bannerKind = 'bad';
+      setKeyGate(true);
     } else if (res.status === 429) {
       banner = 'Too many lookups. Try again in a minute.';
       bannerKind = 'warn';
       bannerHref = '';
+      bannerLinkLabel = '';
+      bannerExample = false;
     } else if (!res.ok) {
       const fail = "We couldn't place this address. Check the ZIP, or enter the codes in step 4.";
       if (model.workAddress) model.workLookup = { error: fail };
@@ -1164,6 +1230,9 @@ async function runLookup() {
     }
   } catch {
     banner = 'Something went wrong on our side. Request id unknown.';
+    bannerHref = '';
+    bannerLinkLabel = '';
+    bannerExample = false;
     bannerKind = 'bad';
   } finally {
     lookupBusy = false;

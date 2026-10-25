@@ -15,8 +15,10 @@
 
 import { createHmac, timingSafeEqual } from 'node:crypto';
 
-// Overridable only to point tests (or stripe-mock) at a local stub.
-const STRIPE_API = process.env.STRIPE_API_BASE ?? 'https://api.stripe.com';
+/** Read at call time so tests and a late-loaded env can point at a stub. */
+function stripeApi(): string {
+  return (process.env.STRIPE_API_BASE ?? 'https://api.stripe.com').trim().replace(/\/+$/, '');
+}
 
 export class StripeError extends Error {
   status: number;
@@ -100,7 +102,7 @@ async function stripeRequest<T>(
   if (idempotencyKey) headers['Idempotency-Key'] = idempotencyKey;
 
   const body = method === 'POST' && params ? formEncode(params).join('&') : undefined;
-  const res = await fetch(`${STRIPE_API}${path}`, { method, headers, body });
+  const res = await fetch(`${stripeApi()}${path}`, { method, headers, body });
   const data = (await res.json().catch(() => ({}))) as Record<string, unknown>;
   if (!res.ok) {
     const err = (data.error ?? {}) as { message?: string; type?: string; code?: string };
