@@ -14,8 +14,15 @@
  * was delivered when it wasn't.
  */
 
-// Overridable only to point tests at a local stand-in.
-const RESEND_ENDPOINT = `${process.env.RESEND_API_BASE ?? 'https://api.resend.com'}/emails`;
+/** Read at call time so a .env loaded after this module is imported still applies. */
+function resendEndpoint(): string {
+  const base = (process.env.RESEND_API_BASE ?? 'https://api.resend.com').trim().replace(/\/+$/, '');
+  return `${base}/emails`;
+}
+
+export function resendApiKey(): string {
+  return (process.env.RESEND_API_KEY ?? '').trim();
+}
 
 /**
  * Resend's shared sandbox sender. Works with zero setup, but Resend only
@@ -35,13 +42,49 @@ function defaultFrom(): string {
   return 'Omnia.tax <onboarding@resend.dev>';
 }
 
+/**
+ * RESEND_FROM is read at send time. A bare address (RESEND_FROM=verify@omniatax.io)
+ * is sent as "Omnia.tax <verify@omniatax.io>". A value that already has a name
+ * is used as written. Quotes and surrounding space are ignored.
+ */
+export function resendFromAddress(): string {
+  const raw = (process.env.RESEND_FROM ?? '').trim().replace(/^['"]|['"]$/g, '').trim();
+  if (!raw) return defaultFrom();
+  if (/^[^\s<>@]+@[^\s<>@]+\.[^\s<>@]+$/.test(raw)) return `Omnia.tax <${raw}>`;
+  return raw;
+}
+
+/**
+ * A line safe to write to the server log. Strips API keys, bearer tokens,
+ * and 6-digit codes. The caller never logs the address or the code itself.
+ */
+export function scrubMailLog(text: string): string {
+  return text
+    .replace(/re_[A-Za-z0-9_-]+/g, '[redacted]')
+    .replace(/\b(?:sk|rk)_(?:test|live)_[A-Za-z0-9]+/g, '[redacted]')
+    .replace(/Bearer\s+\S+/gi, 'Bearer [redacted]')
+    .replace(/\b\d{6}\b/g, '[code]')
+    .replace(/[\r\n]+/g, ' ')
+    .slice(0, 300);
+}
+
+function mailHeaders(apiKey: string): Record<string, string> {
+  return {
+    Authorization: `Bearer ${apiKey}`,
+    'Content-Type': 'application/json',
+    Accept: 'application/json',
+    // A default fetch user agent is rejected by Resend's edge with 403.
+    'User-Agent': 'omniatax-site/1.0',
+  };
+}
+
 export interface SendResult {
   sent: boolean;
   reason?: string;
 }
 
 export function isEmailConfigured(): boolean {
-  return Boolean(process.env.RESEND_API_KEY);
+  return Boolean(resendApiKey());
 }
 
 export async function sendVerificationEmail(args: {
@@ -50,10 +93,10 @@ export async function sendVerificationEmail(args: {
   code: string;
   expiresAt: string;
 }): Promise<SendResult> {
-  const apiKey = process.env.RESEND_API_KEY;
+  const apiKey = resendApiKey();
   if (!apiKey) return { sent: false, reason: 'RESEND_API_KEY is not set.' };
 
-  const from = process.env.RESEND_FROM || defaultFrom();
+  const from = resendFromAddress();
   const firstName = args.name.split(' ')[0] || args.name;
   const minutes = Math.max(1, Math.round((new Date(args.expiresAt).getTime() - Date.now()) / 60_000));
 
@@ -76,9 +119,9 @@ export async function sendVerificationEmail(args: {
   `.trim();
 
   try {
-    const res = await fetch(RESEND_ENDPOINT, {
+    const res = await fetch(resendEndpoint(), {
       method: 'POST',
-      headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+      headers: mailHeaders(apiKey),
       body: JSON.stringify({
         from,
         to: [args.email],
@@ -89,11 +132,11 @@ export async function sendVerificationEmail(args: {
     });
     if (!res.ok) {
       const body = await res.text().catch(() => '');
-      return { sent: false, reason: `Resend responded ${res.status}: ${body.slice(0, 240)}` };
+      return { sent: false, reason: scrubMailLog(`Resend responded ${res.status}: ${body}`) };
     }
     return { sent: true };
   } catch (err) {
-    return { sent: false, reason: err instanceof Error ? err.message : 'Unknown error calling Resend.' };
+    return { sent: false, reason: scrubMailLog(err instanceof Error ? err.message : 'Unknown error calling Resend.') };
   }
 }
 
@@ -104,25 +147,28 @@ export function contactRecipient(): string {
 
 /** A message from the contact form, delivered to the owner with Reply-To set to the sender. */
 export async function sendContactEmail(args: { name: string; email: string; company: string; message: string }): Promise<SendResult> {
-  const apiKey = process.env.RESEND_API_KEY;
+  const apiKey = resendApiKey();
   if (!apiKey) return { sent: false, reason: 'RESEND_API_KEY is not set.' };
   const text = `From: ${args.name} <${args.email}>\nCompany: ${args.company || '(none)'}\n\n${args.message}`;
   try {
-    const res = await fetch(RESEND_ENDPOINT, {
+    const res = await fetch(resendEndpoint(), {
       method: 'POST',
-      headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+      headers: mailHeaders(apiKey),
       body: JSON.stringify({
-        from: process.env.RESEND_FROM || defaultFrom(),
+        from: resendFromAddress(),
         to: [contactRecipient()],
         reply_to: args.email,
         subject: `Omnia.tax contact: ${args.name}`.slice(0, 120),
         text,
       }),
     });
-    if (!res.ok) return { sent: false, reason: `Resend responded ${res.status}` };
+    if (!res.ok) {
+      const body = await res.text().catch(() => '');
+      return { sent: false, reason: scrubMailLog(`Resend responded ${res.status}: ${body}`) };
+    }
     return { sent: true };
   } catch (err) {
-    return { sent: false, reason: err instanceof Error ? err.message : 'Unknown error calling Resend.' };
+    return { sent: false, reason: scrubMailLog(err instanceof Error ? err.message : 'Unknown error calling Resend.') };
   }
 }
 

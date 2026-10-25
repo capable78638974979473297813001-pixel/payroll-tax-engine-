@@ -53,12 +53,12 @@ every one:
 - **Limitation of liability cap** (Terms §7) — total liability is capped at the fees paid in the
   twelve months before the claim, and consequential damages and any tax, penalty or interest
   are excluded; confirm both hold in Michigan and for your price once it is set.
-- **New terms version 2026-10-23.1 needs Scott/legal review** — `site/lib/terms.ts` and
-  `site/legal/terms.html` now say a 14-day free trial, then $0.08 per successful paycheck
+- **New terms version 2026-10-25.1 needs a parent's review before merge** — `site/lib/terms.ts` and
+  `site/legal/terms.html` say a 14-day free trial, then $0.08 per successful paycheck
   calculation, pay as you go, card required at signup, usage during the trial not charged.
-  The previous text is frozen as `2026-10-19.2` and is not what new signups accept.
-  Counsel should confirm the $0.08 rate, the trial-metering statement, and that dropping
-  the unpublished-rate language is what you want to offer.
+  The billing sentence no longer mentions a batch of paychecks, because there is no batch route.
+  The previous published text is frozen as `2026-10-19.2`. Version `2026-10-23.1` is replaced by
+  `2026-10-25.1`. Counsel should confirm the $0.08 rate and the trial-metering statement.
 - **Address lookups and employee data** — the Privacy Policy (§5) discloses that addresses sent
   to `POST /v1/address` may be looked up with public geocoding services (U.S. Census Bureau,
   OpenStreetMap Nominatim, state and county GIS). Confirm that disclosure and your customers'

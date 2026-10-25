@@ -43,6 +43,7 @@
       <button type="button" class="text-link" id="resend" disabled style="background:none;border:0;cursor:pointer">Send a new code</button>
       <span id="resendIn">in <span id="count">0:30</span></span>
     </p>
+    <p class="send-status" id="sendStatus" hidden></p>
     <p id="changeRow" class="fine">Wrong email? <a id="change" href="/signup">Change it</a></p>
     <form id="npForm" hidden novalidate style="margin-top:24px">
       <div class="field" id="npField">
@@ -78,16 +79,28 @@
   var ttl = (window.OMNIA && window.OMNIA.codeTtlSec) || 900;
   document.getElementById('ttlMin').textContent = String(Math.round(ttl / 60));
   var lead = document.getElementById('lead1');
-  if (signin) {
-    lead.innerHTML = pending.emailConfigured
-      ? 'If <b style="color:var(--ink)">' + escapeHtml(email) + '</b> has an Omnia.tax account, we sent a 6-digit code.'
-      : 'If <b style="color:var(--ink)">' + escapeHtml(email) + '</b> has an account, its sign-in code is in the server log (no email provider is connected yet).';
-  } else if (pending.emailSent) {
-    lead.innerHTML = 'We sent a 6-digit code to <b style="color:var(--ink)">' + escapeHtml(email) + '</b>.';
-  } else {
-    lead.innerHTML = 'We couldn’t send the email to <b style="color:var(--ink)">' + escapeHtml(email) + '</b> just now. Use “Resend code” in a moment. On a development server the code is in the server log.';
-  }
   function escapeHtml(s) { return String(s).replace(/[&<>"']/g, function (c) { return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]; }); }
+  function paintLead() {
+    var who = '<b style="color:var(--ink)">' + escapeHtml(email) + '</b>';
+    if (signin) {
+      if (pending.devCodeHint) {
+        lead.innerHTML = 'If ' + who + ' has an account, its sign-in code is in the server log. No email provider is connected on this development server.';
+      } else if (pending.emailSent === false && pending.emailConfigured) {
+        lead.innerHTML = 'We couldn’t send a sign-in code to ' + who + ' just now. Use “Send a new code” to try again.';
+      } else {
+        lead.innerHTML = 'If ' + who + ' has an Omnia.tax account, we sent a 6-digit code.';
+      }
+      return;
+    }
+    if (pending.emailSent) {
+      lead.innerHTML = 'We sent a 6-digit code to ' + who + '.';
+    } else if (pending.devCodeHint) {
+      lead.innerHTML = 'This development server did not email ' + who + '. The code is in the server log.';
+    } else {
+      lead.innerHTML = 'We couldn’t send the email to ' + who + ' just now. Use “Send a new code” to try again.';
+    }
+  }
+  paintLead();
 
   var inputs = Array.prototype.slice.call(document.querySelectorAll('.code'));
   function value() { return inputs.map(function (i) { return i.value; }).join(''); }
@@ -128,8 +141,11 @@
   });
 
   var cooldown = (window.OMNIA && window.OMNIA.codeCooldownSec) || 30;
-  var remain = cooldown;
-  if (pending.sentAt) remain = Math.max(0, cooldown - Math.floor((Date.now() - pending.sentAt) / 1000));
+  // A failed send must not look like success. The 30-second wait applies
+  // only after a code was emailed, or written to the development log.
+  var delivered = !!(pending.emailSent || pending.devCodeHint || pending.cooldown);
+  var remain = 0;
+  if (delivered && pending.sentAt) remain = Math.max(0, cooldown - Math.floor((Date.now() - pending.sentAt) / 1000));
   var resend = document.getElementById('resend');
   var count = document.getElementById('count');
   var resendIn = document.getElementById('resendIn');
@@ -225,23 +241,59 @@
       .catch(function () { Omnia.setLoading(btn, false); err.textContent = 'Could not reach the server. Try again.'; err.hidden = false; });
   });
 
+  var sendStatus = document.getElementById('sendStatus');
+  function showStatus(msg, ok) {
+    sendStatus.textContent = msg;
+    sendStatus.className = 'send-status ' + (ok ? 'ok' : 'bad');
+    sendStatus.setAttribute('role', ok ? 'status' : 'alert');
+    sendStatus.hidden = false;
+  }
+  if (pending.emailSent === false && !pending.devCodeHint && !pending.cooldown) {
+    showStatus(signin
+      ? 'We couldn’t send a sign-in code just now. Try again in a moment.'
+      : 'We couldn’t send the email just now. Try again in a moment.', false);
+  }
   resend.addEventListener('click', function () {
     var path = signin ? '/api/signin' : '/api/signup';
-    var body = signin ? { email: email } : { name: pending.name, email: email, company: pending.company, phone: pending.phone, agreeToTerms: true };
+    var body = signin ? { email: email } : { name: pending.name, email: email, company: pending.company, phone: pending.phone || '', agreeToTerms: true };
     resend.disabled = true;
+    sendStatus.hidden = true;
     Omnia.api(path, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
       .then(function (res) {
         if (!res.ok) {
-          Omnia.toast((res.body && res.body.error) || 'Could not send the code. Try again in a minute.', 'error');
+          showStatus((res.body && res.body.error) || 'Could not send the code. Try again in a minute.', false);
           resend.disabled = false;
           return;
         }
+        var sent = !!(res.body && res.body.emailSent);
+        var hint = !!(res.body && res.body.devCodeHint);
+        var cooling = !!(res.body && res.body.cooldown);
         pending.sentAt = Date.now();
-        if (!signin) pending.emailSent = !!(res.body && res.body.emailSent);
+        pending.emailSent = sent;
+        pending.devCodeHint = hint;
+        if (res.body && typeof res.body.emailConfigured === 'boolean') pending.emailConfigured = res.body.emailConfigured;
         Omnia.setPending(pending);
+        paintLead();
+        if (!sent && !cooling && !hint) {
+          showStatus(signin
+            ? 'We couldn’t send a sign-in code just now. Try again in a moment.'
+            : 'We couldn’t send the email just now. Try again in a moment.', false);
+          resend.disabled = false;
+          return;
+        }
+        if (hint) {
+          showStatus('A new code is in the server log on this development server. It was not emailed.', true);
+        } else if (cooling) {
+          showStatus('A code was just sent. You can request another when the timer ends.', true);
+        } else {
+          showStatus(signin ? 'If this address has an account, a new code is on its way.' : 'A new code is on its way.', true);
+        }
         remain = cooldown;
         tick();
-        Omnia.toast('A new code is on its way.');
+      })
+      .catch(function () {
+        showStatus('Could not reach the server. Try again.', false);
+        resend.disabled = false;
       });
   });
 })();
