@@ -63,9 +63,9 @@ export interface MinimumWageOutput {
 
 export type ExtrasValidation = { ok: true; value: PaycheckExtras } | { ok: false; errors: FieldError[] };
 
-const ORDER_TYPES = ['consumer_creditor', 'child_support', 'federal_student_loan_default'];
-const OCCUPATIONS = ['food_service', 'service_employee'];
-const MAX_ORDERS = 25;
+export const ORDER_TYPES = ['consumer_creditor', 'child_support', 'federal_student_loan_default'];
+export const OCCUPATIONS = ['food_service', 'service_employee'];
+export const MAX_ORDERS = 25;
 
 const isObject = (v: unknown): v is Record<string, unknown> => typeof v === 'object' && v !== null && !Array.isArray(v);
 

@@ -197,6 +197,20 @@ describe('Omnia API (end to end)', () => {
     assert.ok(j.result.taxes.length > 0);
   });
 
+  test('the OpenAPI document and the request schema are public JSON', async () => {
+    const o = await fetch(`${BASE}/v1/openapi.json`);
+    assert.equal(o.status, 200);
+    assert.match(o.headers.get('content-type') ?? '', /application\/json/);
+    const doc = await o.json();
+    assert.equal(doc.openapi, '3.1.0');
+    assert.ok(doc.paths['/v1/paycheck'].post);
+    const s = await fetch(`${BASE}/v1/schemas/paycheck-request.json`);
+    assert.equal(s.status, 200);
+    const schema = await s.json();
+    assert.equal(schema.$schema, 'https://json-schema.org/draft/2020-12/schema');
+    assert.deepEqual(schema.required.slice(0, 2), ['checkDate', 'payFrequency']);
+  });
+
   test('POST /v1/address needs a key and validates before any lookup', async () => {
     const addr = (body: unknown, key: string | null = PLAINTEXT_KEY) =>
       fetch(`${BASE}/v1/address`, {

@@ -16,6 +16,7 @@ import { TRIAL_DAYS, estimate as computePricing } from './lib/pricing.ts';
 import { TERMS_VERSION, TERM_MONTHS, termsClauses } from './lib/terms.ts';
 import { isEmailConfigured, sendVerificationEmail, sendContactEmail } from './lib/mail.ts';
 import { validatePaycheckInput } from './lib/validate.ts';
+import { openApiDocument, paycheckRequestSchema, unknownFieldWarnings } from './lib/api-spec.ts';
 import { ExtrasRefusal, runPaycheckExtras, validatePaycheckExtras } from './lib/extras.ts';
 import { keyLifeFor } from './lib/keylife.ts';
 import { coverage, searchLocal } from './lib/coverage.ts';
@@ -2242,9 +2243,11 @@ async function handlePaycheck(req: IncomingMessage, res: ServerResponse): Promis
   try {
     const result = calculatePaycheck(validation.value);
     const extras = runPaycheckExtras(validation.value, result, extrasCheck.value);
+    const ignored = unknownFieldWarnings(raw as Record<string, unknown>);
     responseBody = {
       result: {
         ...result,
+        ...(ignored.length > 0 ? { warnings: [...(result.warnings ?? []), ...ignored] } : {}),
         ...(extras.garnishment ? { garnishment: extras.garnishment } : {}),
         ...(extras.minimumWage ? { minimumWage: extras.minimumWage } : {}),
       },
@@ -2785,6 +2788,8 @@ createServer((req, res) => {
     if (method === 'GET' && (url === '/api/me' || url === '/v1/me')) return handleMe(req, res);
     if (method === 'POST' && (url === '/api/paycheck' || url === '/v1/paycheck')) return handlePaycheck(req, res);
     if (method === 'GET' && (url === '/api/health' || url === '/v1/health' || url === '/healthz')) return handleHealth(res);
+    if (method === 'GET' && (url === '/v1/openapi.json' || url === '/openapi.json')) return sendJson(res, 200, openApiDocument(API_VERSION), { 'Cache-Control': 'public, max-age=300' });
+    if (method === 'GET' && url === '/v1/schemas/paycheck-request.json') return sendJson(res, 200, paycheckRequestSchema, { 'Cache-Control': 'public, max-age=300' });
     if (method === 'GET' && (url === '/api/states' || url === '/v1/states')) return handleStates(res, req.url ?? url);
     if (method === 'GET' && (url === '/api/coverage' || url === '/v1/coverage')) return handleCoverage(res);
     if (method === 'GET' && (url === '/api/coverage/local' || url === '/v1/coverage/local')) return handleCoverageLocal(res, req.url ?? url);

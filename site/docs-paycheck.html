@@ -36,16 +36,24 @@
     <h1 class="page" style="margin-top:12px">Calculate a paycheck</h1>
     <p class="sub">Returns each federal, state and local tax for one paycheck, plus totals and net pay. All amounts are integers in cents.</p>
 
+    <p class="sub">The body is described by a <a href="/v1/schemas/paycheck-request.json">JSON Schema</a>, and the whole API by an <a href="/v1/openapi.json">OpenAPI 3.1 document</a>. Import either into your editor, client generator or Postman. Both are generated from the same lists the server validates against, so a value they allow is a value the API accepts.</p>
+    <p class="sub"><strong>Money is integer cents</strong>: $3,000.00 is <code>300000</code>. A decimal such as <code>3000.5</code> is a <code>422</code> that says so. Rates are decimals: <code>0.031</code> is 3.1%. Dates are <code>YYYY-MM-DD</code>.</p>
+
     <h2 style="margin-top:36px">Body</h2>
     <div class="table-wrap"><table>
       <tbody>
         <tr><td class="mono">checkDate <span class="fine">string</span></td><td>required</td><td>Pay date, YYYY-MM-DD. Picks the tax year.</td></tr>
-        <tr><td class="mono">payFrequency <span class="fine">string</span></td><td>required</td><td>weekly, biweekly, semimonthly or monthly.</td></tr>
+        <tr><td class="mono">payFrequency <span class="fine">string</span></td><td>required</td><td>One of weekly, biweekly, semimonthly, monthly, quarterly, semiannual, annual or daily.</td></tr>
         <tr><td class="mono">earnings <span class="fine">array</span></td><td>required</td><td>{ code, category, amount } per earning line. amount is cents.</td></tr>
         <tr><td class="mono">deductions <span class="fine">array</span></td><td>required</td><td>Pretax and posttax deductions, amounts in cents. Send <code>[]</code> when there are none.</td></tr>
         <tr><td class="mono">federalW4 <span class="fine">object</span></td><td>required</td><td>All six fields are required: filingStatus, multipleJobs, dependentCredit, otherIncome, deductions, extraWithholding. Dollar fields are cents.</td></tr>
         <tr><td class="mono">ytd <span class="fine">object</span></td><td>required</td><td>Year-to-date socialSecurity, medicare, and futa wages, in cents. Send zeros at the start of the year.</td></tr>
         <tr><td class="mono">workState <span class="fine">object</span></td><td>required</td><td>{ code, certificate }. Pennsylvania uses workPSD and residencePSD.</td></tr>
+        <tr><td class="mono">residenceState <span class="fine">object</span></td><td></td><td>{ code, certificate } for where the employee lives, when it differs from workState. <code>residenceStateWithholding</code> { nexus, voluntary } says whether that state also withholds.</td></tr>
+        <tr><td class="mono">employer <span class="fine">object</span></td><td></td><td>Facts only the employer has. <code>stateUnemploymentRate</code> is your assigned rate by state, e.g. <code>{ "OH": 0.031 }</code>; without it the state's new-employer rate is used and the line says so.</td></tr>
+        <tr><td class="mono">employmentCategory <span class="fine">string</span></td><td></td><td>standard (default), clergy, statutory_employee, household, agricultural, railroad or election_worker. A misspelling is a <code>422</code>.</td></tr>
+        <tr><td class="mono">priorRegularPayment <span class="fine">object</span></td><td></td><td>For a bonus paid apart from regular pay: { taxableWages, stateIncomeTaxWithheld } of the check it is aggregated with.</td></tr>
+        <tr><td class="mono">roundToWholeDollars <span class="fine">boolean</span></td><td></td><td>Round state withholding to whole dollars where the state requires it.</td></tr>
         <tr><td class="mono">minimumWageCheck <span class="fine">object</span></td><td></td><td>{ hourlyRate } in cents, compared with wage floors on the same call. Optional: locality, employeeCount, tipped, region, occupation. American Samoa has no single minimum wage, so it also needs <code>industry</code> (for example <code>garment</code>); without it the check is refused.</td></tr>
         <tr><td class="mono">garnishments <span class="fine">array</span></td><td></td><td>Orders: consumer_creditor, child_support, federal_student_loan_default. amountOrdered is cents.</td></tr>
       </tbody>
@@ -60,7 +68,7 @@
         <tr><td class="mono">employeeTaxTotal</td><td>Sum of employee taxes, in cents.</td></tr>
         <tr><td class="mono">employerTaxTotal</td><td>Sum of employer taxes, in cents.</td></tr>
         <tr><td class="mono">netPay</td><td>Gross minus employee taxes and deductions, in cents.</td></tr>
-        <tr><td class="mono">notices, warnings</td><td>Returned when an input needs a second look.</td></tr>
+        <tr><td class="mono">notices, warnings</td><td>Returned when an input needs a second look. <code>warnings</code> also names any request field the API did not read, with the field you probably meant, so a misspelled optional field is not silent.</td></tr>
       </tbody>
     </table></div>
 
@@ -118,6 +126,14 @@
   <span class="k">"employeeTaxTotal"</span><span class="d">: </span><span class="n">27035</span><span class="d">,</span>
   <span class="k">"employerTaxTotal"</span><span class="d">: </span><span class="n">16901</span><span class="d">,</span>
   <span class="k">"netPay"</span><span class="d">: </span><span class="n">112965</span><span class="d"> } }</span></pre>
+    </div>
+    <div class="panel" style="margin-top:16px">
+      <div class="tabs"><span class="tab-on">Validation error</span><span class="right">422</span></div>
+      <pre><span class="d">{ </span><span class="k">"error"</span><span class="d">: </span><span class="s">"The request did not pass validation."</span><span class="d">,</span>
+  <span class="k">"code"</span><span class="d">: </span><span class="s">"invalid_input"</span><span class="d">,</span>
+  <span class="k">"details"</span><span class="d">: [{ </span><span class="k">"path"</span><span class="d">: </span><span class="s">"earnings[0].amount"</span><span class="d">,</span>
+    <span class="k">"message"</span><span class="d">: </span><span class="s">"must be integer cents, not 3000.5 - send whole cents (e.g. 300050 for $3,000.50), never dollars."</span><span class="d"> }],</span>
+  <span class="k">"requestId"</span><span class="d">: </span><span class="s">"req_3f9a1c07b2e4d856"</span><span class="d"> }</span></pre>
     </div>
     <div class="panel" style="margin-top:16px">
       <div class="tabs"><span class="tab-on">Error</span><span class="right">401</span></div>
