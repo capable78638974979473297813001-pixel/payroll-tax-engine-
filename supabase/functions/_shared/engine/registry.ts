@@ -139,11 +139,11 @@ export interface FederalRuleset {
    * own doc comment for why).
    */
   electiveDeferralLimits: {
-    /** 401(k) and 403(b) share ONE combined IRC 402(g) limit. */
+    /** 401(k), 403(b) and SIMPLE IRA deferrals share ONE combined IRC 402(g) limit. */
     section402gAggregate: number;
     /** A governmental/tax-exempt 457(b) plan's OWN separate limit — not aggregated with 401(k)/403(b). */
     deferral457: number;
-    /** A SIMPLE plan's own separate, lower limit (IRC 408(p)/401(k) SIMPLE). */
+    /** A SIMPLE plan's own, lower limit (IRC 408(p)/401(k) SIMPLE), applied IN ADDITION to the combined 402(g) limit. */
     simple: number;
   };
   /** Household / agricultural / election-worker coverage thresholds — shaped and read in taxes/federal.ts. */

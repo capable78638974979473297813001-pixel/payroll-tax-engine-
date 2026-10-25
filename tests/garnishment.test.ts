@@ -543,18 +543,42 @@ describe('support-order proration rounding', () => {
 });
 
 describe('stacking a support order with an ordinary garnishment', () => {
-  test('the ordinary garnishment only gets what room the support ceiling leaves behind', () => {
-    // $1000 disposable, 60% support ceiling = $600. Support order takes
-    // $300 of it, leaving $300 of room; the ordinary garnishment's own cap
-    // (25% = $250) is smaller than that remaining room, so IT binds.
-    const r = run(paycheckOf(dollars(1000), 0), [
-      order({ id: 'S', type: 'child_support', amountOrdered: dollars(300), supportingOtherFamily: false }),
+  test('support already withheld counts against the ordinary limit (DOL Fact Sheet #30, Example 6)', () => {
+    // $370 weekly disposable, $140 withheld for support. The ordinary limit is
+    // 25% = $92.50; $140 is already more than that, so the creditor gets $0 even
+    // though the support ceiling (50%) would leave $45 of room.
+    const r = run(paycheckOf(dollars(370), 0), [
+      order({ id: 'S', type: 'child_support', amountOrdered: dollars(140), supportingOtherFamily: true }),
       order({ id: 'C', type: 'consumer_creditor', amountOrdered: dollars(500), priority: 1 }),
     ]);
-    assert.equal(r.aggregateCeiling, dollars(600));
-    assert.equal(r.lines.find((l) => l.orderId === 'S')!.withheld, dollars(300));
-    assert.equal(r.lines.find((l) => l.orderId === 'C')!.withheld, dollars(250));
-    assert.equal(r.totalWithheld, dollars(550));
+    assert.equal(r.aggregateCeiling, dollars(185));
+    assert.equal(r.lines.find((l) => l.orderId === 'S')!.withheld, dollars(140));
+    assert.equal(r.lines.find((l) => l.orderId === 'C')!.withheld, 0);
+    assert.equal(r.totalWithheld, dollars(140));
+  });
+
+  test('when support is below the ordinary limit, the creditor gets only the difference', () => {
+    // $1000 disposable, 60% support ceiling = $600. Support takes $100; the
+    // ordinary limit is 25% = $250, so the creditor may take $150 more.
+    const r = run(paycheckOf(dollars(1000), 0), [
+      order({ id: 'S', type: 'child_support', amountOrdered: dollars(100), supportingOtherFamily: false }),
+      order({ id: 'C', type: 'consumer_creditor', amountOrdered: dollars(500), priority: 1 }),
+    ]);
+    assert.equal(r.lines.find((l) => l.orderId === 'C')!.withheld, dollars(150));
+    assert.equal(r.totalWithheld, dollars(250));
+    assert.match(r.lines.find((l) => l.orderId === 'C')!.detail, /already garnished/);
+  });
+
+  test('several ordinary orders share one ordinary limit even when the 30x floor makes it smaller than 25%', () => {
+    // $250 disposable: 25% = $62.50 but only $32.50 is above 30 x $7.25 = $217.50.
+    // The first order takes the $32.50; the second gets nothing.
+    const r = run(paycheckOf(dollars(250), 0), [
+      order({ id: 'C1', type: 'consumer_creditor', amountOrdered: dollars(1000), priority: 1 }),
+      order({ id: 'C2', type: 'consumer_creditor', amountOrdered: dollars(1000), priority: 2 }),
+    ]);
+    assert.equal(r.lines.find((l) => l.orderId === 'C1')!.withheld, dollars(32.5));
+    assert.equal(r.lines.find((l) => l.orderId === 'C2')!.withheld, 0);
+    assert.equal(r.totalWithheld, dollars(32.5));
   });
 
   test('a support order that consumes the full ceiling leaves nothing for anything junior', () => {

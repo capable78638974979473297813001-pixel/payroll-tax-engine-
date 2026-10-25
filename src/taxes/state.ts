@@ -2796,6 +2796,22 @@ interface StatePaidLeaveEmployerConfig {
    */
   tiers?: Record<string, number>;
   /**
+   * The tier used when the caller names none. Without it a tiered state
+   * computes nothing until the caller picks one (Delaware: headcount decides
+   * whether the Act applies at all). With it, the ordinary case needs no input
+   * and only the exception has to be named — Minnesota's standard rate applies
+   * to every employer unless DEED has designated it a small employer.
+   */
+  defaultTier?: string;
+  /**
+   * A fixed employee rate (fraction of wages) that does not move with the
+   * tier. Minnesota's employee pays 0.44% whether the employer's premium is
+   * 0.88% or the small-employer 0.66%: the discount comes entirely off the
+   * employer's share. employeeShareFraction cannot say that, because it is a
+   * fraction of whichever total the tier selected.
+   */
+  employeeRate?: number;
+  /**
    * Ceiling on how much of the total premium the employer may recover from
    * employees, where the state permits recovery at the employer's option.
    */
@@ -2816,7 +2832,7 @@ function resolvePaidLeaveRate(
   cfg: StatePaidLeaveEmployerConfig,
 ): { rate: number; tierLabel: string } | null {
   if (!cfg.tiers) return { rate: cfg.totalRate, tierLabel: "" };
-  const tier = input.employer?.paidLeaveTier?.[rules.code];
+  const tier = input.employer?.paidLeaveTier?.[rules.code] ?? cfg.defaultTier;
   if (!tier) return null;
   const rate = cfg.tiers[tier];
   if (rate === undefined || rate <= 0) return null;
@@ -2938,7 +2954,7 @@ function statePaidLeaveEmployerTax(
   const fraction = resolveEmployeeShareFraction(input, rules, cfg);
 
   const totalPremium = applyRate(taxableWages, resolved.rate);
-  const employeeShare = applyRate(taxableWages, resolved.rate * fraction);
+  const employeeShare = applyRate(taxableWages, cfg.employeeRate ?? resolved.rate * fraction);
   const amount = atLeastZero(totalPremium - employeeShare);
 
   return {
@@ -2950,10 +2966,12 @@ function statePaidLeaveEmployerTax(
     amount,
     detail:
       `${fmt(totalPremium)} total premium (${fmt(taxableWages)} @ ${(resolved.rate * 100).toFixed(2)}%)${resolved.tierLabel} ` +
-      `less ${fmt(employeeShare)} employee share = ${fmt(amount)} employer share ` +
-      `(certificate.employerLiableForPaidLeaveShare — caller's own employer-size determination; ` +
-      `the exact headcount threshold is state-specific, e.g. Washington's 50+ vs Massachusetts's 25+, ` +
-      `and is not itself encoded here since this function is shared across states)`,
+      `less ${fmt(employeeShare)} employee share = ${fmt(amount)} employer share` +
+      (cfg.employerSizeGated === false
+        ? ' (this programme applies to every covered employer)'
+        : ` (certificate.employerLiableForPaidLeaveShare — caller's own employer-size determination; ` +
+          `the exact headcount threshold is state-specific, e.g. Washington's 50+ vs Massachusetts's 25+, ` +
+          `and is not itself encoded here since this function is shared across states)`),
   };
 }
 

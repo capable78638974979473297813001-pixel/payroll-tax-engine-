@@ -91,10 +91,19 @@ interface DeferralGroup {
   ytdKey: keyof NonNullable<YearToDate['electiveDeferrals']>;
 }
 
+/**
+ * Applied in order, so a SIMPLE deferral is checked against the shared 402(g)
+ * limit FIRST (the IRS aggregates "all elective deferrals you made to all
+ * plans" — 401(k), 403(b), SARSEP and SIMPLE IRA — under the one 402(g)
+ * limit) and then, for what survives, against the SIMPLE plan's own lower
+ * limit. Giving SIMPLE a group of its own only, as this once did, let a
+ * participant with $20,000 already counted toward the $24,500 limit defer
+ * another $10,000 to a SIMPLE as pretax, when $4,500 of room was left.
+ */
 const DEFERRAL_GROUPS = (
   limits: ElectiveDeferralLimits,
 ): readonly DeferralGroup[] => [
-  { categories: ['deferral_401k', 'deferral_403b'], limitDollars: limits.section402gAggregate, ytdKey: 'section402gAggregate' },
+  { categories: ['deferral_401k', 'deferral_403b', 'deferral_simple'], limitDollars: limits.section402gAggregate, ytdKey: 'section402gAggregate' },
   { categories: ['deferral_457'], limitDollars: limits.deferral457, ytdKey: 'deferral457' },
   { categories: ['deferral_simple'], limitDollars: limits.simple, ytdKey: 'simple' },
 ];
@@ -109,9 +118,10 @@ const DEFERRAL_GROUPS = (
  * the excess as taxable changes, because it no longer legally qualifies
  * as a pretax deferral once the annual ceiling is reached.
  *
- * Three limit groups, matching how the IRC actually aggregates them (see
- * ElectiveDeferralLimits' own field comments): 401(k)+403(b) combined,
- * 457(b) separate, SIMPLE separate. Deliberately NOT modelled: catch-up
+ * Limit groups, matching how the IRC actually aggregates them (see
+ * ElectiveDeferralLimits' own field comments): 401(k), 403(b) and SIMPLE
+ * together under the one 402(g) limit; 457(b) separate; and SIMPLE ALSO under
+ * its own lower limit on top of that. Deliberately NOT modelled: catch-up
  * contributions for age 50+ or the SECURE 2.0 age-60-63 enhanced
  * catch-up — this engine has no age/birthdate input anywhere, and
  * guessing eligibility would risk UNDER-capping (treating money as

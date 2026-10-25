@@ -53,7 +53,7 @@ const DEDUCTION_CATS = new Set([
 export const WAGE_BASES = {
   2025: { socialSecurity: 176100, futa: 7000 },
   2026: { socialSecurity: 184500, futa: 7000 },
-  2027: { socialSecurity: 184500, futa: 7000 },
+  2027: { socialSecurity: 192300, futa: 7000 },
 };
 
 const FILING = new Set(['single', 'married_joint', 'married_separate', 'head_of_household']);

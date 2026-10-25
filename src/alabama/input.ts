@@ -1,6 +1,6 @@
 import { dollars } from '../money.ts';
 import type { Cents } from '../money.ts';
-import { alCountyRuleset, alMunicipalityRuleset, hasStateRuleset, stateRuleset } from '../registry.ts';
+import { alCountyRuleset, alMunicipalityRuleset, federalRuleset, hasStateRuleset, stateRuleset } from '../registry.ts';
 import { PERIODS_PER_YEAR } from '../types.ts';
 import { EMPLOYMENT_CATEGORIES, isRealIsoDate } from '../validate.ts';
 import type {
@@ -512,9 +512,11 @@ function advisoryWarnings(
   }
 
   if (!input.ytd || Object.keys(input.ytd).length === 0) {
+    // The base is the check date's own, not a figure from the year this text was written.
+    const ssBase = Math.round(federalRuleset(input.checkDate).socialSecurity.wageBase).toLocaleString('en-US');
     out.push(
       `No year-to-date figures were supplied, so every wage-base-capped tax was computed as though this were ` +
-        `the employee's first cheque of the year: Social Security ($184,500 base), FUTA ($7,000) and Alabama ` +
+        `the employee's first cheque of the year: Social Security ($${ssBase} base), FUTA ($7,000) and Alabama ` +
         `unemployment ($8,000 — small, and reached quickly). Correct for a January cheque and wrong for any ` +
         `other.`,
     );

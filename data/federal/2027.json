@@ -4,7 +4,39 @@
     "status": "carry-forward-from-2026",
     "createdOn": "2026-10-13",
     "basedOn": "data/federal/2026.json",
-    "note": "Carried forward from the 2026 file on 2026-10-13. Not yet checked against the 2027 official source: every figure is 2026's unless listed in updatedFor2027. Remove this block only after each figure has been re-verified against its 2027 source."
+    "note": "Carried forward from the 2026 file on 2026-10-13. Not yet checked against the 2027 official source: every figure is 2026's unless listed in updatedFor2027. Remove this block only after each figure has been re-verified against its 2027 source.",
+    "updatedFor2027": [
+      {
+        "path": "socialSecurity.wageBase",
+        "from": 184500.0,
+        "to": 192300.0,
+        "source": "SSA 2027 COLA Fact Sheet https://www.ssa.gov/news/en/cola/factsheets/2027.html, read directly 2026-10-25; also SSA oact/cola/cbb and Journal of Accountancy, Oct 2026"
+      },
+      {
+        "path": "employmentCategories.coverageThresholds.household.annualCashWages",
+        "from": 3000,
+        "to": 3100,
+        "source": "SSA 'Specific coverage thresholds for 2027': domestic employee threshold $3,100 (https://www.ssa.gov/oact/COLA/CovThresh.html), read directly 2026-10-25"
+      },
+      {
+        "path": "employmentCategories.coverageThresholds.electionWorker.annualCashWages",
+        "from": 2500,
+        "to": 2700,
+        "source": "SSA 'Specific coverage thresholds for 2027': election officials and election workers $2,700 (https://www.ssa.gov/oact/COLA/CovThresh.html), read directly 2026-10-25"
+      },
+      {
+        "path": "railroadRetirement.tier2.wageBase",
+        "from": 137100,
+        "to": 142800,
+        "source": "RRB '2027 Maximum Taxable Railroad Earnings': Tier I $192,300, Tier II $142,800 (https://rrb.gov/FinancialReporting/FinancialActuarialStatistical/EarningLimits/COLAs); SSA old-law contribution and benefit base 2027 = $142,800 (ssa.gov/oact/cola/oldcbb.html)"
+      },
+      {
+        "path": "railroadRetirement.ruia.monthlyCompensationBase",
+        "from": 2150,
+        "to": 2235,
+        "source": "RRB '2027 Monthly Compensation Base $2,235.00' (Railroad Unemployment Insurance Act) (https://rrb.gov/FinancialReporting/FinancialActuarialStatistical/EarningLimits/COLAs), read directly 2026-10-25"
+      }
+    ]
   },
   "effectiveFrom": "2027-01-01",
   "effectiveTo": "2027-12-31",
@@ -395,8 +427,8 @@
     "source": "ssa-cola",
     "employeeRate": 0.062,
     "employerRate": 0.062,
-    "wageBase": 184500.0,
-    "comment": "2026 OASDI contribution and benefit base, up from 176100 in 2025.",
+    "wageBase": 192300.0,
+    "comment": "2027 OASDI contribution and benefit base, up from 184500 in 2026. SSA 2027 COLA Fact Sheet (Maximum Taxable Earnings, Social Security (OASDI only): $184,500 -> $192,300), read directly 2026-10-25.",
     "exemptPretax": [
       "section125",
       "hsa",
@@ -478,25 +510,27 @@
   "employmentCategories": {
     "coverageThresholds": {
       "electionWorker": {
-        "annualCashWages": 2500,
+        "annualCashWages": 2700,
         "futa": "excluded",
         "federalIncomeTaxWithholding": "not_required",
         "source": {
           "title": "IRS Publication 15 (2026) and SSA, Election Workers — State and Local Government Employers",
           "url": "https://www.ssa.gov/slge/election_workers.htm",
           "verifiedOn": "2026-08-25",
-          "quote": "Social security and Medicare taxes apply to election workers paid $2,500 or more in cash or its equivalent in 2026, up from $2,300. Below that figure the worker is outside social security and Medicare entirely. Election work is service for a state or political subdivision, which is excluded from FUTA employment, and the pay is not subject to federal income tax withholding — though it remains taxable income to the worker."
+          "quote": "Social security and Medicare taxes apply to election workers paid $2,500 or more in cash or its equivalent in 2026, up from $2,300. Below that figure the worker is outside social security and Medicare entirely. Election work is service for a state or political subdivision, which is excluded from FUTA employment, and the pay is not subject to federal income tax withholding — though it remains taxable income to the worker.",
+          "note2027": "annualCashWages is SSA's 2027 figure ($2,700); the quote above is the 2026 publication it replaced."
         }
       },
       "$comment": "Household and agricultural workers are not taxed at different RATES — ordinary FICA and FUTA apply. The question these thresholds answer is whether the worker is inside the system at all for the year.",
       "household": {
-        "annualCashWages": 3000,
+        "annualCashWages": 3100,
         "futaQuarterlyCashWages": 1000,
         "source": {
           "title": "IRS Publication 926 (2026), Household Employer's Tax Guide",
           "url": "https://www.irs.gov/pub/irs-pdf/p926.pdf",
           "verifiedOn": "2026-08-25",
-          "quote": "Social security and Medicare taxes apply to the wages of household workers paid $3,000 or more in cash wages in 2026 (up from $2,800 in 2025). FUTA applies if $1,000 or more in total cash wages is paid to all household employees during any single calendar quarter — a figure unchanged for 2026. Federal income tax withholding is not required from a household employee at all, though employer and employee may agree to it."
+          "quote": "Social security and Medicare taxes apply to the wages of household workers paid $3,000 or more in cash wages in 2026 (up from $2,800 in 2025). FUTA applies if $1,000 or more in total cash wages is paid to all household employees during any single calendar quarter — a figure unchanged for 2026. Federal income tax withholding is not required from a household employee at all, though employer and employee may agree to it.",
+          "note2027": "annualCashWages is SSA's 2027 figure ($3,100); the quote above is the 2026 publication it replaced. IRS Pub 926 for 2027 not yet published."
         }
       },
       "agricultural": {
@@ -543,7 +577,7 @@
   "railroadRetirement": {
     "ruia": {
       "newEmployerRate": 0.0558,
-      "monthlyCompensationBase": 2150,
+      "monthlyCompensationBase": 2235,
       "experienceRange": {
         "min": 0.0065,
         "max": 0.12
@@ -560,9 +594,10 @@
     "tier2": {
       "employeeRate": 0.049,
       "employerRate": 0.131,
-      "wageBase": 137100
+      "wageBase": 142800,
+      "rateNote2027": "Only the Tier II wage base is updated for 2027. The 2027 Tier II rates (4.9% employee / 13.1% employer in 2026) and the RUIA new-employer and experience rates are still 2026's: not re-verified."
     },
-    "tierOneNote": "Tier I for 2026: 6.20% on compensation up to $184,500 plus 1.45% uncapped, with the same 0.9% additional Medicare above $200,000 — identical to this file's socialSecurity and medicare blocks, which is why they are reused.",
+    "tierOneNote": "Tier I for 2027: 6.20% on compensation up to $192,300 plus 1.45% uncapped, with the same 0.9% additional Medicare above $200,000 — identical to this file's socialSecurity and medicare blocks, which is why they are reused.",
     "source": {
       "title": "US Railroad Retirement Board — Railroad Retirement and Unemployment Insurance Taxes in 2026",
       "url": "https://www.rrb.gov/Newsroom/NewsReleases/RetirementUnemploymentInsuranceTaxes",

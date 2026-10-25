@@ -37,6 +37,12 @@
  *     already at its own 25% leaves nothing for anything junior to it. This
  *     mirrors real payroll practice: a second consumer garnishment queues
  *     behind the first rather than stacking on top of it.
+ *   - Ordinary consumer-debt orders share ONE ordinary limit (25%, or the
+ *     excess over 30x minimum wage, or a state's own formula) together with
+ *     whatever support already took: DOL Fact Sheet #30 Example 6 allows no
+ *     creditor withholding at all when $140 of support already exceeds the
+ *     $92.50 ordinary limit on $370. The higher support ceiling does not
+ *     create room for a creditor.
  */
 
 import { applyRate, atLeastZero, dollars, fmt, roundHalfUp } from './money.ts';
@@ -719,7 +725,18 @@ export function calculateGarnishments(input: GarnishmentInput): GarnishmentResul
     }
   }
 
-  let room = atLeastZero(aggregateCeiling - lines.reduce((s, l) => s + l.withheld, 0));
+  const supportWithheld = lines.reduce((s, l) => s + l.withheld, 0);
+  let room = atLeastZero(aggregateCeiling - supportWithheld);
+  // What ordinary (consumer-debt) orders have taken so far. The CCPA's ordinary
+  // limit (25%, or the excess over 30x minimum wage) is a limit on everything
+  // garnished from the paycheck "regardless of the number of garnishment
+  // orders", and DOL counts a support order's withholding against it: with
+  // $370 disposable and $140 withheld for support, "no additional garnishment
+  // for the defaulted consumer debt may be made because the amount already
+  // garnished is more than the amount (25%) that may be generally garnished"
+  // (Fact Sheet #30, Example 6). The higher support ceiling only decides how
+  // much support itself may take; it does not hand the creditor room.
+  let ordinaryWithheld = 0;
 
   for (const order of otherOrders) {
     const individualCap =
@@ -747,9 +764,21 @@ export function calculateGarnishments(input: GarnishmentInput): GarnishmentResul
       continue;
     }
 
-    const withheld = Math.max(0, Math.min(order.amountOrdered, individualCap.cap, room));
+    let cap = individualCap.cap;
+    let detail = individualCap.detail;
+    if (order.type === 'consumer_creditor') {
+      const alreadyGarnished = supportWithheld + ordinaryWithheld;
+      cap = atLeastZero(cap - alreadyGarnished);
+      if (alreadyGarnished > 0) {
+        detail +=
+          `; ${fmt(alreadyGarnished)} already garnished from this paycheck (support and any earlier ordinary order) ` +
+          `counts against that limit, leaving ${fmt(cap)}`;
+      }
+    }
+    const withheld = Math.max(0, Math.min(order.amountOrdered, cap, room));
     room -= withheld;
-    lines.push({ orderId: order.id, type: order.type, withheld, detail: individualCap.detail });
+    if (order.type === 'consumer_creditor') ordinaryWithheld += withheld;
+    lines.push({ orderId: order.id, type: order.type, withheld, detail });
   }
 
   return {

@@ -202,8 +202,10 @@ export interface YearToDate {
    * wages.ts) checks against the IRC annual limits before letting this
    * period's 401(k)/403(b)/457/SIMPLE deduction count as pretax. Grouped
    * the way the law actually aggregates them: section402gAggregate covers
-   * 401(k)+403(b) combined (one shared limit); deferral457 and simple are
-   * each their own separate limit, tracked independently. Does NOT — and
+   * 401(k), 403(b) AND SIMPLE IRA deferrals combined (one shared 402(g)
+   * limit, so a SIMPLE deferral is counted here as well); deferral457 is its
+   * own separate limit, and simple is the SIMPLE plan's own lower limit,
+   * tracked in addition. Does NOT — and
    * cannot — reflect contributions at a different employer earlier in the
    * year; see this engine's own disclosed single-employer-visibility
    * limitation (same class as the Social Security/FUTA wage-base trackers
@@ -538,6 +540,10 @@ export interface EmployerContext {
    * all three. Headcount is an employer fact, so the caller names the tier
    * ('exempt', 'parentalOnly', 'full') and a state whose config requires one
    * computes nothing until it arrives.
+   *
+   * Minnesota names a default instead ('standard', 0.88% total premium), so
+   * nothing is needed for an ordinary employer; pass { MN: 'small' } for one
+   * DEED has designated a small employer (0.66% total, 0.22% employer share).
    */
   paidLeaveTier?: Record<string, string>;
   /**

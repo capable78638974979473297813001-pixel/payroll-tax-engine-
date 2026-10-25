@@ -4657,10 +4657,16 @@
     {
       "name": "Washington",
       "municode": "81214",
-      "rate": 0.0175,
-      "effectiveFrom": "2026-01-01",
+      "rate": 0.0195,
+      "effectiveFrom": "2025-01-01",
       "administeredBy": "self_or_other",
-      "$correctionNote": "CORRECTED 2026-09-30: was 1.95% (the Finder extract's open row). The City of Washington (Court House) Tax Department: 'Income Tax Rate Change effective January 1, 2026. Current Rate - 1.95%. New Rate - 1.75%.' (https://www.cityofwch.com/183/Tax-Department)"
+      "source2025": {
+        "title": "City of Washington Court House -- 2025 Individual Return with Instructions (multiply line 3 by 1.95%) and Tax Department notice of the January 1, 2026 change",
+        "url": "https://www.cityofwch.com/183/Tax-Department",
+        "says": "Income Tax Rate Change effective January 1, 2026. Current Rate - 1.95%. New Rate - 1.75%.",
+        "fetchedOn": "2026-10-25"
+      },
+      "$correctionNote": "CORRECTED 2026-10-25: this 2025 file carries each town's 2025 rate, but this row had been left at the 1.75% that took effect 2026-01-01 (so a 2025 paycheck was taxed 0.20 points low). The city's own notice and its 2025 return instructions both give 1.95% for 2025. The 2026 and 2027 files keep 1.75%."
     },
     {
       "name": "Washingtonville",
