@@ -1420,6 +1420,36 @@ export function localMinimumWageRuleset(
   return file.jurisdictions;
 }
 
+/**
+ * Notes for a minimum-wage answer that rests on a carry-forward file. A 2027
+ * file marked `provisional` keeps 2026's figure wherever its own
+ * `updatedFor2027` list does not name a 2027 source, and the answer should
+ * say so instead of looking as firm as a dated 2026 one.
+ */
+export function minimumWageProvisionalNotes(stateCode: string, checkDate: string): string[] {
+  const year = yearOf(checkDate);
+  const notes: string[] = [];
+  const note = (label: string, file: { provisional?: { status?: string } } | undefined) => {
+    if (file?.provisional) {
+      notes.push(
+        `${label} minimum wage ${year} rules are provisional (${file.provisional.status ?? 'unverified'}): ` +
+          `figures not listed in its provisional block are the prior year's and have not been checked against ${year} sources.`,
+      );
+    }
+  };
+  note('Federal', federalMinimumWageRuleset(checkDate));
+  if (hasStateMinimumWageRuleset(stateCode, checkDate)) note(stateCode.toUpperCase(), stateMinimumWageRuleset(stateCode, checkDate));
+  if (hasLocalMinimumWageRuleset(stateCode, checkDate)) {
+    note(
+      `${stateCode.toUpperCase()} local`,
+      loadJson<LocalMinimumWageFile>(
+        join('minimum-wage', 'local', `${stateCode.toUpperCase()}-local-${year}.json`),
+      ) as { provisional?: { status?: string } },
+    );
+  }
+  return notes;
+}
+
 export interface SectoralMinimumWageFile {
   state: string;
   year: number;

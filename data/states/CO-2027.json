@@ -6,7 +6,15 @@
     "status": "carry-forward-from-2026",
     "createdOn": "2026-10-13",
     "basedOn": "data/states/CO-2026.json",
-    "note": "Carried forward from the 2026 file on 2026-10-13. Not yet checked against the 2027 official source: every figure is 2026's unless listed in updatedFor2027. Remove this block only after each figure has been re-verified against its 2027 source."
+    "note": "Carried forward from the 2026 file on 2026-10-13. Not yet checked against the 2027 official source: every figure is 2026's unless listed in updatedFor2027. Remove this block only after each figure has been re-verified against its 2027 source.",
+    "updatedFor2027": [
+      {
+        "path": "suiEmployer.wageBase",
+        "from": 30600,
+        "to": 32100,
+        "source": "Colorado Department of Labor and Employment, Account Management / Premium Rates: 'The 2027 chargeable wage base increased to $32,100.00, from $30,600, in 2026.' https://cdle.colorado.gov/ui/employers/requirements/premiums/premium-rates (read 2026-10-25)"
+      }
+    ]
   },
   "method": "flat_rate_status_deduction",
   "$methodComment": "The simplest formula built in this project in some time: DR 1098 (2026 Colorado Withholding Worksheet for Employers, fetched and read directly) has NO allowance-count mechanism at all — annualize wages, subtract a flat filing-status-dependent deduction ($11,000 MFJ / $5,500 otherwise, or a caller-supplied DR 0004 Line 2 override), multiply by a flat 4.40% rate, divide by periods. Genuinely closer to Iowa's/Kentucky's shape than anything built this session, but distinct from both: Iowa's allowance is a post-tax credit and varies by W-4 vintage; Kentucky's deduction is a single universal figure with no filing-status branch at all. WIRED INTO CALC CODE via coloradoWithholding() in state.ts.",
@@ -187,7 +195,7 @@
   "unemploymentInsurance": {
     "$comment": "Employer-only (SUI) — no employee contribution. UPGRADED on a verification pass, and a REAL BUG in this file's own first draft was caught in the process: the original newEmployerRate (0.0135) was actually just the Solvency Surcharge component of the introductory rate, not the combined rate — CDLE's own introductory-rates page shows the 2026 rate is built from THREE components (Beginning Rate + Support Rate + Solvency Surcharge), and 1.35% alone would have understated new-employer UI cost by more than half.",
     "administeredBy": "Colorado Department of Labor and Employment (CDLE)",
-    "wageBase": 30600.0,
+    "wageBase": 32100.0,
     "introductoryRates2026": {
       "nonConstruction": {
         "beginningRate": 0.0153,
@@ -233,8 +241,8 @@
   ],
   "suiEmployer": {
     "$comment": "Normalized employer-side unemployment parameters — the shape src/taxes/state.ts reads. The detailed unemploymentInsurance block above stays the record of research; this exists because that block's shape varies too much between states to compute from directly (wage bases as objects, industry-keyed rate maps, differently-named keys).",
-    "wageBase": 30600,
-    "wageBaseSource": "2026 taxable wage bases cross-checked against EY's published 2026 state-by-state table; where this file already carried a numeric wage base, the two agreed unless noted in wageBaseNote.",
+    "wageBase": 32100,
+    "wageBaseSource": "Colorado Department of Labor and Employment, Account Management / Premium Rates: 'The 2027 chargeable wage base increased to $32,100.00, from $30,600, in 2026.' https://cdle.colorado.gov/ui/employers/requirements/premiums/premium-rates (read 2026-10-25)",
     "newEmployerRate": 0.0305,
     "newEmployerRateSource": "OnPay's published 2026 state-by-state SUI table (secondary), used only where this file had no figure of its own. Cross-source tier, not primary.",
     "experienceRange": {

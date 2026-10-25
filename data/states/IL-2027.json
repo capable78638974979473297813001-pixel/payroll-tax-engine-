@@ -6,7 +6,15 @@
     "status": "carry-forward-from-2026",
     "createdOn": "2026-10-13",
     "basedOn": "data/states/IL-2026.json",
-    "note": "Carried forward from the 2026 file on 2026-10-13. Not yet checked against the 2027 official source: every figure is 2026's unless listed in updatedFor2027. Remove this block only after each figure has been re-verified against its 2027 source."
+    "note": "Carried forward from the 2026 file on 2026-10-13. Not yet checked against the 2027 official source: every figure is 2026's unless listed in updatedFor2027. Remove this block only after each figure has been re-verified against its 2027 source.",
+    "updatedFor2027": [
+      {
+        "path": "suiEmployer.wageBase",
+        "from": 14250,
+        "to": 14592,
+        "source": "820 ILCS 405/235: 'With respect to the calendar year 2027, the term wages shall include only the remuneration ... which does not exceed $14,592.' https://www.ilga.gov/documents/legislation/ilcs/documents/082004050K235.htm (read 2026-10-25)"
+      }
+    ]
   },
   "method": "flat_rate_two_tier_exemption",
   "$methodComment": "STATE-ONLY, no local income tax anywhere in Illinois — see localTaxScope below. The rate itself is flat (same shape as PA/MI), but IL-W-4's allowance structure has TWO tiers (Line 1 basic @ $2,925/allowance, Line 2 additional @ $1,000/allowance), which flatRate()'s single-tier model can't express — same class of gap Indiana's WH-4 had, minus the county add-on. state.ts's new flatRateTwoTierExemption() handles both tiers, each rounded per-period independently (matching the state's own published per-period exemption figures, confirmed two ways: IL-700-T's own bi-weekly/monthly display AND the Illinois Comptroller's 2026 payroll bulletin both show $112.50/pay-period biweekly and $243.75/pay-period monthly for a SINGLE Line-1 allowance, both of which are exactly $2,925 divided by 26 and 12 respectively).",
@@ -130,7 +138,7 @@
   "unemploymentInsurance": {
     "$comment": "Employer-only (SUI, Illinois's own term) — no employee contribution, same as every other state modelled so far.",
     "administeredBy": "Illinois Department of Employment Security (IDES)",
-    "wageBase": 14250.0,
+    "wageBase": 14592.0,
     "rates": {
       "newEmployer": 0.0335,
       "newEmployerNAICS56": 0.0345,
@@ -160,8 +168,8 @@
   ],
   "suiEmployer": {
     "$comment": "Normalized employer-side unemployment parameters — the shape src/taxes/state.ts reads. The detailed unemploymentInsurance block above stays the record of research; this exists because that block's shape varies too much between states to compute from directly (wage bases as objects, industry-keyed rate maps, differently-named keys).",
-    "wageBase": 14250,
-    "wageBaseSource": "2026 taxable wage bases cross-checked against EY's published 2026 state-by-state table; where this file already carried a numeric wage base, the two agreed unless noted in wageBaseNote.",
+    "wageBase": 14592,
+    "wageBaseSource": "820 ILCS 405/235: 'With respect to the calendar year 2027, the term wages shall include only the remuneration ... which does not exceed $14,592.' https://www.ilga.gov/documents/legislation/ilcs/documents/082004050K235.htm (read 2026-10-25)",
     "newEmployerRate": 0.0335,
     "newEmployerRateSource": "This state's own unemploymentInsurance block above, researched in an earlier pass — kept in preference to any aggregate table.",
     "experienceRange": {

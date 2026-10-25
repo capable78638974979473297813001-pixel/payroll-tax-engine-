@@ -6,7 +6,39 @@
     "status": "carry-forward-from-2026",
     "createdOn": "2026-10-13",
     "basedOn": "data/states/NE-2026.json",
-    "note": "Carried forward from the 2026 file on 2026-10-13. Not yet checked against the 2027 official source: every figure is 2026's unless listed in updatedFor2027. Remove this block only after each figure has been re-verified against its 2027 source."
+    "note": "Carried forward from the 2026 file on 2026-10-13. Not yet checked against the 2027 official source: every figure is 2026's unless listed in updatedFor2027. Remove this block only after each figure has been re-verified against its 2027 source.",
+    "updatedFor2027": [
+      {
+        "path": "bracketPerPeriodAllowance.brackets",
+        "from": "2026 Circular EN tables (rates 2.26/3.22/4.21/4.35/4.48/4.60%)",
+        "to": "2027 Circular EN tables (rates 2.26/3.22/3.69/3.81/3.93/4.03%)",
+        "source": "Nebraska Department of Revenue, Circular EN for wages paid on or after January 1, 2027 (published Aug 2026): Percentage Method Tables 1-8 (pp. 12-13) and the Withholding Allowance Table 'Effective January 1, 2027', https://revenue.nebraska.gov/businesses/circular-en-nebraska-income-tax-withholding-wages-pensions-and-annuities-and-gambling ; PDFs 2027_percent.pdf / 2027cir_en_whole.pdf under /sites/default/files/doc/business/Cir_En_2026/. Read 2026-10-25. Every row was parsed from the PDF text and checked for continuity (each 'of excess over' equals the bracket floor and each printed base equals the previous base plus width x rate within 60 cents). The special 1.5% minimum and the 3.5% flat supplemental rate are unchanged in the 2027 circular."
+      },
+      {
+        "path": "bracketPerPeriodAllowance.allowanceAmount",
+        "from": {
+          "daily": 9.38,
+          "weekly": 46.92,
+          "biweekly": 93.85,
+          "semimonthly": 101.67,
+          "monthly": 203.33,
+          "quarterly": 610.0,
+          "semiannual": 1220.0,
+          "annual": 2440.0
+        },
+        "to": {
+          "daily": 9.65,
+          "weekly": 48.27,
+          "biweekly": 96.54,
+          "semimonthly": 104.58,
+          "monthly": 209.17,
+          "quarterly": 627.5,
+          "semiannual": 1255.0,
+          "annual": 2510.0
+        },
+        "source": "Nebraska Department of Revenue, Circular EN for wages paid on or after January 1, 2027 (published Aug 2026): Percentage Method Tables 1-8 (pp. 12-13) and the Withholding Allowance Table 'Effective January 1, 2027', https://revenue.nebraska.gov/businesses/circular-en-nebraska-income-tax-withholding-wages-pensions-and-annuities-and-gambling ; PDFs 2027_percent.pdf / 2027cir_en_whole.pdf under /sites/default/files/doc/business/Cir_En_2026/. Read 2026-10-25. Every row was parsed from the PDF text and checked for continuity (each 'of excess over' equals the bracket floor and each printed base equals the previous base plus width x rate within 60 cents). The special 1.5% minimum and the 3.5% flat supplemental rate are unchanged in the 2027 circular."
+      }
+    ]
   },
   "method": "bracket_per_period_allowance",
   "$methodComment": "REUSES Vermont's existing bracketPerPeriodAllowance() dispatch DIRECTLY — no new function needed. An earlier pass this session left this on a custom 'bracket_annual_from_period_allowance' method because the per-period tables extracted garbled under pdftotext -layout and only the ANNUAL table survived; CLOSED properly this session by re-extracting the SAME pages WITHOUT -layout (the fix already proven for NY/OH elsewhere in this project) — every one of Circular EN's own published per-period tables (daily/weekly/biweekly/semimonthly/monthly/quarterly/semiannual/annual) came out cleanly and was verified internally to the cent by chaining each bracket's base from the one below. With the REAL per-period tables in hand, Nebraska's shape is now IDENTICAL to Vermont's (subtract a flat per-allowance amount from PER-PERIOD wages, look up a bracket table published for that exact period) — reusing bracketPerPeriodAllowance() rather than keeping a bespoke annualize-then-divide approximation function around. The custom nebraskaWithholding() function and its 'bracket_annual_from_period_allowance' method were REMOVED from state.ts in the same pass that fixed this file, so the dead approximation code doesn't linger once the real data made it unnecessary.",
@@ -27,372 +59,680 @@
   "$importantDistinctionFromReturnBrackets": "Nebraska's REAL statutory individual income tax return brackets (Neb. Rev. Stat. 77-2715.03) are a DIFFERENT, simpler 3-tier schedule (2.46% / 3.51% / 4.55% top rate for 2026) that several secondary sources conflated with the withholding table below. This is the SAME structural distinction Wisconsin's data file already documents in this project: the WITHHOLDING table (Circular EN) is what payroll actually uses, and it is NOT required to match the RETURN bracket schedule exactly — Circular EN's own 6-step schedule (topping out at 4.60%, not 4.55%) is a genuinely different, independently-published table, not a transcription error. This file uses the Circular EN withholding table, correctly.",
   "bracketPerPeriodAllowance": {
     "allowanceAmount": {
-      "daily": 9.38,
-      "weekly": 46.92,
-      "biweekly": 93.85,
-      "semimonthly": 101.67,
-      "monthly": 203.33,
-      "quarterly": 610.0,
-      "semiannual": 1220.0,
-      "annual": 2440.0
+      "daily": 9.65,
+      "weekly": 48.27,
+      "biweekly": 96.54,
+      "semimonthly": 104.58,
+      "monthly": 209.17,
+      "quarterly": 627.5,
+      "semiannual": 1255.0,
+      "annual": 2510.0
     },
     "allowanceAmountComment": "Value of ONE withholding allowance, multiplied by the number of allowances claimed on Nebraska Form W-4N (or the employee's federal W-4 allowance count for pre-2020 certificates still on file — Circular EN explicitly grandfathers pre-2020 federal W-4s the same way this project's other post-2020-redesign states, e.g. Delaware, do), then SUBTRACTED from wages BEFORE the bracket lookup — a deduction, not a post-tax credit (the opposite of Delaware's shape built earlier this project).",
     "brackets": {
       "single": {
-        "daily": [
-          {
-            "from": 0,
-            "to": 13,
-            "base": 0,
-            "rate": 0.0
-          },
-          {
-            "from": 13,
-            "to": 26,
-            "base": 0,
-            "rate": 0.0226
-          },
-          {
-            "from": 26,
-            "to": 84,
-            "base": 0.29,
-            "rate": 0.0322
-          },
-          {
-            "from": 84,
-            "to": 122,
-            "base": 2.16,
-            "rate": 0.0421
-          },
-          {
-            "from": 122,
-            "to": 154,
-            "base": 3.76,
-            "rate": 0.0435
-          },
-          {
-            "from": 154,
-            "to": 290,
-            "base": 5.15,
-            "rate": 0.0448
-          },
-          {
-            "from": 290,
-            "to": null,
-            "base": 11.24,
-            "rate": 0.046
-          }
-        ],
         "weekly": [
           {
             "from": 0,
-            "to": 66,
+            "to": 68,
             "base": 0,
             "rate": 0.0
           },
           {
-            "from": 66,
-            "to": 129,
-            "base": 0,
+            "from": 68,
+            "to": 133,
+            "base": 0.0,
             "rate": 0.0226
           },
           {
-            "from": 129,
-            "to": 419,
-            "base": 1.42,
+            "from": 133,
+            "to": 432,
+            "base": 1.47,
             "rate": 0.0322
           },
           {
-            "from": 419,
-            "to": 608,
-            "base": 10.76,
-            "rate": 0.0421
+            "from": 432,
+            "to": 626,
+            "base": 11.1,
+            "rate": 0.0369
           },
           {
-            "from": 608,
-            "to": 772,
-            "base": 18.72,
-            "rate": 0.0435
+            "from": 626,
+            "to": 794,
+            "base": 18.26,
+            "rate": 0.0381
           },
           {
-            "from": 772,
-            "to": 1449,
-            "base": 25.85,
-            "rate": 0.0448
+            "from": 794,
+            "to": 1492,
+            "base": 24.66,
+            "rate": 0.0393
           },
           {
-            "from": 1449,
+            "from": 1492,
             "to": null,
-            "base": 56.18,
-            "rate": 0.046
+            "base": 52.09,
+            "rate": 0.0403
           }
         ],
         "biweekly": [
           {
             "from": 0,
-            "to": 132,
+            "to": 136,
             "base": 0,
             "rate": 0.0
           },
           {
-            "from": 132,
-            "to": 258,
-            "base": 0,
+            "from": 136,
+            "to": 266,
+            "base": 0.0,
             "rate": 0.0226
           },
           {
-            "from": 258,
-            "to": 839,
-            "base": 2.85,
+            "from": 266,
+            "to": 863,
+            "base": 2.94,
             "rate": 0.0322
           },
           {
-            "from": 839,
-            "to": 1216,
-            "base": 21.56,
-            "rate": 0.0421
+            "from": 863,
+            "to": 1252,
+            "base": 22.16,
+            "rate": 0.0369
           },
           {
-            "from": 1216,
-            "to": 1543,
-            "base": 37.43,
-            "rate": 0.0435
+            "from": 1252,
+            "to": 1589,
+            "base": 36.51,
+            "rate": 0.0381
           },
           {
-            "from": 1543,
-            "to": 2899,
-            "base": 51.65,
-            "rate": 0.0448
+            "from": 1589,
+            "to": 2984,
+            "base": 49.35,
+            "rate": 0.0393
           },
           {
-            "from": 2899,
+            "from": 2984,
             "to": null,
-            "base": 112.4,
-            "rate": 0.046
+            "base": 104.17,
+            "rate": 0.0403
           }
         ],
         "semimonthly": [
           {
             "from": 0,
-            "to": 143,
+            "to": 147,
             "base": 0,
             "rate": 0.0
           },
           {
-            "from": 143,
-            "to": 280,
-            "base": 0,
+            "from": 147,
+            "to": 288,
+            "base": 0.0,
             "rate": 0.0226
           },
           {
-            "from": 280,
-            "to": 909,
-            "base": 3.1,
+            "from": 288,
+            "to": 935,
+            "base": 3.19,
             "rate": 0.0322
           },
           {
-            "from": 909,
-            "to": 1317,
-            "base": 23.35,
-            "rate": 0.0421
+            "from": 935,
+            "to": 1356,
+            "base": 24.02,
+            "rate": 0.0369
           },
           {
-            "from": 1317,
-            "to": 1672,
-            "base": 40.53,
-            "rate": 0.0435
+            "from": 1356,
+            "to": 1721,
+            "base": 39.55,
+            "rate": 0.0381
           },
           {
-            "from": 1672,
-            "to": 3140,
-            "base": 55.97,
-            "rate": 0.0448
+            "from": 1721,
+            "to": 3233,
+            "base": 53.46,
+            "rate": 0.0393
           },
           {
-            "from": 3140,
+            "from": 3233,
             "to": null,
-            "base": 121.74,
-            "rate": 0.046
+            "base": 112.88,
+            "rate": 0.0403
           }
         ],
         "monthly": [
           {
             "from": 0,
-            "to": 286,
+            "to": 294,
             "base": 0,
             "rate": 0.0
           },
           {
-            "from": 286,
-            "to": 559,
-            "base": 0,
+            "from": 294,
+            "to": 576,
+            "base": 0.0,
             "rate": 0.0226
           },
           {
-            "from": 559,
-            "to": 1818,
-            "base": 6.17,
+            "from": 576,
+            "to": 1871,
+            "base": 6.37,
             "rate": 0.0322
           },
           {
-            "from": 1818,
-            "to": 2634,
-            "base": 46.71,
-            "rate": 0.0421
+            "from": 1871,
+            "to": 2712,
+            "base": 48.07,
+            "rate": 0.0369
           },
           {
-            "from": 2634,
-            "to": 3344,
-            "base": 81.06,
-            "rate": 0.0435
+            "from": 2712,
+            "to": 3443,
+            "base": 79.1,
+            "rate": 0.0381
           },
           {
-            "from": 3344,
-            "to": 6281,
-            "base": 111.95,
-            "rate": 0.0448
+            "from": 3443,
+            "to": 6466,
+            "base": 106.95,
+            "rate": 0.0393
           },
           {
-            "from": 6281,
+            "from": 6466,
             "to": null,
-            "base": 243.53,
-            "rate": 0.046
+            "base": 225.75,
+            "rate": 0.0403
           }
         ],
         "quarterly": [
           {
             "from": 0,
-            "to": 858,
+            "to": 883,
             "base": 0,
             "rate": 0.0
           },
           {
-            "from": 858,
-            "to": 1678,
-            "base": 0,
+            "from": 883,
+            "to": 1728,
+            "base": 0.0,
             "rate": 0.0226
           },
           {
-            "from": 1678,
-            "to": 5453,
-            "base": 18.53,
+            "from": 1728,
+            "to": 5613,
+            "base": 19.1,
             "rate": 0.0322
           },
           {
-            "from": 5453,
-            "to": 7903,
-            "base": 140.09,
-            "rate": 0.0421
+            "from": 5613,
+            "to": 8135,
+            "base": 144.2,
+            "rate": 0.0369
           },
           {
-            "from": 7903,
-            "to": 10033,
-            "base": 243.24,
-            "rate": 0.0435
+            "from": 8135,
+            "to": 10328,
+            "base": 237.26,
+            "rate": 0.0381
           },
           {
-            "from": 10033,
-            "to": 18843,
-            "base": 335.9,
-            "rate": 0.0448
+            "from": 10328,
+            "to": 19398,
+            "base": 320.81,
+            "rate": 0.0393
           },
           {
-            "from": 18843,
+            "from": 19398,
             "to": null,
-            "base": 730.59,
-            "rate": 0.046
+            "base": 677.26,
+            "rate": 0.0403
           }
         ],
         "semiannual": [
           {
             "from": 0,
-            "to": 1715,
+            "to": 1765,
             "base": 0,
             "rate": 0.0
           },
           {
-            "from": 1715,
-            "to": 3355,
-            "base": 0,
+            "from": 1765,
+            "to": 3455,
+            "base": 0.0,
             "rate": 0.0226
           },
           {
-            "from": 3355,
-            "to": 10905,
-            "base": 37.06,
+            "from": 3455,
+            "to": 11225,
+            "base": 38.19,
             "rate": 0.0322
           },
           {
-            "from": 10905,
-            "to": 15805,
-            "base": 280.17,
-            "rate": 0.0421
+            "from": 11225,
+            "to": 16270,
+            "base": 288.38,
+            "rate": 0.0369
           },
           {
-            "from": 15805,
-            "to": 20065,
-            "base": 486.46,
-            "rate": 0.0435
+            "from": 16270,
+            "to": 20655,
+            "base": 474.54,
+            "rate": 0.0381
           },
           {
-            "from": 20065,
-            "to": 37685,
-            "base": 671.77,
-            "rate": 0.0448
+            "from": 20655,
+            "to": 38795,
+            "base": 641.61,
+            "rate": 0.0393
           },
           {
-            "from": 37685,
+            "from": 38795,
             "to": null,
-            "base": 1461.15,
-            "rate": 0.046
+            "base": 1354.51,
+            "rate": 0.0403
           }
         ],
         "annual": [
           {
             "from": 0,
-            "to": 3430,
+            "to": 3530,
             "base": 0,
             "rate": 0.0
           },
           {
-            "from": 3430,
-            "to": 6710,
-            "base": 0,
+            "from": 3530,
+            "to": 6910,
+            "base": 0.0,
             "rate": 0.0226
           },
           {
-            "from": 6710,
-            "to": 21810,
-            "base": 74.13,
+            "from": 6910,
+            "to": 22450,
+            "base": 76.39,
             "rate": 0.0322
           },
           {
-            "from": 21810,
-            "to": 31610,
-            "base": 560.35,
-            "rate": 0.0421
+            "from": 22450,
+            "to": 32540,
+            "base": 576.78,
+            "rate": 0.0369
           },
           {
-            "from": 31610,
-            "to": 40130,
-            "base": 972.93,
-            "rate": 0.0435
+            "from": 32540,
+            "to": 41310,
+            "base": 949.1,
+            "rate": 0.0381
           },
           {
-            "from": 40130,
-            "to": 75370,
-            "base": 1343.55,
-            "rate": 0.0448
+            "from": 41310,
+            "to": 77590,
+            "base": 1283.24,
+            "rate": 0.0393
           },
           {
-            "from": 75370,
+            "from": 77590,
             "to": null,
-            "base": 2922.3,
-            "rate": 0.046
+            "base": 2709.04,
+            "rate": 0.0403
+          }
+        ],
+        "daily": [
+          {
+            "from": 0,
+            "to": 14,
+            "base": 0,
+            "rate": 0.0
+          },
+          {
+            "from": 14,
+            "to": 27,
+            "base": 0.0,
+            "rate": 0.0226
+          },
+          {
+            "from": 27,
+            "to": 86,
+            "base": 0.29,
+            "rate": 0.0322
+          },
+          {
+            "from": 86,
+            "to": 125,
+            "base": 2.19,
+            "rate": 0.0369
+          },
+          {
+            "from": 125,
+            "to": 159,
+            "base": 3.63,
+            "rate": 0.0381
+          },
+          {
+            "from": 159,
+            "to": 298,
+            "base": 4.93,
+            "rate": 0.0393
+          },
+          {
+            "from": 298,
+            "to": null,
+            "base": 10.39,
+            "rate": 0.0403
           }
         ]
       },
       "married": {
+        "weekly": [
+          {
+            "from": 0,
+            "to": 162,
+            "base": 0,
+            "rate": 0.0
+          },
+          {
+            "from": 162,
+            "to": 258,
+            "base": 0.0,
+            "rate": 0.0226
+          },
+          {
+            "from": 258,
+            "to": 642,
+            "base": 2.17,
+            "rate": 0.0322
+          },
+          {
+            "from": 642,
+            "to": 998,
+            "base": 14.53,
+            "rate": 0.0369
+          },
+          {
+            "from": 998,
+            "to": 1238,
+            "base": 27.67,
+            "rate": 0.0381
+          },
+          {
+            "from": 1238,
+            "to": 1642,
+            "base": 36.81,
+            "rate": 0.0393
+          },
+          {
+            "from": 1642,
+            "to": null,
+            "base": 52.69,
+            "rate": 0.0403
+          }
+        ],
+        "biweekly": [
+          {
+            "from": 0,
+            "to": 324,
+            "base": 0,
+            "rate": 0.0
+          },
+          {
+            "from": 324,
+            "to": 515,
+            "base": 0.0,
+            "rate": 0.0226
+          },
+          {
+            "from": 515,
+            "to": 1283,
+            "base": 4.32,
+            "rate": 0.0322
+          },
+          {
+            "from": 1283,
+            "to": 1996,
+            "base": 29.05,
+            "rate": 0.0369
+          },
+          {
+            "from": 1996,
+            "to": 2476,
+            "base": 55.36,
+            "rate": 0.0381
+          },
+          {
+            "from": 2476,
+            "to": 3283,
+            "base": 73.65,
+            "rate": 0.0393
+          },
+          {
+            "from": 3283,
+            "to": null,
+            "base": 105.37,
+            "rate": 0.0403
+          }
+        ],
+        "semimonthly": [
+          {
+            "from": 0,
+            "to": 351,
+            "base": 0,
+            "rate": 0.0
+          },
+          {
+            "from": 351,
+            "to": 558,
+            "base": 0.0,
+            "rate": 0.0226
+          },
+          {
+            "from": 558,
+            "to": 1390,
+            "base": 4.68,
+            "rate": 0.0322
+          },
+          {
+            "from": 1390,
+            "to": 2162,
+            "base": 31.47,
+            "rate": 0.0369
+          },
+          {
+            "from": 2162,
+            "to": 2682,
+            "base": 59.96,
+            "rate": 0.0381
+          },
+          {
+            "from": 2682,
+            "to": 3557,
+            "base": 79.77,
+            "rate": 0.0393
+          },
+          {
+            "from": 3557,
+            "to": null,
+            "base": 114.16,
+            "rate": 0.0403
+          }
+        ],
+        "monthly": [
+          {
+            "from": 0,
+            "to": 703,
+            "base": 0,
+            "rate": 0.0
+          },
+          {
+            "from": 703,
+            "to": 1116,
+            "base": 0.0,
+            "rate": 0.0226
+          },
+          {
+            "from": 1116,
+            "to": 2780,
+            "base": 9.33,
+            "rate": 0.0322
+          },
+          {
+            "from": 2780,
+            "to": 4324,
+            "base": 62.91,
+            "rate": 0.0369
+          },
+          {
+            "from": 4324,
+            "to": 5364,
+            "base": 119.88,
+            "rate": 0.0381
+          },
+          {
+            "from": 5364,
+            "to": 7114,
+            "base": 159.5,
+            "rate": 0.0393
+          },
+          {
+            "from": 7114,
+            "to": null,
+            "base": 228.28,
+            "rate": 0.0403
+          }
+        ],
+        "quarterly": [
+          {
+            "from": 0,
+            "to": 2108,
+            "base": 0,
+            "rate": 0.0
+          },
+          {
+            "from": 2108,
+            "to": 3348,
+            "base": 0.0,
+            "rate": 0.0226
+          },
+          {
+            "from": 3348,
+            "to": 8340,
+            "base": 28.02,
+            "rate": 0.0322
+          },
+          {
+            "from": 8340,
+            "to": 12973,
+            "base": 188.76,
+            "rate": 0.0369
+          },
+          {
+            "from": 12973,
+            "to": 16093,
+            "base": 359.72,
+            "rate": 0.0381
+          },
+          {
+            "from": 16093,
+            "to": 21343,
+            "base": 478.59,
+            "rate": 0.0393
+          },
+          {
+            "from": 21343,
+            "to": null,
+            "base": 684.92,
+            "rate": 0.0403
+          }
+        ],
+        "semiannual": [
+          {
+            "from": 0,
+            "to": 4215,
+            "base": 0,
+            "rate": 0.0
+          },
+          {
+            "from": 4215,
+            "to": 6695,
+            "base": 0.0,
+            "rate": 0.0226
+          },
+          {
+            "from": 6695,
+            "to": 16680,
+            "base": 56.05,
+            "rate": 0.0322
+          },
+          {
+            "from": 16680,
+            "to": 25945,
+            "base": 377.57,
+            "rate": 0.0369
+          },
+          {
+            "from": 25945,
+            "to": 32185,
+            "base": 719.45,
+            "rate": 0.0381
+          },
+          {
+            "from": 32185,
+            "to": 42685,
+            "base": 957.19,
+            "rate": 0.0393
+          },
+          {
+            "from": 42685,
+            "to": null,
+            "base": 1369.84,
+            "rate": 0.0403
+          }
+        ],
+        "annual": [
+          {
+            "from": 0,
+            "to": 8430,
+            "base": 0,
+            "rate": 0.0
+          },
+          {
+            "from": 8430,
+            "to": 13390,
+            "base": 0.0,
+            "rate": 0.0226
+          },
+          {
+            "from": 13390,
+            "to": 33360,
+            "base": 112.1,
+            "rate": 0.0322
+          },
+          {
+            "from": 33360,
+            "to": 51890,
+            "base": 755.13,
+            "rate": 0.0369
+          },
+          {
+            "from": 51890,
+            "to": 64370,
+            "base": 1438.89,
+            "rate": 0.0381
+          },
+          {
+            "from": 64370,
+            "to": 85370,
+            "base": 1914.38,
+            "rate": 0.0393
+          },
+          {
+            "from": 85370,
+            "to": null,
+            "base": 2739.68,
+            "rate": 0.0403
+          }
+        ],
         "daily": [
           {
             "from": 0,
@@ -402,347 +742,39 @@
           },
           {
             "from": 32,
-            "to": 50,
-            "base": 0,
+            "to": 52,
+            "base": 0.0,
             "rate": 0.0226
           },
           {
-            "from": 50,
-            "to": 125,
-            "base": 0.41,
+            "from": 52,
+            "to": 128,
+            "base": 0.45,
             "rate": 0.0322
           },
           {
-            "from": 125,
-            "to": 194,
-            "base": 2.83,
-            "rate": 0.0421
+            "from": 128,
+            "to": 200,
+            "base": 2.9,
+            "rate": 0.0369
           },
           {
-            "from": 194,
-            "to": 241,
-            "base": 5.73,
-            "rate": 0.0435
+            "from": 200,
+            "to": 248,
+            "base": 5.56,
+            "rate": 0.0381
           },
           {
-            "from": 241,
-            "to": 319,
-            "base": 7.77,
-            "rate": 0.0448
+            "from": 248,
+            "to": 328,
+            "base": 7.39,
+            "rate": 0.0393
           },
           {
-            "from": 319,
+            "from": 328,
             "to": null,
-            "base": 11.26,
-            "rate": 0.046
-          }
-        ],
-        "weekly": [
-          {
-            "from": 0,
-            "to": 158,
-            "base": 0,
-            "rate": 0.0
-          },
-          {
-            "from": 158,
-            "to": 250,
-            "base": 0,
-            "rate": 0.0226
-          },
-          {
-            "from": 250,
-            "to": 623,
-            "base": 2.08,
-            "rate": 0.0322
-          },
-          {
-            "from": 623,
-            "to": 969,
-            "base": 14.09,
-            "rate": 0.0421
-          },
-          {
-            "from": 969,
-            "to": 1203,
-            "base": 28.66,
-            "rate": 0.0435
-          },
-          {
-            "from": 1203,
-            "to": 1595,
-            "base": 38.84,
-            "rate": 0.0448
-          },
-          {
-            "from": 1595,
-            "to": null,
-            "base": 56.4,
-            "rate": 0.046
-          }
-        ],
-        "biweekly": [
-          {
-            "from": 0,
-            "to": 315,
-            "base": 0,
-            "rate": 0.0
-          },
-          {
-            "from": 315,
-            "to": 500,
-            "base": 0,
-            "rate": 0.0226
-          },
-          {
-            "from": 500,
-            "to": 1246,
-            "base": 4.18,
-            "rate": 0.0322
-          },
-          {
-            "from": 1246,
-            "to": 1938,
-            "base": 28.2,
-            "rate": 0.0421
-          },
-          {
-            "from": 1938,
-            "to": 2405,
-            "base": 57.33,
-            "rate": 0.0435
-          },
-          {
-            "from": 2405,
-            "to": 3189,
-            "base": 77.64,
-            "rate": 0.0448
-          },
-          {
-            "from": 3189,
-            "to": null,
-            "base": 112.76,
-            "rate": 0.046
-          }
-        ],
-        "semimonthly": [
-          {
-            "from": 0,
-            "to": 341,
-            "base": 0,
-            "rate": 0.0
-          },
-          {
-            "from": 341,
-            "to": 542,
-            "base": 0,
-            "rate": 0.0226
-          },
-          {
-            "from": 542,
-            "to": 1350,
-            "base": 4.54,
-            "rate": 0.0322
-          },
-          {
-            "from": 1350,
-            "to": 2100,
-            "base": 30.56,
-            "rate": 0.0421
-          },
-          {
-            "from": 2100,
-            "to": 2605,
-            "base": 62.14,
-            "rate": 0.0435
-          },
-          {
-            "from": 2605,
-            "to": 3455,
-            "base": 84.11,
-            "rate": 0.0448
-          },
-          {
-            "from": 3455,
-            "to": null,
-            "base": 122.19,
-            "rate": 0.046
-          }
-        ],
-        "monthly": [
-          {
-            "from": 0,
-            "to": 683,
-            "base": 0,
-            "rate": 0.0
-          },
-          {
-            "from": 683,
-            "to": 1084,
-            "base": 0,
-            "rate": 0.0226
-          },
-          {
-            "from": 1084,
-            "to": 2700,
-            "base": 9.06,
-            "rate": 0.0322
-          },
-          {
-            "from": 2700,
-            "to": 4200,
-            "base": 61.1,
-            "rate": 0.0421
-          },
-          {
-            "from": 4200,
-            "to": 5211,
-            "base": 124.25,
-            "rate": 0.0435
-          },
-          {
-            "from": 5211,
-            "to": 6910,
-            "base": 168.23,
-            "rate": 0.0448
-          },
-          {
-            "from": 6910,
-            "to": null,
-            "base": 244.35,
-            "rate": 0.046
-          }
-        ],
-        "quarterly": [
-          {
-            "from": 0,
-            "to": 2048,
-            "base": 0,
-            "rate": 0.0
-          },
-          {
-            "from": 2048,
-            "to": 3253,
-            "base": 0,
-            "rate": 0.0226
-          },
-          {
-            "from": 3253,
-            "to": 8100,
-            "base": 27.23,
-            "rate": 0.0322
-          },
-          {
-            "from": 8100,
-            "to": 12600,
-            "base": 183.3,
-            "rate": 0.0421
-          },
-          {
-            "from": 12600,
-            "to": 15633,
-            "base": 372.75,
-            "rate": 0.0435
-          },
-          {
-            "from": 15633,
-            "to": 20730,
-            "base": 504.69,
-            "rate": 0.0448
-          },
-          {
-            "from": 20730,
-            "to": null,
-            "base": 733.04,
-            "rate": 0.046
-          }
-        ],
-        "semiannual": [
-          {
-            "from": 0,
-            "to": 4095,
-            "base": 0,
-            "rate": 0.0
-          },
-          {
-            "from": 4095,
-            "to": 6505,
-            "base": 0,
-            "rate": 0.0226
-          },
-          {
-            "from": 6505,
-            "to": 16200,
-            "base": 54.47,
-            "rate": 0.0322
-          },
-          {
-            "from": 16200,
-            "to": 25200,
-            "base": 366.65,
-            "rate": 0.0421
-          },
-          {
-            "from": 25200,
-            "to": 31265,
-            "base": 745.55,
-            "rate": 0.0435
-          },
-          {
-            "from": 31265,
-            "to": 41460,
-            "base": 1009.38,
-            "rate": 0.0448
-          },
-          {
-            "from": 41460,
-            "to": null,
-            "base": 1466.12,
-            "rate": 0.046
-          }
-        ],
-        "annual": [
-          {
-            "from": 0,
-            "to": 8190,
-            "base": 0,
-            "rate": 0.0
-          },
-          {
-            "from": 8190,
-            "to": 13010,
-            "base": 0,
-            "rate": 0.0226
-          },
-          {
-            "from": 13010,
-            "to": 32400,
-            "base": 108.93,
-            "rate": 0.0322
-          },
-          {
-            "from": 32400,
-            "to": 50400,
-            "base": 733.29,
-            "rate": 0.0421
-          },
-          {
-            "from": 50400,
-            "to": 62530,
-            "base": 1491.09,
-            "rate": 0.0435
-          },
-          {
-            "from": 62530,
-            "to": 82920,
-            "base": 2018.75,
-            "rate": 0.0448
-          },
-          {
-            "from": 82920,
-            "to": null,
-            "base": 2932.22,
-            "rate": 0.046
+            "base": 10.53,
+            "rate": 0.0403
           }
         ]
       }

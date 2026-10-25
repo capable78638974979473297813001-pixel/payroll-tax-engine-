@@ -754,6 +754,26 @@
         "$addedNote": "ADDED 2026-09-07, found via an exhaustive city-by-city pass through WV's full ~230-municipality roster (not a keyword search that happened to surface it -- a direct 'Glen Dale West Virginia city service fee' query hit the city's own 'Worker City Service/User Fee Remittance Form' PDF on glendalewv.gov). CONFIRMED via the actual authorizing ordinance itself (Codified Ordinances of Glen Dale, Part Seven, Chapter Three, Article 752, fetched and read in full as a PDF -- the strongest sourcing tier this project uses, on par with Romney's and Fairmont's own ordinance reads): Sec. 752.05 imposes the fee 'on all employee and self-employed individuals at the rate of one dollar ($1.00) per calendar week of employment within the City. No individual shall pay such fee more than once for the same week regardless of having multiple employers' -- the same multi-job dedup rule as Wheeling/Weirton/Glen Dale's neighbors. Sec. 752.03(g) defines 'User' as 'any person who is employed within the City by [an] employer located within the City' -- no residency carve-out, so work-location-based like Wheeling/Weirton/Madison/Montgomery/Charleston, not Fairmont/Romney's nonresident-only shape. Sec. 752.02 cites the same authority as every other city on this list, West Virginia Code Sec. 8-13-13. EFFECTIVE DATE: the ordinance itself (Sec. 752.06, and the enacting ordinance's own signature page) states the fee took effect January 1, 2025 -- passed second reading and adopted November 12, 2024. This is a genuinely NEW-TO-THIS-FILE 11th city, not previously found in six prior research passes on this exact question (all of which searched broader keyword queries and larger/known cities rather than working the full municipality roster one town at a time). One disclosed adjacent finding, not modelled: Sec. 752.15 states this fee is 'in addition to and independent and exclusive of any other municipal service fees... imposed under other Ordinances of the City, including that imposed under Article 751' -- meaning Glen Dale has a SECOND, separate municipal service fee (Article 751) whose text could not be located this pass (not indexed by any search tried, and not linked from the city's own ordinance index page alongside Article 752). Article 751's shape (payroll vs. property) is unconfirmed and NOT added to this file -- flagged for a future pass, same as Montgomery's own unresolved-shape items elsewhere in this file.",
         "minDaysBeforeAttaching": 30,
         "$thresholdNote": "Article 752.03(b) defines an Employee as someone employed in the city at least thirty (30) days PER CALENDAR YEAR -- a cumulative annual count, which certificate.daysWorkedInLocality models exactly."
+      },
+      "Chester": {
+        "weeklyRate": 2,
+        "nonResidentOnly": true,
+        "minDaysBeforeAttaching": 30,
+        "$addedNote": "ADDED 2026-10-25: the daily source watch flagged that WVU Shared Services' list of every West Virginia city's user-fee ordinance shows Chester and this file lacked it. The list (fetched and read directly) says: 'The user fee applies to those who work within the city limits, but do not reside in the city. The fee is paid by all non-residents employed by a business for at least 30 days of the year within city limits. All business entities will be responsible for collecting the fee. The fee is $2.00 per calendar week.' The Weirton Daily Times (2021-02-25) independently reports that 'Chester enacted its $2 per week fee in 2019', so it is in force for every year in this file set. Non-resident-only, so nonResidentOnly:true as for Fairmont and Romney: westVirginiaMunicipalServiceFee() skips it when certificate.residenceCity names Chester. The 'at least 30 days of the year' condition is modelled with minDaysBeforeAttaching: 30: pass certificate.daysWorkedInLocality (days this year) and the fee is skipped below 30; with no count supplied the fee is withheld (the engine cannot see days worked across the year on its own). Chester's own ordinance was not found; this rests on the WVU list and the newspaper.",
+        "sources": [
+          {
+            "title": "WVU Shared Services -- West Virginia city user fee ordinances (Chester)",
+            "url": "https://sharedservices.wvu.edu/west-virginia-city-user-fee-ordinances",
+            "says": "The fee is paid by all non-residents employed by a business for at least 30 days of the year within city limits ... The fee is $2.00 per calendar week.",
+            "fetchedOn": "2026-10-25"
+          },
+          {
+            "title": "Weirton Daily Times -- House committee guts city user fees from state law with amendment (2021-02-25)",
+            "url": "https://www.weirtondailytimes.com/news/local-news/2021/02/house-committee-guts-city-user-fees-from-state-law-with-amendment/",
+            "says": "Chester enacted its $2 per week fee in 2019, with funds going toward public safety",
+            "fetchedOn": "2026-10-25"
+          }
+        ]
       }
     }
   },

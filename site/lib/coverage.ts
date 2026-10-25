@@ -201,13 +201,13 @@ function stateLocalExtras(state: string, raw: Record<string, any>): LocalRow[] {
   return out;
 }
 
-function minimumWageLocals(): Map<string, LocalRow[]> {
+function minimumWageLocals(year: number): Map<string, LocalRow[]> {
   const map = new Map<string, LocalRow[]>();
   const dir = join(DATA, 'minimum-wage', 'local');
   if (!existsSync(dir)) return map;
   for (const f of readdirSync(dir)) {
     const m = /^([A-Z]{2})-local-(\d{4})\.json$/.exec(f);
-    if (!m) continue;
+    if (!m || Number(m[2]) !== year) continue; // one year's ordinances, not every carried-forward copy
     const d = readJson(join(dir, f));
     const rows: LocalRow[] = (d?.jurisdictions ?? []).map((j: any) => ({
       state: m[1],
@@ -229,7 +229,7 @@ export function coverage(): Coverage {
   const stateDir = join(DATA, 'states');
   const years = latestYear(stateDir);
   const year = years.filter((y) => y <= new Date().getFullYear()).at(-1) ?? years.at(-1) ?? new Date().getFullYear();
-  const mw = minimumWageLocals();
+  const mw = minimumWageLocals(year);
   const mwStates = new Set(existsSync(join(DATA, 'minimum-wage', 'states')) ? readdirSync(join(DATA, 'minimum-wage', 'states')).map((f) => f.slice(0, 2)) : []);
   const garnishment = readJson(join(DATA, 'garnishment', `state-overrides-${year}.json`));
   const garnStates = new Set(Object.keys(garnishment?.states ?? {}));

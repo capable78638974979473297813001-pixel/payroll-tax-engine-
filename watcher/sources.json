@@ -50,9 +50,13 @@
    "origin": "curated",
    "used_by": [
     "data/minimum-wage/federal-2026.json",
+    "data/minimum-wage/federal-2027.json",
     "data/minimum-wage/states/NJ-2026.json",
+    "data/minimum-wage/states/NJ-2027.json",
     "data/minimum-wage/states/OH-2026.json",
-    "data/minimum-wage/territories/MP-2026.json"
+    "data/minimum-wage/states/OH-2027.json",
+    "data/minimum-wage/territories/MP-2026.json",
+    "data/minimum-wage/territories/MP-2027.json"
    ]
   },
   {
@@ -74,62 +78,119 @@
    "origin": "curated",
    "used_by": [
     "data/minimum-wage/federal-2026.json",
+    "data/minimum-wage/federal-2027.json",
     "data/minimum-wage/states/AK-2026.json",
+    "data/minimum-wage/states/AK-2027.json",
     "data/minimum-wage/states/AL-2026.json",
+    "data/minimum-wage/states/AL-2027.json",
     "data/minimum-wage/states/AR-2026.json",
+    "data/minimum-wage/states/AR-2027.json",
     "data/minimum-wage/states/AZ-2026.json",
+    "data/minimum-wage/states/AZ-2027.json",
     "data/minimum-wage/states/CA-2026.json",
+    "data/minimum-wage/states/CA-2027.json",
     "data/minimum-wage/states/CO-2026.json",
+    "data/minimum-wage/states/CO-2027.json",
     "data/minimum-wage/states/CT-2026.json",
+    "data/minimum-wage/states/CT-2027.json",
     "data/minimum-wage/states/DC-2026.json",
+    "data/minimum-wage/states/DC-2027.json",
     "data/minimum-wage/states/DE-2026.json",
+    "data/minimum-wage/states/DE-2027.json",
     "data/minimum-wage/states/FL-2026.json",
+    "data/minimum-wage/states/FL-2027.json",
     "data/minimum-wage/states/GA-2026.json",
+    "data/minimum-wage/states/GA-2027.json",
     "data/minimum-wage/states/HI-2026.json",
+    "data/minimum-wage/states/HI-2027.json",
     "data/minimum-wage/states/IA-2026.json",
+    "data/minimum-wage/states/IA-2027.json",
     "data/minimum-wage/states/ID-2026.json",
+    "data/minimum-wage/states/ID-2027.json",
     "data/minimum-wage/states/IL-2026.json",
+    "data/minimum-wage/states/IL-2027.json",
     "data/minimum-wage/states/IN-2026.json",
+    "data/minimum-wage/states/IN-2027.json",
     "data/minimum-wage/states/KS-2026.json",
+    "data/minimum-wage/states/KS-2027.json",
     "data/minimum-wage/states/KY-2026.json",
+    "data/minimum-wage/states/KY-2027.json",
     "data/minimum-wage/states/LA-2026.json",
+    "data/minimum-wage/states/LA-2027.json",
     "data/minimum-wage/states/MA-2026.json",
+    "data/minimum-wage/states/MA-2027.json",
     "data/minimum-wage/states/MD-2026.json",
+    "data/minimum-wage/states/MD-2027.json",
     "data/minimum-wage/states/ME-2026.json",
+    "data/minimum-wage/states/ME-2027.json",
     "data/minimum-wage/states/MI-2026.json",
+    "data/minimum-wage/states/MI-2027.json",
     "data/minimum-wage/states/MN-2026.json",
+    "data/minimum-wage/states/MN-2027.json",
     "data/minimum-wage/states/MO-2026.json",
+    "data/minimum-wage/states/MO-2027.json",
     "data/minimum-wage/states/MS-2026.json",
+    "data/minimum-wage/states/MS-2027.json",
     "data/minimum-wage/states/MT-2026.json",
+    "data/minimum-wage/states/MT-2027.json",
     "data/minimum-wage/states/NC-2026.json",
+    "data/minimum-wage/states/NC-2027.json",
     "data/minimum-wage/states/ND-2026.json",
+    "data/minimum-wage/states/ND-2027.json",
     "data/minimum-wage/states/NE-2026.json",
+    "data/minimum-wage/states/NE-2027.json",
     "data/minimum-wage/states/NH-2026.json",
+    "data/minimum-wage/states/NH-2027.json",
     "data/minimum-wage/states/NJ-2026.json",
+    "data/minimum-wage/states/NJ-2027.json",
     "data/minimum-wage/states/NM-2026.json",
+    "data/minimum-wage/states/NM-2027.json",
     "data/minimum-wage/states/NV-2026.json",
+    "data/minimum-wage/states/NV-2027.json",
     "data/minimum-wage/states/NY-2026.json",
+    "data/minimum-wage/states/NY-2027.json",
     "data/minimum-wage/states/OH-2026.json",
+    "data/minimum-wage/states/OH-2027.json",
     "data/minimum-wage/states/OK-2026.json",
+    "data/minimum-wage/states/OK-2027.json",
     "data/minimum-wage/states/OR-2026.json",
+    "data/minimum-wage/states/OR-2027.json",
     "data/minimum-wage/states/PA-2026.json",
+    "data/minimum-wage/states/PA-2027.json",
     "data/minimum-wage/states/RI-2026.json",
+    "data/minimum-wage/states/RI-2027.json",
     "data/minimum-wage/states/SC-2026.json",
+    "data/minimum-wage/states/SC-2027.json",
     "data/minimum-wage/states/SD-2026.json",
+    "data/minimum-wage/states/SD-2027.json",
     "data/minimum-wage/states/TN-2026.json",
+    "data/minimum-wage/states/TN-2027.json",
     "data/minimum-wage/states/TX-2026.json",
+    "data/minimum-wage/states/TX-2027.json",
     "data/minimum-wage/states/UT-2026.json",
+    "data/minimum-wage/states/UT-2027.json",
     "data/minimum-wage/states/VA-2026.json",
+    "data/minimum-wage/states/VA-2027.json",
     "data/minimum-wage/states/VT-2026.json",
+    "data/minimum-wage/states/VT-2027.json",
     "data/minimum-wage/states/WA-2026.json",
+    "data/minimum-wage/states/WA-2027.json",
     "data/minimum-wage/states/WI-2026.json",
+    "data/minimum-wage/states/WI-2027.json",
     "data/minimum-wage/states/WV-2026.json",
+    "data/minimum-wage/states/WV-2027.json",
     "data/minimum-wage/states/WY-2026.json",
+    "data/minimum-wage/states/WY-2027.json",
     "data/minimum-wage/territories/AS-2026.json",
+    "data/minimum-wage/territories/AS-2027.json",
     "data/minimum-wage/territories/GU-2026.json",
+    "data/minimum-wage/territories/GU-2027.json",
     "data/minimum-wage/territories/MP-2026.json",
+    "data/minimum-wage/territories/MP-2027.json",
     "data/minimum-wage/territories/PR-2026.json",
-    "data/minimum-wage/territories/VI-2026.json"
+    "data/minimum-wage/territories/PR-2027.json",
+    "data/minimum-wage/territories/VI-2026.json",
+    "data/minimum-wage/territories/VI-2027.json"
    ]
   },
   {
@@ -139,7 +200,18 @@
    "url": "https://www.dol.gov/agencies/whd/government-contracts/eo14026",
    "origin": "data",
    "used_by": [
-    "data/minimum-wage/federal-2026.json"
+    "data/minimum-wage/federal-2026.json",
+    "data/minimum-wage/federal-2027.json"
+   ]
+  },
+  {
+   "id": "us-fd7074f77b",
+   "jurisdiction": "US",
+   "title": "Federal Register -- Minimum Wage for Federal Contracts Covered by Executive Order 13658: Notice of Rate Change in Effect",
+   "url": "https://www.federalregister.gov/documents/2026/10/08/2026-20646/minimum-wage-for-federal-contracts-covered-by-executive-order-13658-notice-of-rate-change-in-effect",
+   "origin": "data",
+   "used_by": [
+    "data/minimum-wage/federal-2027.json"
    ]
   },
   {
@@ -185,7 +257,8 @@
    "url": "https://www.federalregister.gov/api/v1/documents.json?per_page=20&order=newest&fields%5B%5D=document_number&fields%5B%5D=title&fields%5B%5D=type&fields%5B%5D=publication_date&fields%5B%5D=effective_on&fields%5B%5D=html_url&conditions%5Bagencies%5D%5B%5D=wage-and-hour-division",
    "origin": "curated",
    "used_by": [
-    "data/minimum-wage/federal-2026.json"
+    "data/minimum-wage/federal-2026.json",
+    "data/minimum-wage/federal-2027.json"
    ],
    "replaces": [
     "https://www.dol.gov/agencies/whd/overtime/rulemaking",
@@ -390,7 +463,8 @@
    "url": "https://www.dol.gov/agencies/whd/fact-sheets/17a-overtime",
    "origin": "data",
    "used_by": [
-    "data/minimum-wage/federal-2026.json"
+    "data/minimum-wage/federal-2026.json",
+    "data/minimum-wage/federal-2027.json"
    ]
   },
   {
@@ -401,62 +475,119 @@
    "origin": "data",
    "used_by": [
     "data/minimum-wage/federal-2026.json",
+    "data/minimum-wage/federal-2027.json",
     "data/minimum-wage/states/AK-2026.json",
+    "data/minimum-wage/states/AK-2027.json",
     "data/minimum-wage/states/AL-2026.json",
+    "data/minimum-wage/states/AL-2027.json",
     "data/minimum-wage/states/AR-2026.json",
+    "data/minimum-wage/states/AR-2027.json",
     "data/minimum-wage/states/AZ-2026.json",
+    "data/minimum-wage/states/AZ-2027.json",
     "data/minimum-wage/states/CA-2026.json",
+    "data/minimum-wage/states/CA-2027.json",
     "data/minimum-wage/states/CO-2026.json",
+    "data/minimum-wage/states/CO-2027.json",
     "data/minimum-wage/states/CT-2026.json",
+    "data/minimum-wage/states/CT-2027.json",
     "data/minimum-wage/states/DC-2026.json",
+    "data/minimum-wage/states/DC-2027.json",
     "data/minimum-wage/states/DE-2026.json",
+    "data/minimum-wage/states/DE-2027.json",
     "data/minimum-wage/states/FL-2026.json",
+    "data/minimum-wage/states/FL-2027.json",
     "data/minimum-wage/states/GA-2026.json",
+    "data/minimum-wage/states/GA-2027.json",
     "data/minimum-wage/states/HI-2026.json",
+    "data/minimum-wage/states/HI-2027.json",
     "data/minimum-wage/states/IA-2026.json",
+    "data/minimum-wage/states/IA-2027.json",
     "data/minimum-wage/states/ID-2026.json",
+    "data/minimum-wage/states/ID-2027.json",
     "data/minimum-wage/states/IL-2026.json",
+    "data/minimum-wage/states/IL-2027.json",
     "data/minimum-wage/states/IN-2026.json",
+    "data/minimum-wage/states/IN-2027.json",
     "data/minimum-wage/states/KS-2026.json",
+    "data/minimum-wage/states/KS-2027.json",
     "data/minimum-wage/states/KY-2026.json",
+    "data/minimum-wage/states/KY-2027.json",
     "data/minimum-wage/states/LA-2026.json",
+    "data/minimum-wage/states/LA-2027.json",
     "data/minimum-wage/states/MA-2026.json",
+    "data/minimum-wage/states/MA-2027.json",
     "data/minimum-wage/states/MD-2026.json",
+    "data/minimum-wage/states/MD-2027.json",
     "data/minimum-wage/states/ME-2026.json",
+    "data/minimum-wage/states/ME-2027.json",
     "data/minimum-wage/states/MI-2026.json",
+    "data/minimum-wage/states/MI-2027.json",
     "data/minimum-wage/states/MN-2026.json",
+    "data/minimum-wage/states/MN-2027.json",
     "data/minimum-wage/states/MO-2026.json",
+    "data/minimum-wage/states/MO-2027.json",
     "data/minimum-wage/states/MS-2026.json",
+    "data/minimum-wage/states/MS-2027.json",
     "data/minimum-wage/states/MT-2026.json",
+    "data/minimum-wage/states/MT-2027.json",
     "data/minimum-wage/states/NC-2026.json",
+    "data/minimum-wage/states/NC-2027.json",
     "data/minimum-wage/states/ND-2026.json",
+    "data/minimum-wage/states/ND-2027.json",
     "data/minimum-wage/states/NE-2026.json",
+    "data/minimum-wage/states/NE-2027.json",
     "data/minimum-wage/states/NH-2026.json",
+    "data/minimum-wage/states/NH-2027.json",
     "data/minimum-wage/states/NJ-2026.json",
+    "data/minimum-wage/states/NJ-2027.json",
     "data/minimum-wage/states/NM-2026.json",
+    "data/minimum-wage/states/NM-2027.json",
     "data/minimum-wage/states/NV-2026.json",
+    "data/minimum-wage/states/NV-2027.json",
     "data/minimum-wage/states/NY-2026.json",
+    "data/minimum-wage/states/NY-2027.json",
     "data/minimum-wage/states/OH-2026.json",
+    "data/minimum-wage/states/OH-2027.json",
     "data/minimum-wage/states/OK-2026.json",
+    "data/minimum-wage/states/OK-2027.json",
     "data/minimum-wage/states/OR-2026.json",
+    "data/minimum-wage/states/OR-2027.json",
     "data/minimum-wage/states/PA-2026.json",
+    "data/minimum-wage/states/PA-2027.json",
     "data/minimum-wage/states/RI-2026.json",
+    "data/minimum-wage/states/RI-2027.json",
     "data/minimum-wage/states/SC-2026.json",
+    "data/minimum-wage/states/SC-2027.json",
     "data/minimum-wage/states/SD-2026.json",
+    "data/minimum-wage/states/SD-2027.json",
     "data/minimum-wage/states/TN-2026.json",
+    "data/minimum-wage/states/TN-2027.json",
     "data/minimum-wage/states/TX-2026.json",
+    "data/minimum-wage/states/TX-2027.json",
     "data/minimum-wage/states/UT-2026.json",
+    "data/minimum-wage/states/UT-2027.json",
     "data/minimum-wage/states/VA-2026.json",
+    "data/minimum-wage/states/VA-2027.json",
     "data/minimum-wage/states/VT-2026.json",
+    "data/minimum-wage/states/VT-2027.json",
     "data/minimum-wage/states/WA-2026.json",
+    "data/minimum-wage/states/WA-2027.json",
     "data/minimum-wage/states/WI-2026.json",
+    "data/minimum-wage/states/WI-2027.json",
     "data/minimum-wage/states/WV-2026.json",
+    "data/minimum-wage/states/WV-2027.json",
     "data/minimum-wage/states/WY-2026.json",
+    "data/minimum-wage/states/WY-2027.json",
     "data/minimum-wage/territories/AS-2026.json",
+    "data/minimum-wage/territories/AS-2027.json",
     "data/minimum-wage/territories/GU-2026.json",
+    "data/minimum-wage/territories/GU-2027.json",
     "data/minimum-wage/territories/MP-2026.json",
+    "data/minimum-wage/territories/MP-2027.json",
     "data/minimum-wage/territories/PR-2026.json",
-    "data/minimum-wage/territories/VI-2026.json"
+    "data/minimum-wage/territories/PR-2027.json",
+    "data/minimum-wage/territories/VI-2026.json",
+    "data/minimum-wage/territories/VI-2027.json"
    ]
   },
   {
@@ -829,7 +960,8 @@
    "url": "https://labor.arkansas.gov/labor/labor-standards/minimum-wage-and-overtime/",
    "origin": "data",
    "used_by": [
-    "data/minimum-wage/states/AR-2026.json"
+    "data/minimum-wage/states/AR-2026.json",
+    "data/minimum-wage/states/AR-2027.json"
    ]
   },
   {
@@ -990,7 +1122,8 @@
    "url": "https://www.flagstaff.az.gov/CivicAlerts.aspx?AID=2165",
    "origin": "data",
    "used_by": [
-    "data/minimum-wage/local/AZ-local-2026.json"
+    "data/minimum-wage/local/AZ-local-2026.json",
+    "data/minimum-wage/local/AZ-local-2027.json"
    ]
   },
   {
@@ -1000,7 +1133,8 @@
    "url": "https://www.tucsonaz.gov/Departments/Business-Services-Department/Tucson-Minimum-Wage-Act",
    "origin": "data",
    "used_by": [
-    "data/minimum-wage/local/AZ-local-2026.json"
+    "data/minimum-wage/local/AZ-local-2026.json",
+    "data/minimum-wage/local/AZ-local-2027.json"
    ]
   },
   {
@@ -1033,13 +1167,24 @@
    "origin": "curated"
   },
   {
+   "id": "ca-f9df989d71",
+   "jurisdiction": "CA",
+   "title": "California DIR -- minimum wage set to increase to $17.40 per hour (News Release 2026-66)",
+   "url": "https://www.dir.ca.gov/DIRNews/2026/2026-66.html",
+   "origin": "data",
+   "used_by": [
+    "data/minimum-wage/states/CA-2027.json"
+   ]
+  },
+  {
    "id": "ca-a80d980aed",
    "jurisdiction": "CA",
    "title": "California Department of Industrial Relations -- Fast Food Minimum Wage Frequently Asked Questions",
    "url": "https://www.dir.ca.gov/dlse/Fast-Food-Minimum-Wage-FAQ.htm",
    "origin": "data",
    "used_by": [
-    "data/minimum-wage/sectoral/CA-sectoral-2026.json"
+    "data/minimum-wage/sectoral/CA-sectoral-2026.json",
+    "data/minimum-wage/sectoral/CA-sectoral-2027.json"
    ]
   },
   {
@@ -1049,7 +1194,8 @@
    "url": "https://www.dir.ca.gov/dlse/Health-Care-Worker-Minimum-Wage-FAQ.htm",
    "origin": "data",
    "used_by": [
-    "data/minimum-wage/sectoral/CA-sectoral-2026.json"
+    "data/minimum-wage/sectoral/CA-sectoral-2026.json",
+    "data/minimum-wage/sectoral/CA-sectoral-2027.json"
    ]
   },
   {
@@ -1121,7 +1267,8 @@
    "url": "https://www.longbeach.gov/globalassets/city-clerk/media-library/documents/public-notices/public-notices/measure-rw-bulletin-effective-july-1-2026",
    "origin": "data",
    "used_by": [
-    "data/minimum-wage/sectoral/CA-sectoral-2026.json"
+    "data/minimum-wage/sectoral/CA-sectoral-2026.json",
+    "data/minimum-wage/sectoral/CA-sectoral-2027.json"
    ]
   },
   {
@@ -1131,7 +1278,8 @@
    "url": "https://www.malibucity.org/minimumwage",
    "origin": "data",
    "used_by": [
-    "data/minimum-wage/local/CA-local-2026.json"
+    "data/minimum-wage/local/CA-local-2026.json",
+    "data/minimum-wage/local/CA-local-2027.json"
    ]
   },
   {
@@ -1141,7 +1289,8 @@
    "url": "https://www.santamonica.gov/minimum-wage",
    "origin": "data",
    "used_by": [
-    "data/minimum-wage/sectoral/CA-sectoral-2026.json"
+    "data/minimum-wage/sectoral/CA-sectoral-2026.json",
+    "data/minimum-wage/sectoral/CA-sectoral-2027.json"
    ]
   },
   {
@@ -1196,7 +1345,8 @@
    "url": "https://dcba.lacounty.gov/newsroom/new-worker-protections-for-july-1-2025/",
    "origin": "data",
    "used_by": [
-    "data/minimum-wage/local/CA-local-2026.json"
+    "data/minimum-wage/local/CA-local-2026.json",
+    "data/minimum-wage/local/CA-local-2027.json"
    ]
   },
   {
@@ -1206,7 +1356,18 @@
    "url": "https://bouldercounty.gov/departments/commissioners/local-minimum-wage/",
    "origin": "data",
    "used_by": [
-    "data/minimum-wage/local/CO-local-2026.json"
+    "data/minimum-wage/local/CO-local-2026.json",
+    "data/minimum-wage/local/CO-local-2027.json"
+   ]
+  },
+  {
+   "id": "co-2a0cc707e8",
+   "jurisdiction": "CO",
+   "title": "CDLE press release -- Colorado minimum wage will increase to $15.71/hour in 2027",
+   "url": "https://cdle.colorado.gov/press-releases/press-release-colorado-minimum-wage-will-increase-to-1571/hour-in-2027",
+   "origin": "data",
+   "used_by": [
+    "data/minimum-wage/states/CO-2027.json"
    ]
   },
   {
@@ -1216,7 +1377,8 @@
    "url": "https://www.denvergov.org/Government/Agencies-Departments-Offices/Agencies-Departments-Offices-Directory/Department-of-Finance/News/2025/Denver-Local-Minimum-Wage-Adjusts-to-19.29-per-Hour-for-2026",
    "origin": "data",
    "used_by": [
-    "data/minimum-wage/local/CO-local-2026.json"
+    "data/minimum-wage/local/CO-local-2026.json",
+    "data/minimum-wage/local/CO-local-2027.json"
    ]
   },
   {
@@ -1257,7 +1419,8 @@
    "url": "https://bouldercolorado.gov/local-minimum-wage",
    "origin": "data",
    "used_by": [
-    "data/minimum-wage/local/CO-local-2026.json"
+    "data/minimum-wage/local/CO-local-2026.json",
+    "data/minimum-wage/local/CO-local-2027.json"
    ]
   },
   {
@@ -1333,7 +1496,8 @@
    "kind": "index",
    "origin": "curated",
    "used_by": [
-    "data/minimum-wage/local/CO-local-2026.json"
+    "data/minimum-wage/local/CO-local-2026.json",
+    "data/minimum-wage/local/CO-local-2027.json"
    ],
    "replaces": [
     "https://www.edgewaterco.gov/doing-business/minimum-wage"
@@ -1445,6 +1609,16 @@
    ]
   },
   {
+   "id": "ct-9f4032ad9e",
+   "jurisdiction": "CT",
+   "title": "Governor Lamont announces Connecticut's minimum wage will increase to $17.48 on January 1, 2027",
+   "url": "https://portal.ct.gov/governor/news/press-releases/2026/08-2026/governor-lamont-announces-minimum-wage-will-increase",
+   "origin": "data",
+   "used_by": [
+    "data/minimum-wage/states/CT-2027.json"
+   ]
+  },
+  {
    "id": "ct-deef46ce60",
    "jurisdiction": "CT",
    "title": "IP 2026(1), Connecticut Employer's Tax Guide, Circular CT",
@@ -1504,7 +1678,8 @@
    "url": "https://does.dc.gov/service/office-wage-hour-compliance-0",
    "origin": "data",
    "used_by": [
-    "data/minimum-wage/states/DC-2026.json"
+    "data/minimum-wage/states/DC-2026.json",
+    "data/minimum-wage/states/DC-2027.json"
    ]
   },
   {
@@ -1535,7 +1710,8 @@
    "url": "https://does.dc.gov/sites/default/files/dc/sites/does/publication/attachments/2026%20Minimum%20Wage%20Increase%20Notice_0.pdf",
    "origin": "data",
    "used_by": [
-    "data/minimum-wage/states/DC-2026.json"
+    "data/minimum-wage/states/DC-2026.json",
+    "data/minimum-wage/states/DC-2027.json"
    ]
   },
   {
@@ -1919,7 +2095,8 @@
    "url": "https://workforce.iowa.gov/media/234/download",
    "origin": "data",
    "used_by": [
-    "data/minimum-wage/states/IA-2026.json"
+    "data/minimum-wage/states/IA-2026.json",
+    "data/minimum-wage/states/IA-2027.json"
    ]
   },
   {
@@ -2067,7 +2244,8 @@
    "url": "https://www.cookcountyil.gov/news/cook-county-issues-notice-minimum-wage-ordinance-5",
    "origin": "data",
    "used_by": [
-    "data/minimum-wage/local/IL-local-2026.json"
+    "data/minimum-wage/local/IL-local-2026.json",
+    "data/minimum-wage/local/IL-local-2027.json"
    ]
   },
   {
@@ -3299,7 +3477,8 @@
    "url": "https://www.howardcountymd.gov/finance/minimum-wage",
    "origin": "data",
    "used_by": [
-    "data/minimum-wage/local/MD-local-2026.json"
+    "data/minimum-wage/local/MD-local-2026.json",
+    "data/minimum-wage/local/MD-local-2027.json"
    ]
   },
   {
@@ -3325,7 +3504,8 @@
    "url": "https://www.labor.maryland.gov/labor/wages/wagehrfacts.shtml",
    "origin": "data",
    "used_by": [
-    "data/minimum-wage/states/MD-2026.json"
+    "data/minimum-wage/states/MD-2026.json",
+    "data/minimum-wage/states/MD-2027.json"
    ]
   },
   {
@@ -3357,7 +3537,8 @@
    "url": "https://www.montgomerycountymd.gov/office-human-rights/minimum-wage-increase",
    "origin": "data",
    "used_by": [
-    "data/minimum-wage/local/MD-local-2026.json"
+    "data/minimum-wage/local/MD-local-2026.json",
+    "data/minimum-wage/local/MD-local-2027.json"
    ]
   },
   {
@@ -3367,7 +3548,8 @@
    "url": "https://www.montgomerycountymd.gov/humanrights/min-wage.html",
    "origin": "data",
    "used_by": [
-    "data/minimum-wage/local/MD-local-2026.json"
+    "data/minimum-wage/local/MD-local-2026.json",
+    "data/minimum-wage/local/MD-local-2027.json"
    ]
   },
   {
@@ -3398,7 +3580,8 @@
    "url": "https://www.portlandmaine.gov/1016/Minimum-Wage",
    "origin": "data",
    "used_by": [
-    "data/minimum-wage/local/ME-local-2026.json"
+    "data/minimum-wage/local/ME-local-2026.json",
+    "data/minimum-wage/local/ME-local-2027.json"
    ]
   },
   {
@@ -3408,7 +3591,8 @@
    "url": "https://rocklandmaine.gov/DocumentCenter/View/2670/2026-Minimum-Wage-Notice---Rockland",
    "origin": "data",
    "used_by": [
-    "data/minimum-wage/local/ME-local-2026.json"
+    "data/minimum-wage/local/ME-local-2026.json",
+    "data/minimum-wage/local/ME-local-2027.json"
    ]
   },
   {
@@ -3420,6 +3604,16 @@
    "used_by": [
     "data/states/ME-2026.json",
     "data/states/ME-2027.json"
+   ]
+  },
+  {
+   "id": "me-f5e210a1b2",
+   "jurisdiction": "ME",
+   "title": "Maine DOL -- Maine's minimum wage to increase to $15.70 per hour in 2027",
+   "url": "https://www.maine.gov/labor/news_events/article.shtml?id=13362373",
+   "origin": "data",
+   "used_by": [
+    "data/minimum-wage/states/ME-2027.json"
    ]
   },
   {
@@ -3612,7 +3806,8 @@
    "url": "https://www.michigan.gov/leo/news/2025/12/08/michigans-minimum-wage-set-to-increase-on-jan-1-2026",
    "origin": "data",
    "used_by": [
-    "data/minimum-wage/states/MI-2026.json"
+    "data/minimum-wage/states/MI-2026.json",
+    "data/minimum-wage/states/MI-2027.json"
    ]
   },
   {
@@ -3760,7 +3955,8 @@
    "url": "https://www.minneapolismn.gov/news/2025/december/minimum-wage/",
    "origin": "data",
    "used_by": [
-    "data/minimum-wage/local/MN-local-2026.json"
+    "data/minimum-wage/local/MN-local-2026.json",
+    "data/minimum-wage/local/MN-local-2027.json"
    ]
   },
   {
@@ -3770,7 +3966,8 @@
    "url": "https://www.stpaul.gov/news/city-saint-paul-minimum-wage-increases-small-and-micro-businesses",
    "origin": "data",
    "used_by": [
-    "data/minimum-wage/local/MN-local-2026.json"
+    "data/minimum-wage/local/MN-local-2026.json",
+    "data/minimum-wage/local/MN-local-2027.json"
    ]
   },
   {
@@ -3842,13 +4039,24 @@
    ]
   },
   {
+   "id": "mn-f9d2022b84",
+   "jurisdiction": "MN",
+   "title": "Minnesota DLI -- minimum-wage rate adjusted for inflation as of Jan. 1, 2027",
+   "url": "https://dli.mn.gov/news/minimum-wage-rate-adjusted-inflation-jan-1-2027",
+   "origin": "data",
+   "used_by": [
+    "data/minimum-wage/states/MN-2027.json"
+   ]
+  },
+  {
    "id": "mn-5aa16f5b41",
    "jurisdiction": "MN",
    "title": "Minnesota Department of Labor and Industry -- Minimum wage in Minnesota",
    "url": "https://www.dli.mn.gov/business/employment-practices/minimum-wage-minnesota",
    "origin": "data",
    "used_by": [
-    "data/minimum-wage/states/MN-2026.json"
+    "data/minimum-wage/states/MN-2026.json",
+    "data/minimum-wage/states/MN-2027.json"
    ]
   },
   {
@@ -3964,7 +4172,8 @@
    "url": "https://labor.mo.gov/dls/minimum-wage",
    "origin": "data",
    "used_by": [
-    "data/minimum-wage/states/MO-2026.json"
+    "data/minimum-wage/states/MO-2026.json",
+    "data/minimum-wage/states/MO-2027.json"
    ]
   },
   {
@@ -4087,6 +4296,16 @@
    "used_by": [
     "data/states/MT-2026.json",
     "data/states/MT-2027.json"
+   ]
+  },
+  {
+   "id": "mt-cb47dae684",
+   "jurisdiction": "MT",
+   "title": "Montana DLI -- Montana's Minimum Wage",
+   "url": "https://erd.dli.mt.gov/labor-standards/wage-and-hour-payment-act/state-minimum-wage",
+   "origin": "data",
+   "used_by": [
+    "data/minimum-wage/states/MT-2027.json"
    ]
   },
   {
@@ -4289,7 +4508,8 @@
    "url": "https://ago.nebraska.gov/news/attorney-general-hilgers-sues-city-omaha-over-unconstitutional-minimum-wage-ordinance",
    "origin": "data",
    "used_by": [
-    "data/minimum-wage/local/NE-local-2026.json"
+    "data/minimum-wage/local/NE-local-2026.json",
+    "data/minimum-wage/local/NE-local-2027.json"
    ]
   },
   {
@@ -4309,7 +4529,18 @@
    "url": "https://dol.nebraska.gov/PressRelease/Details/338",
    "origin": "data",
    "used_by": [
-    "data/minimum-wage/states/NE-2026.json"
+    "data/minimum-wage/states/NE-2026.json",
+    "data/minimum-wage/states/NE-2027.json"
+   ]
+  },
+  {
+   "id": "ne-2ba02f5757",
+   "jurisdiction": "NE",
+   "title": "Nebraska Department of Labor -- State of Nebraska Minimum Wage (updated 7/31/2026)",
+   "url": "https://dol.nebraska.gov/webdocs/getfile/18bc2309-85ed-4957-b072-e899caeaca99",
+   "origin": "data",
+   "used_by": [
+    "data/minimum-wage/states/NE-2027.json"
    ]
   },
   {
@@ -4338,7 +4569,8 @@
    "url": "https://nebraskalegislature.gov/FloorDocs/109/PDF/Slip/LB258.pdf",
    "origin": "data",
    "used_by": [
-    "data/minimum-wage/states/NE-2026.json"
+    "data/minimum-wage/states/NE-2026.json",
+    "data/minimum-wage/states/NE-2027.json"
    ]
   },
   {
@@ -4439,6 +4671,16 @@
    ]
   },
   {
+   "id": "nj-a7acd79e9b",
+   "jurisdiction": "NJ",
+   "title": "NJDOL press release 2026-09-29 -- minimum wage to increase to $16.48 on Jan. 1",
+   "url": "https://www.nj.gov/labor/lwdhome/press/2026/20260929_min_wage.shtml",
+   "origin": "data",
+   "used_by": [
+    "data/minimum-wage/states/NJ-2027.json"
+   ]
+  },
+  {
    "id": "nj-26f8b9db2e",
    "jurisdiction": "NJ",
    "title": "NJDOL \u2014 New Benefit Rates for 2026 (taxable wage bases)",
@@ -4456,7 +4698,8 @@
    "url": "https://www.nj.gov/labor/lwdhome/press/2025/20251001_Minimum_Wage.shtml",
    "origin": "data",
    "used_by": [
-    "data/minimum-wage/states/NJ-2026.json"
+    "data/minimum-wage/states/NJ-2026.json",
+    "data/minimum-wage/states/NJ-2027.json"
    ]
   },
   {
@@ -4485,7 +4728,8 @@
    "url": "https://www.nj.gov/labor/assets/PDFs/Legal%20Notices/Other/Public%20Notice%20Minimum%20Wage%202026_FINAL.pdf",
    "origin": "data",
    "used_by": [
-    "data/minimum-wage/states/NJ-2026.json"
+    "data/minimum-wage/states/NJ-2026.json",
+    "data/minimum-wage/states/NJ-2027.json"
    ]
   },
   {
@@ -4515,7 +4759,8 @@
    "url": "https://www.cabq.gov/legal/albuquerque-minimum-wage-information",
    "origin": "data",
    "used_by": [
-    "data/minimum-wage/local/NM-local-2026.json"
+    "data/minimum-wage/local/NM-local-2026.json",
+    "data/minimum-wage/local/NM-local-2027.json"
    ]
   },
   {
@@ -4525,7 +4770,8 @@
    "url": "https://lascruces.gov/wp-content/uploads/2025/09/MinimumWageEng26.pdf",
    "origin": "data",
    "used_by": [
-    "data/minimum-wage/local/NM-local-2026.json"
+    "data/minimum-wage/local/NM-local-2026.json",
+    "data/minimum-wage/local/NM-local-2027.json"
    ]
   },
   {
@@ -4535,7 +4781,8 @@
    "url": "https://santafenm.gov/media/news_pdf/2025_Living_Wage_Ordinance.pdf",
    "origin": "data",
    "used_by": [
-    "data/minimum-wage/local/NM-local-2026.json"
+    "data/minimum-wage/local/NM-local-2026.json",
+    "data/minimum-wage/local/NM-local-2027.json"
    ]
   },
   {
@@ -4593,7 +4840,8 @@
    "url": "https://www.santafecountynm.gov/livingwage",
    "origin": "data",
    "used_by": [
-    "data/minimum-wage/local/NM-local-2026.json"
+    "data/minimum-wage/local/NM-local-2026.json",
+    "data/minimum-wage/local/NM-local-2027.json"
    ]
   },
   {
@@ -4603,7 +4851,8 @@
    "url": "https://www.santafecountynm.gov/news/detail/santa-fe-county-announces-living-wage-increase-effective-march-1-2025",
    "origin": "data",
    "used_by": [
-    "data/minimum-wage/local/NM-local-2026.json"
+    "data/minimum-wage/local/NM-local-2026.json",
+    "data/minimum-wage/local/NM-local-2027.json"
    ]
   },
   {
@@ -4767,7 +5016,8 @@
    "url": "https://legislation.nysenate.gov/api/3/laws/ELN/3-400?key={env:NYSENATE_API_KEY}",
    "origin": "curated",
    "used_by": [
-    "data/minimum-wage/states/NY-2026.json"
+    "data/minimum-wage/states/NY-2026.json",
+    "data/minimum-wage/states/NY-2027.json"
    ],
    "drop_json_keys": [
     "responseTime"
@@ -4783,7 +5033,8 @@
    "url": "https://legislation.nysenate.gov/api/3/laws/LAB/651?key={env:NYSENATE_API_KEY}",
    "origin": "curated",
    "used_by": [
-    "data/minimum-wage/states/NY-2026.json"
+    "data/minimum-wage/states/NY-2026.json",
+    "data/minimum-wage/states/NY-2027.json"
    ],
    "drop_json_keys": [
     "responseTime"
@@ -4875,7 +5126,8 @@
    "url": "https://dol.ny.gov/home-care-aide-minimum-wage-fact-sheet-p105",
    "origin": "data",
    "used_by": [
-    "data/minimum-wage/sectoral/NY-sectoral-2026.json"
+    "data/minimum-wage/sectoral/NY-sectoral-2026.json",
+    "data/minimum-wage/sectoral/NY-sectoral-2027.json"
    ]
   },
   {
@@ -4885,7 +5137,18 @@
    "url": "https://dol.ny.gov/minimum-wage-0",
    "origin": "data",
    "used_by": [
-    "data/minimum-wage/states/NY-2026.json"
+    "data/minimum-wage/states/NY-2026.json",
+    "data/minimum-wage/states/NY-2027.json"
+   ]
+  },
+  {
+   "id": "ny-3cbadba441",
+   "jurisdiction": "NY",
+   "title": "New York State Department of Labor -- Your New York State Minimum Wage",
+   "url": "https://dol.ny.gov/minimum-wage",
+   "origin": "data",
+   "used_by": [
+    "data/minimum-wage/states/NY-2027.json"
    ]
   },
   {
@@ -4914,7 +5177,8 @@
    "url": "https://www.dol.gov/agencies/whd/compliance-assistance/handy-reference-guide-flsa",
    "origin": "data",
    "used_by": [
-    "data/minimum-wage/states/NY-2026.json"
+    "data/minimum-wage/states/NY-2026.json",
+    "data/minimum-wage/states/NY-2027.json"
    ]
   },
   {
@@ -4933,7 +5197,8 @@
    "used_by": [
     "data/employer-thresholds/NY-2026.json",
     "data/employer-thresholds/NY-2027.json",
-    "data/minimum-wage/federal-2026.json"
+    "data/minimum-wage/federal-2026.json",
+    "data/minimum-wage/federal-2027.json"
    ]
   },
   {
@@ -4943,7 +5208,8 @@
    "url": "https://www.ecfr.gov/api/versioner/v1/versions/title-29.json?section=553.106",
    "origin": "curated",
    "used_by": [
-    "data/minimum-wage/states/NY-2026.json"
+    "data/minimum-wage/states/NY-2026.json",
+    "data/minimum-wage/states/NY-2027.json"
    ],
    "replaces": [
     "https://www.ecfr.gov/current/title-29/subtitle-B/chapter-V/subchapter-A/part-553/subpart-B/section-553.106"
@@ -5089,7 +5355,18 @@
    "url": "https://com.ohio.gov/about-us/media-center/news/ohio%20minimum%20wage%20set%20to%20increase%20in%202026",
    "origin": "data",
    "used_by": [
-    "data/minimum-wage/states/OH-2026.json"
+    "data/minimum-wage/states/OH-2026.json",
+    "data/minimum-wage/states/OH-2027.json"
+   ]
+  },
+  {
+   "id": "oh-0cc4b82d2e",
+   "jurisdiction": "OH",
+   "title": "Ohio Department of Commerce -- Ohio minimum wage to increase by 3.5% in 2027",
+   "url": "https://com.ohio.gov/about-us/media-center/news/Ohio-Minimum-Wage-to-Increase-in-2027",
+   "origin": "data",
+   "used_by": [
+    "data/minimum-wage/states/OH-2027.json"
    ]
   },
   {
@@ -5768,7 +6045,8 @@
    "url": "https://www.oregon.gov/boli/workers/pages/minimum-wage.aspx",
    "origin": "data",
    "used_by": [
-    "data/minimum-wage/states/OR-2026.json"
+    "data/minimum-wage/states/OR-2026.json",
+    "data/minimum-wage/states/OR-2027.json"
    ]
   },
   {
@@ -6028,6 +6306,16 @@
    ]
   },
   {
+   "id": "ri-a84f006e05",
+   "jurisdiction": "RI",
+   "title": "R.I. Gen. Laws 28-12-3 as amended in 2025 ($17.00 from 2027)",
+   "url": "https://webserver.rilegislature.gov/Statutes/TITLE28/28-12/28-12-3.htm",
+   "origin": "data",
+   "used_by": [
+    "data/minimum-wage/states/RI-2027.json"
+   ]
+  },
+  {
    "id": "ri-862019197a",
    "jurisdiction": "RI",
    "title": "RI DLT -- 2025 Tax Rates for Unemployment Insurance and Temporary Disability Insurance (2024-12-20)",
@@ -6244,6 +6532,16 @@
    "follow_limit": 10
   },
   {
+   "id": "va-471a78ec0a",
+   "jurisdiction": "VA",
+   "title": "Code of Virginia 40.1-28.10 -- Minimum wages",
+   "url": "https://law.lis.virginia.gov/vacode/title40.1/chapter3/section40.1-28.10/",
+   "origin": "data",
+   "used_by": [
+    "data/minimum-wage/states/VA-2027.json"
+   ]
+  },
+  {
    "id": "va-10e4ee4522",
    "jurisdiction": "VA",
    "title": "Form VA-4, Employee's Virginia Income Tax Withholding Exemption Certificate (Rev. 04/26) + Personal Exemption Worksheet",
@@ -6392,7 +6690,8 @@
    "url": "https://www.burienwa.gov/MinimumWage",
    "origin": "data",
    "used_by": [
-    "data/minimum-wage/local/WA-local-2026.json"
+    "data/minimum-wage/local/WA-local-2026.json",
+    "data/minimum-wage/local/WA-local-2027.json"
    ]
   },
   {
@@ -6402,7 +6701,8 @@
    "url": "https://www.seattle.gov/laborstandards/ordinances/minimum-wage",
    "origin": "data",
    "used_by": [
-    "data/minimum-wage/local/WA-local-2026.json"
+    "data/minimum-wage/local/WA-local-2026.json",
+    "data/minimum-wage/local/WA-local-2027.json"
    ]
   },
   {
@@ -6531,6 +6831,16 @@
    ]
   },
   {
+   "id": "wa-45b3e1826b",
+   "jurisdiction": "WA",
+   "title": "Washington L&I -- FY27-075 2027 Minimum Wage Announcement",
+   "url": "https://www.lni.wa.gov/workers-rights/_docs/2027-minimum-wage-announcement-Accessible.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/minimum-wage/states/WA-2027.json"
+   ]
+  },
+  {
    "id": "wa-b023203d3c",
    "jurisdiction": "WA",
    "title": "Washington Paid Leave premium rates",
@@ -6545,7 +6855,8 @@
    "url": "https://lni.wa.gov/workers-rights/wages/minimum-wage/local-minimum-wage-rates",
    "origin": "data",
    "used_by": [
-    "data/minimum-wage/local/WA-local-2026.json"
+    "data/minimum-wage/local/WA-local-2026.json",
+    "data/minimum-wage/local/WA-local-2027.json"
    ]
   },
   {
@@ -6555,7 +6866,8 @@
    "url": "https://www.lni.wa.gov/news-events/article/25-27",
    "origin": "data",
    "used_by": [
-    "data/minimum-wage/states/WA-2026.json"
+    "data/minimum-wage/states/WA-2026.json",
+    "data/minimum-wage/states/WA-2027.json"
    ]
   },
   {
@@ -6661,7 +6973,8 @@
    "url": "https://docs.legis.wisconsin.gov/2017/statutes/statutes/104/035/9",
    "origin": "data",
    "used_by": [
-    "data/minimum-wage/states/WI-2026.json"
+    "data/minimum-wage/states/WI-2026.json",
+    "data/minimum-wage/states/WI-2027.json"
    ]
   },
   {
@@ -6750,7 +7063,8 @@
    "url": "https://labor.wv.gov/wage-hour/jobs-act/minimum-wage",
    "origin": "data",
    "used_by": [
-    "data/minimum-wage/states/WV-2026.json"
+    "data/minimum-wage/states/WV-2026.json",
+    "data/minimum-wage/states/WV-2027.json"
    ]
   },
   {

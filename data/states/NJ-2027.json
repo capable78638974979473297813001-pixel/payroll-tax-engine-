@@ -6,7 +6,15 @@
     "status": "carry-forward-from-2026",
     "createdOn": "2026-10-13",
     "basedOn": "data/states/NJ-2026.json",
-    "note": "Carried forward from the 2026 file on 2026-10-13. Not yet checked against the 2027 official source: every figure is 2026's unless listed in updatedFor2027. Remove this block only after each figure has been re-verified against its 2027 source."
+    "note": "Carried forward from the 2026 file on 2026-10-13. Not yet checked against the 2027 official source: every figure is 2026's unless listed in updatedFor2027. Remove this block only after each figure has been re-verified against its 2027 source.",
+    "updatedFor2027": [
+      {
+        "path": "suiEmployer.wageBase; stateUnemploymentEmployee.wageBase; stateDisabilityEmployee.wageBase; statePaidLeaveEmployee.wageBase",
+        "from": [44800, 44800, 171100, 171100],
+        "to": [46400, 46400, 177100, 177100],
+        "source": "New Jersey Division of Employer Accounts, Rate information: '2027 Taxable Wage Base (UI and WF/SWF - workers and employers, TDI - employers): $46,400' and '(TDI, FLI - workers only): $177,100' https://www.nj.gov/labor/ea/employer-services/rate-info/ (read 2026-10-25). The same page says the 2027 worker RATES 'will be available later this year', so the 2026 rates are kept."
+      }
+    ]
   },
   "method": "bracket_per_period_rate_table",
   "$scopeNote": "STATE income tax (NJ-WT's five Rate Tables A-E, all 8 PayFrequency periods) + UI/Workforce/Supplemental-Workforce employee contribution + Temporary Disability Insurance (TDI) employee contribution + Family Leave Insurance (FLI) employee contribution + Newark's EMPLOYER-paid Payroll Tax (see newarkPayrollTax below). New Jersey has NO local/municipal INCOME tax anywhere in the state (unlike PA/OH/IN/KY in this project) -- confirmed by absence in NJ-WT, which covers only state-level withholding; Newark's payroll tax is a genuinely different animal (an employer-paid tax on payroll expense, dispatched off certificate.locality, not an employee withholding at all), modelled the same way FUTA/SS-ER/Medicare-ER already are (payer: 'employer', excluded from net pay).",
@@ -1959,18 +1967,18 @@
   },
   "stateUnemploymentEmployee": {
     "rate": 0.00425,
-    "wageBase": 44800,
+    "wageBase": 46400,
     "$comment": "Combined employee UI (0.3825%) + Workforce Development/Supplemental Workforce Fund (0.0425%) contribution, reported together as one line on NJ payroll (NJ-927) -- modeled as a single rate rather than two separate TaxLines since both share the exact same wage base and YTD tracker, and no employer-facing document treats them as separable withholding lines the way NY splits PFL from DBL."
   },
   "stateDisabilityEmployee": {
     "rate": 0.0019,
-    "wageBase": 171100,
+    "wageBase": 177100,
     "$comment": "Temporary Disability Insurance (TDI), state plan. Uses the wageBase (annual, YTD-tracked) branch of stateDisabilityEmployeeTax(), NOT New York DBL's per-period weeklyCapDollars branch -- NJ TDI is an ordinary annual wage-base cap, structurally identical to statePaidLeaveEmployee's mechanism."
   },
   "statePaidLeaveEmployee": {
     "rate": 0.0023,
-    "wageBase": 171100,
-    "$comment": "Family Leave Insurance (FLI). Shares the same $171,100 TDI/FLI wage base, tracked separately per input.ytd.statePaidLeave.NJ."
+    "wageBase": 177100,
+    "$comment": "Family Leave Insurance (FLI). Shares the same $177,100 TDI/FLI wage base (2027), tracked separately per input.ytd.statePaidLeave.NJ."
   },
   "newarkPayrollTax": {
     "rate": 0.01,
@@ -1983,8 +1991,8 @@
   ],
   "suiEmployer": {
     "$comment": "Normalized employer-side unemployment parameters — the shape src/taxes/state.ts reads. The detailed unemploymentInsurance block above stays the record of research; this exists because that block's shape varies too much between states to compute from directly (wage bases as objects, industry-keyed rate maps, differently-named keys).",
-    "wageBase": 44800,
-    "wageBaseSource": "2026 taxable wage bases cross-checked against EY's published 2026 state-by-state table; where this file already carried a numeric wage base, the two agreed unless noted in wageBaseNote.",
+    "wageBase": 46400,
+    "wageBaseSource": "New Jersey Division of Employer Accounts, Rate information: '2027 Taxable Wage Base (UI and WF/SWF - workers and employers, TDI - employers): $46,400' and '(TDI, FLI - workers only): $177,100' https://www.nj.gov/labor/ea/employer-services/rate-info/ (read 2026-10-25). The same page says the 2027 worker RATES 'will be available later this year', so the 2026 rates are kept. [replaces: 2026 taxable wage bases cross-checked against EY's published 2026 state-by-state table; where this file already carried a numeric wage base, the two agreed unless noted in wageBaseNote.]",
     "employerAssessments": [
       {
         "id": "DI",

@@ -120,6 +120,29 @@ rate rows appear (Woodville, July 2026), so this catches what the Finder knows
 and the engine doesn't, not what neither knows. For that, the local
 government's own pages are watched (and, with `follow`, their documents).
 
+## Checking that cited words are on the cited page
+
+The watcher notices when a page changes. It does not ask whether the words a data
+file attributes to a page are on it. `verify_citations.py` does, offline, against
+the page text already stored in `state/snapshots`:
+
+```
+python watcher/verify_citations.py                 # every data file
+python watcher/verify_citations.py --only MN,US    # some jurisdictions
+python watcher/verify_citations.py --json out.json # machine-readable
+python watcher/verify_citations.py --live          # re-read from the source anything the snapshot doesn't support
+```
+
+For each citation (an object with a `url`) it takes the text the data records as
+verbatim (`quote`, `verbatim`, or text inside quote marks that a `verifiedBy` note
+introduces as the page's own words), splits it where the author elided, and looks
+for each piece after flattening case, quotes, dashes and spacing. Results are
+`supported`, `partly`, `unsupported` or `unread` (no stored snapshot), reported
+separately for verbatim quotes and for `says` summaries, which are paraphrases.
+`supported` means the page contains the words; it does not mean the engine's
+number equals the number in them. Run it after editing a data file's sources, or
+to find citations that have gone stale. Tests: `watcher/test_verify_citations.py`.
+
 ## Zero-day problems
 
 A **zero-day problem** is a change in an official source that alters a number

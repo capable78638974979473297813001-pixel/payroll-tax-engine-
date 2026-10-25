@@ -6,7 +6,15 @@
     "status": "carry-forward-from-2026",
     "createdOn": "2026-10-13",
     "basedOn": "data/states/OK-2026.json",
-    "note": "Carried forward from the 2026 file on 2026-10-13. Not yet checked against the 2027 official source: every figure is 2026's unless listed in updatedFor2027. Remove this block only after each figure has been re-verified against its 2027 source."
+    "note": "Carried forward from the 2026 file on 2026-10-13. Not yet checked against the 2027 official source: every figure is 2026's unless listed in updatedFor2027. Remove this block only after each figure has been re-verified against its 2027 source.",
+    "updatedFor2027": [
+      {
+        "path": "suiEmployer.wageBase",
+        "from": 25000,
+        "to": 24400,
+        "source": "Oklahoma Employment Security Commission, Contribution Rates: calendar year 2027 'Taxable Wage Base $24,400' (down from $25,000) https://oklahoma.gov/oesc/employers/tax/contribution-rates.html (read 2026-10-25)"
+      }
+    ]
   },
   "method": "oklahoma_percentage_method",
   "sources": [
@@ -506,7 +514,7 @@
   },
   "unemploymentInsurance": {
     "administeredBy": "Oklahoma Employment Security Commission (OESC)",
-    "wageBase": 25000.0,
+    "wageBase": 24400.0,
     "newEmployerRate": 0.015,
     "experiencedEmployerRateRange": [
       0.002,
@@ -524,8 +532,8 @@
   ],
   "suiEmployer": {
     "$comment": "Normalized employer-side unemployment parameters — the shape src/taxes/state.ts reads. The detailed unemploymentInsurance block above stays the record of research; this exists because that block's shape varies too much between states to compute from directly (wage bases as objects, industry-keyed rate maps, differently-named keys).",
-    "wageBase": 25000,
-    "wageBaseSource": "2026 taxable wage bases cross-checked against EY's published 2026 state-by-state table; where this file already carried a numeric wage base, the two agreed unless noted in wageBaseNote.",
+    "wageBase": 24400,
+    "wageBaseSource": "Oklahoma Employment Security Commission, Contribution Rates: calendar year 2027 'Taxable Wage Base $24,400' (down from $25,000) https://oklahoma.gov/oesc/employers/tax/contribution-rates.html (read 2026-10-25)",
     "newEmployerRate": 0.015,
     "newEmployerRateSource": "This state's own unemploymentInsurance block above, researched in an earlier pass — kept in preference to any aggregate table.",
     "experienceRange": {

@@ -6,7 +6,14 @@
     "status": "carry-forward-from-2026",
     "createdOn": "2026-10-13",
     "basedOn": "data/states/HI-2026.json",
-    "note": "Carried forward from the 2026 file on 2026-10-13. Not yet checked against the 2027 official source: every figure is 2026's unless listed in updatedFor2027. Remove this block only after each figure has been re-verified against its 2027 source."
+    "note": "Carried forward from the 2026 file on 2026-10-13. Not yet checked against the 2027 official source: every figure is 2026's unless listed in updatedFor2027. Remove this block only after each figure has been re-verified against its 2027 source.",
+    "pendingStatutoryChanges": [
+      {
+        "change": "Act 46 (SLH 2024) as amended by Act 24 (SLH 2026, S.B. 3125): from tax year 2027 the bracket widths expand (single: 1.4% to $14,400, then 2.5% to $19,200, 5% to $24,000, 6.4% to $36,000, 6.8% to $48,000, 7.2% to $125,000, 7.6% to $175,000, 8.25% to $225,000, 9% to $275,000, 10% to $325,000, 11% to $500,000) and a new 13% bracket applies above $500,000 single / $750,000 HoH / $1,000,000 joint. Standard deductions stay at 2026's $8,000 / $12,000 / $16,000.",
+        "source": "Tax Cut Hawai'i (Hawaii Department of Taxation) bracket table https://taxcuthawaii.org/new-hawaii-tax-brackets/ ; EY Tax Alert 2026-1440 https://taxnews.ey.com/news/2026-1440-hawaii-legislation-establishes-higher-personal-income-tax-on-income-over-1-million (both read 2026-10-25)",
+        "status": "NOT APPLIED. Booklet A's withholding brackets are not the statutory return brackets (the 2026 withholding table stops at 7.9% and carries an extra lump-sum allowance), so the 2027 withholding table cannot be derived from the return brackets without guessing. File carries the 2026 Booklet A table, which over-withholds middle incomes in 2027. Replace when the Department publishes the 2027 Booklet A."
+      }
+    ]
   },
   "method": "hawaii_annual_bracket",
   "sources": [
