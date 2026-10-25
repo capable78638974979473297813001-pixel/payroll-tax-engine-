@@ -40,6 +40,20 @@ export interface SendResult {
   reason?: string;
 }
 
+/**
+ * Resend's error body is safe to log (it does not contain the code) but a
+ * misbehaving proxy can echo the Authorization header. Strip API keys,
+ * bearer tokens, and any 6-digit code before the line is written.
+ */
+export function redactMailError(text: string): string {
+  return text
+    .replace(/re_[A-Za-z0-9_-]{8,}/g, '[redacted]')
+    .replace(/Bearer\s+\S+/gi, 'Bearer [redacted]')
+    .replace(/\b\d{6}\b/g, '[code]')
+    .replace(/[\r\n]+/g, ' ')
+    .slice(0, 300);
+}
+
 export function isEmailConfigured(): boolean {
   return Boolean(process.env.RESEND_API_KEY);
 }
@@ -89,11 +103,11 @@ export async function sendVerificationEmail(args: {
     });
     if (!res.ok) {
       const body = await res.text().catch(() => '');
-      return { sent: false, reason: `Resend responded ${res.status}: ${body.slice(0, 240)}` };
+      return { sent: false, reason: redactMailError(`Resend responded ${res.status}: ${body.slice(0, 240)}`) };
     }
     return { sent: true };
   } catch (err) {
-    return { sent: false, reason: err instanceof Error ? err.message : 'Unknown error calling Resend.' };
+    return { sent: false, reason: redactMailError(err instanceof Error ? err.message : 'Unknown error calling Resend.') };
   }
 }
 
@@ -119,10 +133,13 @@ export async function sendContactEmail(args: { name: string; email: string; comp
         text,
       }),
     });
-    if (!res.ok) return { sent: false, reason: `Resend responded ${res.status}` };
+    if (!res.ok) {
+      const body = await res.text().catch(() => '');
+      return { sent: false, reason: redactMailError(`Resend responded ${res.status}: ${body.slice(0, 240)}`) };
+    }
     return { sent: true };
   } catch (err) {
-    return { sent: false, reason: err instanceof Error ? err.message : 'Unknown error calling Resend.' };
+    return { sent: false, reason: redactMailError(err instanceof Error ? err.message : 'Unknown error calling Resend.') };
   }
 }
 

@@ -71,6 +71,16 @@ MAX_BODY_BYTES = 4096
 MIN_SECRET_LEN = 32
 
 EMAIL_RE = re.compile(r"^[^\s@]+@[^\s@]+\.[^\s@]+$")
+# Resend keys look like re_<token>. A 6-digit run is a verification code.
+_SECRET_RE = re.compile(r"re_[A-Za-z0-9_\-]{8,}|Bearer\s+\S+", re.IGNORECASE)
+_CODE_RE = re.compile(r"\b\d{6}\b")
+
+
+def redact_mail_error(text: str) -> str:
+    """Drop API keys, bearer tokens, and codes before a provider error is logged."""
+    text = _SECRET_RE.sub("[redacted]", text)
+    text = _CODE_RE.sub("[code]", text)
+    return text.replace("\n", " ")[:300]
 
 # The one message for every failed check. Do not specialise it.
 INVALID = "That code is incorrect or has expired. Request a new one if needed."
@@ -181,10 +191,12 @@ class Verifier:
         try:
             self._send(email, name, code, CODE_TTL_SECONDS // 60)
             sent = True
-        except Exception as exc:  # delivery failure must not leak the code
-            reason = str(exc).replace("\n", " ")[:300] or type(exc).__name__
+        except Exception as exc:  # delivery failure must not leak the code or the API key
+            reason = redact_mail_error(str(exc) or type(exc).__name__)
             print(f"[verifier] mail delivery failed: {type(exc).__name__}: {reason}", file=sys.stderr)
-            sent = False
+            # `error` stays on this loopback service. The site logs it and does not
+            # forward it to the browser.
+            return {"ok": True, "sent": False, "cooldown": False, "error": reason}
         return {"ok": True, "sent": sent, "cooldown": False}
 
     def check(self, email_raw: object, code_raw: object) -> dict:

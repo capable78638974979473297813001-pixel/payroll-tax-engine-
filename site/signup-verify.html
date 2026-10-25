@@ -40,7 +40,7 @@
     </form>
     <p id="resendRow" style="margin-top:18px">
       <span>Didn't get it?</span>
-      <button type="button" class="text-link" id="resend" disabled style="background:none;border:0;cursor:pointer">Send a new code</button>
+      <button type="button" class="text-link" id="resend" disabled style="background:none;border:0;cursor:pointer">Resend code</button>
       <span id="resendIn">in <span id="count">0:30</span></span>
     </p>
     <p id="changeRow" class="fine">Wrong email? <a id="change" href="/signup">Change it</a></p>
@@ -63,6 +63,7 @@
 </div>
 <script src="/assets/pricing.js"></script>
 <script src="/assets/session.js"></script>
+<script src="/assets/verify-lead.js"></script>
 <script>
 (function () {
   var params = new URLSearchParams(location.search);
@@ -78,16 +79,20 @@
   var ttl = (window.OMNIA && window.OMNIA.codeTtlSec) || 900;
   document.getElementById('ttlMin').textContent = String(Math.round(ttl / 60));
   var lead = document.getElementById('lead1');
-  if (signin) {
-    lead.innerHTML = pending.emailConfigured
-      ? 'If <b style="color:var(--ink)">' + escapeHtml(email) + '</b> has an Omnia.tax account, we sent a 6-digit code.'
-      : 'If <b style="color:var(--ink)">' + escapeHtml(email) + '</b> has an account, its sign-in code is in the server log (no email provider is connected yet).';
-  } else if (pending.emailSent) {
-    lead.innerHTML = 'We sent a 6-digit code to <b style="color:var(--ink)">' + escapeHtml(email) + '</b>.';
-  } else {
-    lead.innerHTML = 'We couldn’t send the email to <b style="color:var(--ink)">' + escapeHtml(email) + '</b> just now. Use “Resend code” in a moment. On a development server the code is in the server log.';
+  function paintLead() {
+    var info = OmniaVerifyLead({
+      email: email,
+      signin: signin,
+      emailSent: !!pending.emailSent,
+      emailConfigured: !!pending.emailConfigured,
+      cooldown: !!pending.cooldown,
+      devHint: !!(window.OMNIA && window.OMNIA.devCodeHint)
+    });
+    lead.innerHTML = info.html;
+    // The rate-limited Resend code control stays on the failure state too.
+    document.getElementById('resendRow').hidden = false;
   }
-  function escapeHtml(s) { return String(s).replace(/[&<>"']/g, function (c) { return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]; }); }
+  paintLead();
 
   var inputs = Array.prototype.slice.call(document.querySelectorAll('.code'));
   function value() { return inputs.map(function (i) { return i.value; }).join(''); }
@@ -232,16 +237,32 @@
     Omnia.api(path, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
       .then(function (res) {
         if (!res.ok) {
-          Omnia.toast((res.body && res.body.error) || 'Could not send the code. Try again in a minute.', 'error');
+          Omnia.toast((res.body && res.body.error) || "We couldn't send your code. Try again or contact support.", 'error');
           resend.disabled = false;
           return;
         }
+        if (res.body && res.body.cooldown) {
+          pending.cooldown = true;
+          Omnia.setPending(pending);
+          remain = cooldown;
+          tick();
+          paintLead();
+          Omnia.toast('A code was just requested. Try Resend code when the timer ends.');
+          return;
+        }
         pending.sentAt = Date.now();
+        pending.cooldown = false;
         if (!signin) pending.emailSent = !!(res.body && res.body.emailSent);
         Omnia.setPending(pending);
         remain = cooldown;
         tick();
-        Omnia.toast('A new code is on its way.');
+        paintLead();
+        if (signin || pending.emailSent) Omnia.toast('A new code is on its way.');
+        else Omnia.toast("We couldn't send your code. Try again or contact support.", 'error');
+      })
+      .catch(function () {
+        resend.disabled = false;
+        Omnia.toast('Could not reach the server. Try again.', 'error');
       });
   });
 })();

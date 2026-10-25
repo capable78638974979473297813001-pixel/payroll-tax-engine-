@@ -14,7 +14,7 @@ import {
 } from './lib/store.ts';
 import { TRIAL_DAYS, estimate as computePricing } from './lib/pricing.ts';
 import { TERMS_VERSION, TERM_MONTHS, termsClauses } from './lib/terms.ts';
-import { isEmailConfigured, sendVerificationEmail, sendContactEmail } from './lib/mail.ts';
+import { isEmailConfigured, redactMailError, sendVerificationEmail, sendContactEmail } from './lib/mail.ts';
 import { validatePaycheckInput } from './lib/validate.ts';
 import { ExtrasRefusal, runPaycheckExtras, validatePaycheckExtras } from './lib/extras.ts';
 import { keyLifeFor } from './lib/keylife.ts';
@@ -117,6 +117,19 @@ const signupPerHour = () => Number(process.env.SIGNUP_PER_HOUR ?? 10);
  */
 function logCodesToConsole(): boolean {
   return !isEmailConfigured();
+}
+
+/**
+ * The "code is in the server log" sentence is a local-development aid.
+ * Production (NODE_ENV=production, including the Docker image) must not show
+ * it. OMNIA_DEV_CODE_HINT=1 or VERIFIER_DEV=1 forces it on for a deliberate
+ * local debug session.
+ */
+function showDevCodeHint(): boolean {
+  const flag = (process.env.OMNIA_DEV_CODE_HINT ?? '').trim().toLowerCase();
+  if (flag === '1' || flag === 'true') return true;
+  if ((process.env.VERIFIER_DEV ?? '').trim() === '1') return true;
+  return process.env.NODE_ENV !== 'production';
 }
 
 const SESSION_COOKIE = 'omnia_session';
@@ -224,6 +237,7 @@ function clientConfig() {
     termMonths: TERM_MONTHS,
     codeTtlSec: CODE_TTL_MS / 1000,
     codeCooldownSec: CODE_COOLDOWN_MS / 1000,
+    devCodeHint: showDevCodeHint(),
     maxCodeAttempts: MAX_CODE_ATTEMPTS,
     rateLimitPerMin: paycheckLimiterLimit(),
     termsVersion: TERMS_VERSION,
@@ -430,6 +444,7 @@ async function handleSignup(req: IncomingMessage, res: ServerResponse): Promise<
   });
 
   let emailSent = false;
+  let cooldown = false;
   if (verifierConfigured()) {
     // The Python verifier owns the code: it mints, mails and later checks it.
     const issued = await issueCode(email, account.name);
@@ -438,6 +453,7 @@ async function handleSignup(req: IncomingMessage, res: ServerResponse): Promise<
       return;
     }
     emailSent = issued.sent;
+    cooldown = issued.cooldown === true;
     if (!issued.ok) console.error('[signup] verifier could not issue a code');
   } else if (logCodesToConsole()) {
     // Local development only: no email provider, so the code has to be
@@ -457,11 +473,18 @@ async function handleSignup(req: IncomingMessage, res: ServerResponse): Promise<
       expiresAt: account.codeExpiresAt!,
     });
     emailSent = result.sent;
-    // Never the code, and no personal details: just that delivery failed.
-    if (!result.sent) console.error(`[signup] verification email failed: ${result.reason}`);
+    // Never the code, the address, or the API key: the provider status and message only.
+    if (!result.sent) console.error(`[mail] verification email failed: ${redactMailError(result.reason ?? '')}`);
   }
 
-  sendJson(res, 200, { ok: true, emailSent, alreadyVerified: Boolean(account.emailVerifiedAt) });
+  const reply: { ok: true; emailSent: boolean; alreadyVerified: boolean; cooldown?: true } = {
+    ok: true,
+    emailSent,
+    alreadyVerified: Boolean(account.emailVerifiedAt),
+  };
+  // A cooldown is not a delivery failure: the previous code is still the one to enter.
+  if (cooldown) reply.cooldown = true;
+  sendJson(res, 200, reply);
 }
 
 /** Drop never-verified signups past retention (and their dangling state). */
@@ -524,7 +547,7 @@ async function handleSignin(req: IncomingMessage, res: ServerResponse): Promise<
       console.log(`[sign-in code, dev: no email provider] ${acct.email}: ${acct.code} (expires ${acct.codeExpiresAt})`);
     } else {
       const result = await sendVerificationEmail({ name: acct.name, email: acct.email, code: acct.code, expiresAt: acct.codeExpiresAt });
-      if (!result.sent) console.error(`[sign-in] verification email failed: ${result.reason}`);
+      if (!result.sent) console.error(`[mail] verification email failed: ${redactMailError(result.reason ?? '')}`);
     }
   }
   sendJson(res, 200, { ok: true, emailConfigured: isEmailConfigured() || verifierConfigured() });

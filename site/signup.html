@@ -180,7 +180,11 @@
           }
           return;
         }
-        Omnia.setPending(Object.assign({}, payload, { emailSent: !!(res.body && res.body.emailSent), sentAt: Date.now() }));
+        Omnia.setPending(Object.assign({}, payload, {
+          emailSent: !!(res.body && res.body.emailSent),
+          cooldown: !!(res.body && res.body.cooldown),
+          sentAt: Date.now()
+        }));
         location.href = '/signup/verify';
       })
       .catch(function () {
