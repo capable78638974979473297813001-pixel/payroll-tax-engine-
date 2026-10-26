@@ -94,6 +94,9 @@ export async function reportCall(customerId: string | null | undefined, identifi
  * idempotency identifier.
  */
 export function enqueueMeterEvent(db: DB, input: { customerId: string; identifier: string; at?: string; value?: number }): void {
+  // The identifier is Stripe's idempotency key. A retry of the same call
+  // must not queue a second event.
+  if (db.meterQueue.some((q) => q.identifier === input.identifier)) return;
   db.meterQueue.push({
     identifier: input.identifier,
     customerId: input.customerId,

@@ -19,6 +19,7 @@
       <a href="/dashboard" aria-current="page">Overview</a>
       <a href="#keys">API keys</a>
       <a href="#usage">Usage</a>
+      <a href="#recent">Recent calls</a>
       <a href="#billing">Billing</a>
       <a href="#settings">Settings</a>
       <h2>Help</h2>
@@ -40,18 +41,18 @@
       <a class="text-link" href="/signup/payment">View billing</a>
     </div>
     <div class="statrow" style="margin-top:28px">
-      <div><span>Calls, last 30 days</span><b id="st-30">—</b></div>
-      <div><span>Calls, last 24 hours</span><b id="st-day">—</b></div>
-      <div><span>Error rate, last 30 days</span><b id="st-err">—</b></div>
+      <div><span>Paychecks today</span><b id="st-today">—</b><p class="fine" id="st-today-req"></p></div>
+      <div><span>This billing period</span><b id="st-period">—</b><p class="fine" id="st-period-note"></p></div>
+      <div><span>All-time paychecks</span><b id="st-all">—</b><p class="fine" id="st-all-req"></p></div>
       <div><span>Rate per paycheck calculation</span><b>$0.08</b></div>
     </div>
-    <h2 style="font-size:16px" id="usage">Calls per day</h2>
-    <p class="fine">Last 30 days, UTC. Counts successful calls on your keys that the usage log still retains.</p>
+    <h2 style="font-size:16px" id="usage">Paychecks per day</h2>
+    <p class="fine">Last 30 days, UTC. Each paycheck calculated counts once, including trial and unbilled calls.</p>
     <div class="bars" id="bars" role="img" aria-label="Calculations per day for the last 30 days"></div>
     <h2 style="font-size:16px;margin-top:36px" id="keys">API keys</h2>
     <p class="fine">A key is shown in full once, when it is issued. Issued keys start with sk_live_.</p>
     <div class="table-wrap"><table>
-      <thead><tr><th>Key</th><th>Mode</th><th>Status</th><th>Created</th><th>Last used</th><th class="num">Calls</th></tr></thead>
+      <thead><tr><th>Key</th><th>Mode</th><th>Status</th><th>Created</th><th>Last used</th><th class="num">Paychecks</th></tr></thead>
       <tbody id="keyRows"><tr><td colspan="6">Loading.</td></tr></tbody>
     </table></div>
     <div style="margin-top:16px;display:flex;gap:12px;align-items:center;flex-wrap:wrap">
@@ -63,14 +64,21 @@
       <code id="newKeyText" style="word-break:break-all"></code>
       <p><button class="btn secondary sm" id="copyNew" type="button">Copy key</button></p>
     </div>
+    <h2 style="font-size:16px;margin-top:36px" id="recent">Recent calls</h2>
+    <p class="fine">Newest first. Trial and unbilled calls are labeled. A payroll run shows how many paychecks it calculated.</p>
+    <div class="table-wrap"><table>
+      <thead><tr><th>When</th><th>Endpoint</th><th>Status</th><th class="num">Paychecks</th><th>Billing</th></tr></thead>
+      <tbody id="recentRows"><tr><td colspan="5">Loading.</td></tr></tbody>
+    </table></div>
     <h2 style="font-size:16px;margin-top:36px" id="billing">Billing</h2>
     <div class="table-wrap"><table>
       <thead><tr><th>Item</th><th class="num">Quantity</th><th class="num">Amount</th></tr></thead>
       <tbody>
-        <tr><td>Paycheck calculations (min. wage and garnishment on the same paycheck included)</td><td class="num" id="b-live">0</td><td class="num">$0.08 after the trial</td></tr>
+        <tr><td id="b-live-label">Paycheck calculations this period (min. wage and garnishment on the same paycheck included)</td><td class="num" id="b-live">0</td><td class="num" id="b-live-amt">$0.08 after the trial</td></tr>
         <tr><td>Address lookups</td><td class="num" id="b-addr">0</td><td class="num">Not a paycheck charge</td></tr>
       </tbody>
     </table></div>
+    <p class="fine" id="b-all">All-time paycheck calculations: 0.</p>
     <p class="fine" id="payline" style="margin-top:16px">Payment method is shown after you add a card. 14-day free trial, then $0.08 per paycheck calculation, pay as you go.</p>
     <h2 style="font-size:16px;margin-top:36px" id="settings">Settings</h2>
     <div class="table-wrap"><table>
@@ -88,6 +96,19 @@
 (function () {
   function $(id) { return document.getElementById(id); }
   function when(iso) { return iso ? new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—'; }
+  function whenTime(iso) {
+    return iso ? new Date(iso).toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' }) : '—';
+  }
+  function billingLabel(code) {
+    if (code === 'trial') return 'Trial';
+    if (code === 'unbilled') return 'Unbilled';
+    if (code === 'error') return 'Not billed';
+    return 'Recorded';
+  }
+  function requestsLine(n) {
+    var count = n || 0;
+    return count.toLocaleString('en-US') + ' request' + (count === 1 ? '' : 's');
+  }
   function td(tr, text, cls) { var c = document.createElement('td'); c.textContent = text; if (cls) c.className = cls; tr.appendChild(c); }
 
   Omnia.api('/api/account', { headers: Omnia.authHeaders() }).then(function (res) {
@@ -115,40 +136,71 @@
   function loadUsage() {
     return Omnia.api('/api/usage', { headers: Omnia.authHeaders() }).then(function (res) {
       if (!res.ok || !res.body) return;
-      var u = res.body, body = $('keyRows');
+      var u = res.body, body = $('keyRows'), recentBody = $('recentRows');
+      var today = u.today || { paychecks: 0, requests: 0 };
+      var period = u.period || { paychecks: 0, requests: 0, trial: false, label: '' };
+      var all = u.allTime || { paychecks: u.billing ? u.billing.paycheckCalculations : 0, requests: u.totalCalls || 0 };
+      function paintCounts() {
+        $('st-today').textContent = (today.paychecks || 0).toLocaleString('en-US');
+        $('st-today-req').textContent = requestsLine(today.requests);
+        $('st-period').textContent = (period.paychecks || 0).toLocaleString('en-US');
+        $('st-period-note').textContent = period.label || (period.trial ? 'Trial — recorded, not billed' : 'This billing period');
+        $('st-all').textContent = (all.paychecks || 0).toLocaleString('en-US');
+        $('st-all-req').textContent = requestsLine(all.requests);
+      }
       if (!u.hasKey) {
         body.textContent = '';
         var tr = document.createElement('tr'); var c = document.createElement('td'); c.colSpan = 6;
         c.innerHTML = 'No key yet. <a class="text-link" href="/signup/payment">Finish setup</a> to get one.';
         tr.appendChild(c); body.appendChild(tr);
         $('reissue').disabled = true;
-        ['st-30', 'st-day'].forEach(function (id) { $(id).textContent = '0'; });
-        $('st-err').textContent = '—';
+        paintCounts();
+        recentBody.textContent = '';
+        var empty = document.createElement('tr'); var ec = document.createElement('td'); ec.colSpan = 5; ec.textContent = 'No calls yet.';
+        empty.appendChild(ec); recentBody.appendChild(empty);
         return;
       }
-      $('st-30').textContent = u.callsLast30.toLocaleString('en-US');
-      $('st-day').textContent = u.callsTodayOk.toLocaleString('en-US');
-      $('st-err').textContent = (u.callsLast30 + u.errorsLast30) ? (u.errorRate * 100).toFixed(1) + '%' : '—';
+      paintCounts();
       var bars = $('bars'); bars.textContent = '';
-      var max = Math.max.apply(null, u.daily.map(function (d) { return d.calls; }).concat([1]));
+      var max = Math.max.apply(null, u.daily.map(function (d) { return d.paychecks != null ? d.paychecks : d.calls; }).concat([1]));
       u.daily.forEach(function (d, i) {
+        var n = d.paychecks != null ? d.paychecks : d.calls;
         var iel = document.createElement('i');
-        iel.style.height = Math.max(d.calls ? 4 : 1, Math.round(d.calls / max * 100)) + '%';
-        iel.title = d.date + ': ' + d.calls + ' call' + (d.calls === 1 ? '' : 's') + (d.errors ? ', ' + d.errors + ' failed' : '');
+        iel.style.height = Math.max(n ? 4 : 1, Math.round(n / max * 100)) + '%';
+        iel.title = d.date + ': ' + n + ' paycheck' + (n === 1 ? '' : 's') + (d.errors ? ', ' + d.errors + ' failed' : '');
         if (i === u.daily.length - 1) iel.className = 'on';
         bars.appendChild(iel);
       });
       body.textContent = '';
       u.keys.forEach(function (k) {
         var tr = document.createElement('tr');
+        var pay = k.totalPaychecks != null ? k.totalPaychecks : k.totalCalls;
         td(tr, k.keyMasked.replace(/•+$/, '••••'), 'mono'); td(tr, k.mode === 'live' ? 'Live' : 'Retired'); td(tr, k.active ? 'Active' : 'Replaced');
-        td(tr, when(k.createdAt)); td(tr, when(k.lastUsedAt)); td(tr, k.totalCalls.toLocaleString('en-US'), 'num');
+        td(tr, when(k.createdAt)); td(tr, whenTime(k.lastUsedAt)); td(tr, pay.toLocaleString('en-US'), 'num');
         body.appendChild(tr);
       });
-      var paychecks = u.billing.paycheckCalculations != null ? u.billing.paycheckCalculations : u.billing.liveCalculations;
+      recentBody.textContent = '';
+      var rows = u.recent || [];
+      if (!rows.length) {
+        var none = document.createElement('tr'); var nc = document.createElement('td'); nc.colSpan = 5; nc.textContent = 'No calls yet.';
+        none.appendChild(nc); recentBody.appendChild(none);
+      } else {
+        rows.forEach(function (call) {
+          var tr = document.createElement('tr');
+          var status = String(call.statusCode) + (call.error ? ' — ' + call.error : '');
+          td(tr, whenTime(call.at)); td(tr, call.endpoint || 'POST /v1/paycheck', 'mono'); td(tr, status);
+          td(tr, (call.paychecks || 0).toLocaleString('en-US'), 'num'); td(tr, billingLabel(call.billing));
+          recentBody.appendChild(tr);
+        });
+      }
+      var periodPay = u.billing.paychecksThisPeriod != null ? u.billing.paychecksThisPeriod : (u.billing.paycheckCalculations != null ? u.billing.paycheckCalculations : u.billing.liveCalculations);
       var lookups = u.billing.addressLookups != null ? u.billing.addressLookups : u.billing.liveAddressLookups;
-      $('b-live').textContent = paychecks.toLocaleString('en-US');
+      $('b-live').textContent = periodPay.toLocaleString('en-US');
       $('b-addr').textContent = lookups.toLocaleString('en-US');
+      if (period.trial) $('b-live-amt').textContent = 'Trial — recorded, not billed';
+      else if (period.label === 'Unbilled') $('b-live-amt').textContent = 'Unbilled';
+      else $('b-live-amt').textContent = '$0.08 after the trial';
+      $('b-all').textContent = 'All-time paycheck calculations: ' + (all.paychecks || 0).toLocaleString('en-US') + '.';
     });
   }
   loadUsage();
