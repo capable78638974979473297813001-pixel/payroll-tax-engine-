@@ -66,11 +66,19 @@ export function calculatePaycheck(input: PaycheckInput): PaycheckResult {
   // capElectiveDeferrals()'s own doc comment in wages.ts. Net pay is
   // unaffected (the same total dollar amount still leaves the paycheck);
   // this only changes which taxes see an over-limit amount as taxable.
+  const age = input.employee?.ageAtYearEnd;
+  if (age !== undefined && (!Number.isInteger(age) || age < 0 || age > 120)) {
+    throw new Error(
+      `employee.ageAtYearEnd must be a whole number of years from 0 to 120 (the age the employee reaches by December 31), got ${JSON.stringify(age)}.`,
+    );
+  }
   const effectiveDeductions = capElectiveDeferrals(
     input.deductions,
     input.ytd.electiveDeferrals,
     federalRuleset(input.checkDate).electiveDeferralLimits,
+    age,
   );
+  const cappedDeferral = effectiveDeductions.some((d) => d.code.endsWith('_OVER_LIMIT'));
 
   const ctx: ComputeContext = {
     year: yearOf(input.checkDate),
@@ -116,6 +124,12 @@ export function calculatePaycheck(input: PaycheckInput): PaycheckResult {
     ...inputContractWarnings(input),
     ...provisionalYearWarnings(input.checkDate, [input.workState?.code, input.residenceState?.code]),
   ];
+  if (cappedDeferral && age === undefined) {
+    warnings.push(
+      `A retirement deferral reached the standard annual limit, so the excess was taxed as ordinary pay. ` +
+        `If this employee reaches age 50 or more by December 31, send employee.ageAtYearEnd to apply the catch-up limit.`,
+    );
+  }
   if (netPay < 0) {
     warnings.push(
       `Taxes and deductions are $${(-netPay / 100).toFixed(2)} more than this paycheck. ` +

@@ -114,6 +114,32 @@ export interface FederalW4 {
    * for every other employment category.
    */
   voluntaryWithholdingAgreement?: boolean;
+  /**
+   * Allowances on a 2019-or-earlier Form W-4 (line 5), for an employee who
+   * never submitted a 2020-or-later form. Presence of this field (0 counts)
+   * selects Pub 15-T Worksheet 1A lines 1j-1l instead of Steps 2-4 of the
+   * new form, so multipleJobs must be false, dependentCredit, otherIncome and
+   * deductions must be 0, and filingStatus must be single, married_separate
+   * or married_joint (Single or Married on the old form; Head of Household
+   * did not exist on it). extraWithholding is the old form's line 6.
+   */
+  legacyAllowances?: number;
+}
+
+/**
+ * Facts about the EMPLOYEE that change a federal limit rather than a tax
+ * rate. Optional; leaving it out never raises withholding, it just means the
+ * standard (under-50) limits apply.
+ */
+export interface EmployeeContext {
+  /**
+   * Age the employee reaches by December 31 of the check date's year (the
+   * IRS test for catch-up contributions). 50 and over raises the 401(k),
+   * 403(b), governmental 457(b) and SIMPLE deferral limits; 60 through 63
+   * raises them further (SECURE 2.0). Age 64 and over is back to the
+   * ordinary catch-up. An integer from 0 to 120.
+   */
+  ageAtYearEnd?: number;
 }
 
 /** Year-to-date wages, needed for every wage-base-capped tax. */
@@ -299,6 +325,8 @@ export interface StateCertificate {
   localOPTWithheldThisMonth?: Cents;
   /** Form TD269-style cross-employer coordination: true when a different employer already withheld this locality's employee OPT this month. */
   localOPTEmployeeWithheldByOtherEmployer?: boolean;
+  /** St. Louis: true when the employer owes no payroll expense tax (nonprofit, government, airport-only). The employee's 1% earnings tax still applies. */
+  stLouisPayrollExpenseTaxExempt?: boolean;
   /** This month's state tax already withheld so far — Denver-style monthly head-tax tests read this the same way. */
   stateTaxWithheldThisMonth?: Cents;
   /** West Virginia municipal service fee: proof it was already withheld elsewhere this period. */
@@ -629,6 +657,8 @@ export interface PaycheckInput {
   ytd: YearToDate;
   /** Employer-side facts the engine cannot derive — see EmployerContext. */
   employer?: EmployerContext;
+  /** Facts about the employee that raise a federal limit; see EmployeeContext. */
+  employee?: EmployeeContext;
   /** Which employment-tax rules apply to this worker. Defaults to 'standard'. */
   employmentCategory?: EmploymentCategory;
   /**

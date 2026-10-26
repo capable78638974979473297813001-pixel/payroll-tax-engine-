@@ -106,9 +106,9 @@
         "thresholdComparison": "at_or_above",
         "source": {
           "title": "City of Greenwood Village occupational privilege tax",
-          "url": "https://www.greenwoodvillage.com/206/Occupational-Privilege-Tax",
+          "url": "https://www.greenwoodvillage.com/1220/Occupational-Privilege-Tax-OPT",
           "verifiedOn": "2026-08-25",
-          "note": "$2 employee and $2 employer per month, both owed once an employee earns $250 or more in a calendar month. Cross-source confirmed rather than fetched from the city's own page this pass."
+          "note": "Fetched directly 2026-10-26 and quoted: 'Both portions are $2 per month for a total of $4 per month, and both apply when $250 or more is earned in a calendar month.' Owners, partners and officers earning under $250 owe only the employer portion. An employee working in several OPT cities owes the tax to the city where they worked the most, and only the primary employer withholds (see certificate.localOPTEmployeeWithheldByOtherEmployer)."
         }
       },
       "Sheridan": {

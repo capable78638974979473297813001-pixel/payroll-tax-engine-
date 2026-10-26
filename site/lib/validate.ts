@@ -169,6 +169,30 @@ export function validatePaycheckInput(raw: unknown, opts: ValidateOptions = {}):
     for (const flag of ['exempt', 'nonresidentAlien', 'voluntaryWithholdingAgreement'] as const) {
       if (w4[flag] !== undefined && typeof w4[flag] !== 'boolean') err(`federalW4.${flag}`, 'must be a boolean when present.');
     }
+    if (w4.legacyAllowances !== undefined) {
+      if (typeof w4.legacyAllowances !== 'number' || !Number.isInteger(w4.legacyAllowances) || w4.legacyAllowances < 0 || w4.legacyAllowances > 99) {
+        err('federalW4.legacyAllowances', 'must be a whole number of allowances from 0 to 99 (the line 5 count on a 2019-or-earlier Form W-4).');
+      } else {
+        if (w4.filingStatus === 'head_of_household') {
+          err('federalW4.filingStatus', 'head_of_household does not exist on a 2019-or-earlier Form W-4. Use single or married_joint with legacyAllowances.');
+        }
+        if (w4.multipleJobs === true || w4.dependentCredit || w4.otherIncome || w4.deductions) {
+          err('federalW4.legacyAllowances', 'means a 2019-or-earlier Form W-4, which has no Step 2 checkbox, credits, other income or deductions. Leave multipleJobs false and dependentCredit, otherIncome and deductions at 0.');
+        }
+      }
+    }
+  }
+
+  // ---- optional: employee ----------------------------------------------
+  if (body.employee !== undefined) {
+    if (!isObject(body.employee)) {
+      err('employee', 'must be an object { ageAtYearEnd? } when present.');
+    } else if (body.employee.ageAtYearEnd !== undefined) {
+      const age = body.employee.ageAtYearEnd;
+      if (typeof age !== 'number' || !Number.isInteger(age) || age < 0 || age > 120) {
+        err('employee.ageAtYearEnd', 'must be a whole number of years from 0 to 120: the age the employee reaches by December 31.');
+      }
+    }
   }
 
   // ---- ytd -------------------------------------------------------------
@@ -179,6 +203,15 @@ export function validatePaycheckInput(raw: unknown, opts: ValidateOptions = {}):
     cents(body.ytd.medicare, 'ytd.medicare');
     cents(body.ytd.futa, 'ytd.futa');
     if (body.ytd.supplemental !== undefined) cents(body.ytd.supplemental, 'ytd.supplemental');
+    if (body.ytd.electiveDeferrals !== undefined) {
+      if (!isObject(body.ytd.electiveDeferrals)) {
+        err('ytd.electiveDeferrals', 'must be an object { section402gAggregate?, deferral457?, simple? } of cents when present.');
+      } else {
+        for (const k of ['section402gAggregate', 'deferral457', 'simple'] as const) {
+          if (body.ytd.electiveDeferrals[k] !== undefined) cents(body.ytd.electiveDeferrals[k], `ytd.electiveDeferrals.${k}`);
+        }
+      }
+    }
   }
 
   // ---- optional: workState / residenceState ---------------------------
