@@ -1,53 +1,25 @@
 {
- "date": "2026-10-25",
+ "date": "2026-10-26",
  "counts": {
-  "unchanged": 1055,
-  "blocked": 29,
-  "gone": 6,
-  "changed": 6,
-  "new": 5,
-  "unreachable": 4
+  "unchanged": 1135,
+  "blocked": 36,
+  "changed": 23,
+  "gone": 5,
+  "new": 13,
+  "unreachable": 3
  },
- "total": 1105,
+ "total": 1215,
  "changed": [
-  {
-   "id": "co-002adac414~dff18f71",
-   "jurisdiction": "CO",
-   "title": "Commissioners\u2019 Agenda (linked from Boulder County -- Local Minimum Wage)",
-   "url": "https://assets.bouldercounty.gov/wp-content/uploads/2017/08/bocc-advance-agenda.pdf",
-   "detail": "79 lines added, 86 removed",
-   "figures_added": [],
-   "figures_removed": [],
-   "links_added": [],
-   "links_removed": [],
-   "significant": true
-  },
   {
    "id": "in-f3e8cf456b~78e8bd47",
    "jurisdiction": "IN",
    "title": "ACH Debit Block Information (linked from Indiana DOR withholding)",
    "url": "https://intime.dor.in.gov/eServices/WebFiles/ACHDebitBlockGuide.pdf",
-   "detail": "5 lines added, 17 removed",
+   "detail": "17 lines added, 5 removed",
    "figures_added": [],
    "figures_removed": [],
    "links_added": [],
    "links_removed": [],
-   "significant": true
-  },
-  {
-   "id": "in-f3e8cf456b",
-   "jurisdiction": "IN",
-   "title": "Indiana DOR withholding",
-   "url": "https://www.in.gov/dor/i-am-a/business-corp/withholding/",
-   "detail": "1 links added, 1 removed",
-   "figures_added": [],
-   "figures_removed": [],
-   "links_added": [
-    "https://www.in.gov/dor/files/iris-2026-tax-year-guide.pdf"
-   ],
-   "links_removed": [
-    "https://www.in.gov/dor/files/IRIS-2026-Tax-Year-Guide.pdf"
-   ],
    "significant": true
   },
   {
@@ -63,42 +35,283 @@
    "significant": false
   },
   {
-   "id": "mo-2d09c4e722",
-   "jurisdiction": "MO",
-   "title": "St. Louis: earnings tax department",
-   "url": "https://www.stlouis-mo.gov/government/departments/collector/earnings-tax/index.cfm",
-   "detail": "1 lines added, 1 removed (link lists / headlines only)",
+   "id": "oh-062f3b7675",
+   "jurisdiction": "OH",
+   "title": null,
+   "url": "https://www.ritaohio.com/municipalities",
+   "detail": "1 lines added, 1 removed",
    "figures_added": [],
    "figures_removed": [],
    "links_added": [],
    "links_removed": [],
-   "significant": false
+   "significant": true
+  },
+  {
+   "id": "oh-557c86e52b",
+   "jurisdiction": "OH",
+   "title": "RITA (Regional Income Tax Agency): news and updates (municipal rate and law changes)",
+   "url": "https://www.ritaohio.com/Resources/News",
+   "detail": "3 lines added, 3 removed; 1 links added, 1 removed",
+   "figures_added": [],
+   "figures_removed": [],
+   "links_added": [
+    "https://www.ritaohio.com/Resources/News/ViewNews?gid=5a631cf5-960a-4dd5-a1d3-e48205f7b184"
+   ],
+   "links_removed": [
+    "https://www.ritaohio.com/Resources/News/ViewNews?gid=204f5f9e-5db0-4abc-bd09-664a4a041bc4"
+   ],
+   "significant": true
+  },
+  {
+   "id": "oh-22f49a043c",
+   "jurisdiction": "OH",
+   "title": "RITA -- Tax Rates Table, 2025 new municipalities and tax rate changes",
+   "url": "https://www.ritaohio.com/TaxRatesTable",
+   "detail": "1 lines added, 1 removed",
+   "figures_added": [],
+   "figures_removed": [],
+   "links_added": [],
+   "links_removed": [],
+   "significant": true
+  },
+  {
+   "id": "oh-cfb9c9e685",
+   "jurisdiction": "OH",
+   "title": "RITA member page (the JEDD's administering agency) -- Recent Tax and Credit History",
+   "url": "https://www.ritaohio.com/Municipalities/Home/MemberPage?id=047",
+   "detail": "1 lines added, 1 removed",
+   "figures_added": [],
+   "figures_removed": [],
+   "links_added": [],
+   "links_removed": [],
+   "significant": true
+  },
+  {
+   "id": "oh-7d9e4cc914",
+   "jurisdiction": "OH",
+   "title": "RITA member page (the JEDD's administering agency) -- Recent Tax and Credit History",
+   "url": "https://www.ritaohio.com/Municipalities/Home/MemberPage?id=247",
+   "detail": "1 lines added, 1 removed",
+   "figures_added": [],
+   "figures_removed": [],
+   "links_added": [],
+   "links_removed": [],
+   "significant": true
+  },
+  {
+   "id": "oh-3b76750224",
+   "jurisdiction": "OH",
+   "title": "RITA member page -- Avon (rate history)",
+   "url": "https://www.ritaohio.com/municipalities/Home/MemberPage?id=020",
+   "detail": "1 lines added, 1 removed",
+   "figures_added": [],
+   "figures_removed": [],
+   "links_added": [],
+   "links_removed": [],
+   "significant": true
+  },
+  {
+   "id": "oh-c764d3cf54",
+   "jurisdiction": "OH",
+   "title": "RITA member page -- Circleville (rate history)",
+   "url": "https://www.ritaohio.com/municipalities/Home/MemberPage?id=190",
+   "detail": "1 lines added, 1 removed",
+   "figures_added": [],
+   "figures_removed": [],
+   "links_added": [],
+   "links_removed": [],
+   "significant": true
+  },
+  {
+   "id": "oh-33b5895ad2",
+   "jurisdiction": "OH",
+   "title": "RITA member page -- DeGraff (rate history)",
+   "url": "https://www.ritaohio.com/municipalities/Home/MemberPage?id=249",
+   "detail": "1 lines added, 1 removed",
+   "figures_added": [],
+   "figures_removed": [],
+   "links_added": [],
+   "links_removed": [],
+   "significant": true
+  },
+  {
+   "id": "oh-b7e3e38768",
+   "jurisdiction": "OH",
+   "title": "RITA member page -- Germantown (rate history)",
+   "url": "https://www.ritaohio.com/municipalities/Home/MemberPage?id=353",
+   "detail": "1 lines added, 1 removed",
+   "figures_added": [],
+   "figures_removed": [],
+   "links_added": [],
+   "links_removed": [],
+   "significant": true
+  },
+  {
+   "id": "oh-4042a711fd",
+   "jurisdiction": "OH",
+   "title": "RITA member page -- Hanging Rock (rate history)",
+   "url": "https://www.ritaohio.com/municipalities/Home/MemberPage?id=616",
+   "detail": "1 lines added, 1 removed",
+   "figures_added": [],
+   "figures_removed": [],
+   "links_added": [],
+   "links_removed": [],
+   "significant": true
+  },
+  {
+   "id": "oh-3a77278cb4",
+   "jurisdiction": "OH",
+   "title": "RITA member page -- Lockbourne (rate history)",
+   "url": "https://www.ritaohio.com/municipalities/Home/MemberPage?id=427",
+   "detail": "1 lines added, 1 removed",
+   "figures_added": [],
+   "figures_removed": [],
+   "links_added": [],
+   "links_removed": [],
+   "significant": true
+  },
+  {
+   "id": "oh-917a7eb627",
+   "jurisdiction": "OH",
+   "title": "RITA member page -- Milford JEDD VIII",
+   "url": "https://www.ritaohio.com/municipalities/Home/MemberPage?id=869",
+   "detail": "1 lines added, 1 removed",
+   "figures_added": [],
+   "figures_removed": [],
+   "links_added": [],
+   "links_removed": [],
+   "significant": true
+  },
+  {
+   "id": "oh-7f647951da",
+   "jurisdiction": "OH",
+   "title": "RITA member page -- Millville (rate history)",
+   "url": "https://www.ritaohio.com/municipalities/Home/MemberPage?id=691",
+   "detail": "1 lines added, 1 removed",
+   "figures_added": [],
+   "figures_removed": [],
+   "links_added": [],
+   "links_removed": [],
+   "significant": true
+  },
+  {
+   "id": "oh-f424ff0fc1",
+   "jurisdiction": "OH",
+   "title": "RITA member page -- North Canton (rate history)",
+   "url": "https://www.ritaohio.com/municipalities/Home/MemberPage?id=546",
+   "detail": "1 lines added, 1 removed",
+   "figures_added": [],
+   "figures_removed": [],
+   "links_added": [],
+   "links_removed": [],
+   "significant": true
+  },
+  {
+   "id": "oh-15bd387bd3",
+   "jurisdiction": "OH",
+   "title": "RITA member page -- North Hampton (rate history)",
+   "url": "https://www.ritaohio.com/municipalities/Home/MemberPage?id=695",
+   "detail": "1 lines added, 1 removed",
+   "figures_added": [],
+   "figures_removed": [],
+   "links_added": [],
+   "links_removed": [],
+   "significant": true
+  },
+  {
+   "id": "oh-c14dbbe03e",
+   "jurisdiction": "OH",
+   "title": "RITA member page -- Oak Hill (rate history)",
+   "url": "https://www.ritaohio.com/municipalities/Home/MemberPage?id=624",
+   "detail": "1 lines added, 1 removed",
+   "figures_added": [],
+   "figures_removed": [],
+   "links_added": [],
+   "links_removed": [],
+   "significant": true
+  },
+  {
+   "id": "oh-8c7dd91687",
+   "jurisdiction": "OH",
+   "title": "RITA member page -- Rio Grande (rate history)",
+   "url": "https://www.ritaohio.com/municipalities/Home/MemberPage?id=588",
+   "detail": "1 lines added, 1 removed",
+   "figures_added": [],
+   "figures_removed": [],
+   "links_added": [],
+   "links_removed": [],
+   "significant": true
+  },
+  {
+   "id": "oh-d4b192b4da",
+   "jurisdiction": "OH",
+   "title": "RITA member page -- Stockport (rate history)",
+   "url": "https://www.ritaohio.com/municipalities/Home/MemberPage?id=719",
+   "detail": "1 lines added, 1 removed",
+   "figures_added": [],
+   "figures_removed": [],
+   "links_added": [],
+   "links_removed": [],
+   "significant": true
+  },
+  {
+   "id": "oh-2fd5ea2a78",
+   "jurisdiction": "OH",
+   "title": "RITA: tax professionals news",
+   "url": "https://www.ritaohio.com/TaxProfessionals/News",
+   "detail": "1 lines added, 1 removed; 1 links added, 1 removed",
+   "figures_added": [],
+   "figures_removed": [],
+   "links_added": [
+    "https://www.ritaohio.com/Resources/News/ViewNews?gid=5a631cf5-960a-4dd5-a1d3-e48205f7b184"
+   ],
+   "links_removed": [
+    "https://www.ritaohio.com/Resources/News/ViewNews?gid=9c040fc4-37c8-4ca4-b331-0c8ee46ad509"
+   ],
+   "significant": true
   },
   {
    "id": "or-f5c7c2d0d9",
    "jurisdiction": "OR",
    "title": "Oregon Department of Revenue: news",
    "url": "https://www.oregon.gov/dor/news/Pages/default.aspx",
-   "detail": "7 lines added, 7 removed; 2 links added, 0 removed",
+   "detail": "18 lines added, 18 removed; 3 links added, 2 removed",
    "figures_added": [],
-   "figures_removed": [
-    "$7"
-   ],
+   "figures_removed": [],
    "links_added": [
-    "https://apps.oregon.gov/oregon-newsroom/OR/GOV/Posts/Post/governor-kotek-community-leaders-discuss-need-to-expand-affordable-childcare-and-preschool",
-    "https://apps.oregon.gov/oregon-newsroom/OR/Posts/Search?from=10%2F24%2F2026&to=10%2F24%2F2026"
+    "https://apps.oregon.gov/oregon-newsroom/OR/OSFM/Posts",
+    "https://apps.oregon.gov/oregon-newsroom/OR/OSFM/Posts/Post/newport-fire",
+    "https://apps.oregon.gov/oregon-newsroom/OR/Posts/Search?from=10%2F25%2F2026&to=10%2F25%2F2026"
    ],
-   "links_removed": [],
+   "links_removed": [
+    "https://apps.oregon.gov/oregon-newsroom/OR/DOR/Posts",
+    "https://apps.oregon.gov/oregon-newsroom/OR/DOR/Posts/Post/Taxpayer-Advocate-urges-Oregonians-to-volunteer-to-help-low-income-families"
+   ],
+   "significant": true
+  },
+  {
+   "id": "us-f10e455e50",
+   "jurisdiction": "US",
+   "title": "IRS draft tax forms: payroll forms only (W-4, W-4P/R, Pub 15/15-T, 940/941/944, W-2/W-3)",
+   "url": "https://www.irs.gov/draft-tax-forms",
+   "detail": "read with a headless browser; 1 lines added, 1 removed; 1 links added, 1 removed",
+   "figures_added": [],
+   "figures_removed": [],
+   "links_added": [
+    "https://www.irs.gov/pub/irs-dft/p15a--dft.pdf"
+   ],
+   "links_removed": [
+    "https://www.irs.gov/pub/irs-dft/p15--dft.pdf"
+   ],
    "significant": true
   }
  ],
- "significant_changes": 4,
+ "significant_changes": 22,
  "broken": [
   "https://www.tuskegeealabama.gov/finance-department/files/occupational-tax-form",
   "https://www.tuskegeealabama.gov/sites/g/files/vyhlif3946/f/uploads/infobrochure_word.pdf",
   "https://www.auroragov.org/business_services/taxes__licensing/occupational_privilege_tax",
   "https://www.greenwoodvillage.com/206/Occupational-Privilege-Tax",
-  "https://tax.colorado.gov/news",
   "https://www.ilga.gov/legislation/ilcs/ilcs4.asp?DocName=073500050K12-803",
   "https://illinoiscomptroller.gov/state-agencies/bulletins-forms/payroll-bulletins/illinois-state-income-tax-exemptions-2026",
   "https://pl.mn.gov/resources/calculators/premium-rate-and-contributions",
@@ -106,22 +319,10 @@
  ],
  "attention": [
   {
-   "kind": "unreadable",
-   "title": "IN Indiana Departmental Notice #1 (county rates)",
-   "url": "",
-   "detail": "could not read the official file to compare with the engine's data (URLError: <urlopen error [Errno 111] Connection refused>)"
-  },
-  {
-   "kind": "missing_from_engine",
+   "kind": "record_changed",
    "title": "KY Whitesville",
    "url": "",
-   "detail": "the Secretary of State lists this district (entered 2026-10-06; rate '') but KY-occupational-2026.json does not"
-  },
-  {
-   "kind": "missing_from_engine",
-   "title": "WV Chester",
-   "url": "",
-   "detail": "the list shows a $2 per week user fee in Chester, which the data does not have"
+   "detail": "the Secretary of State's record changed 2026-10-06, after the data was scraped on 2026-08-13 (rate ''); re-read the ordinance"
   }
  ],
  "reconcile": [
@@ -144,22 +345,13 @@
    "detail": "the League's survey list says 2%; the data has 3% (confirmed from the city's own document: tier conflicting_sources)"
   },
   {
-   "kind": "unreadable",
-   "severity": "action",
-   "source_id": "in-86066aa1c0",
-   "jurisdiction": "IN",
-   "code": "",
-   "name": "Indiana Departmental Notice #1 (county rates)",
-   "detail": "could not read the official file to compare with the engine's data (URLError: <urlopen error [Errno 111] Connection refused>)"
-  },
-  {
-   "kind": "missing_from_engine",
+   "kind": "record_changed",
    "severity": "action",
    "source_id": "ky-df76954a6f",
    "jurisdiction": "KY",
    "code": "246",
    "name": "Whitesville",
-   "detail": "the Secretary of State lists this district (entered 2026-10-06; rate '') but KY-occupational-2026.json does not"
+   "detail": "the Secretary of State's record changed 2026-10-06, after the data was scraped on 2026-08-13 (rate ''); re-read the ordinance"
   },
   {
    "kind": "rate_differs",
@@ -288,23 +480,15 @@
    "code": "",
    "name": "Pennsylvania register 2027",
    "detail": "only 0 of 2627 rows carry a rate, so the 2027 register is not published yet; nothing to compare"
-  },
-  {
-   "kind": "missing_from_engine",
-   "severity": "action",
-   "source_id": "wv-638a265d37",
-   "jurisdiction": "WV",
-   "code": "",
-   "name": "Chester",
-   "detail": "the list shows a $2 per week user fee in Chester, which the data does not have"
   }
  ],
- "followed_documents": 474,
+ "followed_documents": 570,
  "followed_documents_unread": 6,
- "followed_documents_deferred": 556,
- "verified": 1066,
- "unverified": 39,
+ "followed_documents_deferred": 469,
+ "verified": 1171,
+ "unverified": 44,
  "never_baselined": [
+  "https://www.federalregister.gov/documents/2026/10/08/2026-20646/minimum-wage-for-federal-contracts-covered-by-executive-order-13658-notice-of-rate-change-in-effect",
   "https://birminghamal.hdlgov.com/base64files/TAXES_FORM_4.pdf",
   "https://www.tuskegeealabama.gov/finance-department/files/occupational-tax-form",
   "https://www.rbcalabama.com/download/revenue-g-1/?wpdmdl=730&masterkey=60c8bce41072f",
@@ -339,5 +523,5 @@
   "https://villageofcollegecorner.org/wp-content/uploads/2025/04/Rita-Repeal.pdf",
   "https://www.wilsonvilleoregon.gov/finance/page/transit-payroll-tax-information"
  ],
- "max_consecutive_failures": 33
+ "max_consecutive_failures": 34
 }
