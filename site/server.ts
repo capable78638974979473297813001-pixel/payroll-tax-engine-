@@ -3121,10 +3121,15 @@ function handleBilling(req: IncomingMessage, res: ServerResponse): void {
 
 createServer((req, res) => {
   const url = (req.url ?? '/').split('?')[0];
-  const method = req.method ?? 'GET';
+  // A HEAD request is a GET without the body: link checkers, uptime monitors and some crawlers use it
+  // to test a URL (the sitemap, robots.txt, a page) before fetching it. Every route below matches
+  // 'GET' only, so without this a HEAD for any page was a 404 even though the GET was a 200.
+  // Node drops the body of a HEAD response itself and keeps the headers, Content-Length included.
+  const asked = req.method ?? 'GET';
+  const method = asked === 'HEAD' ? 'GET' : asked;
 
   (async () => {
-    if (method === 'GET' || method === 'HEAD') {
+    if (method === 'GET') {
       const dest = canonicalRedirect(req, req.url ?? '/');
       if (dest) {
         res.writeHead(301, { Location: dest, ...securityHeaders(req), 'Cache-Control': 'public, max-age=3600' });
