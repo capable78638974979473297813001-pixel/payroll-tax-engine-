@@ -1,6 +1,7 @@
 import { createServer, type IncomingMessage, type ServerResponse } from 'node:http';
 import { createHash, randomBytes, randomInt, timingSafeEqual } from 'node:crypto';
-import { existsSync, readFileSync, readdirSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
+import { gzipSync } from 'node:zlib';
 import { fileURLToPath } from 'node:url';
 import { dirname, join, resolve } from 'node:path';
 
@@ -18,14 +19,15 @@ import {
 import { dashboardUsage, recordAccountUsage, type RecordUsageInput } from './lib/usage.ts';
 import { TRIAL_DAYS, estimate as computePricing } from './lib/pricing.ts';
 import { TERMS_VERSION, TERM_MONTHS, termsClauses } from './lib/terms.ts';
-import { isEmailConfigured, sendVerificationEmail, sendContactEmail } from './lib/mail.ts';
+import { isEmailConfigured, scrubMailLog, sendVerificationEmail, sendContactEmail } from './lib/mail.ts';
 import { validatePaycheckInput } from './lib/validate.ts';
 import { ExtrasRefusal, runPaycheckExtras, validatePaycheckExtras } from './lib/extras.ts';
 import { keyLifeFor } from './lib/keylife.ts';
 import { coverage, searchLocal } from './lib/coverage.ts';
 import { verifierConfigured, issueCode, checkCode } from './lib/verifier.ts';
-import { checkoutInProduction, resolveCheckoutOrigin, stripeConfigured, stripeKeyRefused } from '../api/stripe.ts';
-import { hashPassword, verifyPassword, passwordProblem, MAX_PASSWORD } from './lib/password.ts';
+import { checkoutInProduction, isAllowedCheckoutUrl, resolveCheckoutOrigin, stripeConfigured, stripeKeyRefused } from '../api/stripe.ts';
+import { hashPassword, verifyPassword, passwordNeedsRehash, passwordProblem, MAX_PASSWORD } from './lib/password.ts';
+import { canonicalOrigin, decorateHtml, indexablePages, pageForRoute, robotsTxt, sitemapXml } from './lib/seo.ts';
 import {
   billingConfigured, meteringConfigured, flushMeterQueue,
   createBillingCustomer, startMeteredCheckout, completeMeteredCheckout, interpretWebhook,
@@ -177,6 +179,33 @@ async function deliverCodeEmail(
 
 const SESSION_COOKIE = 'omnia_session';
 
+/**
+ * Plaintext of a code issued in this process. The store keeps a SHA-256
+ * once email is configured or the process is production, so a database
+ * copy is not a working sign-in code. Development with no mailer still
+ * stores the code in the clear because the same value is printed to the
+ * console for the person at the keyboard.
+ */
+const pendingCodes = new Map<string, string>();
+
+function sealCode(code: string): string {
+  if (logCodesToConsole()) return code;
+  return 'sha256:' + createHash('sha256').update(code).digest('hex');
+}
+
+function codeMatches(stored: string, presented: string): boolean {
+  if (stored.startsWith('sha256:')) {
+    return safeEqual(stored, 'sha256:' + createHash('sha256').update(presented).digest('hex'));
+  }
+  return safeEqual(stored, presented);
+}
+
+function knownPlaintext(email: string, stored: string | null | undefined): string | null {
+  if (!stored) return null;
+  if (!stored.startsWith('sha256:')) return stored;
+  return pendingCodes.get(email) ?? null;
+}
+
 // The set of state codes this build can actually compute, read once from
 // data/states/. Used to reject an unknown workState at validation time
 // (a clean 422) rather than letting it surface as an engine throw.
@@ -211,13 +240,84 @@ function supportedYears(): number[] {
 // Applied to every response. Cheap, standard hardening: don't let the
 // content type be sniffed, don't leak the referrer, don't allow framing,
 // and stamp the API version so a caller can tell which build answered.
-const SECURITY_HEADERS: Record<string, string> = {
-  'X-Content-Type-Options': 'nosniff',
-  'Referrer-Policy': 'no-referrer',
-  'X-Frame-Options': 'SAMEORIGIN',
-  'X-Omnia-Version': API_VERSION,
-  ...((process.env.PUBLIC_BASE_URL ?? '').startsWith('https://') ? { 'Strict-Transport-Security': 'max-age=31536000' } : {}),
-};
+// HSTS is sent only for the public host. A header on a localhost response
+// would pin the browser to HTTPS for localhost.
+function hstsValue(req?: IncomingMessage): string | null {
+  const base = (process.env.PUBLIC_BASE_URL ?? '').trim();
+  if (!base.startsWith('https://')) return null;
+  if (!req) return null;
+  let canonicalHost = '';
+  try { canonicalHost = new URL(base).host.toLowerCase(); } catch { return null; }
+  const host = requestHost(req);
+  if (host !== canonicalHost && host !== `www.${canonicalHost}`) return null;
+  return 'max-age=31536000; includeSubDomains';
+}
+
+function securityHeaders(req?: IncomingMessage, nonce?: string): Record<string, string> {
+  const headers: Record<string, string> = {
+    'X-Content-Type-Options': 'nosniff',
+    'Referrer-Policy': 'no-referrer',
+    'X-Frame-Options': 'DENY',
+    'Permissions-Policy': 'camera=(), microphone=(), geolocation=(), payment=(), usb=()',
+    'X-Omnia-Version': API_VERSION,
+    'Content-Security-Policy': nonce
+      ? [
+          "default-src 'self'",
+          `script-src 'self' 'nonce-${nonce}'`,
+          "script-src-attr 'none'",
+          "style-src 'self' 'unsafe-inline'",
+          "style-src-attr 'unsafe-inline'",
+          "img-src 'self' data:",
+          "font-src 'self'",
+          "connect-src 'self'",
+          "frame-ancestors 'none'",
+          "base-uri 'self'",
+          "form-action 'self'",
+          "object-src 'none'",
+          "frame-src 'none'",
+        ].join('; ')
+      : "default-src 'none'; frame-ancestors 'none'; base-uri 'none'",
+  };
+  const hsts = hstsValue(req);
+  if (hsts) headers['Strict-Transport-Security'] = hsts;
+  return headers;
+}
+
+/** Host the browser asked for, lowercased, without a port. */
+function requestHost(req: IncomingMessage): string {
+  const trust = trustProxy();
+  const forwarded = trust ? String(req.headers['x-forwarded-host'] ?? '').split(',')[0].trim() : '';
+  const raw = (forwarded || String(req.headers.host ?? '')).split(',')[0].trim().toLowerCase();
+  return raw.replace(/:\d+$/, '');
+}
+
+function requestProto(req: IncomingMessage): 'http' | 'https' {
+  if (trustProxy()) {
+    const proto = String(req.headers['x-forwarded-proto'] ?? '').split(',')[0].trim().toLowerCase();
+    if (proto === 'https' || proto === 'http') return proto;
+  }
+  return 'http';
+}
+
+/**
+ * Send http://omniatax.io and www.omniatax.io to https://omniatax.io.
+ * Health checks and any other host (localhost, the Render probe) stay put.
+ */
+function canonicalRedirect(req: IncomingMessage, rawUrl: string): string | null {
+  const pathOnly = rawUrl.split('?')[0] ?? '/';
+  if (pathOnly === '/healthz' || pathOnly === '/api/health' || pathOnly === '/v1/health') return null;
+  const base = (process.env.PUBLIC_BASE_URL ?? '').trim().replace(/\/+$/, '');
+  if (!base.startsWith('https://')) return null;
+  let canonical: URL;
+  try { canonical = new URL(base); } catch { return null; }
+  const host = requestHost(req);
+  const canonicalHost = canonical.host.toLowerCase();
+  const toWww = host === `www.${canonicalHost}`;
+  const toHttps = host === canonicalHost && requestProto(req) === 'http';
+  if (!toWww && !toHttps) return null;
+  const path = rawUrl.startsWith('/') && !rawUrl.startsWith('//') ? rawUrl : '/';
+  return canonical.origin + path;
+}
 
 /** True when the browser's Origin (if any) is this site. */
 function sameOrigin(req: IncomingMessage): boolean {
@@ -249,25 +349,34 @@ function sendJson(res: ServerResponse, status: number, body: unknown, extraHeade
     'Content-Type': 'application/json; charset=utf-8',
     'Content-Length': Buffer.byteLength(payload),
     'Cache-Control': 'no-store',
-    ...SECURITY_HEADERS,
+    ...securityHeaders(res.req),
+    ...corsHeaders(res.req),
     ...extraHeaders,
   };
   delete headers['Set-Cookie'];
   if (cookies.length === 1) headers['Set-Cookie'] = cookies[0];
   else if (cookies.length > 1) headers['Set-Cookie'] = cookies;
+  const bytes = maybeGzip(res.req, Buffer.from(payload), headers);
+  headers['Content-Length'] = bytes.length;
   res.writeHead(status, headers);
-  res.end(payload);
+  res.end(bytes);
 }
 
-function sendHtml(res: ServerResponse, path: string): void {
-  const html = readFileSync(path);
-  res.writeHead(200, {
+function sendHtml(req: IncomingMessage, res: ServerResponse, file: string, route: string): void {
+  const nonce = randomBytes(16).toString('base64url');
+  const html = decorateHtml(readFileSync(file, 'utf8'), route, nonce);
+  const headers: Record<string, string | number | readonly string[]> = {
     'Content-Type': 'text/html; charset=utf-8',
-    'Content-Length': html.byteLength,
     'Cache-Control': 'no-store',
-    ...SECURITY_HEADERS,
-  });
-  res.end(html);
+    ...securityHeaders(req, nonce),
+    ...corsHeaders(req),
+  };
+  const csrf = csrfCookie(req);
+  if (csrf) headers['Set-Cookie'] = csrf;
+  const body = maybeGzip(req, Buffer.from(html), headers);
+  headers['Content-Length'] = body.length;
+  res.writeHead(200, headers);
+  res.end(body);
 }
 
 /**
@@ -292,18 +401,27 @@ function apiOrigin(): string {
   return /^https?:\/\//.test(configured) ? configured : `http://localhost:${PORT}`;
 }
 
-function sendPage(res: ServerResponse, path: string): void {
-  const html = readFileSync(path, 'utf8')
-    .replace('<!--OMNIA_CONFIG-->', `<script>window.OMNIA=${JSON.stringify(clientConfig())};</script>`)
-    .replaceAll('https://api.omnia.tax', apiOrigin());
-  const buf = Buffer.from(html);
-  res.writeHead(200, {
+function sendPage(req: IncomingMessage, res: ServerResponse, path: string, route: string): void {
+  const nonce = randomBytes(16).toString('base64url');
+  const html = decorateHtml(
+    readFileSync(path, 'utf8')
+      .replace('<!--OMNIA_CONFIG-->', `<script>window.OMNIA=${JSON.stringify(clientConfig())};</script>`)
+      .replaceAll('https://api.omnia.tax', apiOrigin()),
+    route,
+    nonce,
+  );
+  const headers: Record<string, string | number | readonly string[]> = {
     'Content-Type': 'text/html; charset=utf-8',
-    'Content-Length': buf.byteLength,
     'Cache-Control': 'no-store',
-    ...SECURITY_HEADERS,
-  });
-  res.end(buf);
+    ...securityHeaders(req, nonce),
+    ...corsHeaders(req),
+  };
+  const csrf = csrfCookie(req);
+  if (csrf) headers['Set-Cookie'] = csrf;
+  const body = maybeGzip(req, Buffer.from(html), headers);
+  headers['Content-Length'] = body.length;
+  res.writeHead(200, headers);
+  res.end(body);
 }
 
 function contentTypeFor(file: string): string {
@@ -319,35 +437,123 @@ function contentTypeFor(file: string): string {
 }
 
 /**
- * Static files are always revalidated (no-cache) and carry an ETag, so a
- * deploy shows up on the next page load instead of after an hour of stale
- * CSS, while an unchanged file still costs only a 304.
+ * Static files cache for a day and must revalidate after that. They carry
+ * an ETag, so an unchanged file still costs only a 304 once the browser
+ * checks again. HTML stays no-store because it is rewritten per request.
  */
 function sendStatic(res: ServerResponse, path: string, contentType: string, req?: IncomingMessage): void {
   const buf = readFileSync(path);
   const etag = '"' + createHash('sha1').update(buf).digest('base64url') + '"';
-  const headers = { 'Cache-Control': 'no-cache', ETag: etag, ...SECURITY_HEADERS };
+  const headers: Record<string, string | number | readonly string[]> = {
+    'Content-Type': contentType,
+    'Cache-Control': 'public, max-age=86400, must-revalidate',
+    ETag: etag,
+    ...securityHeaders(req),
+  };
   if (req && req.headers['if-none-match'] === etag) {
     res.writeHead(304, headers);
     res.end();
     return;
   }
-  res.writeHead(200, { 'Content-Type': contentType, 'Content-Length': buf.byteLength, ...headers });
-  res.end(buf);
+  const body = maybeGzip(req, buf, headers);
+  res.writeHead(200, { 'Content-Length': body.length, ...headers });
+  res.end(body);
 }
+
+function maybeGzip(req: IncomingMessage | undefined, body: Buffer, headers: Record<string, string | number | readonly string[]>): Buffer {
+  const type = String(headers['Content-Type'] ?? '');
+  const accept = String(req?.headers['accept-encoding'] ?? '');
+  if (body.length < 256 || !/\bgzip\b/.test(accept) || !/text\/|json|javascript|xml|\bsvg\b/.test(type)) return body;
+  headers['Content-Encoding'] = 'gzip';
+  const vary = headers['Vary'];
+  headers['Vary'] = vary ? `${vary}, Accept-Encoding` : 'Accept-Encoding';
+  return gzipSync(body, { level: 6 });
+}
+
+/** Origins allowed to read this API from a browser. Everyone else gets no CORS headers. */
+function corsHeaders(req: IncomingMessage | undefined): Record<string, string> {
+  const origin = req?.headers.origin;
+  if (!origin || Array.isArray(origin)) return {};
+  let requestOrigin = '';
+  try { requestOrigin = new URL(origin).origin; } catch { return {}; }
+  const allowed = new Set<string>([canonicalOrigin(), `http://localhost:${PORT}`, `http://127.0.0.1:${PORT}`]);
+  if (!allowed.has(requestOrigin)) return {};
+  return {
+    'Access-Control-Allow-Origin': requestOrigin,
+    'Access-Control-Allow-Credentials': 'true',
+    Vary: 'Origin',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-CSRF-Token, Stripe-Signature',
+    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+  };
+}
+
+const CSRF_COOKIE = 'omnia_csrf';
+/** Browser POSTs that authenticate with a cookie. Bearer-key and webhook routes are not in this list. */
+const CSRF_EXEMPT = new Set([
+  '/api/billing/webhook', '/v1/billing/webhook',
+  '/api/paycheck', '/v1/paycheck',
+  '/api/address', '/v1/address',
+]);
+
+function readCookie(req: IncomingMessage, name: string): string | null {
+  const header = req.headers.cookie;
+  if (!header) return null;
+  for (const part of header.split(';')) {
+    const [k, ...v] = part.trim().split('=');
+    if (k === name) return decodeURIComponent(v.join('=')) || null;
+  }
+  return null;
+}
+
+/** Set a double-submit token when the browser does not already have one. */
+function csrfCookie(req: IncomingMessage): string | null {
+  const existing = readCookie(req, CSRF_COOKIE);
+  if (existing && /^[A-Za-z0-9_-]{32,128}$/.test(existing)) return null;
+  const token = randomBytes(32).toString('base64url');
+  return `${CSRF_COOKIE}=${token}; Path=/; SameSite=Lax; Max-Age=31536000` + (cookieSecure() ? '; Secure' : '');
+}
+
+function browserRequest(req: IncomingMessage): boolean {
+  return Boolean(req.headers.origin || req.headers['sec-fetch-site']);
+}
+
+function csrfOk(req: IncomingMessage): boolean {
+  if (!browserRequest(req)) return true;
+  const cookie = readCookie(req, CSRF_COOKIE);
+  const header = req.headers['x-csrf-token'];
+  const presented = Array.isArray(header) ? header[0] : header;
+  if (!cookie || !presented) return false;
+  return safeEqual(cookie, presented);
+}
+
+const MAX_BODY_BYTES = 1_000_000;
 
 function readBody(req: IncomingMessage): Promise<string> {
   return new Promise((resolve, reject) => {
-    let data = '';
-    req.on('data', (chunk) => {
-      data += chunk;
-      if (data.length > 1_000_000) {
-        reject(new Error('Request body too large.'));
-        req.destroy();
+    const chunks: Buffer[] = [];
+    let received = 0;
+    let settled = false;
+    const fail = (err: Error) => {
+      if (settled) return;
+      settled = true;
+      reject(err);
+    };
+    req.on('data', (chunk: Buffer) => {
+      if (settled) return;
+      received += chunk.length;
+      if (received > MAX_BODY_BYTES) {
+        chunks.length = 0;
+        fail(new Error('Request body too large.'));
+        return;
       }
+      chunks.push(chunk);
     });
-    req.on('end', () => resolve(data));
-    req.on('error', reject);
+    req.on('end', () => {
+      if (settled) return;
+      settled = true;
+      resolve(Buffer.concat(chunks).toString('utf8'));
+    });
+    req.on('error', fail);
   });
 }
 
@@ -445,17 +651,20 @@ async function handleSignup(req: IncomingMessage, res: ServerResponse): Promise<
     pruneUnverified(db, now);
 
     const existing = db.accounts[email];
-    const cooling =
-      existing?.codeRequestedAt && now - new Date(existing.codeRequestedAt).getTime() < CODE_COOLDOWN_MS;
+    const cooling = Boolean(
+      existing?.code && existing.codeRequestedAt && now - new Date(existing.codeRequestedAt).getTime() < CODE_COOLDOWN_MS,
+    );
     const remote = verifierConfigured();
-    const code = remote ? null : cooling && existing.code ? existing.code : String(randomInt(100000, 1000000));
+    const reused = !remote && cooling ? knownPlaintext(email, existing?.code) : null;
+    const code = remote ? null : reused ?? String(randomInt(100000, 1000000));
+    if (code) pendingCodes.set(email, code);
 
     const record: AccountRecord = {
       name,
       email,
       company,
       phone,
-      code,
+      code: code ? sealCode(code) : null,
       codeRequestedAt: cooling ? existing!.codeRequestedAt : new Date(now).toISOString(),
       codeExpiresAt: remote ? null : cooling ? existing!.codeExpiresAt : new Date(now + CODE_TTL_MS).toISOString(),
       codeAttempts: remote ? 0 : cooling ? existing!.codeAttempts ?? 0 : 0,
@@ -487,12 +696,14 @@ async function handleSignup(req: IncomingMessage, res: ServerResponse): Promise<
     return record;
   });
 
-  const delivery = await deliverCodeEmail('signup', {
-    name: account.name,
-    email,
-    code: account.code ?? '',
-    codeExpiresAt: account.codeExpiresAt ?? '',
-  });
+  const delivery = account.code && !pendingCodes.get(email)
+    ? { limited: false as const, emailSent: true, cooldown: true, devCodeHint: false }
+    : await deliverCodeEmail('signup', {
+      name: account.name,
+      email,
+      code: pendingCodes.get(email) ?? '',
+      codeExpiresAt: account.codeExpiresAt ?? '',
+    });
   if (delivery.limited) {
     sendJson(res, 429, { error: 'Too many codes requested for this address. Try again later.', code: 'rate_limited' }, { 'Retry-After': String(delivery.retryAfterSec) });
     return;
@@ -503,7 +714,6 @@ async function handleSignup(req: IncomingMessage, res: ServerResponse): Promise<
     emailSent: delivery.emailSent,
     cooldown: delivery.cooldown,
     devCodeHint: delivery.devCodeHint,
-    alreadyVerified: Boolean(account.emailVerifiedAt),
   });
 }
 
@@ -542,16 +752,21 @@ async function handleSignin(req: IncomingMessage, res: ServerResponse): Promise<
     if (!rl.allowed) return { limited: true as const, retryAfterSec: rl.retryAfterSec };
     const a = db.accounts[email];
     if (!a || !a.emailVerifiedAt) return { acct: null };
-    const cooling = a.codeRequestedAt && a.code && now - new Date(a.codeRequestedAt).getTime() < CODE_COOLDOWN_MS;
+    const cooling = Boolean(a.codeRequestedAt && a.code && now - new Date(a.codeRequestedAt).getTime() < CODE_COOLDOWN_MS);
+    let plain = '';
     if (verifierConfigured()) {
       a.codeRequestedAt = new Date(now).toISOString();
     } else if (!cooling) {
-      a.code = String(randomInt(100000, 1000000));
+      plain = String(randomInt(100000, 1000000));
+      pendingCodes.set(email, plain);
+      a.code = sealCode(plain);
       a.codeRequestedAt = new Date(now).toISOString();
       a.codeExpiresAt = new Date(now + CODE_TTL_MS).toISOString();
       a.codeAttempts = 0;
+    } else {
+      plain = knownPlaintext(email, a.code) ?? '';
     }
-    return { acct: { name: a.name, email: a.email, code: a.code ?? '', codeExpiresAt: a.codeExpiresAt ?? '' } };
+    return { acct: { name: a.name, email: a.email, code: plain, codeExpiresAt: a.codeExpiresAt ?? '', cooling } };
   });
   if ('limited' in outcome) {
     sendJson(res, 429, { error: 'Too many sign-in attempts. Try again later.', code: 'rate_limited' }, { 'Retry-After': String(outcome.retryAfterSec) });
@@ -559,35 +774,21 @@ async function handleSignin(req: IncomingMessage, res: ServerResponse): Promise<
   }
 
   const configured = isEmailConfigured() || verifierConfigured();
-  // No account: the same JSON as a successful send, so this route cannot
-  // be used to learn who is a customer. A real account whose mail fails
-  // does say so (emailSent false). That differs only while delivery is down.
+  // The JSON is the same whether or not the address has an account, and
+  // whether or not the provider accepted the message. A different
+  // emailSent for a real mailbox is an existence oracle. Failures are logged.
+  const devHint = !configured && !inProduction();
+  const publicBody = { ok: true, emailConfigured: configured, emailSent: configured, cooldown: false, devCodeHint: devHint };
   const acct = outcome.acct;
   if (!acct) {
-    sendJson(res, 200, {
-      ok: true,
-      emailConfigured: configured,
-      emailSent: configured,
-      cooldown: false,
-      devCodeHint: !configured && !inProduction(),
-    });
+    sendJson(res, 200, publicBody);
     return;
   }
-  const delivery = await deliverCodeEmail('sign-in', acct);
-  // A 429 here would exist only for addresses that have accounts (unknown
-  // addresses never reach the mailer). Report it as a failed send instead.
-  if (delivery.limited) {
-    console.error('[sign-in] verifier refused another code');
-    sendJson(res, 200, { ok: true, emailConfigured: configured, emailSent: false, cooldown: false, devCodeHint: false });
-    return;
+  if (!acct.cooling) {
+    const delivery = await deliverCodeEmail('sign-in', acct);
+    if (delivery.limited || !delivery.emailSent) console.error('[sign-in] verification email failed');
   }
-  sendJson(res, 200, {
-    ok: true,
-    emailConfigured: configured,
-    emailSent: delivery.emailSent,
-    cooldown: delivery.cooldown,
-    devCodeHint: delivery.devCodeHint,
-  });
+  sendJson(res, 200, publicBody);
 }
 
 // ---------------------------------------------------------------------
@@ -633,7 +834,7 @@ async function handleVerifyEmail(req: IncomingMessage, res: ServerResponse): Pro
       return { ok: false as const, error: TOO_MANY };
     }
     const live = Boolean(acct?.code && acct.codeExpiresAt && now <= new Date(acct.codeExpiresAt).getTime());
-    if (!remote && (!acct || !live || !safeEqual(acct.code!, code))) {
+    if (!remote && (!acct || !live || !codeMatches(acct.code!, code))) {
       const hourly = hitStoredLimit(db, hourKey, MAX_CODE_GUESSES_PER_HOUR, HOUR_MS, now);
       // Unknown addresses get a stored counter too, so "burned" looks
       // the same for them as for real accounts.
@@ -643,6 +844,7 @@ async function handleVerifyEmail(req: IncomingMessage, res: ServerResponse): Pro
       if (burned && acct) {
         acct.code = null;
         acct.codeExpiresAt = null;
+        pendingCodes.delete(email);
       }
       return { ok: false as const, error: burned ? TOO_MANY : INVALID };
     }
@@ -652,6 +854,11 @@ async function handleVerifyEmail(req: IncomingMessage, res: ServerResponse): Pro
     acct.code = null;
     acct.codeExpiresAt = null;
     acct.codeAttempts = 0;
+    pendingCodes.delete(email);
+    // Rotate whatever cookie this browser already held so a session planted
+    // before sign-in cannot be reused. Other devices keep their own rows.
+    const previous = cookieToken(req);
+    if (previous) endSession(db, previous);
     const token = startSession(db, acct, 'code');
     if (acct.stage === 'unverified') acct.stage = 'verified';
 
@@ -770,10 +977,14 @@ async function handleSigninPassword(req: IncomingMessage, res: ServerResponse): 
     sendJson(res, 401, { error: INVALID });
     return;
   }
+  const upgraded = passwordNeedsRehash(gate.hash) ? await hashPassword(password) : null;
+  const previous = cookieToken(req);
 
   const outcome = withDb((db) => {
     const acct = db.accounts[email];
     if (!acct || !acct.emailVerifiedAt) return null;
+    if (upgraded) acct.passwordHash = upgraded;
+    if (previous) endSession(db, previous);
     const token = startSession(db, acct, 'password');
     return { ok: true as const, sessionToken: token, name: acct.name, email: acct.email, company: acct.company, stage: acct.stage, hasPassword: true };
   });
@@ -835,13 +1046,20 @@ async function handlePassword(req: IncomingMessage, res: ServerResponse): Promis
   }
 
   const newHash = await hashPassword(body.password as string);
-  withDb((db) => {
+  const rotated = withDb((db) => {
     const a = db.accounts[session.email];
-    if (!a) return;
+    if (!a) return null;
     a.passwordHash = newHash;
     a.passwordSetAt = new Date().toISOString();
+    // A password change ends every device. This browser gets a new cookie.
+    revokeAccountSessions(db, a.email);
+    return startSession(db, a, 'password');
   });
-  sendJson(res, 200, { ok: true });
+  if (!rotated) {
+    sendJson(res, 401, { error: 'Sign in first.' });
+    return;
+  }
+  sendJson(res, 200, { ok: true, sessionToken: rotated }, { 'Set-Cookie': sessionCookie(rotated, SESSION_TTL_MS) });
 }
 
 function safeEqual(a: string, b: string): boolean {
@@ -890,6 +1108,19 @@ function handleSignout(req: IncomingMessage, res: ServerResponse): void {
     });
   }
   sendJson(res, 200, { ok: true }, { 'Set-Cookie': sessionCookie('', 0) });
+}
+
+/** End every device for this account. Used when the password changes. */
+function revokeAccountSessions(db: DB, email: string): void {
+  for (const [key, session] of Object.entries(db.sessions)) {
+    if (session.email === email) delete db.sessions[key];
+  }
+  const acct = db.accounts[email];
+  if (!acct) return;
+  acct.sessionToken = null;
+  acct.sessionExpiresAt = null;
+  acct.sessionIssuedAt = null;
+  acct.sessionMethod = null;
 }
 
 /** Remove one token. The account mirror is cleared only when it is this token. */
@@ -1116,7 +1347,7 @@ async function handleAcceptTerms(req: IncomingMessage, res: ServerResponse): Pro
     sendJson(res, result.status, { error: result.error, code: result.code });
     return;
   }
-  console.log(`[terms accepted] v${result.acceptance.termsVersion} quote ${result.acceptance.quoteId}`);
+  console.log(`[terms accepted] v${result.acceptance.termsVersion}`);
 
   sendJson(res, 200, {
     ok: true,
@@ -1196,16 +1427,16 @@ async function handlePaymentSetup(req: IncomingMessage, res: ServerResponse): Pr
         });
       }
       const out = await startMeteredCheckout({ customerId, email: session.email, successUrl, cancelUrl, trialDays: TRIAL_DAYS });
-      if (!out.ok || !out.url) {
-        console.error(`[payment] could not start Stripe Checkout (${out.reason ?? 'unknown'}): ${out.error ?? ''}`);
-        sendJson(res, 502, { error: out.error ?? 'The processor rejected the subscription request.', reason: out.reason });
+      if (!out.ok || !out.url || !isAllowedCheckoutUrl(out.url)) {
+        console.error(`[payment] could not start Stripe Checkout (${out.reason ?? 'unknown'}): ${scrubMailLog(out.error ?? '')}`);
+        sendJson(res, 502, { error: 'Could not start checkout.', code: 'checkout_failed' });
         return;
       }
       sendJson(res, 200, { ok: true, checkoutUrl: out.url, paymentsConfigured: true, metered: true });
       return;
     } catch (err) {
-      console.error('[payment] Stripe request failed:', err instanceof Error ? err.message : err);
-      sendJson(res, 502, { error: err instanceof Error ? err.message : 'Could not reach the processor.' });
+      console.error('[payment] Stripe request failed:', scrubMailLog(err instanceof Error ? err.message : String(err)));
+      sendJson(res, 502, { error: 'Could not start checkout.', code: 'checkout_failed' });
       return;
     }
   }
@@ -1230,14 +1461,15 @@ async function handlePaymentSetup(req: IncomingMessage, res: ServerResponse): Pr
     });
     const payload = (await r.json()) as { url?: string; error?: { message?: string } };
     const ok = r.ok;
-    if (!ok || !payload.url) {
-      console.error('[payment] Stripe refused the setup checkout:', payload.error?.message ?? 'no reason given');
-      sendJson(res, 502, { error: payload.error?.message ?? 'The processor rejected the setup request.' });
+    if (!ok || !payload.url || !isAllowedCheckoutUrl(payload.url)) {
+      console.error('[payment] Stripe refused the setup checkout:', scrubMailLog(payload.error?.message ?? 'no reason given'));
+      sendJson(res, 502, { error: 'Could not start checkout.', code: 'checkout_failed' });
       return;
     }
     sendJson(res, 200, { ok: true, checkoutUrl: payload.url, paymentsConfigured: true, metered: false });
   } catch (err) {
-    sendJson(res, 502, { error: err instanceof Error ? err.message : 'Could not reach the processor.' });
+    console.error('[payment] Stripe request failed:', scrubMailLog(err instanceof Error ? err.message : String(err)));
+    sendJson(res, 502, { error: 'Could not start checkout.', code: 'checkout_failed' });
   }
 }
 
@@ -1271,7 +1503,8 @@ async function handleBillingReturn(req: IncomingMessage, res: ServerResponse): P
       sendJson(res, 402, { error: 'That checkout was not completed. Add a card or bank account to continue.', code: 'checkout_not_complete' });
       return;
     }
-    sendJson(res, 502, { error: done.error ?? 'Could not confirm the subscription with the processor.', reason: done.reason });
+    console.error('[billing] checkout confirm failed:', scrubMailLog(done.error ?? done.reason ?? ''));
+    sendJson(res, 502, { error: 'Could not confirm the subscription with the processor.', code: 'checkout_failed' });
     return;
   }
   // The checkout must be this account's own, and must have saved a card
@@ -1330,7 +1563,7 @@ async function handleBillingReturn(req: IncomingMessage, res: ServerResponse): P
       : { error: 'No subscription on file for this account.' });
     return;
   }
-  console.log(`[billing] ${session.email} subscribed -- customer ${done.customerId}, sub ${done.subscriptionId}`);
+  console.log('[billing] subscription linked');
   sendJson(res, 200, { ok: true, subscription: outcome.subscription, metered: meteringConfigured() });
 }
 
@@ -1339,18 +1572,30 @@ async function handleBillingReturn(req: IncomingMessage, res: ServerResponse): P
 // signature). Suspends a key on a failed invoice, reactivates on payment.
 // ---------------------------------------------------------------------
 
-const STRIPE_EVENT_MEMORY = 2000;
+/** Keep event ids long enough for Stripe's retry window (several days). */
+const STRIPE_EVENT_TTL_MS = 30 * 24 * 60 * 60_000;
+const STRIPE_EVENT_CAP = 20_000;
+
+function stripeEventId(row: string): string {
+  const at = row.lastIndexOf('@');
+  return at > 0 && /^\d+$/.test(row.slice(at + 1)) ? row.slice(0, at) : row;
+}
 
 function stripeEventSeen(db: { processedStripeEvents?: string[] }, eventId: string | undefined): boolean {
   if (!eventId) return false;
-  return (db.processedStripeEvents ?? []).includes(eventId);
+  return (db.processedStripeEvents ?? []).some((row) => stripeEventId(row) === eventId);
 }
 
 function rememberStripeEvent(db: { processedStripeEvents?: string[] }, eventId: string | undefined): void {
   if (!eventId) return;
-  const seen = db.processedStripeEvents ?? [];
-  if (!seen.includes(eventId)) seen.push(eventId);
-  db.processedStripeEvents = seen.length > STRIPE_EVENT_MEMORY ? seen.slice(seen.length - STRIPE_EVENT_MEMORY) : seen;
+  const now = Date.now();
+  const kept = (db.processedStripeEvents ?? []).filter((row) => {
+    const at = row.lastIndexOf('@');
+    const ts = at > 0 ? Number(row.slice(at + 1)) : NaN;
+    return !Number.isFinite(ts) || now - ts < STRIPE_EVENT_TTL_MS;
+  });
+  if (!kept.some((row) => stripeEventId(row) === eventId)) kept.push(`${eventId}@${now}`);
+  db.processedStripeEvents = kept.length > STRIPE_EVENT_CAP ? kept.slice(kept.length - STRIPE_EVENT_CAP) : kept;
 }
 
 /**
@@ -1457,7 +1702,7 @@ async function handleBillingWebhook(req: IncomingMessage, res: ServerResponse): 
       sendJson(res, 200, { received: true, duplicate: true });
       return;
     }
-    console.log(`[billing webhook] checkout_completed customer=${result.customerId} account=${applied ?? 'unknown'}`);
+    console.log('[billing webhook] checkout_completed');
     sendJson(res, 200, { received: true, action: 'checkout_completed', matched: Boolean(applied) });
     return;
   }
@@ -1506,11 +1751,11 @@ async function handleBillingWebhook(req: IncomingMessage, res: ServerResponse): 
     return;
   }
   if (applied === 'stale') {
-    console.log(`[billing webhook] ignored ${result.action} for superseded subscription ${result.subscriptionId} customer=${result.customerId}`);
+    console.log(`[billing webhook] ignored ${result.action} for a superseded subscription`);
     sendJson(res, 200, { received: true, action: 'ignored_stale_subscription' });
     return;
   }
-  console.log(`[billing webhook] ${result.action} customer=${result.customerId} account=${applied ?? 'unknown'}`);
+  console.log(`[billing webhook] ${result.action}`);
   sendJson(res, 200, { received: true, action: result.action, matched: Boolean(applied) });
 }
 
@@ -1572,7 +1817,7 @@ async function handleStartTrial(req: IncomingMessage, res: ServerResponse): Prom
     sendJson(res, outcome.code ? 402 : 409, { error: outcome.error, code: outcome.code });
     return;
   }
-  console.log(`[trial started] ${session.email} -- ends ${outcome.subscription.trialEndsAt}`);
+  console.log('[trial started]');
   sendJson(res, 200, { ok: true, subscription: outcome.subscription, paymentAttached: outcome.paymentAttached });
 }
 
@@ -2801,10 +3046,7 @@ async function handleEstimate(req: IncomingMessage, res: ServerResponse): Promis
     });
   });
 
-  console.log(
-    `[estimate] ${email} — ${employees} employees, ${payFrequency}, ${breakdown.callsPerYear} calls/yr, ` +
-      `rooftop=${rooftop} -> $${Math.round(breakdown.total).toLocaleString()}/yr`,
-  );
+  console.log(`[estimate] ${employees} employees, ${payFrequency}, rooftop=${rooftop}`);
   sendJson(res, 200, { ok: true, ...breakdown });
 }
 
@@ -2863,41 +3105,71 @@ createServer((req, res) => {
   const method = req.method ?? 'GET';
 
   (async () => {
-    const pages: Record<string, string> = {
-      '/': 'index.html',
-      '/index.html': 'index.html',
-      '/signup': 'signup.html',
-      '/signup/verify': 'signup-verify.html',
-      '/signup/business': 'signup-business.html',
-      '/signup/payment': 'signup-payment.html',
-      '/signup/key': 'signup-key.html',
-      '/signin': 'signin.html',
-      '/docs': 'docs.html',
-      '/docs.html': 'docs.html',
-      '/sandbox': 'sandbox.html',
-      '/sandbox.html': 'sandbox.html',
-      '/console': 'sandbox.html',
-      '/_states': 'states.html',
-      '/product': 'product.html',
-      '/coverage': 'coverage.html',
-      '/pricing': 'pricing.html',
-      '/docs/paycheck': 'docs-paycheck.html',
-      '/changelog': 'changelog.html',
-      '/status': 'status.html',
-      '/about': 'about.html',
-      '/contact': 'contact.html',
-      '/security': 'security.html',
-      '/dashboard': 'dashboard.html',
-    };
-    if (method === 'GET' && pages[url]) {
-      sendPage(res, join(HERE, pages[url]));
+    if (method === 'GET' || method === 'HEAD') {
+      const dest = canonicalRedirect(req, req.url ?? '/');
+      if (dest) {
+        res.writeHead(301, { Location: dest, ...securityHeaders(req), 'Cache-Control': 'public, max-age=3600' });
+        res.end();
+        return;
+      }
+    }
+    if (method === 'GET' && url === '/robots.txt') {
+      const body = Buffer.from(robotsTxt(canonicalOrigin()));
+      const headers: Record<string, string | number> = {
+        'Content-Type': 'text/plain; charset=utf-8',
+        'Cache-Control': 'public, max-age=3600',
+        ...securityHeaders(req),
+      };
+      const gz = maybeGzip(req, body, headers);
+      headers['Content-Length'] = gz.length;
+      res.writeHead(200, headers);
+      res.end(gz);
       return;
     }
-    if (method === 'GET' && (url === '/favicon.ico' || url === '/favicon.svg' || url.startsWith('/logo/') || url.startsWith('/assets/') || url === '/tokens.css')) {
-      const rel = url === '/favicon.ico' || url === '/favicon.svg' ? 'logo/favicon.svg' : url.replace(/^\/+/, '');
-      if (!rel.includes('..')) {
+    if (method === 'GET' && url === '/sitemap.xml') {
+      const lastmod: Record<string, string> = {};
+      for (const page of indexablePages()) {
+        try { lastmod[page.path] = statSync(join(HERE, page.file)).mtime.toISOString().slice(0, 10); } catch { /* missing file */ }
+      }
+      const body = Buffer.from(sitemapXml(canonicalOrigin(), lastmod));
+      const headers: Record<string, string | number> = {
+        'Content-Type': 'application/xml; charset=utf-8',
+        'Cache-Control': 'public, max-age=3600',
+        ...securityHeaders(req),
+      };
+      const gz = maybeGzip(req, body, headers);
+      headers['Content-Length'] = gz.length;
+      res.writeHead(200, headers);
+      res.end(gz);
+      return;
+    }
+    if (method === 'OPTIONS' && (url.startsWith('/api/') || url.startsWith('/v1/'))) {
+      const cors = corsHeaders(req);
+      if (!cors['Access-Control-Allow-Origin']) {
+        sendJson(res, 403, { error: 'Origin not allowed.', code: 'cors' });
+        return;
+      }
+      res.writeHead(204, { ...securityHeaders(req), ...cors, 'Content-Length': '0' });
+      res.end();
+      return;
+    }
+
+    const page = method === 'GET' ? pageForRoute(url) : undefined;
+    if (page) {
+      sendPage(req, res, join(HERE, page.file), page.path);
+      return;
+    }
+    if (method === 'GET' && (url === '/favicon.ico' || url === '/favicon.svg' || url === '/apple-touch-icon.png' || url.startsWith('/logo/') || url.startsWith('/assets/') || url === '/tokens.css')) {
+      let decoded = url;
+      try { decoded = decodeURIComponent(url); } catch { decoded = url; }
+      const rel = decoded === '/favicon.ico' || decoded === '/favicon.svg'
+        ? 'logo/favicon.svg'
+        : decoded === '/apple-touch-icon.png'
+          ? 'logo/apple-touch-icon.png'
+          : decoded.replace(/^\/+/, '');
+      if (!rel.includes('..') && !rel.includes('\\') && !rel.includes('\0')) {
         const file = resolve(HERE, rel);
-        if ((file === HERE || file.startsWith(HERE + '/')) && existsSync(file)) {
+        if ((file === HERE || file.startsWith(HERE + '/')) && existsSync(file) && statSync(file).isFile()) {
           sendStatic(res, file, contentTypeFor(file), req);
           return;
         }
@@ -2907,9 +3179,22 @@ createServer((req, res) => {
       sendStatic(res, join(HERE, 'sandbox-examples.json'), 'application/json; charset=utf-8', req);
       return;
     }
-    if (method === 'GET' && (url === '/reference' || url === '/reference.html' || url === '/api-reference')) {
-      // The old standalone reference page is gone; its URLs land on the docs.
-      res.writeHead(301, { Location: '/docs', ...SECURITY_HEADERS });
+    const aliases: Record<string, string> = {
+      '/index.html': '/',
+      '/docs.html': '/docs',
+      '/sandbox.html': '/sandbox',
+      '/terms.html': '/terms',
+      '/privacy.html': '/privacy',
+      '/legal/terms.html': '/terms',
+      '/legal/privacy.html': '/privacy',
+      '/legal/acceptable-use.html': '/acceptable-use',
+      '/legal/disclaimer.html': '/disclaimer',
+      '/reference': '/docs',
+      '/reference.html': '/docs',
+      '/api-reference': '/docs',
+    };
+    if (method === 'GET' && aliases[url]) {
+      res.writeHead(301, { Location: aliases[url], ...securityHeaders(req) });
       res.end();
       return;
     }
@@ -2921,22 +3206,26 @@ createServer((req, res) => {
     }
     {
       const legal: Record<string, string> = {
-        '/terms': 'terms', '/terms.html': 'terms', '/legal/terms.html': 'terms',
-        '/privacy': 'privacy', '/privacy.html': 'privacy', '/legal/privacy.html': 'privacy',
-        '/acceptable-use': 'acceptable-use', '/legal/acceptable-use.html': 'acceptable-use',
-        '/disclaimer': 'disclaimer', '/legal/disclaimer.html': 'disclaimer',
+        '/terms': 'terms',
+        '/privacy': 'privacy',
+        '/acceptable-use': 'acceptable-use',
+        '/disclaimer': 'disclaimer',
       };
       if (method === 'GET' && legal[url]) {
-        sendHtml(res, join(HERE, 'legal', `${legal[url]}.html`));
+        sendHtml(req, res, join(HERE, 'legal', `${legal[url]}.html`), url);
         return;
       }
     }
 
-    // Cookie-authenticated console routes refuse cross-site browser POSTs
+    // Cookie-authenticated routes refuse cross-site browser POSTs
     // (belt and braces on top of SameSite=Lax). Bearer-key clients and the
     // Stripe webhook send no Origin header, so they pass untouched.
-    if (method === 'POST' && url.startsWith('/api/') && url !== '/api/billing/webhook' && url !== '/api/paycheck' && url !== '/api/address' && !sameOrigin(req)) {
+    if (method === 'POST' && url.startsWith('/api/') && !CSRF_EXEMPT.has(url) && !sameOrigin(req)) {
       sendJson(res, 403, { error: 'Cross-origin request refused.', code: 'bad_origin' });
+      return;
+    }
+    if (method === 'POST' && (url.startsWith('/api/') || url.startsWith('/v1/')) && !CSRF_EXEMPT.has(url) && !csrfOk(req)) {
+      sendJson(res, 403, { error: 'Cross-site request refused.', code: 'bad_csrf' });
       return;
     }
 
@@ -2976,21 +3265,24 @@ createServer((req, res) => {
     if (method === 'GET' && url === '/api/billing') return handleBilling(req, res);
 
     if (method === 'GET' && !url.startsWith('/api/') && !url.startsWith('/v1/')) {
-      const missing = readFileSync(join(HERE, 'not-found.html'));
-      res.writeHead(404, {
+      const nonce = randomBytes(16).toString('base64url');
+      const html = decorateHtml(readFileSync(join(HERE, 'not-found.html'), 'utf8'), '/404', nonce);
+      const headers: Record<string, string | number> = {
         'Content-Type': 'text/html; charset=utf-8',
-        'Content-Length': missing.byteLength,
         'Cache-Control': 'no-store',
-        ...SECURITY_HEADERS,
-      });
-      res.end(missing);
+        ...securityHeaders(req, nonce),
+      };
+      const body = maybeGzip(req, Buffer.from(html), headers);
+      headers['Content-Length'] = body.length;
+      res.writeHead(404, headers);
+      res.end(body);
       return;
     }
-    res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8', ...SECURITY_HEADERS });
+    res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8', ...securityHeaders(req) });
     res.end('Not found');
   })().catch((err) => {
-    console.error(err);
-    sendJson(res, 500, { error: 'Internal server error.' });
+    console.error(scrubMailLog(err instanceof Error ? err.message : String(err)));
+    if (!res.headersSent) sendJson(res, 500, { error: 'Internal server error.' });
   });
 }).listen(PORT, () => {
   const liveRefused = stripeKeyRefused();

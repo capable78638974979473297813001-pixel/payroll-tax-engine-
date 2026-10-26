@@ -9,10 +9,18 @@
  */
 import { randomBytes, scrypt, timingSafeEqual, type ScryptOptions } from 'node:crypto';
 
-const N = 16384;
+/**
+ * OWASP Password Storage Cheat Sheet scrypt parameters: N=2^17, r=8, p=1.
+ * Argon2id is the cheat sheet's first choice and needs a native module this
+ * process does not ship. scrypt at these parameters is the listed alternative
+ * in node:crypto. Hashes written at the previous N=2^14 still verify, and a
+ * successful sign-in rewrites them at the current cost.
+ */
+const N = 131072;
 const R = 8;
 const P = 1;
 const KEYLEN = 32;
+const MIN_N = 16384;
 
 export const MIN_PASSWORD = 12;
 /** Upper bound so a huge password can't be used to burn CPU. */
@@ -42,11 +50,23 @@ export async function verifyPassword(password: string, stored: string | null | u
   const n = Number(parts[1]);
   const r = Number(parts[2]);
   const p = Number(parts[3]);
-  if (!Number.isInteger(n) || !Number.isInteger(r) || !Number.isInteger(p) || n > 1 << 20) return false;
+  // A stored cost above the current one is rejected so a tampered row cannot
+  // pin the event loop. Below MIN_N is not a hash this app ever wrote.
+  if (!Number.isInteger(n) || !Number.isInteger(r) || !Number.isInteger(p) || r !== R || p < 1 || p > 4 || n < MIN_N || n > N || (n & (n - 1)) !== 0) {
+    await derive(password, Buffer.alloc(16), N, R, P);
+    return false;
+  }
   const salt = Buffer.from(parts[4]!, 'base64');
   const want = Buffer.from(parts[5]!, 'base64');
   const got = await derive(password, salt, n, r, p);
   return got.length === want.length && timingSafeEqual(got, want);
+}
+
+/** True when a stored hash should be rewritten at the current cost. */
+export function passwordNeedsRehash(stored: string | null | undefined): boolean {
+  const parts = (stored ?? '').split('$');
+  if (parts.length !== 6 || parts[0] !== 'scrypt') return false;
+  return Number(parts[1]) !== N || Number(parts[2]) !== R || Number(parts[3]) !== P;
 }
 
 const WEAK = new Set([

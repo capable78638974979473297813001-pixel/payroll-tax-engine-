@@ -386,7 +386,7 @@ function step1() {
   const freq = FREQS.map(([v, name, n]) => `<option value="${v}"${model.payFrequency === v ? ' selected' : ''}>${esc(name)} · ${n} per year</option>`).join('');
   const workers = WORKERS.map(([v, desc]) => `<option value="${v}"${model.employmentCategory === v ? ' selected' : ''}>${esc(v === 'standard' ? 'Standard' : v.replace(/_/g, ' '))}</option>`).join('');
   const desc = (WORKERS.find((w) => w[0] === model.employmentCategory) || WORKERS[0])[1];
-  return `<p class="eyebrow">Step 1 of 8</p><h1>Employee and addresses</h1><p class="sub">Who is being paid, and where they live and work.</p>
+  return `<p class="eyebrow">Step 1 of 8</p><h2 class="step-title">Employee and addresses</h2><p class="sub">Who is being paid, and where they live and work.</p>
     ${bannerHtml()}${residentNote()}
     <div class="grid g2">
       ${wrap('checkDate', 'Check date', `<input id="f-date" class="inp" type="date" data-bind="str:checkDate" value="${esc(model.checkDate)}">`)}
@@ -407,7 +407,7 @@ function step1() {
 function step2() {
   const place = model.workAddress || stateLabel(model.workCode) || 'Primary location';
   const day = (bind, path, label) => wrap(path, label, `<input class="inp" inputmode="numeric" data-bind="str:${bind}" value="${esc(model[bind])}">`, 'A whole number from 0 to 366.');
-  return `<p class="eyebrow">Step 2 of 8</p><h1>Work locations</h1><p class="sub">One work state per paycheck.</p>${bannerHtml()}
+  return `<p class="eyebrow">Step 2 of 8</p><h2 class="step-title">Work locations</h2><p class="sub">One work state per paycheck.</p>${bannerHtml()}
     <div class="loc"><div><b>${esc(place)}</b><div class="hint">${esc(stateLabel(model.workCode))}</div></div><span class="pct">100% of wages</span></div>
     <div class="f" data-path="workState.certificate.workCityIsPrincipalWorkplace"><label class="chk"><input class="tick" type="checkbox" data-bind="bool:principalWorkplace"${model.principalWorkplace ? ' checked' : ''}><span><span class="cl">This is the principal workplace</span><span class="hint">Sent only when this is off.</span><span class="path">workState.certificate.workCityIsPrincipalWorkplace</span></span></label></div>
     <div class="nsb"><div class="nsb-h"><b>Split across locations</b> <span class="tag tag-ns">Not supported yet</span> <span class="tag tag-ip">In progress</span></div>
@@ -425,7 +425,7 @@ function step3() {
   const mfs = `<div class="chk"><input class="tick" type="checkbox" data-bind="mfs:1"${model.filingStatus === 'married_separate' ? ' checked' : ''}><span>Married filing separately</span></div>`;
   const creditKids = model.depChildren;
   const creditOther = model.depOther;
-  return `<p class="eyebrow">Step 3 of 8</p><h1>Federal W-4</h1><p class="sub">The current form. Counts fill the credit. Only the credit is sent.</p>${bannerHtml()}
+  return `<p class="eyebrow">Step 3 of 8</p><h2 class="step-title">Federal W-4</h2><p class="sub">The current form. Counts fill the credit. Only the credit is sent.</p>${bannerHtml()}
     <div class="seg"><button type="button" class="on">2020 or later</button><button type="button" disabled data-unsupported>Before 2020 <span class="tag tag-ns">Not supported yet</span></button></div>
     <p class="hint">Pre-2020 forms with allowances aren't supported yet. Ask the employee for a current W-4.</p>
     <div class="f${errClass('federalW4.filingStatus')}" data-path="federalW4.filingStatus"><div class="lab"><label>Filing status</label></div>
@@ -463,7 +463,7 @@ function step4() {
       <label class="chk${model._reciprocal ? ' is-disabled' : ''}"><input class="tick" type="checkbox" data-bind="bool:nexus"${model.nexus ? ' checked' : ''}${holdDis}><span><span class="cl">Nexus</span><span class="hint">The employer is registered in ${esc(home)}, so it has to withhold there.</span><span class="path">residenceStateWithholding.nexus</span></span></label>
       <label class="chk${model._reciprocal ? ' is-disabled' : ''}"><input class="tick" type="checkbox" data-bind="bool:voluntaryWh"${model.voluntaryWh ? ' checked' : ''}${holdDis}><span><span class="cl">Voluntary withholding</span><span class="hint">No nexus, but the employer withholds ${esc(home)} tax as a courtesy.</span><span class="path">residenceStateWithholding.voluntary</span></span></label>
     </div>` : '';
-  return `<p class="eyebrow">Step 4 of 8</p><h1>State and local</h1><p class="sub">Certificate choices for the work state, and for home when it differs.</p>${bannerHtml()}${residentNote()}
+  return `<p class="eyebrow">Step 4 of 8</p><h2 class="step-title">State and local</h2><p class="sub">Certificate choices for the work state, and for home when it differs.</p>${bannerHtml()}${residentNote()}
     ${wrap('workState.code', 'Work state', `<select class="inp" data-bind="str:workCode">${stateOptions(model.workCode)}</select>`)}
     <h2>${esc(stateLabel(model.workCode))} certificate</h2>
     ${certBlock('work', model.workCode)}
@@ -504,7 +504,7 @@ function step5() {
     : `<button type="button" data-action="earn-pick" data-id="${item.id}">${esc(item.label)}</button>`).join('');
   const prior = model.priorWages == null ? '' : centsToDollars(model.priorWages);
   const priorTax = model.priorTax == null ? '' : centsToDollars(model.priorTax);
-  return `<p class="eyebrow">Step 5 of 8</p><h1>Earnings</h1><p class="sub">At least one line with an amount.</p>${bannerHtml()}
+  return `<p class="eyebrow">Step 5 of 8</p><h2 class="step-title">Earnings</h2><p class="sub">At least one line with an amount.</p>${bannerHtml()}
     <div class="f${errClass('earnings')}" data-path="earnings">${fieldError('earnings')}
       <div class="tbl ed"><div class="tr th"><span>Code</span><span>Type</span><span>Amount</span><span></span></div>${rows}</div>
       <div class="addrow"><button type="button" class="btn sec" data-action="add-earn">+ Add earning</button><div class="menu" id="earnMenu" hidden>${menu}</div></div>
@@ -558,7 +558,7 @@ function step6() {
     extraBits.push(wrap('ytd.tier2Compensation', 'Tier II compensation, year to date', moneyInput('ytdcents:tier2Compensation', model.ytdExtra.tier2Compensation == null ? null : model.ytdExtra.tier2Compensation, true)));
     extraBits.push(wrap('ytd.railroadMonthlyCompensation', 'Railroad unemployment compensation this month', moneyInput('ytdcents:railroadMonthlyCompensation', model.ytdExtra.railroadMonthlyCompensation == null ? null : model.ytdExtra.railroadMonthlyCompensation, true)));
   }
-  return `<p class="eyebrow">Step 6 of 8</p><h1>Deductions and year to date</h1>${bannerHtml()}
+  return `<p class="eyebrow">Step 6 of 8</p><h2 class="step-title">Deductions and year to date</h2>${bannerHtml()}
     <p class="hint">Each type lowers different taxes. 401(k) skips income tax but not Social Security. Section 125 skips both.</p>
     <div class="tbl ed"><div class="tr th"><span>Code</span><span>Type</span><span>Amount</span><span></span></div>${rows || ''}</div>
     <button type="button" class="btn sec" data-action="add-ded">+ Add deduction</button>
@@ -620,7 +620,7 @@ function step7() {
   const garnRows = garnOn ? model.garnishments.map((g, i) => garnRow(g, i)).join('') : '<p class="hint">Off. Nothing is sent until you add an order.</p><button type="button" class="btn sec" data-action="garn-on">Add a garnishment</button>';
   const mwOn = model.minimumWage && typeof model.minimumWage === 'object';
   const mw = mwOn ? minWageFields() : '<p class="hint">Off. Nothing is sent until you turn this on.</p><button type="button" class="btn sec" data-action="mw-on">Check an hourly rate</button>';
-  return `<p class="eyebrow">Step 7 of 8</p><h1>Employer</h1>${bannerHtml()}
+  return `<p class="eyebrow">Step 7 of 8</p><h2 class="step-title">Employer</h2>${bannerHtml()}
     ${wrap(`employer.stateUnemploymentRate.${model.workCode || 'ST'}`, `${st} unemployment rate`, pctInput('pct:suiRate', model.suiRate), 'Blank uses the new-employer rate. From 0 to 20, with three decimals.')}
     <div class="f is-disabled"><div class="lab"><label>FUTA rate</label> <span class="tag tag-ns">Not supported yet</span></div>
       <div class="money pct"><input class="inp" disabled data-unsupported value="0.6"><em>%</em></div>
@@ -684,7 +684,7 @@ function oneLine(n) {
 function step8() {
   const rows = STEPS.filter((s) => s.n < 8).map((s) => `<div class="rv"><div><b>${esc(s.name)}</b><p>${esc(oneLine(s.n))}</p></div><button type="button" class="lnk" data-action="edit" data-step="${s.n}">Edit</button></div>`).join('');
   const localGap = !LOCAL[model.workCode] ? stateLabel(model.workCode) : '';
-  return `<p class="eyebrow">Step 8 of 8</p><h1>Review and run</h1><p class="sub">Check the request, then run it against the engine.</p>${banner ? bannerHtml() : keyGateHtml()}
+  return `<p class="eyebrow">Step 8 of 8</p><h2 class="step-title">Review and run</h2><p class="sub">Check the request, then run it against the engine.</p>${banner ? bannerHtml() : keyGateHtml()}
     <div class="rev">${rows}</div>
     <div class="note note-info"><b>Not included.</b> Split work locations, pre-2020 W-4 allowances, tips, and an employer FUTA rate. Unsupported items are left off the request.${localGap ? ' ' + esc(`Local tax for ${localGap} is in progress.`) : ''}</div>`;
 }
@@ -757,7 +757,7 @@ function resultsView() {
     body = `<div class="code"><div class="code-h"><span>Response</span><button type="button" class="btn sec" data-action="copy" data-copy="res">Copy</button></div><pre>${hi(res)}</pre></div>`;
   }
   const cards = [['Gross pay', r.grossPay], ['Employee taxes', r.employeeTaxTotal], ['Employer taxes', r.employerTaxTotal], ['Net pay', r.netPay]];
-  return `${bannerHtml()}<p class="eyebrow">Result</p><h1>${esc(exampleTitle || 'Your paycheck')}</h1><p class="sub">${esc(sub)}</p>
+  return `${bannerHtml()}<p class="eyebrow">Result</p><h2 class="step-title">${esc(exampleTitle || 'Your paycheck')}</h2><p class="sub">${esc(sub)}</p>
     <div class="cards">${cards.map(([n, v], i) => `<div class="card${i === 3 ? ' netc' : ''}"><span>${n}</span><b>${formatMoney(v || 0)}</b></div>`).join('')}</div>
     <div class="tabs">${tab('taxes', 'Taxes')}${tab('req', 'Request JSON')}${tab('res', 'Response JSON')}</div>
     ${body}

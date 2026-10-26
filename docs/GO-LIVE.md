@@ -209,6 +209,23 @@ the server uses the request host (`x-forwarded-proto` and host on Render) and
 refuses localhost instead of creating a Checkout session. An `https` value
 also marks the console's session cookie `Secure`.
 
+**Canonical host is the apex.** `https://omniatax.io` is the canonical origin
+for every public page, the sitemap, and Open Graph URLs. Keep `www.omniatax.io`
+on the same Render service (the Blueprint already lists both domains). With
+`TRUST_PROXY=1`, a request whose host is `www.omniatax.io`, or whose host is
+`omniatax.io` and `X-Forwarded-Proto` is `http`, is answered `301` to
+`https://omniatax.io` plus the original path and query. Health checks
+(`/healthz`, `/api/health`, `/v1/health`) are not redirected. HSTS is sent
+only on those two hosts, so a local browser is not pinned to https.
+
+**Search Console.** After the domain is verified, copy the HTML-tag token
+(only the `content` value) into `GOOGLE_SITE_VERIFICATION` on the Render
+service. `render.yaml` lists the key with `sync: false`, so it stays out of
+git. The site prints `<meta name="google-site-verification" content="…">`
+when the value matches `[A-Za-z0-9_-]{8,128}`. Leave it unset and the tag
+is omitted. Submit `https://omniatax.io/sitemap.xml` in Search Console once
+the tag is live.
+
 Start it: `npm run site` (keep it running under a process manager / systemd).
 
 **Instances and the store.** The store in `SITE_DB_DIR` is a JSON file: every
