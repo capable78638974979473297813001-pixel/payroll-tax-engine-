@@ -1,28 +1,16 @@
 {
- "date": "2026-10-25",
+ "date": "2026-10-26",
  "fixed": [],
  "verified": [
   {
    "file": "",
-   "name": "Indiana Departmental Notice #1 (county rates)",
-   "why_not_automatic": "could not read the official file to compare with the engine's data (URLError: <urlopen error [Errno 111] Connection refused>)",
-   "edits": []
-  },
-  {
-   "file": "",
    "name": "Whitesville",
-   "why_not_automatic": "the Secretary of State lists this district (entered 2026-10-06; rate '') but KY-occupational-2026.json does not",
-   "edits": []
-  },
-  {
-   "file": "",
-   "name": "Chester",
-   "why_not_automatic": "the list shows a $2 per week user fee in Chester, which the data does not have",
+   "why_not_automatic": "the Secretary of State's record changed 2026-10-06, after the data was scraped on 2026-08-13 (rate ''); re-read the ordinance",
    "edits": []
   }
  ],
  "possible": [],
- "informational_changes": 6,
+ "informational_changes": 23,
  "blind_spots": [
   {
    "jurisdiction": "AL",
@@ -67,7 +55,8 @@
    "why": "HTTP 403: the site refuses automated requests; a real browser was refused too",
    "never_read": true,
    "feeds": [
-    "data/minimum-wage/states/AR-2026.json"
+    "data/minimum-wage/states/AR-2026.json",
+    "data/minimum-wage/states/AR-2027.json"
    ]
   },
   {
@@ -122,7 +111,8 @@
    "why": "HTTP 403: the site refuses automated requests; a real browser was refused too",
    "never_read": true,
    "feeds": [
-    "data/minimum-wage/states/DC-2026.json"
+    "data/minimum-wage/states/DC-2026.json",
+    "data/minimum-wage/states/DC-2027.json"
    ]
   },
   {
@@ -250,7 +240,8 @@
    "why": "HTTP 403: the site refuses automated requests; a real browser was refused too",
    "never_read": true,
    "feeds": [
-    "data/minimum-wage/local/NM-local-2026.json"
+    "data/minimum-wage/local/NM-local-2026.json",
+    "data/minimum-wage/local/NM-local-2027.json"
    ]
   },
   {
@@ -260,7 +251,8 @@
    "why": "needs a free API key: add repository secret NYSENATE_API_KEY; a real browser was refused too",
    "never_read": true,
    "feeds": [
-    "data/minimum-wage/states/NY-2026.json"
+    "data/minimum-wage/states/NY-2026.json",
+    "data/minimum-wage/states/NY-2027.json"
    ]
   },
   {
@@ -270,7 +262,8 @@
    "why": "needs a free API key: add repository secret NYSENATE_API_KEY; a real browser was refused too",
    "never_read": true,
    "feeds": [
-    "data/minimum-wage/states/NY-2026.json"
+    "data/minimum-wage/states/NY-2026.json",
+    "data/minimum-wage/states/NY-2027.json"
    ]
   },
   {
@@ -328,15 +321,13 @@
    ]
   },
   {
-   "jurisdiction": "AL",
-   "title": "City of Fairfield -- Ordinance 1019, Occupational Tax",
-   "url": "https://cityoffairfieldal.org/wp-content/uploads/2025/02/Ordinance-1019-Occupational-Tax_rotated.pdf",
-   "why": "HTTP 429: the site refuses automated requests; a real browser was refused too",
-   "never_read": false,
+   "jurisdiction": "US",
+   "title": "Federal Register -- Minimum Wage for Federal Contracts Covered by Executive Order 13658: Notice of Rate Change in Effect",
+   "url": "https://www.federalregister.gov/documents/2026/10/08/2026-20646/minimum-wage-for-federal-contracts-covered-by-executive-order-13658-notice-of-rate-change-in-effect",
+   "why": "redirected to a bot check (https://unblock.federalregister.gov/); a real browser was refused too",
+   "never_read": true,
    "feeds": [
-    "data/local/AL-municipalities-2025.json",
-    "data/local/AL-municipalities-2026.json",
-    "data/local/AL-municipalities-2027.json"
+    "data/minimum-wage/federal-2027.json"
    ]
   },
   {
@@ -352,15 +343,63 @@
    ]
   },
   {
-   "jurisdiction": "IN",
-   "title": "WH-4, State Form 48845",
-   "url": "https://www.in.gov/dor/tax-forms/withholding-tax-forms/",
-   "why": "URLError: <urlopen error [Errno 111] Connection refused>",
+   "jurisdiction": "KY",
+   "title": "City of Middlesboro Code of Ordinances, Ch. 110 (levy section)",
+   "url": "https://codelibrary.amlegal.com/codes/middlesboroky/latest/middlesboro_ky/0-0-0-5065",
+   "why": "read with a browser last time; a real browser was refused too",
    "never_read": false,
    "feeds": [
-    "data/states/IN-2025.json",
-    "data/states/IN-2026.json",
-    "data/states/IN-2027.json"
+    "data/local/KY-occupational-2025.json",
+    "data/local/KY-occupational-2026.json",
+    "data/local/KY-occupational-2027.json"
+   ]
+  },
+  {
+   "jurisdiction": "KY",
+   "title": "City of Middletown Code of Ordinances Sec. 114.23 (Ord. 07-13-2023-B, 10-12-2023-B)",
+   "url": "https://codelibrary.amlegal.com/codes/middletownky/latest/middletown_ky/0-0-0-10846",
+   "why": "read with a browser last time; a real browser was refused too",
+   "never_read": false,
+   "feeds": [
+    "data/local/KY-occupational-2025.json",
+    "data/local/KY-occupational-2026.json",
+    "data/local/KY-occupational-2027.json"
+   ]
+  },
+  {
+   "jurisdiction": "KY",
+   "title": "City of Nortonville Code of Ordinances \u00a7 110.03 OCCUPATIONAL LICENSE FEE PAYMENT REQUIRED",
+   "url": "https://codelibrary.amlegal.com/codes/nortonvilleky/latest/nortonville_ky/0-0-0-3279",
+   "why": "read with a browser last time; a real browser was refused too",
+   "never_read": false,
+   "feeds": [
+    "data/local/KY-occupational-2025.json",
+    "data/local/KY-occupational-2026.json",
+    "data/local/KY-occupational-2027.json"
+   ]
+  },
+  {
+   "jurisdiction": "KY",
+   "title": "City of Simpsonville Code of Ordinances Sec. 110.27",
+   "url": "https://codelibrary.amlegal.com/codes/simpsonville/latest/simpsonville_ky/0-0-0-6803",
+   "why": "read with a browser last time; a real browser was refused too",
+   "never_read": false,
+   "feeds": [
+    "data/local/KY-occupational-2025.json",
+    "data/local/KY-occupational-2026.json",
+    "data/local/KY-occupational-2027.json"
+   ]
+  },
+  {
+   "jurisdiction": "KY",
+   "title": "Louisville Metro Revenue Commission -- W-1KJC Instructions and Louisville Metro Code Sec. 110.02",
+   "url": "https://louisvilleky.gov/sites/default/files/2024-12/w-1kjc_instructions_2025.pdf",
+   "why": "HTTP 403: the site refuses automated requests; a real browser was refused too",
+   "never_read": false,
+   "feeds": [
+    "data/local/KY-occupational-2025.json",
+    "data/local/KY-occupational-2026.json",
+    "data/local/KY-occupational-2027.json"
    ]
   },
   {
@@ -383,6 +422,17 @@
    "feeds": [
     "data/garnishment/state-overrides-2026.json",
     "data/garnishment/state-overrides-2027.json"
+   ]
+  },
+  {
+   "jurisdiction": "NJ",
+   "title": "City of Newark Q1 2026 Payroll Tax Booklet",
+   "url": "https://www.newarknj.gov/DocumentCenter/View/2741/Payroll-Tax-Booklet-2026-PDF",
+   "why": "read with a browser last time; a real browser was refused too",
+   "never_read": false,
+   "feeds": [
+    "data/states/NJ-2026.json",
+    "data/states/NJ-2027.json"
    ]
   }
  ]
