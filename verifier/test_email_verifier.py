@@ -150,7 +150,12 @@ class ResendFailureTest(unittest.TestCase):
         class Handler(BaseHTTPRequestHandler):
             def do_POST(self) -> None:  # noqa: N802
                 self.rfile.read(int(self.headers.get("Content-Length", "0")))
-                body = json.dumps({"statusCode": 403, "message": "The omniatax.io domain is not verified."}).encode()
+                body = json.dumps({
+                    "statusCode": 403,
+                    "message": "The omniatax.io domain is not verified.",
+                    "token": "re_supersecretkey999",
+                    "note": "ref 123456",
+                }).encode()
                 self.send_response(403)
                 self.send_header("Content-Length", str(len(body)))
                 self.end_headers()
@@ -171,6 +176,11 @@ class ResendFailureTest(unittest.TestCase):
             text = log.getvalue()
             self.assertIn("403", text)
             self.assertIn("domain is not verified", text)
+            self.assertIn("[redacted]", text)
+            self.assertNotIn("re_supersecretkey999", text)
+            self.assertNotIn("re_supersecretkey999", json.dumps(result))
+            self.assertNotIn("123456", text)
+            self.assertNotIn("123456", result.get("error", ""))
             row = v._db.execute("SELECT code_hash FROM codes").fetchone()
             self.assertTrue(row)  # a code was minted, but is not in the log
             self.assertNotRegex(text, r"\b\d{6}\b")
@@ -228,6 +238,24 @@ class HttpTest(unittest.TestCase):
     def test_db_file_is_private(self) -> None:
         mode = Path(self.v._db.execute("PRAGMA database_list").fetchone()[2]).stat().st_mode & 0o777
         self.assertEqual(mode & 0o077, 0)
+
+
+class FromAndLogTest(unittest.TestCase):
+    def test_bare_resend_from_is_named(self) -> None:
+        self.assertEqual(ev.normalise_from("verify@omniatax.io"), "Omnia.tax <verify@omniatax.io>")
+        self.assertEqual(ev.normalise_from("  'verify@omniatax.io'  "), "Omnia.tax <verify@omniatax.io>")
+        self.assertEqual(
+            ev.normalise_from("Omnia.tax <verify@omniatax.io>"),
+            "Omnia.tax <verify@omniatax.io>",
+        )
+
+    def test_scrub_log_removes_keys_and_codes(self) -> None:
+        text = ev.scrub_log("fail re_AbCdEf123456 code 654321 Bearer secret\nnext")
+        self.assertNotIn("re_AbCdEf123456", text)
+        self.assertNotIn("654321", text)
+        self.assertNotIn("\n", text)
+        self.assertIn("[redacted]", text)
+        self.assertIn("[code]", text)
 
 
 if __name__ == "__main__":

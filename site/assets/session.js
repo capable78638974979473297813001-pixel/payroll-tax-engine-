@@ -1,3 +1,25 @@
+/* Copy the double-submit cookie onto state-changing fetches. The cookie is
+   not HttpOnly; the session cookie is. Install once so a second script
+   on the same page does not wrap fetch twice. */
+(function (w) {
+  if (w.__omniaCsrfFetch || typeof w.fetch !== 'function') return;
+  w.__omniaCsrfFetch = true;
+  var orig = w.fetch;
+  w.fetch = function (input, init) {
+    var opts = init ? Object.assign({}, init) : {};
+    var method = String(opts.method || (input && input.method) || 'GET').toUpperCase();
+    if (method !== 'GET' && method !== 'HEAD' && method !== 'OPTIONS') {
+      var match = document.cookie.match(/(?:^|; )omnia_csrf=([^;]*)/);
+      if (match) {
+        var headers = new Headers(opts.headers || undefined);
+        if (!headers.has('X-CSRF-Token')) headers.set('X-CSRF-Token', decodeURIComponent(match[1]));
+        opts.headers = headers;
+      }
+    }
+    return orig.call(this, input, opts);
+  };
+})(window);
+
 /* Display profile for this tab only. The session token is an HttpOnly cookie
    set by email verification and by password sign-in, so page script never
    stores it. The cookie lasts a year and is renewed while the account is in

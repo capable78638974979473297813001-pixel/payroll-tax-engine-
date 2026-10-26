@@ -71,6 +71,7 @@ MAX_BODY_BYTES = 4096
 MIN_SECRET_LEN = 32
 
 EMAIL_RE = re.compile(r"^[^\s@]+@[^\s@]+\.[^\s@]+$")
+# Resend keys look like re_<token>. A 6-digit run is a verification code.
 
 # The one message for every failed check. Do not specialise it.
 INVALID = "That code is incorrect or has expired. Request a new one if needed."
@@ -182,9 +183,11 @@ class Verifier:
             self._send(email, name, code, CODE_TTL_SECONDS // 60)
             sent = True
         except Exception as exc:  # delivery failure must not leak the code
-            reason = str(exc).replace("\n", " ")[:300] or type(exc).__name__
+            reason = scrub_log(str(exc)) or type(exc).__name__
             print(f"[verifier] mail delivery failed: {type(exc).__name__}: {reason}", file=sys.stderr)
-            sent = False
+            # `error` stays on this loopback service. The site logs it and does not
+            # forward it to the browser.
+            return {"ok": True, "sent": False, "cooldown": False, "error": reason}
         return {"ok": True, "sent": sent, "cooldown": False}
 
     def check(self, email_raw: object, code_raw: object) -> dict:
@@ -309,6 +312,29 @@ def dev_sender(email: str, name: str, code: str, minutes: int) -> None:
     print(f"[verifier dev] {email}: {code} (expires in {minutes} min)", file=sys.stderr)
 
 
+def scrub_log(text: str) -> str:
+    """A log line with API keys, bearer tokens, and 6-digit codes removed."""
+    text = re.sub(r"re_[A-Za-z0-9_-]+", "[redacted]", text)
+    text = re.sub(r"\b(?:sk|rk)_(?:test|live)_[A-Za-z0-9]+", "[redacted]", text)
+    text = re.sub(r"Bearer\s+\S+", "Bearer [redacted]", text, flags=re.I)
+    text = re.sub(r"\b\d{6}\b", "[code]", text)
+    return text.replace("\n", " ")[:300]
+
+
+# The name PR #144's tests and docs use.
+redact_mail_error = scrub_log
+
+
+def normalise_from(raw: str | None) -> str:
+    """RESEND_FROM=verify@omniatax.io becomes a named From address."""
+    value = (raw or "").strip().strip("'\"")
+    if not value:
+        return default_from()
+    if re.fullmatch(r"[^\s<>@]+@[^\s<>@]+\.[^\s<>@]+", value):
+        return f"Omnia.tax <{value}>"
+    return value
+
+
 def default_from() -> str:
     """The From address when RESEND_FROM is not set.
 
@@ -326,8 +352,9 @@ def default_from() -> str:
 
 
 def sender_from_env() -> Callable[[str, str, str, int], None]:
-    if os.environ.get("RESEND_API_KEY"):
-        return resend_sender(os.environ["RESEND_API_KEY"], os.environ.get("RESEND_FROM") or default_from())
+    api_key = os.environ.get("RESEND_API_KEY", "").strip()
+    if api_key:
+        return resend_sender(api_key, normalise_from(os.environ.get("RESEND_FROM")))
     if os.environ.get("SMTP_HOST"):
         sender = os.environ.get("SMTP_FROM")
         if not sender:

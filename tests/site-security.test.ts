@@ -132,9 +132,9 @@ describe('account security', () => {
     assert.doesNotMatch(home, /id="cGross"/);
     assert.doesNotMatch(home, /\$0\.09/);
 
-    // Static files revalidate, so a deploy is never hidden behind a stale cache.
+    // Static files cache for a day, then must revalidate. An ETag still answers 304.
     const css = await fetch(BASE + '/assets/site.css');
-    assert.equal(css.headers.get('cache-control'), 'no-cache');
+    assert.equal(css.headers.get('cache-control'), 'public, max-age=86400, must-revalidate');
     const etag = css.headers.get('etag')!;
     assert.ok(etag);
     assert.equal((await fetch(BASE + '/assets/site.css', { headers: { 'If-None-Match': etag } })).status, 304);

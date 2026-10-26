@@ -1,24 +1,14 @@
 {
-  "date": "2026-10-25",
+  "date": "2026-10-26",
   "mode": "check only",
   "applied": [],
   "would_apply": [],
   "left_for_a_person": [],
   "disagreements_for_a_person": [
     {
-      "name": "Indiana Departmental Notice #1 (county rates)",
-      "detail": "could not read the official file to compare with the engine's data (URLError: <urlopen error [Errno 111] Connection refused>)",
-      "jurisdiction": "IN"
-    },
-    {
       "name": "Whitesville",
-      "detail": "the Secretary of State lists this district (entered 2026-10-06; rate '') but KY-occupational-2026.json does not",
+      "detail": "the Secretary of State's record changed 2026-10-06, after the data was scraped on 2026-08-13 (rate ''); re-read the ordinance",
       "jurisdiction": "KY"
-    },
-    {
-      "name": "Chester",
-      "detail": "the list shows a $2 per week user fee in Chester, which the data does not have",
-      "jurisdiction": "WV"
     }
   ]
 }

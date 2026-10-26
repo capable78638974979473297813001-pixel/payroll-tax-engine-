@@ -60,7 +60,7 @@ test('customer-facing copy has no sandbox or old price strings', () => {
   assert.deepEqual(hits, []);
   assert.match(current, /\$0\.08/);
   assert.match(current, /14-day free trial|Free for 14 days/i);
-  assert.equal(TERMS_VERSION, '2026-10-23.1');
+  assert.equal(TERMS_VERSION, '2026-10-25.1');
 });
 
 test('the previous terms version is still the old text', () => {

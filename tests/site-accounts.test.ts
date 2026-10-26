@@ -115,7 +115,7 @@ describe('accounts you can log back into', { skip: !havePython }, () => {
     const stored = readFileSync(join(dir, 'db.json'), 'utf8');
     assert.ok(!stored.includes(PW), 'plaintext password in the store');
     assert.ok(!stored.includes(lastCode()), 'the emailed code in the store');
-    assert.match(stored, /scrypt\$16384\$8\$1\$/);
+    assert.match(stored, /scrypt\$131072\$8\$1\$/);
   });
 
   test('log back in with the password; wrong and unknown look the same', async () => {

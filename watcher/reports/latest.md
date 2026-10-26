@@ -1,26 +1,24 @@
-# Source watch - 2026-10-25
+# Source watch - 2026-10-26
 
-**4 sources changed**
+**22 sources changed**
 
-**3 items need attention: see "Needs attention" below.** A run with no changes is not an all-clear while this list is not empty.
+**1 item need attention: see "Needs attention" below.** A run with no changes is not an all-clear while this list is not empty.
 
 | Changed | Minor | Unchanged | New | Unstable | Unreachable | Gone (404) | Blocks bots | Total |
 |---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| 4 | 2 | 1055 | 5 | 0 | 4 | 6 | 29 | 1105 |
+| 22 | 1 | 1135 | 13 | 0 | 3 | 5 | 36 | 1215 |
 
-_Run took 2493 s. A change is only reported after a second fetch confirms it._
+_Run took 2469 s. A change is only reported after a second fetch confirms it._
 
-**Coverage: 1066 of 1105 sources were read this run; 39 could not be checked**, and 33 of those have never been read successfully, so nothing about them is being watched.
-474 of those are documents linked from pages. 6 other linked documents could not be read (a dead link, or a file the site won't serve) and are not counted above.
-**556 linked documents were not read this run** (the time budget ran out) and will be read first thing in the next run; until then they are not being watched.
+**Coverage: 1171 of 1215 sources were read this run; 44 could not be checked**, and 34 of those have never been read successfully, so nothing about them is being watched.
+570 of those are documents linked from pages. 6 other linked documents could not be read (a dead link, or a file the site won't serve) and are not counted above.
+**469 linked documents were not read this run** (the time budget ran out) and will be read first thing in the next run; until then they are not being watched.
 
-## Needs attention (3)
+## Needs attention (1)
 
 | What | Detail |
 |---|---|
-| IN Indiana Departmental Notice #1 (county rates) | could not read the official file to compare with the engine's data (URLError: <urlopen error [Errno 111] Connection refused>) |
-| KY Whitesville | the Secretary of State lists this district (entered 2026-10-06; rate '') but KY-occupational-2026.json does not |
-| WV Chester | the list shows a $2 per week user fee in Chester, which the data does not have |
+| KY Whitesville | the Secretary of State's record changed 2026-10-06, after the data was scraped on 2026-08-13 (rate ''); re-read the ordinance |
 
 ## Data checks against official files: for information (14)
 
@@ -49,134 +47,418 @@ No change needed, but worth knowing: a variance the data file already explains, 
 
 ## Changed
 
-### CO - Commissioners’ Agenda (linked from Boulder County -- Local Minimum Wage)
-
-<https://assets.bouldercounty.gov/wp-content/uploads/2017/08/bocc-advance-agenda.pdf>  
-79 lines added, 86 removed
-  
-Used by: `data/minimum-wage/local/CO-local-2026.json`
-
-
-<details><summary>What changed</summary>
-
-```diff
--October 19 - 30, 2026
-+October 26 - November 6, 2026
--Monday, October 19
--Please Note: The IDD Advisory Council Meeting scheduled for Monday, Oct. 19 has been canceled.
--Administrative Meeting
--Administrative Meeting
--Commissioners attend joint meeting hosted by Larimer County Board of Commissioners
--Location - Larimer County Loveland Campus, Big Thompson River Conference Room, 200
--Peridot Avenue, Loveland
--Please note: No public testimony will be taken during this meeting.
--Tuesday, October 20
--Business Meeting and Head Start Division Public Meeting
--Item No. 1: Business Meeting
--Location - Hybrid: Hearing Room and Zoom Webinar
--More information on virtual business meetings can be found in the Open Meeting Portal
--agenda packet.
--Item No. 2: Public Meeting on Head Start Division Monthly Report to the Commissioners
--Staff Contact: Akane Ogren
--Location - Hybrid: Hearing Room and Zoom Webinar
--Community Services Department: Monthly report from the Head Start Division.
--Action Requested: None - information only
--No public testimony will be taken.
--Virtual Attendee Link for Commissioners' October 20 Morning Session
--Call-in information: 1-833-568-8864, Webinar ID: 165 720 9251
--Community Action Programs Administering Board Meeting
--Location - Virtual using Microsoft Teams
--Wednesday, October 21
--Administrative Meeting
--Administrative Meeting
--Commissioners attend meeting hosted by Colorado Counties, Inc.
--Executive Session
--Planning Commission Meeting
--Location - Hybrid: Hearing Room and Zoom Webinar
--The agenda and information regarding how to participate in this hybrid meeting will be available
--on the Planning Commission webpage before the meeting. There may be an opportunity to
--provide public comments, both remotely and in person, depending on the specific docket (see the
--agenda for confirmation). Comments regarding items where public comment will be taken may
--be mailed to the Community Planning and Permitting Department (P.O. Box 471, Boulder, CO
--80306) or emailed to planner@bouldercounty.gov. Please include the docket number of the
--subject item in your communication. Call 303-441-3930 or email planner@bouldercounty.gov
-... 125 more changed lines
-```
-</details>
-
 ### IN - ACH Debit Block Information (linked from Indiana DOR withholding)
 
 <https://intime.dor.in.gov/eServices/WebFiles/ACHDebitBlockGuide.pdf>  
-5 lines added, 17 removed
+17 lines added, 5 removed
 
 
 <details><summary>What changed</summary>
 
 ```diff
--DOR Identification Number to be used
--by Taxpayers with ACH Debit Blocks
--Learn how to protect your electronic payments made to
--DOR by creating an ACH debit block through your bank.
--An ACH debit block protects your bank account(s) from
--unauthorized electronic charges.
--To set up debit block protection for electronic payments made
--to DOR,
-- Provide your bank with DOR's company identification
--number of 9207000TAX.
--If you don't provide your bank with DOR's company
--identification number, your bank will reject the payment.
--In this case, you may receive a bill for the amount due,
--including any applicable penalty and interest. If you are unsure
--about whether you have a debit block on your bank account,
--please contact your bank.
--For questions contact (317) 232-5500.
-+INTIME Unavailable
-+INTIME is Currently Unavailable
-+INTIME is currently under scheduled maintenance and will be back online very soon. We apologize for any inconvenience.
-+Return to the DOR Homepage
-+If you have questions, please call (317) 232-2240 for assistance.
+-INTIME Unavailable
+-INTIME is Currently Unavailable
+-INTIME is currently under scheduled maintenance and will be back online very soon. We apologize for any inconvenience.
+-Return to the DOR Homepage
+-If you have questions, please call (317) 232-2240 for assistance.
++DOR Identification Number to be used
++by Taxpayers with ACH Debit Blocks
++Learn how to protect your electronic payments made to
++DOR by creating an ACH debit block through your bank.
++An ACH debit block protects your bank account(s) from
++unauthorized electronic charges.
++To set up debit block protection for electronic payments made
++to DOR,
++ Provide your bank with DOR's company identification
++number of 9207000TAX.
++If you don't provide your bank with DOR's company
++identification number, your bank will reject the payment.
++In this case, you may receive a bill for the amount due,
++including any applicable penalty and interest. If you are unsure
++about whether you have a debit block on your bank account,
++please contact your bank.
++For questions contact (317) 232-5500.
 ```
 </details>
 
-### IN - Indiana DOR withholding
+### OH - https://www.ritaohio.com/municipalities
 
-<https://www.in.gov/dor/i-am-a/business-corp/withholding/>  
-1 links added, 1 removed
+<https://www.ritaohio.com/municipalities>  
+1 lines added, 1 removed
+  
+Used by: `data/local/OH-municipalities-2025.json`, `data/local/OH-municipalities-2026.json`, `data/local/OH-municipalities-2027.json`
 
-- New link: [IRIS 2026 Tax Year Guide](https://www.in.gov/dor/files/iris-2026-tax-year-guide.pdf)
-- Removed link: [IRIS 2026 Tax Year Guide](https://www.in.gov/dor/files/IRIS-2026-Tax-Year-Guide.pdf)
+
+<details><summary>What changed</summary>
+
+```diff
+-Routine System Maintenance October 24
++Credit Card Processor Maintenance October 29
+```
+</details>
+
+### OH - RITA (Regional Income Tax Agency): news and updates (municipal rate and law changes)
+
+<https://www.ritaohio.com/Resources/News>  
+3 lines added, 3 removed; 1 links added, 1 removed
+
+- New link: [October 29](https://www.ritaohio.com/Resources/News/ViewNews?gid=5a631cf5-960a-4dd5-a1d3-e48205f7b184)
+- Removed link: [Estimated Tax Payments Due September 15](https://www.ritaohio.com/Resources/News/ViewNews?gid=204f5f9e-5db0-4abc-bd09-664a4a041bc4)
+
+<details><summary>What changed</summary>
+
+```diff
+-Routine System Maintenance October 24
++Credit Card Processor Maintenance October 29
++Credit Card Processor Maintenance
++Thursday, October 29
+-Estimated Tax Payments Due September 15
+-Deadline applies to individuals and businesses
+```
+</details>
+
+### OH - RITA -- Tax Rates Table, 2025 new municipalities and tax rate changes
+
+<https://www.ritaohio.com/TaxRatesTable>  
+1 lines added, 1 removed
+  
+Used by: `data/local/OH-jedd-jedz-2025.json`, `data/local/OH-jedd-jedz-2026.json`, `data/local/OH-jedd-jedz-2027.json`
+
+
+<details><summary>What changed</summary>
+
+```diff
+-Routine System Maintenance October 24
++Credit Card Processor Maintenance October 29
+```
+</details>
+
+### OH - RITA member page (the JEDD's administering agency) -- Recent Tax and Credit History
+
+<https://www.ritaohio.com/Municipalities/Home/MemberPage?id=047>  
+1 lines added, 1 removed
+  
+Used by: `data/local/OH-jedd-jedz-2025.json`, `data/local/OH-jedd-jedz-2026.json`, `data/local/OH-jedd-jedz-2027.json`
+
+
+<details><summary>What changed</summary>
+
+```diff
+-Routine System Maintenance October 24
++Credit Card Processor Maintenance October 29
+```
+</details>
+
+### OH - RITA member page (the JEDD's administering agency) -- Recent Tax and Credit History
+
+<https://www.ritaohio.com/Municipalities/Home/MemberPage?id=247>  
+1 lines added, 1 removed
+  
+Used by: `data/local/OH-jedd-jedz-2025.json`, `data/local/OH-jedd-jedz-2026.json`, `data/local/OH-jedd-jedz-2027.json`
+
+
+<details><summary>What changed</summary>
+
+```diff
+-Routine System Maintenance October 24
++Credit Card Processor Maintenance October 29
+```
+</details>
+
+### OH - RITA member page -- Avon (rate history)
+
+<https://www.ritaohio.com/municipalities/Home/MemberPage?id=020>  
+1 lines added, 1 removed
+  
+Used by: `data/local/OH-municipalities-2025.json`
+
+
+<details><summary>What changed</summary>
+
+```diff
+-Routine System Maintenance October 24
++Credit Card Processor Maintenance October 29
+```
+</details>
+
+### OH - RITA member page -- Circleville (rate history)
+
+<https://www.ritaohio.com/municipalities/Home/MemberPage?id=190>  
+1 lines added, 1 removed
+  
+Used by: `data/local/OH-municipalities-2025.json`
+
+
+<details><summary>What changed</summary>
+
+```diff
+-Routine System Maintenance October 24
++Credit Card Processor Maintenance October 29
+```
+</details>
+
+### OH - RITA member page -- DeGraff (rate history)
+
+<https://www.ritaohio.com/municipalities/Home/MemberPage?id=249>  
+1 lines added, 1 removed
+  
+Used by: `data/local/OH-municipalities-2025.json`
+
+
+<details><summary>What changed</summary>
+
+```diff
+-Routine System Maintenance October 24
++Credit Card Processor Maintenance October 29
+```
+</details>
+
+### OH - RITA member page -- Germantown (rate history)
+
+<https://www.ritaohio.com/municipalities/Home/MemberPage?id=353>  
+1 lines added, 1 removed
+  
+Used by: `data/local/OH-municipalities-2025.json`, `data/local/OH-municipalities-2026.json`, `data/local/OH-municipalities-2027.json`
+
+
+<details><summary>What changed</summary>
+
+```diff
+-Routine System Maintenance October 24
++Credit Card Processor Maintenance October 29
+```
+</details>
+
+### OH - RITA member page -- Hanging Rock (rate history)
+
+<https://www.ritaohio.com/municipalities/Home/MemberPage?id=616>  
+1 lines added, 1 removed
+  
+Used by: `data/local/OH-municipalities-2025.json`
+
+
+<details><summary>What changed</summary>
+
+```diff
+-Routine System Maintenance October 24
++Credit Card Processor Maintenance October 29
+```
+</details>
+
+### OH - RITA member page -- Lockbourne (rate history)
+
+<https://www.ritaohio.com/municipalities/Home/MemberPage?id=427>  
+1 lines added, 1 removed
+  
+Used by: `data/local/OH-municipalities-2025.json`
+
+
+<details><summary>What changed</summary>
+
+```diff
+-Routine System Maintenance October 24
++Credit Card Processor Maintenance October 29
+```
+</details>
+
+### OH - RITA member page -- Milford JEDD VIII
+
+<https://www.ritaohio.com/municipalities/Home/MemberPage?id=869>  
+1 lines added, 1 removed
+  
+Used by: `data/local/OH-jedd-jedz-2025.json`, `data/local/OH-jedd-jedz-2026.json`, `data/local/OH-jedd-jedz-2027.json`
+
+
+<details><summary>What changed</summary>
+
+```diff
+-Routine System Maintenance October 24
++Credit Card Processor Maintenance October 29
+```
+</details>
+
+### OH - RITA member page -- Millville (rate history)
+
+<https://www.ritaohio.com/municipalities/Home/MemberPage?id=691>  
+1 lines added, 1 removed
+  
+Used by: `data/local/OH-municipalities-2025.json`
+
+
+<details><summary>What changed</summary>
+
+```diff
+-Routine System Maintenance October 24
++Credit Card Processor Maintenance October 29
+```
+</details>
+
+### OH - RITA member page -- North Canton (rate history)
+
+<https://www.ritaohio.com/municipalities/Home/MemberPage?id=546>  
+1 lines added, 1 removed
+  
+Used by: `data/local/OH-municipalities-2025.json`
+
+
+<details><summary>What changed</summary>
+
+```diff
+-Routine System Maintenance October 24
++Credit Card Processor Maintenance October 29
+```
+</details>
+
+### OH - RITA member page -- North Hampton (rate history)
+
+<https://www.ritaohio.com/municipalities/Home/MemberPage?id=695>  
+1 lines added, 1 removed
+  
+Used by: `data/local/OH-municipalities-2025.json`, `data/local/OH-municipalities-2026.json`, `data/local/OH-municipalities-2027.json`
+
+
+<details><summary>What changed</summary>
+
+```diff
+-Routine System Maintenance October 24
++Credit Card Processor Maintenance October 29
+```
+</details>
+
+### OH - RITA member page -- Oak Hill (rate history)
+
+<https://www.ritaohio.com/municipalities/Home/MemberPage?id=624>  
+1 lines added, 1 removed
+  
+Used by: `data/local/OH-municipalities-2025.json`
+
+
+<details><summary>What changed</summary>
+
+```diff
+-Routine System Maintenance October 24
++Credit Card Processor Maintenance October 29
+```
+</details>
+
+### OH - RITA member page -- Rio Grande (rate history)
+
+<https://www.ritaohio.com/municipalities/Home/MemberPage?id=588>  
+1 lines added, 1 removed
+  
+Used by: `data/local/OH-municipalities-2025.json`
+
+
+<details><summary>What changed</summary>
+
+```diff
+-Routine System Maintenance October 24
++Credit Card Processor Maintenance October 29
+```
+</details>
+
+### OH - RITA member page -- Stockport (rate history)
+
+<https://www.ritaohio.com/municipalities/Home/MemberPage?id=719>  
+1 lines added, 1 removed
+  
+Used by: `data/local/OH-municipalities-2025.json`, `data/local/OH-municipalities-2026.json`, `data/local/OH-municipalities-2027.json`
+
+
+<details><summary>What changed</summary>
+
+```diff
+-Routine System Maintenance October 24
++Credit Card Processor Maintenance October 29
+```
+</details>
+
+### OH - RITA: tax professionals news
+
+<https://www.ritaohio.com/TaxProfessionals/News>  
+1 lines added, 1 removed; 1 links added, 1 removed
+
+- New link: [October 29](https://www.ritaohio.com/Resources/News/ViewNews?gid=5a631cf5-960a-4dd5-a1d3-e48205f7b184)
+- Removed link: [October 24](https://www.ritaohio.com/Resources/News/ViewNews?gid=9c040fc4-37c8-4ca4-b331-0c8ee46ad509)
+
+<details><summary>What changed</summary>
+
+```diff
+-Routine System Maintenance October 24
++Credit Card Processor Maintenance October 29
+```
+</details>
 
 ### OR - Oregon Department of Revenue: news
 
 <https://www.oregon.gov/dor/news/Pages/default.aspx>  
-7 lines added, 7 removed; 2 links added, 0 removed
+18 lines added, 18 removed; 3 links added, 2 removed
 
-- Figures now present: none
-- Figures no longer present: $7
-- New link: [https://apps.oregon.gov/oregon-newsroom/OR/GOV/Posts/Post/governor-kotek-community-leaders-discuss-need-to-expand-affordable-childcare-and-preschool](https://apps.oregon.gov/oregon-newsroom/OR/GOV/Posts/Post/governor-kotek-community-leaders-discuss-need-to-expand-affordable-childcare-and-preschool)
-- New link: [October 24, 2026](https://apps.oregon.gov/oregon-newsroom/OR/Posts/Search?from=10%2F24%2F2026&to=10%2F24%2F2026)
+- New link: [Oregon State Fire Marshal](https://apps.oregon.gov/oregon-newsroom/OR/OSFM/Posts)
+- New link: [https://apps.oregon.gov/oregon-newsroom/OR/OSFM/Posts/Post/newport-fire](https://apps.oregon.gov/oregon-newsroom/OR/OSFM/Posts/Post/newport-fire)
+- New link: [October 25, 2026](https://apps.oregon.gov/oregon-newsroom/OR/Posts/Search?from=10%2F25%2F2026&to=10%2F25%2F2026)
+- Removed link: [Dept. of Revenue](https://apps.oregon.gov/oregon-newsroom/OR/DOR/Posts)
+- Removed link: [Taxpayer Advocate urges Oregonians to volunteer to help low-income families receive millions in unclaimed tax benefits](https://apps.oregon.gov/oregon-newsroom/OR/DOR/Posts/Post/Taxpayer-Advocate-urges-Oregonians-to-volunteer-to-help-low-income-families)
 
 <details><summary>What changed</summary>
 
 ```diff
-+Children & Family
-+October 24, 2026
-+Governor Kotek, Community Leaders Discuss Need to Expand Affordable Childcare and Preschool
-+Governor underscores urgent need for improved statewide access amid proposed federal changes
-+GOV
+-Social Services
+-October 23, 2026
+-Public notice and request for comment on ODDS Medicaid waiver updates
+-Oregon Department of Human Services
++Emergency
++October 25, 2026
++State fire marshal mobilizes hazmat team, firefighters to structure fire at seafood plant in Newport
++Oregon State Fire Marshal
++Social Services
++Oct 23
++Public notice and request for comment on ODDS Medicaid waiver updates
++Oregon Dept. of Human Services
++·
++Pr. Release
+-Oct 22
++·
+-·
+-Pr. Release
+-Taxes
+-·
+-Taxpayer Advocate urges Oregonians to volunteer to help low-income families receive millions in unclaimed tax benefits
+-Dept. of Revenue
+-(287)
++(288)
++Emergency
++October 25, 2026
++State fire marshal mobilizes hazmat team, firefighters to structure fire at seafood plant in Newport
++OSFM
 +·
 +Press Release
+-ODHS
 -·
 -Press Release
--Consumer Information
+-Social Services
 -October 23, 2026
--Treasury to Return $7 Million in Unclaimed Funds Directly to Oregonians
--Eligible residents to receive money through the 'Checks Without Claims' initiative in October
--OST
+-Public notice and request for comment on ODDS Medicaid waiver updates
 ```
 </details>
 
-## Minor changes: link lists and headlines only (2)
+### US - IRS draft tax forms: payroll forms only (W-4, W-4P/R, Pub 15/15-T, 940/941/944, W-2/W-3)
+
+<https://www.irs.gov/draft-tax-forms>  
+read with a headless browser; 1 lines added, 1 removed; 1 links added, 1 removed
+
+- New link: [Publication 15-A](https://www.irs.gov/pub/irs-dft/p15a--dft.pdf)
+- Removed link: [Publication 15](https://www.irs.gov/pub/irs-dft/p15--dft.pdf)
+
+<details><summary>What changed</summary>
+
+```diff
++Product Number Publication 15-A
+-Product Number Publication 15
+```
+</details>
+
+## Minor changes: link lists and headlines only (1)
 
 Recorded, but only the text of links to other pages changed (news boxes, menus).
 
@@ -187,34 +469,20 @@ Recorded, but only the text of links to other pages changed (news boxes, menus).
 <https://www.michigan.gov/leo/news/2025/12/08/michigans-minimum-wage-set-to-increase-on-jan-1-2026>  
 1 lines added, 1 removed (link lists / headlines only)
   
-Used by: `data/minimum-wage/states/MI-2026.json`
+Used by: `data/minimum-wage/states/MI-2026.json`, `data/minimum-wage/states/MI-2027.json`
 
 
 <details><summary>What changed</summary>
 
 ```diff
-+Operating Engineers Local 324 members gain expanded pathway to college credit through apprenticeships
--Operating Engineers Local 324 members gain expanded pathway to college credit through apprenticeships
-```
-</details>
-
-### MO - St. Louis: earnings tax department
-
-<https://www.stlouis-mo.gov/government/departments/collector/earnings-tax/index.cfm>  
-1 lines added, 1 removed (link lists / headlines only)
-
-
-<details><summary>What changed</summary>
-
-```diff
-+Employer Withholding and Payroll Expense Tax Information
--Employer Withholding and Payroll Expense Tax Information
++Get Ready for MiUI: New system brings modern unemployment experience for workers and employers
+-Michigan's manufacturing industry fuels career and economic growth
 ```
 </details>
 
 </details>
 
-## Never read successfully - no baseline, so changes here go unnoticed (33)
+## Never read successfully - no baseline, so changes here go unnoticed (34)
 
 Each of these has failed on every run so far. Replace the URL, or check the document by hand.
 
@@ -228,7 +496,7 @@ Each of these has failed on every run so far. Replace the URL, or check the docu
 | CO | [City of Aurora — Occupational Privilege Tax repeal](https://www.auroragov.org/business_services/taxes__licensing/occupational_privilege_tax) | HTTP 404 |
 | CO | [City of Greenwood Village occupational privilege tax](https://www.greenwoodvillage.com/206/Occupational-Privilege-Tax) | HTTP 404 |
 | CO | [Colorado DOR -- DR 1098 Colorado Withholding Worksheet for Employers](https://tax.colorado.gov/DR1098) | HTTP 403: the site refuses automated requests; a real browser was refused too |
-| CO | [Colorado Department of Revenue: news](https://tax.colorado.gov/news) | read with a headless browser; HTTP 404 (browser) |
+| CO | [Colorado Department of Revenue: news](https://tax.colorado.gov/news) | HTTP 403: the site refuses automated requests; a real browser was refused too |
 | CO | [Colorado wage withholding](https://tax.colorado.gov/withholding-tax) | HTTP 403: the site refuses automated requests; a real browser was refused too |
 | DC | [DC Department of Employment Services -- Office of Wage-Hour Compliance](https://does.dc.gov/service/office-wage-hour-compliance-0) | HTTP 403: the site refuses automated requests; a real browser was refused too |
 | DC | [DC OTR withholding](https://otr.cfo.dc.gov/page/withholding-tax-forms-and-publications) | HTTP 403: the site refuses automated requests; a real browser was refused too |
@@ -253,8 +521,9 @@ Each of these has failed on every run so far. Replace the URL, or check the docu
 | NY | [NYS Paid Family Leave -- 2025 contribution rate 0.388%, maximum annual contribution $354.5](https://paidfamilyleave.ny.gov/2025) | HTTP 403: the site refuses automated requests; a real browser was refused too |
 | OH | [Village of College Corner income tax ordinance (1%) and repeal resolution](https://villageofcollegecorner.org/wp-content/uploads/2025/04/Rita-Repeal.pdf) | HTTP 403: the site refuses automated requests; a real browser was refused too |
 | OR | [City of Wilsonville Transit Payroll Tax Information](https://www.wilsonvilleoregon.gov/finance/page/transit-payroll-tax-information) | HTTP 404 |
+| US | [Federal Register -- Minimum Wage for Federal Contracts Covered by Executive Order 13658: N](https://www.federalregister.gov/documents/2026/10/08/2026-20646/minimum-wage-for-federal-contracts-covered-by-executive-order-13658-notice-of-rate-change-in-effect) | redirected to a bot check (https://unblock.federalregister.gov/); a real browser was refused too |
 
-## Broken - failing for 3+ runs (9)
+## Broken - failing for 3+ runs (8)
 
 These URLs need replacing in `watcher/sources.json` (or the site blocks automated fetches).
 
@@ -264,29 +533,30 @@ These URLs need replacing in `watcher/sources.json` (or the site blocks automate
 | AL | [City of Tuskegee -- business information brochure](https://www.tuskegeealabama.gov/sites/g/files/vyhlif3946/f/uploads/infobrochure_word.pdf) | HTTP 404 |
 | CO | [City of Aurora — Occupational Privilege Tax repeal](https://www.auroragov.org/business_services/taxes__licensing/occupational_privilege_tax) | HTTP 404 |
 | CO | [City of Greenwood Village occupational privilege tax](https://www.greenwoodvillage.com/206/Occupational-Privilege-Tax) | HTTP 404 |
-| CO | [Colorado Department of Revenue: news](https://tax.colorado.gov/news) | read with a headless browser; HTTP 404 (browser) |
 | IL | [735 ILCS 5/12-803 — maximum wage deduction: lesser of 15% of GROSS weekly wages, or the am](https://www.ilga.gov/legislation/ilcs/ilcs4.asp?DocName=073500050K12-803) | site's TLS certificate failed verification (unable to get local issuer certificate) |
 | IL | [Illinois State Income Tax Exemptions - 2026 (Illinois Office of Comptroller, Payroll Bulle](https://illinoiscomptroller.gov/state-agencies/bulletins-forms/payroll-bulletins/illinois-state-income-tax-exemptions-2026) | HTTP 500 |
 | MN | [Minnesota Paid Leave -- Premium rate and contributions](https://pl.mn.gov/resources/calculators/premium-rate-and-contributions) | HTTP 405 |
 | OR | [City of Wilsonville Transit Payroll Tax Information](https://www.wilsonvilleoregon.gov/finance/page/transit-payroll-tax-information) | HTTP 404 |
 
-## Unreachable this run (1)
+## New (first snapshot taken) (13)
 
 | Jurisdiction | Source | Detail |
 |---|---|---|
-| IN | [WH-4, State Form 48845](https://www.in.gov/dor/tax-forms/withholding-tax-forms/) | URLError: <urlopen error [Errno 111] Connection refused> |
+| CA | [California DIR -- minimum wage set to increase to $17.40 per hour (News Release 2026-66)](https://www.dir.ca.gov/DIRNews/2026/2026-66.html) | first snapshot (2210 words, html) |
+| CO | [CDLE press release -- Colorado minimum wage will increase to $15.71/hour in 2027](https://cdle.colorado.gov/press-releases/press-release-colorado-minimum-wage-will-increase-to-1571/hour-in-2027) | first snapshot (344 words, html) |
+| CT | [Governor Lamont announces Connecticut's minimum wage will increase to $17.48 on January 1,](https://portal.ct.gov/governor/news/press-releases/2026/08-2026/governor-lamont-announces-minimum-wage-will-increase) | first snapshot (542 words, html) |
+| ME | [Maine DOL -- Maine's minimum wage to increase to $15.70 per hour in 2027](https://www.maine.gov/labor/news_events/article.shtml?id=13362373) | first snapshot (465 words, html) |
+| MN | [Minnesota DLI -- minimum-wage rate adjusted for inflation as of Jan. 1, 2027](https://dli.mn.gov/news/minimum-wage-rate-adjusted-inflation-jan-1-2027) | first snapshot (210 words, html) |
+| MT | [Montana DLI -- Montana's Minimum Wage](https://erd.dli.mt.gov/labor-standards/wage-and-hour-payment-act/state-minimum-wage) | first snapshot (277 words, html) |
+| NE | [Nebraska Department of Labor -- State of Nebraska Minimum Wage (updated 7/31/2026)](https://dol.nebraska.gov/webdocs/getfile/18bc2309-85ed-4957-b072-e899caeaca99) | first snapshot (342 words, pdf) |
+| NJ | [NJDOL press release 2026-09-29 -- minimum wage to increase to $16.48 on Jan. 1](https://www.nj.gov/labor/lwdhome/press/2026/20260929_min_wage.shtml) | first snapshot (411 words, html) |
+| NY | [New York State Department of Labor -- Your New York State Minimum Wage](https://dol.ny.gov/minimum-wage) | first snapshot (831 words, html) |
+| OH | [Ohio Department of Commerce -- Ohio minimum wage to increase by 3.5% in 2027](https://com.ohio.gov/about-us/media-center/news/Ohio-Minimum-Wage-to-Increase-in-2027) | first snapshot (536 words, html) |
+| RI | [R.I. Gen. Laws 28-12-3 as amended in 2025 ($17.00 from 2027)](https://webserver.rilegislature.gov/Statutes/TITLE28/28-12/28-12-3.htm) | first snapshot (548 words, html) |
+| VA | [Code of Virginia 40.1-28.10 -- Minimum wages](https://law.lis.virginia.gov/vacode/title40.1/chapter3/section40.1-28.10/) | first snapshot (459 words, html) |
+| WA | [Washington L&I -- FY27-075 2027 Minimum Wage Announcement](https://www.lni.wa.gov/workers-rights/_docs/2027-minimum-wage-announcement-Accessible.pdf) | first snapshot (63 words, pdf) |
 
-## New (first snapshot taken) (5)
-
-| Jurisdiction | Source | Detail |
-|---|---|---|
-| CO | [Colorado withholding tax guide](https://tax.colorado.gov/withholding-tax-guide) | read with a headless browser; first snapshot (5402 words, html) |
-| KY | [City of Middlesboro Code of Ordinances, Ch. 110 (levy section)](https://codelibrary.amlegal.com/codes/middlesboroky/latest/middlesboro_ky/0-0-0-5065) | read with a headless browser; first snapshot (2936 words, html) |
-| KY | [City of Middletown Code of Ordinances Sec. 114.23 (Ord. 07-13-2023-B, 10-12-2023-B)](https://codelibrary.amlegal.com/codes/middletownky/latest/middletown_ky/0-0-0-10846) | read with a headless browser; first snapshot (2775 words, html) |
-| KY | [City of Nortonville Code of Ordinances § 110.03 OCCUPATIONAL LICENSE FEE PAYMENT REQUIRED](https://codelibrary.amlegal.com/codes/nortonvilleky/latest/nortonville_ky/0-0-0-3279) | read with a headless browser; first snapshot (4604 words, html) |
-| KY | [City of Simpsonville Code of Ordinances Sec. 110.27](https://codelibrary.amlegal.com/codes/simpsonville/latest/simpsonville_ky/0-0-0-6803) | read with a headless browser; first snapshot (4292 words, html) |
-
-## Redirected (83)
+## Redirected (84)
 
 These still work but redirect elsewhere; consider updating the URL in data/ or curated.json.
 
@@ -361,6 +631,7 @@ These still work but redirect elsewhere; consider updating the URL in data/ or c
 | NY | [New York State Department of Labor -- Minimum Wage (rates effective 01/01/2026)](https://dol.ny.gov/minimum-wage-0) | -> https://dol.ny.gov/minimum-wage |
 | NY | [fact sheet PDF (linked from IRS -- Determining if an employer is an applicable)](http://www.treasury.gov/press-center/press-releases/Documents/Fact%20Sheet%20021014.pdf) | -> https://home.treasury.gov/news/press-releases |
 | OH | [Combined Form IT 4 — Employee's Withholding Exemption Certificate (post-2020-12-07 combine](https://tax.ohio.gov/static/forms/employer_withholding/generic/wth-it4-combined-fi.pdf) | -> https://dam.assets.ohio.gov/image/upload/tax.ohio.gov/forms/employer_withholding/generic/wth-it4-combined-fi.pdf |
+| OH | [Declaration of Estimated Payments (linked from Ohio Department of Taxation: municipal inco](https://tax.ohio.gov/static/muni-net-profit/ascii%20and%20xml/ascii%20-%20declaration%20of%20estimated%20payments%208-21-18.xlsx) | -> https://dam.assets.ohio.gov/raw/upload/tax.ohio.gov/muni-net-profit/ascii%20and%20xml/ascii%20-%20declaration%20of%20estimated%20payments%208-21-18.xlsx |
 | OH | [Excel File Generator Tool (linked from Ohio Department of Taxation: municipal income tax )](https://tax.ohio.gov/static/muni-net-profit/ascii%20and%20xml/oh%20muni%20ascii%20dev%20v017%202_19_2020.xls) | -> https://dam.assets.ohio.gov/raw/upload/tax.ohio.gov/muni-net-profit/ascii%20and%20xml/oh%20muni%20ascii%20dev%20v017%202_19_2020.xls |
 | OH | [MNP10 Tax Return (linked from Ohio Department of Taxation: municipal income tax )](https://tax.ohio.gov/static/muni-net-profit/ascii%20and%20xml/ascii%20-%20mnp10%20return%208-21-18.xlsx) | -> https://dam.assets.ohio.gov/raw/upload/tax.ohio.gov/muni-net-profit/ascii%20and%20xml/ascii%20-%20mnp10%20return%208-21-18.xlsx |
 | OH | [Ohio Department of Taxation: all news](https://tax.ohio.gov/wps/portal/gov/tax/home/news-and-events/all-news/) | -> https://tax.ohio.gov/home/news-and-events/all-news/ |
@@ -368,7 +639,7 @@ These still work but redirect elsewhere; consider updating the URL in data/ or c
 | OH | [Ohio Department of Taxation: municipal income tax (state page for municipalities and emplo](https://tax.ohio.gov/business/municipalities) | -> https://tax.ohio.gov/business/municipal-net-profit-tax |
 | OH | [Ohio Dept of Taxation: school district income tax list](https://tax.ohio.gov/static/tax_analysis/tax_data_series/school_district_data/SDIT_LIST.pdf) | -> https://dam.assets.ohio.gov/image/upload/tax.ohio.gov/tax_analysis/tax_data_series/school_district_data/SDIT_LIST.pdf |
 | OH | [Ohio Form IT 4NR — Employee's Statement of Residency in a Reciprocity State (Rev. 5/07), O](https://tax.ohio.gov/static/forms/employer_withholding/generic/wth_it4nr.pdf) | -> https://dam.assets.ohio.gov/image/upload/tax.ohio.gov/forms/employer_withholding/generic/wth_it4nr.pdf |
-| OR | [Oregon Department of Revenue: news](https://www.oregon.gov/dor/news/Pages/default.aspx) | 7 lines added, 7 removed; 2 links added, 0 removed |
+| OR | [Oregon Department of Revenue: news](https://www.oregon.gov/dor/news/Pages/default.aspx) | 18 lines added, 18 removed; 3 links added, 2 removed |
 | PA | [PA Department of Revenue -- Employer Withholding (reciprocal agreements)](https://www.pa.gov/en/agencies/revenue/resources/tax-types-and-information/employer-withholding.html) | -> https://www.pa.gov/agencies/revenue/resources/tax-types-and-information/employer-withholding |
 | WA | [City of Burien -- Minimum Wage (BMC Chapter 5.16, Administrative Rule 2026-01)](https://www.burienwa.gov/MinimumWage) | -> https://www.burienwa.gov/city_hall/laws_regulations/minimum_wage |
 | WI | [2026 Tax Rate Schedule for Employers (DWD, full Schedule D reserve-percentage rate table)](https://dwd.wisconsin.gov/ui/employers/taxrates.htm) | read with a headless browser |
@@ -376,7 +647,7 @@ These still work but redirect elsewhere; consider updating the URL in data/ or c
 | WI | [Wis. Stat. § 812.34 — 80% of disposable earnings exempt from garnishment (i.e. 20% reachab](https://docs.legis.wisconsin.gov/document/statutes/812.34) | -> https://docs.legis.wisconsin.gov/statutes/statutes/812/ii/34 |
 | WV | [West Virginia State Tax Department: home page (news and notices)](https://tax.wv.gov/) | -> https://tax.wv.gov/Pages/default.aspx |
 
-## Sites that block automated checks (29)
+## Sites that block automated checks (36)
 
 These can't be watched by a script (bot protection or JavaScript-only pages). Check them by hand now and then, or find the same document at an address that allows it.
 
@@ -385,12 +656,13 @@ These can't be watched by a script (bot protection or JavaScript-only pages). Ch
 | Jurisdiction | Source | Detail |
 |---|---|---|
 | AL | [City of Birmingham -- Employers Return of Occupational Tax Withheld](https://birminghamal.hdlgov.com/base64files/TAXES_FORM_4.pdf) | HTTP 403: the site refuses automated requests; a real browser was refused too |
-| AL | [City of Fairfield -- Ordinance 1019, Occupational Tax](https://cityoffairfieldal.org/wp-content/uploads/2025/02/Ordinance-1019-Occupational-Tax_rotated.pdf) | HTTP 429: the site refuses automated requests; a real browser was refused too |
 | AL | [Rainbow City -- Form G-1 (Rev 12/20), occupational license fee return](https://www.rbcalabama.com/download/revenue-g-1/?wpdmdl=730&masterkey=60c8bce41072f) | HTTP 403: the site refuses automated requests; a real browser was refused too |
 | AR | [Arkansas Department of Labor and Licensing -- Minimum Wage and Overtime](https://labor.arkansas.gov/labor/labor-standards/minimum-wage-and-overtime/) | HTTP 403: the site refuses automated requests; a real browser was refused too |
 | AZ | [UIT-0603A (FY26), Unemployment Insurance Tax Rate Chart](https://des.az.gov/sites/default/files/dl/UIT-0603A_FY26.pdf) | HTTP 403: the site refuses automated requests; a real browser was refused too |
 | CO | [Colorado DOR -- DR 1098 Colorado Withholding Worksheet for Employers](https://tax.colorado.gov/DR1098) | HTTP 403: the site refuses automated requests; a real browser was refused too |
+| CO | [Colorado Department of Revenue: news](https://tax.colorado.gov/news) | HTTP 403: the site refuses automated requests; a real browser was refused too |
 | CO | [Colorado wage withholding](https://tax.colorado.gov/withholding-tax) | HTTP 403: the site refuses automated requests; a real browser was refused too |
+| CO | [Colorado withholding tax guide](https://tax.colorado.gov/withholding-tax-guide) | read with a browser last time; a real browser was refused too |
 | DC | [DC Department of Employment Services -- Office of Wage-Hour Compliance](https://does.dc.gov/service/office-wage-hour-compliance-0) | HTTP 403: the site refuses automated requests; a real browser was refused too |
 | DC | [DC OTR withholding](https://otr.cfo.dc.gov/page/withholding-tax-forms-and-publications) | HTTP 403: the site refuses automated requests; a real browser was refused too |
 | DE | [City of Wilmington: City wage and net profits taxes](https://www.wilmingtonde.gov/residents/earned-income-tax-and-net-profits-tax) | HTTP 403: the site refuses automated requests; a real browser was refused too |
@@ -401,9 +673,15 @@ These can't be watched by a script (bot protection or JavaScript-only pages). Ch
 | KY | [City of Marion Code of Ordinances Sec. 110.22](https://codelibrary.amlegal.com/codes/marionky/latest/marion_ky/0-0-0-22684) | HTTP 403: the site refuses automated requests; a real browser was refused too |
 | KY | [City of Mayfield Code of Ordinances Sec. 9-42, Earnings and net profits tax payment requir](https://library.municode.com/ky/mayfield/codes/code_of_ordinances?nodeId=COOR_CH9OCLITARE_ARTIIOCLITA_S9-42EANEPRTAPARE) | HTTP 403: the site refuses automated requests; a real browser was refused too |
 | KY | [City of McKee Code of Ordinances § 110.02 LICENSE REQUIRED; FEES](https://codelibrary.amlegal.com/codes/mckeeky/latest/mckee_ky/0-0-0-2883) | HTTP 403: the site refuses automated requests; a real browser was refused too |
+| KY | [City of Middlesboro Code of Ordinances, Ch. 110 (levy section)](https://codelibrary.amlegal.com/codes/middlesboroky/latest/middlesboro_ky/0-0-0-5065) | read with a browser last time; a real browser was refused too |
+| KY | [City of Middletown Code of Ordinances Sec. 114.23 (Ord. 07-13-2023-B, 10-12-2023-B)](https://codelibrary.amlegal.com/codes/middletownky/latest/middletown_ky/0-0-0-10846) | read with a browser last time; a real browser was refused too |
+| KY | [City of Nortonville Code of Ordinances § 110.03 OCCUPATIONAL LICENSE FEE PAYMENT REQUIRED](https://codelibrary.amlegal.com/codes/nortonvilleky/latest/nortonville_ky/0-0-0-3279) | read with a browser last time; a real browser was refused too |
 | KY | [City of Pikeville -- Business Licenses](https://pikevilleky.gov/business/) | HTTP 403: the site refuses automated requests; a real browser was refused too |
+| KY | [City of Simpsonville Code of Ordinances Sec. 110.27](https://codelibrary.amlegal.com/codes/simpsonville/latest/simpsonville_ky/0-0-0-6803) | read with a browser last time; a real browser was refused too |
+| KY | [Louisville Metro Revenue Commission -- W-1KJC Instructions and Louisville Metro Code Sec. ](https://louisvilleky.gov/sites/default/files/2024-12/w-1kjc_instructions_2025.pdf) | HTTP 403: the site refuses automated requests; a real browser was refused too |
 | MO | [Kansas City, MO: earnings tax](https://www.kcmo.gov/city-hall/departments/finance/earnings-tax) | HTTP 403: the site refuses automated requests; a real browser was refused too |
 | MO | [Kansas City, MO: tax guide for non-resident businesses (employer withholding of the earnin](https://www.kcmo.gov/city-hall/departments/finance/tax-home/tax-guides/tax-guide-for-non-resident-businesses) | HTTP 403: the site refuses automated requests; a real browser was refused too |
+| NJ | [City of Newark Q1 2026 Payroll Tax Booklet](https://www.newarknj.gov/DocumentCenter/View/2741/Payroll-Tax-Booklet-2026-PDF) | read with a browser last time; a real browser was refused too |
 | NJ | [HHS/ASPE 2026 Poverty Guidelines for the 48 Contiguous States and DC — household of 1: $15](https://aspe.hhs.gov/topics/poverty-economic-mobility/poverty-guidelines) | HTTP 403: the site refuses automated requests; a real browser was refused too |
 | NM | [City of Las Cruces -- Official Notice, Minimum Wage Ordinance (2026)](https://lascruces.gov/wp-content/uploads/2025/09/MinimumWageEng26.pdf) | HTTP 403: the site refuses automated requests; a real browser was refused too |
 | NY | [NY Department of Financial Services -- COBRA and Premium Assistance](https://www.dfs.ny.gov/consumers/health_insurance/cobra_and_premium_assistance) | HTTP 403: the site refuses automated requests; a real browser was refused too |
@@ -412,11 +690,11 @@ These can't be watched by a script (bot protection or JavaScript-only pages). Ch
 | NY | [NY.gov -- New York State Paid Sick Leave FAQ](https://www.ny.gov/sites/default/files/atoms/files/PSL_FAQ_PaidSickLeaveFAQ.pdf) | HTTP 403: the site refuses automated requests; a real browser was refused too |
 | NY | [NYS Paid Family Leave -- 2025 contribution rate 0.388%, maximum annual contribution $354.5](https://paidfamilyleave.ny.gov/2025) | HTTP 403: the site refuses automated requests; a real browser was refused too |
 | OH | [Village of College Corner income tax ordinance (1%) and repeal resolution](https://villageofcollegecorner.org/wp-content/uploads/2025/04/Rita-Repeal.pdf) | HTTP 403: the site refuses automated requests; a real browser was refused too |
-| US | [IRS draft tax forms: payroll forms only (W-4, W-4P/R, Pub 15/15-T, 940/941/944, W-2/W-3)](https://www.irs.gov/draft-tax-forms) | read with a browser last time; a real browser was refused too |
+| US | [Federal Register -- Minimum Wage for Federal Contracts Covered by Executive Order 13658: N](https://www.federalregister.gov/documents/2026/10/08/2026-20646/minimum-wage-for-federal-contracts-covered-by-executive-order-13658-notice-of-rate-change-in-effect) | redirected to a bot check (https://unblock.federalregister.gov/); a real browser was refused too |
 
 </details>
 
-## Unchanged (1055)
+## Unchanged (1135)
 
 <details><summary>Show all</summary>
 
@@ -428,6 +706,7 @@ These can't be watched by a script (bot protection or JavaScript-only pages). Ch
 - AL - [Alabama League of Municipalities: municipal tax rates (occupational tax survey list)](https://almonline.org/TaxRates.aspx) (last changed: 2026-10-20)
 - AL - [Alabama State Comptroller -- Memorandum, 'Jefferson County Occupational Tax'](https://comptroller.alabama.gov/wp-content/uploads/2018/01/Jefferson-County-Occupational-Tax.pdf) (last changed: 2026-09-24)
 - AL - [City of Auburn -- Occupational License Fee](https://www.auburnal.gov/revenue/tax-information/occupational-license-fee/) (last changed: 2026-09-30)
+- AL - [City of Fairfield -- Ordinance 1019, Occupational Tax](https://cityoffairfieldal.org/wp-content/uploads/2025/02/Ordinance-1019-Occupational-Tax_rotated.pdf) (last changed: 2026-10-23)
 - AL - [City of Glencoe -- Form G-1, Employer's Monthly/Quarterly Return of Occupational Tax Withheld (Ordin](https://cityofglencoe.org/wp-content/uploads/2021/09/Glencoe-Occupational-Tax-Form.pdf) (last changed: 2026-10-20)
 - AL - [City of Irondale -- Occupational License Fee](https://cityofirondaleal.gov/occupational-license-fee/) (last changed: 2026-09-30)
 - AL - [City of Leeds -- Occupational Tax](https://www.leedsalabama.gov/471/Occupational-Tax) (last changed: 2026-09-30)
@@ -560,6 +839,7 @@ These can't be watched by a script (bot protection or JavaScript-only pages). Ch
 - CO - [Colorado Division of Labor Standards (local minimum wage notices, INFO #19)](https://cdle.colorado.gov/dlss) (last changed: 2026-10-20)
 - CO - [Colorado FAMLI -- premium rate (0.9% for 2023-2025; 0.88% from 2026)](https://famli.colorado.gov/employers) (last changed: 2026-10-20)
 - CO - [Colorado Wage Withholding Tax Guide, January 2026](https://tax.colorado.gov/sites/tax/files/documents/Wage_Withholding_Tax_Guide_Jan_2026.pdf) (last changed: 2026-10-20)
+- CO - [Commissioners’ Agenda (linked from Boulder County -- Local Minimum Wage)](https://assets.bouldercounty.gov/wp-content/uploads/2017/08/bocc-advance-agenda.pdf) (last changed: 2026-10-25)
 - CO - [DR 1098 (10/21/25), 2026 Colorado Withholding Worksheet for Employers](https://tax.colorado.gov/sites/tax/files/documents/DR_1098_Colorado_Withholding_Worksheet_for_Employees.pdf) (last changed: 2026-10-20)
 - CO - [Local Minimum Wage Ordinance (linked from Boulder County -- Local Minimum Wage)](https://assets.bouldercounty.gov/wp-content/uploads/2025/11/Ordinance-2025-1-Amending-Local-Minimum-Wage.pdf) (last changed: 2026-10-20)
 - CO - [Local Minimum Wage Report (linked from Colorado Division of Labor Standards (local minimu)](https://cdle.colorado.gov/sites/cdle/files/Local_Min_Wage_Report_2023_1.pdf) (last changed: 2026-10-20)
@@ -752,6 +1032,7 @@ These can't be watched by a script (bot protection or JavaScript-only pages). Ch
 - IN - [Income Tax to Residents With Out-of-State Income (Reciprocal Agreement (linked from Indiana DOR with](https://www.in.gov/dA/ca58e65593/ib28.pdf?language_id=1) (last changed: 2026-10-18)
 - IN - [Indiana DOR Launches Amnesty Eligibility Tool (linked from Indiana DOR: news and publications)](https://www.in.gov/dA/a2e30e47fc/News-Release-Amnesty-Eligibility-Tool-May-18-2026.pdf?language_id=1) (last changed: 2026-10-18)
 - IN - [Indiana DOR shares changes for 2025 tax returns (linked from Indiana DOR: news and publications)](https://www.in.gov/dA/a26f05261b/NP-Indiana_DOR_shares_changes_for_2025_tax_returns.pdf?language_id=1) (last changed: 2026-10-18)
+- IN - [Indiana DOR withholding](https://www.in.gov/dor/i-am-a/business-corp/withholding/) (last changed: 2026-10-25)
 - IN - [Indiana DOR: departmental notices](https://www.in.gov/dor/legal-resources/tax-library/departmental-notices/) (last changed: 2026-10-20)
 - IN - [Indiana DOR: news and publications](https://www.in.gov/dor/about/news-publications/) (last changed: 2026-10-18)
 - IN - [Indiana Department of Revenue Warns of Text Message Scam (linked from Indiana DOR: news and publicat](https://www.in.gov/dA/2a75116158/NP-Indiana_Department_of_Revenue_Warns_of_Text_Message_Scam.pdf?language_id=1) (last changed: 2026-10-18)
@@ -775,6 +1056,7 @@ These can't be watched by a script (bot protection or JavaScript-only pages). Ch
 - IN - [Time's Running Out: Indiana’s Tax Amnesty 2026 Ends Sept. 9 (linked from Indiana DOR: news and publi](https://www.in.gov/dA/82b7e62e1f/2026-news-release-tax-amnesty-times-running-out.pdf?language_id=1) (last changed: 2026-10-18)
 - IN - [WH-1 XML Business Rules (linked from Indiana DOR withholding)](https://www.in.gov/dA/d2a2c3ce66/business-rules-wh1-xml.pdf?language_id=1) (last changed: 2026-10-18)
 - IN - [WH-3 XML Business Rules (linked from Indiana DOR withholding)](https://www.in.gov/dA/734e099191/business-rules-wh3-xml.pdf?language_id=1) (last changed: 2026-10-18)
+- IN - [WH-4, State Form 48845](https://www.in.gov/dor/tax-forms/withholding-tax-forms/) (last changed: 2026-10-19)
 - IN - [Where's my refund? (linked from Indiana DOR: news and publications)](https://www.in.gov/dA/01d4f0b348/nn-wheres-my-refund.pdf?language_id=1) (last changed: 2026-10-18)
 - IN - [Withholding Information for Part-Time Employees (linked from Indiana DOR withholding)](https://www.in.gov/dA/f205e0a637/ib52.pdf?language_id=1) (last changed: 2026-10-18)
 - IN - [electronic methods and options for filing Withholding (linked from Indiana DOR withholding)](https://www.in.gov/dA/8abea3ed05/dor-efile-methods-bulk.pdf?language_id=1) (last changed: 2026-10-18)
@@ -905,7 +1187,6 @@ These can't be watched by a script (bot protection or JavaScript-only pages). Ch
 - KY - [Kentucky Unemployment Insurance self-service site (employer notices)](https://ui.ky.gov/Redesign/home.aspx) (last changed: 2026-10-18)
 - KY - [Kentucky withholding](https://revenue.ky.gov/Business/Pages/Employer-Payroll-Withholding.aspx) (last changed: 2026-10-22)
 - KY - [License Fee Regulations – 5th edition – Issued Dec. 1, 2000 (linked from City of Lexington -- Occupa](https://content.lexingtonky.gov/sites/default/files/migrated-files/sites/default/files/2016-08/License%2520Fee%2520Regulations.pdf) (last changed: 2026-10-20)
-- KY - [Louisville Metro Revenue Commission -- W-1KJC Instructions and Louisville Metro Code Sec. 110.02](https://louisvilleky.gov/sites/default/files/2024-12/w-1kjc_instructions_2025.pdf) (last changed: 2026-09-24)
 - KY - [Need to update or cancel a business account? (linked from Kentucky withholding)](http://revenue.ky.gov/Forms/10A104.pdf) (last changed: 2026-10-18)
 - KY - [Net Profit License Fee Return (linked from City of Nicholasville, KY — Tax Office)](https://nicholasville.org/wp-content/uploads/2020/07/NPform-1.pdf) (last changed: 2026-10-20)
 - KY - [Notice of Rate Change (linked from Grant County Fiscal Court -- Occupational Licensin)](https://grantcounty.ky.gov/wp-content/uploads/2026/05/NEW-RATE-LETTER-2026.pdf) (last changed: 2026-10-20)
@@ -1055,6 +1336,7 @@ These can't be watched by a script (bot protection or JavaScript-only pages). Ch
 - MO - [Missouri Department of Revenue: news](https://dor.mo.gov/news/) (last changed: 2026-10-24)
 - MO - [Missouri unemployment insurance 2026 rate/wage-base reporting (Bloomberg Tax, Vensure, MO DOLIR's ow](https://labor.mo.gov/des/employers/tax-rates) (last changed: 2026-10-20)
 - MO - [Missouri withholding](https://dor.mo.gov/taxation/business/tax-types/withholding/) (last changed: 2026-10-20)
+- MO - [St. Louis: earnings tax department](https://www.stlouis-mo.gov/government/departments/collector/earnings-tax/index.cfm) (last changed: 2026-10-25)
 - MO - [St. Louis: employer withholding and payroll expense tax information](https://www.stlouis-mo.gov/government/departments/collector/earnings-tax/payroll-tax-info.cfm) (last changed: 2026-10-20)
 - MO - [W-10/P-10 Forms (Fillable) (linked from St. Louis: earnings tax department)](https://www.stlouis-mo.gov/government/departments/collector/earnings-tax/documents/p-10-w-10-form-fillable.cfm) (last changed: 2026-10-20)
 - MO - [W-3 Reconciliation (linked from St. Louis: employer withholding and payroll expens)](https://www.stlouis-mo.gov/government/departments/collector/earnings-tax/documents/w-3-form.cfm) (last changed: 2026-10-20)
@@ -1154,7 +1436,6 @@ These can't be watched by a script (bot protection or JavaScript-only pages). Ch
 - NE - [Weekly Payroll Period (linked from Nebraska withholding)](https://revenue.nebraska.gov/sites/revenue.nebraska.gov/files/doc/business/Cir_En_2026/2027_weekly.pdf) (last changed: 2026-10-20)
 - NE - [wage table brackets (linked from Nebraska withholding)](https://revenue.nebraska.gov/sites/default/files/doc/business/Cir_En_2026/2027_weekly.pdf) (last changed: 2026-10-20)
 - NJ - [2026 State Equalization Table (linked from New Jersey Division of Taxation: what's new)](https://www.nj.gov/treasury/taxation/pdf/lpt/2026NoticeofHearing.pdf) (last changed: 2026-10-20)
-- NJ - [City of Newark Q1 2026 Payroll Tax Booklet](https://www.newarknj.gov/DocumentCenter/View/2741/Payroll-Tax-Booklet-2026-PDF) (last changed: 2026-10-22)
 - NJ - [Click here (linked from NJ Division of Employer Accounts -- Rate informati)](https://www.nj.gov/labor/forms_pdfs/ea/Explanation%20of%20Unemployment%20Rate.pdf) (last changed: 2026-10-20)
 - NJ - [DOWNLOAD HERE > (linked from NJ Division of Temporary Disability and Family Lea)](https://www.nj.gov/labor/myleavebenefits/assets/pdfs/FL1_7-20.pdf) (last changed: 2026-10-20)
 - NJ - [DOWNLOAD NOW (ENGLISH) > (linked from NJ Division of Temporary Disability and Family Lea)](https://www.nj.gov/labor/myleavebenefits/assets/pdfs/PR-148%20(7-26)%20Cash%20Benefits%20Family%20Leave.pdf) (last changed: 2026-10-20)
@@ -1265,7 +1546,48 @@ These can't be watched by a script (bot protection or JavaScript-only pages). Ch
 - NY - [eCFR 29 CFR 553.106 amendment history - official API](https://www.ecfr.gov/api/versioner/v1/versions/title-29.json?section=553.106) (last changed: 2026-10-20)
 - NY - [fact sheet PDF (linked from IRS -- Determining if an employer is an applicable)](http://www.treasury.gov/press-center/press-releases/Documents/Fact%20Sheet%20021014.pdf) (last changed: 2026-10-23)
 - OH - [https://www.ccaohio.gov/member-municipalities](https://www.ccaohio.gov/member-municipalities) (last changed: 2026-10-13)
-- OH - [https://www.ritaohio.com/municipalities](https://www.ritaohio.com/municipalities) (last changed: 2026-10-20)
+- OH - [1099 Common Errors (linked from Ohio employer withholding)](https://dam.assets.ohio.gov/image/upload/tax.ohio.gov/employer_withholding/1099_common_errors_2021.pdf) (last changed: 2026-10-18)
+- OH - [1099 Submission Error Descriptions (linked from Ohio employer withholding)](https://dam.assets.ohio.gov/image/upload/tax.ohio.gov/employer_withholding/1099uploadsubmissionerrordescriptions2021.pdf) (last changed: 2026-10-18)
+- OH - [1375-income-tax (linked from Village of Georgetown -- Income Tax)](https://georgetownohio.gov/documents/1375-income-tax/) (last changed: 2026-10-20)
+- OH - [2023 Rate Details (linked from Ohio Unemployment Contribution Rates for Calendar )](https://dam.assets.ohio.gov/image/upload/jfs.ohio.gov/ouio/uctax/2023-RateDetails.pdf) (last changed: 2026-10-20)
+- OH - [2023-quarterly-estimate-form (linked from Village of Georgetown -- Income Tax)](https://georgetownohio.gov/documents/2023-quarterly-estimate-form/) (last changed: 2026-10-20)
+- OH - [2023-w1-employer-s-withholding-monthly (linked from Village of Georgetown -- Income Tax)](https://georgetownohio.gov/documents/2023-w1-employer-s-withholding-monthly/) (last changed: 2026-10-20)
+- OH - [2023-w1-employer-s-withholding-quarterly (linked from Village of Georgetown -- Income Tax)](https://georgetownohio.gov/documents/2023-w1-employer-s-withholding-quarterly/) (last changed: 2026-10-20)
+- OH - [2023-w3-employer-s-withholding-reconciliation-form (linked from Village of Georgetown -- Income Tax)](https://georgetownohio.gov/documents/2023-w3-employer-s-withholding-reconciliation-form/) (last changed: 2026-10-20)
+- OH - [2024 Rate Details (linked from Ohio Unemployment Contribution Rates for Calendar )](https://dam.assets.ohio.gov/image/upload/jfs.ohio.gov/ouio/uctax/2024RateDetails.pdf) (last changed: 2026-10-20)
+- OH - [2024-business-return-form (linked from Village of Georgetown -- Income Tax)](https://georgetownohio.gov/documents/2024-business-return-form/) (last changed: 2026-10-20)
+- OH - [2024-quarterly-estimate-form (linked from Village of Georgetown -- Income Tax)](https://georgetownohio.gov/documents/2024-quarterly-estimate-form/) (last changed: 2026-10-20)
+- OH - [2024-w1-employers-wh-monthly (linked from Village of Georgetown -- Income Tax)](https://georgetownohio.gov/documents/2024-w1-employers-wh-monthly/) (last changed: 2026-10-20)
+- OH - [2024-w1-employers-wh-quarterly (linked from Village of Georgetown -- Income Tax)](https://georgetownohio.gov/documents/2024-w1-employers-wh-quarterly/) (last changed: 2026-10-20)
+- OH - [2024-w3-employers-wh-rec-form (linked from Village of Georgetown -- Income Tax)](https://georgetownohio.gov/documents/2024-w3-employers-wh-rec-form/) (last changed: 2026-10-20)
+- OH - [2025 1099-MISC Upload Specifications (linked from Ohio employer withholding)](https://dam.assets.ohio.gov/image/upload/tax.ohio.gov/employer_withholding/2025-2026%20NYP%20Updates/2025_1099MISC_Specs_V1.pdf) (last changed: 2026-10-18)
+- OH - [2025 1099-NEC Upload Specifications (linked from Ohio employer withholding)](https://dam.assets.ohio.gov/image/upload/tax.ohio.gov/employer_withholding/2025-2026%20NYP%20Updates/2025_1099NEC_Specs_V1.pdf) (last changed: 2026-10-18)
+- OH - [2025 1099-R Upload Specifications (linked from Ohio employer withholding)](https://dam.assets.ohio.gov/image/upload/tax.ohio.gov/employer_withholding/2025-2026%20NYP%20Updates/2025_1099R_Specs_V1.pdf) (last changed: 2026-10-18)
+- OH - [2025 EFW2 Upload Specifications (linked from Ohio employer withholding)](https://dam.assets.ohio.gov/image/upload/tax.ohio.gov/employer_withholding/2025-2026%20NYP%20Updates/2025_W2_Specs_V1.pdf) (last changed: 2026-10-18)
+- OH - [2025 EFW2C Upload Specifications (linked from Ohio employer withholding)](https://dam.assets.ohio.gov/image/upload/tax.ohio.gov/employer_withholding/2025-2026%20NYP%20Updates/2025_W2C_Specs_v1.pdf) (last changed: 2026-10-18)
+- OH - [2025 Rate Details (linked from Ohio Unemployment Contribution Rates for Calendar )](https://dam.assets.ohio.gov/image/upload/jfs.ohio.gov/ouio/uctax/2025RateDetails.pdf) (last changed: 2026-10-20)
+- OH - [2025 Simplified W-2 Method Specifications Create CSV Guide (linked from Ohio employer withholding)](https://dam.assets.ohio.gov/image/upload/tax.ohio.gov/employer_withholding/2025-2026%20NYP%20Updates/2025_W2_CSV_Specs_V1.pdf) (last changed: 2026-10-18)
+- OH - [2025 Simplified W-2 Method Specifications Easy Entry Guide (linked from Ohio employer withholding)](https://dam.assets.ohio.gov/image/upload/tax.ohio.gov/employer_withholding/2025-2026%20NYP%20Updates/2025_Simplified_Upload_Specs_Easy_Entry_V1.pdf) (last changed: 2026-10-18)
+- OH - [2025 Simplified W-2 Method Spreadsheet Without Macros (linked from Ohio employer withholding)](https://dam.assets.ohio.gov/raw/upload/tax.ohio.gov/employer_withholding/2025-2026%20NYP%20Updates/2025_simpified-w2_no_macro_V2_1.xlsx) (last changed: 2026-10-20)
+- OH - [2025-br-form (linked from Village of Georgetown -- Income Tax)](https://georgetownohio.gov/documents/2025-br-form/) (last changed: 2026-10-20)
+- OH - [2025-ir-form (linked from Village of Georgetown -- Income Tax)](https://georgetownohio.gov/documents/2025-ir-form/) (last changed: 2026-10-20)
+- OH - [2025-q1-est-form (linked from Village of Georgetown -- Income Tax)](https://georgetownohio.gov/documents/2025-q1-est-form/) (last changed: 2026-10-20)
+- OH - [2025-w1-emp-wh-monthly (linked from Village of Georgetown -- Income Tax)](https://georgetownohio.gov/documents/2025-w1-emp-wh-monthly/) (last changed: 2026-10-20)
+- OH - [2025-w1-emp-wh-quarterly (linked from Village of Georgetown -- Income Tax)](https://georgetownohio.gov/documents/2025-w1-emp-wh-quarterly/) (last changed: 2026-10-20)
+- OH - [2025-w3-annual-rec-form (linked from Village of Georgetown -- Income Tax)](https://georgetownohio.gov/documents/2025-w3-annual-rec-form/) (last changed: 2026-10-20)
+- OH - [2026 EFW2 Upload Specifications (linked from Ohio employer withholding)](https://dam.assets.ohio.gov/image/upload/tax.ohio.gov/employer_withholding/2026-2027%20NYP%20Updates/2026_W2_Specs_V1.pdf) (last changed: 2026-10-24)
+- OH - [2026 Rate Details (linked from Ohio Unemployment Contribution Rates for Calendar )](https://dam.assets.ohio.gov/image/upload/jfs.ohio.gov/ouio/uctax/2026RateDetails.pdf) (last changed: 2026-10-20)
+- OH - [ASCII Guidelines (linked from Ohio Department of Taxation: municipal income tax )](https://dam.assets.ohio.gov/image/upload/tax.ohio.gov/muni-net-profit/ascii%20and%20xml/ASCII%20Instructions%207.19.23.pdf) (last changed: 2026-10-18)
+- OH - [Biweekly Withholding (linked from Ohio employer withholding)](https://dam.assets.ohio.gov/image/upload/tax.ohio.gov/employer_withholding/2026%20Withholding%20Tables/WHT_BiweeklyRate_2026.pdf) (last changed: 2026-10-18)
+- OH - [Biweekly Withholding (linked from Ohio employer withholding)](https://dam.assets.ohio.gov/image/upload/tax.ohio.gov/employer_withholding/2025%20Withholding%20Tables/WHT_BiweeklyRate_2025.pdf) (last changed: 2026-10-18)
+- OH - [Bulk Filing Certification Testing (linked from Ohio employer withholding)](https://dam.assets.ohio.gov/image/upload/tax.ohio.gov/employer_withholding/Bulk%20Filing%20Guide/BulkFilingCertificationTestingDocument_01152025.pdf) (last changed: 2026-10-20)
+- OH - [Bulk Filing IT-501 Field Mapping (linked from Ohio employer withholding)](https://dam.assets.ohio.gov/image/upload/tax.ohio.gov/employer_withholding/Bulk%20Filing%20Guide/BulkFilingIT-501FieldMapping01152025.pdf) (last changed: 2026-10-20)
+- OH - [Bulk Filing IT-941 Field Mappings (linked from Ohio employer withholding)](https://dam.assets.ohio.gov/image/upload/tax.ohio.gov/employer_withholding/Bulk%20Filing%20Guide/BulkFilingIT-941FieldMappings01152025.pdf) (last changed: 2026-10-20)
+- OH - [Bulk Filing Implementation Guide - Part A (linked from Ohio employer withholding)](https://dam.assets.ohio.gov/image/upload/tax.ohio.gov/employer_withholding/Bulk%20Filing%20Guide/BulkFilingImplementationGuideA_OHTAX_02242026.pdf) (last changed: 2026-10-20)
+- OH - [Bulk Filing Implementation Guide – Part B (linked from Ohio employer withholding)](https://dam.assets.ohio.gov/image/upload/tax.ohio.gov/employer_withholding/Bulk%20Filing%20Guide/BulkFilingImplementationGuideB_OHTAX_01222026.pdf) (last changed: 2026-10-20)
+- OH - [Bulk Filing SD-101 Field Mappings (linked from Ohio employer withholding)](https://dam.assets.ohio.gov/image/upload/tax.ohio.gov/employer_withholding/Bulk%20Filing%20Guide/BulkFilingSD-101FieldMappings01152025.pdf) (last changed: 2026-10-20)
+- OH - [Bulk Filing SD-141 Field Mappings (linked from Ohio employer withholding)](https://dam.assets.ohio.gov/image/upload/tax.ohio.gov/employer_withholding/Bulk%20Filing%20Guide/BulkFilingSD-141FieldMappings01152025.pdf) (last changed: 2026-10-20)
+- OH - [Bulk Filing Walkthrough Document (linked from Ohio employer withholding)](https://dam.assets.ohio.gov/image/upload/tax.ohio.gov/employer_withholding/Bulk%20Filing%20Guide/OHTAX_Walkthrough_01152025.pdf) (last changed: 2026-10-20)
 - OH - [CCA (Central Collection Agency): municipal income tax calendar and notices](https://www.ccaohio.gov/due-dates/municipal-income-tax-calendar) (last changed: 2026-10-18)
 - OH - [CCA Division of Taxation -- Tax Rates (2026 and 2025 tables)](https://www.ccaohio.gov/tax-rates) (last changed: 2026-09-30)
 - OH - [City of Cheviot Tax Department -- JEDD INFORMATION (Contracts with Green Township)](https://cheviot.org/departments/tax/) (last changed: 2026-10-20)
@@ -1273,13 +1595,44 @@ These can't be watched by a script (bot protection or JavaScript-only pages). Ch
 - OH - [City of Gallipolis Tax Department](https://cityofgallipolis.com/tax-department-2/) (last changed: 2026-10-20)
 - OH - [City of Warren Income Tax Department -- Joint Economic Development Districts: 'The Warren-Champion J](https://www.warren.org/income_tax_department/joint_economic_development_districts_(jedd).php) (last changed: 2026-10-20)
 - OH - [Combined Form IT 4 — Employee's Withholding Exemption Certificate (post-2020-12-07 combined version)](https://tax.ohio.gov/static/forms/employer_withholding/generic/wth-it4-combined-fi.pdf) (last changed: 2026-09-24)
+- OH - [Daily Withholding Tables (linked from Ohio employer withholding)](https://dam.assets.ohio.gov/image/upload/tax.ohio.gov/employer_withholding/2026%20Withholding%20Tables/WHT_DailyRate_2026.pdf) (last changed: 2026-10-18)
+- OH - [Daily Withholding Tables (linked from Ohio employer withholding)](https://dam.assets.ohio.gov/image/upload/tax.ohio.gov/employer_withholding/2025%20Withholding%20Tables/WHT_DailyRate_2025.pdf) (last changed: 2026-10-18)
+- OH - [Declaration of Estimated Payments (linked from Ohio Department of Taxation: municipal income tax )](https://tax.ohio.gov/static/muni-net-profit/ascii%20and%20xml/ascii%20-%20declaration%20of%20estimated%20payments%208-21-18.xlsx) (last changed: 2026-10-18)
+- OH - [Download Authenticated PDF (linked from Ohio Revised Code 715.691 (joint economic developm)](https://codes.ohio.gov/assets/laws/revised-code/authenticated/7/715/715.691/10-3-2023/715.691-10-3-2023.pdf) (last changed: 2026-10-20)
+- OH - [Download Authenticated PDF (linked from Ohio Revised Code 718.01(R), definition of "qualif)](https://codes.ohio.gov/assets/laws/revised-code/authenticated/7/718/718.01/9-30-2025/718.01-9-30-2025.pdf) (last changed: 2026-10-20)
+- OH - [Download Authenticated PDF (linked from Ohio Revised Code Section 5747.06(A) -- Withholdin)](https://codes.ohio.gov/assets/laws/revised-code/authenticated/57/5747/5747.06/10-17-2019/5747.06-10-17-2019.pdf) (last changed: 2026-10-20)
+- OH - [Download Authenticated PDF (linked from R.C. 2716.02 — maximum garnishment is the lesser o)](https://codes.ohio.gov/assets/laws/revised-code/authenticated/27/2716/2716.02/9-30-2008/2716.02-9-30-2008.pdf) (last changed: 2026-10-20)
+- OH - [Due Dates and Payment Schedule (2025) (linked from Ohio employer withholding)](https://dam.assets.ohio.gov/image/upload/tax.ohio.gov/employer_withholding/2024-2025%20NYP%20Updates/Due_Dates_2024-2025.pdf) (last changed: 2026-10-18)
+- OH - [Due Dates and Payment Schedule (2026) (linked from Ohio employer withholding)](https://dam.assets.ohio.gov/image/upload/tax.ohio.gov/employer_withholding/2025-2026%20NYP%20Updates/Due_Dates_2025-2026.pdf) (last changed: 2026-10-18)
+- OH - [EFW2 Common Submission Errors (linked from Ohio employer withholding)](https://dam.assets.ohio.gov/image/upload/tax.ohio.gov/employer_withholding/2021-efw2-upload-common-submission-errors.pdf) (last changed: 2026-10-18)
+- OH - [EFW2 Error Codes and Descriptions (linked from Ohio employer withholding)](https://dam.assets.ohio.gov/image/upload/tax.ohio.gov/employer_withholding/efw2-upload-error-codes-and-descriptions-2021.pdf) (last changed: 2026-10-20)
+- OH - [EMPLOYER ANNUAL W-3 RECONCILIATION (linked from Village of Woodville: income tax page (withholding)](https://www.villageofwoodville.com/_files/ugd/ef2ef5_547e5bf4650c4ac4917f6505c1a6cd9c.pdf) (last changed: 2026-10-18)
+- OH - [EW 2001-01 - Proper Completion of Form IT-4 (linked from Ohio employer withholding)](https://dam.assets.ohio.gov/image/upload/tax.ohio.gov/ohio_individual/individual/information_releases/2001-01ewit4ir.pdf) (last changed: 2026-10-20)
 - OH - [Employer Withholding Taxes - Percentage Method (Effective August 1, 2026)](https://dam.assets.ohio.gov/image/upload/tax.ohio.gov/employer_withholding/2026%20Withholding%20Tables/WHT_PercentageMethod_2026.pdf) (last changed: 2026-09-24)
 - OH - [Excel File Generator Tool (linked from Ohio Department of Taxation: municipal income tax )](https://tax.ohio.gov/static/muni-net-profit/ascii%20and%20xml/oh%20muni%20ascii%20dev%20v017%202_19_2020.xls) (last changed: 2026-10-18)
+- OH - [Excel template (linked from Ohio employer withholding)](https://dam.assets.ohio.gov/raw/upload/tax.ohio.gov/employer_withholding/Employer%20Withholding%20Templates/ODT_PEO_Report_1.xlsx) (last changed: 2026-10-20)
+- OH - [FREQUENTLY ASKED BUSINESS QUESTIONS (linked from Village of Woodville: income tax page (withholding)](https://www.villageofwoodville.com/_files/ugd/ef2ef5_671d3095bbb94e7b855bd7177f85501c.pdf) (last changed: 2026-10-18)
+- OH - [FREQUENTLY ASKED QUESTIONS (linked from Village of Woodville: income tax page (withholding)](https://www.villageofwoodville.com/_files/ugd/ef2ef5_c4df5a9b47eb40408b719b1a032a0952.pdf) (last changed: 2026-10-18)
+- OH - [Form MNP-TTI (linked from Ohio Department of Taxation: municipal income tax )](https://dam.assets.ohio.gov/image/upload/tax.ohio.gov/forms/municipal-net-profit/2021/mnp_transfer_of_info.pdf) (last changed: 2026-10-18)
+- OH - [General Fund Balance at 0.45% (linked from Village of Indian Hill -- Tax)](https://indianhill.gov/documents/income-tax-increase-0-45/) (last changed: 2026-10-20)
+- OH - [General Fund Balance at 0.5% (linked from Village of Indian Hill -- Tax)](https://indianhill.gov/documents/income-tax-increase-0-5/) (last changed: 2026-10-20)
+- OH - [IMPORTANT TAX NOTIFICATION (linked from Village of Woodville: income tax page (withholding)](https://www.villageofwoodville.com/_files/ugd/ef2ef5_7f2c69d239cb4b4280d39b32dcae18ad.pdf) (last changed: 2026-10-18)
+- OH - [INCOME TAX RETURN FORM (linked from Village of Woodville: income tax page (withholding)](https://www.villageofwoodville.com/_files/ugd/ef2ef5_79b4f5e4750649cb8c98764b7d509c71.pdf) (last changed: 2026-10-18)
+- OH - [Information Booklet for Taxpayers (linked from Ohio Department of Taxation: municipal income tax )](https://dam.assets.ohio.gov/image/upload/tax.ohio.gov/muni-net-profit/forms/taxpayer_booklet_042023.pdf) (last changed: 2026-10-18)
+- OH - [Instructions for Declaration of Estimated Payments (linked from Ohio Department of Taxation: municip](https://dam.assets.ohio.gov/image/upload/tax.ohio.gov/muni-net-profit/instructions_for_declaration_of_estimated_payments_ohio_taxation-municipal_net_profit_tax_rev3.1.21.pdf) (last changed: 2026-10-18)
+- OH - [JANUARY 12TH 2026 MEETING MINUTES (linked from Village of Woodville: income tax page (withholding)](https://www.villageofwoodville.com/_files/ugd/ef2ef5_b51c292022524d29b3b925318000fbed.pdf) (last changed: 2026-10-18)
+- OH - [JANUARY 26TH 2026 MEETING MINUTES (linked from Village of Woodville: income tax page (withholding)](https://www.villageofwoodville.com/_files/ugd/ef2ef5_5ff4eff4f9a846d3852598a970090c39.pdf) (last changed: 2026-10-18)
 - OH - [Jefferson Township -- Jefferson Township-Whitehall JEDD: 'On November 19th, 2024 ... mutually agreed](https://www.jeffersontownship.org/departments___services/economic_development___planning/jefferson_township-whitehall_jedd.php) (last changed: 2026-10-20)
 - OH - [MNP 2017-01: Information for JEDDs and JEDZs information release (linked from Ohio Department of Tax](https://dam.assets.ohio.gov/image/upload/tax.ohio.gov/muni-net-profit/information-releases/mnp2017-01_information_for_jedds_and_jedzs-1.5.24.pdf) (last changed: 2026-10-18)
 - OH - [MNP10 Tax Return (linked from Ohio Department of Taxation: municipal income tax )](https://tax.ohio.gov/static/muni-net-profit/ascii%20and%20xml/ascii%20-%20mnp10%20return%208-21-18.xlsx) (last changed: 2026-10-18)
+- OH - [MONTHLY TAX WITHHOLDING FORM (linked from Village of Woodville: income tax page (withholding)](https://www.villageofwoodville.com/_files/ugd/ef2ef5_3609a1bbc1ec47fcbb0ae4054a1365b5.pdf) (last changed: 2026-10-18)
+- OH - [Monthly Withholding Tables (linked from Ohio employer withholding)](https://dam.assets.ohio.gov/image/upload/tax.ohio.gov/employer_withholding/2026%20Withholding%20Tables/WHT_MonthlyRate_2026.pdf) (last changed: 2026-10-20)
+- OH - [Monthly Withholding Tables (linked from Ohio employer withholding)](https://dam.assets.ohio.gov/image/upload/tax.ohio.gov/employer_withholding/2025%20Withholding%20Tables/WHT_MonthlyRate_2025.pdf) (last changed: 2026-10-18)
+- OH - [Municipalities and Municipality Codes List (linked from Ohio Department of Taxation: municipal incom](https://dam.assets.ohio.gov/image/upload/v1741618460/tax.ohio.gov/muni-net-profit/municipal.tax.rate-3.7.25.pdf) (last changed: 2026-10-18)
 - OH - [Municipality Address List (linked from Ohio Department of Taxation: municipal income tax )](https://dam.assets.ohio.gov/image/upload/tax.ohio.gov/muni-net-profit/muni%20address%20list%203-5-18.pdf) (last changed: 2026-10-18)
+- OH - [Municipality/Local Government Portal User Guide (linked from Ohio Department of Taxation: municipal ](https://dam.assets.ohio.gov/image/upload/tax.ohio.gov/muni-net-profit/local%20gov%20portal%20user%20guide%2012-13-19.pdf) (last changed: 2026-10-18)
 - OH - [Ohio Auditor of State, Liberty Township (Henry County) regular audit 2021-2022: 'The JEDD was dissol](https://ohioauditor.gov/Auditsearch/Reports/2023/Liberty_Township_22_21_Henry_FINAL.pdf) (last changed: 2026-10-06)
+- OH - [Ohio Business Gateway Registration Instructions (linked from Ohio Department of Taxation: municipal ](https://dam.assets.ohio.gov/image/upload/tax.ohio.gov/muni-net-profit/modernized_gateway_registration_for_municipal_net_profit_tax_rev3.1.21.pdf) (last changed: 2026-10-18)
 - OH - [Ohio Department of Commerce -- Ohio Minimum Wage Set to Increase in 2026](https://com.ohio.gov/about-us/media-center/news/ohio%20minimum%20wage%20set%20to%20increase%20in%202026) (last changed: 2026-09-24)
 - OH - [Ohio Department of Taxation -- Employer Withholding Taxes, Percentage Method (Effective October 1, 2](https://dam.assets.ohio.gov/image/upload/tax.ohio.gov/employer_withholding/2025%20Withholding%20Tables/WHT_PercentageMethod_2025.pdf) (last changed: 2026-09-24)
 - OH - [Ohio Department of Taxation -- School Districts With an Income Tax for 2025 (Updated School District](https://dam.assets.ohio.gov/image/upload/tax.ohio.gov/employer_withholding/2024-2025%20NYP%20Updates/School_Districts_2025.pdf) (last changed: 2026-09-30)
@@ -1288,6 +1641,7 @@ These can't be watched by a script (bot protection or JavaScript-only pages). Ch
 - OH - [Ohio Department of Taxation: municipal income tax (state page for municipalities and employers)](https://tax.ohio.gov/business/municipalities) (last changed: 2026-10-18)
 - OH - [Ohio Dept of Taxation: school district income tax list](https://tax.ohio.gov/static/tax_analysis/tax_data_series/school_district_data/SDIT_LIST.pdf) (last changed: 2026-09-24)
 - OH - [Ohio Form IT 4NR — Employee's Statement of Residency in a Reciprocity State (Rev. 5/07), Ohio Depart](https://tax.ohio.gov/static/forms/employer_withholding/generic/wth_it4nr.pdf) (last changed: 2026-09-24)
+- OH - [Ohio IT 4 Employee’s Withholding Exemption Certificate (linked from Ohio employer withholding)](https://dam.assets.ohio.gov/image/upload/tax.ohio.gov/forms/employer_withholding/generic/wth-it4-combined.pdf) (last changed: 2026-10-20)
 - OH - [Ohio JEDD/JEDZ Income Tax Rate Database Table (The Finder, bulk CSV)](https://thefinder.tax.ohio.gov/api/file-downloads/content?target=https%3A%2F%2Fapi.thefinder.tax.ohio.gov%2Ffinder%2Fapi%2Fv1%2Ftax-rates%2Fdownloads%2FJEDTaxRates.csv) (last changed: 2026-09-24)
 - OH - [Ohio Municipal Income Tax Rates (The Finder, bulk CSV: read through the Finder's own download link)](https://thefinder.tax.ohio.gov/api/file-downloads/content?target=https%3A%2F%2Fapi.thefinder.tax.ohio.gov%2Ffinder%2Fapi%2Fv1%2Ftax-rates%2Fdownloads%2FMuni%2FOHMuniRateTable.csv) (last changed: 2026-10-18)
 - OH - [Ohio Revised Code 5748.01(E), definition of "taxable income" for school district income tax](https://codes.ohio.gov/ohio-revised-code/section-5748.01) (last changed: 2026-09-26)
@@ -1299,25 +1653,16 @@ These can't be watched by a script (bot protection or JavaScript-only pages). Ch
 - OH - [Ohio Revised Code Section 718.121 — Second municipality imposing tax after time period allowed for r](https://codes.ohio.gov/ohio-revised-code/section-718.121) (last changed: 2026-09-24)
 - OH - [Ohio Unemployment Contribution Rates for Calendar Year 2023-2026](https://jfs.ohio.gov/unemployment-services/for-employers/file-unemployment-taxes/tax-resources/contribution-rates) (last changed: 2026-10-15)
 - OH - [Ohio employer withholding](https://tax.ohio.gov/business/employer-withholding) (last changed: 2026-10-07)
+- OH - [QUARTERLY TAX WITHHOLDING FORM (linked from Village of Woodville: income tax page (withholding)](https://www.villageofwoodville.com/_files/ugd/ef2ef5_bf1167c7bfba4bb9a22a04b6b0dbbd1e.pdf) (last changed: 2026-10-18)
+- OH - [QUARTERLY VOUCHER (linked from Village of Woodville: income tax page (withholding)](https://www.villageofwoodville.com/_files/ugd/ef2ef5_04f52afe0409481fad8c2157a8933a33.pdf) (last changed: 2026-10-18)
 - OH - [R.C. 2716.02 — maximum garnishment is the lesser of 25% of disposable earnings, or the amount by whi](https://codes.ohio.gov/ohio-revised-code/section-2716.02) (last changed: 2026-10-18)
-- OH - [RITA (Regional Income Tax Agency): news and updates (municipal rate and law changes)](https://www.ritaohio.com/Resources/News) (last changed: 2026-10-22)
-- OH - [RITA -- Tax Rates Table, 2025 new municipalities and tax rate changes](https://www.ritaohio.com/TaxRatesTable) (last changed: 2026-10-20)
-- OH - [RITA member page (the JEDD's administering agency) -- Recent Tax and Credit History](https://www.ritaohio.com/Municipalities/Home/MemberPage?id=047) (last changed: 2026-10-20)
-- OH - [RITA member page (the JEDD's administering agency) -- Recent Tax and Credit History](https://www.ritaohio.com/Municipalities/Home/MemberPage?id=247) (last changed: 2026-10-20)
-- OH - [RITA member page -- Avon (rate history)](https://www.ritaohio.com/municipalities/Home/MemberPage?id=020) (last changed: 2026-10-20)
-- OH - [RITA member page -- Circleville (rate history)](https://www.ritaohio.com/municipalities/Home/MemberPage?id=190) (last changed: 2026-10-20)
-- OH - [RITA member page -- DeGraff (rate history)](https://www.ritaohio.com/municipalities/Home/MemberPage?id=249) (last changed: 2026-10-20)
-- OH - [RITA member page -- Germantown (rate history)](https://www.ritaohio.com/municipalities/Home/MemberPage?id=353) (last changed: 2026-10-20)
-- OH - [RITA member page -- Hanging Rock (rate history)](https://www.ritaohio.com/municipalities/Home/MemberPage?id=616) (last changed: 2026-10-20)
-- OH - [RITA member page -- Lockbourne (rate history)](https://www.ritaohio.com/municipalities/Home/MemberPage?id=427) (last changed: 2026-10-20)
-- OH - [RITA member page -- Milford JEDD VIII](https://www.ritaohio.com/municipalities/Home/MemberPage?id=869) (last changed: 2026-10-20)
-- OH - [RITA member page -- Millville (rate history)](https://www.ritaohio.com/municipalities/Home/MemberPage?id=691) (last changed: 2026-10-20)
-- OH - [RITA member page -- North Canton (rate history)](https://www.ritaohio.com/municipalities/Home/MemberPage?id=546) (last changed: 2026-10-20)
-- OH - [RITA member page -- North Hampton (rate history)](https://www.ritaohio.com/municipalities/Home/MemberPage?id=695) (last changed: 2026-10-20)
-- OH - [RITA member page -- Oak Hill (rate history)](https://www.ritaohio.com/municipalities/Home/MemberPage?id=624) (last changed: 2026-10-20)
-- OH - [RITA member page -- Rio Grande (rate history)](https://www.ritaohio.com/municipalities/Home/MemberPage?id=588) (last changed: 2026-10-20)
-- OH - [RITA member page -- Stockport (rate history)](https://www.ritaohio.com/municipalities/Home/MemberPage?id=719) (last changed: 2026-10-20)
-- OH - [RITA: tax professionals news](https://www.ritaohio.com/TaxProfessionals/News) (last changed: 2026-10-20)
+- OH - [School district rates (2026) (linked from Ohio employer withholding)](https://dam.assets.ohio.gov/image/upload/tax.ohio.gov/employer_withholding/2025-2026%20NYP%20Updates/School_Districts_2026.pdf) (last changed: 2026-10-18)
+- OH - [Semi-monthly Withholding (linked from Ohio employer withholding)](https://dam.assets.ohio.gov/image/upload/tax.ohio.gov/employer_withholding/2025%20Withholding%20Tables/WHT_Semi-MonthlyRate_2025.pdf) (last changed: 2026-10-18)
+- OH - [Semi-monthly Withholding (linked from Ohio employer withholding)](https://dam.assets.ohio.gov/image/upload/tax.ohio.gov/employer_withholding/2026%20Withholding%20Tables/WHT_Semi-MonthlyRate_2026.pdf) (last changed: 2026-10-20)
+- OH - [Simplified W-2 Field Descriptions and Error Messages (linked from Ohio employer withholding)](https://dam.assets.ohio.gov/image/upload/tax.ohio.gov/employer_withholding/2021-simplifed-w2-field-descriptions-error-messages.pdf) (last changed: 2026-10-18)
+- OH - [TAXABLE VS NONTAXABLE INCOME (linked from Village of Woodville: income tax page (withholding)](https://www.villageofwoodville.com/_files/ugd/ef2ef5_51de34806c534a27a18322c185722de7.pdf) (last changed: 2026-10-18)
+- OH - [Tax Withholding Tables - Optional Computer Method (linked from Ohio employer withholding)](https://dam.assets.ohio.gov/image/upload/tax.ohio.gov/employer_withholding/2025%20Withholding%20Tables/WHT_OptionalComputerFormula_2025.pdf) (last changed: 2026-10-18)
+- OH - [Tax Withholding Tables - Optional Computer Method (linked from Ohio employer withholding)](https://dam.assets.ohio.gov/image/upload/tax.ohio.gov/employer_withholding/2026%20Withholding%20Tables/WHT_OptionalComputerFormula_2026.pdf) (last changed: 2026-10-20)
 - OH - [The Finder: directory of every Ohio municipality (a new entry here is a new jurisdiction)](https://thefinder.tax.ohio.gov/api/file-downloads?type=municipality) (last changed: 2026-10-17)
 - OH - [The Finder: directory of every Ohio school district](https://thefinder.tax.ohio.gov/api/file-downloads?type=schoolDistrict) (last changed: 2026-10-18)
 - OH - [Village of Georgetown -- Income Tax](https://georgetownohio.gov/income-tax/) (last changed: 2026-10-04)
@@ -1325,6 +1670,19 @@ These can't be watched by a script (bot protection or JavaScript-only pages). Ch
 - OH - [Village of Woodville -- Important Tax Notification (1% local municipal income tax from July 1, 2026,](https://www.villageofwoodville.com/_files/ugd/ef2ef5_5f60f5fa78e64495b52690728f655b41.pdf) (last changed: 2026-10-20)
 - OH - [Village of Woodville -- Ordinance No. 1-2026, passed 02-09-2026: levies the village income tax, 'beg](https://www.villageofwoodville.com/_files/ugd/ef2ef5_fc1ed5429f25479b939fd57201b684f7.pdf) (last changed: 2026-10-20)
 - OH - [Village of Woodville: income tax page (withholding notice, forms, ordinance)](https://www.villageofwoodville.com/tax-information) (last changed: 2026-10-18)
+- OH - [W-2G Winners Report specifications (linked from Ohio employer withholding)](https://dam.assets.ohio.gov/image/upload/tax.ohio.gov/employer_withholding/2025-2026%20NYP%20Updates/W2G_Winners_Report_Specs.pdf) (last changed: 2026-10-18)
+- OH - [Weekly Withholding (linked from Ohio employer withholding)](https://dam.assets.ohio.gov/image/upload/tax.ohio.gov/employer_withholding/2026%20Withholding%20Tables/WHT_WeeklyRate_2026.pdf) (last changed: 2026-10-20)
+- OH - [Weekly Withholding (linked from Ohio employer withholding)](https://dam.assets.ohio.gov/image/upload/tax.ohio.gov/employer_withholding/2025%20Withholding%20Tables/WHT_WeeklyRate_2025.pdf) (last changed: 2026-10-18)
+- OH - [Withholding Tax Filing Guidelines (linked from Ohio employer withholding)](https://dam.assets.ohio.gov/image/upload/tax.ohio.gov/employer_withholding/2025-2026%20NYP%20Updates/2026_OH_Employer_School_District_Withholding_Tax_Filing_Guidelines.pdf) (last changed: 2026-10-18)
+- OH - [XML Guidelines (linked from Ohio Department of Taxation: municipal income tax )](https://dam.assets.ohio.gov/image/upload/tax.ohio.gov/muni-net-profit/ascii%20and%20xml/XML%20Instructions%207.19.23.pdf) (last changed: 2026-10-18)
+- OH - [all-year-business-return-form (linked from Village of Georgetown -- Income Tax)](https://georgetownohio.gov/documents/all-year-business-return-form/) (last changed: 2026-10-20)
+- OH - [all-year-individual-return (linked from Village of Georgetown -- Income Tax)](https://georgetownohio.gov/documents/all-year-individual-return/) (last changed: 2026-10-20)
+- OH - [all-year-monthly-withholding (linked from Village of Georgetown -- Income Tax)](https://georgetownohio.gov/documents/all-year-monthly-withholding/) (last changed: 2026-10-20)
+- OH - [all-year-quarterly-withholding (linked from Village of Georgetown -- Income Tax)](https://georgetownohio.gov/documents/all-year-quarterly-withholding/) (last changed: 2026-10-20)
+- OH - [application-for-extension-request (linked from Village of Georgetown -- Income Tax)](https://georgetownohio.gov/documents/application-for-extension-request/) (last changed: 2026-10-20)
+- OH - [business-professional-application (linked from Village of Georgetown -- Income Tax)](https://georgetownohio.gov/documents/business-professional-application/) (last changed: 2026-10-20)
+- OH - [file upload option (linked from Ohio employer withholding)](https://dam.assets.ohio.gov/raw/upload/tax.ohio.gov/employer_withholding/Employer%20Withholding%20Templates/SD101_Upload_File_2026.xls) (last changed: 2026-10-20)
+- OH - [inc-tax-ord-1236-12052023082812 (linked from Village of Georgetown -- Income Tax)](https://georgetownohio.gov/documents/inc-tax-ord-1236-12052023082812/) (last changed: 2026-10-20)
 - OK - [Form OK-W-4 (Rev. 3-2021) -- Employee's State Withholding Allowance Certificate](https://oklahoma.gov/content/dam/ok/en/tax/documents/forms/businesses/general/OK-W-4.pdf) (last changed: 2026-10-20)
 - OK - [Oklahoma Employment Security Commission -- Important Numbers for Employers 2026](https://oklahoma.gov/content/dam/ok/en/oesc/images/misc/Employer-Improtant-Numbers-2026.pdf) (last changed: 2026-10-20)
 - OK - [Oklahoma Tax Commission -- 2025 Oklahoma Income Tax Withholding Tables (Packet OW-2, revised 11-2024](https://www.oklahoma.gov/content/dam/ok/en/tax/documents/resources/publications/businesses/withholding-tables/WHTables-2025.pdf) (last changed: 2026-10-20)

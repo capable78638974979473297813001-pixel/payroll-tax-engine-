@@ -45,6 +45,21 @@ export function isDue(item: QueuedMeterEvent, now: number = Date.now()): boolean
   return now - new Date(item.lastAttemptAt).getTime() >= retryDelayMs(item.attempts);
 }
 
+/**
+ * Stripe answers 400 when a meter event's identifier was already accepted.
+ * That delivery already happened, so the queue must drop the item instead
+ * of retrying it forever.
+ */
+export function isDuplicateMeterEvent(err: unknown): boolean {
+  const message = err instanceof Error ? err.message : String(err ?? '');
+  const code = err && typeof err === 'object' && 'code' in err ? String((err as { code?: unknown }).code ?? '') : '';
+  if (code === 'resource_already_exists') return true;
+  const namesIdentifier = /identifier/i.test(message);
+  if (/already exists/i.test(message) && namesIdentifier) return true;
+  if (/duplicate/i.test(message) && namesIdentifier) return true;
+  return false;
+}
+
 export async function deliverMeterEvent(
   item: QueuedMeterEvent,
   eventName: string,
@@ -64,6 +79,7 @@ export async function deliverMeterEvent(
     });
     return { delivered: true };
   } catch (err) {
+    if (isDuplicateMeterEvent(err)) return { delivered: true };
     return { delivered: false, error: err instanceof Error ? err.message : String(err) };
   }
 }

@@ -1,30 +1,36 @@
 import { createServer, type IncomingMessage, type ServerResponse } from 'node:http';
 import { createHash, randomBytes, randomInt, timingSafeEqual } from 'node:crypto';
-import { existsSync, readFileSync, readdirSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
+import { gzipSync } from 'node:zlib';
 import { fileURLToPath } from 'node:url';
 import { dirname, join, resolve } from 'node:path';
 
 import { calculatePaycheck } from '../src/calculate.ts';
+import type { PayFrequency } from '../src/types.ts';
 import { CannotComputeError, UnsupportedTaxYearError } from '../src/registry.ts';
+import { listUniqueTaxIds, payCalc, resolveUniqueTaxId, type PayCalcRequest } from '../api/ste-compat.ts';
+import { runEmbeddedPayroll, type PlatformEmployeeInput } from '../payroll/platform.ts';
 import { pointSourceOf, resolveEmployee } from '../geocode/index.ts';
 import {
-  withDb, readDb, appendUsage, hitStoredLimit,
+  withDb, readDb, hitStoredLimit,
   type AccountRecord, type AuthSession, type DB, type KeyRecord, type PaymentMethodRecord,
   type SavedScenario, type SubscriptionRecord, type TermsAcceptance, type TermsQuote,
 } from './lib/store.ts';
+import { dashboardUsage, recordAccountUsage, type RecordUsageInput } from './lib/usage.ts';
 import { TRIAL_DAYS, estimate as computePricing } from './lib/pricing.ts';
 import { TERMS_VERSION, TERM_MONTHS, termsClauses } from './lib/terms.ts';
-import { isEmailConfigured, sendVerificationEmail, sendContactEmail } from './lib/mail.ts';
+import { isEmailConfigured, scrubMailLog, sendVerificationEmail, sendContactEmail } from './lib/mail.ts';
 import { validatePaycheckInput } from './lib/validate.ts';
 import { openApiDocument, paycheckRequestSchema, unknownFieldWarnings } from './lib/api-spec.ts';
 import { ExtrasRefusal, runPaycheckExtras, validatePaycheckExtras } from './lib/extras.ts';
 import { keyLifeFor } from './lib/keylife.ts';
 import { coverage, searchLocal } from './lib/coverage.ts';
 import { verifierConfigured, issueCode, checkCode } from './lib/verifier.ts';
-import { resolveCheckoutOrigin, stripeConfigured, stripeKeyRefused } from '../api/stripe.ts';
-import { hashPassword, verifyPassword, passwordProblem, MAX_PASSWORD } from './lib/password.ts';
+import { checkoutInProduction, isAllowedCheckoutUrl, resolveCheckoutOrigin, stripeConfigured, stripeKeyRefused } from '../api/stripe.ts';
+import { hashPassword, verifyPassword, passwordNeedsRehash, passwordProblem, MAX_PASSWORD } from './lib/password.ts';
+import { canonicalOrigin, decorateHtml, indexablePages, pageForRoute, robotsTxt, sitemapXml } from './lib/seo.ts';
 import {
-  billingConfigured, meteringConfigured, enqueueMeterEvent, flushMeterQueue,
+  billingConfigured, meteringConfigured, flushMeterQueue,
   createBillingCustomer, startMeteredCheckout, completeMeteredCheckout, interpretWebhook,
 } from './lib/billing.ts';
 
@@ -43,7 +49,7 @@ try {
  *
  * The signup flow is staged deliberately, in this order:
  *
- *   1. POST /api/signup        name, work email, business, phone
+ *   1. POST /api/signup        name, work email, business, optional phone
  *   2. POST /api/verify-email  6-digit code proves they own the address
  *   3. GET  /api/terms         the exact clauses + figures they must see
  *   4. POST /api/accept-terms  typed signature, stored immutably
@@ -111,16 +117,110 @@ const HOUR_MS = 60 * 60_000;
 const signinPerHour = () => Number(process.env.SIGNIN_PER_HOUR ?? 10);
 const signupPerHour = () => Number(process.env.SIGNUP_PER_HOUR ?? 10);
 
+/** Production is NODE_ENV=production, or a process Render itself started. */
+function inProduction(): boolean {
+  return checkoutInProduction();
+}
+
 /**
- * Print verification codes to the console only when no email provider is
- * configured (local development). With email on, a code in the logs is a
- * working sign-in credential for anyone who can read them.
+ * Print verification codes to the console only in development, and only
+ * when no email provider is configured. A code in a production log is a
+ * working sign-in credential. The verify page mentions the log only when
+ * this is true.
  */
 function logCodesToConsole(): boolean {
-  return !isEmailConfigured();
+  return !isEmailConfigured() && !verifierConfigured() && !inProduction();
+}
+
+type CodeDelivery =
+  | { limited: true; retryAfterSec: number }
+  | { limited: false; emailSent: boolean; cooldown: boolean; devCodeHint: boolean };
+
+/**
+ * Send a signup or sign-in code. Failures are logged without the code,
+ * the address, or any API key. A verifier cooldown means a code was just
+ * sent, so the caller treats it as delivered.
+ */
+async function deliverCodeEmail(
+  where: 'signup' | 'sign-in',
+  acct: { name: string; email: string; code: string; codeExpiresAt: string },
+): Promise<CodeDelivery> {
+  if (verifierConfigured()) {
+    const issued = await issueCode(acct.email, acct.name);
+    if (issued.status === 429) return { limited: true, retryAfterSec: issued.retryAfterSec ?? 3600 };
+    const cooldown = issued.cooldown === true;
+    const emailSent = issued.sent || cooldown;
+    if (!issued.ok) console.error(`[${where}] verifier could not issue a code`);
+    else if (!emailSent) console.error(`[${where}] verification email failed`);
+    return { limited: false, emailSent, cooldown, devCodeHint: false };
+  }
+  if (logCodesToConsole()) {
+    console.log('');
+    console.log(`+- Omnia ${where} code (dev: no email provider) -`);
+    console.log(`|  ${acct.email}`);
+    console.log(`|  CODE: ${acct.code}`);
+    console.log(`|  expires ${acct.codeExpiresAt}`);
+    console.log('+--------------------------------------------------');
+    console.log('');
+    return { limited: false, emailSent: false, cooldown: false, devCodeHint: true };
+  }
+  if (!isEmailConfigured()) {
+    console.error(`[${where}] verification email failed: no email provider is configured`);
+    return { limited: false, emailSent: false, cooldown: false, devCodeHint: false };
+  }
+  const result = await sendVerificationEmail({
+    name: acct.name,
+    email: acct.email,
+    code: acct.code,
+    expiresAt: acct.codeExpiresAt,
+  });
+  // The provider's status and message only (mail.ts already removed keys and codes), under the
+  // [mail] tag the verifier client also uses, so one grep finds a delivery failure on either path.
+  if (!result.sent) console.error(`[mail] verification email failed: ${where}: ${scrubMailLog(result.reason ?? 'unknown error')}`);
+  return { limited: false, emailSent: result.sent, cooldown: false, devCodeHint: false };
+}
+
+/**
+ * The "code is in the server log" sentence is a local-development aid.
+ * Production (NODE_ENV=production, including the Docker image) must not show
+ * it. OMNIA_DEV_CODE_HINT=1 or VERIFIER_DEV=1 forces it on for a deliberate
+ * local debug session.
+ */
+function showDevCodeHint(): boolean {
+  const flag = (process.env.OMNIA_DEV_CODE_HINT ?? '').trim().toLowerCase();
+  if (flag === '1' || flag === 'true') return true;
+  if ((process.env.VERIFIER_DEV ?? '').trim() === '1') return true;
+  return process.env.NODE_ENV !== 'production';
 }
 
 const SESSION_COOKIE = 'omnia_session';
+
+/**
+ * Plaintext of a code issued in this process. The store keeps a SHA-256
+ * once email is configured or the process is production, so a database
+ * copy is not a working sign-in code. Development with no mailer still
+ * stores the code in the clear because the same value is printed to the
+ * console for the person at the keyboard.
+ */
+const pendingCodes = new Map<string, string>();
+
+function sealCode(code: string): string {
+  if (logCodesToConsole()) return code;
+  return 'sha256:' + createHash('sha256').update(code).digest('hex');
+}
+
+function codeMatches(stored: string, presented: string): boolean {
+  if (stored.startsWith('sha256:')) {
+    return safeEqual(stored, 'sha256:' + createHash('sha256').update(presented).digest('hex'));
+  }
+  return safeEqual(stored, presented);
+}
+
+function knownPlaintext(email: string, stored: string | null | undefined): string | null {
+  if (!stored) return null;
+  if (!stored.startsWith('sha256:')) return stored;
+  return pendingCodes.get(email) ?? null;
+}
 
 // The set of state codes this build can actually compute, read once from
 // data/states/. Used to reject an unknown workState at validation time
@@ -156,13 +256,84 @@ function supportedYears(): number[] {
 // Applied to every response. Cheap, standard hardening: don't let the
 // content type be sniffed, don't leak the referrer, don't allow framing,
 // and stamp the API version so a caller can tell which build answered.
-const SECURITY_HEADERS: Record<string, string> = {
-  'X-Content-Type-Options': 'nosniff',
-  'Referrer-Policy': 'no-referrer',
-  'X-Frame-Options': 'SAMEORIGIN',
-  'X-Omnia-Version': API_VERSION,
-  ...((process.env.PUBLIC_BASE_URL ?? '').startsWith('https://') ? { 'Strict-Transport-Security': 'max-age=31536000' } : {}),
-};
+// HSTS is sent only for the public host. A header on a localhost response
+// would pin the browser to HTTPS for localhost.
+function hstsValue(req?: IncomingMessage): string | null {
+  const base = (process.env.PUBLIC_BASE_URL ?? '').trim();
+  if (!base.startsWith('https://')) return null;
+  if (!req) return null;
+  let canonicalHost = '';
+  try { canonicalHost = new URL(base).host.toLowerCase(); } catch { return null; }
+  const host = requestHost(req);
+  if (host !== canonicalHost && host !== `www.${canonicalHost}`) return null;
+  return 'max-age=31536000; includeSubDomains';
+}
+
+function securityHeaders(req?: IncomingMessage, nonce?: string): Record<string, string> {
+  const headers: Record<string, string> = {
+    'X-Content-Type-Options': 'nosniff',
+    'Referrer-Policy': 'no-referrer',
+    'X-Frame-Options': 'DENY',
+    'Permissions-Policy': 'camera=(), microphone=(), geolocation=(), payment=(), usb=()',
+    'X-Omnia-Version': API_VERSION,
+    'Content-Security-Policy': nonce
+      ? [
+          "default-src 'self'",
+          `script-src 'self' 'nonce-${nonce}'`,
+          "script-src-attr 'none'",
+          "style-src 'self' 'unsafe-inline'",
+          "style-src-attr 'unsafe-inline'",
+          "img-src 'self' data:",
+          "font-src 'self'",
+          "connect-src 'self'",
+          "frame-ancestors 'none'",
+          "base-uri 'self'",
+          "form-action 'self'",
+          "object-src 'none'",
+          "frame-src 'none'",
+        ].join('; ')
+      : "default-src 'none'; frame-ancestors 'none'; base-uri 'none'",
+  };
+  const hsts = hstsValue(req);
+  if (hsts) headers['Strict-Transport-Security'] = hsts;
+  return headers;
+}
+
+/** Host the browser asked for, lowercased, without a port. */
+function requestHost(req: IncomingMessage): string {
+  const trust = trustProxy();
+  const forwarded = trust ? String(req.headers['x-forwarded-host'] ?? '').split(',')[0].trim() : '';
+  const raw = (forwarded || String(req.headers.host ?? '')).split(',')[0].trim().toLowerCase();
+  return raw.replace(/:\d+$/, '');
+}
+
+function requestProto(req: IncomingMessage): 'http' | 'https' {
+  if (trustProxy()) {
+    const proto = String(req.headers['x-forwarded-proto'] ?? '').split(',')[0].trim().toLowerCase();
+    if (proto === 'https' || proto === 'http') return proto;
+  }
+  return 'http';
+}
+
+/**
+ * Send http://omniatax.io and www.omniatax.io to https://omniatax.io.
+ * Health checks and any other host (localhost, the Render probe) stay put.
+ */
+function canonicalRedirect(req: IncomingMessage, rawUrl: string): string | null {
+  const pathOnly = rawUrl.split('?')[0] ?? '/';
+  if (pathOnly === '/healthz' || pathOnly === '/api/health' || pathOnly === '/v1/health') return null;
+  const base = (process.env.PUBLIC_BASE_URL ?? '').trim().replace(/\/+$/, '');
+  if (!base.startsWith('https://')) return null;
+  let canonical: URL;
+  try { canonical = new URL(base); } catch { return null; }
+  const host = requestHost(req);
+  const canonicalHost = canonical.host.toLowerCase();
+  const toWww = host === `www.${canonicalHost}`;
+  const toHttps = host === canonicalHost && requestProto(req) === 'http';
+  if (!toWww && !toHttps) return null;
+  const path = rawUrl.startsWith('/') && !rawUrl.startsWith('//') ? rawUrl : '/';
+  return canonical.origin + path;
+}
 
 /** True when the browser's Origin (if any) is this site. */
 function sameOrigin(req: IncomingMessage): boolean {
@@ -194,25 +365,34 @@ function sendJson(res: ServerResponse, status: number, body: unknown, extraHeade
     'Content-Type': 'application/json; charset=utf-8',
     'Content-Length': Buffer.byteLength(payload),
     'Cache-Control': 'no-store',
-    ...SECURITY_HEADERS,
+    ...securityHeaders(res.req),
+    ...corsHeaders(res.req),
     ...extraHeaders,
   };
   delete headers['Set-Cookie'];
   if (cookies.length === 1) headers['Set-Cookie'] = cookies[0];
   else if (cookies.length > 1) headers['Set-Cookie'] = cookies;
+  const bytes = maybeGzip(res.req, Buffer.from(payload), headers);
+  headers['Content-Length'] = bytes.length;
   res.writeHead(status, headers);
-  res.end(payload);
+  res.end(bytes);
 }
 
-function sendHtml(res: ServerResponse, path: string): void {
-  const html = readFileSync(path);
-  res.writeHead(200, {
+function sendHtml(req: IncomingMessage, res: ServerResponse, file: string, route: string): void {
+  const nonce = randomBytes(16).toString('base64url');
+  const html = decorateHtml(readFileSync(file, 'utf8'), route, nonce);
+  const headers: Record<string, string | number | readonly string[]> = {
     'Content-Type': 'text/html; charset=utf-8',
-    'Content-Length': html.byteLength,
     'Cache-Control': 'no-store',
-    ...SECURITY_HEADERS,
-  });
-  res.end(html);
+    ...securityHeaders(req, nonce),
+    ...corsHeaders(req),
+  };
+  const csrf = csrfCookie(req);
+  if (csrf) headers['Set-Cookie'] = csrf;
+  const body = maybeGzip(req, Buffer.from(html), headers);
+  headers['Content-Length'] = body.length;
+  res.writeHead(200, headers);
+  res.end(body);
 }
 
 /**
@@ -225,6 +405,7 @@ function clientConfig() {
     termMonths: TERM_MONTHS,
     codeTtlSec: CODE_TTL_MS / 1000,
     codeCooldownSec: CODE_COOLDOWN_MS / 1000,
+    devCodeHint: showDevCodeHint(),
     maxCodeAttempts: MAX_CODE_ATTEMPTS,
     rateLimitPerMin: paycheckLimiterLimit(),
     termsVersion: TERMS_VERSION,
@@ -237,18 +418,27 @@ function apiOrigin(): string {
   return /^https?:\/\//.test(configured) ? configured : `http://localhost:${PORT}`;
 }
 
-function sendPage(res: ServerResponse, path: string): void {
-  const html = readFileSync(path, 'utf8')
-    .replace('<!--OMNIA_CONFIG-->', `<script>window.OMNIA=${JSON.stringify(clientConfig())};</script>`)
-    .replaceAll('https://api.omnia.tax', apiOrigin());
-  const buf = Buffer.from(html);
-  res.writeHead(200, {
+function sendPage(req: IncomingMessage, res: ServerResponse, path: string, route: string): void {
+  const nonce = randomBytes(16).toString('base64url');
+  const html = decorateHtml(
+    readFileSync(path, 'utf8')
+      .replace('<!--OMNIA_CONFIG-->', `<script>window.OMNIA=${JSON.stringify(clientConfig())};</script>`)
+      .replaceAll('https://api.omnia.tax', apiOrigin()),
+    route,
+    nonce,
+  );
+  const headers: Record<string, string | number | readonly string[]> = {
     'Content-Type': 'text/html; charset=utf-8',
-    'Content-Length': buf.byteLength,
     'Cache-Control': 'no-store',
-    ...SECURITY_HEADERS,
-  });
-  res.end(buf);
+    ...securityHeaders(req, nonce),
+    ...corsHeaders(req),
+  };
+  const csrf = csrfCookie(req);
+  if (csrf) headers['Set-Cookie'] = csrf;
+  const body = maybeGzip(req, Buffer.from(html), headers);
+  headers['Content-Length'] = body.length;
+  res.writeHead(200, headers);
+  res.end(body);
 }
 
 function contentTypeFor(file: string): string {
@@ -264,35 +454,123 @@ function contentTypeFor(file: string): string {
 }
 
 /**
- * Static files are always revalidated (no-cache) and carry an ETag, so a
- * deploy shows up on the next page load instead of after an hour of stale
- * CSS, while an unchanged file still costs only a 304.
+ * Static files cache for a day and must revalidate after that. They carry
+ * an ETag, so an unchanged file still costs only a 304 once the browser
+ * checks again. HTML stays no-store because it is rewritten per request.
  */
 function sendStatic(res: ServerResponse, path: string, contentType: string, req?: IncomingMessage): void {
   const buf = readFileSync(path);
   const etag = '"' + createHash('sha1').update(buf).digest('base64url') + '"';
-  const headers = { 'Cache-Control': 'no-cache', ETag: etag, ...SECURITY_HEADERS };
+  const headers: Record<string, string | number | readonly string[]> = {
+    'Content-Type': contentType,
+    'Cache-Control': 'public, max-age=86400, must-revalidate',
+    ETag: etag,
+    ...securityHeaders(req),
+  };
   if (req && req.headers['if-none-match'] === etag) {
     res.writeHead(304, headers);
     res.end();
     return;
   }
-  res.writeHead(200, { 'Content-Type': contentType, 'Content-Length': buf.byteLength, ...headers });
-  res.end(buf);
+  const body = maybeGzip(req, buf, headers);
+  res.writeHead(200, { 'Content-Length': body.length, ...headers });
+  res.end(body);
 }
+
+function maybeGzip(req: IncomingMessage | undefined, body: Buffer, headers: Record<string, string | number | readonly string[]>): Buffer {
+  const type = String(headers['Content-Type'] ?? '');
+  const accept = String(req?.headers['accept-encoding'] ?? '');
+  if (body.length < 256 || !/\bgzip\b/.test(accept) || !/text\/|json|javascript|xml|\bsvg\b/.test(type)) return body;
+  headers['Content-Encoding'] = 'gzip';
+  const vary = headers['Vary'];
+  headers['Vary'] = vary ? `${vary}, Accept-Encoding` : 'Accept-Encoding';
+  return gzipSync(body, { level: 6 });
+}
+
+/** Origins allowed to read this API from a browser. Everyone else gets no CORS headers. */
+function corsHeaders(req: IncomingMessage | undefined): Record<string, string> {
+  const origin = req?.headers.origin;
+  if (!origin || Array.isArray(origin)) return {};
+  let requestOrigin = '';
+  try { requestOrigin = new URL(origin).origin; } catch { return {}; }
+  const allowed = new Set<string>([canonicalOrigin(), `http://localhost:${PORT}`, `http://127.0.0.1:${PORT}`]);
+  if (!allowed.has(requestOrigin)) return {};
+  return {
+    'Access-Control-Allow-Origin': requestOrigin,
+    'Access-Control-Allow-Credentials': 'true',
+    Vary: 'Origin',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-CSRF-Token, Stripe-Signature',
+    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+  };
+}
+
+const CSRF_COOKIE = 'omnia_csrf';
+/** Browser POSTs that authenticate with a cookie. Bearer-key and webhook routes are not in this list. */
+const CSRF_EXEMPT = new Set([
+  '/api/billing/webhook', '/v1/billing/webhook',
+  '/api/paycheck', '/v1/paycheck',
+  '/api/address', '/v1/address',
+]);
+
+function readCookie(req: IncomingMessage, name: string): string | null {
+  const header = req.headers.cookie;
+  if (!header) return null;
+  for (const part of header.split(';')) {
+    const [k, ...v] = part.trim().split('=');
+    if (k === name) return decodeURIComponent(v.join('=')) || null;
+  }
+  return null;
+}
+
+/** Set a double-submit token when the browser does not already have one. */
+function csrfCookie(req: IncomingMessage): string | null {
+  const existing = readCookie(req, CSRF_COOKIE);
+  if (existing && /^[A-Za-z0-9_-]{32,128}$/.test(existing)) return null;
+  const token = randomBytes(32).toString('base64url');
+  return `${CSRF_COOKIE}=${token}; Path=/; SameSite=Lax; Max-Age=31536000` + (cookieSecure() ? '; Secure' : '');
+}
+
+function browserRequest(req: IncomingMessage): boolean {
+  return Boolean(req.headers.origin || req.headers['sec-fetch-site']);
+}
+
+function csrfOk(req: IncomingMessage): boolean {
+  if (!browserRequest(req)) return true;
+  const cookie = readCookie(req, CSRF_COOKIE);
+  const header = req.headers['x-csrf-token'];
+  const presented = Array.isArray(header) ? header[0] : header;
+  if (!cookie || !presented) return false;
+  return safeEqual(cookie, presented);
+}
+
+const MAX_BODY_BYTES = 1_000_000;
 
 function readBody(req: IncomingMessage): Promise<string> {
   return new Promise((resolve, reject) => {
-    let data = '';
-    req.on('data', (chunk) => {
-      data += chunk;
-      if (data.length > 1_000_000) {
-        reject(new Error('Request body too large.'));
-        req.destroy();
+    const chunks: Buffer[] = [];
+    let received = 0;
+    let settled = false;
+    const fail = (err: Error) => {
+      if (settled) return;
+      settled = true;
+      reject(err);
+    };
+    req.on('data', (chunk: Buffer) => {
+      if (settled) return;
+      received += chunk.length;
+      if (received > MAX_BODY_BYTES) {
+        chunks.length = 0;
+        fail(new Error('Request body too large.'));
+        return;
       }
+      chunks.push(chunk);
     });
-    req.on('end', () => resolve(data));
-    req.on('error', reject);
+    req.on('end', () => {
+      if (settled) return;
+      settled = true;
+      resolve(Buffer.concat(chunks).toString('utf8'));
+    });
+    req.on('error', fail);
   });
 }
 
@@ -342,8 +620,10 @@ async function handleSignup(req: IncomingMessage, res: ServerResponse): Promise<
   const company = (body.company ?? '').trim();
   const phone = (body.phone ?? '').trim();
 
-  if (!name || !isValidEmail(email) || !company || !phone) {
-    sendJson(res, 400, { error: 'Name, a valid work email, business name and phone are all required.' });
+  // Phone is stored when the visitor types one. Nothing else reads it:
+  // no texts, no billing, no display. An empty phone is a valid signup.
+  if (!name || !isValidEmail(email) || !company) {
+    sendJson(res, 400, { error: 'Name, a valid work email, and a business name are required.' });
     return;
   }
   if (name.length > 200 || email.length > 254 || company.length > 200 || phone.length > 40) {
@@ -388,17 +668,20 @@ async function handleSignup(req: IncomingMessage, res: ServerResponse): Promise<
     pruneUnverified(db, now);
 
     const existing = db.accounts[email];
-    const cooling =
-      existing?.codeRequestedAt && now - new Date(existing.codeRequestedAt).getTime() < CODE_COOLDOWN_MS;
+    const cooling = Boolean(
+      existing?.code && existing.codeRequestedAt && now - new Date(existing.codeRequestedAt).getTime() < CODE_COOLDOWN_MS,
+    );
     const remote = verifierConfigured();
-    const code = remote ? null : cooling && existing.code ? existing.code : String(randomInt(100000, 1000000));
+    const reused = !remote && cooling ? knownPlaintext(email, existing?.code) : null;
+    const code = remote ? null : reused ?? String(randomInt(100000, 1000000));
+    if (code) pendingCodes.set(email, code);
 
     const record: AccountRecord = {
       name,
       email,
       company,
       phone,
-      code,
+      code: code ? sealCode(code) : null,
       codeRequestedAt: cooling ? existing!.codeRequestedAt : new Date(now).toISOString(),
       codeExpiresAt: remote ? null : cooling ? existing!.codeExpiresAt : new Date(now + CODE_TTL_MS).toISOString(),
       codeAttempts: remote ? 0 : cooling ? existing!.codeAttempts ?? 0 : 0,
@@ -430,39 +713,25 @@ async function handleSignup(req: IncomingMessage, res: ServerResponse): Promise<
     return record;
   });
 
-  let emailSent = false;
-  if (verifierConfigured()) {
-    // The Python verifier owns the code: it mints, mails and later checks it.
-    const issued = await issueCode(email, account.name);
-    if (issued.status === 429) {
-      sendJson(res, 429, { error: 'Too many codes requested for this address. Try again later.', code: 'rate_limited' }, { 'Retry-After': String(issued.retryAfterSec ?? 3600) });
-      return;
-    }
-    emailSent = issued.sent;
-    if (!issued.ok) console.error('[signup] verifier could not issue a code');
-  } else if (logCodesToConsole()) {
-    // Local development only: no email provider, so the code has to be
-    // readable somewhere. Never taken when RESEND_API_KEY is set.
-    console.log('');
-    console.log('+- Omnia verification code (dev: no email provider) -');
-    console.log(`|  ${email}`);
-    console.log(`|  CODE: ${account.code}`);
-    console.log(`|  expires ${account.codeExpiresAt}`);
-    console.log('+--------------------------------------------------');
-    console.log('');
-  } else {
-    const result = await sendVerificationEmail({
+  const delivery = account.code && !pendingCodes.get(email)
+    ? { limited: false as const, emailSent: true, cooldown: true, devCodeHint: false }
+    : await deliverCodeEmail('signup', {
       name: account.name,
       email,
-      code: account.code!,
-      expiresAt: account.codeExpiresAt!,
+      code: pendingCodes.get(email) ?? '',
+      codeExpiresAt: account.codeExpiresAt ?? '',
     });
-    emailSent = result.sent;
-    // Never the code, and no personal details: just that delivery failed.
-    if (!result.sent) console.error(`[signup] verification email failed: ${result.reason}`);
+  if (delivery.limited) {
+    sendJson(res, 429, { error: 'Too many codes requested for this address. Try again later.', code: 'rate_limited' }, { 'Retry-After': String(delivery.retryAfterSec) });
+    return;
   }
 
-  sendJson(res, 200, { ok: true, emailSent, alreadyVerified: Boolean(account.emailVerifiedAt) });
+  sendJson(res, 200, {
+    ok: true,
+    emailSent: delivery.emailSent,
+    cooldown: delivery.cooldown,
+    devCodeHint: delivery.devCodeHint,
+  });
 }
 
 /** Drop never-verified signups past retention (and their dangling state). */
@@ -500,35 +769,43 @@ async function handleSignin(req: IncomingMessage, res: ServerResponse): Promise<
     if (!rl.allowed) return { limited: true as const, retryAfterSec: rl.retryAfterSec };
     const a = db.accounts[email];
     if (!a || !a.emailVerifiedAt) return { acct: null };
-    const cooling = a.codeRequestedAt && a.code && now - new Date(a.codeRequestedAt).getTime() < CODE_COOLDOWN_MS;
+    const cooling = Boolean(a.codeRequestedAt && a.code && now - new Date(a.codeRequestedAt).getTime() < CODE_COOLDOWN_MS);
+    let plain = '';
     if (verifierConfigured()) {
       a.codeRequestedAt = new Date(now).toISOString();
     } else if (!cooling) {
-      a.code = String(randomInt(100000, 1000000));
+      plain = String(randomInt(100000, 1000000));
+      pendingCodes.set(email, plain);
+      a.code = sealCode(plain);
       a.codeRequestedAt = new Date(now).toISOString();
       a.codeExpiresAt = new Date(now + CODE_TTL_MS).toISOString();
       a.codeAttempts = 0;
+    } else {
+      plain = knownPlaintext(email, a.code) ?? '';
     }
-    return { acct: { name: a.name, email: a.email, code: a.code ?? '', codeExpiresAt: a.codeExpiresAt ?? '' } };
+    return { acct: { name: a.name, email: a.email, code: plain, codeExpiresAt: a.codeExpiresAt ?? '', cooling } };
   });
   if ('limited' in outcome) {
     sendJson(res, 429, { error: 'Too many sign-in attempts. Try again later.', code: 'rate_limited' }, { 'Retry-After': String(outcome.retryAfterSec) });
     return;
   }
 
+  const configured = isEmailConfigured() || verifierConfigured();
+  // The JSON is the same whether or not the address has an account, and
+  // whether or not the provider accepted the message. A different
+  // emailSent for a real mailbox is an existence oracle. Failures are logged.
+  const devHint = !configured && !inProduction();
+  const publicBody = { ok: true, emailConfigured: configured, emailSent: configured, cooldown: false, devCodeHint: devHint };
   const acct = outcome.acct;
-  if (acct && verifierConfigured()) {
-    const issued = await issueCode(acct.email, acct.name);
-    if (!issued.ok) console.error('[sign-in] verifier could not issue a code');
-  } else if (acct) {
-    if (logCodesToConsole()) {
-      console.log(`[sign-in code, dev: no email provider] ${acct.email}: ${acct.code} (expires ${acct.codeExpiresAt})`);
-    } else {
-      const result = await sendVerificationEmail({ name: acct.name, email: acct.email, code: acct.code, expiresAt: acct.codeExpiresAt });
-      if (!result.sent) console.error(`[sign-in] verification email failed: ${result.reason}`);
-    }
+  if (!acct) {
+    sendJson(res, 200, publicBody);
+    return;
   }
-  sendJson(res, 200, { ok: true, emailConfigured: isEmailConfigured() || verifierConfigured() });
+  if (!acct.cooling) {
+    const delivery = await deliverCodeEmail('sign-in', acct);
+    if (delivery.limited || !delivery.emailSent) console.error('[sign-in] verification email failed');
+  }
+  sendJson(res, 200, publicBody);
 }
 
 // ---------------------------------------------------------------------
@@ -574,7 +851,7 @@ async function handleVerifyEmail(req: IncomingMessage, res: ServerResponse): Pro
       return { ok: false as const, error: TOO_MANY };
     }
     const live = Boolean(acct?.code && acct.codeExpiresAt && now <= new Date(acct.codeExpiresAt).getTime());
-    if (!remote && (!acct || !live || !safeEqual(acct.code!, code))) {
+    if (!remote && (!acct || !live || !codeMatches(acct.code!, code))) {
       const hourly = hitStoredLimit(db, hourKey, MAX_CODE_GUESSES_PER_HOUR, HOUR_MS, now);
       // Unknown addresses get a stored counter too, so "burned" looks
       // the same for them as for real accounts.
@@ -584,6 +861,7 @@ async function handleVerifyEmail(req: IncomingMessage, res: ServerResponse): Pro
       if (burned && acct) {
         acct.code = null;
         acct.codeExpiresAt = null;
+        pendingCodes.delete(email);
       }
       return { ok: false as const, error: burned ? TOO_MANY : INVALID };
     }
@@ -593,6 +871,11 @@ async function handleVerifyEmail(req: IncomingMessage, res: ServerResponse): Pro
     acct.code = null;
     acct.codeExpiresAt = null;
     acct.codeAttempts = 0;
+    pendingCodes.delete(email);
+    // Rotate whatever cookie this browser already held so a session planted
+    // before sign-in cannot be reused. Other devices keep their own rows.
+    const previous = cookieToken(req);
+    if (previous) endSession(db, previous);
     const token = startSession(db, acct, 'code');
     if (acct.stage === 'unverified') acct.stage = 'verified';
 
@@ -711,10 +994,14 @@ async function handleSigninPassword(req: IncomingMessage, res: ServerResponse): 
     sendJson(res, 401, { error: INVALID });
     return;
   }
+  const upgraded = passwordNeedsRehash(gate.hash) ? await hashPassword(password) : null;
+  const previous = cookieToken(req);
 
   const outcome = withDb((db) => {
     const acct = db.accounts[email];
     if (!acct || !acct.emailVerifiedAt) return null;
+    if (upgraded) acct.passwordHash = upgraded;
+    if (previous) endSession(db, previous);
     const token = startSession(db, acct, 'password');
     return { ok: true as const, sessionToken: token, name: acct.name, email: acct.email, company: acct.company, stage: acct.stage, hasPassword: true };
   });
@@ -776,13 +1063,20 @@ async function handlePassword(req: IncomingMessage, res: ServerResponse): Promis
   }
 
   const newHash = await hashPassword(body.password as string);
-  withDb((db) => {
+  const rotated = withDb((db) => {
     const a = db.accounts[session.email];
-    if (!a) return;
+    if (!a) return null;
     a.passwordHash = newHash;
     a.passwordSetAt = new Date().toISOString();
+    // A password change ends every device. This browser gets a new cookie.
+    revokeAccountSessions(db, a.email);
+    return startSession(db, a, 'password');
   });
-  sendJson(res, 200, { ok: true });
+  if (!rotated) {
+    sendJson(res, 401, { error: 'Sign in first.' });
+    return;
+  }
+  sendJson(res, 200, { ok: true, sessionToken: rotated }, { 'Set-Cookie': sessionCookie(rotated, SESSION_TTL_MS) });
 }
 
 function safeEqual(a: string, b: string): boolean {
@@ -792,7 +1086,11 @@ function safeEqual(a: string, b: string): boolean {
 }
 
 function cookieSecure(): boolean {
-  return (process.env.PUBLIC_BASE_URL ?? '').startsWith('https://') || process.env.COOKIE_SECURE === '1';
+  // Render serves the site over https and talks to this process over http.
+  // The Secure flag has to follow the public site, not the hop in front of it.
+  return (process.env.PUBLIC_BASE_URL ?? '').startsWith('https://')
+    || process.env.COOKIE_SECURE === '1'
+    || Boolean((process.env.RENDER ?? '').trim());
 }
 
 function sessionCookie(token: string, ttlMs: number): string {
@@ -827,6 +1125,19 @@ function handleSignout(req: IncomingMessage, res: ServerResponse): void {
     });
   }
   sendJson(res, 200, { ok: true }, { 'Set-Cookie': sessionCookie('', 0) });
+}
+
+/** End every device for this account. Used when the password changes. */
+function revokeAccountSessions(db: DB, email: string): void {
+  for (const [key, session] of Object.entries(db.sessions)) {
+    if (session.email === email) delete db.sessions[key];
+  }
+  const acct = db.accounts[email];
+  if (!acct) return;
+  acct.sessionToken = null;
+  acct.sessionExpiresAt = null;
+  acct.sessionIssuedAt = null;
+  acct.sessionMethod = null;
 }
 
 /** Remove one token. The account mirror is cleared only when it is this token. */
@@ -1053,7 +1364,7 @@ async function handleAcceptTerms(req: IncomingMessage, res: ServerResponse): Pro
     sendJson(res, result.status, { error: result.error, code: result.code });
     return;
   }
-  console.log(`[terms accepted] v${result.acceptance.termsVersion} quote ${result.acceptance.quoteId}`);
+  console.log(`[terms accepted] v${result.acceptance.termsVersion}`);
 
   sendJson(res, 200, {
     ok: true,
@@ -1133,16 +1444,16 @@ async function handlePaymentSetup(req: IncomingMessage, res: ServerResponse): Pr
         });
       }
       const out = await startMeteredCheckout({ customerId, email: session.email, successUrl, cancelUrl, trialDays: TRIAL_DAYS });
-      if (!out.ok || !out.url) {
-        console.error(`[payment] could not start Stripe Checkout (${out.reason ?? 'unknown'}): ${out.error ?? ''}`);
-        sendJson(res, 502, { error: out.error ?? 'The processor rejected the subscription request.', reason: out.reason });
+      if (!out.ok || !out.url || !isAllowedCheckoutUrl(out.url)) {
+        console.error(`[payment] could not start Stripe Checkout (${out.reason ?? 'unknown'}): ${scrubMailLog(out.error ?? '')}`);
+        sendJson(res, 502, { error: 'Could not start checkout.', code: 'checkout_failed' });
         return;
       }
       sendJson(res, 200, { ok: true, checkoutUrl: out.url, paymentsConfigured: true, metered: true });
       return;
     } catch (err) {
-      console.error('[payment] Stripe request failed:', err instanceof Error ? err.message : err);
-      sendJson(res, 502, { error: err instanceof Error ? err.message : 'Could not reach the processor.' });
+      console.error('[payment] Stripe request failed:', scrubMailLog(err instanceof Error ? err.message : String(err)));
+      sendJson(res, 502, { error: 'Could not start checkout.', code: 'checkout_failed' });
       return;
     }
   }
@@ -1167,14 +1478,15 @@ async function handlePaymentSetup(req: IncomingMessage, res: ServerResponse): Pr
     });
     const payload = (await r.json()) as { url?: string; error?: { message?: string } };
     const ok = r.ok;
-    if (!ok || !payload.url) {
-      console.error('[payment] Stripe refused the setup checkout:', payload.error?.message ?? 'no reason given');
-      sendJson(res, 502, { error: payload.error?.message ?? 'The processor rejected the setup request.' });
+    if (!ok || !payload.url || !isAllowedCheckoutUrl(payload.url)) {
+      console.error('[payment] Stripe refused the setup checkout:', scrubMailLog(payload.error?.message ?? 'no reason given'));
+      sendJson(res, 502, { error: 'Could not start checkout.', code: 'checkout_failed' });
       return;
     }
     sendJson(res, 200, { ok: true, checkoutUrl: payload.url, paymentsConfigured: true, metered: false });
   } catch (err) {
-    sendJson(res, 502, { error: err instanceof Error ? err.message : 'Could not reach the processor.' });
+    console.error('[payment] Stripe request failed:', scrubMailLog(err instanceof Error ? err.message : String(err)));
+    sendJson(res, 502, { error: 'Could not start checkout.', code: 'checkout_failed' });
   }
 }
 
@@ -1208,7 +1520,8 @@ async function handleBillingReturn(req: IncomingMessage, res: ServerResponse): P
       sendJson(res, 402, { error: 'That checkout was not completed. Add a card or bank account to continue.', code: 'checkout_not_complete' });
       return;
     }
-    sendJson(res, 502, { error: done.error ?? 'Could not confirm the subscription with the processor.', reason: done.reason });
+    console.error('[billing] checkout confirm failed:', scrubMailLog(done.error ?? done.reason ?? ''));
+    sendJson(res, 502, { error: 'Could not confirm the subscription with the processor.', code: 'checkout_failed' });
     return;
   }
   // The checkout must be this account's own, and must have saved a card
@@ -1267,7 +1580,7 @@ async function handleBillingReturn(req: IncomingMessage, res: ServerResponse): P
       : { error: 'No subscription on file for this account.' });
     return;
   }
-  console.log(`[billing] ${session.email} subscribed -- customer ${done.customerId}, sub ${done.subscriptionId}`);
+  console.log('[billing] subscription linked');
   sendJson(res, 200, { ok: true, subscription: outcome.subscription, metered: meteringConfigured() });
 }
 
@@ -1276,18 +1589,30 @@ async function handleBillingReturn(req: IncomingMessage, res: ServerResponse): P
 // signature). Suspends a key on a failed invoice, reactivates on payment.
 // ---------------------------------------------------------------------
 
-const STRIPE_EVENT_MEMORY = 2000;
+/** Keep event ids long enough for Stripe's retry window (several days). */
+const STRIPE_EVENT_TTL_MS = 30 * 24 * 60 * 60_000;
+const STRIPE_EVENT_CAP = 20_000;
+
+function stripeEventId(row: string): string {
+  const at = row.lastIndexOf('@');
+  return at > 0 && /^\d+$/.test(row.slice(at + 1)) ? row.slice(0, at) : row;
+}
 
 function stripeEventSeen(db: { processedStripeEvents?: string[] }, eventId: string | undefined): boolean {
   if (!eventId) return false;
-  return (db.processedStripeEvents ?? []).includes(eventId);
+  return (db.processedStripeEvents ?? []).some((row) => stripeEventId(row) === eventId);
 }
 
 function rememberStripeEvent(db: { processedStripeEvents?: string[] }, eventId: string | undefined): void {
   if (!eventId) return;
-  const seen = db.processedStripeEvents ?? [];
-  if (!seen.includes(eventId)) seen.push(eventId);
-  db.processedStripeEvents = seen.length > STRIPE_EVENT_MEMORY ? seen.slice(seen.length - STRIPE_EVENT_MEMORY) : seen;
+  const now = Date.now();
+  const kept = (db.processedStripeEvents ?? []).filter((row) => {
+    const at = row.lastIndexOf('@');
+    const ts = at > 0 ? Number(row.slice(at + 1)) : NaN;
+    return !Number.isFinite(ts) || now - ts < STRIPE_EVENT_TTL_MS;
+  });
+  if (!kept.some((row) => stripeEventId(row) === eventId)) kept.push(`${eventId}@${now}`);
+  db.processedStripeEvents = kept.length > STRIPE_EVENT_CAP ? kept.slice(kept.length - STRIPE_EVENT_CAP) : kept;
 }
 
 /**
@@ -1394,7 +1719,7 @@ async function handleBillingWebhook(req: IncomingMessage, res: ServerResponse): 
       sendJson(res, 200, { received: true, duplicate: true });
       return;
     }
-    console.log(`[billing webhook] checkout_completed customer=${result.customerId} account=${applied ?? 'unknown'}`);
+    console.log('[billing webhook] checkout_completed');
     sendJson(res, 200, { received: true, action: 'checkout_completed', matched: Boolean(applied) });
     return;
   }
@@ -1443,11 +1768,11 @@ async function handleBillingWebhook(req: IncomingMessage, res: ServerResponse): 
     return;
   }
   if (applied === 'stale') {
-    console.log(`[billing webhook] ignored ${result.action} for superseded subscription ${result.subscriptionId} customer=${result.customerId}`);
+    console.log(`[billing webhook] ignored ${result.action} for a superseded subscription`);
     sendJson(res, 200, { received: true, action: 'ignored_stale_subscription' });
     return;
   }
-  console.log(`[billing webhook] ${result.action} customer=${result.customerId} account=${applied ?? 'unknown'}`);
+  console.log(`[billing webhook] ${result.action}`);
   sendJson(res, 200, { received: true, action: result.action, matched: Boolean(applied) });
 }
 
@@ -1509,7 +1834,7 @@ async function handleStartTrial(req: IncomingMessage, res: ServerResponse): Prom
     sendJson(res, outcome.code ? 402 : 409, { error: outcome.error, code: outcome.code });
     return;
   }
-  console.log(`[trial started] ${session.email} -- ends ${outcome.subscription.trialEndsAt}`);
+  console.log('[trial started]');
   sendJson(res, 200, { ok: true, subscription: outcome.subscription, paymentAttached: outcome.paymentAttached });
 }
 
@@ -1924,11 +2249,23 @@ async function handleScenarioDelete(req: IncomingMessage, res: ServerResponse): 
 }
 
 // Address of the caller, for per-address limits.
+/**
+ * Trust X-Forwarded-For when TRUST_PROXY is on, or when Render started the
+ * process (it always sits behind its proxy). An explicit TRUST_PROXY=0
+ * wins, so a direct deployment can refuse the header. render.yaml sets
+ * TRUST_PROXY=1; this default covers a service that did not sync that file.
+ */
+function trustProxy(): boolean {
+  const flag = (process.env.TRUST_PROXY ?? '').trim().toLowerCase();
+  if (flag === '0' || flag === 'false' || flag === 'no') return false;
+  if (flag === '1' || flag === 'true' || flag === 'yes') return true;
+  return Boolean((process.env.RENDER ?? '').trim());
+}
+
 function clientAddress(req: IncomingMessage): string {
-  // Behind a proxy that sets it (the hosted deployment), the first
-  // X-Forwarded-For hop is the client. Only trusted when TRUST_PROXY=1, so
-  // a direct caller can't pick its own address to dodge the limit.
-  if (process.env.TRUST_PROXY === '1') {
+  // The first X-Forwarded-For hop is the client. Only trusted behind a
+  // proxy, so a direct caller can't pick its own address to dodge the limit.
+  if (trustProxy()) {
     const fwd = String(req.headers['x-forwarded-for'] ?? '').split(',')[0].trim();
     if (fwd) return fwd;
   }
@@ -2009,82 +2346,11 @@ function handleUsage(req: IncomingMessage, res: ServerResponse): void {
     return;
   }
 
-  readDb((db) => {
-    const keyRecord = Object.values(db.keys).find((k) => k.ownerEmail === session.email && k.isActive);
-    if (!keyRecord) {
-      sendJson(res, 200, { hasKey: false });
-      return;
-    }
-
-    const events = db.usage.filter((u) => u.keyHash === keyRecord.keyHash);
-    const dayAgo = Date.now() - 24 * 60 * 60_000;
-    const monthAgo = Date.now() - 30 * 24 * 60 * 60_000;
-    const callsToday = events.filter((e) => new Date(e.at).getTime() >= dayAgo).length;
-    const callsThisMonth = events.filter((e) => new Date(e.at).getTime() >= monthAgo).length;
-
-    // Every key this account has held, newest first, and one bucket per UTC
-    // day for the last 30 days across all of them (what the usage log still
-    // retains; it is trimmed to MAX_USAGE_EVENTS).
-    const ownKeys = Object.values(db.keys).filter((k) => k.ownerEmail === session.email);
-    const ownHashes = new Set(ownKeys.map((k) => k.keyHash));
-    const windowEvents = db.usage.filter((u) => ownHashes.has(u.keyHash) && new Date(u.at).getTime() >= monthAgo);
-    const daily: { date: string; calls: number; errors: number }[] = [];
-    for (let i = 29; i >= 0; i--) daily.push({ date: new Date(Date.now() - i * 86_400_000).toISOString().slice(0, 10), calls: 0, errors: 0 });
-    for (const u of windowEvents) {
-      const bucket = daily.find((d) => d.date === u.at.slice(0, 10));
-      if (!bucket) continue;
-      if (u.statusCode === 200) bucket.calls += 1;
-      else bucket.errors += 1;
-    }
-    let paycheckCalculations = 0;
-    let addressLookups = 0;
-    for (const u of db.usage) {
-      if (!ownHashes.has(u.keyHash) || u.statusCode !== 200) continue;
-      if (u.kind === 'address') addressLookups += 1;
-      else paycheckCalculations += 1;
-    }
-    const callsLast30 = daily.reduce((n, d) => n + d.calls, 0);
-    const errorsLast30 = daily.reduce((n, d) => n + d.errors, 0);
-    const keys = ownKeys
-      .slice()
-      .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
-      .map((k) => ({
-        keyMasked: maskKey(k.keyPrefix),
-        mode: k.keyPrefix.startsWith('sk_live_') ? 'live' : 'test',
-        active: k.isActive,
-        createdAt: k.createdAt,
-        expiresAt: k.expiresAt,
-        lastUsedAt: k.lastUsedAt,
-        totalCalls: k.totalCalls ?? 0,
-      }));
-    const recent = events
-      .slice()
-      .sort((a, b) => new Date(b.at).getTime() - new Date(a.at).getTime())
-      .slice(0, 15);
-
-    sendJson(res, 200, {
-      hasKey: true,
-      keyPrefix: keyRecord.keyPrefix,
-      keyMasked: maskKey(keyRecord.keyPrefix),
-      plan: keyRecord.plan,
-      issuedAt: keyRecord.createdAt,
-      expiresAt: keyRecord.expiresAt,
-      lastUsedAt: keyRecord.lastUsedAt,
-      // Durable meter (survives usage-log trimming); falls back to the
-      // retained-window count for keys minted before the counter existed.
-      totalCalls: keyRecord.totalCalls ?? events.length,
-      callsToday,
-      callsThisMonth,
-      callsTodayOk: events.filter((e) => e.statusCode === 200 && new Date(e.at).getTime() >= dayAgo).length,
-      callsLast30,
-      errorsLast30,
-      errorRate: callsLast30 + errorsLast30 ? errorsLast30 / (callsLast30 + errorsLast30) : 0,
-      daily,
-      billing: { paycheckCalculations, addressLookups, liveCalculations: paycheckCalculations, liveAddressLookups: addressLookups },
-      keys,
-      recent,
-    });
-  });
+  // Counts come from the site store, not from Stripe. Trial rows, $0 rows,
+  // and rows whose meter event failed are included. Another account's keys
+  // are not.
+  const summary = readDb((db) => dashboardUsage(db, session.email, { metering: meteringConfigured() }));
+  sendJson(res, 200, summary);
 }
 
 // ---------------------------------------------------------------------
@@ -2185,10 +2451,62 @@ function authenticateKey(req: IncomingMessage, res: ServerResponse, limiter: str
   return { requestId, keyHash, rlHeaders, customerId: auth.customerId, meteredSubscription: auth.meteredSubscription };
 }
 
+function idempotencyKeyOf(req: IncomingMessage): string | null {
+  const raw = req.headers['idempotency-key'];
+  const value = Array.isArray(raw) ? raw[0] : raw;
+  if (typeof value !== 'string') return null;
+  const trimmed = value.trim();
+  if (!trimmed || trimmed.length > 200 || !/^[\w.:-]+$/.test(trimmed)) return null;
+  return trimmed;
+}
+
+function endpointOf(req: IncomingMessage): string {
+  const path = (req.url ?? '/').split('?')[0];
+  return `${req.method ?? 'POST'} ${path}`;
+}
+
+/** Meter when this key's account has a metered subscription. Trial subscriptions qualify. */
+function wantMeter(auth: KeyContext): boolean {
+  return meteringConfigured() && auth.meteredSubscription && Boolean(auth.customerId);
+}
+
+/**
+ * Write the local usage row (and any meter queue items) before the response.
+ * Stripe is not called here. A retry with the same Idempotency-Key does not
+ * write a second row.
+ */
+function noteUsage(
+  ctx: KeyContext,
+  req: IncomingMessage,
+  input: {
+    statusCode: number;
+    error: string | null;
+    checkDate: string | null;
+    kind: RecordUsageInput['kind'];
+    paychecks: number;
+    matched?: boolean;
+  },
+): { recorded: boolean } {
+  return recordAccountUsage({
+    keyHash: ctx.keyHash,
+    statusCode: input.statusCode,
+    error: input.error,
+    checkDate: input.checkDate,
+    endpoint: endpointOf(req),
+    requestId: ctx.requestId,
+    idempotencyKey: idempotencyKeyOf(req),
+    kind: input.kind,
+    paychecks: input.paychecks,
+    ...(input.matched === undefined ? {} : { matched: input.matched }),
+    meterCustomerId: ctx.customerId,
+    wantMeter: wantMeter(ctx),
+  });
+}
+
 async function handlePaycheck(req: IncomingMessage, res: ServerResponse): Promise<void> {
   const ctx = authenticateKey(req, res, 'paycheck');
   if (!ctx) return;
-  const { requestId, keyHash, rlHeaders } = ctx;
+  const { requestId, rlHeaders } = ctx;
   const auth = ctx;
 
   // --- parse ------------------------------------------------------------
@@ -2196,6 +2514,7 @@ async function handlePaycheck(req: IncomingMessage, res: ServerResponse): Promis
   try {
     raw = await readJson<unknown>(req);
   } catch (err) {
+    noteUsage(ctx, req, { statusCode: 400, error: 'invalid_json', checkDate: null, kind: 'paycheck', paychecks: 0 });
     sendJson(res, 400, { error: (err as Error).message, code: 'invalid_json', requestId }, rlHeaders);
     return;
   }
@@ -2207,7 +2526,13 @@ async function handlePaycheck(req: IncomingMessage, res: ServerResponse): Promis
     stateHasYear: (code, year) => stateYears(code).includes(year),
   });
   if (!validation.ok) {
-    recordUsage(keyHash, 422, 'validation_failed', (raw as { checkDate?: string } | null)?.checkDate ?? null);
+    noteUsage(ctx, req, {
+      statusCode: 422,
+      error: 'validation_failed',
+      checkDate: (raw as { checkDate?: string } | null)?.checkDate ?? null,
+      kind: 'paycheck',
+      paychecks: 0,
+    });
     sendJson(
       res,
       422,
@@ -2226,7 +2551,7 @@ async function handlePaycheck(req: IncomingMessage, res: ServerResponse): Promis
   // Answered in this same call and billed as this same call.
   const extrasCheck = validatePaycheckExtras(raw as Record<string, unknown>, validation.value.workState?.code);
   if (!extrasCheck.ok) {
-    recordUsage(keyHash, 422, 'validation_failed', validation.value.checkDate);
+    noteUsage(ctx, req, { statusCode: 422, error: 'validation_failed', checkDate: validation.value.checkDate, kind: 'paycheck', paychecks: 0 });
     sendJson(
       res,
       422,
@@ -2273,17 +2598,19 @@ async function handlePaycheck(req: IncomingMessage, res: ServerResponse): Promis
           };
   }
 
-  // A billable call on a metered subscription queues its Stripe meter
-  // event in the same store write that records the call, so the two are
-  // saved together; delivery happens off the response path and a failure
-  // stays queued for retry (flushMeterQueue) rather than being lost.
-  // requestId is Stripe's idempotency identifier for the event.
-  const meter = status === 200 && meteringConfigured() && auth.meteredSubscription && auth.customerId
-    ? { customerId: auth.customerId, identifier: requestId }
-    : null;
-  recordUsage(keyHash, status, usageError, validation.value.checkDate, meter);
+  // The usage row and its meter events are one store write. Stripe is
+  // called afterwards, off the response path. A failed or skipped meter
+  // event leaves the row in place. One successful paycheck is one unit.
+  // requestId is Stripe's idempotency identifier for a single paycheck.
+  const recorded = noteUsage(ctx, req, {
+    statusCode: status,
+    error: usageError,
+    checkDate: validation.value.checkDate,
+    kind: 'paycheck',
+    paychecks: status === 200 ? 1 : 0,
+  });
   sendJson(res, status, responseBody, rlHeaders);
-  if (meter) flushMeterSoon();
+  if (recorded.recorded && status === 200 && wantMeter(auth)) flushMeterSoon();
 }
 
 // ---------------------------------------------------------------------
@@ -2298,12 +2625,13 @@ async function handlePaycheck(req: IncomingMessage, res: ServerResponse): Promis
 async function handleAddress(req: IncomingMessage, res: ServerResponse): Promise<void> {
   const ctx = authenticateKey(req, res, 'address');
   if (!ctx) return;
-  const { requestId, keyHash, rlHeaders } = ctx;
+  const { requestId, rlHeaders } = ctx;
 
   let body: Record<string, unknown>;
   try {
     body = await readJson<Record<string, unknown>>(req);
   } catch (err) {
+    noteUsage(ctx, req, { statusCode: 400, error: 'invalid_json', checkDate: null, kind: 'address', paychecks: 0 });
     sendJson(res, 400, { error: (err as Error).message, code: 'invalid_json', requestId }, rlHeaders);
     return;
   }
@@ -2317,7 +2645,7 @@ async function handleAddress(req: IncomingMessage, res: ServerResponse): Promise
     : body.checkDate !== undefined && !/^\d{4}-\d{2}-\d{2}$/.test(checkDate) ? 'checkDate must be ISO yyyy-mm-dd.'
     : null;
   if (problem) {
-    recordUsage(keyHash, 422, 'validation_failed', null);
+    noteUsage(ctx, req, { statusCode: 422, error: 'validation_failed', checkDate: null, kind: 'address', paychecks: 0 });
     sendJson(res, 422, { error: problem, code: 'invalid_input', requestId }, rlHeaders);
     return;
   }
@@ -2339,7 +2667,7 @@ async function handleAddress(req: IncomingMessage, res: ServerResponse): Promise
     const state = (r.work?.matched ? r.work.resolved?.state : null) ?? (r.residence?.matched ? r.residence.resolved?.state : null) ?? null;
     const homeState = r.residence?.matched ? r.residence.resolved?.state ?? null : null;
     // An address lookup is not a paycheck calculation and is not metered.
-    recordUsage(keyHash, 200, null, null, null, 'address', matched);
+    noteUsage(ctx, req, { statusCode: 200, error: null, checkDate: null, kind: 'address', paychecks: 0, matched });
     sendJson(res, 200, {
       matched,
       state,
@@ -2355,31 +2683,9 @@ async function handleAddress(req: IncomingMessage, res: ServerResponse): Promise
     }, rlHeaders);
   } catch (err) {
     console.error(`[address ${requestId}] lookup failed:`, err instanceof Error ? err.message : err);
-    recordUsage(keyHash, 502, 'geocode_unavailable', null);
+    noteUsage(ctx, req, { statusCode: 502, error: 'geocode_unavailable', checkDate: null, kind: 'address', paychecks: 0 });
     sendJson(res, 502, { error: 'The address lookup is unavailable right now. Retry shortly; nothing was billed.', code: 'geocode_unavailable', requestId }, rlHeaders);
   }
-}
-
-/** One place that appends a bounded usage event and updates the key's meter. */
-function recordUsage(
-  keyHash: string,
-  statusCode: number,
-  error: string | null,
-  checkDate: string | null,
-  meter: { customerId: string; identifier: string } | null = null,
-  kind: 'paycheck' | 'address' = 'paycheck',
-  matched?: boolean,
-): void {
-  withDb((db) => {
-    const at = new Date().toISOString();
-    appendUsage(db, { keyHash, at, statusCode, error, checkDate, kind, ...(matched === undefined ? {} : { matched }) });
-    const stored = db.keys[keyHash];
-    if (stored) {
-      stored.lastUsedAt = at;
-      if (statusCode === 200) stored.totalCalls = (stored.totalCalls ?? 0) + 1;
-    }
-    if (meter) enqueueMeterEvent(db, { ...meter, at });
-  });
 }
 
 /** Deliver queued meter events now, off the response path. Failures stay queued. */
@@ -2389,6 +2695,140 @@ function flushMeterSoon(): void {
       if (r.failed || r.dead) console.error(`[meter] ${r.failed} failed, ${r.dead} past Stripe's window; ${r.pending} still queued`);
     })
     .catch((err) => console.error('[meter] flush error:', err instanceof Error ? err.message : err));
+}
+
+const PAY_FREQUENCIES = new Set<PayFrequency>(['weekly', 'biweekly', 'semimonthly', 'monthly', 'quarterly', 'semiannual', 'annual']);
+
+/**
+ * POST /v1/payCalc — one meter unit per successful paycheck in the batch.
+ * The HTTP status stays 200 when the batch was parsed, matching the
+ * self-hosted adapter. The usage row's status is 422 when every paycheck
+ * in the batch failed, so a failed batch is not billed.
+ */
+async function handlePayCalc(req: IncomingMessage, res: ServerResponse): Promise<void> {
+  const ctx = authenticateKey(req, res, 'payCalc');
+  if (!ctx) return;
+  const { requestId, rlHeaders } = ctx;
+
+  let requests: PayCalcRequest[];
+  try {
+    const body = await readJson<PayCalcRequest[] | { payCalc: PayCalcRequest[] }>(req);
+    requests = Array.isArray(body) ? body : body.payCalc;
+    if (!Array.isArray(requests)) throw new Error('Request body must be an array of PayCalcRequest, or { "payCalc": [...] }.');
+  } catch (err) {
+    noteUsage(ctx, req, { statusCode: 400, error: 'invalid_json', checkDate: null, kind: 'payCalc', paychecks: 0 });
+    sendJson(res, 400, { error: err instanceof Error ? err.message : 'Bad request.', code: 'invalid_json', requestId }, rlHeaders);
+    return;
+  }
+
+  let results;
+  try {
+    results = payCalc(requests);
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'calculation_error';
+    console.error(`[payCalc ${requestId}] failed:`, message);
+    noteUsage(ctx, req, { statusCode: 422, error: 'calculation_error', checkDate: null, kind: 'payCalc', paychecks: 0 });
+    sendJson(res, 422, { error: 'The calculation could not be completed for the input provided.', code: 'calculation_error', requestId }, rlHeaders);
+    return;
+  }
+
+  const successes = results.filter((row) => !row.error).length;
+  const failed = results.length - successes;
+  const usageStatus = successes === 0 && failed > 0 ? 422 : 200;
+  const recorded = noteUsage(ctx, req, {
+    statusCode: usageStatus,
+    error: failed > 0 ? `${failed} of ${results.length} paychecks failed` : null,
+    checkDate: null,
+    kind: 'payCalc',
+    paychecks: successes,
+  });
+  sendJson(res, 200, { payCalc: results }, rlHeaders);
+  if (recorded.recorded && successes > 0 && wantMeter(ctx)) flushMeterSoon();
+}
+
+/**
+ * POST /v1/payroll/run — one usage unit per employee paycheck, not one
+ * unit for the HTTP request. The request itself is counted separately.
+ */
+async function handlePayrollRun(req: IncomingMessage, res: ServerResponse): Promise<void> {
+  const ctx = authenticateKey(req, res, 'payroll');
+  if (!ctx) return;
+  const { requestId, rlHeaders } = ctx;
+
+  let body: { companyId?: string; checkDate?: string; payFrequency?: string; employees?: PlatformEmployeeInput[] };
+  try {
+    body = await readJson(req);
+  } catch (err) {
+    noteUsage(ctx, req, { statusCode: 400, error: 'invalid_json', checkDate: null, kind: 'payroll', paychecks: 0 });
+    sendJson(res, 400, { error: err instanceof Error ? err.message : 'Bad request.', code: 'invalid_json', requestId }, rlHeaders);
+    return;
+  }
+  const frequency = body.payFrequency ?? 'biweekly';
+  if (!body.employees?.length || !body.checkDate || !PAY_FREQUENCIES.has(frequency as PayFrequency)) {
+    noteUsage(ctx, req, { statusCode: 400, error: 'validation_failed', checkDate: body.checkDate ?? null, kind: 'payroll', paychecks: 0 });
+    sendJson(res, 400, { error: 'checkDate, payFrequency, and a non-empty employees[] are required.', code: 'invalid_input', requestId }, rlHeaders);
+    return;
+  }
+  try {
+    const run = await runEmbeddedPayroll({
+      companyId: body.companyId ?? 'company',
+      checkDate: body.checkDate,
+      payFrequency: frequency as PayFrequency,
+      employees: body.employees,
+    });
+    const paychecks = run.paychecks.length;
+    const recorded = noteUsage(ctx, req, {
+      statusCode: 200,
+      error: null,
+      checkDate: body.checkDate,
+      kind: 'payroll',
+      paychecks,
+    });
+    sendJson(res, 200, { ok: true, run }, rlHeaders);
+    if (recorded.recorded && paychecks > 0 && wantMeter(ctx)) flushMeterSoon();
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Payroll run failed.';
+    console.error(`[payroll ${requestId}] failed:`, message);
+    noteUsage(ctx, req, { statusCode: 422, error: 'calculation_error', checkDate: body.checkDate, kind: 'payroll', paychecks: 0 });
+    sendJson(res, 422, { error: 'The payroll run could not be completed for the input provided.', code: 'calculation_error', requestId }, rlHeaders);
+  }
+}
+
+function catalogCheckDate(req: IncomingMessage): string {
+  const raw = new URL(req.url ?? '/', 'http://localhost').searchParams.get('checkDate');
+  return raw && /^\d{4}-\d{2}-\d{2}$/.test(raw) ? raw : new Date().toISOString().slice(0, 10);
+}
+
+/** GET /v1/uniqueTaxIds — a keyed catalog read. Recorded, not a paycheck charge. */
+function handleUniqueTaxIds(req: IncomingMessage, res: ServerResponse): void {
+  const ctx = authenticateKey(req, res, 'catalog');
+  if (!ctx) return;
+  const checkDate = catalogCheckDate(req);
+  try {
+    const entries = listUniqueTaxIds(checkDate);
+    noteUsage(ctx, req, { statusCode: 200, error: null, checkDate, kind: 'catalog', paychecks: 0 });
+    sendJson(res, 200, { checkDate, count: entries.length, entries }, ctx.rlHeaders);
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Bad request.';
+    noteUsage(ctx, req, { statusCode: 400, error: 'invalid_input', checkDate, kind: 'catalog', paychecks: 0 });
+    sendJson(res, 400, { error: message, code: 'invalid_input', requestId: ctx.requestId }, ctx.rlHeaders);
+  }
+}
+
+function handleUniqueTaxId(req: IncomingMessage, res: ServerResponse, path: string): void {
+  const ctx = authenticateKey(req, res, 'catalog');
+  if (!ctx) return;
+  const prefix = path.startsWith('/api/') ? '/api/uniqueTaxIds/' : '/v1/uniqueTaxIds/';
+  const id = decodeURIComponent(path.slice(prefix.length));
+  const checkDate = catalogCheckDate(req);
+  const entry = resolveUniqueTaxId(id, checkDate);
+  if (!entry) {
+    noteUsage(ctx, req, { statusCode: 404, error: 'not_found', checkDate, kind: 'catalog', paychecks: 0 });
+    sendJson(res, 404, { error: `No such uniqueTaxId for ${checkDate}.`, code: 'not_found', requestId: ctx.requestId }, ctx.rlHeaders);
+    return;
+  }
+  noteUsage(ctx, req, { statusCode: 200, error: null, checkDate, kind: 'catalog', paychecks: 0 });
+  sendJson(res, 200, entry, ctx.rlHeaders);
 }
 
 // ---------------------------------------------------------------------
@@ -2625,10 +3065,7 @@ async function handleEstimate(req: IncomingMessage, res: ServerResponse): Promis
     });
   });
 
-  console.log(
-    `[estimate] ${email} — ${employees} employees, ${payFrequency}, ${breakdown.callsPerYear} calls/yr, ` +
-      `rooftop=${rooftop} -> $${Math.round(breakdown.total).toLocaleString()}/yr`,
-  );
+  console.log(`[estimate] ${employees} employees, ${payFrequency}, rooftop=${rooftop}`);
   sendJson(res, 200, { ok: true, ...breakdown });
 }
 
@@ -2687,41 +3124,71 @@ createServer((req, res) => {
   const method = req.method ?? 'GET';
 
   (async () => {
-    const pages: Record<string, string> = {
-      '/': 'index.html',
-      '/index.html': 'index.html',
-      '/signup': 'signup.html',
-      '/signup/verify': 'signup-verify.html',
-      '/signup/business': 'signup-business.html',
-      '/signup/payment': 'signup-payment.html',
-      '/signup/key': 'signup-key.html',
-      '/signin': 'signin.html',
-      '/docs': 'docs.html',
-      '/docs.html': 'docs.html',
-      '/sandbox': 'sandbox.html',
-      '/sandbox.html': 'sandbox.html',
-      '/console': 'sandbox.html',
-      '/_states': 'states.html',
-      '/product': 'product.html',
-      '/coverage': 'coverage.html',
-      '/pricing': 'pricing.html',
-      '/docs/paycheck': 'docs-paycheck.html',
-      '/changelog': 'changelog.html',
-      '/status': 'status.html',
-      '/about': 'about.html',
-      '/contact': 'contact.html',
-      '/security': 'security.html',
-      '/dashboard': 'dashboard.html',
-    };
-    if (method === 'GET' && pages[url]) {
-      sendPage(res, join(HERE, pages[url]));
+    if (method === 'GET' || method === 'HEAD') {
+      const dest = canonicalRedirect(req, req.url ?? '/');
+      if (dest) {
+        res.writeHead(301, { Location: dest, ...securityHeaders(req), 'Cache-Control': 'public, max-age=3600' });
+        res.end();
+        return;
+      }
+    }
+    if (method === 'GET' && url === '/robots.txt') {
+      const body = Buffer.from(robotsTxt(canonicalOrigin()));
+      const headers: Record<string, string | number> = {
+        'Content-Type': 'text/plain; charset=utf-8',
+        'Cache-Control': 'public, max-age=3600',
+        ...securityHeaders(req),
+      };
+      const gz = maybeGzip(req, body, headers);
+      headers['Content-Length'] = gz.length;
+      res.writeHead(200, headers);
+      res.end(gz);
       return;
     }
-    if (method === 'GET' && (url === '/favicon.ico' || url === '/favicon.svg' || url.startsWith('/logo/') || url.startsWith('/assets/') || url === '/tokens.css')) {
-      const rel = url === '/favicon.ico' || url === '/favicon.svg' ? 'logo/favicon.svg' : url.replace(/^\/+/, '');
-      if (!rel.includes('..')) {
+    if (method === 'GET' && url === '/sitemap.xml') {
+      const lastmod: Record<string, string> = {};
+      for (const page of indexablePages()) {
+        try { lastmod[page.path] = statSync(join(HERE, page.file)).mtime.toISOString().slice(0, 10); } catch { /* missing file */ }
+      }
+      const body = Buffer.from(sitemapXml(canonicalOrigin(), lastmod));
+      const headers: Record<string, string | number> = {
+        'Content-Type': 'application/xml; charset=utf-8',
+        'Cache-Control': 'public, max-age=3600',
+        ...securityHeaders(req),
+      };
+      const gz = maybeGzip(req, body, headers);
+      headers['Content-Length'] = gz.length;
+      res.writeHead(200, headers);
+      res.end(gz);
+      return;
+    }
+    if (method === 'OPTIONS' && (url.startsWith('/api/') || url.startsWith('/v1/'))) {
+      const cors = corsHeaders(req);
+      if (!cors['Access-Control-Allow-Origin']) {
+        sendJson(res, 403, { error: 'Origin not allowed.', code: 'cors' });
+        return;
+      }
+      res.writeHead(204, { ...securityHeaders(req), ...cors, 'Content-Length': '0' });
+      res.end();
+      return;
+    }
+
+    const page = method === 'GET' ? pageForRoute(url) : undefined;
+    if (page) {
+      sendPage(req, res, join(HERE, page.file), page.path);
+      return;
+    }
+    if (method === 'GET' && (url === '/favicon.ico' || url === '/favicon.svg' || url === '/apple-touch-icon.png' || url.startsWith('/logo/') || url.startsWith('/assets/') || url === '/tokens.css')) {
+      let decoded = url;
+      try { decoded = decodeURIComponent(url); } catch { decoded = url; }
+      const rel = decoded === '/favicon.ico' || decoded === '/favicon.svg'
+        ? 'logo/favicon.svg'
+        : decoded === '/apple-touch-icon.png'
+          ? 'logo/apple-touch-icon.png'
+          : decoded.replace(/^\/+/, '');
+      if (!rel.includes('..') && !rel.includes('\\') && !rel.includes('\0')) {
         const file = resolve(HERE, rel);
-        if ((file === HERE || file.startsWith(HERE + '/')) && existsSync(file)) {
+        if ((file === HERE || file.startsWith(HERE + '/')) && existsSync(file) && statSync(file).isFile()) {
           sendStatic(res, file, contentTypeFor(file), req);
           return;
         }
@@ -2731,9 +3198,22 @@ createServer((req, res) => {
       sendStatic(res, join(HERE, 'sandbox-examples.json'), 'application/json; charset=utf-8', req);
       return;
     }
-    if (method === 'GET' && (url === '/reference' || url === '/reference.html' || url === '/api-reference')) {
-      // The old standalone reference page is gone; its URLs land on the docs.
-      res.writeHead(301, { Location: '/docs', ...SECURITY_HEADERS });
+    const aliases: Record<string, string> = {
+      '/index.html': '/',
+      '/docs.html': '/docs',
+      '/sandbox.html': '/sandbox',
+      '/terms.html': '/terms',
+      '/privacy.html': '/privacy',
+      '/legal/terms.html': '/terms',
+      '/legal/privacy.html': '/privacy',
+      '/legal/acceptable-use.html': '/acceptable-use',
+      '/legal/disclaimer.html': '/disclaimer',
+      '/reference': '/docs',
+      '/reference.html': '/docs',
+      '/api-reference': '/docs',
+    };
+    if (method === 'GET' && aliases[url]) {
+      res.writeHead(301, { Location: aliases[url], ...securityHeaders(req) });
       res.end();
       return;
     }
@@ -2745,22 +3225,26 @@ createServer((req, res) => {
     }
     {
       const legal: Record<string, string> = {
-        '/terms': 'terms', '/terms.html': 'terms', '/legal/terms.html': 'terms',
-        '/privacy': 'privacy', '/privacy.html': 'privacy', '/legal/privacy.html': 'privacy',
-        '/acceptable-use': 'acceptable-use', '/legal/acceptable-use.html': 'acceptable-use',
-        '/disclaimer': 'disclaimer', '/legal/disclaimer.html': 'disclaimer',
+        '/terms': 'terms',
+        '/privacy': 'privacy',
+        '/acceptable-use': 'acceptable-use',
+        '/disclaimer': 'disclaimer',
       };
       if (method === 'GET' && legal[url]) {
-        sendHtml(res, join(HERE, 'legal', `${legal[url]}.html`));
+        sendHtml(req, res, join(HERE, 'legal', `${legal[url]}.html`), url);
         return;
       }
     }
 
-    // Cookie-authenticated console routes refuse cross-site browser POSTs
+    // Cookie-authenticated routes refuse cross-site browser POSTs
     // (belt and braces on top of SameSite=Lax). Bearer-key clients and the
     // Stripe webhook send no Origin header, so they pass untouched.
-    if (method === 'POST' && url.startsWith('/api/') && url !== '/api/billing/webhook' && url !== '/api/paycheck' && url !== '/api/address' && !sameOrigin(req)) {
+    if (method === 'POST' && url.startsWith('/api/') && !CSRF_EXEMPT.has(url) && !sameOrigin(req)) {
       sendJson(res, 403, { error: 'Cross-origin request refused.', code: 'bad_origin' });
+      return;
+    }
+    if (method === 'POST' && (url.startsWith('/api/') || url.startsWith('/v1/')) && !CSRF_EXEMPT.has(url) && !csrfOk(req)) {
+      sendJson(res, 403, { error: 'Cross-site request refused.', code: 'bad_csrf' });
       return;
     }
 
@@ -2787,6 +3271,10 @@ createServer((req, res) => {
     if (method === 'GET' && url === '/api/usage') return handleUsage(req, res);
     if (method === 'GET' && (url === '/api/me' || url === '/v1/me')) return handleMe(req, res);
     if (method === 'POST' && (url === '/api/paycheck' || url === '/v1/paycheck')) return handlePaycheck(req, res);
+    if (method === 'POST' && (url === '/api/payCalc' || url === '/v1/payCalc')) return handlePayCalc(req, res);
+    if (method === 'POST' && (url === '/api/payroll/run' || url === '/v1/payroll/run')) return handlePayrollRun(req, res);
+    if (method === 'GET' && (url === '/api/uniqueTaxIds' || url === '/v1/uniqueTaxIds')) return handleUniqueTaxIds(req, res);
+    if (method === 'GET' && (url.startsWith('/api/uniqueTaxIds/') || url.startsWith('/v1/uniqueTaxIds/'))) return handleUniqueTaxId(req, res, url);
     if (method === 'GET' && (url === '/api/health' || url === '/v1/health' || url === '/healthz')) return handleHealth(res);
     if (method === 'GET' && (url === '/v1/openapi.json' || url === '/openapi.json')) return sendJson(res, 200, openApiDocument(API_VERSION), { 'Cache-Control': 'public, max-age=300' });
     if (method === 'GET' && url === '/v1/schemas/paycheck-request.json') return sendJson(res, 200, paycheckRequestSchema, { 'Cache-Control': 'public, max-age=300' });
@@ -2798,21 +3286,24 @@ createServer((req, res) => {
     if (method === 'GET' && url === '/api/billing') return handleBilling(req, res);
 
     if (method === 'GET' && !url.startsWith('/api/') && !url.startsWith('/v1/')) {
-      const missing = readFileSync(join(HERE, 'not-found.html'));
-      res.writeHead(404, {
+      const nonce = randomBytes(16).toString('base64url');
+      const html = decorateHtml(readFileSync(join(HERE, 'not-found.html'), 'utf8'), '/404', nonce);
+      const headers: Record<string, string | number> = {
         'Content-Type': 'text/html; charset=utf-8',
-        'Content-Length': missing.byteLength,
         'Cache-Control': 'no-store',
-        ...SECURITY_HEADERS,
-      });
-      res.end(missing);
+        ...securityHeaders(req, nonce),
+      };
+      const body = maybeGzip(req, Buffer.from(html), headers);
+      headers['Content-Length'] = body.length;
+      res.writeHead(404, headers);
+      res.end(body);
       return;
     }
-    res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8', ...SECURITY_HEADERS });
+    res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8', ...securityHeaders(req) });
     res.end('Not found');
   })().catch((err) => {
-    console.error(err);
-    sendJson(res, 500, { error: 'Internal server error.' });
+    console.error(scrubMailLog(err instanceof Error ? err.message : String(err)));
+    if (!res.headersSent) sendJson(res, 500, { error: 'Internal server error.' });
   });
 }).listen(PORT, () => {
   const liveRefused = stripeKeyRefused();

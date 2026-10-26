@@ -28,6 +28,15 @@ let loginCookie = '';
 const dbFile = () => join(dir, 'db.json');
 const db = () => JSON.parse(readFileSync(dbFile(), 'utf8'));
 
+/** A same-origin browser post carries the double-submit cookie and header. */
+async function browserHeaders(cookie: string): Promise<Record<string, string>> {
+  const page = await fetch(base + '/signin');
+  const rows = typeof page.headers.getSetCookie === 'function' ? page.headers.getSetCookie() : [page.headers.get('set-cookie') ?? ''];
+  const row = rows.find((c) => c.startsWith('omnia_csrf=')) ?? '';
+  const token = row.split(';')[0]?.slice('omnia_csrf='.length) ?? '';
+  return { Cookie: `${cookie}; omnia_csrf=${token}`, Origin: base, 'X-CSRF-Token': token };
+}
+
 async function freePort(): Promise<number> {
   const s = createServer();
   await new Promise<void>((r) => s.listen(0, '127.0.0.1', r));
@@ -189,7 +198,7 @@ describe('sessions stay until Sign out', () => {
   });
 
   test('sign-out deletes that server session and clears the cookie, and the other device stays signed in', async () => {
-    const out = await post('/api/signout', {}, { Cookie: signupCookie, Origin: base });
+    const out = await post('/api/signout', {}, await browserHeaders(signupCookie));
     assert.equal(out.status, 200);
     const cleared = out.headers.get('set-cookie') ?? '';
     assert.match(cleared, /omnia_session=;/);
@@ -212,7 +221,7 @@ describe('sessions stay until Sign out', () => {
   });
 
   test('signing out the remaining device ends it', async () => {
-    const out = await post('/api/signout', {}, { Cookie: loginCookie, Origin: base });
+    const out = await post('/api/signout', {}, await browserHeaders(loginCookie));
     assert.equal(out.status, 200);
     assert.equal(await accountStatus(loginCookie), 401);
     assert.equal((await fetch(`${base}/api/account`, { headers: { Authorization: `Bearer ${tokenOf(loginCookie)}` } })).status, 401);

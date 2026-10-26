@@ -100,7 +100,7 @@ describe('signup: a key needs a card or bank account on file', () => {
     assert.equal(r.status, 200);
     const created = db().accounts[EMAIL];
     assert.ok(created.termsAcceptedAt);
-    assert.equal(created.termsVersion, '2026-10-23.1');
+    assert.equal(created.termsVersion, '2026-10-25.1');
     const code = created.code;
     assert.match(code, /^\d{6}$/);
     const v = await post('/api/verify-email', { email: EMAIL, code });
@@ -268,9 +268,11 @@ describe('signup pages: contrast, labels, and step chrome', () => {
       assert.ok(agree);
       assert.doesNotMatch(agree, /\schecked(\s|=|>|$)/);
     }
-    for (const label of ['Work email', 'Password', 'Your name', 'Business name', 'Phone']) {
+    for (const label of ['Work email', 'Password', 'Your name', 'Business name']) {
       assert.match(signup, new RegExp(`<label[^>]*>${label}</label>`));
     }
+    assert.match(signup, /<label[^>]*for="phone"[^>]*>Phone <span class="hint">\(optional\)<\/span><\/label>/);
+    assert.doesNotMatch(signup, /id="phone"[^>]*\srequired/);
     assert.match(business, /<label[^>]*>Business address<\/label>/);
     assert.match(business, /<label[^>]*>Signature<\/label>/);
     assert.match(verify, /<label[^>]*>Code<\/label>/);

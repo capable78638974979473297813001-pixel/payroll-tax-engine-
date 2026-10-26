@@ -130,6 +130,8 @@ let errors = {};
 let banner = '';
 let bannerHref = '';
 let bannerKind = 'bad';
+let bannerLinkLabel = '';
+let bannerExample = false;
 let busy = false;
 let lookupBusy = false;
 let returnToReview = false;
@@ -191,11 +193,64 @@ function advanced(id, title, count, inner) {
   const open = advMap()[id] ? ' open' : '';
   return `<div class="adv${open}"><button type="button" class="adv-h" data-action="adv" data-adv="${id}"><span class="chev"></span>${esc(title)}<span class="cnt">${esc(count)}</span></button><div class="adv-b">${inner}</div></div>`;
 }
+function exampleOutputHtml() {
+  return `<div class="sample"><p>Example output. This is not your calculation.</p><pre>{
+  "grossPay": 140000,
+  "employeeTaxTotal": 27035,
+  "netPay": 112965,
+  "taxes": [ "…one line per tax, in cents" ]
+}</pre></div>`;
+}
+function hasApiKey() {
+  const key = window.Omnia && Omnia.apiKey && Omnia.apiKey();
+  return !!(key && key.key);
+}
+function signedIn() {
+  return !!(window.Omnia && Omnia.session && Omnia.session() && Omnia.session().email);
+}
+function clearBanner() {
+  banner = '';
+  bannerHref = '';
+  bannerKind = 'bad';
+  bannerLinkLabel = '';
+  bannerExample = false;
+}
+function setKeyGate(forLookup) {
+  bannerKind = 'bad';
+  bannerExample = !signedIn();
+  if (!signedIn()) {
+    banner = forLookup
+      ? 'Sign up to get an API key before an address can be looked up. This page does not issue a key.'
+      : 'Sign up to get an API key before this calculation can run. This page does not issue a key.';
+    bannerHref = '/signup';
+    bannerLinkLabel = 'Create an account';
+    return;
+  }
+  banner = forLookup
+    ? 'Create an API key in your account, then paste it here, before an address can be looked up.'
+    : 'Create an API key in your account, then paste it here, before this calculation can run.';
+  bannerHref = '/dashboard';
+  bannerLinkLabel = 'Open your account';
+  bannerExample = false;
+}
+function keyGateHtml() {
+  if (hasApiKey() || banner) return '';
+  const prev = { banner, bannerHref, bannerKind, bannerLinkLabel, bannerExample };
+  setKeyGate(false);
+  const html = bannerHtml();
+  banner = prev.banner;
+  bannerHref = prev.bannerHref;
+  bannerKind = prev.bannerKind;
+  bannerLinkLabel = prev.bannerLinkLabel;
+  bannerExample = prev.bannerExample;
+  return html;
+}
 function bannerHtml() {
   if (!banner) return '';
   const cls = bannerKind === 'warn' ? 'banner-warn' : 'banner-bad';
-  const link = bannerHref ? ` <a href="${esc(bannerHref)}">Open your account</a>.` : '';
-  return `<div class="banner ${cls}" role="alert">${esc(banner)}${link}</div>`;
+  const link = bannerHref ? ` <a href="${esc(bannerHref)}">${esc(bannerLinkLabel || 'Open your account')}</a>.` : '';
+  const example = bannerExample ? exampleOutputHtml() : '';
+  return `<div class="banner ${cls}" role="alert">${esc(banner)}${link}${example}</div>`;
 }
 function residentNote() {
   if (!model.homeCode || !model.workCode || model.homeCode === model.workCode) return '';
@@ -331,7 +386,7 @@ function step1() {
   const freq = FREQS.map(([v, name, n]) => `<option value="${v}"${model.payFrequency === v ? ' selected' : ''}>${esc(name)} · ${n} per year</option>`).join('');
   const workers = WORKERS.map(([v, desc]) => `<option value="${v}"${model.employmentCategory === v ? ' selected' : ''}>${esc(v === 'standard' ? 'Standard' : v.replace(/_/g, ' '))}</option>`).join('');
   const desc = (WORKERS.find((w) => w[0] === model.employmentCategory) || WORKERS[0])[1];
-  return `<p class="eyebrow">Step 1 of 8</p><h1>Employee and addresses</h1><p class="sub">Who is being paid, and where they live and work.</p>
+  return `<p class="eyebrow">Step 1 of 8</p><h2 class="step-title">Employee and addresses</h2><p class="sub">Who is being paid, and where they live and work.</p>
     ${bannerHtml()}${residentNote()}
     <div class="grid g2">
       ${wrap('checkDate', 'Check date', `<input id="f-date" class="inp" type="date" data-bind="str:checkDate" value="${esc(model.checkDate)}">`)}
@@ -352,7 +407,7 @@ function step1() {
 function step2() {
   const place = model.workAddress || stateLabel(model.workCode) || 'Primary location';
   const day = (bind, path, label) => wrap(path, label, `<input class="inp" inputmode="numeric" data-bind="str:${bind}" value="${esc(model[bind])}">`, 'A whole number from 0 to 366.');
-  return `<p class="eyebrow">Step 2 of 8</p><h1>Work locations</h1><p class="sub">One work state per paycheck.</p>${bannerHtml()}
+  return `<p class="eyebrow">Step 2 of 8</p><h2 class="step-title">Work locations</h2><p class="sub">One work state per paycheck.</p>${bannerHtml()}
     <div class="loc"><div><b>${esc(place)}</b><div class="hint">${esc(stateLabel(model.workCode))}</div></div><span class="pct">100% of wages</span></div>
     <div class="f" data-path="workState.certificate.workCityIsPrincipalWorkplace"><label class="chk"><input class="tick" type="checkbox" data-bind="bool:principalWorkplace"${model.principalWorkplace ? ' checked' : ''}><span><span class="cl">This is the principal workplace</span><span class="hint">Sent only when this is off.</span><span class="path">workState.certificate.workCityIsPrincipalWorkplace</span></span></label></div>
     <div class="nsb"><div class="nsb-h"><b>Split across locations</b> <span class="tag tag-ns">Not supported yet</span> <span class="tag tag-ip">In progress</span></div>
@@ -370,7 +425,7 @@ function step3() {
   const mfs = `<div class="chk"><input class="tick" type="checkbox" data-bind="mfs:1"${model.filingStatus === 'married_separate' ? ' checked' : ''}><span>Married filing separately</span></div>`;
   const creditKids = model.depChildren;
   const creditOther = model.depOther;
-  return `<p class="eyebrow">Step 3 of 8</p><h1>Federal W-4</h1><p class="sub">The current form. Counts fill the credit. Only the credit is sent.</p>${bannerHtml()}
+  return `<p class="eyebrow">Step 3 of 8</p><h2 class="step-title">Federal W-4</h2><p class="sub">The current form. Counts fill the credit. Only the credit is sent.</p>${bannerHtml()}
     <div class="seg"><button type="button" class="on">2020 or later</button><button type="button" disabled data-unsupported>Before 2020 <span class="tag tag-ns">Not supported yet</span></button></div>
     <p class="hint">Pre-2020 forms with allowances aren't supported yet. Ask the employee for a current W-4.</p>
     <div class="f${errClass('federalW4.filingStatus')}" data-path="federalW4.filingStatus"><div class="lab"><label>Filing status</label></div>
@@ -408,7 +463,7 @@ function step4() {
       <label class="chk${model._reciprocal ? ' is-disabled' : ''}"><input class="tick" type="checkbox" data-bind="bool:nexus"${model.nexus ? ' checked' : ''}${holdDis}><span><span class="cl">Nexus</span><span class="hint">The employer is registered in ${esc(home)}, so it has to withhold there.</span><span class="path">residenceStateWithholding.nexus</span></span></label>
       <label class="chk${model._reciprocal ? ' is-disabled' : ''}"><input class="tick" type="checkbox" data-bind="bool:voluntaryWh"${model.voluntaryWh ? ' checked' : ''}${holdDis}><span><span class="cl">Voluntary withholding</span><span class="hint">No nexus, but the employer withholds ${esc(home)} tax as a courtesy.</span><span class="path">residenceStateWithholding.voluntary</span></span></label>
     </div>` : '';
-  return `<p class="eyebrow">Step 4 of 8</p><h1>State and local</h1><p class="sub">Certificate choices for the work state, and for home when it differs.</p>${bannerHtml()}${residentNote()}
+  return `<p class="eyebrow">Step 4 of 8</p><h2 class="step-title">State and local</h2><p class="sub">Certificate choices for the work state, and for home when it differs.</p>${bannerHtml()}${residentNote()}
     ${wrap('workState.code', 'Work state', `<select class="inp" data-bind="str:workCode">${stateOptions(model.workCode)}</select>`)}
     <h2>${esc(stateLabel(model.workCode))} certificate</h2>
     ${certBlock('work', model.workCode)}
@@ -449,7 +504,7 @@ function step5() {
     : `<button type="button" data-action="earn-pick" data-id="${item.id}">${esc(item.label)}</button>`).join('');
   const prior = model.priorWages == null ? '' : centsToDollars(model.priorWages);
   const priorTax = model.priorTax == null ? '' : centsToDollars(model.priorTax);
-  return `<p class="eyebrow">Step 5 of 8</p><h1>Earnings</h1><p class="sub">At least one line with an amount.</p>${bannerHtml()}
+  return `<p class="eyebrow">Step 5 of 8</p><h2 class="step-title">Earnings</h2><p class="sub">At least one line with an amount.</p>${bannerHtml()}
     <div class="f${errClass('earnings')}" data-path="earnings">${fieldError('earnings')}
       <div class="tbl ed"><div class="tr th"><span>Code</span><span>Type</span><span>Amount</span><span></span></div>${rows}</div>
       <div class="addrow"><button type="button" class="btn sec" data-action="add-earn">+ Add earning</button><div class="menu" id="earnMenu" hidden>${menu}</div></div>
@@ -503,7 +558,7 @@ function step6() {
     extraBits.push(wrap('ytd.tier2Compensation', 'Tier II compensation, year to date', moneyInput('ytdcents:tier2Compensation', model.ytdExtra.tier2Compensation == null ? null : model.ytdExtra.tier2Compensation, true)));
     extraBits.push(wrap('ytd.railroadMonthlyCompensation', 'Railroad unemployment compensation this month', moneyInput('ytdcents:railroadMonthlyCompensation', model.ytdExtra.railroadMonthlyCompensation == null ? null : model.ytdExtra.railroadMonthlyCompensation, true)));
   }
-  return `<p class="eyebrow">Step 6 of 8</p><h1>Deductions and year to date</h1>${bannerHtml()}
+  return `<p class="eyebrow">Step 6 of 8</p><h2 class="step-title">Deductions and year to date</h2>${bannerHtml()}
     <p class="hint">Each type lowers different taxes. 401(k) skips income tax but not Social Security. Section 125 skips both.</p>
     <div class="tbl ed"><div class="tr th"><span>Code</span><span>Type</span><span>Amount</span><span></span></div>${rows || ''}</div>
     <button type="button" class="btn sec" data-action="add-ded">+ Add deduction</button>
@@ -565,7 +620,7 @@ function step7() {
   const garnRows = garnOn ? model.garnishments.map((g, i) => garnRow(g, i)).join('') : '<p class="hint">Off. Nothing is sent until you add an order.</p><button type="button" class="btn sec" data-action="garn-on">Add a garnishment</button>';
   const mwOn = model.minimumWage && typeof model.minimumWage === 'object';
   const mw = mwOn ? minWageFields() : '<p class="hint">Off. Nothing is sent until you turn this on.</p><button type="button" class="btn sec" data-action="mw-on">Check an hourly rate</button>';
-  return `<p class="eyebrow">Step 7 of 8</p><h1>Employer</h1>${bannerHtml()}
+  return `<p class="eyebrow">Step 7 of 8</p><h2 class="step-title">Employer</h2>${bannerHtml()}
     ${wrap(`employer.stateUnemploymentRate.${model.workCode || 'ST'}`, `${st} unemployment rate`, pctInput('pct:suiRate', model.suiRate), 'Blank uses the new-employer rate. From 0 to 20, with three decimals.')}
     <div class="f is-disabled"><div class="lab"><label>FUTA rate</label> <span class="tag tag-ns">Not supported yet</span></div>
       <div class="money pct"><input class="inp" disabled data-unsupported value="0.6"><em>%</em></div>
@@ -629,7 +684,7 @@ function oneLine(n) {
 function step8() {
   const rows = STEPS.filter((s) => s.n < 8).map((s) => `<div class="rv"><div><b>${esc(s.name)}</b><p>${esc(oneLine(s.n))}</p></div><button type="button" class="lnk" data-action="edit" data-step="${s.n}">Edit</button></div>`).join('');
   const localGap = !LOCAL[model.workCode] ? stateLabel(model.workCode) : '';
-  return `<p class="eyebrow">Step 8 of 8</p><h1>Review and run</h1><p class="sub">Check the request, then run it against the engine.</p>${bannerHtml()}
+  return `<p class="eyebrow">Step 8 of 8</p><h2 class="step-title">Review and run</h2><p class="sub">Check the request, then run it against the engine.</p>${banner ? bannerHtml() : keyGateHtml()}
     <div class="rev">${rows}</div>
     <div class="note note-info"><b>Not included.</b> Split work locations, pre-2020 W-4 allowances, tips, and an employer FUTA rate. Unsupported items are left off the request.${localGap ? ' ' + esc(`Local tax for ${localGap} is in progress.`) : ''}</div>`;
 }
@@ -702,7 +757,7 @@ function resultsView() {
     body = `<div class="code"><div class="code-h"><span>Response</span><button type="button" class="btn sec" data-action="copy" data-copy="res">Copy</button></div><pre>${hi(res)}</pre></div>`;
   }
   const cards = [['Gross pay', r.grossPay], ['Employee taxes', r.employeeTaxTotal], ['Employer taxes', r.employerTaxTotal], ['Net pay', r.netPay]];
-  return `${bannerHtml()}<p class="eyebrow">Result</p><h1>${esc(exampleTitle || 'Your paycheck')}</h1><p class="sub">${esc(sub)}</p>
+  return `${bannerHtml()}<p class="eyebrow">Result</p><h2 class="step-title">${esc(exampleTitle || 'Your paycheck')}</h2><p class="sub">${esc(sub)}</p>
     <div class="cards">${cards.map(([n, v], i) => `<div class="card${i === 3 ? ' netc' : ''}"><span>${n}</span><b>${formatMoney(v || 0)}</b></div>`).join('')}</div>
     <div class="tabs">${tab('taxes', 'Taxes')}${tab('req', 'Request JSON')}${tab('res', 'Response JSON')}</div>
     ${body}
@@ -979,6 +1034,8 @@ function showErrors(details) {
   banner = list.length ? `${list.length} fields need a fix` : '';
   bannerHref = '';
   bannerKind = 'bad';
+  bannerLinkLabel = '';
+  bannerExample = false;
   if (list[0] && list[0].path) {
     step = stepForPath(list[0].path);
     visited.add(step);
@@ -1054,9 +1111,7 @@ async function runCalc() {
     busy = false;
     if (res.status === 422 && Array.isArray(body.details)) { showErrors(body.details); return; }
     if (res.status === 401) {
-      banner = 'Add your API key to run a calculation.';
-      bannerHref = '/dashboard';
-      bannerKind = 'bad';
+      setKeyGate(false);
       view = 'wizard';
       render();
       return;
@@ -1064,6 +1119,8 @@ async function runCalc() {
     if (res.status === 402) {
       banner = body.error || 'This account cannot run a calculation yet.';
       bannerHref = '/dashboard';
+      bannerLinkLabel = 'Open your account';
+      bannerExample = false;
       bannerKind = 'bad';
       view = 'wizard';
       render();
@@ -1071,6 +1128,9 @@ async function runCalc() {
     }
     if (res.status === 429) {
       banner = 'Too many calculations. Try again in a minute.';
+      bannerHref = '';
+      bannerLinkLabel = '';
+      bannerExample = false;
       bannerKind = 'warn';
       view = 'wizard';
       render();
@@ -1078,6 +1138,9 @@ async function runCalc() {
     }
     if (!res.ok) {
       banner = `Something went wrong on our side. Request id ${body.requestId || 'unknown'}.`;
+      bannerHref = '';
+      bannerLinkLabel = '';
+      bannerExample = false;
       bannerKind = 'bad';
       view = 'wizard';
       render();
@@ -1088,6 +1151,9 @@ async function runCalc() {
   } catch {
     busy = false;
     banner = 'Something went wrong on our side. Request id unknown.';
+    bannerHref = '';
+    bannerLinkLabel = '';
+    bannerExample = false;
     bannerKind = 'bad';
     view = 'wizard';
     render();
@@ -1122,13 +1188,13 @@ async function runLookup() {
     model.homeDirty = false;
     model.workDirty = false;
     if (res.status === 401) {
-      banner = 'Add your API key to look up addresses';
-      bannerHref = '/dashboard';
-      bannerKind = 'bad';
+      setKeyGate(true);
     } else if (res.status === 429) {
       banner = 'Too many lookups. Try again in a minute.';
       bannerKind = 'warn';
       bannerHref = '';
+      bannerLinkLabel = '';
+      bannerExample = false;
     } else if (!res.ok) {
       const fail = "We couldn't place this address. Check the ZIP, or enter the codes in step 4.";
       if (model.workAddress) model.workLookup = { error: fail };
@@ -1164,6 +1230,9 @@ async function runLookup() {
     }
   } catch {
     banner = 'Something went wrong on our side. Request id unknown.';
+    bannerHref = '';
+    bannerLinkLabel = '';
+    bannerExample = false;
     bannerKind = 'bad';
   } finally {
     lookupBusy = false;
