@@ -226,6 +226,13 @@ when the value matches `[A-Za-z0-9_-]{8,128}`. Leave it unset and the tag
 is omitted. Submit `https://omniatax.io/sitemap.xml` in Search Console once
 the tag is live.
 
+**Search pages and icons are generated.** The guides and the 51 state pages under
+`/payroll-tax` are written by `npm run build:seo-pages` from the state rule files and the
+engine; the icons, `wordmark.svg` and the 1200x630 share image are written by
+`python3 scripts/build-brand-assets.py` (needs `fonttools`, `pillow` and node with Playwright).
+Re-run the first after a rule-file change; `tests/seo-pages.test.ts` fails while the
+committed pages are stale.
+
 Start it: `npm run site` (keep it running under a process manager / systemd).
 
 **Instances and the store.** The store in `SITE_DB_DIR` is a JSON file: every

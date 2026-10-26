@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="color-scheme" content="light" />
+<title>Payroll tax calculation: how gross pay becomes net pay | Omnia.tax</title>
+<meta name="description" content="How payroll tax is calculated, step by step: FICA wage base ($184,500 in 2026), federal and state withholding, unemployment tax, a worked example." />
+<link rel="stylesheet" href="/assets/v5.css" />
+</head>
+<body>
+<header class="site-header"><div class="bar">
+  <a class="mark" href="/">Omnia<span class="dot" aria-hidden="true"></span>tax</a>
+  <nav class="nav-links" aria-label="Primary"><a href="/product">Product</a><a href="/coverage">Coverage</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a></nav>
+  <div class="nav-end"><a class="signin" href="/signin">Sign in</a><a class="btn sm" href="/signup">Get API key</a></div>
+  <button class="menu-btn" type="button" aria-expanded="false" aria-label="Menu"><span></span><span></span></button>
+</div></header>
+<main class="wrap">
+  <div class="page-head">
+    <nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a> <span aria-hidden="true">/</span> <span aria-current="page">Payroll tax calculation</span></nav>
+    <p class="eyebrow">Guide</p>
+    <h1 class="page">Payroll tax calculation, step by step</h1>
+    <p class="sub">How a paycheck is worked out, which numbers change the result, and how to automate it.</p>
+  </div>
+  <div class="prose seo" style="margin-top:32px;max-width:720px">
+
+    <p>Payroll tax calculation turns one paycheck's gross pay into net pay by working out each tax separately. The hard part is not the arithmetic. Each tax has its own taxable wages, its own cap, and its own rules for which deductions count, so one set of numbers does not carry across all of them.</p>
+    <h2>The steps, in order</h2>
+    <ol>
+      <li><strong>Gross pay.</strong> Add every earning for the period. Bonuses and commissions are supplemental wages and can be taxed differently.</li>
+      <li><strong>Pre-tax deductions, tax by tax.</strong> A section 125 health premium reduces federal income tax, Social Security and Medicare wages. A traditional 401(k) deferral reduces income tax wages but not Social Security or Medicare wages.</li>
+      <li><strong>Social Security.</strong> 6.2% from the employee and the same from the employer, up to the annual wage base: $184,500 in 2026, $192,300 in 2027. This is why year-to-date wages are an input.</li>
+      <li><strong>Medicare.</strong> 1.45% from each side with no cap, plus 0.9% Additional Medicare Tax withheld from the employee on wages above $200,000.</li>
+      <li><strong>Federal income tax.</strong> Worked out from the employee's Form W-4: filing status, the multiple-jobs checkbox, the dependent credit, other income, deductions and extra withholding, using the IRS percentage method.</li>
+      <li><strong>State and local income tax.</strong> Each state has its own formula, tables and withholding certificate. Some cities, counties and school districts add a tax on top, which depends on both the work and the home address.</li>
+      <li><strong>Employer-only taxes.</strong> Federal unemployment (FUTA) is 6.0% of the first $7,000 per employee, with a credit that normally brings it to 0.6%. State unemployment (SUTA) has its own wage base and rate. Some states add employer contributions for paid leave.</li>
+      <li><strong>Net pay.</strong> Gross pay less employee taxes and all deductions. Employer taxes are a cost to the employer, not a deduction from the employee.</li>
+    </ol>
+    <h2>An example, with a 401(k) deferral</h2>
+    <p>A single employee in Columbus, Ohio, paid $3,000.00 biweekly with a $240.00 traditional 401(k) deferral, check dated 2026-09-15. Net pay is $2,119.32. These lines were produced by the Omnia.tax engine for this input; notice that the deferral lowers income tax but not the Social Security and Medicare lines.</p>
+    <div class="table-wrap"><table><thead><tr><th>Tax</th><th>Paid by</th><th>Level</th><th style="text-align:right">Amount</th></tr></thead><tbody><tr><td>Federal Income Tax</td><td>Employee</td><td>Federal</td><td style="text-align:right">$267.58</td></tr><tr><td>Social Security</td><td>Employee</td><td>Federal</td><td style="text-align:right">$186.00</td></tr><tr><td>Social Security (Employer)</td><td>Employer</td><td>Federal</td><td style="text-align:right">$186.00</td></tr><tr><td>Medicare</td><td>Employee</td><td>Federal</td><td style="text-align:right">$43.50</td></tr><tr><td>Medicare (Employer)</td><td>Employer</td><td>Federal</td><td style="text-align:right">$43.50</td></tr><tr><td>FUTA</td><td>Employer</td><td>Federal</td><td style="text-align:right">$18.00</td></tr><tr><td>Ohio Income Tax</td><td>Employee</td><td>State</td><td style="text-align:right">$68.60</td></tr><tr><td>Ohio Unemployment Insurance (Employer)</td><td>Employer</td><td>State</td><td style="text-align:right">$85.50</td></tr><tr><td>Ohio Municipal Income Tax</td><td>Employee</td><td>Local</td><td style="text-align:right">$75.00</td></tr></tbody></table></div>
+    <h2>Where payroll tax calculations go wrong</h2>
+    <ul>
+      <li>Treating one deduction as pre-tax for every tax.</li>
+      <li>Missing a wage-base cap because year-to-date wages were not carried forward.</li>
+      <li>Using the tax year of the pay period instead of the check date; withholding follows the date the check is paid.</li>
+      <li>Looking up a state without the local layer, which matters in Ohio, Pennsylvania, Kentucky, Indiana, Michigan, Alabama and others.</li>
+      <li>Rounding each line before totalling instead of working in whole cents.</li>
+    </ul>
+    <h2>Calculate it with the API</h2>
+    <p>The <a href="/payroll-tax-api">Omnia.tax payroll tax API</a> does these steps in one request and returns every line. See the <a href="/payroll-tax">state-by-state guides</a> for rates and wage bases, or the <a href="/docs/paycheck">API reference</a> for the request fields.</p>
+  </div>
+<section class="faq" aria-labelledby="faq-h" style="margin-top:44px;max-width:720px"><h2 id="faq-h" style="font-size:22px;line-height:30px">Questions</h2><article><h3>How do you calculate payroll taxes?</h3><p>Start with gross pay, subtract the deductions that are pre-tax for each tax, then apply each tax to its own taxable wages: Social Security at 6.2% up to the wage base, Medicare at 1.45%, federal income tax from the employee's Form W-4, then state and local tax. Employers add federal and state unemployment tax on top.</p></article><article><h3>What is the Social Security wage base?</h3><p>$184,500 for 2026 and $192,300 for 2027. Social Security tax stops once an employee's wages for the year pass that amount; Medicare has no cap.</p></article><article><h3>Is a 401(k) deferral subject to payroll tax?</h3><p>It depends on the tax. A traditional 401(k) deferral reduces federal and most state income tax wages, but it is still subject to Social Security and Medicare. That difference between taxes is the most common cause of payroll tax errors.</p></article><article><h3>Can an API calculate payroll taxes for me?</h3><p>Yes. Omnia.tax takes earnings, deductions, a Form W-4, year-to-date wages and the work location, and returns each tax line with the wages it applied to and who pays it. It calculates; you still file and deposit.</p></article></section>
+  <div class="seo-cta" style="margin:48px 0 8px;max-width:720px"><a class="btn" href="/signup">Start the 14-day trial</a> <a class="text-link" href="/docs">Read the docs →</a><p class="fine">14-day free trial, then $0.08 per paycheck calculation. Omnia.tax calculates; it does not file, deposit tax, or give tax advice. <a href="/disclaimer">Disclaimer</a>.</p></div>
+</main>
+<footer class="site-footer">
+  <div class="wrap foot-grid">
+    <a class="mark" href="/">Omnia<span class="dot" aria-hidden="true"></span>tax</a>
+    <div><h2>Product</h2><a href="/coverage">Coverage</a><a href="/pricing">Pricing</a><a href="/changelog">Changelog</a></div>
+    <div><h2>Developers</h2><a href="/docs">Docs</a><a href="/docs/paycheck">API reference</a><a href="/status">Status</a></div>
+    <div><h2>Guides</h2><a href="/payroll-tax-calculation">Payroll tax calculation</a><a href="/payroll-tax-api">Payroll tax API</a><a href="/payroll-tax">Payroll tax by state</a><a href="/symmetry-tax-engine-alternative">Symmetry alternative</a><a href="/payroll-tax-engine-comparison">Engine comparison</a></div>
+    <div><h2>Company</h2><a href="/about">About</a><a href="/contact">Contact</a><a href="/terms">Terms</a><a href="/privacy">Privacy</a></div>
+  </div>
+  <p class="wrap copy">© 2026 OMNIA TAX LLC. A Michigan limited liability company.</p>
+</footer>
+<script src="/assets/v5.js"></script>
+</body>
+</html>

@@ -446,6 +446,8 @@ function contentTypeFor(file: string): string {
   if (file.endsWith('.js')) return 'text/javascript; charset=utf-8';
   if (file.endsWith('.svg')) return 'image/svg+xml';
   if (file.endsWith('.png')) return 'image/png';
+  if (file.endsWith('.ico')) return 'image/x-icon';
+  if (file.endsWith('.webmanifest')) return 'application/manifest+json; charset=utf-8';
   if (file.endsWith('.jpg') || file.endsWith('.jpeg')) return 'image/jpeg';
   if (file.endsWith('.json')) return 'application/json; charset=utf-8';
   if (file.endsWith('.woff2')) return 'font/woff2';
@@ -3121,10 +3123,15 @@ function handleBilling(req: IncomingMessage, res: ServerResponse): void {
 
 createServer((req, res) => {
   const url = (req.url ?? '/').split('?')[0];
-  const method = req.method ?? 'GET';
+  // A HEAD request is a GET without the body: link checkers, uptime monitors and some crawlers use it
+  // to test a URL (the sitemap, robots.txt, a page) before fetching it. Every route below matches
+  // 'GET' only, so without this a HEAD for any page was a 404 even though the GET was a 200.
+  // Node drops the body of a HEAD response itself and keeps the headers, Content-Length included.
+  const asked = req.method ?? 'GET';
+  const method = asked === 'HEAD' ? 'GET' : asked;
 
   (async () => {
-    if (method === 'GET' || method === 'HEAD') {
+    if (method === 'GET') {
       const dest = canonicalRedirect(req, req.url ?? '/');
       if (dest) {
         res.writeHead(301, { Location: dest, ...securityHeaders(req), 'Cache-Control': 'public, max-age=3600' });
@@ -3178,14 +3185,19 @@ createServer((req, res) => {
       sendPage(req, res, join(HERE, page.file), page.path);
       return;
     }
-    if (method === 'GET' && (url === '/favicon.ico' || url === '/favicon.svg' || url === '/apple-touch-icon.png' || url.startsWith('/logo/') || url.startsWith('/assets/') || url === '/tokens.css')) {
+    if (method === 'GET' && (url === '/favicon.ico' || url === '/favicon.svg' || url === '/apple-touch-icon.png' || url === '/site.webmanifest' || url.startsWith('/logo/') || url.startsWith('/assets/') || url === '/tokens.css')) {
       let decoded = url;
       try { decoded = decodeURIComponent(url); } catch { decoded = url; }
-      const rel = decoded === '/favicon.ico' || decoded === '/favicon.svg'
-        ? 'logo/favicon.svg'
-        : decoded === '/apple-touch-icon.png'
-          ? 'logo/apple-touch-icon.png'
-          : decoded.replace(/^\/+/, '');
+      // Google and every browser ask for /favicon.ico at the root first, so it must be a real .ico.
+      const rel = decoded === '/favicon.ico'
+        ? 'logo/favicon.ico'
+        : decoded === '/favicon.svg'
+          ? 'logo/favicon.svg'
+          : decoded === '/site.webmanifest'
+            ? 'site.webmanifest'
+            : decoded === '/apple-touch-icon.png'
+            ? 'logo/apple-touch-icon.png'
+            : decoded.replace(/^\/+/, '');
       if (!rel.includes('..') && !rel.includes('\\') && !rel.includes('\0')) {
         const file = resolve(HERE, rel);
         if ((file === HERE || file.startsWith(HERE + '/')) && existsSync(file) && statSync(file).isFile()) {

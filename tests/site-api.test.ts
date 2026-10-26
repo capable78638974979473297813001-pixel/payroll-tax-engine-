@@ -211,6 +211,19 @@ describe('Omnia API (end to end)', () => {
     assert.deepEqual(schema.required.slice(0, 2), ['checkDate', 'payFrequency']);
   });
 
+  test('HEAD on a page, robots.txt and the sitemap answers like GET, without the body', async () => {
+    for (const path of ['/', '/robots.txt', '/sitemap.xml', '/healthz']) {
+      const get = await fetch(`${BASE}${path}`);
+      const head = await fetch(`${BASE}${path}`, { method: 'HEAD' });
+      assert.equal(head.status, get.status, path);
+      assert.equal(head.status, 200, path);
+      assert.equal(head.headers.get('content-type'), get.headers.get('content-type'), path);
+      assert.equal((await head.text()).length, 0, `${path}: a HEAD response has no body`);
+    }
+    const missing = await fetch(`${BASE}/no-such-page`, { method: 'HEAD' });
+    assert.equal(missing.status, 404);
+  });
+
   test('POST /v1/address needs a key and validates before any lookup', async () => {
     const addr = (body: unknown, key: string | null = PLAINTEXT_KEY) =>
       fetch(`${BASE}/v1/address`, {
