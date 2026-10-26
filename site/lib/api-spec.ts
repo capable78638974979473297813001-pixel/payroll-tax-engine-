@@ -523,6 +523,15 @@ export function openApiDocument(version: string): Record<string, unknown> {
                 grossPay: { type: 'integer', description: 'Total earnings in cents.' },
                 pretaxDeductions: { type: 'integer' },
                 posttaxDeductions: { type: 'integer' },
+                electiveDeferrals: {
+                  type: 'object',
+                  description: 'Present when the check had retirement deferrals: what stayed pretax after the annual limits, in cents. Add these to ytd.electiveDeferrals for the next check.',
+                  properties: {
+                    section402gAggregate: { type: 'integer' },
+                    deferral457: { type: 'integer' },
+                    simple: { type: 'integer' },
+                  },
+                },
                 taxes: { type: 'array', items: { $ref: '#/components/schemas/TaxLine' } },
                 employeeTaxTotal: { type: 'integer', description: 'Sum of the employee-paid taxes, in cents.' },
                 employerTaxTotal: { type: 'integer', description: 'Sum of the employer-paid taxes, in cents. Not deducted from net pay.' },

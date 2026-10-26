@@ -26,6 +26,7 @@ const freePort = () => new Promise<number>((resolve) => {
 const LIVE_EMAIL = 'live@wire.test';
 const PENDING_EMAIL = 'pending@wire.test';
 const SESSION = 'sess_wire_token';
+const PENDING_SESSION = 'sess_pending_token';
 const LIVE_KEY = 'sk_live_' + randomBytes(18).toString('base64url');
 const TEST_KEY = 'sk_test_' + randomBytes(18).toString('base64url');
 const WEBHOOK_SECRET = 'whsec_wire';
@@ -56,8 +57,8 @@ function account(email: string, stage: string) {
   return {
     name: 'Live Wire', email, company: 'Wire LLC', phone: '555-0100',
     code: null, codeExpiresAt: null, codeRequestedAt: null, emailVerifiedAt: now,
-    sessionToken: email === LIVE_EMAIL ? SESSION : null,
-    sessionExpiresAt: email === LIVE_EMAIL ? new Date(Date.now() + 86_400_000).toISOString() : null,
+    sessionToken: email === LIVE_EMAIL ? SESSION : PENDING_SESSION,
+    sessionExpiresAt: new Date(Date.now() + 86_400_000).toISOString(),
     stage, createdAt: now,
   };
 }
@@ -67,7 +68,7 @@ function subscription(email: string, status: string, stripeCustomerId: string | 
   return {
     email, legalName: 'Wire LLC', billingContact: 'Live Wire', billingEmail: email, address: '1 Main St',
     expectedEmployees: 2, payFrequency: 'biweekly', rooftop: false, estimatedAnnual: 0,
-    status, trialStartsAt: now, trialEndsAt: now, termMonths: 12, termEndsAt: now,
+    status, trialStartsAt: status === 'payment_pending' ? null : now, trialEndsAt: status === 'payment_pending' ? null : now, termMonths: 12, termEndsAt: status === 'payment_pending' ? null : now,
     createdAt: now, activatedAt: now, stripeCustomerId, stripeSubscriptionId, suspended: false, suspendedReason: null,
   };
 }
@@ -95,7 +96,7 @@ before(async () => {
     },
     subscriptions: {
       [LIVE_EMAIL]: subscription(LIVE_EMAIL, 'trialing', 'cus_live', 'sub_live'),
-      [PENDING_EMAIL]: subscription(PENDING_EMAIL, 'payment_pending', null, null),
+      [PENDING_EMAIL]: subscription(PENDING_EMAIL, 'payment_pending', 'cus_pending', null),
     },
     keys: { [liveHash]: keyRecord(LIVE_KEY, LIVE_EMAIL), [testHash]: keyRecord(TEST_KEY, LIVE_EMAIL) },
     usage: [], estimates: [], termsQuotes: {}, meterQueue: [], rateLimits: {}, processedStripeEvents: [],
@@ -189,14 +190,20 @@ const until = async (cond: () => boolean) => {
 };
 
 test('checkout, meter events, and the webhook', async () => {
-  const setup = await fetch(`${BASE}/api/payment-setup`, { method: 'POST', headers: bearer(SESSION) });
+  // An account that already has a subscription cannot open another Checkout.
+  const dup = await fetch(`${BASE}/api/payment-setup`, { method: 'POST', headers: bearer(SESSION) });
+  assert.equal(dup.status, 409);
+  assert.equal((await dup.json() as { code?: string }).code, 'already_subscribed');
+  assert.equal(checkoutBody, '', 'no Checkout session was created for it');
+
+  const setup = await fetch(`${BASE}/api/payment-setup`, { method: 'POST', headers: bearer(PENDING_SESSION) });
   assert.equal(setup.status, 200, await setup.clone().text());
   const setupBody = await setup.json() as { checkoutUrl?: string; metered?: boolean };
   assert.equal(setupBody.metered, true);
   assert.match(setupBody.checkoutUrl ?? '', /checkout\.test/);
   const params = new URLSearchParams(checkoutBody);
   assert.equal(params.get('mode'), 'subscription');
-  assert.equal(params.get('customer'), 'cus_live');
+  assert.equal(params.get('customer'), 'cus_pending');
   assert.equal(params.get('line_items[0][price]'), 'price_wire');
   assert.equal(params.get('line_items[0][quantity]'), null);
   assert.equal(params.get('subscription_data[trial_period_days]'), '14');

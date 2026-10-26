@@ -55,7 +55,21 @@ CREATE TABLE jurisdiction (
   -- e.g. PA Act 32 PSD code, OH municipality code — the authoritative external id.
   external_code    TEXT,
   parent_id        BIGINT REFERENCES jurisdiction (id),
-  UNIQUE (type, name, state_code)
+  -- Names repeat: Pennsylvania has Franklin Township in 15 counties, and a
+  -- municipality split across school districts appears once per Act 32 code.
+  -- Identity is therefore the name together with the parent and the external
+  -- code (see jurisdiction_identity below), not the name alone.
+  CHECK (external_code IS NULL OR external_code <> '')
+);
+
+-- One row per distinct jurisdiction. NULLs are folded to a value so that two
+-- rows with no parent (or no external code) and the same name still collide.
+CREATE UNIQUE INDEX jurisdiction_identity ON jurisdiction (
+  type,
+  name,
+  COALESCE(state_code, '--'),
+  COALESCE(parent_id, 0),
+  COALESCE(external_code, '')
 );
 
 

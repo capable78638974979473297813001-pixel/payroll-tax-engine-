@@ -55,6 +55,8 @@ export interface ApiKey {
   balanceDueCents: number;
   /** Everything ever billed to this key, in cents (survives settlement). */
   lifetimeBilledCents: number;
+  /** Recent payment intents already taken off the balance, so a replayed settlement cannot take off more. */
+  settledPaymentIntents?: string[];
   /** Stripe Customer id, set once this key's owner saves a card. */
   stripeCustomerId: string | null;
   /** The saved card to charge off-session (used only for the manual/settle path). */
@@ -533,10 +535,20 @@ export function usageForKey(id: string): {
  * charge happened when no processor is connected). Until a processor is wired,
  * treat a returned amount as "invoice this", not "money collected".
  */
-export function settleBalance(idOrPrefix: string, amountCents?: number): { ok: boolean; name?: string; chargedCents: number } {
+export function settleBalance(
+  idOrPrefix: string,
+  amountCents?: number,
+  /** The processor's id for the payment. A payment already settled is not settled again. */
+  paymentIntentId?: string,
+): { ok: boolean; name?: string; chargedCents: number; duplicate?: boolean } {
   return withDb((db) => {
     const k = db.keys[idOrPrefix] ?? Object.values(db.keys).find((x) => x.prefix === idOrPrefix);
     if (!k) return { ok: false, chargedCents: 0 };
+    if (paymentIntentId) {
+      const seen = k.settledPaymentIntents ?? [];
+      if (seen.includes(paymentIntentId)) return { ok: true, name: k.name, chargedCents: 0, duplicate: true };
+      k.settledPaymentIntents = [...seen, paymentIntentId].slice(-50);
+    }
     const chargedCents = amountCents === undefined ? k.balanceDueCents : Math.min(k.balanceDueCents, Math.max(0, Math.round(amountCents)));
     k.balanceDueCents -= chargedCents;
     return { ok: true, name: k.name, chargedCents };

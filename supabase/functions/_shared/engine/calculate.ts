@@ -138,9 +138,22 @@ export function calculatePaycheck(input: PaycheckInput): PaycheckResult {
     );
   }
 
+  // The deferrals that stayed pretax, bucketed the way ytd.electiveDeferrals
+  // is: 401(k), 403(b) and SIMPLE share the 402(g) total, SIMPLE also has its
+  // own, and 457(b) is separate.
+  const deferred = (...categories: string[]) =>
+    effectiveDeductions.filter((d) => d.category !== null && categories.includes(d.category)).reduce((sum, d) => sum + d.amount, 0);
+  const deferrals = {
+    section402gAggregate: deferred('deferral_401k', 'deferral_403b', 'deferral_simple'),
+    deferral457: deferred('deferral_457'),
+    simple: deferred('deferral_simple'),
+  };
+  const electiveDeferrals = Object.fromEntries(Object.entries(deferrals).filter(([, v]) => v > 0)) as NonNullable<PaycheckResult['electiveDeferrals']>;
+
   return {
     checkDate: input.checkDate,
     grossPay: gross,
+    ...(Object.keys(electiveDeferrals).length ? { electiveDeferrals } : {}),
     pretaxDeductions: pretax,
     posttaxDeductions: posttax,
     taxes,

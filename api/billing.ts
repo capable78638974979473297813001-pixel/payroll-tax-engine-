@@ -309,7 +309,22 @@ export interface ChargeResult {
  * when nothing is due (no-op) or when Stripe/card aren't set up (no charge, no
  * balance change).
  */
+const chargesInFlight = new Set<string>();
+
 export async function chargeOutstanding(keyId: string): Promise<ChargeResult> {
+  // One settlement per key at a time. Two overlapping ones read the same
+  // balance, ask Stripe for the same payment (same idempotency key), and would
+  // each take it off, wiping out usage recorded in between.
+  if (chargesInFlight.has(keyId)) return { ok: true, chargedCents: 0, reason: 'charge_in_progress' };
+  chargesInFlight.add(keyId);
+  try {
+    return await chargeOutstandingOnce(keyId);
+  } finally {
+    chargesInFlight.delete(keyId);
+  }
+}
+
+async function chargeOutstandingOnce(keyId: string): Promise<ChargeResult> {
   const key = getApiKey(keyId);
   if (!key) return { ok: false, chargedCents: 0, reason: 'no_such_key' };
   const amount = key.balanceDueCents;
@@ -331,8 +346,8 @@ export async function chargeOutstanding(keyId: string): Promise<ChargeResult> {
     }
     // Take off only what Stripe collected: usage recorded while the charge was
     // in flight is a new balance, not part of this payment.
-    settleBalance(key.id, amount);
-    return { ok: true, chargedCents: amount, paymentIntentId: intent.id };
+    const settled = settleBalance(key.id, amount, intent.id);
+    return { ok: true, chargedCents: settled.duplicate ? 0 : amount, paymentIntentId: intent.id, ...(settled.duplicate ? { reason: 'already_settled' } : {}) };
   } catch (err) {
     const message = err instanceof StripeError ? err.message : err instanceof Error ? err.message : 'charge failed';
     return { ok: false, chargedCents: 0, reason: 'charge_failed', error: message };

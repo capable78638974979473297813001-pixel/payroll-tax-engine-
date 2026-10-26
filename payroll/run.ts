@@ -108,6 +108,7 @@ export function approvePayRun(run: PayRun, employees: readonly Employee[]): Appr
       employmentCategory: employee.employmentCategory,
       grossPay: line.grossPay,
       taxLines: line.taxLines,
+      electiveDeferrals: line.electiveDeferrals,
     });
 
     updatedEmployees.push({ ...employee, ytd: nextYtd, ytdYear: Number(run.checkDate.slice(0, 4)) });

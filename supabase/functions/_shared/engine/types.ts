@@ -773,6 +773,17 @@ export interface PaycheckResult {
   checkDate: string;
   /** Cash earnings (excludes imputed income). */
   grossPay: Cents;
+  /**
+   * What this check counted as pretax retirement deferrals, after the annual
+   * limits were applied, in the buckets ytd.electiveDeferrals tracks. A
+   * caller (payroll/ytd.ts) adds these to the running totals so the limit
+   * binds on later checks. Absent when the check had no deferral.
+   */
+  electiveDeferrals?: {
+    section402gAggregate?: Cents;
+    deferral457?: Cents;
+    simple?: Cents;
+  };
   /** Sum of all pre-tax deductions. */
   pretaxDeductions: Cents;
   /** Sum of all post-tax deductions. */

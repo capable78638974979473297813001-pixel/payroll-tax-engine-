@@ -47,6 +47,7 @@ async function mailArrives(n: number) {
   assert.ok(mail.length >= n, `expected ${n} emails, saw ${mail.length}`);
 }
 
+let signupToken = '';
 describe('accounts you can log back into', { skip: !havePython }, () => {
   before(async () => {
     dir = mkdtempSync(join(tmpdir(), 'site-accounts-'));
@@ -92,6 +93,7 @@ describe('accounts you can log back into', { skip: !havePython }, () => {
 
     const r = await post('/api/signup', { name: 'Grace Hopper', email: EMAIL, company: 'Navy LLC', phone: '5555550101', password: PW, agreeToTerms: true });
     assert.equal(r.status, 200);
+    signupToken = r.headers.get('x-signup-token') ?? '';
     assert.equal((await r.json()).emailSent, true);
     await mailArrives(1);
     const m = mail[0]!;
@@ -104,7 +106,7 @@ describe('accounts you can log back into', { skip: !havePython }, () => {
 
     const bad = await post('/api/verify-email', { email: EMAIL, code: lastCode() === '000000' ? '111111' : '000000' });
     assert.equal(bad.status, 401);
-    const ok = await post('/api/verify-email', { email: EMAIL, code: lastCode() });
+    const ok = await post('/api/verify-email', { email: EMAIL, code: lastCode(), signupToken });
     assert.equal(ok.status, 200);
     const body = await ok.json();
     assert.equal(body.hasPassword, true);

@@ -54,10 +54,13 @@ export interface FetchOptions {
 async function fetchWithRetry(
   url: string,
   fetchImpl: typeof fetch,
-  { retries = 1, timeoutMs = 10_000, baseBackoffMs = 300 }: FetchOptions = {},
+  { retries = 1, timeoutMs = 10_000, baseBackoffMs = 300, minIntervalMs = DEFAULT_MIN_INTERVAL_MS }: FetchOptions = {},
 ): Promise<Response> {
   let lastError: unknown;
   for (let attempt = 0; attempt <= retries; attempt++) {
+    // Every attempt takes a slot, the first and each retry, so a retry cannot
+    // push the application past one request per second.
+    await throttle(minIntervalMs);
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), timeoutMs);
     try {
@@ -69,6 +72,11 @@ async function fetchWithRetry(
       if (res.ok) return res;
       if (res.status < 500 && res.status !== 429) return res;
       lastError = new Error(`HTTP ${res.status}`);
+      // A rate-limited answer says how long to stay away; honour it (capped).
+      const retryAfter = Number(res.headers?.get?.('retry-after'));
+      if (res.status === 429 && Number.isFinite(retryAfter) && retryAfter > 0 && attempt < retries && baseBackoffMs > 0) {
+        await new Promise((resolve) => setTimeout(resolve, Math.min(retryAfter, 10) * 1000));
+      }
     } catch (err) {
       clearTimeout(timer);
       lastError = err;
@@ -93,8 +101,6 @@ export async function crossCheckAddress(
   fetchImpl: typeof fetch = fetch,
   retryOptions: FetchOptions = {},
 ): Promise<NominatimResult> {
-  await throttle(retryOptions.minIntervalMs ?? DEFAULT_MIN_INTERVAL_MS);
-
   const url = new URL(NOMINATIM_SEARCH);
   url.searchParams.set('q', oneLineAddress);
   url.searchParams.set('format', 'jsonv2');
@@ -156,8 +162,6 @@ export async function searchStructuredAddress(
   fetchImpl: typeof fetch = fetch,
   retryOptions: FetchOptions = {},
 ): Promise<StructuredAddressHit | null> {
-  await throttle(retryOptions.minIntervalMs ?? DEFAULT_MIN_INTERVAL_MS);
-
   const url = new URL(NOMINATIM_SEARCH);
   url.searchParams.set('street', parts.street);
   if (parts.city) url.searchParams.set('city', parts.city);

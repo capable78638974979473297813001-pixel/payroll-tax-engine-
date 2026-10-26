@@ -226,6 +226,8 @@ export interface CompletedCheckout {
   email?: string | null;
   customerId?: string | null;
   subscriptionId?: string | null;
+  /** Stripe's status for that subscription right now (active, trialing, past_due, ...). Null when the checkout made none. */
+  subscriptionStatus?: string | null;
   /** The card or bank account the customer saved. Null if none was. */
   paymentMethod?: SavedPaymentMethod | null;
   reason?: string;
@@ -260,9 +262,11 @@ export async function completeMeteredCheckout(sessionId: string): Promise<Comple
     // cancelled account, revive it. The expanded subscription carries its
     // status; a bare id is looked up. A failed lookup is a retryable error,
     // not a guess.
+    let subscriptionStatus: string | null = null;
     if (subscriptionId) {
       const status = typeof sub === 'object' && sub ? sub.status : (await retrieveSubscription(subscriptionId)).status;
       if (status === 'canceled' || status === 'incomplete_expired') return { ok: false, reason: 'subscription_not_active' };
+      subscriptionStatus = status ?? null;
     }
     const si = s.setup_intent;
     const raw = (typeof sub === 'object' && sub ? sub.default_payment_method : null)
@@ -272,6 +276,7 @@ export async function completeMeteredCheckout(sessionId: string): Promise<Comple
       email: s.metadata?.omnia_email ?? null,
       customerId: typeof s.customer === 'string' ? s.customer : null,
       subscriptionId,
+      subscriptionStatus,
       paymentMethod: describePaymentMethod(raw),
     };
   } catch (err) {
@@ -330,6 +335,8 @@ export function interpretWebhook(rawBody: string, signatureHeader: string | unde
         status?: string;
         mode?: string;
         subscription?: unknown;
+        /** Newer Stripe API versions move an invoice's subscription here. */
+        parent?: { subscription_details?: { subscription?: unknown } };
         metadata?: { omnia_email?: string };
         customer_email?: string | null;
         customer_details?: { email?: string | null };
@@ -347,6 +354,9 @@ export function interpretWebhook(rawBody: string, signatureHeader: string | unde
   const tagged = <T extends { ok: true; action: WebhookAction; customerId: string | null }>(base: T): WebhookInterpretation =>
     eventId ? { ...base, eventId } : base;
   const forSubscription = (id: string | null | undefined) => (id ? { subscriptionId: id } : {});
+  // An invoice names its subscription as `subscription` (older API versions)
+  // or under `parent.subscription_details` (newer ones).
+  const invoiceSubscription = idOf(obj.subscription) ?? idOf(obj.parent?.subscription_details?.subscription);
 
   switch (event.type) {
     case 'checkout.session.completed': {
@@ -381,14 +391,14 @@ export function interpretWebhook(rawBody: string, signatureHeader: string | unde
     // event's own id; an invoice's `subscription`), so the caller can tell an
     // event for the subscription an account holds from a late one for an old one.
     case 'invoice.payment_failed':
-      return tagged({ ok: true, action: 'suspend', customerId, ...forSubscription(idOf(obj.subscription)) });
+      return tagged({ ok: true, action: 'suspend', customerId, ...forSubscription(invoiceSubscription) });
     case 'customer.subscription.paused':
       return tagged({ ok: true, action: 'suspend', customerId, ...forSubscription(obj.id) });
     case 'customer.subscription.deleted':
       return tagged({ ok: true, action: 'cancel', customerId, ...forSubscription(obj.id) });
     case 'invoice.paid':
     case 'invoice.payment_succeeded':
-      return tagged({ ok: true, action: 'reactivate', customerId, ...forSubscription(idOf(obj.subscription)) });
+      return tagged({ ok: true, action: 'reactivate', customerId, ...forSubscription(invoiceSubscription) });
     case 'customer.subscription.resumed':
       return tagged({ ok: true, action: 'reactivate', customerId, ...forSubscription(obj.id) });
     default:

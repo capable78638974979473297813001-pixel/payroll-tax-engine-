@@ -108,6 +108,7 @@ export function buildPaycheckInput(
     workState: employee.workState ?? { code: company.homeState },
     residenceState: employee.residenceState,
     residenceStateWithholding: employee.residenceStateWithholding,
+    ...(employee.ageAtYearEnd !== undefined ? { employee: { ageAtYearEnd: employee.ageAtYearEnd } } : {}),
   };
 }
 
@@ -170,6 +171,7 @@ export function computeEmployeePaycheck(
       taxableWages: t.taxableWages,
       amount: t.amount,
     })),
+    ...(result.electiveDeferrals ? { electiveDeferrals: result.electiveDeferrals } : {}),
     garnishmentLines: garnishment?.lines.map((g) => ({ orderId: g.orderId, withheld: g.withheld, detail: g.detail })) ?? [],
     depositAllocations,
   };
