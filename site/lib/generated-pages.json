@@ -1,0 +1,1938 @@
+[
+  {
+    "path": "/payroll-tax-calculation",
+    "file": "payroll-tax-calculation.html",
+    "title": "Payroll tax calculation: how gross pay becomes net pay | Omnia.tax",
+    "description": "How payroll tax is calculated, step by step: FICA wage base ($184,500 in 2026), federal and state withholding, unemployment tax, a worked example.",
+    "h1": "Payroll tax calculation, step by step",
+    "faq": [
+      {
+        "q": "How do you calculate payroll taxes?",
+        "a": "Start with gross pay, subtract the deductions that are pre-tax for each tax, then apply each tax to its own taxable wages: Social Security at 6.2% up to the wage base, Medicare at 1.45%, federal income tax from the employee's Form W-4, then state and local tax. Employers add federal and state unemployment tax on top."
+      },
+      {
+        "q": "What is the Social Security wage base?",
+        "a": "$184,500 for 2026 and $192,300 for 2027. Social Security tax stops once an employee's wages for the year pass that amount; Medicare has no cap."
+      },
+      {
+        "q": "Is a 401(k) deferral subject to payroll tax?",
+        "a": "It depends on the tax. A traditional 401(k) deferral reduces federal and most state income tax wages, but it is still subject to Social Security and Medicare. That difference between taxes is the most common cause of payroll tax errors."
+      },
+      {
+        "q": "Can an API calculate payroll taxes for me?",
+        "a": "Yes. Omnia.tax takes earnings, deductions, a Form W-4, year-to-date wages and the work location, and returns each tax line with the wages it applied to and who pays it. It calculates; you still file and deposit."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Payroll tax calculation",
+        "path": "/payroll-tax-calculation"
+      }
+    ]
+  },
+  {
+    "path": "/payroll-tax-api",
+    "file": "payroll-tax-api.html",
+    "title": "Payroll tax API: federal, state, local | Omnia.tax",
+    "description": "A payroll tax calculation API for developers: federal, state, local and employer taxes in one request. JSON in cents, OpenAPI spec, $0.08 per paycheck.",
+    "h1": "Payroll tax API",
+    "faq": [
+      {
+        "q": "What is a payroll tax API?",
+        "a": "An HTTP service that takes one paycheck (earnings, deductions, the employee's W-4 and work location) and returns the payroll taxes: federal, state and local withholding, Social Security, Medicare and the employer taxes."
+      },
+      {
+        "q": "How much does the Omnia.tax payroll tax API cost?",
+        "a": "$0.08 per paycheck calculation after a 14-day free trial. There are no seat fees."
+      },
+      {
+        "q": "Does Omnia.tax file or pay payroll taxes?",
+        "a": "No. It calculates the tax. It does not file returns, deposit or remit tax, pay employees or move money, and it does not give tax advice."
+      },
+      {
+        "q": "Which states and years does it cover?",
+        "a": "All 50 states and DC for 2025, 2026 and 2027 (2027 is provisional where a state has not yet published its tables), plus local taxes in 15 states covering 4,135 jurisdictions and 69 local minimum wage ordinances."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Payroll tax API",
+        "path": "/payroll-tax-api"
+      }
+    ]
+  },
+  {
+    "path": "/symmetry-tax-engine-alternative",
+    "file": "symmetry-tax-engine-alternative.html",
+    "title": "Symmetry Tax Engine alternative: payroll tax API | Omnia.tax",
+    "description": "Comparing Symmetry Tax Engine with Omnia.tax: what each covers, how each is sold, and when a self-serve payroll tax API is and is not a fit.",
+    "h1": "A Symmetry Tax Engine alternative",
+    "faq": [
+      {
+        "q": "Is Omnia.tax a Symmetry Tax Engine alternative?",
+        "a": "For some teams. If you need a self-serve HTTP API for gross-to-net payroll tax with public per-call pricing and you can work with state-level coverage plus the local taxes listed on our coverage page, it can replace a tax engine. If you need Symmetry's breadth of local jurisdictions, withholding forms, I-9 or a vendor with decades of production history, it is not a like-for-like replacement."
+      },
+      {
+        "q": "Is the Omnia.tax API compatible with Symmetry's?",
+        "a": "No. Omnia.tax has an adapter that accepts a Symmetry-shaped payCalc request, but it is not wire-compatible with Symmetry's API, and its tax jurisdiction ids are its own, not Symmetry's. Expect to change your integration."
+      },
+      {
+        "q": "How is Omnia.tax priced compared with Symmetry?",
+        "a": "Omnia.tax is $0.08 per paycheck calculation after a 14-day trial, published on the pricing page. Symmetry does not publish a price on its website; it directs buyers to a demo. We have not seen Symmetry's pricing and do not compare it."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Symmetry Tax Engine alternative",
+        "path": "/symmetry-tax-engine-alternative"
+      }
+    ]
+  },
+  {
+    "path": "/payroll-tax-engine-comparison",
+    "file": "payroll-tax-engine-comparison.html",
+    "title": "Payroll tax engine comparison: Symmetry, Vertex, Check, Omnia.tax",
+    "description": "Compare payroll tax calculation options: Symmetry Tax Engine, Vertex Payroll Tax, Check, a self-serve API, or build it yourself. What each covers.",
+    "h1": "Payroll tax engine comparison",
+    "faq": [
+      {
+        "q": "What are the alternatives to Symmetry Software?",
+        "a": "Other ways to get payroll tax calculation include Vertex Payroll Tax, an embedded payroll API such as Check, a self-serve payroll tax API such as Omnia.tax, or building the rules in-house from IRS and state publications. Which fits depends on whether you need only calculation or a full payroll platform."
+      },
+      {
+        "q": "Should I build payroll tax calculation myself?",
+        "a": "Only if payroll tax is your product. The arithmetic is simple. Keeping every state and local rule current, effective-dated and tested is the permanent cost."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Payroll tax engine comparison",
+        "path": "/payroll-tax-engine-comparison"
+      }
+    ]
+  },
+  {
+    "path": "/payroll-tax",
+    "file": "payroll-tax.html",
+    "title": "Payroll tax by state: rates, wage bases, minimum wage | Omnia.tax",
+    "description": "Payroll tax for all 50 states and DC: income tax, unemployment wage base and new-employer rate, minimum wage, local taxes, and a worked paycheck.",
+    "h1": "Payroll tax by state",
+    "faq": [
+      {
+        "q": "Which states have no income tax?",
+        "a": "Alaska, Florida, New Hampshire, Nevada, South Dakota, Tennessee, Texas, Washington, Wyoming do not tax wages in Omnia.tax's 2026 rules, so employers withhold no state income tax there."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Payroll tax by state",
+        "path": "/payroll-tax"
+      }
+    ]
+  },
+  {
+    "path": "/payroll-tax/alaska",
+    "file": "payroll-tax/alaska.html",
+    "title": "Alaska payroll tax calculation: rates, wage base, API | Omnia.tax",
+    "description": "Alaska payroll tax for employers: no state income tax, $54,200 unemployment wage base, 1% new-employer rate. Worked paycheck and API example.",
+    "h1": "Alaska payroll tax calculation",
+    "faq": [
+      {
+        "q": "Does Alaska have a state income tax?",
+        "a": "No. Alaska does not tax wages, so an employer withholds no state income tax. Federal income tax, Social Security and Medicare still apply."
+      },
+      {
+        "q": "What is Alaska's unemployment tax wage base?",
+        "a": "Alaska's state unemployment wage base is $54,200 for 2026 in Omnia.tax's rule files. The federal FUTA wage base is $7,000 in every state."
+      },
+      {
+        "q": "What unemployment rate does a new employer pay in Alaska?",
+        "a": "Omnia.tax uses 1% for a new employer in Alaska unless you send your own assigned rate in employer.stateUnemploymentRate. An established employer's rate is assigned by the state from its experience, so check your rate notice."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Payroll tax by state",
+        "path": "/payroll-tax"
+      },
+      {
+        "name": "Alaska",
+        "path": "/payroll-tax/alaska"
+      }
+    ]
+  },
+  {
+    "path": "/payroll-tax/alabama",
+    "file": "payroll-tax/alabama.html",
+    "title": "Alabama payroll tax calculation: rates, wage base, API | Omnia.tax",
+    "description": "Alabama payroll tax for employers: state withholding tables, $8,000 unemployment wage base, 2.7% new-employer rate. Worked paycheck and API example.",
+    "h1": "Alabama payroll tax calculation",
+    "faq": [
+      {
+        "q": "Does Alabama have a state income tax?",
+        "a": "Yes. Alabama withholds income tax from its own published tables or formula. The result depends on pay, pay frequency and the employee's withholding certificate."
+      },
+      {
+        "q": "What is Alabama's unemployment tax wage base?",
+        "a": "Alabama's state unemployment wage base is $8,000 for 2026 in Omnia.tax's rule files. The federal FUTA wage base is $7,000 in every state."
+      },
+      {
+        "q": "What unemployment rate does a new employer pay in Alabama?",
+        "a": "Omnia.tax uses 2.7% for a new employer in Alabama unless you send your own assigned rate in employer.stateUnemploymentRate. An established employer's rate is assigned by the state from its experience, so check your rate notice."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Payroll tax by state",
+        "path": "/payroll-tax"
+      },
+      {
+        "name": "Alabama",
+        "path": "/payroll-tax/alabama"
+      }
+    ]
+  },
+  {
+    "path": "/payroll-tax/arkansas",
+    "file": "payroll-tax/arkansas.html",
+    "title": "Arkansas payroll tax calculation: rates, wage base, API | Omnia.tax",
+    "description": "Arkansas payroll tax for employers: state withholding tables, $7,000 unemployment wage base, 2% new-employer rate. Worked paycheck and API example.",
+    "h1": "Arkansas payroll tax calculation",
+    "faq": [
+      {
+        "q": "Does Arkansas have a state income tax?",
+        "a": "Yes. Arkansas withholds income tax from its own published tables or formula. The result depends on pay, pay frequency and the employee's withholding certificate."
+      },
+      {
+        "q": "What is Arkansas's unemployment tax wage base?",
+        "a": "Arkansas's state unemployment wage base is $7,000 for 2026 in Omnia.tax's rule files. The federal FUTA wage base is $7,000 in every state."
+      },
+      {
+        "q": "What unemployment rate does a new employer pay in Arkansas?",
+        "a": "Omnia.tax uses 2% for a new employer in Arkansas unless you send your own assigned rate in employer.stateUnemploymentRate. An established employer's rate is assigned by the state from its experience, so check your rate notice."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Payroll tax by state",
+        "path": "/payroll-tax"
+      },
+      {
+        "name": "Arkansas",
+        "path": "/payroll-tax/arkansas"
+      }
+    ]
+  },
+  {
+    "path": "/payroll-tax/arizona",
+    "file": "payroll-tax/arizona.html",
+    "title": "Arizona payroll tax calculation: rates, wage base, API | Omnia.tax",
+    "description": "Arizona payroll tax for employers: state withholding tables, $8,000 unemployment wage base, 2% new-employer rate. Worked paycheck and API example.",
+    "h1": "Arizona payroll tax calculation",
+    "faq": [
+      {
+        "q": "Does Arizona have a state income tax?",
+        "a": "Yes. Arizona withholds income tax from its own published tables or formula. The result depends on pay, pay frequency and the employee's withholding certificate."
+      },
+      {
+        "q": "What is Arizona's unemployment tax wage base?",
+        "a": "Arizona's state unemployment wage base is $8,000 for 2026 in Omnia.tax's rule files. The federal FUTA wage base is $7,000 in every state."
+      },
+      {
+        "q": "What unemployment rate does a new employer pay in Arizona?",
+        "a": "Omnia.tax uses 2% for a new employer in Arizona unless you send your own assigned rate in employer.stateUnemploymentRate. An established employer's rate is assigned by the state from its experience, so check your rate notice."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Payroll tax by state",
+        "path": "/payroll-tax"
+      },
+      {
+        "name": "Arizona",
+        "path": "/payroll-tax/arizona"
+      }
+    ]
+  },
+  {
+    "path": "/payroll-tax/california",
+    "file": "payroll-tax/california.html",
+    "title": "California payroll tax calculation: rates, wage base, API | Omnia.tax",
+    "description": "California payroll tax for employers: state withholding tables, $7,000 unemployment wage base, 3.4% new-employer rate. Worked paycheck and API example.",
+    "h1": "California payroll tax calculation",
+    "faq": [
+      {
+        "q": "Does California have a state income tax?",
+        "a": "Yes. California withholds income tax from its own published tables or formula. The result depends on pay, pay frequency and the employee's withholding certificate."
+      },
+      {
+        "q": "What is California's unemployment tax wage base?",
+        "a": "California's state unemployment wage base is $7,000 for 2026 in Omnia.tax's rule files. The federal FUTA wage base is $7,000 in every state."
+      },
+      {
+        "q": "What unemployment rate does a new employer pay in California?",
+        "a": "Omnia.tax uses 3.4% for a new employer in California unless you send your own assigned rate in employer.stateUnemploymentRate. An established employer's rate is assigned by the state from its experience, so check your rate notice."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Payroll tax by state",
+        "path": "/payroll-tax"
+      },
+      {
+        "name": "California",
+        "path": "/payroll-tax/california"
+      }
+    ]
+  },
+  {
+    "path": "/payroll-tax/colorado",
+    "file": "payroll-tax/colorado.html",
+    "title": "Colorado payroll tax calculation: rates, wage base, API | Omnia.tax",
+    "description": "Colorado payroll tax for employers: state withholding tables, $30,600 unemployment wage base, 3.05% new-employer rate. Worked paycheck and API example.",
+    "h1": "Colorado payroll tax calculation",
+    "faq": [
+      {
+        "q": "Does Colorado have a state income tax?",
+        "a": "Yes. Colorado withholds income tax from its own published tables or formula. The result depends on pay, pay frequency and the employee's withholding certificate."
+      },
+      {
+        "q": "What is Colorado's unemployment tax wage base?",
+        "a": "Colorado's state unemployment wage base is $30,600 for 2026 and $32,100 for 2027 in Omnia.tax's rule files. The federal FUTA wage base is $7,000 in every state."
+      },
+      {
+        "q": "What unemployment rate does a new employer pay in Colorado?",
+        "a": "Omnia.tax uses 3.05% for a new employer in Colorado unless you send your own assigned rate in employer.stateUnemploymentRate. An established employer's rate is assigned by the state from its experience, so check your rate notice."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Payroll tax by state",
+        "path": "/payroll-tax"
+      },
+      {
+        "name": "Colorado",
+        "path": "/payroll-tax/colorado"
+      }
+    ]
+  },
+  {
+    "path": "/payroll-tax/connecticut",
+    "file": "payroll-tax/connecticut.html",
+    "title": "Connecticut payroll tax calculation: rates, wage base, API | Omnia.tax",
+    "description": "Connecticut payroll tax for employers: state withholding tables, $27,000 unemployment wage base, 1.9% new-employer rate. Worked paycheck and API example.",
+    "h1": "Connecticut payroll tax calculation",
+    "faq": [
+      {
+        "q": "Does Connecticut have a state income tax?",
+        "a": "Yes. Connecticut withholds income tax from its own published tables or formula. The result depends on pay, pay frequency and the employee's withholding certificate."
+      },
+      {
+        "q": "What is Connecticut's unemployment tax wage base?",
+        "a": "Connecticut's state unemployment wage base is $27,000 for 2026 in Omnia.tax's rule files. The federal FUTA wage base is $7,000 in every state."
+      },
+      {
+        "q": "What unemployment rate does a new employer pay in Connecticut?",
+        "a": "Omnia.tax uses 1.9% for a new employer in Connecticut unless you send your own assigned rate in employer.stateUnemploymentRate. An established employer's rate is assigned by the state from its experience, so check your rate notice."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Payroll tax by state",
+        "path": "/payroll-tax"
+      },
+      {
+        "name": "Connecticut",
+        "path": "/payroll-tax/connecticut"
+      }
+    ]
+  },
+  {
+    "path": "/payroll-tax/district-of-columbia",
+    "file": "payroll-tax/district-of-columbia.html",
+    "title": "District of Columbia payroll tax calculation | Omnia.tax",
+    "description": "District of Columbia payroll tax for employers: state withholding tables, $9,000 unemployment wage base, 2.7% new-employer rate. Worked paycheck and API...",
+    "h1": "District of Columbia payroll tax calculation",
+    "faq": [
+      {
+        "q": "Does District of Columbia have a state income tax?",
+        "a": "Yes. District of Columbia withholds income tax from its own published tables or formula. The result depends on pay, pay frequency and the employee's withholding certificate."
+      },
+      {
+        "q": "What is District of Columbia's unemployment tax wage base?",
+        "a": "District of Columbia's state unemployment wage base is $9,000 for 2026 in Omnia.tax's rule files. The federal FUTA wage base is $7,000 in every state."
+      },
+      {
+        "q": "What unemployment rate does a new employer pay in District of Columbia?",
+        "a": "Omnia.tax uses 2.7% for a new employer in District of Columbia unless you send your own assigned rate in employer.stateUnemploymentRate. An established employer's rate is assigned by the state from its experience, so check your rate notice."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Payroll tax by state",
+        "path": "/payroll-tax"
+      },
+      {
+        "name": "District of Columbia",
+        "path": "/payroll-tax/district-of-columbia"
+      }
+    ]
+  },
+  {
+    "path": "/payroll-tax/delaware",
+    "file": "payroll-tax/delaware.html",
+    "title": "Delaware payroll tax calculation: rates, wage base, API | Omnia.tax",
+    "description": "Delaware payroll tax for employers: state withholding tables, $14,500 unemployment wage base, 1% new-employer rate. Worked paycheck and API example.",
+    "h1": "Delaware payroll tax calculation",
+    "faq": [
+      {
+        "q": "Does Delaware have a state income tax?",
+        "a": "Yes. Delaware withholds income tax from its own published tables or formula. The result depends on pay, pay frequency and the employee's withholding certificate."
+      },
+      {
+        "q": "What is Delaware's unemployment tax wage base?",
+        "a": "Delaware's state unemployment wage base is $14,500 for 2026 and $16,500 for 2027 in Omnia.tax's rule files. The federal FUTA wage base is $7,000 in every state."
+      },
+      {
+        "q": "What unemployment rate does a new employer pay in Delaware?",
+        "a": "Omnia.tax uses 1% for a new employer in Delaware unless you send your own assigned rate in employer.stateUnemploymentRate. An established employer's rate is assigned by the state from its experience, so check your rate notice."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Payroll tax by state",
+        "path": "/payroll-tax"
+      },
+      {
+        "name": "Delaware",
+        "path": "/payroll-tax/delaware"
+      }
+    ]
+  },
+  {
+    "path": "/payroll-tax/florida",
+    "file": "payroll-tax/florida.html",
+    "title": "Florida payroll tax calculation: rates, wage base, API | Omnia.tax",
+    "description": "Florida payroll tax for employers: no state income tax, $7,000 unemployment wage base, 2.7% new-employer rate. Worked paycheck and API example.",
+    "h1": "Florida payroll tax calculation",
+    "faq": [
+      {
+        "q": "Does Florida have a state income tax?",
+        "a": "No. Florida does not tax wages, so an employer withholds no state income tax. Federal income tax, Social Security and Medicare still apply."
+      },
+      {
+        "q": "What is Florida's unemployment tax wage base?",
+        "a": "Florida's state unemployment wage base is $7,000 for 2026 in Omnia.tax's rule files. The federal FUTA wage base is $7,000 in every state."
+      },
+      {
+        "q": "What unemployment rate does a new employer pay in Florida?",
+        "a": "Omnia.tax uses 2.7% for a new employer in Florida unless you send your own assigned rate in employer.stateUnemploymentRate. An established employer's rate is assigned by the state from its experience, so check your rate notice."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Payroll tax by state",
+        "path": "/payroll-tax"
+      },
+      {
+        "name": "Florida",
+        "path": "/payroll-tax/florida"
+      }
+    ]
+  },
+  {
+    "path": "/payroll-tax/georgia",
+    "file": "payroll-tax/georgia.html",
+    "title": "Georgia payroll tax calculation: rates, wage base, API | Omnia.tax",
+    "description": "Georgia payroll tax for employers: state withholding tables, $9,500 unemployment wage base, 2.7% new-employer rate. Worked paycheck and API example.",
+    "h1": "Georgia payroll tax calculation",
+    "faq": [
+      {
+        "q": "Does Georgia have a state income tax?",
+        "a": "Yes. Georgia withholds income tax from its own published tables or formula. The result depends on pay, pay frequency and the employee's withholding certificate."
+      },
+      {
+        "q": "What is Georgia's unemployment tax wage base?",
+        "a": "Georgia's state unemployment wage base is $9,500 for 2026 in Omnia.tax's rule files. The federal FUTA wage base is $7,000 in every state."
+      },
+      {
+        "q": "What unemployment rate does a new employer pay in Georgia?",
+        "a": "Omnia.tax uses 2.7% for a new employer in Georgia unless you send your own assigned rate in employer.stateUnemploymentRate. An established employer's rate is assigned by the state from its experience, so check your rate notice."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Payroll tax by state",
+        "path": "/payroll-tax"
+      },
+      {
+        "name": "Georgia",
+        "path": "/payroll-tax/georgia"
+      }
+    ]
+  },
+  {
+    "path": "/payroll-tax/hawaii",
+    "file": "payroll-tax/hawaii.html",
+    "title": "Hawaii payroll tax calculation: rates, wage base, API | Omnia.tax",
+    "description": "Hawaii payroll tax for employers: state withholding tables, $64,500 unemployment wage base, 2.4% new-employer rate. Worked paycheck and API example.",
+    "h1": "Hawaii payroll tax calculation",
+    "faq": [
+      {
+        "q": "Does Hawaii have a state income tax?",
+        "a": "Yes. Hawaii withholds income tax from its own published tables or formula. The result depends on pay, pay frequency and the employee's withholding certificate."
+      },
+      {
+        "q": "What is Hawaii's unemployment tax wage base?",
+        "a": "Hawaii's state unemployment wage base is $64,500 for 2026 in Omnia.tax's rule files. The federal FUTA wage base is $7,000 in every state."
+      },
+      {
+        "q": "What unemployment rate does a new employer pay in Hawaii?",
+        "a": "Omnia.tax uses 2.4% for a new employer in Hawaii unless you send your own assigned rate in employer.stateUnemploymentRate. An established employer's rate is assigned by the state from its experience, so check your rate notice."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Payroll tax by state",
+        "path": "/payroll-tax"
+      },
+      {
+        "name": "Hawaii",
+        "path": "/payroll-tax/hawaii"
+      }
+    ]
+  },
+  {
+    "path": "/payroll-tax/iowa",
+    "file": "payroll-tax/iowa.html",
+    "title": "Iowa payroll tax calculation: rates, wage base, API | Omnia.tax",
+    "description": "Iowa payroll tax for employers: state withholding tables, $20,400 unemployment wage base, 1% new-employer rate. Worked paycheck and API example.",
+    "h1": "Iowa payroll tax calculation",
+    "faq": [
+      {
+        "q": "Does Iowa have a state income tax?",
+        "a": "Yes. Iowa withholds income tax from its own published tables or formula. The result depends on pay, pay frequency and the employee's withholding certificate."
+      },
+      {
+        "q": "What is Iowa's unemployment tax wage base?",
+        "a": "Iowa's state unemployment wage base is $20,400 for 2026 and $21,100 for 2027 in Omnia.tax's rule files. The federal FUTA wage base is $7,000 in every state."
+      },
+      {
+        "q": "What unemployment rate does a new employer pay in Iowa?",
+        "a": "Omnia.tax uses 1% for a new employer in Iowa unless you send your own assigned rate in employer.stateUnemploymentRate. An established employer's rate is assigned by the state from its experience, so check your rate notice."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Payroll tax by state",
+        "path": "/payroll-tax"
+      },
+      {
+        "name": "Iowa",
+        "path": "/payroll-tax/iowa"
+      }
+    ]
+  },
+  {
+    "path": "/payroll-tax/idaho",
+    "file": "payroll-tax/idaho.html",
+    "title": "Idaho payroll tax calculation: rates, wage base, API | Omnia.tax",
+    "description": "Idaho payroll tax for employers: state withholding tables, $58,300 unemployment wage base, 1% new-employer rate. Worked paycheck and API example.",
+    "h1": "Idaho payroll tax calculation",
+    "faq": [
+      {
+        "q": "Does Idaho have a state income tax?",
+        "a": "Yes. Idaho withholds income tax from its own published tables or formula. The result depends on pay, pay frequency and the employee's withholding certificate."
+      },
+      {
+        "q": "What is Idaho's unemployment tax wage base?",
+        "a": "Idaho's state unemployment wage base is $58,300 for 2026 in Omnia.tax's rule files. The federal FUTA wage base is $7,000 in every state."
+      },
+      {
+        "q": "What unemployment rate does a new employer pay in Idaho?",
+        "a": "Omnia.tax uses 1% for a new employer in Idaho unless you send your own assigned rate in employer.stateUnemploymentRate. An established employer's rate is assigned by the state from its experience, so check your rate notice."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Payroll tax by state",
+        "path": "/payroll-tax"
+      },
+      {
+        "name": "Idaho",
+        "path": "/payroll-tax/idaho"
+      }
+    ]
+  },
+  {
+    "path": "/payroll-tax/illinois",
+    "file": "payroll-tax/illinois.html",
+    "title": "Illinois payroll tax calculation: rates, wage base, API | Omnia.tax",
+    "description": "Illinois payroll tax for employers: flat 4.95% income tax, $14,250 unemployment wage base, 3.35% new-employer rate. Worked paycheck and API example.",
+    "h1": "Illinois payroll tax calculation",
+    "faq": [
+      {
+        "q": "Does Illinois have a state income tax?",
+        "a": "Yes. Illinois taxes wages at a flat 4.95% under Omnia.tax's 2026 rules, applied after the state's allowances and deductions."
+      },
+      {
+        "q": "What is Illinois's unemployment tax wage base?",
+        "a": "Illinois's state unemployment wage base is $14,250 for 2026 and $14,592 for 2027 in Omnia.tax's rule files. The federal FUTA wage base is $7,000 in every state."
+      },
+      {
+        "q": "What unemployment rate does a new employer pay in Illinois?",
+        "a": "Omnia.tax uses 3.35% for a new employer in Illinois unless you send your own assigned rate in employer.stateUnemploymentRate. An established employer's rate is assigned by the state from its experience, so check your rate notice."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Payroll tax by state",
+        "path": "/payroll-tax"
+      },
+      {
+        "name": "Illinois",
+        "path": "/payroll-tax/illinois"
+      }
+    ]
+  },
+  {
+    "path": "/payroll-tax/indiana",
+    "file": "payroll-tax/indiana.html",
+    "title": "Indiana payroll tax calculation: rates, wage base, API | Omnia.tax",
+    "description": "Indiana payroll tax for employers: flat 2.95% income tax, $9,500 unemployment wage base, 2.5% new-employer rate. Worked paycheck and API example.",
+    "h1": "Indiana payroll tax calculation",
+    "faq": [
+      {
+        "q": "Does Indiana have a state income tax?",
+        "a": "Yes. Indiana taxes wages at a flat 2.95% under Omnia.tax's 2026 rules, applied after the state's allowances and deductions."
+      },
+      {
+        "q": "What is Indiana's unemployment tax wage base?",
+        "a": "Indiana's state unemployment wage base is $9,500 for 2026 in Omnia.tax's rule files. The federal FUTA wage base is $7,000 in every state."
+      },
+      {
+        "q": "What unemployment rate does a new employer pay in Indiana?",
+        "a": "Omnia.tax uses 2.5% for a new employer in Indiana unless you send your own assigned rate in employer.stateUnemploymentRate. An established employer's rate is assigned by the state from its experience, so check your rate notice."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Payroll tax by state",
+        "path": "/payroll-tax"
+      },
+      {
+        "name": "Indiana",
+        "path": "/payroll-tax/indiana"
+      }
+    ]
+  },
+  {
+    "path": "/payroll-tax/kansas",
+    "file": "payroll-tax/kansas.html",
+    "title": "Kansas payroll tax calculation: rates, wage base, API | Omnia.tax",
+    "description": "Kansas payroll tax for employers: state withholding tables, $15,100 unemployment wage base, 1.75% new-employer rate. Worked paycheck and API example.",
+    "h1": "Kansas payroll tax calculation",
+    "faq": [
+      {
+        "q": "Does Kansas have a state income tax?",
+        "a": "Yes. Kansas withholds income tax from its own published tables or formula. The result depends on pay, pay frequency and the employee's withholding certificate."
+      },
+      {
+        "q": "What is Kansas's unemployment tax wage base?",
+        "a": "Kansas's state unemployment wage base is $15,100 for 2026 in Omnia.tax's rule files. The federal FUTA wage base is $7,000 in every state."
+      },
+      {
+        "q": "What unemployment rate does a new employer pay in Kansas?",
+        "a": "Omnia.tax uses 1.75% for a new employer in Kansas unless you send your own assigned rate in employer.stateUnemploymentRate. An established employer's rate is assigned by the state from its experience, so check your rate notice."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Payroll tax by state",
+        "path": "/payroll-tax"
+      },
+      {
+        "name": "Kansas",
+        "path": "/payroll-tax/kansas"
+      }
+    ]
+  },
+  {
+    "path": "/payroll-tax/kentucky",
+    "file": "payroll-tax/kentucky.html",
+    "title": "Kentucky payroll tax calculation: rates, wage base, API | Omnia.tax",
+    "description": "Kentucky payroll tax for employers: flat 3.5% income tax, $12,000 unemployment wage base, 2.7% new-employer rate. Worked paycheck and API example.",
+    "h1": "Kentucky payroll tax calculation",
+    "faq": [
+      {
+        "q": "Does Kentucky have a state income tax?",
+        "a": "Yes. Kentucky taxes wages at a flat 3.5% under Omnia.tax's 2026 rules, applied after the state's allowances and deductions."
+      },
+      {
+        "q": "What is Kentucky's unemployment tax wage base?",
+        "a": "Kentucky's state unemployment wage base is $12,000 for 2026 in Omnia.tax's rule files. The federal FUTA wage base is $7,000 in every state."
+      },
+      {
+        "q": "What unemployment rate does a new employer pay in Kentucky?",
+        "a": "Omnia.tax uses 2.7% for a new employer in Kentucky unless you send your own assigned rate in employer.stateUnemploymentRate. An established employer's rate is assigned by the state from its experience, so check your rate notice."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Payroll tax by state",
+        "path": "/payroll-tax"
+      },
+      {
+        "name": "Kentucky",
+        "path": "/payroll-tax/kentucky"
+      }
+    ]
+  },
+  {
+    "path": "/payroll-tax/louisiana",
+    "file": "payroll-tax/louisiana.html",
+    "title": "Louisiana payroll tax calculation: rates, wage base, API | Omnia.tax",
+    "description": "Louisiana payroll tax for employers: state withholding tables, $7,000 unemployment wage base. Worked paycheck and API example.",
+    "h1": "Louisiana payroll tax calculation",
+    "faq": [
+      {
+        "q": "Does Louisiana have a state income tax?",
+        "a": "Yes. Louisiana withholds income tax from its own published tables or formula. The result depends on pay, pay frequency and the employee's withholding certificate."
+      },
+      {
+        "q": "What is Louisiana's unemployment tax wage base?",
+        "a": "Louisiana's state unemployment wage base is $7,000 for 2026 in Omnia.tax's rule files. The federal FUTA wage base is $7,000 in every state."
+      },
+      {
+        "q": "What unemployment rate does a new employer pay in Louisiana?",
+        "a": "Louisiana does not publish a single new-employer rate, so Omnia.tax produces no unemployment line unless you send your assigned rate in employer.stateUnemploymentRate."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Payroll tax by state",
+        "path": "/payroll-tax"
+      },
+      {
+        "name": "Louisiana",
+        "path": "/payroll-tax/louisiana"
+      }
+    ]
+  },
+  {
+    "path": "/payroll-tax/massachusetts",
+    "file": "payroll-tax/massachusetts.html",
+    "title": "Massachusetts payroll tax calculation | Omnia.tax",
+    "description": "Massachusetts payroll tax for employers: state withholding tables, $15,000 unemployment wage base, 2.42% new-employer rate. Worked paycheck and API example.",
+    "h1": "Massachusetts payroll tax calculation",
+    "faq": [
+      {
+        "q": "Does Massachusetts have a state income tax?",
+        "a": "Yes. Massachusetts withholds income tax from its own published tables or formula. The result depends on pay, pay frequency and the employee's withholding certificate."
+      },
+      {
+        "q": "What is Massachusetts's unemployment tax wage base?",
+        "a": "Massachusetts's state unemployment wage base is $15,000 for 2026 in Omnia.tax's rule files. The federal FUTA wage base is $7,000 in every state."
+      },
+      {
+        "q": "What unemployment rate does a new employer pay in Massachusetts?",
+        "a": "Omnia.tax uses 2.42% for a new employer in Massachusetts unless you send your own assigned rate in employer.stateUnemploymentRate. An established employer's rate is assigned by the state from its experience, so check your rate notice."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Payroll tax by state",
+        "path": "/payroll-tax"
+      },
+      {
+        "name": "Massachusetts",
+        "path": "/payroll-tax/massachusetts"
+      }
+    ]
+  },
+  {
+    "path": "/payroll-tax/maryland",
+    "file": "payroll-tax/maryland.html",
+    "title": "Maryland payroll tax calculation: rates, wage base, API | Omnia.tax",
+    "description": "Maryland payroll tax for employers: state withholding tables, $8,500 unemployment wage base. Worked paycheck and API example.",
+    "h1": "Maryland payroll tax calculation",
+    "faq": [
+      {
+        "q": "Does Maryland have a state income tax?",
+        "a": "Yes. Maryland withholds income tax from its own published tables or formula. The result depends on pay, pay frequency and the employee's withholding certificate."
+      },
+      {
+        "q": "What is Maryland's unemployment tax wage base?",
+        "a": "Maryland's state unemployment wage base is $8,500 for 2026 in Omnia.tax's rule files. The federal FUTA wage base is $7,000 in every state."
+      },
+      {
+        "q": "What unemployment rate does a new employer pay in Maryland?",
+        "a": "Maryland does not publish a single new-employer rate, so Omnia.tax produces no unemployment line unless you send your assigned rate in employer.stateUnemploymentRate."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Payroll tax by state",
+        "path": "/payroll-tax"
+      },
+      {
+        "name": "Maryland",
+        "path": "/payroll-tax/maryland"
+      }
+    ]
+  },
+  {
+    "path": "/payroll-tax/maine",
+    "file": "payroll-tax/maine.html",
+    "title": "Maine payroll tax calculation: rates, wage base, API | Omnia.tax",
+    "description": "Maine payroll tax for employers: state withholding tables, $12,000 unemployment wage base, 2.54% new-employer rate. Worked paycheck and API example.",
+    "h1": "Maine payroll tax calculation",
+    "faq": [
+      {
+        "q": "Does Maine have a state income tax?",
+        "a": "Yes. Maine withholds income tax from its own published tables or formula. The result depends on pay, pay frequency and the employee's withholding certificate."
+      },
+      {
+        "q": "What is Maine's unemployment tax wage base?",
+        "a": "Maine's state unemployment wage base is $12,000 for 2026 in Omnia.tax's rule files. The federal FUTA wage base is $7,000 in every state."
+      },
+      {
+        "q": "What unemployment rate does a new employer pay in Maine?",
+        "a": "Omnia.tax uses 2.54% for a new employer in Maine unless you send your own assigned rate in employer.stateUnemploymentRate. An established employer's rate is assigned by the state from its experience, so check your rate notice."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Payroll tax by state",
+        "path": "/payroll-tax"
+      },
+      {
+        "name": "Maine",
+        "path": "/payroll-tax/maine"
+      }
+    ]
+  },
+  {
+    "path": "/payroll-tax/michigan",
+    "file": "payroll-tax/michigan.html",
+    "title": "Michigan payroll tax calculation: rates, wage base, API | Omnia.tax",
+    "description": "Michigan payroll tax for employers: flat 4.25% income tax, 2.7% new-employer rate. Worked paycheck and API example.",
+    "h1": "Michigan payroll tax calculation",
+    "faq": [
+      {
+        "q": "Does Michigan have a state income tax?",
+        "a": "Yes. Michigan taxes wages at a flat 4.25% under Omnia.tax's 2026 rules, applied after the state's allowances and deductions."
+      },
+      {
+        "q": "What is Michigan's unemployment tax wage base?",
+        "a": "Michigan's state unemployment wage base is $[object Object] for 2026 and $[object Object] for 2027 in Omnia.tax's rule files. The federal FUTA wage base is $7,000 in every state."
+      },
+      {
+        "q": "What unemployment rate does a new employer pay in Michigan?",
+        "a": "Omnia.tax uses 2.7% for a new employer in Michigan unless you send your own assigned rate in employer.stateUnemploymentRate. An established employer's rate is assigned by the state from its experience, so check your rate notice."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Payroll tax by state",
+        "path": "/payroll-tax"
+      },
+      {
+        "name": "Michigan",
+        "path": "/payroll-tax/michigan"
+      }
+    ]
+  },
+  {
+    "path": "/payroll-tax/minnesota",
+    "file": "payroll-tax/minnesota.html",
+    "title": "Minnesota payroll tax calculation: rates, wage base, API | Omnia.tax",
+    "description": "Minnesota payroll tax for employers: state withholding tables, $44,000 unemployment wage base. Worked paycheck and API example.",
+    "h1": "Minnesota payroll tax calculation",
+    "faq": [
+      {
+        "q": "Does Minnesota have a state income tax?",
+        "a": "Yes. Minnesota withholds income tax from its own published tables or formula. The result depends on pay, pay frequency and the employee's withholding certificate."
+      },
+      {
+        "q": "What is Minnesota's unemployment tax wage base?",
+        "a": "Minnesota's state unemployment wage base is $44,000 for 2026 in Omnia.tax's rule files. The federal FUTA wage base is $7,000 in every state."
+      },
+      {
+        "q": "What unemployment rate does a new employer pay in Minnesota?",
+        "a": "Minnesota does not publish a single new-employer rate, so Omnia.tax produces no unemployment line unless you send your assigned rate in employer.stateUnemploymentRate."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Payroll tax by state",
+        "path": "/payroll-tax"
+      },
+      {
+        "name": "Minnesota",
+        "path": "/payroll-tax/minnesota"
+      }
+    ]
+  },
+  {
+    "path": "/payroll-tax/missouri",
+    "file": "payroll-tax/missouri.html",
+    "title": "Missouri payroll tax calculation: rates, wage base, API | Omnia.tax",
+    "description": "Missouri payroll tax for employers: state withholding tables, $9,000 unemployment wage base, 2.376% new-employer rate. Worked paycheck and API example.",
+    "h1": "Missouri payroll tax calculation",
+    "faq": [
+      {
+        "q": "Does Missouri have a state income tax?",
+        "a": "Yes. Missouri withholds income tax from its own published tables or formula. The result depends on pay, pay frequency and the employee's withholding certificate."
+      },
+      {
+        "q": "What is Missouri's unemployment tax wage base?",
+        "a": "Missouri's state unemployment wage base is $9,000 for 2026 in Omnia.tax's rule files. The federal FUTA wage base is $7,000 in every state."
+      },
+      {
+        "q": "What unemployment rate does a new employer pay in Missouri?",
+        "a": "Omnia.tax uses 2.376% for a new employer in Missouri unless you send your own assigned rate in employer.stateUnemploymentRate. An established employer's rate is assigned by the state from its experience, so check your rate notice."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Payroll tax by state",
+        "path": "/payroll-tax"
+      },
+      {
+        "name": "Missouri",
+        "path": "/payroll-tax/missouri"
+      }
+    ]
+  },
+  {
+    "path": "/payroll-tax/mississippi",
+    "file": "payroll-tax/mississippi.html",
+    "title": "Mississippi payroll tax calculation: rates, wage base, API | Omnia.tax",
+    "description": "Mississippi payroll tax for employers: state withholding tables, $14,000 unemployment wage base, 1% new-employer rate. Worked paycheck and API example.",
+    "h1": "Mississippi payroll tax calculation",
+    "faq": [
+      {
+        "q": "Does Mississippi have a state income tax?",
+        "a": "Yes. Mississippi withholds income tax from its own published tables or formula. The result depends on pay, pay frequency and the employee's withholding certificate."
+      },
+      {
+        "q": "What is Mississippi's unemployment tax wage base?",
+        "a": "Mississippi's state unemployment wage base is $14,000 for 2026 in Omnia.tax's rule files. The federal FUTA wage base is $7,000 in every state."
+      },
+      {
+        "q": "What unemployment rate does a new employer pay in Mississippi?",
+        "a": "Omnia.tax uses 1% for a new employer in Mississippi unless you send your own assigned rate in employer.stateUnemploymentRate. An established employer's rate is assigned by the state from its experience, so check your rate notice."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Payroll tax by state",
+        "path": "/payroll-tax"
+      },
+      {
+        "name": "Mississippi",
+        "path": "/payroll-tax/mississippi"
+      }
+    ]
+  },
+  {
+    "path": "/payroll-tax/montana",
+    "file": "payroll-tax/montana.html",
+    "title": "Montana payroll tax calculation: rates, wage base, API | Omnia.tax",
+    "description": "Montana payroll tax for employers: state withholding tables, $47,300 unemployment wage base. Worked paycheck and API example.",
+    "h1": "Montana payroll tax calculation",
+    "faq": [
+      {
+        "q": "Does Montana have a state income tax?",
+        "a": "Yes. Montana withholds income tax from its own published tables or formula. The result depends on pay, pay frequency and the employee's withholding certificate."
+      },
+      {
+        "q": "What is Montana's unemployment tax wage base?",
+        "a": "Montana's state unemployment wage base is $47,300 for 2026 in Omnia.tax's rule files. The federal FUTA wage base is $7,000 in every state."
+      },
+      {
+        "q": "What unemployment rate does a new employer pay in Montana?",
+        "a": "Montana does not publish a single new-employer rate, so Omnia.tax produces no unemployment line unless you send your assigned rate in employer.stateUnemploymentRate."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Payroll tax by state",
+        "path": "/payroll-tax"
+      },
+      {
+        "name": "Montana",
+        "path": "/payroll-tax/montana"
+      }
+    ]
+  },
+  {
+    "path": "/payroll-tax/north-carolina",
+    "file": "payroll-tax/north-carolina.html",
+    "title": "North Carolina payroll tax calculation | Omnia.tax",
+    "description": "North Carolina payroll tax for employers: state withholding tables, $34,200 unemployment wage base, 1% new-employer rate. Worked paycheck and API example.",
+    "h1": "North Carolina payroll tax calculation",
+    "faq": [
+      {
+        "q": "Does North Carolina have a state income tax?",
+        "a": "Yes. North Carolina withholds income tax from its own published tables or formula. The result depends on pay, pay frequency and the employee's withholding certificate."
+      },
+      {
+        "q": "What is North Carolina's unemployment tax wage base?",
+        "a": "North Carolina's state unemployment wage base is $34,200 for 2026 in Omnia.tax's rule files. The federal FUTA wage base is $7,000 in every state."
+      },
+      {
+        "q": "What unemployment rate does a new employer pay in North Carolina?",
+        "a": "Omnia.tax uses 1% for a new employer in North Carolina unless you send your own assigned rate in employer.stateUnemploymentRate. An established employer's rate is assigned by the state from its experience, so check your rate notice."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Payroll tax by state",
+        "path": "/payroll-tax"
+      },
+      {
+        "name": "North Carolina",
+        "path": "/payroll-tax/north-carolina"
+      }
+    ]
+  },
+  {
+    "path": "/payroll-tax/north-dakota",
+    "file": "payroll-tax/north-dakota.html",
+    "title": "North Dakota payroll tax calculation | Omnia.tax",
+    "description": "North Dakota payroll tax for employers: state withholding tables, $46,600 unemployment wage base, 1% new-employer rate. Worked paycheck and API example.",
+    "h1": "North Dakota payroll tax calculation",
+    "faq": [
+      {
+        "q": "Does North Dakota have a state income tax?",
+        "a": "Yes. North Dakota withholds income tax from its own published tables or formula. The result depends on pay, pay frequency and the employee's withholding certificate."
+      },
+      {
+        "q": "What is North Dakota's unemployment tax wage base?",
+        "a": "North Dakota's state unemployment wage base is $46,600 for 2026 in Omnia.tax's rule files. The federal FUTA wage base is $7,000 in every state."
+      },
+      {
+        "q": "What unemployment rate does a new employer pay in North Dakota?",
+        "a": "Omnia.tax uses 1% for a new employer in North Dakota unless you send your own assigned rate in employer.stateUnemploymentRate. An established employer's rate is assigned by the state from its experience, so check your rate notice."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Payroll tax by state",
+        "path": "/payroll-tax"
+      },
+      {
+        "name": "North Dakota",
+        "path": "/payroll-tax/north-dakota"
+      }
+    ]
+  },
+  {
+    "path": "/payroll-tax/nebraska",
+    "file": "payroll-tax/nebraska.html",
+    "title": "Nebraska payroll tax calculation: rates, wage base, API | Omnia.tax",
+    "description": "Nebraska payroll tax for employers: state withholding tables, $9,000 unemployment wage base, 1.25% new-employer rate. Worked paycheck and API example.",
+    "h1": "Nebraska payroll tax calculation",
+    "faq": [
+      {
+        "q": "Does Nebraska have a state income tax?",
+        "a": "Yes. Nebraska withholds income tax from its own published tables or formula. The result depends on pay, pay frequency and the employee's withholding certificate."
+      },
+      {
+        "q": "What is Nebraska's unemployment tax wage base?",
+        "a": "Nebraska's state unemployment wage base is $9,000 for 2026 in Omnia.tax's rule files. The federal FUTA wage base is $7,000 in every state."
+      },
+      {
+        "q": "What unemployment rate does a new employer pay in Nebraska?",
+        "a": "Omnia.tax uses 1.25% for a new employer in Nebraska unless you send your own assigned rate in employer.stateUnemploymentRate. An established employer's rate is assigned by the state from its experience, so check your rate notice."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Payroll tax by state",
+        "path": "/payroll-tax"
+      },
+      {
+        "name": "Nebraska",
+        "path": "/payroll-tax/nebraska"
+      }
+    ]
+  },
+  {
+    "path": "/payroll-tax/new-hampshire",
+    "file": "payroll-tax/new-hampshire.html",
+    "title": "New Hampshire payroll tax calculation | Omnia.tax",
+    "description": "New Hampshire payroll tax for employers: no state income tax, $14,000 unemployment wage base, 1.7% new-employer rate. Worked paycheck and API example.",
+    "h1": "New Hampshire payroll tax calculation",
+    "faq": [
+      {
+        "q": "Does New Hampshire have a state income tax?",
+        "a": "No. New Hampshire does not tax wages, so an employer withholds no state income tax. Federal income tax, Social Security and Medicare still apply."
+      },
+      {
+        "q": "What is New Hampshire's unemployment tax wage base?",
+        "a": "New Hampshire's state unemployment wage base is $14,000 for 2026 in Omnia.tax's rule files. The federal FUTA wage base is $7,000 in every state."
+      },
+      {
+        "q": "What unemployment rate does a new employer pay in New Hampshire?",
+        "a": "Omnia.tax uses 1.7% for a new employer in New Hampshire unless you send your own assigned rate in employer.stateUnemploymentRate. An established employer's rate is assigned by the state from its experience, so check your rate notice."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Payroll tax by state",
+        "path": "/payroll-tax"
+      },
+      {
+        "name": "New Hampshire",
+        "path": "/payroll-tax/new-hampshire"
+      }
+    ]
+  },
+  {
+    "path": "/payroll-tax/new-jersey",
+    "file": "payroll-tax/new-jersey.html",
+    "title": "New Jersey payroll tax calculation: rates, wage base, API | Omnia.tax",
+    "description": "New Jersey payroll tax for employers: state withholding tables, $44,800 unemployment wage base, 2.8% new-employer rate. Worked paycheck and API example.",
+    "h1": "New Jersey payroll tax calculation",
+    "faq": [
+      {
+        "q": "Does New Jersey have a state income tax?",
+        "a": "Yes. New Jersey withholds income tax from its own published tables or formula. The result depends on pay, pay frequency and the employee's withholding certificate."
+      },
+      {
+        "q": "What is New Jersey's unemployment tax wage base?",
+        "a": "New Jersey's state unemployment wage base is $44,800 for 2026 and $46,400 for 2027 in Omnia.tax's rule files. The federal FUTA wage base is $7,000 in every state."
+      },
+      {
+        "q": "What unemployment rate does a new employer pay in New Jersey?",
+        "a": "Omnia.tax uses 2.8% for a new employer in New Jersey unless you send your own assigned rate in employer.stateUnemploymentRate. An established employer's rate is assigned by the state from its experience, so check your rate notice."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Payroll tax by state",
+        "path": "/payroll-tax"
+      },
+      {
+        "name": "New Jersey",
+        "path": "/payroll-tax/new-jersey"
+      }
+    ]
+  },
+  {
+    "path": "/payroll-tax/new-mexico",
+    "file": "payroll-tax/new-mexico.html",
+    "title": "New Mexico payroll tax calculation: rates, wage base, API | Omnia.tax",
+    "description": "New Mexico payroll tax for employers: state withholding tables, $34,800 unemployment wage base, 1% new-employer rate. Worked paycheck and API example.",
+    "h1": "New Mexico payroll tax calculation",
+    "faq": [
+      {
+        "q": "Does New Mexico have a state income tax?",
+        "a": "Yes. New Mexico withholds income tax from its own published tables or formula. The result depends on pay, pay frequency and the employee's withholding certificate."
+      },
+      {
+        "q": "What is New Mexico's unemployment tax wage base?",
+        "a": "New Mexico's state unemployment wage base is $34,800 for 2026 in Omnia.tax's rule files. The federal FUTA wage base is $7,000 in every state."
+      },
+      {
+        "q": "What unemployment rate does a new employer pay in New Mexico?",
+        "a": "Omnia.tax uses 1% for a new employer in New Mexico unless you send your own assigned rate in employer.stateUnemploymentRate. An established employer's rate is assigned by the state from its experience, so check your rate notice."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Payroll tax by state",
+        "path": "/payroll-tax"
+      },
+      {
+        "name": "New Mexico",
+        "path": "/payroll-tax/new-mexico"
+      }
+    ]
+  },
+  {
+    "path": "/payroll-tax/nevada",
+    "file": "payroll-tax/nevada.html",
+    "title": "Nevada payroll tax calculation: rates, wage base, API | Omnia.tax",
+    "description": "Nevada payroll tax for employers: no state income tax, $43,700 unemployment wage base, 2.95% new-employer rate. Worked paycheck and API example.",
+    "h1": "Nevada payroll tax calculation",
+    "faq": [
+      {
+        "q": "Does Nevada have a state income tax?",
+        "a": "No. Nevada does not tax wages, so an employer withholds no state income tax. Federal income tax, Social Security and Medicare still apply."
+      },
+      {
+        "q": "What is Nevada's unemployment tax wage base?",
+        "a": "Nevada's state unemployment wage base is $43,700 for 2026 and $45,400 for 2027 in Omnia.tax's rule files. The federal FUTA wage base is $7,000 in every state."
+      },
+      {
+        "q": "What unemployment rate does a new employer pay in Nevada?",
+        "a": "Omnia.tax uses 2.95% for a new employer in Nevada unless you send your own assigned rate in employer.stateUnemploymentRate. An established employer's rate is assigned by the state from its experience, so check your rate notice."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Payroll tax by state",
+        "path": "/payroll-tax"
+      },
+      {
+        "name": "Nevada",
+        "path": "/payroll-tax/nevada"
+      }
+    ]
+  },
+  {
+    "path": "/payroll-tax/new-york",
+    "file": "payroll-tax/new-york.html",
+    "title": "New York payroll tax calculation: rates, wage base, API | Omnia.tax",
+    "description": "New York payroll tax for employers: state withholding tables, $17,600 unemployment wage base, 4.1% new-employer rate. Worked paycheck and API example.",
+    "h1": "New York payroll tax calculation",
+    "faq": [
+      {
+        "q": "Does New York have a state income tax?",
+        "a": "Yes. New York withholds income tax from its own published tables or formula. The result depends on pay, pay frequency and the employee's withholding certificate."
+      },
+      {
+        "q": "What is New York's unemployment tax wage base?",
+        "a": "New York's state unemployment wage base is $17,600 for 2026 in Omnia.tax's rule files. The federal FUTA wage base is $7,000 in every state."
+      },
+      {
+        "q": "What unemployment rate does a new employer pay in New York?",
+        "a": "Omnia.tax uses 4.1% for a new employer in New York unless you send your own assigned rate in employer.stateUnemploymentRate. An established employer's rate is assigned by the state from its experience, so check your rate notice."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Payroll tax by state",
+        "path": "/payroll-tax"
+      },
+      {
+        "name": "New York",
+        "path": "/payroll-tax/new-york"
+      }
+    ]
+  },
+  {
+    "path": "/payroll-tax/ohio",
+    "file": "payroll-tax/ohio.html",
+    "title": "Ohio payroll tax calculation: rates, wage base, API | Omnia.tax",
+    "description": "Ohio payroll tax for employers: state withholding tables, $9,000 unemployment wage base, 2.85% new-employer rate. Worked paycheck and API example.",
+    "h1": "Ohio payroll tax calculation",
+    "faq": [
+      {
+        "q": "Does Ohio have a state income tax?",
+        "a": "Yes. Ohio withholds income tax from its own published tables or formula. The result depends on pay, pay frequency and the employee's withholding certificate."
+      },
+      {
+        "q": "What is Ohio's unemployment tax wage base?",
+        "a": "Ohio's state unemployment wage base is $9,000 for 2026 in Omnia.tax's rule files. The federal FUTA wage base is $7,000 in every state."
+      },
+      {
+        "q": "What unemployment rate does a new employer pay in Ohio?",
+        "a": "Omnia.tax uses 2.85% for a new employer in Ohio unless you send your own assigned rate in employer.stateUnemploymentRate. An established employer's rate is assigned by the state from its experience, so check your rate notice."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Payroll tax by state",
+        "path": "/payroll-tax"
+      },
+      {
+        "name": "Ohio",
+        "path": "/payroll-tax/ohio"
+      }
+    ]
+  },
+  {
+    "path": "/payroll-tax/oklahoma",
+    "file": "payroll-tax/oklahoma.html",
+    "title": "Oklahoma payroll tax calculation: rates, wage base, API | Omnia.tax",
+    "description": "Oklahoma payroll tax for employers: state withholding tables, $25,000 unemployment wage base, 1.5% new-employer rate. Worked paycheck and API example.",
+    "h1": "Oklahoma payroll tax calculation",
+    "faq": [
+      {
+        "q": "Does Oklahoma have a state income tax?",
+        "a": "Yes. Oklahoma withholds income tax from its own published tables or formula. The result depends on pay, pay frequency and the employee's withholding certificate."
+      },
+      {
+        "q": "What is Oklahoma's unemployment tax wage base?",
+        "a": "Oklahoma's state unemployment wage base is $25,000 for 2026 and $24,400 for 2027 in Omnia.tax's rule files. The federal FUTA wage base is $7,000 in every state."
+      },
+      {
+        "q": "What unemployment rate does a new employer pay in Oklahoma?",
+        "a": "Omnia.tax uses 1.5% for a new employer in Oklahoma unless you send your own assigned rate in employer.stateUnemploymentRate. An established employer's rate is assigned by the state from its experience, so check your rate notice."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Payroll tax by state",
+        "path": "/payroll-tax"
+      },
+      {
+        "name": "Oklahoma",
+        "path": "/payroll-tax/oklahoma"
+      }
+    ]
+  },
+  {
+    "path": "/payroll-tax/oregon",
+    "file": "payroll-tax/oregon.html",
+    "title": "Oregon payroll tax calculation: rates, wage base, API | Omnia.tax",
+    "description": "Oregon payroll tax for employers: state withholding tables, $56,700 unemployment wage base, 2.4% new-employer rate. Worked paycheck and API example.",
+    "h1": "Oregon payroll tax calculation",
+    "faq": [
+      {
+        "q": "Does Oregon have a state income tax?",
+        "a": "Yes. Oregon withholds income tax from its own published tables or formula. The result depends on pay, pay frequency and the employee's withholding certificate."
+      },
+      {
+        "q": "What is Oregon's unemployment tax wage base?",
+        "a": "Oregon's state unemployment wage base is $56,700 for 2026 in Omnia.tax's rule files. The federal FUTA wage base is $7,000 in every state."
+      },
+      {
+        "q": "What unemployment rate does a new employer pay in Oregon?",
+        "a": "Omnia.tax uses 2.4% for a new employer in Oregon unless you send your own assigned rate in employer.stateUnemploymentRate. An established employer's rate is assigned by the state from its experience, so check your rate notice."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Payroll tax by state",
+        "path": "/payroll-tax"
+      },
+      {
+        "name": "Oregon",
+        "path": "/payroll-tax/oregon"
+      }
+    ]
+  },
+  {
+    "path": "/payroll-tax/pennsylvania",
+    "file": "payroll-tax/pennsylvania.html",
+    "title": "Pennsylvania payroll tax calculation | Omnia.tax",
+    "description": "Pennsylvania payroll tax for employers: flat 3.07% income tax, $10,000 unemployment wage base, 3.822% new-employer rate. Worked paycheck and API example.",
+    "h1": "Pennsylvania payroll tax calculation",
+    "faq": [
+      {
+        "q": "Does Pennsylvania have a state income tax?",
+        "a": "Yes. Pennsylvania taxes wages at a flat 3.07% under Omnia.tax's 2026 rules, applied after the state's allowances and deductions."
+      },
+      {
+        "q": "What is Pennsylvania's unemployment tax wage base?",
+        "a": "Pennsylvania's state unemployment wage base is $10,000 for 2026 in Omnia.tax's rule files. The federal FUTA wage base is $7,000 in every state."
+      },
+      {
+        "q": "What unemployment rate does a new employer pay in Pennsylvania?",
+        "a": "Omnia.tax uses 3.822% for a new employer in Pennsylvania unless you send your own assigned rate in employer.stateUnemploymentRate. An established employer's rate is assigned by the state from its experience, so check your rate notice."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Payroll tax by state",
+        "path": "/payroll-tax"
+      },
+      {
+        "name": "Pennsylvania",
+        "path": "/payroll-tax/pennsylvania"
+      }
+    ]
+  },
+  {
+    "path": "/payroll-tax/rhode-island",
+    "file": "payroll-tax/rhode-island.html",
+    "title": "Rhode Island payroll tax calculation | Omnia.tax",
+    "description": "Rhode Island payroll tax for employers: state withholding tables, $30,800 unemployment wage base, 1.21% new-employer rate. Worked paycheck and API example.",
+    "h1": "Rhode Island payroll tax calculation",
+    "faq": [
+      {
+        "q": "Does Rhode Island have a state income tax?",
+        "a": "Yes. Rhode Island withholds income tax from its own published tables or formula. The result depends on pay, pay frequency and the employee's withholding certificate."
+      },
+      {
+        "q": "What is Rhode Island's unemployment tax wage base?",
+        "a": "Rhode Island's state unemployment wage base is $30,800 for 2026 in Omnia.tax's rule files. The federal FUTA wage base is $7,000 in every state."
+      },
+      {
+        "q": "What unemployment rate does a new employer pay in Rhode Island?",
+        "a": "Omnia.tax uses 1.21% for a new employer in Rhode Island unless you send your own assigned rate in employer.stateUnemploymentRate. An established employer's rate is assigned by the state from its experience, so check your rate notice."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Payroll tax by state",
+        "path": "/payroll-tax"
+      },
+      {
+        "name": "Rhode Island",
+        "path": "/payroll-tax/rhode-island"
+      }
+    ]
+  },
+  {
+    "path": "/payroll-tax/south-carolina",
+    "file": "payroll-tax/south-carolina.html",
+    "title": "South Carolina payroll tax calculation | Omnia.tax",
+    "description": "South Carolina payroll tax for employers: state withholding tables, $14,000 unemployment wage base, 1.06% new-employer rate. Worked paycheck and API example.",
+    "h1": "South Carolina payroll tax calculation",
+    "faq": [
+      {
+        "q": "Does South Carolina have a state income tax?",
+        "a": "Yes. South Carolina withholds income tax from its own published tables or formula. The result depends on pay, pay frequency and the employee's withholding certificate."
+      },
+      {
+        "q": "What is South Carolina's unemployment tax wage base?",
+        "a": "South Carolina's state unemployment wage base is $14,000 for 2026 in Omnia.tax's rule files. The federal FUTA wage base is $7,000 in every state."
+      },
+      {
+        "q": "What unemployment rate does a new employer pay in South Carolina?",
+        "a": "Omnia.tax uses 1.06% for a new employer in South Carolina unless you send your own assigned rate in employer.stateUnemploymentRate. An established employer's rate is assigned by the state from its experience, so check your rate notice."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Payroll tax by state",
+        "path": "/payroll-tax"
+      },
+      {
+        "name": "South Carolina",
+        "path": "/payroll-tax/south-carolina"
+      }
+    ]
+  },
+  {
+    "path": "/payroll-tax/south-dakota",
+    "file": "payroll-tax/south-dakota.html",
+    "title": "South Dakota payroll tax calculation | Omnia.tax",
+    "description": "South Dakota payroll tax for employers: no state income tax, $15,000 unemployment wage base, 1.75% new-employer rate. Worked paycheck and API example.",
+    "h1": "South Dakota payroll tax calculation",
+    "faq": [
+      {
+        "q": "Does South Dakota have a state income tax?",
+        "a": "No. South Dakota does not tax wages, so an employer withholds no state income tax. Federal income tax, Social Security and Medicare still apply."
+      },
+      {
+        "q": "What is South Dakota's unemployment tax wage base?",
+        "a": "South Dakota's state unemployment wage base is $15,000 for 2026 in Omnia.tax's rule files. The federal FUTA wage base is $7,000 in every state."
+      },
+      {
+        "q": "What unemployment rate does a new employer pay in South Dakota?",
+        "a": "Omnia.tax uses 1.75% for a new employer in South Dakota unless you send your own assigned rate in employer.stateUnemploymentRate. An established employer's rate is assigned by the state from its experience, so check your rate notice."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Payroll tax by state",
+        "path": "/payroll-tax"
+      },
+      {
+        "name": "South Dakota",
+        "path": "/payroll-tax/south-dakota"
+      }
+    ]
+  },
+  {
+    "path": "/payroll-tax/tennessee",
+    "file": "payroll-tax/tennessee.html",
+    "title": "Tennessee payroll tax calculation: rates, wage base, API | Omnia.tax",
+    "description": "Tennessee payroll tax for employers: no state income tax, $7,000 unemployment wage base, 2.7% new-employer rate. Worked paycheck and API example.",
+    "h1": "Tennessee payroll tax calculation",
+    "faq": [
+      {
+        "q": "Does Tennessee have a state income tax?",
+        "a": "No. Tennessee does not tax wages, so an employer withholds no state income tax. Federal income tax, Social Security and Medicare still apply."
+      },
+      {
+        "q": "What is Tennessee's unemployment tax wage base?",
+        "a": "Tennessee's state unemployment wage base is $7,000 for 2026 in Omnia.tax's rule files. The federal FUTA wage base is $7,000 in every state."
+      },
+      {
+        "q": "What unemployment rate does a new employer pay in Tennessee?",
+        "a": "Omnia.tax uses 2.7% for a new employer in Tennessee unless you send your own assigned rate in employer.stateUnemploymentRate. An established employer's rate is assigned by the state from its experience, so check your rate notice."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Payroll tax by state",
+        "path": "/payroll-tax"
+      },
+      {
+        "name": "Tennessee",
+        "path": "/payroll-tax/tennessee"
+      }
+    ]
+  },
+  {
+    "path": "/payroll-tax/texas",
+    "file": "payroll-tax/texas.html",
+    "title": "Texas payroll tax calculation: rates, wage base, API | Omnia.tax",
+    "description": "Texas payroll tax for employers: no state income tax, $9,000 unemployment wage base, 2.7% new-employer rate. Worked paycheck and API example.",
+    "h1": "Texas payroll tax calculation",
+    "faq": [
+      {
+        "q": "Does Texas have a state income tax?",
+        "a": "No. Texas does not tax wages, so an employer withholds no state income tax. Federal income tax, Social Security and Medicare still apply."
+      },
+      {
+        "q": "What is Texas's unemployment tax wage base?",
+        "a": "Texas's state unemployment wage base is $9,000 for 2026 in Omnia.tax's rule files. The federal FUTA wage base is $7,000 in every state."
+      },
+      {
+        "q": "What unemployment rate does a new employer pay in Texas?",
+        "a": "Omnia.tax uses 2.7% for a new employer in Texas unless you send your own assigned rate in employer.stateUnemploymentRate. An established employer's rate is assigned by the state from its experience, so check your rate notice."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Payroll tax by state",
+        "path": "/payroll-tax"
+      },
+      {
+        "name": "Texas",
+        "path": "/payroll-tax/texas"
+      }
+    ]
+  },
+  {
+    "path": "/payroll-tax/utah",
+    "file": "payroll-tax/utah.html",
+    "title": "Utah payroll tax calculation: rates, wage base, API | Omnia.tax",
+    "description": "Utah payroll tax for employers: state withholding tables, $50,700 unemployment wage base. Worked paycheck and API example.",
+    "h1": "Utah payroll tax calculation",
+    "faq": [
+      {
+        "q": "Does Utah have a state income tax?",
+        "a": "Yes. Utah withholds income tax from its own published tables or formula. The result depends on pay, pay frequency and the employee's withholding certificate."
+      },
+      {
+        "q": "What is Utah's unemployment tax wage base?",
+        "a": "Utah's state unemployment wage base is $50,700 for 2026 in Omnia.tax's rule files. The federal FUTA wage base is $7,000 in every state."
+      },
+      {
+        "q": "What unemployment rate does a new employer pay in Utah?",
+        "a": "Utah does not publish a single new-employer rate, so Omnia.tax produces no unemployment line unless you send your assigned rate in employer.stateUnemploymentRate."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Payroll tax by state",
+        "path": "/payroll-tax"
+      },
+      {
+        "name": "Utah",
+        "path": "/payroll-tax/utah"
+      }
+    ]
+  },
+  {
+    "path": "/payroll-tax/virginia",
+    "file": "payroll-tax/virginia.html",
+    "title": "Virginia payroll tax calculation: rates, wage base, API | Omnia.tax",
+    "description": "Virginia payroll tax for employers: state withholding tables, $8,000 unemployment wage base, 2.73% new-employer rate. Worked paycheck and API example.",
+    "h1": "Virginia payroll tax calculation",
+    "faq": [
+      {
+        "q": "Does Virginia have a state income tax?",
+        "a": "Yes. Virginia withholds income tax from its own published tables or formula. The result depends on pay, pay frequency and the employee's withholding certificate."
+      },
+      {
+        "q": "What is Virginia's unemployment tax wage base?",
+        "a": "Virginia's state unemployment wage base is $8,000 for 2026 in Omnia.tax's rule files. The federal FUTA wage base is $7,000 in every state."
+      },
+      {
+        "q": "What unemployment rate does a new employer pay in Virginia?",
+        "a": "Omnia.tax uses 2.73% for a new employer in Virginia unless you send your own assigned rate in employer.stateUnemploymentRate. An established employer's rate is assigned by the state from its experience, so check your rate notice."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Payroll tax by state",
+        "path": "/payroll-tax"
+      },
+      {
+        "name": "Virginia",
+        "path": "/payroll-tax/virginia"
+      }
+    ]
+  },
+  {
+    "path": "/payroll-tax/vermont",
+    "file": "payroll-tax/vermont.html",
+    "title": "Vermont payroll tax calculation: rates, wage base, API | Omnia.tax",
+    "description": "Vermont payroll tax for employers: state withholding tables, $15,400 unemployment wage base, 1% new-employer rate. Worked paycheck and API example.",
+    "h1": "Vermont payroll tax calculation",
+    "faq": [
+      {
+        "q": "Does Vermont have a state income tax?",
+        "a": "Yes. Vermont withholds income tax from its own published tables or formula. The result depends on pay, pay frequency and the employee's withholding certificate."
+      },
+      {
+        "q": "What is Vermont's unemployment tax wage base?",
+        "a": "Vermont's state unemployment wage base is $15,400 for 2026 in Omnia.tax's rule files. The federal FUTA wage base is $7,000 in every state."
+      },
+      {
+        "q": "What unemployment rate does a new employer pay in Vermont?",
+        "a": "Omnia.tax uses 1% for a new employer in Vermont unless you send your own assigned rate in employer.stateUnemploymentRate. An established employer's rate is assigned by the state from its experience, so check your rate notice."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Payroll tax by state",
+        "path": "/payroll-tax"
+      },
+      {
+        "name": "Vermont",
+        "path": "/payroll-tax/vermont"
+      }
+    ]
+  },
+  {
+    "path": "/payroll-tax/washington",
+    "file": "payroll-tax/washington.html",
+    "title": "Washington payroll tax calculation: rates, wage base, API | Omnia.tax",
+    "description": "Washington payroll tax for employers: no state income tax, $78,200 unemployment wage base. Worked paycheck and API example.",
+    "h1": "Washington payroll tax calculation",
+    "faq": [
+      {
+        "q": "Does Washington have a state income tax?",
+        "a": "No. Washington does not tax wages, so an employer withholds no state income tax. Federal income tax, Social Security and Medicare still apply."
+      },
+      {
+        "q": "What is Washington's unemployment tax wage base?",
+        "a": "Washington's state unemployment wage base is $78,200 for 2026 and $82,000 for 2027 in Omnia.tax's rule files. The federal FUTA wage base is $7,000 in every state."
+      },
+      {
+        "q": "What unemployment rate does a new employer pay in Washington?",
+        "a": "Washington does not publish a single new-employer rate, so Omnia.tax produces no unemployment line unless you send your assigned rate in employer.stateUnemploymentRate."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Payroll tax by state",
+        "path": "/payroll-tax"
+      },
+      {
+        "name": "Washington",
+        "path": "/payroll-tax/washington"
+      }
+    ]
+  },
+  {
+    "path": "/payroll-tax/wisconsin",
+    "file": "payroll-tax/wisconsin.html",
+    "title": "Wisconsin payroll tax calculation: rates, wage base, API | Omnia.tax",
+    "description": "Wisconsin payroll tax for employers: state withholding tables, $14,000 unemployment wage base, 3.05% new-employer rate. Worked paycheck and API example.",
+    "h1": "Wisconsin payroll tax calculation",
+    "faq": [
+      {
+        "q": "Does Wisconsin have a state income tax?",
+        "a": "Yes. Wisconsin withholds income tax from its own published tables or formula. The result depends on pay, pay frequency and the employee's withholding certificate."
+      },
+      {
+        "q": "What is Wisconsin's unemployment tax wage base?",
+        "a": "Wisconsin's state unemployment wage base is $14,000 for 2026 in Omnia.tax's rule files. The federal FUTA wage base is $7,000 in every state."
+      },
+      {
+        "q": "What unemployment rate does a new employer pay in Wisconsin?",
+        "a": "Omnia.tax uses 3.05% for a new employer in Wisconsin unless you send your own assigned rate in employer.stateUnemploymentRate. An established employer's rate is assigned by the state from its experience, so check your rate notice."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Payroll tax by state",
+        "path": "/payroll-tax"
+      },
+      {
+        "name": "Wisconsin",
+        "path": "/payroll-tax/wisconsin"
+      }
+    ]
+  },
+  {
+    "path": "/payroll-tax/west-virginia",
+    "file": "payroll-tax/west-virginia.html",
+    "title": "West Virginia payroll tax calculation | Omnia.tax",
+    "description": "West Virginia payroll tax for employers: state withholding tables, $9,500 unemployment wage base, 2.7% new-employer rate. Worked paycheck and API example.",
+    "h1": "West Virginia payroll tax calculation",
+    "faq": [
+      {
+        "q": "Does West Virginia have a state income tax?",
+        "a": "Yes. West Virginia withholds income tax from its own published tables or formula. The result depends on pay, pay frequency and the employee's withholding certificate."
+      },
+      {
+        "q": "What is West Virginia's unemployment tax wage base?",
+        "a": "West Virginia's state unemployment wage base is $9,500 for 2026 in Omnia.tax's rule files. The federal FUTA wage base is $7,000 in every state."
+      },
+      {
+        "q": "What unemployment rate does a new employer pay in West Virginia?",
+        "a": "Omnia.tax uses 2.7% for a new employer in West Virginia unless you send your own assigned rate in employer.stateUnemploymentRate. An established employer's rate is assigned by the state from its experience, so check your rate notice."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Payroll tax by state",
+        "path": "/payroll-tax"
+      },
+      {
+        "name": "West Virginia",
+        "path": "/payroll-tax/west-virginia"
+      }
+    ]
+  },
+  {
+    "path": "/payroll-tax/wyoming",
+    "file": "payroll-tax/wyoming.html",
+    "title": "Wyoming payroll tax calculation: rates, wage base, API | Omnia.tax",
+    "description": "Wyoming payroll tax for employers: no state income tax, $33,800 unemployment wage base. Worked paycheck and API example.",
+    "h1": "Wyoming payroll tax calculation",
+    "faq": [
+      {
+        "q": "Does Wyoming have a state income tax?",
+        "a": "No. Wyoming does not tax wages, so an employer withholds no state income tax. Federal income tax, Social Security and Medicare still apply."
+      },
+      {
+        "q": "What is Wyoming's unemployment tax wage base?",
+        "a": "Wyoming's state unemployment wage base is $33,800 for 2026 and $34,900 for 2027 in Omnia.tax's rule files. The federal FUTA wage base is $7,000 in every state."
+      },
+      {
+        "q": "What unemployment rate does a new employer pay in Wyoming?",
+        "a": "Wyoming does not publish a single new-employer rate, so Omnia.tax produces no unemployment line unless you send your assigned rate in employer.stateUnemploymentRate."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Payroll tax by state",
+        "path": "/payroll-tax"
+      },
+      {
+        "name": "Wyoming",
+        "path": "/payroll-tax/wyoming"
+      }
+    ]
+  }
+]

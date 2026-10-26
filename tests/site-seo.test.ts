@@ -170,7 +170,11 @@ describe('every page', () => {
       assert.equal(meta(html, 'og:description'), page.description, page.path);
       assert.equal(meta(html, 'og:url'), canonical, page.path);
       assert.equal(meta(html, 'og:type'), 'website', page.path);
-      assert.equal(meta(html, 'twitter:card'), 'summary', page.path);
+      assert.equal(meta(html, 'twitter:card'), 'summary_large_image', page.path);
+      assert.equal(meta(html, 'og:image'), `${ORIGIN}/logo/og-image.png`, page.path);
+      assert.equal(meta(html, 'og:image:width'), '1200', page.path);
+      assert.equal(meta(html, 'og:image:height'), '630', page.path);
+      assert.ok(meta(html, 'og:image:alt'), page.path);
       assert.equal(meta(html, 'twitter:title'), page.title, page.path);
       assert.equal(meta(html, 'twitter:description'), page.description, page.path);
       assert.equal(meta(html, 'robots'), page.index ? 'index, follow' : 'noindex, nofollow', page.path);
@@ -184,7 +188,10 @@ describe('every page', () => {
         const json = html.match(/<script type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/)?.[1] ?? '';
         const graph = JSON.parse(json) as { '@graph': Array<Record<string, unknown>> };
         const types = graph['@graph'].map((n) => n['@type']);
-        assert.deepEqual(types, ['Organization', 'WebSite', 'SoftwareApplication']);
+        assert.deepEqual(types.slice(0, 3), ['Organization', 'WebSite', 'SoftwareApplication']);
+        for (const t of types.slice(3)) assert.ok(['BreadcrumbList', 'FAQPage'].includes(String(t)), `${page.path}: unexpected ${t}`);
+        assert.equal(types.includes('BreadcrumbList'), page.path !== '/', page.path);
+        assert.equal(types.includes('FAQPage'), Boolean(page.faq?.length), page.path);
         const app = graph['@graph'][2] as { offers: { price: string; priceCurrency: string; description: string } };
         assert.equal(app.offers.price, '0.08');
         assert.equal(app.offers.priceCurrency, 'USD');
@@ -213,10 +220,26 @@ describe('every page', () => {
         assert.match(tag, /\bheight="\d+"/, tag);
       }
     }
-    const svg = await raw('/favicon.ico');
+    const ico = await raw('/favicon.ico');
+    assert.equal(ico.status, 200);
+    assert.match(header(ico, 'content-type'), /image\/x-icon/);
+    assert.equal(ico.body.subarray(0, 4).toString('hex'), '00000100', 'a real .ico, not an SVG served under that name');
+    const svg = await raw('/logo/favicon.svg');
     assert.equal(svg.status, 200);
     assert.match(header(svg, 'content-type'), /svg/);
     assert.match(svg.body.toString('utf8'), /<svg/);
+    for (const [path, size] of [['/logo/favicon-48.png', 48], ['/logo/favicon-96.png', 96], ['/logo/favicon-192.png', 192], ['/logo/favicon-512.png', 512], ['/apple-touch-icon.png', 180]] as const) {
+      const icon = await raw(path);
+      assert.equal(icon.status, 200, path);
+      assert.equal(icon.body.subarray(0, 4).toString('hex'), '89504e47', path);
+      assert.equal(icon.body.readUInt32BE(16), size, `${path} width`);
+      assert.equal(icon.body.readUInt32BE(20), size, `${path} height`);
+    }
+    const og = await raw('/logo/og-image.png');
+    assert.equal(og.body.readUInt32BE(16), 1200);
+    assert.equal(og.body.readUInt32BE(20), 630);
+    const manifest = JSON.parse((await raw('/site.webmanifest')).body.toString('utf8')) as { icons: { src: string }[] };
+    assert.ok(manifest.icons.length >= 2);
     const png = await raw('/apple-touch-icon.png');
     assert.equal(png.status, 200);
     assert.match(header(png, 'content-type'), /image\/png/);

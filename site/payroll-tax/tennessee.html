@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="color-scheme" content="light" />
+<title>Tennessee payroll tax calculation: rates, wage base, API | Omnia.tax</title>
+<meta name="description" content="Tennessee payroll tax for employers: no state income tax, $7,000 unemployment wage base, 2.7% new-employer rate. Worked paycheck and API example." />
+<link rel="stylesheet" href="/assets/v5.css" />
+</head>
+<body>
+<header class="site-header"><div class="bar">
+  <a class="mark" href="/">Omnia<span class="dot" aria-hidden="true"></span>tax</a>
+  <nav class="nav-links" aria-label="Primary"><a href="/product">Product</a><a href="/coverage">Coverage</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a></nav>
+  <div class="nav-end"><a class="signin" href="/signin">Sign in</a><a class="btn sm" href="/signup">Get API key</a></div>
+  <button class="menu-btn" type="button" aria-expanded="false" aria-label="Menu"><span></span><span></span></button>
+</div></header>
+<main class="wrap">
+  <div class="page-head">
+    <nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a> <span aria-hidden="true">/</span> <a href="/payroll-tax">Payroll tax by state</a> <span aria-hidden="true">/</span> <span aria-current="page">Tennessee</span></nav>
+    <p class="eyebrow">Payroll tax by state</p>
+    <h1 class="page">Tennessee payroll tax calculation</h1>
+    <p class="sub">What an employer withholds and pays in Tennessee, from the same rule files the API uses.</p>
+  </div>
+  <div class="prose seo" style="margin-top:32px;max-width:720px">
+
+    <p>Tennessee does not tax wages, so there is no state income tax to withhold. Employers also withhold federal income tax, Social Security and Medicare, and pay federal and state unemployment tax.</p>
+    <h2>Tennessee payroll tax at a glance</h2>
+    <div class="table-wrap"><table><tbody><tr><th scope="row" style="text-align:left">State income tax</th><td>None</td></tr><tr><th scope="row" style="text-align:left">Unemployment (SUTA) wage base</th><td>$7,000 for 2026</td></tr><tr><th scope="row" style="text-align:left">New-employer unemployment rate</th><td>2.7%</td></tr><tr><th scope="row" style="text-align:left">State minimum wage</th><td>$7.25</td></tr><tr><th scope="row" style="text-align:left">Local income or wage taxes in Omnia.tax data</th><td>None recorded</td></tr><tr><th scope="row" style="text-align:left">Reciprocity with other states</th><td>None</td></tr></tbody></table></div>
+    <p class="fine">Omnia.tax rule files for 2026, with the 2027 figures that are already published. 2027 rules are provisional until the state publishes its own tables. Confirm against Tennessee's revenue and workforce agencies before you rely on a figure.</p>
+    <h2>A Tennessee paycheck, line by line</h2>
+    <p>A single employee paid $3,000.00 biweekly, no allowances, no pre-tax deductions, check dated 2026-09-15. Net pay is $2,450.12. Every line below comes from the engine, and the employer lines are not taken from the employee's pay.</p>
+    <div class="table-wrap"><table><thead><tr><th>Tax</th><th>Paid by</th><th>Level</th><th style="text-align:right">Amount</th></tr></thead><tbody><tr><td>Federal Income Tax</td><td>Employee</td><td>Federal</td><td style="text-align:right">$320.38</td></tr><tr><td>Social Security</td><td>Employee</td><td>Federal</td><td style="text-align:right">$186.00</td></tr><tr><td>Social Security (Employer)</td><td>Employer</td><td>Federal</td><td style="text-align:right">$186.00</td></tr><tr><td>Medicare</td><td>Employee</td><td>Federal</td><td style="text-align:right">$43.50</td></tr><tr><td>Medicare (Employer)</td><td>Employer</td><td>Federal</td><td style="text-align:right">$43.50</td></tr><tr><td>FUTA</td><td>Employer</td><td>Federal</td><td style="text-align:right">$18.00</td></tr><tr><td>Tennessee Unemployment Insurance (Employer)</td><td>Employer</td><td>State</td><td style="text-align:right">$81.00</td></tr></tbody></table></div>
+    <h2>Calculate Tennessee payroll tax with the API</h2>
+    <p>One call returns federal, Tennessee state and employer taxes for a paycheck. Amounts are integer cents.</p>
+    <div class="panel" style="margin-top:14px"><pre style="margin:0;padding:18px 22px;overflow:auto">curl https://api.omnia.tax/v1/paycheck \
+  -H &quot;Authorization: Bearer $KEY&quot; \
+  -H &quot;Content-Type: application/json&quot; \
+  -d '{
+  &quot;checkDate&quot;: &quot;2026-09-15&quot;,
+  &quot;payFrequency&quot;: &quot;biweekly&quot;,
+  &quot;earnings&quot;: [{ &quot;code&quot;: &quot;REG&quot;, &quot;category&quot;: &quot;regular&quot;, &quot;amount&quot;: 300000 }],
+  &quot;deductions&quot;: [],
+  &quot;federalW4&quot;: { &quot;filingStatus&quot;: &quot;single&quot;, &quot;multipleJobs&quot;: false,
+    &quot;dependentCredit&quot;: 0, &quot;otherIncome&quot;: 0, &quot;deductions&quot;: 0, &quot;extraWithholding&quot;: 0 },
+  &quot;ytd&quot;: { &quot;socialSecurity&quot;: 0, &quot;medicare&quot;: 0, &quot;futa&quot;: 0 },
+  &quot;workState&quot;: { &quot;code&quot;: &quot;TN&quot; }
+}'</pre></div>
+    
+    <h2>Related</h2>
+    <p><a href="/payroll-tax">Payroll tax by state</a> · <a href="/payroll-tax-calculation">How payroll tax calculation works</a> · <a href="/coverage">Coverage</a> · <a href="/pricing">Pricing</a> · <a href="/payroll-tax/texas">Texas</a> · <a href="/payroll-tax/south-dakota">South Dakota</a></p>
+  </div>
+<section class="faq" aria-labelledby="faq-h" style="margin-top:44px;max-width:720px"><h2 id="faq-h" style="font-size:22px;line-height:30px">Questions</h2><article><h3>Does Tennessee have a state income tax?</h3><p>No. Tennessee does not tax wages, so an employer withholds no state income tax. Federal income tax, Social Security and Medicare still apply.</p></article><article><h3>What is Tennessee's unemployment tax wage base?</h3><p>Tennessee's state unemployment wage base is $7,000 for 2026 in Omnia.tax's rule files. The federal FUTA wage base is $7,000 in every state.</p></article><article><h3>What unemployment rate does a new employer pay in Tennessee?</h3><p>Omnia.tax uses 2.7% for a new employer in Tennessee unless you send your own assigned rate in employer.stateUnemploymentRate. An established employer's rate is assigned by the state from its experience, so check your rate notice.</p></article></section>
+  <div class="seo-cta" style="margin:48px 0 8px;max-width:720px"><a class="btn" href="/signup">Start the 14-day trial</a> <a class="text-link" href="/docs">Read the docs →</a><p class="fine">14-day free trial, then $0.08 per paycheck calculation. Omnia.tax calculates; it does not file, deposit tax, or give tax advice. <a href="/disclaimer">Disclaimer</a>.</p></div>
+</main>
+<footer class="site-footer">
+  <div class="wrap foot-grid">
+    <a class="mark" href="/">Omnia<span class="dot" aria-hidden="true"></span>tax</a>
+    <div><h2>Product</h2><a href="/coverage">Coverage</a><a href="/pricing">Pricing</a><a href="/changelog">Changelog</a></div>
+    <div><h2>Developers</h2><a href="/docs">Docs</a><a href="/docs/paycheck">API reference</a><a href="/status">Status</a></div>
+    <div><h2>Guides</h2><a href="/payroll-tax-calculation">Payroll tax calculation</a><a href="/payroll-tax-api">Payroll tax API</a><a href="/payroll-tax">Payroll tax by state</a><a href="/symmetry-tax-engine-alternative">Symmetry alternative</a><a href="/payroll-tax-engine-comparison">Engine comparison</a></div>
+    <div><h2>Company</h2><a href="/about">About</a><a href="/contact">Contact</a><a href="/terms">Terms</a><a href="/privacy">Privacy</a></div>
+  </div>
+  <p class="wrap copy">© 2026 OMNIA TAX LLC. A Michigan limited liability company.</p>
+</footer>
+<script src="/assets/v5.js"></script>
+</body>
+</html>

@@ -149,7 +149,7 @@ h2 { font-weight: 500; font-size: 32px; line-height: 40px; letter-spacing: -0.01
 .dev-actions { display: flex; gap: 12px; flex-shrink: 0; }
 
 .site-footer { border-top: 1px solid var(--rule); padding: 56px 0 40px; }
-.foot-grid { display: grid; grid-template-columns: 1.4fr 1fr 1fr 1fr; gap: 24px; }
+.foot-grid { display: grid; grid-template-columns: 1.2fr 1fr 1fr 1.3fr 1fr; gap: 24px; }
 .foot-grid h2 { font-size: 13px; font-weight: 500; margin-bottom: 16px; }
 .foot-grid a { display: block; color: var(--ink2); font-size: 14px; line-height: 28px; text-decoration: none; }
 .foot-grid a:hover { color: var(--ink); text-decoration: underline; }
@@ -457,3 +457,16 @@ input::placeholder, textarea::placeholder { color: #70757B; opacity: 1; }
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
 }
+
+/* Search-landing pages (site/lib/seo-pages.ts) */
+.crumbs { font-size: 13px; color: var(--ink3); margin-bottom: 18px; }
+.crumbs a { color: var(--ink2); text-decoration: none; }
+.crumbs a:hover { color: var(--ink); text-decoration: underline; }
+.prose.seo ol, .prose.seo ul { color: var(--ink2); margin-top: 12px; padding-left: 1.25em; }
+.prose.seo li { margin-top: 8px; }
+.prose.seo table { width: 100%; border-collapse: collapse; margin-top: 16px; font-size: 14.5px; line-height: 22px; }
+.prose.seo th, .prose.seo td { border-top: 1px solid var(--rule); padding: 10px 12px 10px 0; text-align: left; vertical-align: top; color: var(--ink2); }
+.prose.seo thead th { color: var(--ink); font-weight: 500; }
+.prose.seo th[scope="row"] { color: var(--ink); font-weight: 500; }
+.prose.seo code { font-family: "Martian Mono", ui-monospace, monospace; font-size: 0.86em; }
+.prose.seo .panel pre { color: var(--code-text); }
