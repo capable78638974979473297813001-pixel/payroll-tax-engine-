@@ -228,12 +228,38 @@ export interface KeyRecord {
   isActive: boolean;
   lastUsedAt: string | null;
   /**
-   * Monotonic lifetime count of billable calls on this key. Kept on the
-   * key itself so it survives usage-log trimming (see MAX_USAGE_EVENTS)
-   * and so metering never has to scan the whole log to bill.
+   * Monotonic lifetime count of successful requests on this key. Kept on
+   * the key itself so it survives usage-log trimming (see MAX_USAGE_EVENTS).
+   * This is requests, not paychecks: a payroll run is one request.
    */
   totalCalls?: number;
+  /** Every recorded request on this key, including errors. Survives log trimming. */
+  totalRequests?: number;
+  /**
+   * Paychecks calculated on this key, one per paycheck, matching what billing
+   * counts. A payroll run of N adds N. Survives log trimming.
+   */
+  totalPaychecks?: number;
+  /** Recorded requests that were not a success. Survives log trimming. */
+  totalErrors?: number;
+  /** Counts for the current UTC day. Replaced when the day changes. */
+  dayUsage?: UsageBucket;
+  /** Counts for the current billing period. Replaced when the period changes. */
+  periodUsage?: UsageBucket;
 }
+
+/** A durable counter bucket. `key` is the UTC day (YYYY-MM-DD) or the period start. */
+export interface UsageBucket {
+  key: string;
+  requests: number;
+  paychecks: number;
+  errors: number;
+}
+
+export type UsageKind = 'paycheck' | 'address' | 'payCalc' | 'payroll' | 'catalog';
+
+/** Why a recorded call is or isn't a charge. Trial usage is recorded and is not billed. */
+export type UsageBilling = 'trial' | 'unbilled' | 'metered' | 'error';
 
 export interface UsageEvent {
   keyHash: string;
@@ -242,9 +268,34 @@ export interface UsageEvent {
   error: string | null;
   checkDate: string | null;
   /** Which endpoint made the call. Absent on events recorded before this field existed (all paycheck calls). */
-  kind?: 'paycheck' | 'address';
-  /** For address lookups: whether an address matched. Only matched lookups are billable. */
+  kind?: UsageKind;
+  /** For address lookups: whether an address matched. Address lookups are not paycheck charges. */
   matched?: boolean;
+  /** `METHOD /path` as the client called it. */
+  endpoint?: string;
+  /** Server request id. Pairs with a client Idempotency-Key so a retry is one record. */
+  requestId?: string;
+  /**
+   * Paychecks calculated on this request. One per paycheck, including trial
+   * and other unbilled successes. Zero for errors and for calls that are
+   * not paycheck calculations. Absent on events recorded before this field
+   * existed: those count as one paycheck when they succeeded and were not
+   * address lookups.
+   */
+  paychecks?: number;
+  /** HTTP requests this event stands for. Always 1. */
+  requests?: number;
+  billing?: UsageBilling;
+}
+
+/**
+ * An idempotency key already applied for a usage write. A retry with the
+ * same id does not append another event and does not queue another meter
+ * event. Bounded; see MAX_USAGE_RECEIPTS in site/lib/usage.ts.
+ */
+export interface UsageReceipt {
+  id: string;
+  at: string;
 }
 
 export interface EstimateEvent {
@@ -292,6 +343,8 @@ export interface DB {
   subscriptions: Record<string, SubscriptionRecord>;
   keys: Record<string, KeyRecord>;
   usage: UsageEvent[];
+  /** Idempotency receipts for usage writes. Absent on stores from before receipts existed. */
+  usageReceipts: UsageReceipt[];
   estimates: EstimateEvent[];
   termsQuotes: Record<string, TermsQuote>;
   meterQueue: MeterQueueItem[];
@@ -320,6 +373,7 @@ function emptyDb(): DB {
     subscriptions: {},
     keys: {},
     usage: [],
+    usageReceipts: [],
     estimates: [],
     termsQuotes: {},
     meterQueue: [],
@@ -346,6 +400,7 @@ function load(): DB {
     subscriptions: parsed.subscriptions ?? base.subscriptions,
     keys: parsed.keys ?? base.keys,
     usage: parsed.usage ?? base.usage,
+    usageReceipts: parsed.usageReceipts ?? base.usageReceipts,
     estimates: parsed.estimates ?? base.estimates,
     termsQuotes: parsed.termsQuotes ?? base.termsQuotes,
     meterQueue: parsed.meterQueue ?? base.meterQueue,

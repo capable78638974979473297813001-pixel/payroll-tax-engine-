@@ -209,13 +209,15 @@ describe('signup verify email', () => {
     assert.equal(r.status, 200);
     assert.equal(body.ok, true);
     assert.equal(body.emailSent, false);
-    assert.equal(body.cooldown, undefined);
+    assert.equal(body.cooldown, false);
     assert.equal(text.includes('not verified'), false);
     assert.equal(text.includes(API_KEY), false);
     assert.equal(text.includes(PLANTED), false);
 
-    const code = JSON.parse(readFileSync(join(prod.dir, 'db.json'), 'utf8')).accounts[email].code as string;
-    assert.match(code, /^\d{6}$/);
+    // The store keeps only a hash of the code, so there is no plaintext to look for: the log must hold
+    // no six-digit number at all, and no stored hash.
+    const stored = JSON.parse(readFileSync(join(prod.dir, 'db.json'), 'utf8')).accounts[email].code as string;
+    assert.match(stored, /^sha256:/);
     for (let i = 0; i < 20 && !prod.log().includes('domain is not verified'); i++) {
       await new Promise((res) => setTimeout(res, 25));
     }
@@ -224,7 +226,8 @@ describe('signup verify email', () => {
     assert.match(log, /domain is not verified/);
     assert.match(log, /\[redacted\]/);
     assert.equal(log.includes(API_KEY), false, 'log contained the API key');
-    assert.equal(log.includes(code), false, 'log contained the verification code');
+    assert.doesNotMatch(log, /\b\d{6}\b/, 'log contained a six-digit code');
+    assert.equal(log.includes(stored), false, 'log contained the stored code hash');
     assert.equal(log.includes('[code]'), false, 'a code was logged and then redacted');
     assert.equal(log.includes('CODE:'), false);
 
@@ -261,7 +264,8 @@ describe('signup verify email', () => {
     const coolBody = await cool.json();
     assert.equal(cool.status, 200);
     assert.equal(coolBody.cooldown, true);
-    assert.equal(coolBody.emailSent, false);
+    // A cooldown means a code was just sent, so the site reports it as delivered.
+    assert.equal(coolBody.emailSent, true);
     await new Promise((res) => setTimeout(res, 50));
     assert.equal(viaVerifier.log().slice(mark).includes('verification email failed'), false);
     const coolLead = leadFor(false, { emailSent: false, cooldown: true });

@@ -29,7 +29,7 @@
     <h2>Rate limits</h2>
     <p>Calls are rate limited per key. When you hit the limit the API returns 429 <span class="mono">rate_limited</span> and a <span class="mono">Retry-After</span> header.</p>
     <h2>Passwords and sessions</h2>
-    <p>Passwords are hashed with scrypt and a fresh salt. They are never stored in a form that can be read back. The console session cookie is HTTP-only.</p>
+    <p>Passwords are hashed with scrypt (N=131072, r=8, p=1) and a fresh salt. They are never stored in a form that can be read back. Email sign-in codes are stored as a hash once mail is configured. The console session cookie is HTTP-only, SameSite=Lax, and Secure on https.</p>
     <h2>Card numbers</h2>
     <p>Card and bank account numbers are entered on the payment processor’s page. This server stores a processor reference and a last four, not the full number.</p>
     <h2>Reporting an issue</h2>

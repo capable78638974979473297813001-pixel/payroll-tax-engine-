@@ -1,3 +1,22 @@
+(function (w) {
+  if (w.__omniaCsrfFetch || typeof w.fetch !== 'function') return;
+  w.__omniaCsrfFetch = true;
+  var orig = w.fetch;
+  w.fetch = function (input, init) {
+    var opts = init ? Object.assign({}, init) : {};
+    var method = String(opts.method || (input && input.method) || 'GET').toUpperCase();
+    if (method !== 'GET' && method !== 'HEAD' && method !== 'OPTIONS') {
+      var match = document.cookie.match(/(?:^|; )omnia_csrf=([^;]*)/);
+      if (match) {
+        var headers = new Headers(opts.headers || undefined);
+        if (!headers.has('X-CSRF-Token')) headers.set('X-CSRF-Token', decodeURIComponent(match[1]));
+        opts.headers = headers;
+      }
+    }
+    return orig.call(this, input, opts);
+  };
+})(window);
+
 (function () {
   var btn = document.querySelector('.menu-btn');
   var header = document.querySelector('.site-header');

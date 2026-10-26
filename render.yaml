@@ -25,6 +25,9 @@ services:
         value: https://omniatax.io
       - key: TRUST_PROXY
         value: "1"
+      # Search Console HTML-tag token (content value only). Set in the dashboard.
+      - key: GOOGLE_SITE_VERIFICATION
+        sync: false
       # Secrets: set these in the Render dashboard (sync: false keeps them out of git).
       - key: STRIPE_SECRET_KEY
         sync: false

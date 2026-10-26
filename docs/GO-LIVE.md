@@ -179,16 +179,16 @@ Dashboard (**Settings → Payment methods**); those are what Checkout offers.
 `STRIPE_METER_EVENT_NAME` (or `STRIPE_METER_EVENT`). With only the secret key,
 onboarding saves a card and no usage is billed; the server logs a warning at
 startup saying so. An `sk_live_` Stripe secret is refused unless `STRIPE_ALLOW_LIVE=1`.
-Each successful paycheck calculation, including each paycheck in a batch and
-including calculations during the 14-day trial, queues one meter event (`value` 1).
+Each successful paycheck calculation, including calculations during the
+14-day trial, queues one meter event (`value` 1). There is no batch route.
 Stripe does not bill usage recorded during `trial_period_days` (see
 `docs/STRIPE-SETUP.md`, "Trial usage on the metered price"). A Stripe outage
 does not fail the API response.
 
-**Set `RESEND_API_KEY` in production.** Without it the server is in local
-development mode and prints each 6-digit verification code to its console —
-a working sign-in credential for anyone who can read the logs. With it set,
-codes are only emailed and never logged.
+**Set `RESEND_API_KEY` in production.** Without it, signup and sign-in cannot
+email a code, and production does not print the code. A development server
+with no email provider prints the code to its console so signup can be
+finished locally. With the key set, codes are only emailed and never logged.
 
 **The Python email verifier.** On Render it runs automatically (section 0c). To run it
 yourself, `npm run verifier` starts
@@ -208,6 +208,23 @@ set `PUBLIC_BASE_URL` in the Render dashboard. In production, if it is missing,
 the server uses the request host (`x-forwarded-proto` and host on Render) and
 refuses localhost instead of creating a Checkout session. An `https` value
 also marks the console's session cookie `Secure`.
+
+**Canonical host is the apex.** `https://omniatax.io` is the canonical origin
+for every public page, the sitemap, and Open Graph URLs. Keep `www.omniatax.io`
+on the same Render service (the Blueprint already lists both domains). With
+`TRUST_PROXY=1`, a request whose host is `www.omniatax.io`, or whose host is
+`omniatax.io` and `X-Forwarded-Proto` is `http`, is answered `301` to
+`https://omniatax.io` plus the original path and query. Health checks
+(`/healthz`, `/api/health`, `/v1/health`) are not redirected. HSTS is sent
+only on those two hosts, so a local browser is not pinned to https.
+
+**Search Console.** After the domain is verified, copy the HTML-tag token
+(only the `content` value) into `GOOGLE_SITE_VERIFICATION` on the Render
+service. `render.yaml` lists the key with `sync: false`, so it stays out of
+git. The site prints `<meta name="google-site-verification" content="…">`
+when the value matches `[A-Za-z0-9_-]{8,128}`. Leave it unset and the tag
+is omitted. Submit `https://omniatax.io/sitemap.xml` in Search Console once
+the tag is live.
 
 Start it: `npm run site` (keep it running under a process manager / systemd).
 

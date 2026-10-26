@@ -114,7 +114,13 @@
       .then(function (res) {
         Omnia.setLoading(btn, false);
         if (!res.ok) { fail(err, (res.body && res.body.error) || 'Could not send a sign-in code.'); return; }
-        Omnia.setPending({ email: email, emailConfigured: !!(res.body && res.body.emailConfigured), sentAt: Date.now() });
+        Omnia.setPending({
+          email: email,
+          emailConfigured: !!(res.body && res.body.emailConfigured),
+          emailSent: !(res.body && res.body.emailSent === false),
+          devCodeHint: !!(res.body && res.body.devCodeHint),
+          sentAt: Date.now()
+        });
         location.href = '/signup/verify?mode=signin' + (reset ? '&reset=1' : '');
       })
       .catch(function () { Omnia.setLoading(btn, false); fail(err, 'Could not reach the server. Try again.'); });

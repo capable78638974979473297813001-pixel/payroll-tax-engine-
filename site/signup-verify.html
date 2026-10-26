@@ -43,6 +43,7 @@
       <button type="button" class="text-link" id="resend" disabled style="background:none;border:0;cursor:pointer">Resend code</button>
       <span id="resendIn">in <span id="count">0:30</span></span>
     </p>
+    <p class="send-status" id="sendStatus" hidden></p>
     <p id="changeRow" class="fine">Wrong email? <a id="change" href="/signup">Change it</a></p>
     <form id="npForm" hidden novalidate style="margin-top:24px">
       <div class="field" id="npField">
@@ -80,16 +81,18 @@
   document.getElementById('ttlMin').textContent = String(Math.round(ttl / 60));
   var lead = document.getElementById('lead1');
   function paintLead() {
+    // devHint is the server's own answer for THIS send (no mail provider and not production),
+    // not a guess from the environment, so a Resend rejection in production never points at the log.
     var info = OmniaVerifyLead({
       email: email,
       signin: signin,
       emailSent: !!pending.emailSent,
       emailConfigured: !!pending.emailConfigured,
       cooldown: !!pending.cooldown,
-      devHint: !!(window.OMNIA && window.OMNIA.devCodeHint)
+      devHint: !!pending.devCodeHint
     });
     lead.innerHTML = info.html;
-    // The rate-limited Resend code control stays on the failure state too.
+    // The rate-limited resend control stays available on the failure state too.
     document.getElementById('resendRow').hidden = false;
   }
   paintLead();
@@ -133,8 +136,11 @@
   });
 
   var cooldown = (window.OMNIA && window.OMNIA.codeCooldownSec) || 30;
-  var remain = cooldown;
-  if (pending.sentAt) remain = Math.max(0, cooldown - Math.floor((Date.now() - pending.sentAt) / 1000));
+  // A failed send must not look like success. The 30-second wait applies
+  // only after a code was emailed, or written to the development log.
+  var delivered = !!(pending.emailSent || pending.devCodeHint || pending.cooldown);
+  var remain = 0;
+  if (delivered && pending.sentAt) remain = Math.max(0, cooldown - Math.floor((Date.now() - pending.sentAt) / 1000));
   var resend = document.getElementById('resend');
   var count = document.getElementById('count');
   var resendIn = document.getElementById('resendIn');
@@ -230,39 +236,60 @@
       .catch(function () { Omnia.setLoading(btn, false); err.textContent = 'Could not reach the server. Try again.'; err.hidden = false; });
   });
 
+  var sendStatus = document.getElementById('sendStatus');
+  function showStatus(msg, ok) {
+    sendStatus.textContent = msg;
+    sendStatus.className = 'send-status ' + (ok ? 'ok' : 'bad');
+    sendStatus.setAttribute('role', ok ? 'status' : 'alert');
+    sendStatus.hidden = false;
+  }
+  if (pending.emailSent === false && !pending.devCodeHint && !pending.cooldown) {
+    showStatus(signin
+      ? 'We couldn’t send a sign-in code just now. Try again in a moment.'
+      : 'We couldn’t send the email just now. Try again in a moment.', false);
+  }
   resend.addEventListener('click', function () {
     var path = signin ? '/api/signin' : '/api/signup';
-    var body = signin ? { email: email } : { name: pending.name, email: email, company: pending.company, phone: pending.phone, agreeToTerms: true };
+    var body = signin ? { email: email } : { name: pending.name, email: email, company: pending.company, phone: pending.phone || '', agreeToTerms: true };
     resend.disabled = true;
+    sendStatus.hidden = true;
     Omnia.api(path, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
       .then(function (res) {
         if (!res.ok) {
-          Omnia.toast((res.body && res.body.error) || "We couldn't send your code. Try again or contact support.", 'error');
+          showStatus((res.body && res.body.error) || 'Could not send the code. Try again in a minute.', false);
           resend.disabled = false;
           return;
         }
-        if (res.body && res.body.cooldown) {
-          pending.cooldown = true;
-          Omnia.setPending(pending);
-          remain = cooldown;
-          tick();
-          paintLead();
-          Omnia.toast('A code was just requested. Try Resend code when the timer ends.');
+        var sent = !!(res.body && res.body.emailSent);
+        var hint = !!(res.body && res.body.devCodeHint);
+        var cooling = !!(res.body && res.body.cooldown);
+        pending.sentAt = Date.now();
+        pending.emailSent = sent;
+        pending.devCodeHint = hint;
+        pending.cooldown = cooling;
+        if (res.body && typeof res.body.emailConfigured === 'boolean') pending.emailConfigured = res.body.emailConfigured;
+        Omnia.setPending(pending);
+        paintLead();
+        if (!sent && !cooling && !hint) {
+          showStatus(signin
+            ? 'We couldn’t send a sign-in code just now. Try again in a moment.'
+            : 'We couldn’t send the email just now. Try again in a moment.', false);
+          resend.disabled = false;
           return;
         }
-        pending.sentAt = Date.now();
-        pending.cooldown = false;
-        if (!signin) pending.emailSent = !!(res.body && res.body.emailSent);
-        Omnia.setPending(pending);
+        if (hint) {
+          showStatus('A new code is in the server log on this development server. It was not emailed.', true);
+        } else if (cooling) {
+          showStatus('A code was just sent. You can request another when the timer ends.', true);
+        } else {
+          showStatus(signin ? 'If this address has an account, a new code is on its way.' : 'A new code is on its way.', true);
+        }
         remain = cooldown;
         tick();
-        paintLead();
-        if (signin || pending.emailSent) Omnia.toast('A new code is on its way.');
-        else Omnia.toast("We couldn't send your code. Try again or contact support.", 'error');
       })
       .catch(function () {
+        showStatus('Could not reach the server. Try again.', false);
         resend.disabled = false;
-        Omnia.toast('Could not reach the server. Try again.', 'error');
       });
   });
 })();

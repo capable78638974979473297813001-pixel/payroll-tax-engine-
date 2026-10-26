@@ -1,6 +1,7 @@
 /* Lead copy for /signup/verify. The dev-server sentence is appended only when
-   the server sets window.OMNIA.devCodeHint (NODE_ENV is not production, or
-   OMNIA_DEV_CODE_HINT / VERIFIER_DEV is set). */
+   the server says, for this send, that it only printed the code to its own log
+   (devHint). window.OMNIA.devCodeHint is the site-wide flag: NODE_ENV is not
+   production, or OMNIA_DEV_CODE_HINT / VERIFIER_DEV is set. */
 (function (root) {
   'use strict';
 
@@ -19,13 +20,16 @@
     var devHint = !!opts.devHint;
     var bold = '<b style="color:var(--ink)">' + email + '</b>';
     if (opts.signin) {
-      if (opts.emailConfigured || !devHint) {
-        return { html: 'If ' + bold + ' has an Omnia.tax account, we sent a 6-digit code.', devHintShown: false };
+      if (devHint) {
+        return {
+          html: 'If ' + bold + ' has an account, its sign-in code is in the server log. No email provider is connected on this development server.',
+          devHintShown: true,
+        };
       }
-      return {
-        html: 'If ' + bold + ' has an account, its sign-in code is in the server log (no email provider is connected yet).',
-        devHintShown: true,
-      };
+      if (opts.emailSent === false && opts.emailConfigured) {
+        return { html: "We couldn't send a sign-in code to " + bold + ' just now. Use Resend code to try again.', devHintShown: false };
+      }
+      return { html: 'If ' + bold + ' has an Omnia.tax account, we sent a 6-digit code.', devHintShown: false };
     }
     if (opts.emailSent) {
       return { html: 'We sent a 6-digit code to ' + bold + '.', devHintShown: false };

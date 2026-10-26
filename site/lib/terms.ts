@@ -14,7 +14,7 @@ import { TRIAL_DAYS } from './pricing.ts';
  * no minimum term. The trial stays cancellable (ROSCA, 15 U.S.C. 8403).
  */
 
-export const TERMS_VERSION = '2026-10-23.1';
+export const TERMS_VERSION = '2026-10-25.1';
 /** Frozen prior version. Acceptances already stored under this string. */
 export const TERMS_VERSION_2026_10_19_2 = '2026-10-19.2';
 export const TERM_MONTHS = 12;
@@ -128,7 +128,7 @@ export function termsClauses(args: TermsArgs): TermsClause[] {
       heading: 'What you are agreeing to pay',
       body:
         `Successful paycheck calculations are billed at $0.08 each, monthly, pay as you go. ` +
-        `A batch that calculates more than one paycheck is one charge per paycheck that succeeds. A paycheck that does not succeed is not charged. ` +
+        `Each successful paycheck calculation is one charge. A calculation that does not succeed is not charged. ` +
         `There is no per-employee fee, no seat license, no setup fee, and no minimum term. ` +
         `An address lookup is not a paycheck calculation and is not charged. ` +
         `A minimum-wage check or a wage garnishment sent on the same paycheck is part of that one calculation.`,

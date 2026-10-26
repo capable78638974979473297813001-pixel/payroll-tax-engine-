@@ -15,8 +15,10 @@
 
 import { createHmac, timingSafeEqual } from 'node:crypto';
 
-// Overridable only to point tests (or stripe-mock) at a local stub.
-const STRIPE_API = process.env.STRIPE_API_BASE ?? 'https://api.stripe.com';
+/** Read at call time so tests and a late-loaded env can point at a stub. */
+function stripeApi(): string {
+  return (process.env.STRIPE_API_BASE ?? 'https://api.stripe.com').trim().replace(/\/+$/, '');
+}
 
 export class StripeError extends Error {
   status: number;
@@ -100,7 +102,7 @@ async function stripeRequest<T>(
   if (idempotencyKey) headers['Idempotency-Key'] = idempotencyKey;
 
   const body = method === 'POST' && params ? formEncode(params).join('&') : undefined;
-  const res = await fetch(`${STRIPE_API}${path}`, { method, headers, body });
+  const res = await fetch(`${stripeApi()}${path}`, { method, headers, body });
   const data = (await res.json().catch(() => ({}))) as Record<string, unknown>;
   if (!res.ok) {
     const err = (data.error ?? {}) as { message?: string; type?: string; code?: string };
@@ -394,17 +396,48 @@ export function reportMeterEvent(input: {
  */
 export function verifyWebhookSignature(rawBody: string, signatureHeader: string, secret: string, toleranceSeconds = 300): boolean {
   if (!signatureHeader || !secret) return false;
-  const parts = Object.fromEntries(signatureHeader.split(',').map((p) => p.split('=').map((s) => s.trim())));
-  const t = parts['t'];
-  const v1 = parts['v1'];
-  if (!t || !v1) return false;
-  // Reject stale timestamps (replay protection).
+  // Stripe may send more than one v1 signature during a secret rotation.
+  // Object-from-entries would keep only the last. Check every v1.
+  const pieces = signatureHeader.split(',').map((p) => {
+    const eq = p.indexOf('=');
+    if (eq < 0) return ['', ''] as const;
+    return [p.slice(0, eq).trim(), p.slice(eq + 1).trim()] as const;
+  });
+  const t = pieces.find((p) => p[0] === 't')?.[1];
+  const sigs = pieces.filter((p) => p[0] === 'v1' && p[1]).map((p) => p[1]);
+  if (!t || sigs.length === 0) return false;
+  // Reject stale and future-skewed timestamps (replay of a captured delivery).
   const age = Math.abs(Date.now() / 1000 - Number(t));
   if (!Number.isFinite(age) || age > toleranceSeconds) return false;
   const expected = createHmac('sha256', secret).update(`${t}.${rawBody}`).digest('hex');
   const a = Buffer.from(expected);
-  const b = Buffer.from(v1);
-  return a.length === b.length && timingSafeEqual(a, b);
+  let ok = false;
+  for (const v1 of sigs) {
+    const b = Buffer.from(v1);
+    if (a.length === b.length && timingSafeEqual(a, b)) ok = true;
+  }
+  return ok;
+}
+
+/**
+ * Hosted Checkout URLs we will hand to a browser. Real Stripe only.
+ * A test stub (STRIPE_API_BASE pointing somewhere else) may also return
+ * its own host, or the https://checkout.test fixture the wire tests use.
+ * Anything else is refused so a bad response cannot redirect the customer.
+ */
+export function isAllowedCheckoutUrl(url: string): boolean {
+  let parsed: URL;
+  try { parsed = new URL(url); } catch { return false; }
+  if (parsed.username || parsed.password) return false;
+  const host = parsed.hostname.toLowerCase();
+  if (parsed.protocol === 'https:' && (host === 'checkout.stripe.com' || host === 'billing.stripe.com')) return true;
+  const base = (process.env.STRIPE_API_BASE ?? '').trim();
+  if (!base || base === 'https://api.stripe.com') return false;
+  try {
+    const stub = new URL(base);
+    if (parsed.host === stub.host && (parsed.protocol === 'http:' || parsed.protocol === 'https:')) return true;
+  } catch { /* ignore a bad stub base */ }
+  return host === 'checkout.test' && parsed.protocol === 'https:';
 }
 
 export interface StripePaymentIntent {
