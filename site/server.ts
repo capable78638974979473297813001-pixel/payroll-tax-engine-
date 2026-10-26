@@ -173,8 +173,23 @@ async function deliverCodeEmail(
     code: acct.code,
     expiresAt: acct.codeExpiresAt,
   });
-  if (!result.sent) console.error(`[${where}] verification email failed: ${result.reason ?? 'unknown error'}`);
+  // The provider's status and message only (mail.ts already removed keys and codes), under the
+  // [mail] tag the verifier client also uses, so one grep finds a delivery failure on either path.
+  if (!result.sent) console.error(`[mail] verification email failed: ${where}: ${scrubMailLog(result.reason ?? 'unknown error')}`);
   return { limited: false, emailSent: result.sent, cooldown: false, devCodeHint: false };
+}
+
+/**
+ * The "code is in the server log" sentence is a local-development aid.
+ * Production (NODE_ENV=production, including the Docker image) must not show
+ * it. OMNIA_DEV_CODE_HINT=1 or VERIFIER_DEV=1 forces it on for a deliberate
+ * local debug session.
+ */
+function showDevCodeHint(): boolean {
+  const flag = (process.env.OMNIA_DEV_CODE_HINT ?? '').trim().toLowerCase();
+  if (flag === '1' || flag === 'true') return true;
+  if ((process.env.VERIFIER_DEV ?? '').trim() === '1') return true;
+  return process.env.NODE_ENV !== 'production';
 }
 
 const SESSION_COOKIE = 'omnia_session';
@@ -389,6 +404,7 @@ function clientConfig() {
     termMonths: TERM_MONTHS,
     codeTtlSec: CODE_TTL_MS / 1000,
     codeCooldownSec: CODE_COOLDOWN_MS / 1000,
+    devCodeHint: showDevCodeHint(),
     maxCodeAttempts: MAX_CODE_ATTEMPTS,
     rateLimitPerMin: paycheckLimiterLimit(),
     termsVersion: TERMS_VERSION,

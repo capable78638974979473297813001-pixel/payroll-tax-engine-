@@ -150,7 +150,12 @@ class ResendFailureTest(unittest.TestCase):
         class Handler(BaseHTTPRequestHandler):
             def do_POST(self) -> None:  # noqa: N802
                 self.rfile.read(int(self.headers.get("Content-Length", "0")))
-                body = json.dumps({"statusCode": 403, "message": "The omniatax.io domain is not verified."}).encode()
+                body = json.dumps({
+                    "statusCode": 403,
+                    "message": "The omniatax.io domain is not verified.",
+                    "token": "re_supersecretkey999",
+                    "note": "ref 123456",
+                }).encode()
                 self.send_response(403)
                 self.send_header("Content-Length", str(len(body)))
                 self.end_headers()
@@ -171,6 +176,11 @@ class ResendFailureTest(unittest.TestCase):
             text = log.getvalue()
             self.assertIn("403", text)
             self.assertIn("domain is not verified", text)
+            self.assertIn("[redacted]", text)
+            self.assertNotIn("re_supersecretkey999", text)
+            self.assertNotIn("re_supersecretkey999", json.dumps(result))
+            self.assertNotIn("123456", text)
+            self.assertNotIn("123456", result.get("error", ""))
             row = v._db.execute("SELECT code_hash FROM codes").fetchone()
             self.assertTrue(row)  # a code was minted, but is not in the log
             self.assertNotRegex(text, r"\b\d{6}\b")

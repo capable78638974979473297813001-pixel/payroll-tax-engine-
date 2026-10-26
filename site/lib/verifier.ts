@@ -8,6 +8,8 @@
  * development still works with nothing else running.
  */
 
+import { redactMailError } from './mail.ts';
+
 export function verifierConfigured(): boolean {
   return Boolean(process.env.VERIFIER_URL && process.env.VERIFIER_SECRET);
 }
@@ -36,7 +38,18 @@ async function call(path: string, body: unknown): Promise<{ status: number; json
 export async function issueCode(email: string, name: string): Promise<IssueResult> {
   try {
     const { status, json, retryAfter } = await call('/issue', { email, name });
-    if (status === 200) return { ok: true, sent: json.sent === true, cooldown: json.cooldown === true };
+    if (status === 200) {
+      const sent = json.sent === true;
+      const cooldown = json.cooldown === true;
+      // Delivery failed (not the per-address cooldown). The verifier already
+      // logged this; log it here too so the site process has the Resend
+      // status and message. Never the code, the recipient, or the API key.
+      if (!sent && !cooldown) {
+        const detail = typeof json.error === 'string' ? redactMailError(json.error) : '';
+        console.error(`[mail] verification email failed: ${detail || 'the provider did not accept the message'}`);
+      }
+      return { ok: true, sent, cooldown };
+    }
     return { ok: false, sent: false, status, retryAfterSec: retryAfter };
   } catch (err) {
     console.error(`[verifier] issue failed: ${err instanceof Error ? err.message : 'unknown error'}`);

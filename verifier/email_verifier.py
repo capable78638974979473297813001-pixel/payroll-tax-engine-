@@ -71,6 +71,7 @@ MAX_BODY_BYTES = 4096
 MIN_SECRET_LEN = 32
 
 EMAIL_RE = re.compile(r"^[^\s@]+@[^\s@]+\.[^\s@]+$")
+# Resend keys look like re_<token>. A 6-digit run is a verification code.
 
 # The one message for every failed check. Do not specialise it.
 INVALID = "That code is incorrect or has expired. Request a new one if needed."
@@ -184,7 +185,9 @@ class Verifier:
         except Exception as exc:  # delivery failure must not leak the code
             reason = scrub_log(str(exc)) or type(exc).__name__
             print(f"[verifier] mail delivery failed: {type(exc).__name__}: {reason}", file=sys.stderr)
-            sent = False
+            # `error` stays on this loopback service. The site logs it and does not
+            # forward it to the browser.
+            return {"ok": True, "sent": False, "cooldown": False, "error": reason}
         return {"ok": True, "sent": sent, "cooldown": False}
 
     def check(self, email_raw: object, code_raw: object) -> dict:
@@ -316,6 +319,10 @@ def scrub_log(text: str) -> str:
     text = re.sub(r"Bearer\s+\S+", "Bearer [redacted]", text, flags=re.I)
     text = re.sub(r"\b\d{6}\b", "[code]", text)
     return text.replace("\n", " ")[:300]
+
+
+# The name PR #144's tests and docs use.
+redact_mail_error = scrub_log
 
 
 def normalise_from(raw: str | None) -> str:

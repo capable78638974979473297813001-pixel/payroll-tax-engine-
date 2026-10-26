@@ -68,6 +68,9 @@ export function scrubMailLog(text: string): string {
     .slice(0, 300);
 }
 
+/** Same function under the name the verifier client and the PR #144 tests use. */
+export const redactMailError = scrubMailLog;
+
 function mailHeaders(apiKey: string): Record<string, string> {
   return {
     Authorization: `Bearer ${apiKey}`,

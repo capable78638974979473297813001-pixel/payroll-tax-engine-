@@ -40,7 +40,7 @@
     </form>
     <p id="resendRow" style="margin-top:18px">
       <span>Didn't get it?</span>
-      <button type="button" class="text-link" id="resend" disabled style="background:none;border:0;cursor:pointer">Send a new code</button>
+      <button type="button" class="text-link" id="resend" disabled style="background:none;border:0;cursor:pointer">Resend code</button>
       <span id="resendIn">in <span id="count">0:30</span></span>
     </p>
     <p class="send-status" id="sendStatus" hidden></p>
@@ -64,6 +64,7 @@
 </div>
 <script src="/assets/pricing.js"></script>
 <script src="/assets/session.js"></script>
+<script src="/assets/verify-lead.js"></script>
 <script>
 (function () {
   var params = new URLSearchParams(location.search);
@@ -79,26 +80,20 @@
   var ttl = (window.OMNIA && window.OMNIA.codeTtlSec) || 900;
   document.getElementById('ttlMin').textContent = String(Math.round(ttl / 60));
   var lead = document.getElementById('lead1');
-  function escapeHtml(s) { return String(s).replace(/[&<>"']/g, function (c) { return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]; }); }
   function paintLead() {
-    var who = '<b style="color:var(--ink)">' + escapeHtml(email) + '</b>';
-    if (signin) {
-      if (pending.devCodeHint) {
-        lead.innerHTML = 'If ' + who + ' has an account, its sign-in code is in the server log. No email provider is connected on this development server.';
-      } else if (pending.emailSent === false && pending.emailConfigured) {
-        lead.innerHTML = 'We couldn’t send a sign-in code to ' + who + ' just now. Use “Send a new code” to try again.';
-      } else {
-        lead.innerHTML = 'If ' + who + ' has an Omnia.tax account, we sent a 6-digit code.';
-      }
-      return;
-    }
-    if (pending.emailSent) {
-      lead.innerHTML = 'We sent a 6-digit code to ' + who + '.';
-    } else if (pending.devCodeHint) {
-      lead.innerHTML = 'This development server did not email ' + who + '. The code is in the server log.';
-    } else {
-      lead.innerHTML = 'We couldn’t send the email to ' + who + ' just now. Use “Send a new code” to try again.';
-    }
+    // devHint is the server's own answer for THIS send (no mail provider and not production),
+    // not a guess from the environment, so a Resend rejection in production never points at the log.
+    var info = OmniaVerifyLead({
+      email: email,
+      signin: signin,
+      emailSent: !!pending.emailSent,
+      emailConfigured: !!pending.emailConfigured,
+      cooldown: !!pending.cooldown,
+      devHint: !!pending.devCodeHint
+    });
+    lead.innerHTML = info.html;
+    // The rate-limited resend control stays available on the failure state too.
+    document.getElementById('resendRow').hidden = false;
   }
   paintLead();
 
@@ -271,6 +266,7 @@
         pending.sentAt = Date.now();
         pending.emailSent = sent;
         pending.devCodeHint = hint;
+        pending.cooldown = cooling;
         if (res.body && typeof res.body.emailConfigured === 'boolean') pending.emailConfigured = res.body.emailConfigured;
         Omnia.setPending(pending);
         paintLead();

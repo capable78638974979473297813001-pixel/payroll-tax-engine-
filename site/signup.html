@@ -183,6 +183,7 @@
         }
         Omnia.setPending(Object.assign({}, payload, {
           emailSent: !!(res.body && res.body.emailSent),
+          cooldown: !!(res.body && res.body.cooldown),
           devCodeHint: !!(res.body && res.body.devCodeHint),
           sentAt: Date.now()
         }));
