@@ -135,6 +135,8 @@ export interface Employee {
   /** This employee's own workers' compensation classification — see payroll/workersComp.ts's own header on why the code and its rate are caller-supplied (an insurer/rating bureau assignment, not something this project derives from a job title). */
   workersCompClassCode?: string;
   employmentCategory: EmploymentCategory;
+  /** Age the employee reaches by December 31 of the pay year. Raises the retirement-deferral limits from 50 (catch-up) and 60-63 (enhanced); absent, the standard limits apply. */
+  ageAtYearEnd?: number;
   payType: { kind: 'hourly'; hourlyRate: Cents } | { kind: 'salary'; annualSalary: Cents };
   /** Where the employee lives — drives residence-based rules; see PaycheckInput.residenceState's own doc comment. */
   residenceState: StateWithholding;
@@ -197,6 +199,8 @@ export interface PayRunLine {
     taxableWages: Cents;
     amount: Cents;
   }[];
+  /** Retirement deferrals that stayed pretax on this check, so an approved run can add them to the employee's year-to-date and the annual limits bind on later checks. */
+  electiveDeferrals?: { section402gAggregate?: Cents; deferral457?: Cents; simple?: Cents };
   garnishmentLines: { orderId: string; withheld: Cents; detail: string }[];
   depositAllocations: { accountId: string; amount: Cents }[];
 }

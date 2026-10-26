@@ -135,7 +135,7 @@ describe('sessions stay until Sign out', () => {
     assert.equal(await accountStatus('omnia_session=nope'), 401);
 
     const code = db().accounts[EMAIL].code as string;
-    const verified = await post('/api/verify-email', { email: EMAIL, code });
+    const verified = await post('/api/verify-email', { email: EMAIL, code, signupToken: created.headers.get('x-signup-token') });
     assert.equal(verified.status, 200);
     const raw = verified.headers.get('set-cookie') ?? '';
     assertPersistentCookie(raw);

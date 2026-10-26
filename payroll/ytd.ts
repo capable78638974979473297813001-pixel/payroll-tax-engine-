@@ -18,6 +18,8 @@ export interface YtdAccumulatorInput {
   /** The paycheck's cash gross — feeds categoryCashWages only; see this module's own header comment. */
   grossPay: Cents;
   taxLines: readonly { id: string; taxableWages: Cents }[];
+  /** Retirement deferrals that stayed pretax on this paycheck; adds to ytd.electiveDeferrals so the annual limits bind on later checks. */
+  electiveDeferrals?: { section402gAggregate?: Cents; deferral457?: Cents; simple?: Cents };
 }
 
 /**
@@ -137,7 +139,16 @@ export function accumulateYtd(ytd: ExtendedYearToDate, paycheck: YtdAccumulatorI
     stateDisabilityEmployee: { ...ytd.stateDisabilityEmployee },
     stateLongTermCare: { ...ytd.stateLongTermCare },
     localIncomeTax: { ...ytd.localIncomeTax },
+    ...(ytd.electiveDeferrals ? { electiveDeferrals: { ...ytd.electiveDeferrals } } : {}),
   };
+
+  if (paycheck.electiveDeferrals) {
+    const e = (next.electiveDeferrals ??= {});
+    for (const k of ['section402gAggregate', 'deferral457', 'simple'] as const) {
+      const add = paycheck.electiveDeferrals[k];
+      if (add) e[k] = (e[k] ?? 0) + add;
+    }
+  }
 
   const simpleAdd: Partial<Record<SimpleBucket, number>> = {};
   // Per (bucket, code), the employee-side and employer-side taxableWages

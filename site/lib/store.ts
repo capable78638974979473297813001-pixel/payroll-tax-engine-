@@ -73,6 +73,16 @@ export interface AccountRecord {
   passwordHash?: string | null;
   passwordSetAt?: string | null;
 
+  /**
+   * A password typed at signup stays here until the address is verified, and
+   * only the client that holds the matching signup token can activate it.
+   * Anyone can submit someone else's email address, so the password must not
+   * become real just because the real owner then proves the address.
+   */
+  pendingPasswordHash?: string | null;
+  /** SHA-256 of the random token given to the client that made this signup. */
+  signupBindingHash?: string | null;
+
   stage: SignupStage;
   createdAt: string;
 

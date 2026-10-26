@@ -102,7 +102,7 @@
     <p class="sub"><code>grossPay</code>, <code>pretaxDeductions</code>, <code>posttaxDeductions</code>, <code>taxes[]</code> with <code>id</code>, <code>name</code>, <code>payer</code>, <code>jurisdiction</code>, <code>taxableWages</code>, <code>amount</code>, <code>detail</code>, <code>employeeTaxTotal</code>, <code>employerTaxTotal</code>, <code>netPay</code>, plus <code>notices</code> and <code>warnings</code> when an input needs a second look.</p>
 
     <h2 id="address" style="margin-top:36px">POST /v1/address</h2>
-    <p class="sub">Send a work address and, when you have it, a home address. The response includes a <code>workState</code> certificate you can reuse. A lookup that matches an address is counted like one calculation on a live key; a lookup that does not match is not billed.</p>
+    <p class="sub">Send a work address and, when you have it, a home address. The response includes a <code>workState</code> certificate you can reuse. Address lookups are not charged; only the paycheck calculation is.</p>
 
     <h2 id="states" style="margin-top:36px">GET /v1/states</h2>
     <p class="sub">Lists state codes the engine will calculate for the requested year.</p>

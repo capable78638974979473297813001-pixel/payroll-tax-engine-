@@ -371,6 +371,11 @@ CREATE TABLE pay_run_line (
   posttax_deductions_cents  BIGINT NOT NULL,
   garnishment_total_cents   BIGINT NOT NULL,
   net_pay_after_garnishment_cents BIGINT NOT NULL,
+  -- Retirement deferrals that stayed pretax on this check, as
+  -- {"section402gAggregate": cents, "deferral457": cents, "simple": cents}
+  -- (absent keys are zero). What employee_ytd's elective_deferral columns are
+  -- rebuilt from, so the annual limits bind on later checks.
+  elective_deferrals        JSONB NOT NULL DEFAULT '{}'::JSONB,
 
   UNIQUE (pay_run_id, employee_id)
 );
@@ -435,6 +440,9 @@ CREATE TABLE employee_ytd (
   category_cash_wages_cents     BIGINT NOT NULL DEFAULT 0,
   railroad_monthly_compensation_cents BIGINT NOT NULL DEFAULT 0,
   railroad_monthly_compensation_month CHAR(7),  -- 'YYYY-MM', see payroll/ytd.ts's own reset rule
+  elective_deferral_402g_cents  BIGINT NOT NULL DEFAULT 0,   -- 401(k) + 403(b) + SIMPLE together, the one IRC 402(g) limit
+  elective_deferral_457_cents   BIGINT NOT NULL DEFAULT 0,   -- 457(b), its own limit
+  elective_deferral_simple_cents BIGINT NOT NULL DEFAULT 0,  -- SIMPLE plans, also counted in the 402(g) total
   seattle_compensation_cents    BIGINT NOT NULL DEFAULT 0,  -- see payroll/ytd.ts's own header comment: NOT safely derivable from pay_run_line_tax alone; a Seattle-liable employer's own payroll system must write this column directly
   state_unemployment            JSONB NOT NULL DEFAULT '{}'::JSONB,   -- {"NJ": cents, ...}
   state_paid_leave              JSONB NOT NULL DEFAULT '{}'::JSONB,
@@ -615,5 +623,114 @@ CREATE TABLE audit_log (
 );
 
 CREATE INDEX audit_log_entity_id_idx ON audit_log (entity_id);
+
+-- ----------------------------------------------------------------------------
+-- Immutability, enforced by the database
+-- ----------------------------------------------------------------------------
+-- The header promises that an approved pay run is immutable and that the audit
+-- trail and raw time punches are append-only. A comment protects nothing, so
+-- these triggers make the database refuse the write, whatever the application
+-- (or a person with a SQL prompt) tries. Corrections are new rows: a void and
+-- reissue, an off-cycle run, a new audit entry.
+
+CREATE FUNCTION forbid_change() RETURNS trigger LANGUAGE plpgsql AS $$
+BEGIN
+  RAISE EXCEPTION '% on % is not allowed: the table is append-only. Record a correction as a new row.', TG_OP, TG_TABLE_NAME
+    USING ERRCODE = 'restrict_violation';
+END;
+$$;
+
+CREATE TRIGGER audit_log_append_only
+  BEFORE UPDATE OR DELETE ON audit_log
+  FOR EACH ROW EXECUTE FUNCTION forbid_change();
+CREATE TRIGGER audit_log_no_truncate
+  BEFORE TRUNCATE ON audit_log
+  FOR EACH STATEMENT EXECUTE FUNCTION forbid_change();
+
+CREATE TRIGGER time_punch_append_only
+  BEFORE UPDATE OR DELETE ON time_punch
+  FOR EACH ROW EXECUTE FUNCTION forbid_change();
+CREATE TRIGGER time_punch_no_truncate
+  BEFORE TRUNCATE ON time_punch
+  FOR EACH STATEMENT EXECUTE FUNCTION forbid_change();
+
+-- A pay run may change freely while it is a draft. Once approved, the only
+-- permitted change is voiding it, and nothing else about the row may differ.
+-- A voided run never changes again, and only a draft may be deleted.
+CREATE FUNCTION pay_run_guard() RETURNS trigger LANGUAGE plpgsql AS $$
+BEGIN
+  IF TG_OP = 'DELETE' THEN
+    IF OLD.status <> 'draft' THEN
+      RAISE EXCEPTION 'pay run % is % and cannot be deleted: void and reissue instead.', OLD.id, OLD.status
+        USING ERRCODE = 'restrict_violation';
+    END IF;
+    RETURN OLD;
+  END IF;
+
+  IF OLD.status = 'draft' THEN
+    RETURN NEW;
+  END IF;
+
+  IF OLD.status = 'approved' AND NEW.status = 'voided'
+     AND NEW.id = OLD.id AND NEW.company_id = OLD.company_id
+     AND NEW.period_start = OLD.period_start AND NEW.period_end = OLD.period_end
+     AND NEW.check_date = OLD.check_date AND NEW.created_at = OLD.created_at
+     AND NEW.approved_at IS NOT DISTINCT FROM OLD.approved_at THEN
+    RETURN NEW;
+  END IF;
+
+  RAISE EXCEPTION 'pay run % is % and cannot be changed (only approved -> voided is allowed).', OLD.id, OLD.status
+    USING ERRCODE = 'restrict_violation';
+END;
+$$;
+
+CREATE TRIGGER pay_run_immutable
+  BEFORE UPDATE OR DELETE ON pay_run
+  FOR EACH ROW EXECUTE FUNCTION pay_run_guard();
+
+-- Lines and their tax, garnishment and deposit rows belong to a run, and may
+-- be added, changed or removed only while that run is a draft.
+CREATE FUNCTION pay_run_line_guard() RETURNS trigger LANGUAGE plpgsql AS $$
+DECLARE
+  run_status pay_run_status;
+  run_id UUID;
+  line_id UUID;
+BEGIN
+  IF TG_TABLE_NAME = 'pay_run_line' THEN
+    run_id := CASE WHEN TG_OP = 'DELETE' THEN OLD.pay_run_id ELSE NEW.pay_run_id END;
+    IF TG_OP = 'UPDATE' AND NEW.pay_run_id IS DISTINCT FROM OLD.pay_run_id THEN
+      RAISE EXCEPTION 'a pay run line cannot be moved to another pay run.' USING ERRCODE = 'restrict_violation';
+    END IF;
+  ELSE
+    line_id := CASE WHEN TG_OP = 'DELETE' THEN OLD.pay_run_line_id ELSE NEW.pay_run_line_id END;
+    SELECT pay_run_id INTO run_id FROM pay_run_line WHERE id = line_id;
+  END IF;
+
+  -- The parent is gone: this is a cascade from deleting the draft run or line.
+  IF run_id IS NULL THEN
+    RETURN CASE WHEN TG_OP = 'DELETE' THEN OLD ELSE NEW END;
+  END IF;
+
+  SELECT status INTO run_status FROM pay_run WHERE id = run_id;
+  IF run_status IS NOT NULL AND run_status <> 'draft' THEN
+    RAISE EXCEPTION '% on % refused: pay run % is %, so its lines are immutable.', TG_OP, TG_TABLE_NAME, run_id, run_status
+      USING ERRCODE = 'restrict_violation';
+  END IF;
+  RETURN CASE WHEN TG_OP = 'DELETE' THEN OLD ELSE NEW END;
+END;
+$$;
+
+CREATE TRIGGER pay_run_line_immutable
+  BEFORE INSERT OR UPDATE OR DELETE ON pay_run_line
+  FOR EACH ROW EXECUTE FUNCTION pay_run_line_guard();
+CREATE TRIGGER pay_run_line_tax_immutable
+  BEFORE INSERT OR UPDATE OR DELETE ON pay_run_line_tax
+  FOR EACH ROW EXECUTE FUNCTION pay_run_line_guard();
+CREATE TRIGGER pay_run_line_garnishment_immutable
+  BEFORE INSERT OR UPDATE OR DELETE ON pay_run_line_garnishment
+  FOR EACH ROW EXECUTE FUNCTION pay_run_line_guard();
+CREATE TRIGGER pay_run_line_deposit_allocation_immutable
+  BEFORE INSERT OR UPDATE OR DELETE ON pay_run_line_deposit_allocation
+  FOR EACH ROW EXECUTE FUNCTION pay_run_line_guard();
 
 COMMIT;

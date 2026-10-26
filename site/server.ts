@@ -1,3 +1,4 @@
+import './lib/env.ts';
 import { createServer, type IncomingMessage, type ServerResponse } from 'node:http';
 import { createHash, randomBytes, randomInt, timingSafeEqual } from 'node:crypto';
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
@@ -34,15 +35,12 @@ import {
   createBillingCustomer, startMeteredCheckout, completeMeteredCheckout, interpretWebhook,
 } from './lib/billing.ts';
 
-// Loads <repo root>/.env (RESEND_API_KEY, STRIPE_SECRET_KEY -- see
-// .env.example) before any handler reads it. Absent .env is fine: signup
-// still works, the code prints to this console instead of emailing, and
-// the payment step reports honestly that no processor is connected.
-try {
-  process.loadEnvFile(join(dirname(fileURLToPath(import.meta.url)), '..', '.env'));
-} catch {
-  /* no .env yet */
-}
+// <repo root>/.env (RESEND_API_KEY, STRIPE_SECRET_KEY -- see .env.example) is
+// loaded by ./lib/env.ts, the first import above, so modules that read the
+// environment while loading (the store's SITE_DB_DIR) see it. Absent .env is
+// fine: signup still works, the code prints to this console instead of
+// emailing, and the payment step reports honestly that no processor is
+// connected.
 
 /**
  * Serves the Omnia landing page and console, plus the API behind them.
@@ -194,6 +192,8 @@ function showDevCodeHint(): boolean {
 }
 
 const SESSION_COOKIE = 'omnia_session';
+/** Ties an unverified signup to the browser or API client that made it. */
+const SIGNUP_COOKIE = 'omnia_signup';
 
 /**
  * Plaintext of a code issued in this process. The store keeps a SHA-256
@@ -348,7 +348,7 @@ function sameOrigin(req: IncomingMessage): boolean {
   }
 }
 
-function sendJson(res: ServerResponse, status: number, body: unknown, extraHeaders: Record<string, string> = {}): void {
+function sendJson(res: ServerResponse, status: number, body: unknown, extraHeaders: Record<string, string | string[]> = {}): void {
   const payload = JSON.stringify(body);
   // A sliding session sets Set-Cookie before the handler responds. writeHead
   // must keep that header, and must also keep a Set-Cookie the handler passes
@@ -576,13 +576,29 @@ function readBody(req: IncomingMessage): Promise<string> {
   });
 }
 
-async function readJson<T>(req: IncomingMessage): Promise<T> {
+/**
+ * Parse a JSON request body. By default the body must be a JSON object:
+ * `null`, a number, a string or an array would otherwise reach handlers that
+ * read fields off it and throw. Pass 'any' for the few routes that take an
+ * array or validate the whole body themselves.
+ */
+async function readJson<T>(req: IncomingMessage, shape: 'object' | 'any' = 'object'): Promise<T> {
   const raw = await readBody(req);
+  let parsed: unknown;
   try {
-    return raw ? (JSON.parse(raw) as T) : ({} as T);
+    parsed = raw ? JSON.parse(raw) : {};
   } catch {
     throw new Error('Request body must be valid JSON.');
   }
+  if (shape === 'object' && (parsed === null || typeof parsed !== 'object' || Array.isArray(parsed))) {
+    throw new Error('Request body must be a JSON object.');
+  }
+  return parsed as T;
+}
+
+/** A string field from a request body, or '' when it is missing or not a string. */
+function text(value: unknown): string {
+  return typeof value === 'string' ? value : '';
 }
 
 function sha256Hex(text: string): string {
@@ -609,7 +625,7 @@ function maskKey(prefix: string): string {
 // ---------------------------------------------------------------------
 
 async function handleSignup(req: IncomingMessage, res: ServerResponse): Promise<void> {
-  let body: { name?: string; email?: string; company?: string; phone?: string; password?: string; agreeToTerms?: unknown };
+  let body: { name?: string; email?: string; company?: string; phone?: string; password?: string; agreeToTerms?: unknown; signupToken?: unknown };
   try {
     body = await readJson(req);
   } catch (err) {
@@ -617,10 +633,10 @@ async function handleSignup(req: IncomingMessage, res: ServerResponse): Promise<
     return;
   }
 
-  const name = (body.name ?? '').trim();
-  const email = (body.email ?? '').trim().toLowerCase();
-  const company = (body.company ?? '').trim();
-  const phone = (body.phone ?? '').trim();
+  const name = text(body.name).trim();
+  const email = text(body.email).trim().toLowerCase();
+  const company = text(body.company).trim();
+  const phone = text(body.phone).trim();
 
   // Phone is stored when the visitor types one. Nothing else reads it:
   // no texts, no billing, no display. An empty phone is a valid signup.
@@ -666,10 +682,29 @@ async function handleSignup(req: IncomingMessage, res: ServerResponse): Promise<
     passwordHash = await hashPassword(body.password);
   }
 
+  // Whoever submits an email address is not necessarily its owner, so what
+  // an unverified signup stores (profile, password) is bound to the client
+  // that made it. Only that client may change it before the code is entered.
+  const presentedToken = signupTokenFrom(req, body);
+  let issuedToken: string | null = null;
+  let realToken = '';
+
   const account = withDb((db) => {
     pruneUnverified(db, now);
 
     const existing = db.accounts[email];
+    const unverified = Boolean(existing) && !existing!.emailVerifiedAt;
+    const lastCode = existing?.codeRequestedAt ? new Date(existing.codeRequestedAt).getTime() : 0;
+    const liveSignup = unverified && now - lastCode < CODE_TTL_MS;
+    const sameSigner = unverified && Boolean(existing!.signupBindingHash) && Boolean(presentedToken)
+      && safeEqual(sha256Hex(presentedToken!), existing!.signupBindingHash!);
+    // New address, an abandoned unverified record, or the same client again.
+    const claims = !existing || (unverified && (!liveSignup || sameSigner));
+    // Every reply carries a token, so a signup for a taken address looks the
+    // same as a new one. Only a claiming signup stores the token's hash; for
+    // anyone else it is a throwaway that binds nothing.
+    realToken = claims && sameSigner && presentedToken ? presentedToken : randomBytes(24).toString('hex');
+    issuedToken = realToken;
     const cooling = Boolean(
       existing?.code && existing.codeRequestedAt && now - new Date(existing.codeRequestedAt).getTime() < CODE_COOLDOWN_MS,
     );
@@ -678,11 +713,12 @@ async function handleSignup(req: IncomingMessage, res: ServerResponse): Promise<
     const code = remote ? null : reused ?? String(randomInt(100000, 1000000));
     if (code) pendingCodes.set(email, code);
 
+    const keep = !claims && existing; // a live signup by someone else, or a verified account
     const record: AccountRecord = {
-      name,
+      name: keep ? existing.name : name,
       email,
-      company,
-      phone,
+      company: keep ? existing.company : company,
+      phone: keep ? existing.phone : phone,
       code: code ? sealCode(code) : null,
       codeRequestedAt: cooling ? existing!.codeRequestedAt : new Date(now).toISOString(),
       codeExpiresAt: remote ? null : cooling ? existing!.codeExpiresAt : new Date(now + CODE_TTL_MS).toISOString(),
@@ -692,25 +728,23 @@ async function handleSignup(req: IncomingMessage, res: ServerResponse): Promise<
       sessionExpiresAt: existing?.sessionExpiresAt ?? null,
       sessionIssuedAt: existing?.sessionIssuedAt ?? null,
       sessionMethod: existing?.sessionMethod ?? null,
-      // A signup can set the password of an account that was never verified,
-      // but never replace the password of one that was: that would let anyone
-      // who knows an email address take its account over.
-      passwordHash: existing?.emailVerifiedAt ? existing.passwordHash ?? null : passwordHash ?? existing?.passwordHash ?? null,
-      passwordSetAt: existing?.emailVerifiedAt
-        ? existing.passwordSetAt ?? null
-        : passwordHash ? new Date(now).toISOString() : existing?.passwordSetAt ?? null,
+      // The password of a verified account never changes here: that would let
+      // anyone who knows an email address take its account over. Before
+      // verification a typed password is only held as pending, behind the
+      // signup token, and becomes the real one when that client verifies.
+      passwordHash: existing?.emailVerifiedAt ? existing.passwordHash ?? null : null,
+      passwordSetAt: existing?.emailVerifiedAt ? existing.passwordSetAt ?? null : null,
+      pendingPasswordHash: existing?.emailVerifiedAt
+        ? null
+        : claims ? passwordHash ?? (sameSigner ? existing?.pendingPasswordHash ?? null : null) : existing?.pendingPasswordHash ?? null,
+      signupBindingHash: existing?.emailVerifiedAt
+        ? null
+        : claims ? sha256Hex(realToken) : existing?.signupBindingHash ?? null,
       stage: existing?.emailVerifiedAt ? existing.stage : 'unverified',
       createdAt: existing?.createdAt ?? new Date(now).toISOString(),
       termsAcceptedAt: existing?.termsAcceptedAt ?? new Date(now).toISOString(),
       termsVersion: existing?.termsVersion ?? TERMS_VERSION,
     };
-    // An existing account keeps its profile: an unauthenticated signup
-    // for a known email may only issue a new code, never rewrite it.
-    if (existing?.emailVerifiedAt) {
-      record.name = existing.name;
-      record.company = existing.company;
-      record.phone = existing.phone;
-    }
     db.accounts[email] = record;
     return record;
   });
@@ -728,12 +762,26 @@ async function handleSignup(req: IncomingMessage, res: ServerResponse): Promise<
     return;
   }
 
-  sendJson(res, 200, {
-    ok: true,
-    emailSent: delivery.emailSent,
-    cooldown: delivery.cooldown,
-    devCodeHint: delivery.devCodeHint,
-  });
+  // The token travels in a cookie for a browser and an X-Signup-Token header
+  // for an API client, not in the body, so the JSON is identical whether or
+  // not the address already has an account.
+  sendJson(
+    res,
+    200,
+    { ok: true, emailSent: delivery.emailSent, cooldown: delivery.cooldown, devCodeHint: delivery.devCodeHint },
+    { 'Set-Cookie': signupCookie(issuedToken!), 'X-Signup-Token': issuedToken! },
+  );
+}
+
+/** The signup token a client presents: its cookie, the X-Signup-Token header, or a signupToken body field. */
+function signupTokenFrom(req: IncomingMessage, body: { signupToken?: unknown }): string | null {
+  const header = req.headers['x-signup-token'];
+  return readCookie(req, SIGNUP_COOKIE) || (Array.isArray(header) ? header[0] : header) || text(body.signupToken) || null;
+}
+
+/** HttpOnly cookie holding a signup's token; cleared once the address is verified. */
+function signupCookie(token: string, maxAgeSec = Math.floor(UNVERIFIED_RETENTION_MS / 1000)): string {
+  return `${SIGNUP_COOKIE}=${token}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${maxAgeSec}` + (cookieSecure() ? '; Secure' : '');
 }
 
 /** Drop never-verified signups past retention (and their dangling state). */
@@ -760,7 +808,7 @@ async function handleSignin(req: IncomingMessage, res: ServerResponse): Promise<
     sendJson(res, 400, { error: (err as Error).message });
     return;
   }
-  const email = (body.email ?? '').trim().toLowerCase();
+  const email = text(body.email).trim().toLowerCase();
   if (!isValidEmail(email)) {
     sendJson(res, 400, { error: 'Enter the work email you signed up with.' });
     return;
@@ -815,7 +863,7 @@ async function handleSignin(req: IncomingMessage, res: ServerResponse): Promise<
 // ---------------------------------------------------------------------
 
 async function handleVerifyEmail(req: IncomingMessage, res: ServerResponse): Promise<void> {
-  let body: { email?: string; code?: string };
+  let body: { email?: string; code?: string; signupToken?: unknown };
   try {
     body = await readJson(req);
   } catch (err) {
@@ -823,8 +871,9 @@ async function handleVerifyEmail(req: IncomingMessage, res: ServerResponse): Pro
     return;
   }
 
-  const email = (body.email ?? '').trim().toLowerCase();
-  const code = (body.code ?? '').trim();
+  const email = text(body.email).trim().toLowerCase();
+  const code = text(body.code).trim();
+  const presentedToken = signupTokenFrom(req, body);
   if (!isValidEmail(email) || !code) {
     sendJson(res, 400, { error: 'Email and code are both required.' });
     return;
@@ -869,6 +918,17 @@ async function handleVerifyEmail(req: IncomingMessage, res: ServerResponse): Pro
     }
 
     if (!acct) return { ok: false as const, error: INVALID };
+    if (!acct.emailVerifiedAt) {
+      // First proof of the address. A password typed at signup becomes real
+      // only for the client that made that signup; for anyone else the
+      // account starts with no password and the owner sets one while signed in.
+      const bound = Boolean(acct.signupBindingHash) && Boolean(presentedToken)
+        && safeEqual(sha256Hex(presentedToken!), acct.signupBindingHash!);
+      acct.passwordHash = bound ? acct.pendingPasswordHash ?? null : null;
+      acct.passwordSetAt = acct.passwordHash ? new Date().toISOString() : null;
+      acct.pendingPasswordHash = null;
+      acct.signupBindingHash = null;
+    }
     acct.emailVerifiedAt = acct.emailVerifiedAt ?? new Date().toISOString();
     acct.code = null;
     acct.codeExpiresAt = null;
@@ -901,7 +961,8 @@ async function handleVerifyEmail(req: IncomingMessage, res: ServerResponse): Pro
   // HttpOnly so page script cannot read the token (an XSS can't lift it).
   // The token is also in the body for non-browser API clients, which send
   // it as a Bearer header; the console does not store it.
-  sendJson(res, 200, outcome, { 'Set-Cookie': sessionCookie(outcome.sessionToken, SESSION_TTL_MS) });
+  // The session cookie first (clients that read only the first cookie keep working), then the spent signup token is cleared.
+  sendJson(res, 200, outcome, { 'Set-Cookie': [sessionCookie(outcome.sessionToken, SESSION_TTL_MS), signupCookie('', 0)] });
 }
 
 /**
@@ -961,7 +1022,7 @@ async function handleSigninPassword(req: IncomingMessage, res: ServerResponse): 
     sendJson(res, 400, { error: (err as Error).message });
     return;
   }
-  const email = (body.email ?? '').trim().toLowerCase();
+  const email = text(body.email).trim().toLowerCase();
   const password = typeof body.password === 'string' ? body.password : '';
   if (!isValidEmail(email) || !password) {
     sendJson(res, 400, { error: 'Enter your email and password.' });
@@ -1250,10 +1311,10 @@ async function handleAcceptTerms(req: IncomingMessage, res: ServerResponse): Pro
     return;
   }
 
-  const signedName = (body.signedName ?? '').trim();
-  const legalName = (body.legalName ?? '').trim();
-  const billingEmail = (body.billingEmail ?? '').trim().toLowerCase();
-  const address = (body.address ?? '').trim();
+  const signedName = text(body.signedName).trim();
+  const legalName = text(body.legalName).trim();
+  const billingEmail = text(body.billingEmail).trim().toLowerCase();
+  const address = text(body.address).trim();
   const quoteId = String(body.quoteId ?? '');
 
   if (body.agreed !== true) {
@@ -1399,6 +1460,17 @@ async function handlePaymentSetup(req: IncomingMessage, res: ServerResponse): Pr
     return;
   }
 
+  // One subscription per account. Another Checkout would make a second
+  // Stripe subscription (billed and metered separately) and offer another
+  // free trial. A cancelled account may start a new one.
+  if (sub.stripeSubscriptionId && sub.status !== 'cancelled') {
+    sendJson(res, 409, {
+      error: 'This account already has a subscription. If a payment failed, update the card from the link in Stripe\'s email, or contact support.',
+      code: 'already_subscribed',
+    });
+    return;
+  }
+
   const refused = stripeKeyRefused();
   if (refused) {
     console.error(`[payment] ${refused}`);
@@ -1445,7 +1517,8 @@ async function handlePaymentSetup(req: IncomingMessage, res: ServerResponse): Pr
           if (s) s.stripeCustomerId = customerId;
         });
       }
-      const out = await startMeteredCheckout({ customerId, email: session.email, successUrl, cancelUrl, trialDays: TRIAL_DAYS });
+      // The free trial is once per account: coming back after a cancellation starts billing.
+      const out = await startMeteredCheckout({ customerId, email: session.email, successUrl, cancelUrl, trialDays: sub.trialStartsAt ? 0 : TRIAL_DAYS });
       if (!out.ok || !out.url || !isAllowedCheckoutUrl(out.url)) {
         console.error(`[payment] could not start Stripe Checkout (${out.reason ?? 'unknown'}): ${scrubMailLog(out.error ?? '')}`);
         sendJson(res, 502, { error: 'Could not start checkout.', code: 'checkout_failed' });
@@ -1511,7 +1584,7 @@ async function handleBillingReturn(req: IncomingMessage, res: ServerResponse): P
     sendJson(res, 400, { error: (err as Error).message });
     return;
   }
-  if (!body.sessionId) {
+  if (typeof body.sessionId !== 'string' || !body.sessionId) {
     sendJson(res, 400, { error: 'A Checkout session_id is required.' });
     return;
   }
@@ -1538,6 +1611,18 @@ async function handleBillingReturn(req: IncomingMessage, res: ServerResponse): P
     return;
   }
 
+  // Stripe's word on the subscription decides whether this checkout unlocks
+  // anything. A replayed or half-finished one (past_due, unpaid, incomplete)
+  // must not clear a billing suspension.
+  if (done.subscriptionStatus && !GOOD_SUBSCRIPTION_STATUSES.has(done.subscriptionStatus)) {
+    sendJson(res, 402, {
+      error: 'Stripe has not accepted the first payment for this subscription, so the account was not unlocked. Update the payment method and try again.',
+      code: 'subscription_not_in_good_standing',
+      status: done.subscriptionStatus,
+    });
+    return;
+  }
+
   const now = Date.now();
   const outcome = withDb((db) => {
     const sub = db.subscriptions[session.email];
@@ -1545,6 +1630,11 @@ async function handleBillingReturn(req: IncomingMessage, res: ServerResponse): P
     if (!sub) return { ok: false as const };
     const resubscribed = Boolean(done.subscriptionId && done.subscriptionId !== sub.stripeSubscriptionId);
     if (sub.status === 'cancelled' && !resubscribed) return { ok: false as const, cancelled: true };
+    // A checkout for some other subscription than the one this account holds
+    // is an old or stray one. It must not replace the current subscription.
+    if (sub.status !== 'cancelled' && sub.stripeSubscriptionId && done.subscriptionId && done.subscriptionId !== sub.stripeSubscriptionId) {
+      return { ok: false as const, superseded: true };
+    }
     db.paymentMethods[session.email] = {
       email: session.email,
       kind: saved.kind,
@@ -1558,7 +1648,11 @@ async function handleBillingReturn(req: IncomingMessage, res: ServerResponse): P
     sub.suspended = false;
     sub.suspendedReason = null;
     // A returning (re-subscribed) customer is active, not on a second trial.
-    sub.status = sub.trialStartsAt && resubscribed && sub.status === 'cancelled' ? 'active' : 'trialing';
+    // An account that is already trialing or active stays as it is: replaying
+    // its checkout must not move it back to trialing.
+    if (sub.status !== 'active' && sub.status !== 'trialing') {
+      sub.status = sub.trialStartsAt && resubscribed && sub.status === 'cancelled' ? 'active' : 'trialing';
+    }
     sub.trialStartsAt = sub.trialStartsAt ?? new Date(now).toISOString();
     sub.trialEndsAt = sub.trialEndsAt ?? new Date(now + TRIAL_DAYS * 86_400_000).toISOString();
     if (!sub.termEndsAt) {
@@ -1579,7 +1673,9 @@ async function handleBillingReturn(req: IncomingMessage, res: ServerResponse): P
   if (!outcome.ok) {
     sendJson(res, 409, 'cancelled' in outcome
       ? { error: 'This subscription was cancelled. Start a new subscription to resume.', code: 'subscription_cancelled' }
-      : { error: 'No subscription on file for this account.' });
+      : 'superseded' in outcome
+        ? { error: 'That checkout is for a different subscription than the one on this account.', code: 'checkout_superseded' }
+        : { error: 'No subscription on file for this account.' });
     return;
   }
   console.log('[billing] subscription linked');
@@ -1590,6 +1686,9 @@ async function handleBillingReturn(req: IncomingMessage, res: ServerResponse): P
 // POST /api/billing/webhook -- Stripe delivery (open route; verified by
 // signature). Suspends a key on a failed invoice, reactivates on payment.
 // ---------------------------------------------------------------------
+
+/** Subscription statuses that mean the customer has paid or is in a free trial. */
+const GOOD_SUBSCRIPTION_STATUSES = new Set(['active', 'trialing']);
 
 /** Keep event ids long enough for Stripe's retry window (several days). */
 const STRIPE_EVENT_TTL_MS = 30 * 24 * 60 * 60_000;
@@ -1624,13 +1723,19 @@ function rememberStripeEvent(db: { processedStripeEvents?: string[] }, eventId: 
  */
 function applyCheckoutCompletion(
   db: DB,
-  done: { email?: string | null; customerId?: string | null; subscriptionId?: string | null; paymentMethod?: { id: string; kind: string; brand: string | null; last4: string | null } | null },
+  done: { email?: string | null; customerId?: string | null; subscriptionId?: string | null; subscriptionStatus?: string | null; paymentMethod?: { id: string; kind: string; brand: string | null; last4: string | null } | null },
 ): string | null {
   const email = done.email?.trim().toLowerCase() || null;
   const sub = (email && db.subscriptions[email])
     || (done.customerId ? Object.values(db.subscriptions).find((s) => s.stripeCustomerId === done.customerId) : undefined);
   if (!sub) return null;
   const previousSubId = sub.stripeSubscriptionId ?? null;
+  // A completed checkout for some other subscription than the one this
+  // account holds is old or stray. It links nothing and unlocks nothing.
+  if (sub.status !== 'cancelled' && previousSubId && done.subscriptionId && done.subscriptionId !== previousSubId) return null;
+  // Stripe has not accepted the payment (past_due, unpaid, incomplete): keep
+  // any suspension and any status as they are.
+  const good = !done.subscriptionStatus || GOOD_SUBSCRIPTION_STATUSES.has(done.subscriptionStatus);
   const resubscribed = Boolean(done.subscriptionId && sub.status === 'cancelled' && done.subscriptionId !== previousSubId);
   if (done.customerId) sub.stripeCustomerId = done.customerId;
   if (done.subscriptionId) sub.stripeSubscriptionId = done.subscriptionId;
@@ -1645,6 +1750,7 @@ function applyCheckoutCompletion(
       attachedAt: new Date().toISOString(),
     };
   }
+  if (!good) return sub.email;
   if (resubscribed && saved) {
     sub.status = 'active';
     sub.suspended = false;
@@ -1714,6 +1820,7 @@ async function handleBillingWebhook(req: IncomingMessage, res: ServerResponse): 
         email: done.email ?? result.email,
         customerId: done.customerId ?? result.customerId,
         subscriptionId: done.subscriptionId ?? result.subscriptionId,
+        subscriptionStatus: done.subscriptionStatus,
         paymentMethod: done.paymentMethod,
       });
     });
@@ -2514,7 +2621,7 @@ async function handlePaycheck(req: IncomingMessage, res: ServerResponse): Promis
   // --- parse ------------------------------------------------------------
   let raw: unknown;
   try {
-    raw = await readJson<unknown>(req);
+    raw = await readJson<unknown>(req, 'any');
   } catch (err) {
     noteUsage(ctx, req, { statusCode: 400, error: 'invalid_json', checkDate: null, kind: 'paycheck', paychecks: 0 });
     sendJson(res, 400, { error: (err as Error).message, code: 'invalid_json', requestId }, rlHeaders);
@@ -2714,7 +2821,7 @@ async function handlePayCalc(req: IncomingMessage, res: ServerResponse): Promise
 
   let requests: PayCalcRequest[];
   try {
-    const body = await readJson<PayCalcRequest[] | { payCalc: PayCalcRequest[] }>(req);
+    const body = await readJson<PayCalcRequest[] | { payCalc: PayCalcRequest[] }>(req, 'any');
     requests = Array.isArray(body) ? body : body.payCalc;
     if (!Array.isArray(requests)) throw new Error('Request body must be an array of PayCalcRequest, or { "payCalc": [...] }.');
   } catch (err) {
@@ -2965,10 +3072,10 @@ async function handleContact(req: IncomingMessage, res: ServerResponse): Promise
     sendJson(res, 200, { ok: true });
     return;
   }
-  const name = String(body.name ?? '').trim().slice(0, 120);
-  const email = String(body.email ?? '').trim().toLowerCase().slice(0, 254);
-  const company = String(body.company ?? '').trim().slice(0, 160);
-  const message = String(body.message ?? '').trim().slice(0, 5000);
+  const name = text(body.name).trim().slice(0, 120);
+  const email = text(body.email).trim().toLowerCase().slice(0, 254);
+  const company = text(body.company).trim().slice(0, 160);
+  const message = text(body.message).trim().slice(0, 5000);
   if (!name || !isValidEmail(email) || message.length < 5) {
     sendJson(res, 400, { error: 'Name, a valid email and a message are required.', code: 'invalid_input' });
     return;
@@ -3036,9 +3143,9 @@ async function handleEstimate(req: IncomingMessage, res: ServerResponse): Promis
     return;
   }
 
-  const email = (body.email ?? '').trim().toLowerCase();
+  const email = text(body.email).trim().toLowerCase();
   const employees = Math.max(0, Math.trunc(Number(body.employees) || 0));
-  const payFrequency = (body.payFrequency ?? 'biweekly').trim();
+  const payFrequency = text(body.payFrequency).trim() || 'biweekly';
   const rooftop = body.rooftop === true;
 
   if (!isValidEmail(email)) {
