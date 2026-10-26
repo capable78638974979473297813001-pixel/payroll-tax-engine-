@@ -28,14 +28,14 @@ export type ValidationResult =
   | { ok: true; value: PaycheckInput }
   | { ok: false; errors: FieldError[] };
 
-const PAY_FREQUENCIES = Object.keys(PERIODS_PER_YEAR);
-const EARNING_CATEGORIES = ['regular', 'supplemental', 'imputed', 'reimbursement', 'housing_allowance'];
-const PRETAX_CATEGORIES = [
+export const PAY_FREQUENCIES = Object.keys(PERIODS_PER_YEAR);
+export const EARNING_CATEGORIES = ['regular', 'supplemental', 'imputed', 'reimbursement', 'housing_allowance'];
+export const PRETAX_CATEGORIES = [
   'section125', 'hsa', 'fsa', 'dependent_care',
   'deferral_401k', 'deferral_403b', 'deferral_457', 'deferral_simple', 'commuter',
 ];
-const FILING_STATUSES = ['single', 'married_joint', 'married_separate', 'head_of_household'];
-const EMPLOYMENT_CATEGORIES = [
+export const FILING_STATUSES = ['single', 'married_joint', 'married_separate', 'head_of_household'];
+export const EMPLOYMENT_CATEGORIES = [
   'standard', 'clergy', 'statutory_employee', 'household', 'agricultural', 'railroad', 'election_worker',
 ];
 

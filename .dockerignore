@@ -11,7 +11,9 @@ design
 docs
 examples
 tests
-payroll
+payroll/*
+!payroll/platform.ts
+!payroll/embeddedProvider.ts
 trades
 db
 "Don’t look at useless"
