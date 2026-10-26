@@ -174,20 +174,28 @@ describe('verification email tells the truth', { concurrency: 1 }, () => {
     assert.equal(body.emailSent, false);
     assert.equal(body.devCodeHint, false);
     const code = db(site).accounts[email].code as string;
+    assert.match(code, /^sha256:[0-9a-f]{64}$/);
     await new Promise((resolve) => setTimeout(resolve, 50));
     const log = site.log();
     assert.equal(log.includes(code), false);
+    assert.equal(/\b\d{6}\b/.test(log), false);
     assert.equal(log.includes(email), false);
     assert.match(log, /no email provider is configured/);
   });
 
   test('a failed send is reported, and the log keeps the key and the code out', async () => {
     const seen: string[] = [];
-    const stub = createServer((_req, res) => {
-      seen.push('hit');
-      const body = JSON.stringify({ message: 'refused re_AbCdEf123456 for code 654321' });
-      res.writeHead(403, { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(body) });
-      res.end(body);
+    const bodies: string[] = [];
+    const stub = createServer((req, res) => {
+      const chunks: Buffer[] = [];
+      req.on('data', (c) => chunks.push(c));
+      req.on('end', () => {
+        bodies.push(Buffer.concat(chunks).toString('utf8'));
+        seen.push('hit');
+        const body = JSON.stringify({ message: 'refused re_AbCdEf123456 for code 654321' });
+        res.writeHead(403, { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(body) });
+        res.end(body);
+      });
     });
     await new Promise<void>((resolve) => stub.listen(0, '127.0.0.1', resolve));
     const port = (stub.address() as { port: number }).port;
@@ -203,7 +211,12 @@ describe('verification email tells the truth', { concurrency: 1 }, () => {
     assert.equal(body.emailSent, false);
     assert.equal(body.devCodeHint, false);
     assert.equal(seen.length, 1);
-    const code = db(site).accounts[email].code as string;
+    const stored = db(site).accounts[email].code as string;
+    assert.match(stored, /^sha256:[0-9a-f]{64}$/);
+    const mailed = JSON.parse(bodies[0] ?? '{}') as { subject?: string };
+    const code = String(mailed.subject ?? '').slice(0, 6);
+    assert.match(code, /^\d{6}$/);
+    assert.notEqual(stored, code);
     await new Promise((resolve) => setTimeout(resolve, 50));
     const log = site.log();
     assert.equal(log.includes(code), false);
@@ -222,8 +235,14 @@ describe('verification email tells the truth', { concurrency: 1 }, () => {
     const again = await post(site, '/api/signin', { email });
     assert.equal(again.status, 200);
     const againBody = await again.json();
-    assert.equal(againBody.emailSent, false);
+    // A configured provider reports the same emailSent for every address,
+    // including when the provider refused the previous message.
+    assert.equal(againBody.emailSent, true);
     assert.equal(againBody.devCodeHint, false);
+    assert.deepEqual(
+      { ok: againBody.ok, emailConfigured: againBody.emailConfigured, emailSent: againBody.emailSent, cooldown: againBody.cooldown, devCodeHint: againBody.devCodeHint },
+      { ok: unknownBody.ok, emailConfigured: unknownBody.emailConfigured, emailSent: unknownBody.emailSent, cooldown: unknownBody.cooldown, devCodeHint: unknownBody.devCodeHint },
+    );
     assert.equal(seen.length, 2);
     stub.close();
   });
@@ -254,10 +273,11 @@ describe('Render proxy and cookies', { concurrency: 1 }, () => {
     const keys = Object.keys(db(trusted).rateLimits);
     assert.ok(keys.includes('signup:203.0.113.50'), keys.join(','));
     const code = db(trusted).accounts['proxy@audit.test'].code as string;
-    assert.equal(trusted.log().includes(code), false);
-    const verified = await post(trusted, '/api/verify-email', { email: 'proxy@audit.test', code });
-    assert.equal(verified.status, 200);
-    assert.match(verified.headers.get('set-cookie') ?? '', /Secure/);
+    assert.match(code, /^sha256:[0-9a-f]{64}$/);
+    assert.equal(/\b\d{6}\b/.test(trusted.log()), false);
+    const signinPage = await fetch(trusted.base + '/signin');
+    assert.equal(signinPage.status, 200);
+    assert.match(signinPage.headers.get('set-cookie') ?? '', /Secure/);
 
     const refused = await startSite({ RENDER: 'true', TRUST_PROXY: '0' });
     const r2 = await post(refused, '/api/signup', {

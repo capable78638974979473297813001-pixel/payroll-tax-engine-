@@ -91,7 +91,10 @@ describe('site + python verifier', { skip: !havePython }, () => {
   test('cross-origin console POSTs are refused; same-origin and header-less pass', async () => {
     const evil = await post('/api/signin', { email: EMAIL }, { Origin: 'https://evil.example' });
     assert.equal(evil.status, 403);
-    const same = await post('/api/signin', { email: EMAIL }, { Origin: BASE });
+    const page = await fetch(BASE + '/signin');
+    const rows = typeof page.headers.getSetCookie === 'function' ? page.headers.getSetCookie() : [page.headers.get('set-cookie') ?? ''];
+    const token = (rows.find((c) => c.startsWith('omnia_csrf=')) ?? '').split(';')[0]?.slice('omnia_csrf='.length) ?? '';
+    const same = await post('/api/signin', { email: EMAIL }, { Origin: BASE, 'X-CSRF-Token': token, Cookie: `omnia_csrf=${token}` });
     assert.equal(same.status, 200);
   });
 
