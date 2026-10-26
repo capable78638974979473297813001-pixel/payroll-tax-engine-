@@ -25,8 +25,8 @@
 <main class="wrap">
   <div class="page-head">
     <p class="eyebrow">Coverage</p>
-    <h1 class="page">The whole USA, covered.</h1>
-    <p class="sub">Federal, all 50 states and DC, and every local jurisdiction. Minimum wage and wage garnishments included.</p>
+    <h1 class="page">What we cover, and what we don’t.</h1>
+    <p class="sub">Federal, all 50 states and DC, and thousands of local taxes and minimum wages, each listed by name. Where a state’s local list is partial, the table says so. Wage garnishments included.</p>
     <p class="cov-jump"><a href="#states">By state</a><a href="#local">Local jurisdictions</a></p>
   </div>
 
@@ -37,7 +37,7 @@
     <div class="cov-stat"><b id="s-wage">—</b><span>Local minimum wages</span></div>
     <div class="cov-stat"><b>Garnishments</b><span>Federal and state limits</span></div>
   </div>
-  <p class="cov-note">Same-paycheck multi-state withholding is in progress. Reciprocity between a residence state and a work state is already on the call, as a <code>residenceState</code> next to <code>workState</code>.</p>
+  <p class="cov-note">Same-paycheck multi-state withholding is in progress. Already on the call, with a <code>residenceState</code> next to <code>workState</code>: reciprocity between the two states, the resident-state credit where a state gives one, and residence-state withholding when the employer has nexus or elects it. Splitting one paycheck’s wages between two work states is not built yet.</p>
 
   <section class="cov-section" id="states" aria-labelledby="states-h">
     <p class="eyebrow">By state</p>
@@ -63,7 +63,7 @@
       </table>
     </div>
     <div class="cov-foot"><span id="count" aria-live="polite"></span><nav class="cov-pages" id="pages" aria-label="State pages"></nav></div>
-    <p class="fine cov-fine">Rates are effective-dated and updated as jurisdictions publish changes. The local list shows only places that have a local tax, fee or minimum wage; “None levied” means the state has no local wage tax.</p>
+    <p class="fine cov-fine">Rates are effective-dated and updated as jurisdictions publish changes. The local list shows only places that have a local tax, fee or minimum wage; “None levied” means the state has no local wage tax. “Partial” means the state has local taxes we have not finished listing, so a place missing from the list may still levy one.</p>
     <noscript><p class="fine">The coverage tables load from <code>/api/coverage</code> and need JavaScript.</p></noscript>
   </section>
 

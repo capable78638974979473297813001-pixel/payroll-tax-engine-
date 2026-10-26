@@ -83,6 +83,30 @@ export interface ElectiveDeferralLimits {
   deferral457: number;
   /** A SIMPLE plan's own separate, lower limit, in dollars (IRC 408(p)/401(k) SIMPLE). */
   simple: number;
+  /** Extra room for an employee who reaches the age by December 31, in dollars. */
+  catchUp?: {
+    age50: number;
+    age60to63: number;
+    simpleAge50: number;
+    simpleAge60to63: number;
+  };
+}
+
+/**
+ * Catch-up room, in dollars, for the plan family a group belongs to, for an
+ * employee who reaches `ageAtYearEnd` by December 31. Zero when the age is
+ * unknown, under 50, or the year's data carries no catch-up figures.
+ */
+function catchUpDollars(
+  limits: ElectiveDeferralLimits,
+  family: 'standard' | 'simple',
+  ageAtYearEnd: number | undefined,
+): number {
+  const c = limits.catchUp;
+  if (!c || ageAtYearEnd === undefined || ageAtYearEnd < 50) return 0;
+  const enhanced = ageAtYearEnd >= 60 && ageAtYearEnd <= 63;
+  if (family === 'simple') return enhanced ? c.simpleAge60to63 : c.simpleAge50;
+  return enhanced ? c.age60to63 : c.age50;
 }
 
 interface DeferralGroup {
@@ -102,10 +126,11 @@ interface DeferralGroup {
  */
 const DEFERRAL_GROUPS = (
   limits: ElectiveDeferralLimits,
+  ageAtYearEnd: number | undefined,
 ): readonly DeferralGroup[] => [
-  { categories: ['deferral_401k', 'deferral_403b', 'deferral_simple'], limitDollars: limits.section402gAggregate, ytdKey: 'section402gAggregate' },
-  { categories: ['deferral_457'], limitDollars: limits.deferral457, ytdKey: 'deferral457' },
-  { categories: ['deferral_simple'], limitDollars: limits.simple, ytdKey: 'simple' },
+  { categories: ['deferral_401k', 'deferral_403b', 'deferral_simple'], limitDollars: limits.section402gAggregate + catchUpDollars(limits, 'standard', ageAtYearEnd), ytdKey: 'section402gAggregate' },
+  { categories: ['deferral_457'], limitDollars: limits.deferral457 + catchUpDollars(limits, 'standard', ageAtYearEnd), ytdKey: 'deferral457' },
+  { categories: ['deferral_simple'], limitDollars: limits.simple + catchUpDollars(limits, 'simple', ageAtYearEnd), ytdKey: 'simple' },
 ];
 
 /**
@@ -121,16 +146,19 @@ const DEFERRAL_GROUPS = (
  * Limit groups, matching how the IRC actually aggregates them (see
  * ElectiveDeferralLimits' own field comments): 401(k), 403(b) and SIMPLE
  * together under the one 402(g) limit; 457(b) separate; and SIMPLE ALSO under
- * its own lower limit on top of that. Deliberately NOT modelled: catch-up
- * contributions for age 50+ or the SECURE 2.0 age-60-63 enhanced
- * catch-up — this engine has no age/birthdate input anywhere, and
- * guessing eligibility would risk UNDER-capping (treating money as
- * taxable that the law still exempts), the wrong direction for a tax
- * engine to guess in — so every employee is capped at the STANDARD
- * figure regardless of true age. Also not modelled: deferrals at a
- * DIFFERENT employer earlier in the same calendar year, since `ytd` here
- * only reflects what THIS employer has paid — see
- * data/federal/2026.json's own knownGaps entry for both caveats.
+ * its own lower limit on top of that.
+ *
+ * Catch-up: when the caller supplies the age the employee reaches by
+ * December 31 (employee.ageAtYearEnd), each group's limit grows by the
+ * year's catch-up figure — age 50+ gets the ordinary catch-up, ages 60-63
+ * the SECURE 2.0 enhanced one. With no age the standard limit applies,
+ * because guessing eligibility would risk under-capping (treating money as
+ * taxable that the law still exempts is the safe direction to be wrong in;
+ * the opposite is not). Not modelled: deferrals at a DIFFERENT employer
+ * earlier in the same calendar year, since `ytd` only reflects what THIS
+ * employer has paid; the requirement that catch-up be Roth for employees
+ * above the prior-year FICA wage threshold; and the 457(b) final-years
+ * catch-up. See data/federal/2026.json's knownGaps.
  *
  * Splits a single over-limit deduction into two lines (same code, the
  * post-tax remainder suffixed `_OVER_LIMIT`) rather than recharacterizing
@@ -141,10 +169,11 @@ export function capElectiveDeferrals(
   deductions: readonly Deduction[],
   ytd: YearToDate['electiveDeferrals'] | undefined,
   limits: ElectiveDeferralLimits,
+  ageAtYearEnd?: number,
 ): Deduction[] {
   let result: Deduction[] = deductions.slice();
 
-  for (const group of DEFERRAL_GROUPS(limits)) {
+  for (const group of DEFERRAL_GROUPS(limits, ageAtYearEnd)) {
     const categorySet = new Set<PretaxCategory>(group.categories);
     const groupTotal = result
       .filter((d) => d.category !== null && categorySet.has(d.category))

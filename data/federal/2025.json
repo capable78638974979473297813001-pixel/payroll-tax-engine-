@@ -385,7 +385,25 @@
       "deferral_457",
       "deferral_simple",
       "commuter"
-    ]
+    ],
+    "legacyW4": {
+      "comment": "Employees who never submitted a Form W-4 for 2020 or later (the 2019-and-earlier form: allowances and a Single/Married status instead of Steps 2-4). Pub 15-T Worksheet 1A lines 1j-1l: annual wages minus (allowances x allowanceAmount), then the STANDARD schedules by marital status (Head of Household is not available on the old form), no Step 3 credit. Table 1 is the nonresident-alien addback for this population instead of Table 2.",
+      "allowanceAmount": 4300.0,
+      "nonresidentAlienAdjustment": {
+        "weekly": 205.8,
+        "biweekly": 411.5,
+        "semimonthly": 445.8,
+        "monthly": 891.7,
+        "quarterly": 2675.0,
+        "semiannual": 5350.0,
+        "annual": 10700.0,
+        "daily": 41.2
+      },
+      "source": {
+        "title": "Publication 15-T (2025), Worksheet 1A lines 1j-1l and Table 1, https://www.irs.gov/pub/irs-prior/p15t--2025.pdf",
+        "verifiedOn": "2026-10-26"
+      }
+    }
   },
   "socialSecurity": {
     "source": "ssa-cola",
@@ -449,17 +467,24 @@
     "section402gAggregate": 23500.0,
     "deferral457": 23500.0,
     "simple": 16500.0,
-    "$comment": "IRS Notice 2024-80 (2025 amounts): 402(g) and 457(b) $23,500, SIMPLE $16,500 (from $16,000). Publication 560 (2025): 'The limit on elective deferrals, other than catch-up contributions, is $23,500 for 2025'."
+    "$comment": "IRS Notice 2024-80 (2025 amounts): 402(g) and 457(b) $23,500, SIMPLE $16,500 (from $16,000). Publication 560 (2025): 'The limit on elective deferrals, other than catch-up contributions, is $23,500 for 2025'.",
+    "catchUp": {
+      "age50": 7500,
+      "age60to63": 11250,
+      "simpleAge50": 3500,
+      "simpleAge60to63": 5250,
+      "$comment": "IRS Newsroom IR-2025-111 (Nov. 13, 2025) gives 2025 as the comparison year: the 50+ catch-up was $7,500 in 2025, the age 60-63 limit $11,250, the SIMPLE catch-up $3,500 and the SIMPLE age 60-63 catch-up $5,250. age50 applies to 401(k), 403(b) and governmental 457(b) deferrals for an employee who reaches 50 by December 31; age60to63 replaces it for an employee who reaches 60, 61, 62 or 63 by December 31 (not 64 and over). simpleAge50 and simpleAge60to63 are the SIMPLE plan equivalents. The higher SIMPLE limits for small employers or 4%-match plans ($18,100 and a $3,850 catch-up in 2026) are not modelled. The 457(b) 'last three years before normal retirement age' special catch-up is not modelled."
+    }
   },
   "knownGaps": [
     "2025 is supported for the federal rules and every state plus DC, each with its own data/states/<ST>-2025.json, and every local registry has a 2025 file (see docs/tax-years.md). Years before 2025 are refused rather than computed.",
     "Pension/annuity withholding (Pub 15-T's separate periodic-payment tables, Form W-4P) is not modelled -- this engine assumes ordinary W-2 wage/salary payroll only.",
     "Nonpayroll withholding (Form 945 categories: IRA distributions, gambling winnings, certain government/Indian gaming payments) is out of scope -- these aren't wage payroll at all.",
-    "Special employment-tax categories are not modelled: household employees, agricultural (incl. H-2A) workers, statutory employees, ministers/clergy, election workers, railroad employees, tipped employees' allocated-tips rules. A standard W-2 wage/salary employee is the only supported case; using this engine for any of these categories will produce wrong numbers, not an explicit error. PARTLY CLOSED: clergy and statutory employees are now modelled via input.employmentCategory — see the employmentCategories block above for each one's rule and source. Household employees, agricultural workers, election workers, ministers' housing allowances and railroad (RRTA) employment remain unmodelled. FURTHER CLOSED: household and agricultural workers are now modelled too (input.employmentCategory, with the coverage thresholds in employmentCategories.coverageThresholds). Election workers, railroad (RRTA) employment and ministers housing allowances remain unmodelled. Railroad (RRTA) employment is now modelled as well — see the railroadRetirement block: Tier I relabelled from the identical FICA computation, Tier II computed at 4.9%/13.1% to its own 37,100 base, and FUTA zeroed because rail employers contribute under the RUIA. Election workers and ministers housing allowances remain unmodelled. Election workers are now modelled too ($2,500 coverage threshold, outside FUTA as government employment), and railroad unemployment contributions are computed under the RUIA rather than merely disclosed. What remains unmodelled: ministers housing allowances and the supplemental annuity work-hour tax.",
+    "Employment categories are modelled through input.employmentCategory (see the employmentCategories and railroadRetirement blocks): clergy (including the housing-allowance exclusion and the voluntary withholding agreement), statutory employees, household, agricultural, election workers and railroad (Tier I, Tier II and RUIA). Not modelled: the railroad supplemental annuity work-hour tax, and the allocated-tips rules for tipped employees.",
     "FUTA credit reductions for 2025 are final and applied: California 1.2% and the U.S. Virgin Islands 4.5% on top of the 0.6% net rate (futa.creditReduction.states).",
-    "Backup withholding (backupWithholdingRate, 24%) is recorded as data but has no compute path -- no rule detects a missing/invalid TIN and applies it.",
+    "Backup withholding (24%, backupWithholdingRate above) applies to payments to contractors and other non-wage payees, not to W-2 wages, so this wage engine has no compute path for it by design. It is computed in payroll/backupWithholding.ts. What is not modelled anywhere is the IRS B-notice workflow (CP2100 notices and response deadlines).",
     "The percentage_method_automated_worksheet_1a method is the ONLY Pub 15-T method implemented. Pub 15-T also publishes wage-bracket tables and non-automated percentage-method tables for manual systems; this engine intentionally supports only the automated-system method, which is exact rather than table-rounded.",
-    "WIRED: IRC 402(g)/457/SIMPLE elective-deferral annual limits (electiveDeferralLimits above) are now enforced by capElectiveDeferrals() in src/wages.ts, called once in calculate.ts before any tax reads the deduction list — any 401(k)/403(b)/457/SIMPLE deduction that would push this employee's YTD cumulative deferrals (input.ytd.electiveDeferrals) past the applicable limit has its excess reclassified from pretax to post-tax (net pay is unaffected either way; only which taxes see the money as taxable changes). Found as a genuine, previously-undisclosed gap during a manual verification pass (2026-09-06): before this, a caller could supply a deduction of any size at all and every dollar of it was excluded from federal/state/local taxable wages with no limit, silently understating tax on any contribution over the real IRC ceiling. STILL NOT modelled, disclosed rather than guessed: catch-up contributions for age 50+ and the SECURE 2.0 age-60-63 enhanced catch-up (no age/birthdate input exists anywhere in this engine, and guessing eligibility risks UNDER-capping, the wrong direction) — every employee is capped at the STANDARD limit regardless of true age, which is conservative (never wrongly exempts money the law wouldn't) but will over-cap a genuinely catch-up-eligible employee's later-year contributions; and cumulative deferrals at a DIFFERENT employer earlier in the same calendar year, since input.ytd only reflects what THIS employer has paid — the same single-employer-visibility limitation this project already discloses for Social Security/FUTA wage-base tracking."
+    "WIRED: IRC 402(g)/457/SIMPLE elective-deferral annual limits (electiveDeferralLimits above) are enforced by capElectiveDeferrals() in src/wages.ts, called once in calculate.ts before any tax reads the deduction list. A deduction that would push YTD deferrals (input.ytd.electiveDeferrals) past the limit has its excess reclassified from pretax to post-tax; net pay is unchanged, only which taxes see the money changes. Catch-up contributions are applied when the caller sends employee.ageAtYearEnd (age reached by December 31): 50+ gets the ordinary catch-up, 60-63 the SECURE 2.0 enhanced one, 64+ is back to the ordinary one; with no age the standard limit applies and the result carries a warning when a deferral is capped. STILL NOT modelled: deferrals at a DIFFERENT employer earlier in the year (input.ytd only reflects this employer, the same single-employer limitation as the Social Security and FUTA wage bases); the SECURE 2.0 rule that catch-up must be Roth for employees whose prior-year FICA wages exceed the threshold ($150,000 for 2026), which depends on plan design and prior-year wages this engine does not hold; the higher SIMPLE limits for small employers; and the 457(b) special catch-up in the three years before normal retirement age."
   ],
   "employmentCategories": {
     "coverageThresholds": {

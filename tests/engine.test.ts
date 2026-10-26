@@ -6932,6 +6932,18 @@ describe('Missouri', () => {
     assert.equal(amountOf(r, 'STL_PAYROLL_ER'), dollars(14.58));
   });
 
+  test('St. Louis: an exempt employer (nonprofit, government, airport-only) owes no payroll expense tax but the employee still pays the earnings tax', () => {
+    const r = calculatePaycheck(
+      input({
+        payFrequency: 'monthly',
+        earnings: [{ code: 'REG', category: 'regular', amount: dollars(2916.67) }],
+        workState: { code: 'MO', certificate: { locality: 'St. Louis', stLouisPayrollExpenseTaxExempt: true } },
+      }),
+    );
+    assert.equal(amountOf(r, 'STL_EARN'), dollars(29.17));
+    assert.equal(r.taxes.some((t) => t.id === 'STL_PAYROLL_ER'), false);
+  });
+
   test('no certificate.locality at all means neither city tax fires', () => {
     const r = calculatePaycheck(
       input({

@@ -1436,15 +1436,24 @@
    ]
   },
   {
+   "id": "co-4ddc9d5a81",
+   "jurisdiction": "CO",
+   "title": "City of Greenwood Village occupational privilege tax",
+   "url": "https://www.greenwoodvillage.com/1220/Occupational-Privilege-Tax-OPT",
+   "origin": "data",
+   "used_by": [
+    "data/states/CO-2026.json",
+    "data/states/CO-2027.json"
+   ]
+  },
+  {
    "id": "co-c68031ef52",
    "jurisdiction": "CO",
    "title": "City of Greenwood Village occupational privilege tax",
    "url": "https://www.greenwoodvillage.com/206/Occupational-Privilege-Tax",
    "origin": "data",
    "used_by": [
-    "data/states/CO-2025.json",
-    "data/states/CO-2026.json",
-    "data/states/CO-2027.json"
+    "data/states/CO-2025.json"
    ]
   },
   {

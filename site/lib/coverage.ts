@@ -88,14 +88,14 @@ const INFO_NOTES: Record<string, string> = {
   IA: 'School district surtax is settled on the return, not withheld from pay.',
   WA: 'Seattle taxes are paid by employers; there is no employee withholding.',
   NJ: 'Newark\'s payroll tax is paid by the employer.',
-  OR: 'Statewide transit tax, plus Metro and Multnomah County taxes above an income threshold.',
+  OR: 'Statewide transit tax, six employer-paid transit districts, plus Metro and Multnomah County taxes above an income threshold.',
 };
 
 /** Where the data itself says the local list is not the whole story. */
 const PARTIAL_NOTES: Record<string, string> = {
+  CO: 'Flat monthly occupational privilege tax in Denver, Glendale, Greenwood Village and Sheridan, the only Colorado cities we have found that charge one. Aurora repealed its tax on January 1, 2025.',
   AL: '29 municipalities and Macon County; seven of those rates come from a survey rather than the city\'s own document.',
   WV: '11 cities that charge a per-week service fee; other municipalities are not enumerated yet.',
-  CO: 'Occupational privilege tax in Denver, Glendale, Greenwood Village and Sheridan.',
 };
 
 function localRowsFor(state: string, year: number): { rows: LocalRow[]; label: string } {
@@ -165,13 +165,25 @@ function stateLocalExtras(state: string, raw: Record<string, any>): LocalRow[] {
   }
   if (state === 'OR') {
     if (raw.statewideTransitTax) out.push({ state, name: 'Statewide transit tax', kind: 'Statewide payroll tax', rate: num(raw.statewideTransitTax.rate), detail: 'Employee-paid' });
+    const districts: [string, string, string][] = [
+      ['triMet', 'TriMet transit district (Portland area)', 'Employer-paid, on wages earned in the district'],
+      ['laneTransit', 'Lane Transit District (Eugene and Springfield)', 'Employer-paid, on wages earned in the district'],
+      ['canby', 'Canby Area Transit', 'Employer-paid, on wages earned in the district'],
+      ['sandy', 'Sandy Area Metro', 'Employer-paid, on wages earned in the district'],
+      ['wilsonville', 'South Metro Area Regional Transit (Wilsonville)', 'Employer-paid, on wages earned in the district'],
+      ['sctd', 'South Clackamas Transportation District', 'Employer-paid, on wages earned in the district'],
+    ];
+    for (const [key, name, detail] of districts) {
+      const d = raw.tripDistrictPayrollTaxes?.[key];
+      if (d) out.push({ state, name, kind: 'Transit district payroll tax', rate: num(d.rate), detail });
+    }
     if (raw.portlandAreaLocalIncomeTax?.metroSHS) out.push({ state, name: 'Metro Supportive Housing Services', kind: 'Metro income tax', rate: num(raw.portlandAreaLocalIncomeTax.metroSHS.rate), detail: 'Above the income threshold' });
     if (raw.portlandAreaLocalIncomeTax?.multnomahPFA) out.push({ state, name: 'Multnomah County Preschool for All', kind: 'County income tax', rate: num(raw.portlandAreaLocalIncomeTax.multnomahPFA.tier1Rate), detail: 'Above the income threshold' });
   }
   if (state === 'MO' && raw.localIncomeTax) {
     const li = raw.localIncomeTax;
     if (li.kansasCity) out.push({ state, name: 'Kansas City', kind: 'City earnings tax', rate: num(li.kansasCity.rate), detail: 'Residents and anyone working in the city' });
-    if (li.stLouis) out.push({ state, name: 'St. Louis', kind: 'City earnings tax', rate: num(li.stLouis.earningsTaxRate), detail: 'Residents and anyone working in the city' });
+    if (li.stLouis) out.push({ state, name: 'St. Louis', kind: 'City earnings tax', rate: num(li.stLouis.earningsTaxRate), detail: `Residents and anyone working in the city${typeof li.stLouis.payrollExpenseTax?.rate === 'number' ? `; employers also pay a ${(li.stLouis.payrollExpenseTax.rate * 100).toFixed(1)}% payroll expense tax` : ''}` });
   }
   if (state === 'DE' && raw.localIncomeTax) {
     out.push({ state, name: 'Wilmington', kind: 'City wage tax', rate: num(raw.localIncomeTax.rate), detail: 'Residents and anyone working in the city' });
@@ -181,7 +193,7 @@ function stateLocalExtras(state: string, raw: Record<string, any>): LocalRow[] {
     const opt = li.occupationalPrivilegeTax ?? {};
     if (li.denver) out.push({ state, name: 'Denver', kind: 'Occupational privilege tax', rate: null, value: `$${Number(li.denver.employeeRate).toFixed(2)}/mo`, detail: `Employee pays this; employer pays $${Number(li.denver.employerRatePerEmployee).toFixed(2)} per employee` });
     for (const [name, v] of Object.entries<any>(opt)) {
-      if (name.startsWith('$') || v?.repealed) continue;
+      if (name.startsWith('$') || (typeof v?.repealedOn === 'string' && v.repealedOn <= new Date().toISOString().slice(0, 10))) continue;
       out.push({ state, name, kind: 'Occupational privilege tax', rate: null, value: `$${Number(v.employeeRate).toFixed(2)}/mo`, detail: `Employee pays this; employer pays $${Number(v.employerRatePerEmployee).toFixed(2)} per employee` });
     }
   }

@@ -7369,6 +7369,10 @@ function stLouisPayrollExpenseTaxEmployer(
 ): TaxLine | null {
   const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
   if (!hasLocality(cert, 'St. Louis')) return null;
+  // Religious/charitable/not-for-profit employers, government agencies and
+  // airport-only businesses owe no payroll expense tax (St. Louis Collector
+  // of Revenue). The employee's 1% earnings tax is unaffected.
+  if (resolveCertBoolean(cert, 'stLouisPayrollExpenseTaxExempt')) return null;
 
   const cfg = rules.localIncomeTax as MOLocalityConfig | undefined;
   const rate = cfg?.stLouis?.payrollExpenseTax?.rate;

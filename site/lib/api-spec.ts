@@ -144,6 +144,15 @@ export const paycheckRequestSchema = {
         extraWithholding: cents('Step 4(c): extra withholding PER PAY PERIOD.'),
         exempt: { type: 'boolean', description: 'The employee claimed exempt from federal income tax withholding.' },
         nonresidentAlien: { type: 'boolean', description: 'Nonresident alien employee: applies the IRS Pub 15-T adjustment.' },
+        legacyAllowances: {
+          type: 'integer',
+          minimum: 0,
+          maximum: 99,
+          description:
+            'The allowance count (line 5) from a 2019-or-earlier Form W-4, for an employee who never filed a 2020-or-later form. ' +
+            'Uses Pub 15-T Worksheet 1A lines 1j-1l. Then multipleJobs is false, dependentCredit, otherIncome and deductions are 0, ' +
+            'filingStatus is single or married_joint, and extraWithholding is the old line 6.',
+        },
         voluntaryWithholdingAgreement: {
           type: 'boolean',
           description: 'A voluntary withholding agreement. Read only for employmentCategory "clergy".',
@@ -160,6 +169,17 @@ export const paycheckRequestSchema = {
         medicare: cents('Wages already subject to Medicare tax this year.'),
         futa: cents('Wages already subject to FUTA this year.'),
         supplemental: cents('Supplemental wages paid so far this year. Drives the 37% rate above $1,000,000.'),
+        electiveDeferrals: {
+          type: 'object',
+          description:
+            'Retirement deferrals already made at this employer this year, so the annual limit can be applied. A deduction past the limit is taxed as ordinary pay.',
+          properties: {
+            section402gAggregate: cents('401(k), 403(b) and SIMPLE deferrals together.'),
+            deferral457: cents('457(b) deferrals.'),
+            simple: cents('SIMPLE plan deferrals (also counted in section402gAggregate).'),
+          },
+          additionalProperties: false,
+        },
         stateUnemployment: stateKeyedCents('Wages already subject to state unemployment tax, by state code.'),
         statePaidLeave: stateKeyedCents('Wages already counted toward a state paid-leave wage cap, by state code.'),
         stateDisabilityEmployee: stateKeyedCents('Wages already counted toward a state disability wage cap, by state code.'),
@@ -186,6 +206,20 @@ export const paycheckRequestSchema = {
       enum: [...EMPLOYMENT_CATEGORIES],
       default: 'standard',
       description: 'Selects whole sets of federal and state rules. A misspelling is a 422, never a silent fallback.',
+    },
+    employee: {
+      type: 'object',
+      description: 'Facts about the employee that raise a federal limit.',
+      properties: {
+        ageAtYearEnd: {
+          type: 'integer',
+          minimum: 0,
+          maximum: 120,
+          description:
+            'The age the employee reaches by December 31 of the check year. 50 and over raises the 401(k), 403(b), 457(b) and SIMPLE deferral limits; 60 through 63 raises them further. Absent, the standard limits apply.',
+        },
+      },
+      additionalProperties: false,
     },
     employer: {
       type: 'object',

@@ -85,8 +85,28 @@ export function federalIncomeTax(
   // catches that the same way it now does for every certificate.* boolean
   // in taxes/state.ts, rather than trusting the type annotation alone.
   const w4Raw = w4 as unknown as Record<string, unknown>;
+  // A 2019-or-earlier Form W-4 (allowances, no Steps 2-4) takes Worksheet 1A
+  // lines 1j-1l and its own NRA addback (Table 1); everything else is the
+  // 2020-or-later path below.
+  const legacyAllowances = w4.legacyAllowances;
+  const legacy = legacyAllowances !== undefined;
+  if (legacy) {
+    if (!cfg.legacyW4) {
+      throw new Error(`federalW4.legacyAllowances is not available for ${rules.year}: that year's federal data has no pre-2020 Form W-4 figures.`);
+    }
+    if (!Number.isInteger(legacyAllowances) || legacyAllowances < 0 || legacyAllowances > 99) {
+      throw new Error(`federalW4.legacyAllowances must be a whole number of allowances from 0 to 99, got ${JSON.stringify(legacyAllowances)}.`);
+    }
+    if (w4.filingStatus === 'head_of_household') {
+      throw new Error('federalW4.legacyAllowances with filingStatus "head_of_household": the 2019-and-earlier Form W-4 has only Single and Married, so Pub 15-T has no Head of Household schedule for it. Use single or married_joint, or send a 2020-or-later form without legacyAllowances.');
+    }
+    if (w4.multipleJobs || w4.dependentCredit || w4.otherIncome || w4.deductions) {
+      throw new Error('federalW4.legacyAllowances means a 2019-or-earlier Form W-4, which has no Step 2 checkbox, credits, other income or deductions. Leave multipleJobs false and dependentCredit, otherIncome and deductions at 0, or drop legacyAllowances to use a 2020-or-later form.');
+    }
+  }
+  const nraTable = legacy ? cfg.legacyW4!.nonresidentAlienAdjustment : cfg.nonresidentAlienAdjustment;
   const nraAdjustment = resolveCertBoolean(w4Raw, 'nonresidentAlien')
-    ? dollars(cfg.nonresidentAlienAdjustment[input.payFrequency] ?? 0)
+    ? dollars(nraTable[input.payFrequency] ?? 0)
     : 0;
 
   const line = (amount: Cents, detail: string): TaxLine => ({
@@ -106,10 +126,11 @@ export function federalIncomeTax(
   // Step 1 — annualise and adjust.
   const annualWages = (taxableWages + nraAdjustment) * periods; // 1c
   const withOther = annualWages + w4.otherIncome; // 1e
+  const legacyAllowanceAmount = legacy ? (legacyAllowances ?? 0) * dollars(cfg.legacyW4!.allowanceAmount) : 0; // 1k
 
   // 1g: zero when the Step 2 checkbox is marked, because the multiple-jobs
   // schedules already have the adjustment built into their bracket widths.
-  const standardAdj = w4.multipleJobs
+  const standardAdj = w4.multipleJobs || legacy
     ? 0
     : dollars(
         w4.filingStatus === 'married_joint'
@@ -118,7 +139,9 @@ export function federalIncomeTax(
       );
 
   const totalDeductions = w4.deductions + standardAdj; // 1h
-  const adjustedAnnual = atLeastZero(withOther - totalDeductions); // 1i
+  const adjustedAnnual = legacy
+    ? atLeastZero(annualWages - legacyAllowanceAmount) // 1l
+    : atLeastZero(withOther - totalDeductions); // 1i
 
   // Step 2 — bracket lookup.
   const schedules = w4.multipleJobs
@@ -146,8 +169,9 @@ export function federalIncomeTax(
 
   const detail =
     (nraAdjustment
-      ? `NRA adjustment +${fmt(nraAdjustment)}/period (Pub 15-T Table 2, not reported as wages); `
+      ? `NRA adjustment +${fmt(nraAdjustment)}/period (Pub 15-T Table ${legacy ? '1' : '2'}, not reported as wages); `
       : '') +
+    (legacy ? `pre-2020 Form W-4: ${legacyAllowances} allowance(s) × ${fmt(dollars(cfg.legacyW4!.allowanceAmount))}; ` : '') +
     `annualised ${fmt(annualWages)} → adjusted ${fmt(adjustedAnnual)}; ` +
     `bracket ${(bracket.rate * 100).toFixed(0)}% over ${fmt(dollars(bracket.from))}; ` +
     `tentative/yr ${fmt(tentativeAnnual)} ÷ ${periods}` +

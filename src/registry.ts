@@ -111,6 +111,11 @@ export interface FederalRuleset {
     multipleJobsSchedules: Record<string, Bracket[]>;
     exemptPretax: string[];
     nonresidentAlienAdjustment: Record<string, number>;
+    /** Pub 15-T Worksheet 1A lines 1j-1l: the 2019-and-earlier Form W-4 (allowances), with its own NRA addback (Table 1). */
+    legacyW4?: {
+      allowanceAmount: number;
+      nonresidentAlienAdjustment: Record<string, number>;
+    };
   };
   socialSecurity: {
     employeeRate: number;
@@ -135,8 +140,7 @@ export interface FederalRuleset {
    * much of a 401(k)/403(b)/457(b)/SIMPLE deduction can actually be
    * pretax-exempt this calendar year, not just how much a plan lets an
    * employee defer. See capElectiveDeferrals() in wages.ts for how these
-   * are applied (standard limits only — no catch-up, see that function's
-   * own doc comment for why).
+   * are applied, including the age 50+ and age 60-63 catch-up amounts.
    */
   electiveDeferralLimits: {
     /** 401(k), 403(b) and SIMPLE IRA deferrals share ONE combined IRC 402(g) limit. */
@@ -145,6 +149,17 @@ export interface FederalRuleset {
     deferral457: number;
     /** A SIMPLE plan's own, lower limit (IRC 408(p)/401(k) SIMPLE), applied IN ADDITION to the combined 402(g) limit. */
     simple: number;
+    /** Extra room for an employee who reaches the age by December 31; applied only when the caller supplies employee.ageAtYearEnd. */
+    catchUp?: {
+      /** 401(k), 403(b) and governmental 457(b), age 50 and over. */
+      age50: number;
+      /** Same plans, ages 60 through 63 (SECURE 2.0); replaces age50. */
+      age60to63: number;
+      /** SIMPLE plans, age 50 and over. */
+      simpleAge50: number;
+      /** SIMPLE plans, ages 60 through 63; replaces simpleAge50. */
+      simpleAge60to63: number;
+    };
   };
   /** Household / agricultural / election-worker coverage thresholds — shaped and read in taxes/federal.ts. */
   employmentCategories?: unknown;
