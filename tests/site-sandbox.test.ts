@@ -147,7 +147,7 @@ test('every certificate key is named, and every option passes the engine', () =>
   }
 });
 
-test('every step keeps a visible field border and a near-black primary', { timeout: 180_000, skip: findChrome() ? false : 'no Chrome/Chromium found (set CHROME_BIN)' }, async () => {
+test('the calculator keeps a visible field border and a near-black primary', { timeout: 180_000, skip: findChrome() ? false : 'no Chrome/Chromium found (set CHROME_BIN)' }, async () => {
   let shots = join(tmpdir(), 'sandbox-shots');
   try {
     mkdirSync('/opt/cursor/artifacts/sandbox', { recursive: true });
@@ -233,141 +233,132 @@ test('every step keeps a visible field border and a near-black primary', { timeo
     const ready = await evaluate(`new Promise((resolve) => {
       const start = Date.now();
       const tick = () => {
-        const api = window.OmniaSandbox;
-        const req = api && api.serialize();
-        if (req && req.workState && req.workState.certificate && req.workState.certificate.workPSD === '510101' && req.payFrequency === 'weekly') resolve(true);
+        const sel = document.getElementById('state');
+        const hasMI = sel && [...sel.options].some((o) => o.value === 'MI');
+        const date = document.getElementById('checkDate') && document.getElementById('checkDate').value;
+        if (window.OmniaSandbox && hasMI && /^\\d{4}-\\d{2}-\\d{2}$/.test(date || '')) resolve(true);
         else if (Date.now() - start > 8000) resolve(false);
         else setTimeout(tick, 50);
       };
       tick();
     })`);
-    assert.equal(ready, true, 'default example did not load');
+    assert.equal(ready, true, 'calculator did not finish loading states');
     const fresh = await evaluate(`({
-      step: OmniaSandbox.step(),
-      visited: OmniaSandbox.visited(),
-      future: document.querySelector('[data-step="2"]').disabled,
+      state: document.getElementById('state').selectedOptions[0].textContent,
+      freq: document.getElementById('payFrequency').value,
+      hourlyHidden: document.getElementById('hourlyRow').hidden,
+      placeholder: document.getElementById('placeholder').textContent,
+      empty: document.getElementById('noStateMsg') && document.getElementById('noStateMsg').textContent,
       text: document.body.innerText,
+      legends: [...document.querySelectorAll('legend')].map((el) => el.textContent),
     })`);
-    assert.equal(fresh.step, 1);
-    assert.deepEqual(fresh.visited, [1]);
-    assert.equal(fresh.future, true);
+    assert.equal(fresh.state, 'Federal taxes only');
+    assert.equal(fresh.freq, 'biweekly');
+    assert.equal(fresh.hourlyHidden, true);
+    assert.equal(fresh.placeholder, 'Fill in the form and press Calculate — the result appears here.');
+    assert.equal(fresh.empty, 'No state selected. Select state above to see its withholding certificate fields.');
+    assert.deepEqual(fresh.legends, [
+      'Work Address (optional)',
+      'Residence Address (optional)',
+      'State & Date',
+      'Earnings',
+      'Federal Taxes (enter your W-4 info)',
+      'State and Local Taxes',
+      'Benefits and Deductions (optional)',
+    ]);
+    assert.match(fresh.text, /Look up a street address to auto-fill the state and local jurisdiction fields below/);
+    assert.match(fresh.text, /Where the employee lives, if different from where they work/);
+    assert.match(fresh.text, /This engine implements the 2020-or-later Form W-4 only/);
     assert.equal(/test mode/i.test(fresh.text), false);
     assert.equal(/not billed/i.test(fresh.text), false);
     assert.equal(/test key/i.test(fresh.text), false);
+    assert.equal(/census/i.test(fresh.text), false);
 
     const measureExpr = `(() => {
-      const visible = (el) => {
-        if (el.disabled || el.type === 'hidden') return false;
-        const s = getComputedStyle(el);
-        if (s.display === 'none' || s.visibility === 'hidden') return false;
-        const r = el.getBoundingClientRect();
-        return r.width > 0 && r.height > 0;
-      };
-      const fields = [...document.querySelectorAll('input.inp, select.inp')].filter(visible);
-      const ticks = [...document.querySelectorAll('input.tick, input.dot')].filter(visible);
-      const input = fields[0] || ticks[0] || null;
-      const btn = document.getElementById('primary') || document.getElementById('runAgain');
-      const actions = document.querySelector('.actions');
-      const ics = input ? getComputedStyle(input) : null;
+      const input = document.getElementById('addrStreet');
+      const btn = document.getElementById('calc');
+      btn.scrollIntoView({ block: 'center' });
+      const ics = getComputedStyle(input);
       const bcs = getComputedStyle(btn);
+      const hourly = getComputedStyle(document.getElementById('hourlyRow'));
       const r = btn.getBoundingClientRect();
-      const bad = [...document.querySelectorAll('[data-unsupported]')].filter((el) => !el.disabled).map((el) => el.outerHTML.slice(0, 80));
       return {
-        kind: input ? (input.classList.contains('inp') ? 'inp' : 'tick') : '',
-        hasInput: !!input,
-        borderTopColor: ics && ics.borderTopColor,
-        borderTopWidth: ics && ics.borderTopWidth,
+        borderTopColor: ics.borderTopColor,
+        borderTopWidth: ics.borderTopWidth,
         bg: bcs.backgroundColor,
         disabled: btn.disabled,
         text: (btn.innerText || '').replace(/\\s+/g, ' ').trim(),
         top: r.top, bottom: r.bottom, height: r.height,
         innerHeight: window.innerHeight,
-        actionsPosition: actions ? getComputedStyle(actions).position : '',
-        unsupportedEnabled: bad,
+        hourlyDisplay: hourly.display,
       };
     })()`;
-    const labels = [
-      'Continue to work locations',
-      'Continue to Federal W-4',
-      'Continue to state & local',
-      'Continue to earnings',
-      'Continue to deductions & YTD',
-      'Continue to employer',
-      'Continue to review & run',
-      'Run calculation',
-    ];
-    const names = ['01-employee', '02-locations', '03-w4', '04-state', '05-earnings', '06-deductions', '07-employer', '08-review'];
-    for (let n = 1; n <= 8; n++) {
-      await evaluate(`OmniaSandbox.go(${n})`);
+    for (const [w, h, name] of [[1440, 900, 'desktop'], [390, 844, 'mobile']] as const) {
+      await setSize(w, h);
+      await evaluate('window.scrollTo(0,0)');
       await paint();
-      for (const [w, h] of [[1440, 900], [390, 844]] as const) {
-        await setSize(w, h);
-        await evaluate('window.scrollTo(0,0)');
-        await paint();
-        const m = await evaluate(measureExpr);
-        assert.equal(m.text, labels[n - 1], `step ${n} label`);
-        assert.equal(m.disabled, false, `step ${n} primary stays enabled`);
-        assert.equal(m.bg, 'rgb(22, 24, 26)', `step ${n} primary`);
-        assert.deepEqual(m.unsupportedEnabled, [], `step ${n} unsupported`);
-        if (n !== 8) {
-          assert.equal(m.hasInput, true, `step ${n} field`);
-          assert.notEqual(m.borderTopColor, 'rgba(0, 0, 0, 0)', `step ${n} border`);
-          if (m.kind === 'inp') {
-            assert.equal(m.borderTopWidth, '1px', `step ${n} border width`);
-            assert.equal(m.borderTopColor, 'rgb(107, 112, 118)', `step ${n} border color`);
-          } else {
-            assert.ok(m.borderTopWidth === '1px' || m.borderTopWidth === '6px', `step ${n} border width ${m.borderTopWidth}`);
-            assert.ok(m.borderTopColor === 'rgb(107, 112, 118)' || m.borderTopColor === 'rgb(22, 24, 26)', `step ${n} border color ${m.borderTopColor}`);
-          }
-        }
-        if (w < 600) {
-          assert.equal(m.actionsPosition, 'fixed', `step ${n} actions`);
-          assert.ok(m.top >= 0 && m.bottom <= m.innerHeight + 0.5 && m.height >= 40, `step ${n} ${w}x${h} button ${m.top}-${m.bottom} of ${m.innerHeight}`);
-        }
-        await shot(`${names[n - 1]}-${w === 1440 ? 'desktop' : 'mobile'}`);
-      }
+      const m = await evaluate(measureExpr);
+      assert.equal(m.text, 'Calculate', name);
+      assert.equal(m.disabled, false, name);
+      assert.equal(m.bg, 'rgb(22, 24, 26)', name);
+      assert.equal(m.borderTopWidth, '1px', name);
+      assert.equal(m.borderTopColor, 'rgb(107, 112, 118)', name);
+      assert.equal(m.hourlyDisplay, 'none', name);
+      assert.ok(m.top >= 0 && m.bottom <= m.innerHeight + 1 && m.height >= 40, `${name} button ${m.top}-${m.bottom} of ${m.innerHeight}`);
+      await shot(`calculator-${name}`);
     }
-    await evaluate(`OmniaSandbox.go(2)`);
-    const split = await evaluate(`document.querySelector('[data-unsupported]').disabled && document.body.innerText.includes('Not supported yet') && document.body.innerText.includes('In progress')`);
-    assert.equal(split, true);
-    await evaluate(`OmniaSandbox.go(3)`);
-    // The 2019-or-earlier form is supported now: its button works and brings its own field.
-    assert.equal(await evaluate(`document.querySelector('[data-unsupported]') === null && !document.body.innerText.includes("aren't supported yet")`), true);
-    assert.equal(await evaluate(`(document.querySelector('[data-action="w4form"][data-form="old"]').click(), document.body.innerText.includes('Allowances') && !!document.querySelector('[data-bind="str:legacyAllowances"]'))`), true);
-    await evaluate(`document.querySelector('[data-action="w4form"][data-form="new"]').click()`);
-    await evaluate(`OmniaSandbox.go(5); document.querySelector('[data-action="add-earn"]').click();`);
-    assert.equal(await evaluate(`document.querySelector('#earnMenu [data-unsupported]').disabled`), true);
-    await evaluate(`OmniaSandbox.go(7)`);
-    assert.equal(await evaluate(`document.querySelector('[data-unsupported]').value === '0.6' && document.querySelector('[data-unsupported]').disabled`), true);
 
-    await evaluate(`OmniaSandbox.showErrors([{ path: 'federalW4.filingStatus', message: 'Choose a filing status the engine knows.' }])`);
-    const mapped = await evaluate(`({
-      step: OmniaSandbox.step(),
-      msg: (document.querySelector('[data-path="federalW4.filingStatus"] .msg') || {}).textContent || '',
-      banner: (document.querySelector('.banner') || {}).textContent || '',
-    })`);
-    assert.equal(mapped.step, 3);
-    assert.equal(mapped.msg, 'Choose a filing status the engine knows.');
-    assert.match(mapped.banner, /1 fields need a fix/);
-
-    const paNj = examples.find((ex) => ex.id === 'pa-nj-reciprocity')!.request;
-    const result = calculatePaycheck(paNj as never);
     await setSize(1440, 900);
-    await evaluate('OmniaSandbox.loadExample("pa-nj-reciprocity")');
+    await evaluate(`document.getElementById('state').value = 'MI'; document.getElementById('state').dispatchEvent(new Event('change'));`);
+    await paint();
+    const mi = await evaluate(`({
+      allowances: !!document.getElementById('sf_allowances'),
+      city: !!document.getElementById('sf_workCity'),
+      empty: document.getElementById('noStateMsg'),
+    })`);
+    assert.equal(mi.allowances, true);
+    assert.equal(mi.city, true);
+    assert.equal(mi.empty, null);
+    await shot('calculator-michigan');
+
+    await evaluate(`document.getElementById('state').value = ''; document.getElementById('state').dispatchEvent(new Event('change'));`);
+    assert.equal(await evaluate(`document.getElementById('noStateMsg').textContent`), 'No state selected. Select state above to see its withholding certificate fields.');
+
+    await evaluate(`document.getElementById('grossPayMethod').value = 'hourly'; document.getElementById('grossPayMethod').dispatchEvent(new Event('change'));`);
+    assert.equal(await evaluate(`document.getElementById('hourlyRow').hidden`), false);
+    await evaluate(`document.getElementById('addPayItem').click()`);
+    const kinds = await evaluate(`[...document.querySelectorAll('.pay-kind option')].map((o) => o.textContent)`);
+    assert.deepEqual(kinds, ['Bonus', 'Commission', 'Overtime', 'Reimbursement']);
+
+    await evaluate(`document.getElementById('addrStreet').value = '2 Woodward Ave'; document.getElementById('addrCity').value = 'Detroit'; document.getElementById('addrState').value = 'MI'; document.getElementById('addressLookup').click();`);
+    await paint();
+    const gateText = await evaluate(`document.getElementById('gate').innerText`);
+    assert.match(gateText, /This page does not issue a key/);
+    assert.match(gateText, /Create an account/);
+    assert.match(gateText, /Example output\. This is not your calculation\./);
+
+    await evaluate(`document.getElementById('calc').click()`);
+    await paint();
+    const calcGate = await evaluate(`document.getElementById('gate').innerText`);
+    assert.match(calcGate, /Sign up to get an API key before this calculation can run/);
+    assert.match(calcGate, /Create an account/);
+
+    const result = calculatePaycheck({
+      checkDate: '2026-10-15',
+      payFrequency: 'biweekly',
+      earnings: [{ code: 'REG', category: 'regular', amount: 200000 }],
+      deductions: [],
+      federalW4: { filingStatus: 'single', multipleJobs: false, dependentCredit: 0, otherIncome: 0, deductions: 0, extraWithholding: 0 },
+      ytd: { socialSecurity: 0, medicare: 0, futa: 0 },
+    });
     await evaluate('OmniaSandbox.showResult(' + JSON.stringify(result) + ')');
     await paint();
-    const resultText = await evaluate('document.body.innerText');
-    assert.match(resultText, /Philadelphia worker, lives in New Jersey/);
+    const resultText = await evaluate('document.getElementById("result").innerText');
     assert.match(resultText, /Net pay/);
-    await shot('09-results-desktop', true);
-    await setSize(390, 844);
-    await evaluate('window.scrollTo(0,0)');
-    const again = await evaluate(measureExpr);
-    assert.equal(again.text, 'Run again');
-    assert.equal(again.bg, 'rgb(22, 24, 26)');
-    assert.equal(again.disabled, false);
-    assert.ok(again.top >= 0 && again.bottom <= again.innerHeight + 0.5, `results button ${again.top}-${again.bottom}`);
-    await shot('09-results-mobile', true);
+    assert.match(resultText, /Withheld from the employee/);
+    assert.match(resultText, /Paid by the employer/);
+    assert.match(resultText, /Social Security/);
+    await shot('calculator-results', true);
   } finally {
     try { ws.close(); } catch { /* already closed */ }
     chrome.kill();
