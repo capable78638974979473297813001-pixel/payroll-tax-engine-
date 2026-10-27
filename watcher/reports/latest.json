@@ -1,22 +1,102 @@
 {
- "date": "2026-10-26",
+ "date": "2026-10-27",
  "counts": {
-  "unchanged": 1135,
-  "blocked": 36,
-  "changed": 23,
+  "unchanged": 1418,
+  "new": 106,
+  "changed": 32,
+  "blocked": 33,
   "gone": 5,
-  "new": 13,
-  "unreachable": 3
+  "unreachable": 4
  },
- "total": 1215,
+ "total": 1598,
  "changed": [
   {
-   "id": "in-f3e8cf456b~78e8bd47",
-   "jurisdiction": "IN",
-   "title": "ACH Debit Block Information (linked from Indiana DOR withholding)",
-   "url": "https://intime.dor.in.gov/eServices/WebFiles/ACHDebitBlockGuide.pdf",
-   "detail": "17 lines added, 5 removed",
+   "id": "al-9366421409",
+   "jurisdiction": "AL",
+   "title": "Alabama DOR withholding tax",
+   "url": "https://www.revenue.alabama.gov/individual-corporate/withholding-tax-2/",
+   "detail": "1 lines added, 1 removed; 1 links added, 1 removed",
    "figures_added": [],
+   "figures_removed": [],
+   "links_added": [
+    "https://www.revenue.alabama.gov/individual-corporate/certificate-of-compliance/"
+   ],
+   "links_removed": [
+    "https://www.revenue.alabama.gov/individual-corporate/individual-income-tax-filing-information/"
+   ],
+   "significant": true
+  },
+  {
+   "id": "az-b66098e04c",
+   "jurisdiction": "AZ",
+   "title": "City of Flagstaff -- City of Flagstaff announces minimum wage for 2026",
+   "url": "https://www.flagstaff.az.gov/CivicAlerts.aspx?AID=2165",
+   "detail": "2 lines added, 2 removed",
+   "figures_added": [],
+   "figures_removed": [],
+   "links_added": [],
+   "links_removed": [],
+   "significant": true
+  },
+  {
+   "id": "co-2a0cc707e8",
+   "jurisdiction": "CO",
+   "title": "CDLE press release -- Colorado minimum wage will increase to $15.71/hour in 2027",
+   "url": "https://cdle.colorado.gov/press-releases/press-release-colorado-minimum-wage-will-increase-to-1571/hour-in-2027",
+   "detail": "1 lines added, 1 removed (link lists / headlines only)",
+   "figures_added": [],
+   "figures_removed": [],
+   "links_added": [],
+   "links_removed": [],
+   "significant": false
+  },
+  {
+   "id": "il-584349fcaf~c372ba64",
+   "jurisdiction": "IL",
+   "title": "Publication 110 (linked from Illinois withholding income tax)",
+   "url": "https://tax.illinois.gov/content/dam/soi/en/web/tax/research/publications/pubs/documents/pub-110.pdf",
+   "detail": "5 lines added, 5 removed",
+   "figures_added": [],
+   "figures_removed": [],
+   "links_added": [],
+   "links_removed": [],
+   "significant": true
+  },
+  {
+   "id": "il-3574699e38~c372ba64",
+   "jurisdiction": "IL",
+   "title": "Publication 110, W-2, W-2c, W-2G, and 1099 Filing and Storage Requirem (linked from Pub-130, Withholding Illinois Income Tax for My Em)",
+   "url": "https://tax.illinois.gov/content/dam/soi/en/web/tax/research/publications/pubs/documents/pub-110.pdf",
+   "detail": "5 lines added, 5 removed",
+   "figures_added": [],
+   "figures_removed": [],
+   "links_added": [],
+   "links_removed": [],
+   "significant": true
+  },
+  {
+   "id": "ky-ceacde3868",
+   "jurisdiction": "KY",
+   "title": "City of Lyndon occupational tax FAQ (GovOS / munirevs)",
+   "url": "https://lyndonky.munirevs.com/faq/",
+   "detail": "0 lines added, 1 removed",
+   "figures_added": [],
+   "figures_removed": [],
+   "links_added": [],
+   "links_removed": [],
+   "significant": true
+  },
+  {
+   "id": "md-d8888f97db",
+   "jurisdiction": "MD",
+   "title": "Howard County, MD -- Minimum Wage schedule (Finance Department)",
+   "url": "https://www.howardcountymd.gov/finance/minimum-wage",
+   "detail": "4 lines added, 0 removed",
+   "figures_added": [
+    "$16.45",
+    "$16.45",
+    "$16.45"
+   ],
    "figures_removed": [],
    "links_added": [],
    "links_removed": [],
@@ -28,6 +108,42 @@
    "title": "Michigan LEO -- Michigan's Minimum Wage Set to Increase on Jan. 1, 2026",
    "url": "https://www.michigan.gov/leo/news/2025/12/08/michigans-minimum-wage-set-to-increase-on-jan-1-2026",
    "detail": "1 lines added, 1 removed (link lists / headlines only)",
+   "figures_added": [],
+   "figures_removed": [],
+   "links_added": [],
+   "links_removed": [],
+   "significant": false
+  },
+  {
+   "id": "mi-b2211f9083",
+   "jurisdiction": "MI",
+   "title": "Other Michigan cities with income tax (City of Grand Rapids rate table)",
+   "url": "https://www.grandrapidsmi.gov/departments/fiscal-services/income-tax/other-michigan-cities-with-income-tax/",
+   "detail": "2 lines added, 2 removed (link lists / headlines only)",
+   "figures_added": [],
+   "figures_removed": [],
+   "links_added": [],
+   "links_removed": [],
+   "significant": false
+  },
+  {
+   "id": "mo-2d09c4e722",
+   "jurisdiction": "MO",
+   "title": "St. Louis: earnings tax department",
+   "url": "https://www.stlouis-mo.gov/government/departments/collector/earnings-tax/index.cfm",
+   "detail": "1 lines added, 1 removed (link lists / headlines only)",
+   "figures_added": [],
+   "figures_removed": [],
+   "links_added": [],
+   "links_removed": [],
+   "significant": false
+  },
+  {
+   "id": "nc-e720098358",
+   "jurisdiction": "NC",
+   "title": "NCDOR -- Withholding Tax Frequently Asked Questions",
+   "url": "https://www.ncdor.gov/withholding-tax-frequently-asked-questions",
+   "detail": "25 lines added, 0 removed (link lists / headlines only)",
    "figures_added": [],
    "figures_removed": [],
    "links_added": [],
@@ -51,14 +167,15 @@
    "jurisdiction": "OH",
    "title": "RITA (Regional Income Tax Agency): news and updates (municipal rate and law changes)",
    "url": "https://www.ritaohio.com/Resources/News",
-   "detail": "3 lines added, 3 removed; 1 links added, 1 removed",
+   "detail": "3 lines added, 3 removed; 1 links added, 2 removed",
    "figures_added": [],
    "figures_removed": [],
    "links_added": [
-    "https://www.ritaohio.com/Resources/News/ViewNews?gid=5a631cf5-960a-4dd5-a1d3-e48205f7b184"
+    "https://www.ritaohio.com/Resources/News/ViewNews?gid=ba5e025e-8b93-419c-9600-d6d928982406"
    ],
    "links_removed": [
-    "https://www.ritaohio.com/Resources/News/ViewNews?gid=204f5f9e-5db0-4abc-bd09-664a4a041bc4"
+    "https://www.ritaohio.com/Resources/News/ViewNews?gid=42ffceb6-48a3-4033-aa4a-ed9e1d2f360d",
+    "https://www.ritaohio.com/Resources/News/ViewNews?gid=62ede43a-31de-436c-ab3a-b03d2daddd8d"
    ],
    "significant": true
   },
@@ -263,10 +380,10 @@
    "figures_added": [],
    "figures_removed": [],
    "links_added": [
-    "https://www.ritaohio.com/Resources/News/ViewNews?gid=5a631cf5-960a-4dd5-a1d3-e48205f7b184"
+    "https://www.ritaohio.com/Resources/News/ViewNews?gid=ba5e025e-8b93-419c-9600-d6d928982406"
    ],
    "links_removed": [
-    "https://www.ritaohio.com/Resources/News/ViewNews?gid=9c040fc4-37c8-4ca4-b331-0c8ee46ad509"
+    "https://www.ritaohio.com/Resources/News/ViewNews?gid=42ffceb6-48a3-4033-aa4a-ed9e1d2f360d"
    ],
    "significant": true
   },
@@ -275,38 +392,47 @@
    "jurisdiction": "OR",
    "title": "Oregon Department of Revenue: news",
    "url": "https://www.oregon.gov/dor/news/Pages/default.aspx",
-   "detail": "18 lines added, 18 removed; 3 links added, 2 removed",
+   "detail": "33 lines added, 30 removed; 7 links added, 7 removed",
    "figures_added": [],
    "figures_removed": [],
    "links_added": [
-    "https://apps.oregon.gov/oregon-newsroom/OR/OSFM/Posts",
-    "https://apps.oregon.gov/oregon-newsroom/OR/OSFM/Posts/Post/newport-fire",
-    "https://apps.oregon.gov/oregon-newsroom/OR/Posts/Search?from=10%2F25%2F2026&to=10%2F25%2F2026"
+    "https://apps.oregon.gov/oregon-newsroom/OR/DEQ/Posts",
+    "https://apps.oregon.gov/oregon-newsroom/OR/DEQ/Posts/Post/deq-issues-nine-penalties-in-sept-2026",
+    "https://apps.oregon.gov/oregon-newsroom/OR/GOV/Posts/Post/governor-kotek-outlines-next-steps-of-state-response-to-silver-rail-elementary-tragedy",
+    "https://apps.oregon.gov/oregon-newsroom/OR/OHCS/Posts/Post/oregon-housing-and-community-services-celebrates-grand-reopening-of-233-affordable-homes-for-older-adults-in-portland",
+    "https://apps.oregon.gov/oregon-newsroom/OR/Posts/Search?cat=Housing",
+    "https://apps.oregon.gov/oregon-newsroom/OR/Posts/Search?from=10%2F26%2F2026&to=10%2F26%2F2026",
+    "https://apps.oregon.gov/oregon-newsroom/OR/SOS/Posts/Post/secretary-read-to-hold-virtual-oregon-votes-town-hall"
    ],
    "links_removed": [
-    "https://apps.oregon.gov/oregon-newsroom/OR/DOR/Posts",
-    "https://apps.oregon.gov/oregon-newsroom/OR/DOR/Posts/Post/Taxpayer-Advocate-urges-Oregonians-to-volunteer-to-help-low-income-families"
+    "https://apps.oregon.gov/oregon-newsroom/OR/GOV/Posts/Post/governor-kotek-community-leaders-discuss-need-to-expand-affordable-childcare-and-preschool",
+    "https://apps.oregon.gov/oregon-newsroom/OR/ODHS/Posts/Post/aviso-publico-y-solicitud-de-comentarios-sobre-los-cambios-a-las-exenciones-de-medicaid-de-odds-10-2026",
+    "https://apps.oregon.gov/oregon-newsroom/OR/OEM/Posts/Post/SPIRE-UTVs-2026",
+    "https://apps.oregon.gov/oregon-newsroom/OR/Posts/Search?cat=Preparedness",
+    "https://apps.oregon.gov/oregon-newsroom/OR/Posts/Search?cat=Spanish",
+    "https://apps.oregon.gov/oregon-newsroom/OR/Posts/Search?from=10%2F24%2F2026&to=10%2F24%2F2026",
+    "https://apps.oregon.gov/oregon-newsroom/OR/SOS/Posts/Post/drop-box-update-from-oregon-secretary-tobias-read"
    ],
    "significant": true
   },
   {
-   "id": "us-f10e455e50",
+   "id": "us-61cf4e8aaf~b289ef45",
    "jurisdiction": "US",
-   "title": "IRS draft tax forms: payroll forms only (W-4, W-4P/R, Pub 15/15-T, 940/941/944, W-2/W-3)",
-   "url": "https://www.irs.gov/draft-tax-forms",
-   "detail": "read with a headless browser; 1 lines added, 1 removed; 1 links added, 1 removed",
-   "figures_added": [],
-   "figures_removed": [],
-   "links_added": [
-    "https://www.irs.gov/pub/irs-dft/p15a--dft.pdf"
+   "title": "86 FR 22835 (linked from Executive Order 14236, Additional Rescissions of H)",
+   "url": "https://www.federalregister.gov/documents/2021/04/30/2021-09263/increasing-the-minimum-wage-for-federal-contractors",
+   "detail": "3 lines added, 3 removed",
+   "figures_added": [
+    "51,656"
    ],
-   "links_removed": [
-    "https://www.irs.gov/pub/irs-dft/p15--dft.pdf"
+   "figures_removed": [
+    "51,548"
    ],
+   "links_added": [],
+   "links_removed": [],
    "significant": true
   }
  ],
- "significant_changes": 22,
+ "significant_changes": 27,
  "broken": [
   "https://www.tuskegeealabama.gov/finance-department/files/occupational-tax-form",
   "https://www.tuskegeealabama.gov/sites/g/files/vyhlif3946/f/uploads/infobrochure_word.pdf",
@@ -482,13 +608,12 @@
    "detail": "only 0 of 2627 rows carry a rate, so the 2027 register is not published yet; nothing to compare"
   }
  ],
- "followed_documents": 570,
- "followed_documents_unread": 6,
- "followed_documents_deferred": 469,
- "verified": 1171,
- "unverified": 44,
+ "followed_documents": 948,
+ "followed_documents_unread": 103,
+ "followed_documents_deferred": 0,
+ "verified": 1556,
+ "unverified": 42,
  "never_baselined": [
-  "https://www.federalregister.gov/documents/2026/10/08/2026-20646/minimum-wage-for-federal-contracts-covered-by-executive-order-13658-notice-of-rate-change-in-effect",
   "https://birminghamal.hdlgov.com/base64files/TAXES_FORM_4.pdf",
   "https://www.tuskegeealabama.gov/finance-department/files/occupational-tax-form",
   "https://www.rbcalabama.com/download/revenue-g-1/?wpdmdl=730&masterkey=60c8bce41072f",
@@ -504,11 +629,9 @@
   "https://www.wilmingtonde.gov/residents/earned-income-tax-and-net-profits-tax",
   "https://www.ilga.gov/legislation/ilcs/ilcs4.asp?DocName=073500050K12-803",
   "https://illinoiscomptroller.gov/state-agencies/bulletins-forms/payroll-bulletins/illinois-state-income-tax-exemptions-2026",
-  "https://codelibrary.amlegal.com/codes/augusta/latest/augusta_ky/0-0-0-8998",
   "https://codelibrary.amlegal.com/codes/elizabethtownky/latest/elizabethtown_ky/0-0-0-3203",
   "https://codelibrary.amlegal.com/codes/marionky/latest/marion_ky/0-0-0-22684",
   "https://codelibrary.amlegal.com/codes/mckeeky/latest/mckee_ky/0-0-0-2883",
-  "https://hartfordky.org/notice-of-occupational-license-fees/",
   "https://library.municode.com/ky/hickman/codes/code_of_ordinances?nodeId=COOR_CH14LIBURE_ARTIIOCLITA",
   "https://library.municode.com/ky/mayfield/codes/code_of_ordinances?nodeId=COOR_CH9OCLITARE_ARTIIOCLITA_S9-42EANEPRTAPARE",
   "https://pikevilleky.gov/business/",
@@ -523,5 +646,5 @@
   "https://villageofcollegecorner.org/wp-content/uploads/2025/04/Rita-Repeal.pdf",
   "https://www.wilsonvilleoregon.gov/finance/page/transit-payroll-tax-information"
  ],
- "max_consecutive_failures": 34
+ "max_consecutive_failures": 35
 }

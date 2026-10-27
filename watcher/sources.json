@@ -7014,6 +7014,42 @@
    "origin": "curated"
   },
   {
+   "id": "wv-081b679e74",
+   "jurisdiction": "WV",
+   "title": "City of Montgomery City Service Fee Remittance Form",
+   "url": "https://montgomery.wv.gov/media/19506/download?inline=",
+   "origin": "data",
+   "used_by": [
+    "data/states/WV-2025.json",
+    "data/states/WV-2026.json",
+    "data/states/WV-2027.json"
+   ]
+  },
+  {
+   "id": "wv-cd03f426e5",
+   "jurisdiction": "WV",
+   "title": "City of Wheeling Article 797 City Service Fee",
+   "url": "https://www.wheelingwv.gov/media/Finance/City%20Service%20Fee/City%20Service%20Fee-%20Ordinance%20Final.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/states/WV-2025.json",
+    "data/states/WV-2026.json",
+    "data/states/WV-2027.json"
+   ]
+  },
+  {
+   "id": "wv-5d301b42c5",
+   "jurisdiction": "WV",
+   "title": "Fairmont administrative regulations section 1.2",
+   "url": "https://fairmontwv.gov/DocumentCenter/View/2198",
+   "origin": "data",
+   "used_by": [
+    "data/states/WV-2025.json",
+    "data/states/WV-2026.json",
+    "data/states/WV-2027.json"
+   ]
+  },
+  {
    "id": "wv-5a62d719fd",
    "jurisdiction": "WV",
    "title": "W. Va. Code \u00a7 38-5A-3 \u2014 ordinary (consumer credit sale/consumer loan judgment) garnishment limited to the lesser of 20% of disposable earnings, or the amount by which disposable earnings exceed 50 times the FEDERAL minimum hourly wage specifically (not a 'greater of state or federal' test)",
@@ -7110,6 +7146,18 @@
    "url": "https://tax.wv.gov/business/withholding/pages/withholdingtaxforms.aspx",
    "kind": "index",
    "origin": "curated"
+  },
+  {
+   "id": "wv-509bb97d7f",
+   "jurisdiction": "WV",
+   "title": "Wheeling employer worksheet CSF-3",
+   "url": "https://www.wheelingwv.gov/media/Finance/City%20Service%20Fee/City%20Service%20Fee%20-%20Employer%20Worksheet%20Form%20CSF-3.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/states/WV-2025.json",
+    "data/states/WV-2026.json",
+    "data/states/WV-2027.json"
+   ]
   }
  ]
 }
