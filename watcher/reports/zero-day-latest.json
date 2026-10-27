@@ -1,5 +1,5 @@
 {
- "date": "2026-10-26",
+ "date": "2026-10-27",
  "fixed": [],
  "verified": [
   {
@@ -9,8 +9,21 @@
    "edits": []
   }
  ],
- "possible": [],
- "informational_changes": 23,
+ "possible": [
+  {
+   "jurisdiction": "MD",
+   "title": "Howard County, MD -- Minimum Wage schedule (Finance Department)",
+   "url": "https://www.howardcountymd.gov/finance/minimum-wage",
+   "figures": [
+    "$16.45"
+   ],
+   "feeds": [
+    "data/minimum-wage/local/MD-local-2026.json",
+    "data/minimum-wage/local/MD-local-2027.json"
+   ]
+  }
+ ],
+ "informational_changes": 31,
  "blind_spots": [
   {
    "jurisdiction": "AL",
@@ -99,9 +112,7 @@
    "why": "HTTP 404",
    "never_read": true,
    "feeds": [
-    "data/states/CO-2025.json",
-    "data/states/CO-2026.json",
-    "data/states/CO-2027.json"
+    "data/states/CO-2025.json"
    ]
   },
   {
@@ -139,18 +150,6 @@
   },
   {
    "jurisdiction": "KY",
-   "title": "City of Augusta Code of Ordinances Sec. 110.02",
-   "url": "https://codelibrary.amlegal.com/codes/augusta/latest/augusta_ky/0-0-0-8998",
-   "why": "HTTP 403: the site refuses automated requests; a real browser was refused too",
-   "never_read": true,
-   "feeds": [
-    "data/local/KY-occupational-2025.json",
-    "data/local/KY-occupational-2026.json",
-    "data/local/KY-occupational-2027.json"
-   ]
-  },
-  {
-   "jurisdiction": "KY",
    "title": "City of Elizabethtown, KY \u2014 Code of Ordinances Chapter 110, \u00a7 110.03 Occupational License Tax Payment Required",
    "url": "https://codelibrary.amlegal.com/codes/elizabethtownky/latest/elizabethtown_ky/0-0-0-3203",
    "why": "HTTP 403: the site refuses automated requests; a real browser was refused too",
@@ -177,18 +176,6 @@
    "jurisdiction": "KY",
    "title": "City of McKee Code of Ordinances \u00a7 110.02 LICENSE REQUIRED; FEES",
    "url": "https://codelibrary.amlegal.com/codes/mckeeky/latest/mckee_ky/0-0-0-2883",
-   "why": "HTTP 403: the site refuses automated requests; a real browser was refused too",
-   "never_read": true,
-   "feeds": [
-    "data/local/KY-occupational-2025.json",
-    "data/local/KY-occupational-2026.json",
-    "data/local/KY-occupational-2027.json"
-   ]
-  },
-  {
-   "jurisdiction": "KY",
-   "title": "City of Hartford -- Notice of Occupational License Fees",
-   "url": "https://hartfordky.org/notice-of-occupational-license-fees/",
    "why": "HTTP 403: the site refuses automated requests; a real browser was refused too",
    "never_read": true,
    "feeds": [
@@ -321,13 +308,15 @@
    ]
   },
   {
-   "jurisdiction": "US",
-   "title": "Federal Register -- Minimum Wage for Federal Contracts Covered by Executive Order 13658: Notice of Rate Change in Effect",
-   "url": "https://www.federalregister.gov/documents/2026/10/08/2026-20646/minimum-wage-for-federal-contracts-covered-by-executive-order-13658-notice-of-rate-change-in-effect",
-   "why": "redirected to a bot check (https://unblock.federalregister.gov/); a real browser was refused too",
-   "never_read": true,
+   "jurisdiction": "AL",
+   "title": "City of Fairfield -- Ordinance 1019, Occupational Tax",
+   "url": "https://cityoffairfieldal.org/wp-content/uploads/2025/02/Ordinance-1019-Occupational-Tax_rotated.pdf",
+   "why": "HTTP 429: the site refuses automated requests; a real browser was refused too",
+   "never_read": false,
    "feeds": [
-    "data/minimum-wage/federal-2027.json"
+    "data/local/AL-municipalities-2025.json",
+    "data/local/AL-municipalities-2026.json",
+    "data/local/AL-municipalities-2027.json"
    ]
   },
   {
@@ -368,18 +357,6 @@
   },
   {
    "jurisdiction": "KY",
-   "title": "City of Nortonville Code of Ordinances \u00a7 110.03 OCCUPATIONAL LICENSE FEE PAYMENT REQUIRED",
-   "url": "https://codelibrary.amlegal.com/codes/nortonvilleky/latest/nortonville_ky/0-0-0-3279",
-   "why": "read with a browser last time; a real browser was refused too",
-   "never_read": false,
-   "feeds": [
-    "data/local/KY-occupational-2025.json",
-    "data/local/KY-occupational-2026.json",
-    "data/local/KY-occupational-2027.json"
-   ]
-  },
-  {
-   "jurisdiction": "KY",
    "title": "City of Simpsonville Code of Ordinances Sec. 110.27",
    "url": "https://codelibrary.amlegal.com/codes/simpsonville/latest/simpsonville_ky/0-0-0-6803",
    "why": "read with a browser last time; a real browser was refused too",
@@ -392,9 +369,9 @@
   },
   {
    "jurisdiction": "KY",
-   "title": "Louisville Metro Revenue Commission -- W-1KJC Instructions and Louisville Metro Code Sec. 110.02",
-   "url": "https://louisvilleky.gov/sites/default/files/2024-12/w-1kjc_instructions_2025.pdf",
-   "why": "HTTP 403: the site refuses automated requests; a real browser was refused too",
+   "title": "City of Georgetown, KY \u2014 Taxes and license fees (occupational license tax: net profits vs gross receipts)",
+   "url": "https://www.georgetownky.gov/2167/Taxes-License-Fees",
+   "why": "read with a browser last time; a real browser was refused too",
    "never_read": false,
    "feeds": [
     "data/local/KY-occupational-2025.json",
@@ -433,6 +410,18 @@
    "feeds": [
     "data/states/NJ-2026.json",
     "data/states/NJ-2027.json"
+   ]
+  },
+  {
+   "jurisdiction": "OH",
+   "title": "Ohio Auditor of State, Liberty Township (Henry County) regular audit 2021-2022: 'The JEDD was dissolved June 1, 2021 by the Township and the Village.'",
+   "url": "https://ohioauditor.gov/Auditsearch/Reports/2023/Liberty_Township_22_21_Henry_FINAL.pdf",
+   "why": "URLError: <urlopen error timed out>",
+   "never_read": false,
+   "feeds": [
+    "data/local/OH-jedd-jedz-2025.json",
+    "data/local/OH-jedd-jedz-2026.json",
+    "data/local/OH-jedd-jedz-2027.json"
    ]
   }
  ]
