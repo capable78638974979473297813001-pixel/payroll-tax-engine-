@@ -90,14 +90,18 @@ after(() => {
 });
 
 describe('sitemap, robots, and Search Console', () => {
-  test('robots.txt allows the site, disallows private paths, and points at the sitemap', async () => {
+  test('robots.txt allows the site, blocks only the JSON API, and points at the sitemap', async () => {
     const r = await fetch(`${BASE}/robots.txt`);
     assert.equal(r.status, 200);
     const text = await r.text();
     assert.match(text, /User-agent: \*/);
     assert.match(text, /Allow: \//);
-    for (const path of ['/dashboard', '/signin', '/signup', '/console', '/_states', '/api/', '/v1/']) {
+    // The JSON API is blocked. Account and sign-up pages are not: they carry noindex, which a crawler can only read if it may fetch them.
+    for (const path of ['/api/', '/v1/']) {
       assert.match(text, new RegExp(`Disallow: ${path.replace('/', '\\/')}`));
+    }
+    for (const path of ['/dashboard', '/signin', '/signup', '/console', '/_states']) {
+      assert.doesNotMatch(text, new RegExp(`Disallow: ${path.replace('/', '\\/')}`));
     }
     assert.match(text, new RegExp(`Sitemap: ${ORIGIN}/sitemap.xml`));
     assert.equal(r.headers.get('cache-control'), 'public, max-age=3600');
