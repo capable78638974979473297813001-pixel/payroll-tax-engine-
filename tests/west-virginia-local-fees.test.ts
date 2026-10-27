@@ -32,6 +32,21 @@ test('a same-named city in another state does not exempt a Montgomery WV worker'
 
 for (const year of [2025, 2026, 2027]) {
   const date = `${year}-10-16`;
+  test(`${year}: Fairmont and Wheeling use their city-published monthly amount`, () => {
+    for (const city of ['Fairmont', 'Wheeling']) {
+      assert.equal(fee({ locality: city, residenceCity: 'Charleston' }, date, 'monthly'), 867, city);
+      assert.equal(fee({ locality: city, residenceCity: 'Charleston' }, date, 'semimonthly'), 433, city);
+      assert.equal(fee({ locality: city, residenceCity: 'Charleston' }, date, 'biweekly'), 400, city);
+    }
+    assert.equal(fee({ locality: 'Fairmont', residenceCity: 'Fairmont' }, date, 'monthly'), undefined);
+  });
+  test(`${year}: Parkersburg and Romney use their city-published semimonthly amount`, () => {
+    assert.equal(fee({ locality: 'Parkersburg' }, date, 'semimonthly'), 542);
+    assert.equal(fee({ locality: 'Romney', residenceCity: 'Charleston' }, date, 'semimonthly'), 217);
+    assert.equal(fee({ locality: 'Romney', residenceCity: 'Romney' }, date, 'semimonthly'), undefined);
+    assert.equal(fee({ locality: 'Parkersburg' }, date, 'monthly'), 1083);
+    assert.equal(fee({ locality: 'Romney' }, date, 'monthly'), 433);
+  });
   test(`${year}: Montgomery exempts residents; Rivesville charges only nonresidents`, () => {
     for (const city of ['Montgomery', 'Rivesville']) {
       assert.equal(fee({ locality: city, residenceCity: 'Charleston' }, date), 200, city);
