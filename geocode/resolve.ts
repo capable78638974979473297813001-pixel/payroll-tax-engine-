@@ -532,14 +532,8 @@ export function resolveJurisdiction(
     }
   }
   if (state === 'WV') {
-    result.wvServiceFeeCity = matchAnyPlace(geo.incorporatedPlaces, [
-      'Charleston',
-      'Huntington',
-      'Morgantown',
-      'Parkersburg',
-      'Wheeling',
-      'Weirton',
-    ]);
+    const cities = Object.keys((stateRuleset('WV', checkDate).localIncomeTax as { serviceFeeCities?: Record<string, unknown> } | undefined)?.serviceFeeCities ?? {});
+    result.wvServiceFeeCity = matchAnyPlace(geo.incorporatedPlaces, cities);
   }
   if (state === 'CO') {
     result.coOptCity = matchAnyPlace(geo.incorporatedPlaces, ['Denver', 'Glendale', 'Greenwood Village', 'Sheridan', 'Aurora']);
@@ -571,6 +565,10 @@ export function toCertificateFields(
 ): Partial<StateCertificate> {
   const fields: Partial<StateCertificate> = {};
 
+  // WV resident exemptions require the residence city as well as the work locality.
+  if (resolved.wvServiceFeeCity) {
+    fields[role === 'work' ? 'workCity' : 'residenceCity'] = resolved.wvServiceFeeCity;
+  }
   if (resolved.miCity?.confidence === 'matched' && resolved.miCity.entry) {
     fields[role === 'work' ? 'workCity' : 'residenceCity'] = resolved.miCity.entry.name;
   }
