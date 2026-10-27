@@ -229,6 +229,14 @@ export interface SubscriptionRecord {
 export interface KeyRecord {
   keyHash: string;
   keyPrefix: string;
+  /**
+   * 'test' for a test key: the same engine and data as a live key, never
+   * billed, never counted in the account's usage, and held to a daily cap.
+   * Absent means a live key.
+   */
+  mode?: 'live' | 'test';
+  /** Test keys only: requests so far on this UTC date, for the daily cap. */
+  testDay?: { date: string; calls: number };
   ownerEmail: string;
   ownerName: string;
   company: string;

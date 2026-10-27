@@ -64,6 +64,21 @@
       <code id="newKeyText" style="word-break:break-all"></code>
       <p><button class="btn secondary sm" id="copyNew" type="button">Copy key</button></p>
     </div>
+    <h2 style="font-size:16px;margin-top:36px" id="testkey">Test key</h2>
+    <p class="fine" id="testNote">A test key runs the same engine and data as a live key. It is never billed, does not need a card, and is not counted in the usage above. It is capped per minute and per day, so it cannot stand in for a live key. Test keys start with sk_test_.</p>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Key</th><th>Expires</th><th>Last used</th><th class="num">Today</th><th class="num">Daily limit</th></tr></thead>
+      <tbody id="testRows"><tr><td colspan="5">No test key yet.</td></tr></tbody>
+    </table></div>
+    <div style="margin-top:16px;display:flex;gap:12px;align-items:center;flex-wrap:wrap">
+      <button class="btn secondary sm" id="makeTest" type="button">Create a test key</button>
+      <span class="fine" id="makeTestNote">Creating a new test key switches the old one off. Your live key is not touched.</span>
+    </div>
+    <div id="newTestKey" hidden style="margin-top:16px;border:1px solid var(--rule);padding:16px">
+      <p class="fine" style="margin:0 0 8px">Your new test key. Copy it now; it is not shown again.</p>
+      <code id="newTestKeyText" style="word-break:break-all"></code>
+      <p><button class="btn secondary sm" id="copyTest" type="button">Copy key</button></p>
+    </div>
     <h2 style="font-size:16px;margin-top:36px" id="recent">Recent calls</h2>
     <p class="fine">Newest first. Trial and unbilled calls are labeled. A payroll run shows how many paychecks it calculated.</p>
     <div class="table-wrap"><table>
@@ -148,6 +163,18 @@
         $('st-all').textContent = (all.paychecks || 0).toLocaleString('en-US');
         $('st-all-req').textContent = requestsLine(all.requests);
       }
+      var tk = u.testKey, tbody = $('testRows');
+      tbody.textContent = '';
+      var trow = document.createElement('tr');
+      if (tk) {
+        td(trow, tk.keyMasked.replace(/•+$/, '••••'), 'mono'); td(trow, tk.expired ? 'Expired' : when(tk.expiresAt)); td(trow, whenTime(tk.lastUsedAt));
+        td(trow, (tk.callsToday || 0).toLocaleString('en-US'), 'num'); td(trow, tk.limits.requestsPerDay.toLocaleString('en-US'), 'num');
+        $('makeTest').textContent = 'Replace my test key';
+      } else {
+        var tcell = document.createElement('td'); tcell.colSpan = 5; tcell.textContent = 'No test key yet.'; trow.appendChild(tcell);
+        $('makeTest').textContent = 'Create a test key';
+      }
+      tbody.appendChild(trow);
       if (!u.hasKey) {
         body.textContent = '';
         var tr = document.createElement('tr'); var c = document.createElement('td'); c.colSpan = 6;
@@ -216,6 +243,22 @@
       $('reissueNote').textContent = 'Done. The previous key no longer works.';
       loadUsage();
     });
+  });
+  $('makeTest').addEventListener('click', function () {
+    var btn = this; Omnia.setLoading(btn, true);
+    Omnia.api('/api/issue-key', { method: 'POST', headers: Omnia.authHeaders(), body: JSON.stringify({ mode: 'test' }) }).then(function (r) {
+      Omnia.setLoading(btn, false);
+      if (!r.ok) { $('makeTestNote').textContent = (r.body && r.body.error) || 'Could not create a test key.'; return; }
+      $('newTestKeyText').textContent = r.body.key;
+      $('newTestKey').hidden = false;
+      $('makeTestNote').textContent = 'Done. Any earlier test key no longer works.';
+      loadUsage();
+    });
+  });
+  $('copyTest').addEventListener('click', function () {
+    var t = $('newTestKeyText').textContent;
+    var done = function () { Omnia.toast('Test key copied to clipboard.'); };
+    if (navigator.clipboard) navigator.clipboard.writeText(t).then(done, done); else done();
   });
   $('copyNew').addEventListener('click', function () {
     var t = $('newKeyText').textContent;

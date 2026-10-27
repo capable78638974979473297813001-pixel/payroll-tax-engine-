@@ -25,6 +25,7 @@ let registry = {};
 let states = [];
 let busy = false;
 let lookupBusy = false;
+let lastMode = '';
 
 function num(id) {
   const el = $(id);
@@ -120,14 +121,14 @@ function setKeyGate(forLookup) {
   let label;
   if (!signedIn()) {
     text = forLookup
-      ? 'Sign up to get an API key before an address can be looked up. This page does not issue a key.'
-      : 'Sign up to get an API key before this calculation can run. This page does not issue a key.';
+      ? 'Sign up to get an API key before an address can be looked up. A test key is free and needs no card. This page does not issue a key.'
+      : 'Sign up to get an API key before this calculation can run. A test key is free and needs no card. This page does not issue a key.';
     href = '/signup';
     label = 'Create an account';
   } else {
     text = forLookup
-      ? 'Create an API key in your account, then paste it here, before an address can be looked up.'
-      : 'Create an API key in your account, then paste it here, before this calculation can run.';
+      ? 'Create a test key (free, no card) or a live key in your account, then paste it here, before an address can be looked up.'
+      : 'Create a test key (free, no card) or a live key in your account, then paste it here, before this calculation can run.';
     href = '/dashboard';
     label = 'Open your account';
   }
@@ -295,7 +296,9 @@ function showResult(result) {
   };
   const notices = (result.notices || []).map((n) => `<div class="note note-warn"><b>${esc(n.taxId || '')}</b> ${esc(n.note || '')}</div>`).join('');
   const warnings = (result.warnings || []).map((w) => `<div class="note note-warn">${esc(typeof w === 'string' ? w : JSON.stringify(w))}</div>`).join('');
+  const testNote = lastMode === 'test' ? '<p class="hint">Run with a test key: same engine and data as a live key, and not billed.</p>' : '';
   $('result').innerHTML = `<div class="paystub">
+    ${testNote}
     <p class="meta">${esc(result.checkDate || '')}</p>
     <div class="net-pay"><span>Net pay</span><b>${money(result.netPay || 0)}</b></div>
     <p class="meta">Gross ${money(result.grossPay || 0)} · Pre-tax deductions ${money(result.pretaxDeductions || 0)} · Post-tax deductions ${money(result.posttaxDeductions || 0)}</p>
@@ -392,6 +395,7 @@ async function runCalc(ev) {
       body: JSON.stringify(request),
     });
     const body = await res.json().catch(() => ({}));
+    lastMode = res.headers.get('Omnia-Mode') || '';
     if (res.status === 401) {
       setKeyGate(false);
       return;

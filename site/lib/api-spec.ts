@@ -459,6 +459,66 @@ export function openApiDocument(version: string): Record<string, unknown> {
           },
         },
       },
+      '/v1/paycheck/compare': {
+        post: {
+          operationId: 'comparePaychecks',
+          summary: 'Compare two paychecks and explain the difference',
+          description:
+            'Calculates two paychecks with the engine and says what moved between them. Send `before` and either `after` (a full second request) or `change` (only the fields that differ, merged onto `before`: objects merge, arrays and values replace, `null` removes a field). ' +
+            'Both requests are validated exactly as `POST /v1/paycheck` validates one; a failure names the side in the `details` path (`before.`, `after.` or `change.`). ' +
+            'The explanation is not a guess: each input difference is applied to `before` one at a time, in a fixed order, and the engine is re-run, so every step is an engine result and the steps add up to the whole difference. When changes interact, another order can split the credit differently; the total is the same. ' +
+            'Billed as two paychecks when it succeeds, nothing when it is refused. Garnishment and minimum-wage extras are not part of the comparison.',
+          requestBody: {
+            required: true,
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  required: ['before'],
+                  properties: {
+                    before: { $ref: '#/components/schemas/PaycheckRequest' },
+                    after: { $ref: '#/components/schemas/PaycheckRequest' },
+                    change: { type: 'object', additionalProperties: true, description: 'Merged onto `before`. Send this or `after`, not both.' },
+                  },
+                },
+                examples: { raiseAndMove: { summary: 'The same employee after a raise and a move to California', value: { before: paycheckRequestExamples[Object.keys(paycheckRequestExamples)[0]!]!.value, change: { workState: { code: 'CA' } } } } },
+              },
+            },
+          },
+          responses: {
+            '200': {
+              description: 'Both paychecks, and the comparison: `totals` (before, after, change), `taxes` (only the taxes that moved), `inputChanges`, `steps` (each with `summary`, `netPayChange`, the `taxes` it moved and a one-line `narrative`) and `notes`.',
+              content: { 'application/json': { schema: { type: 'object', required: ['before', 'after', 'comparison'], properties: { before: { type: 'object', additionalProperties: true }, after: { type: 'object', additionalProperties: true }, comparison: { type: 'object', additionalProperties: true } } } } },
+            },
+            '400': errorResponse('The body is not valid JSON.', 'invalid_json'),
+            '401': errorResponse('No key, an invalid key, or an expired key.', 'invalid_key'),
+            '422': errorResponse('Either request failed validation, or the engine cannot compute it.', 'invalid_input'),
+            '429': errorResponse('Too many requests this minute.', 'rate_limited'),
+          },
+        },
+      },
+      '/mcp': {
+        post: {
+          operationId: 'mcp',
+          summary: 'Model Context Protocol endpoint',
+          description:
+            'A Model Context Protocol server over streamable HTTP, for AI assistants and agents. One JSON-RPC 2.0 message per request (no batches); replies are JSON. ' +
+            'Supports `initialize`, `ping`, `tools/list` and `tools/call`. Tools: `calculate_paycheck`, `compare_paychecks`, `lookup_address`, `coverage`. ' +
+            'Authenticate with the same bearer key. A tool call is recorded and billed like the REST endpoint it matches: one paycheck, two for a comparison, none for an address lookup or coverage. A refused call is not billed. A call that fails validation comes back as a result with `isError: true`, not as a JSON-RPC error.',
+          requestBody: {
+            required: true,
+            content: { 'application/json': { schema: { type: 'object', required: ['jsonrpc', 'method'], properties: { jsonrpc: { const: '2.0' }, id: { type: ['string', 'integer'] }, method: { type: 'string' }, params: { type: 'object', additionalProperties: true } } } } },
+          },
+          responses: {
+            '200': { description: 'A JSON-RPC response.', content: { 'application/json': { schema: { type: 'object', additionalProperties: true } } } },
+            '202': { description: 'A notification was accepted. No body.' },
+            '400': { description: 'Not JSON, a batch, or not a JSON-RPC 2.0 request.' },
+            '401': errorResponse('No key, an invalid key, or an expired key.', 'invalid_key'),
+            '403': { description: 'A browser request from an origin that is not allowed.' },
+            '429': errorResponse('Too many requests this minute.', 'rate_limited'),
+          },
+        },
+      },
       '/v1/address': {
         post: {
           operationId: 'resolveAddress',
@@ -507,7 +567,7 @@ export function openApiDocument(version: string): Record<string, unknown> {
       },
     },
     components: {
-      securitySchemes: { bearerAuth: { type: 'http', scheme: 'bearer', description: 'An API key from the console, sent as `Authorization: Bearer <key>`.' } },
+      securitySchemes: { bearerAuth: { type: 'http', scheme: 'bearer', description: 'An API key from the console, sent as `Authorization: Bearer <key>`. A live key (`sk_live_`) is billed per calculation and needs a card on file. A test key (`sk_test_`) runs the same engine and data, is never billed, and is capped per minute and per day.' } },
       headers: { XOmniaVersion: { schema: { type: 'string' }, description: 'The API version that served the request.' } },
       schemas: {
         PaycheckRequest: schema,
