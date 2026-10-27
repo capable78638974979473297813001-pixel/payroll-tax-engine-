@@ -331,7 +331,10 @@ test('every step keeps a visible field border and a near-black primary', { timeo
     const split = await evaluate(`document.querySelector('[data-unsupported]').disabled && document.body.innerText.includes('Not supported yet') && document.body.innerText.includes('In progress')`);
     assert.equal(split, true);
     await evaluate(`OmniaSandbox.go(3)`);
-    assert.equal(await evaluate(`document.querySelector('[data-unsupported]').disabled && document.body.innerText.includes("aren't supported yet")`), true);
+    // The 2019-or-earlier form is supported now: its button works and brings its own field.
+    assert.equal(await evaluate(`document.querySelector('[data-unsupported]') === null && !document.body.innerText.includes("aren't supported yet")`), true);
+    assert.equal(await evaluate(`(document.querySelector('[data-action="w4form"][data-form="old"]').click(), document.body.innerText.includes('Allowances') && !!document.querySelector('[data-bind="str:legacyAllowances"]'))`), true);
+    await evaluate(`document.querySelector('[data-action="w4form"][data-form="new"]').click()`);
     await evaluate(`OmniaSandbox.go(5); document.querySelector('[data-action="add-earn"]').click();`);
     assert.equal(await evaluate(`document.querySelector('#earnMenu [data-unsupported]').disabled`), true);
     await evaluate(`OmniaSandbox.go(7)`);

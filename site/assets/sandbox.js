@@ -106,15 +106,27 @@ const LOCAL = {
     { key: 'multnomahCounty', label: 'Multnomah County', type: 'boolean' },
     { key: 'locality', label: 'Locality', hint: 'A caller-resolved transit district, when the lookup did not set one.' },
   ],
-  NJ: [{ key: 'locality', label: 'Locality', hint: 'Newark, when the lookup did not set it.' }],
+  NJ: [
+    { key: 'locality', label: 'Locality', hint: 'Newark, when the lookup did not set it.' },
+    { key: 'newarkResidentApportionmentExcluded', label: 'Newark resident excluded from the employer tax apportionment', type: 'boolean' },
+  ],
   MO: [
     { key: 'locality', label: 'Locality', hint: 'Kansas City or St. Louis.' },
     { key: 'localities', label: 'Localities', type: 'list', hint: 'Comma-separated when more than one city applies.' },
+    { key: 'stLouisPayrollExpenseTaxExempt', label: 'Employer exempt from the St. Louis payroll expense tax', type: 'boolean', hint: 'Nonprofit, government or airport-only. The employee earnings tax still applies.' },
   ],
   DE: [{ key: 'locality', label: 'Locality', hint: 'Wilmington, when the lookup did not set it.' }],
   WA: [{ key: 'locality', label: 'Locality', hint: 'Seattle, when the lookup did not set it.' }],
-  CO: [{ key: 'locality', label: 'Locality', hint: 'Denver, Glendale, Greenwood Village, Sheridan, or Aurora.' }],
-  WV: [{ key: 'locality', label: 'Locality', hint: 'A city with a municipal service fee.' }],
+  CO: [
+    { key: 'locality', label: 'Locality', hint: 'Denver, Glendale, Greenwood Village or Sheridan. Aurora ended its tax on 2025-01-01.' },
+    { key: 'localMonthlyCompensation', label: 'Pay in this locality so far this month', type: 'money', hint: 'Decides whether the monthly head tax applies.' },
+    { key: 'localOPTWithheldThisMonth', label: 'Head tax already withheld this month', type: 'money' },
+    { key: 'localOPTEmployeeWithheldByOtherEmployer', label: 'Another employer already withheld the employee head tax this month', type: 'boolean' },
+  ],
+  WV: [
+    { key: 'locality', label: 'Locality', hint: 'A city with a municipal service fee.' },
+    { key: 'wvLocalFeeAlreadyWithheld', label: 'Service fee already withheld this week', type: 'boolean' },
+  ],
 };
 
 const model = createModel();
@@ -368,14 +380,20 @@ function lookupCard(side, role) {
   if (!side) return '';
   if (side.error) return `<p class="msg">${esc(side.error)}</p>`;
   if (!side.matched) return '';
-  const prec = precisionLabel(side.precision);
+  const prec = precisionLabel(side.precision, side.pointSource);
   const codes = side.codes ? `<div><dt>Code</dt><dd>${esc(side.codes)}</dd></div>` : '';
-  const warn = side.warnings && side.warnings.length
-    ? `<div class="note note-warn">${side.warnings.map((w) => esc(w)).join('<br>')}</div>` : '';
+  const warn = (side.warnings && side.warnings.length
+    ? `<div class="note note-warn">${side.warnings.map((w) => esc(w)).join('<br>')}</div>` : '')
+    // A boundary service that did not answer means a local tax may be missing: an unknown, not a "none here".
+    + (side.failures && side.failures.length
+      ? `<div class="note note-warn"><b>Not checked.</b> ${side.failures.map((w) => esc(w)).join('<br>')}</div>` : '')
+    + (side.notes && side.notes.length
+      ? `<div class="note note-info">${side.notes.map((w) => esc(w)).join('<br>')}</div>` : '');
   return `<div class="match"><div class="match-h"><span class="ok"></span><span>${esc(side.matchedAddress || 'Matched')}</span>${prec ? `<span class="tag tag-auto">${esc(prec)}</span>` : ''}</div><dl><div><dt>State</dt><dd>${esc(side.state || '—')}</dd></div><div><dt>County</dt><dd>${esc(side.county || '—')}</dd></div><div><dt>Place</dt><dd>${esc(side.place || '—')}</dd></div>${codes}</dl>${warn}</div>`;
 }
-function precisionLabel(p) {
-  if (p === 'rooftop' || p === 'rooftop-osm') return 'Rooftop';
+function precisionLabel(p, source) {
+  if (p === 'rooftop-osm') return 'Rooftop (OpenStreetMap)';
+  if (p === 'rooftop') return source ? `Rooftop (${source})` : 'Rooftop';
   if (p === 'parcel-centroid') return 'Parcel';
   if (p === 'neighbor') return 'Nearby building';
   if (p === 'interpolated') return 'Estimated along the street';
@@ -420,17 +438,36 @@ function step2() {
 }
 
 function step3() {
+  const legacy = model.legacyW4;
   const ignored = model.w4Exempt ? '<p class="hint">Ignored while exempt.</p>' : '';
   const radio = (value, label) => `<label class="rad"><input class="dot" type="radio" name="fs" data-bind="str:filingStatus" value="${value}"${(model.filingStatus === value || (value === 'single' && model.filingStatus === 'married_separate')) ? ' checked' : ''}><span class="cl">${esc(label)}</span></label>`;
   const mfs = `<div class="chk"><input class="tick" type="checkbox" data-bind="mfs:1"${model.filingStatus === 'married_separate' ? ' checked' : ''}><span>Married filing separately</span></div>`;
   const creditKids = model.depChildren;
   const creditOther = model.depOther;
+  const seg = `<div class="seg"><button type="button"${legacy ? '' : ' class="on"'} data-action="w4form" data-form="new">2020 or later</button><button type="button"${legacy ? ' class="on"' : ''} data-action="w4form" data-form="old">2019 or earlier</button></div>`;
+  const status = `<div class="f${errClass('federalW4.filingStatus')}" data-path="federalW4.filingStatus"><div class="lab"><label>${legacy ? 'Marital status' : 'Filing status'}</label></div>
+      <div class="rads">${radio('single', legacy ? 'Single' : 'Single or married filing separately')}${legacy ? '' : mfs}${radio('married_joint', legacy ? 'Married' : 'Married filing jointly')}${legacy ? '' : radio('head_of_household', 'Head of household')}</div>
+      ${fieldError('federalW4.filingStatus')}${ignored}<span class="path">federalW4.filingStatus</span></div>`;
+  const advancedBits = `
+      <label class="chk"><input class="tick" type="checkbox" data-bind="bool:w4Exempt"${model.w4Exempt ? ' checked' : ''}><span><span class="cl">Exempt</span><span class="path">federalW4.exempt</span></span></label>
+      <label class="chk"><input class="tick" type="checkbox" data-bind="bool:w4Nra"${model.w4Nra ? ' checked' : ''}><span><span class="cl">Nonresident alien</span><span class="path">federalW4.nonresidentAlien</span></span></label>
+      ${model.employmentCategory === 'clergy' ? `<label class="chk"><input class="tick" type="checkbox" data-bind="bool:w4Voluntary"${model.w4Voluntary ? ' checked' : ''}><span><span class="cl">Voluntary withholding agreement</span><span class="path">federalW4.voluntaryWithholdingAgreement</span></span></label>` : ''}
+      ${legacy ? '' : `<div class="f"><div class="lab"><label>Married filing separately</label></div>
+        <label class="rad" style="border:1px solid var(--rule);border-radius:6px"><input class="dot" type="radio" name="fs-adv" data-bind="str:filingStatus" value="married_separate"${model.filingStatus === 'married_separate' ? ' checked' : ''}><span class="cl">Married filing separately</span></label>
+        <span class="path">federalW4.filingStatus</span></div>`}
+    `;
+  const advCount = model.employmentCategory === 'clergy' ? 3 : 2;
+  if (legacy) {
+    return `<p class="eyebrow">Step 3 of 8</p><h2 class="step-title">Federal W-4</h2><p class="sub">A form from 2019 or earlier. Allowances and a marital status; no credits, other income or deductions.</p>${bannerHtml()}
+    ${seg}
+    ${status}
+    ${wrap('federalW4.legacyAllowances', 'Allowances', `<input class="inp" inputmode="numeric" data-bind="str:legacyAllowances" value="${esc(model.legacyAllowances)}">`, 'Line 5 of the old form. Each one takes $4,300 off the year’s wages.')}
+    ${wrap('federalW4.extraWithholding', 'Extra withholding', moneyInput('cents:extraWithholding', model.extraWithholding), 'Line 6 of the old form, per check.')}
+    ${advanced('s3', 'Advanced', advCount + ' fields', advancedBits)}`;
+  }
   return `<p class="eyebrow">Step 3 of 8</p><h2 class="step-title">Federal W-4</h2><p class="sub">The current form. Counts fill the credit. Only the credit is sent.</p>${bannerHtml()}
-    <div class="seg"><button type="button" class="on">2020 or later</button><button type="button" disabled data-unsupported>Before 2020 <span class="tag tag-ns">Not supported yet</span></button></div>
-    <p class="hint">Pre-2020 forms with allowances aren't supported yet. Ask the employee for a current W-4.</p>
-    <div class="f${errClass('federalW4.filingStatus')}" data-path="federalW4.filingStatus"><div class="lab"><label>Filing status</label></div>
-      <div class="rads">${radio('single', 'Single or married filing separately')}${mfs}${radio('married_joint', 'Married filing jointly')}${radio('head_of_household', 'Head of household')}</div>
-      ${fieldError('federalW4.filingStatus')}${ignored}<span class="path">federalW4.filingStatus</span></div>
+    ${seg}
+    ${status}
     <label class="chk"><input class="tick" type="checkbox" data-bind="bool:multipleJobs"${model.multipleJobs ? ' checked' : ''}><span><span class="cl">Multiple jobs or spouse works</span>${ignored}<span class="path">federalW4.multipleJobs</span></span></label>
     <div class="grid g2">
       <div class="f"><div class="lab"><label>Children under 17</label></div><input class="inp" inputmode="numeric" data-bind="str:depChildren" value="${esc(creditKids)}"><p class="hint">× $2,000. The count is not sent.</p></div>
@@ -442,14 +479,7 @@ function step3() {
       ${wrap('federalW4.deductions', 'Deductions', moneyInput('cents:w4Deductions', model.w4Deductions), 'Annual, beyond the standard deduction.')}
     </div>
     ${wrap('federalW4.extraWithholding', 'Extra withholding', moneyInput('cents:extraWithholding', model.extraWithholding), 'Per check.')}
-    ${advanced('s3', 'Advanced', model.employmentCategory === 'clergy' ? '3 fields' : '2 fields', `
-      <label class="chk"><input class="tick" type="checkbox" data-bind="bool:w4Exempt"${model.w4Exempt ? ' checked' : ''}><span><span class="cl">Exempt</span><span class="path">federalW4.exempt</span></span></label>
-      <label class="chk"><input class="tick" type="checkbox" data-bind="bool:w4Nra"${model.w4Nra ? ' checked' : ''}><span><span class="cl">Nonresident alien</span><span class="path">federalW4.nonresidentAlien</span></span></label>
-      ${model.employmentCategory === 'clergy' ? `<label class="chk"><input class="tick" type="checkbox" data-bind="bool:w4Voluntary"${model.w4Voluntary ? ' checked' : ''}><span><span class="cl">Voluntary withholding agreement</span><span class="path">federalW4.voluntaryWithholdingAgreement</span></span></label>` : ''}
-      <div class="f"><div class="lab"><label>Married filing separately</label></div>
-        <label class="rad" style="border:1px solid var(--rule);border-radius:6px"><input class="dot" type="radio" name="fs-adv" data-bind="str:filingStatus" value="married_separate"${model.filingStatus === 'married_separate' ? ' checked' : ''}><span class="cl">Married filing separately</span></label>
-        <span class="path">federalW4.filingStatus</span></div>
-    `)}`;
+    ${advanced('s3', 'Advanced', advCount + ' fields', advancedBits)}`;
 }
 
 function step4() {
@@ -545,6 +575,7 @@ function step6() {
   const local = model.ytdExtra.localIncomeTax || {};
   const localId = Object.keys(local)[0] || '';
   extraBits.push(wrap(localId ? `ytd.localIncomeTax.${localId}` : 'ytd.localIncomeTax.{id}', 'Local income tax, year to date', `<div class="grid g2"><input class="inp" data-bind="localid" placeholder="Tax id" value="${esc(localId)}">${moneyInput('localamt', localId ? local[localId] : null, true)}</div>`));
+  extraBits.push(wrap('employee.ageAtYearEnd', 'Age reached by December 31', `<input class="inp" inputmode="numeric" data-bind="str:ageAtYearEnd" value="${esc(model.ageAtYearEnd)}">`, '50 or older raises the 401(k), 403(b), 457(b) and SIMPLE limits; 60 to 63 raises them further. Blank uses the standard limits.'));
   extraBits.push(nest('section402gAggregate', 'Section 402(g) deferrals'));
   extraBits.push(nest('deferral457', '457 deferrals'));
   extraBits.push(nest('simple', 'SIMPLE deferrals'));
@@ -674,7 +705,7 @@ function minWageFields() {
 function oneLine(n) {
   if (n === 1) return `${model.checkDate || 'No date'} · ${freqLabel(model.payFrequency)}`;
   if (n === 2) return `${stateLabel(model.workCode)} · ${model.principalWorkplace ? 'principal workplace' : 'not the principal workplace'}`;
-  if (n === 3) return FILING_LABEL[model.filingStatus] || model.filingStatus;
+  if (n === 3) return model.legacyW4 ? `2019 or earlier · ${model.filingStatus === 'married_joint' ? 'Married' : 'Single'} · ${model.legacyAllowances || 0} allowances` : (FILING_LABEL[model.filingStatus] || model.filingStatus);
   if (n === 4) return model.homeCode && model.homeCode !== model.workCode ? `${stateLabel(model.workCode)} work · ${stateLabel(model.homeCode)} home` : stateLabel(model.workCode);
   if (n === 5) return `Gross ${formatMoney(grossCents(model))}`;
   if (n === 6) return `${model.deductions.length} deduction${model.deductions.length === 1 ? '' : 's'}`;
@@ -686,7 +717,7 @@ function step8() {
   const localGap = !LOCAL[model.workCode] ? stateLabel(model.workCode) : '';
   return `<p class="eyebrow">Step 8 of 8</p><h2 class="step-title">Review and run</h2><p class="sub">Check the request, then run it against the engine.</p>${banner ? bannerHtml() : keyGateHtml()}
     <div class="rev">${rows}</div>
-    <div class="note note-info"><b>Not included.</b> Split work locations, pre-2020 W-4 allowances, tips, and an employer FUTA rate. Unsupported items are left off the request.${localGap ? ' ' + esc(`Local tax for ${localGap} is in progress.`) : ''}</div>`;
+    <div class="note note-info"><b>Not included.</b> Split work locations, tips, and an employer FUTA rate. Unsupported items are left off the request.${localGap ? ' ' + esc(`Local tax for ${localGap} is in progress.`) : ''}</div>`;
 }
 
 function prettyDate(iso) {
@@ -1006,7 +1037,7 @@ function onChange(ev) {
     render();
     return;
   }
-  if (bind === 'str:employmentCategory' || bind === 'str:filingStatus' || bind === 'mfs:1' || bind === 'bool:w4Exempt' || bind.startsWith('rowtype') || bind.startsWith('garn:') && (bind.endsWith(':type') || bind.endsWith(':max'))) {
+  if (bind === 'str:employmentCategory' || bind === 'bool:legacyW4' || bind === 'str:filingStatus' || bind === 'mfs:1' || bind === 'bool:w4Exempt' || bind.startsWith('rowtype') || bind.startsWith('garn:') && (bind.endsWith(':type') || bind.endsWith(':max'))) {
     applyBind(el);
     render();
     return;
@@ -1183,7 +1214,8 @@ async function runLookup() {
   if (model.workAddress) payload.workAddress = model.workAddress;
   if (model.homeAddress) payload.residenceAddress = model.homeAddress;
   try {
-    const res = await fetch('/v1/address', { method: 'POST', headers, body: JSON.stringify(payload) });
+    // Census and the boundary services can be slow; a minute or more is normal for a first lookup.
+    const res = await fetch('/v1/address', { method: 'POST', headers, body: JSON.stringify(payload), signal: AbortSignal.timeout(150000) });
     const body = await res.json().catch(() => ({}));
     model.homeDirty = false;
     model.workDirty = false;
@@ -1195,6 +1227,11 @@ async function runLookup() {
       bannerHref = '';
       bannerLinkLabel = '';
       bannerExample = false;
+    } else if (res.status === 502 || res.status === 503) {
+      // The address service did not answer. That says nothing about the address itself.
+      const fail = 'The address service did not answer. Try again in a minute; nothing was billed.';
+      if (model.workAddress) model.workLookup = { error: fail };
+      if (model.homeAddress) model.homeLookup = { error: fail };
     } else if (!res.ok) {
       const fail = "We couldn't place this address. Check the ZIP, or enter the codes in step 4.";
       if (model.workAddress) model.workLookup = { error: fail };
@@ -1203,18 +1240,27 @@ async function runLookup() {
       banner = '';
       const fail = body.notResolvable || (Array.isArray(body.lookupFailures) && body.lookupFailures.length);
       const msg = "We couldn't place this address. Check the ZIP, or enter the codes in step 4.";
-      const side = (block) => block && {
+      // The API prefixes each reason with the address it is about; keep each on its own card.
+      const reasons = body.fullyResolved === false ? (body.warnings || []) : [];
+      const forRole = (role) => reasons.filter((w) => {
+        const m = /^(Work|Residence) address:/.exec(String(w));
+        return m ? m[1].toLowerCase() === role : role === 'work';
+      });
+      const side = (block, role) => block && {
         matched: !!block.matched,
         matchedAddress: block.matchedAddress || '',
-        precision: block.precision || (block.pointSource || ''),
+        precision: block.precision || '',
+        pointSource: block.pointSource || '',
         state: block.state || '',
         county: block.county || '',
         place: block.place || '',
-        warnings: body.fullyResolved === false ? (body.warnings || []) : [],
+        warnings: forRole(role),
+        failures: role === 'work' || !body.work ? (body.lookupFailures || []) : [],
+        notes: (role === 'work' || !body.work ? (body.notResolvable || []) : []).filter((n) => !(body.lookupFailures || []).includes(n)),
         error: block.matched ? '' : msg,
       };
-      if (model.workAddress) model.workLookup = side(body.work) || (fail ? { error: msg } : null);
-      if (model.homeAddress) model.homeLookup = side(body.residence) || (fail ? { error: msg } : null);
+      if (model.workAddress) model.workLookup = side(body.work, 'work') || (fail ? { error: msg } : null);
+      if (model.homeAddress) model.homeLookup = side(body.residence, 'residence') || (fail ? { error: msg } : null);
       if (body.certificate && typeof body.certificate === 'object') {
         for (const [k, v] of Object.entries(body.certificate)) {
           if (!CERT_KEYS.has(k) || v == null || v === '' || v === false) continue;
@@ -1228,8 +1274,10 @@ async function runLookup() {
       if (body.residenceState) model.homeCode = body.residenceState;
       refreshReciprocal();
     }
-  } catch {
-    banner = 'Something went wrong on our side. Request id unknown.';
+  } catch (err) {
+    banner = err && err.name === 'TimeoutError'
+      ? 'The address service is taking too long. Try again in a minute; nothing was billed.'
+      : 'Something went wrong on our side. Request id unknown.';
     bannerHref = '';
     bannerLinkLabel = '';
     bannerExample = false;
@@ -1303,6 +1351,18 @@ function onClick(ev) {
   if (!actionEl) return;
   const action = actionEl.dataset.action;
   if (action === 'primary') { continuePrimary(); return; }
+  if (action === 'w4form') {
+    const old = actionEl.dataset.form === 'old';
+    if (old !== model.legacyW4) {
+      model.legacyW4 = old;
+      // Head of household did not exist on the old form.
+      if (old && model.filingStatus === 'head_of_household') model.filingStatus = 'single';
+      if (old && model.filingStatus === 'married_separate') model.filingStatus = 'single';
+      if (old && model.legacyAllowances === '') model.legacyAllowances = '0';
+    }
+    render();
+    return;
+  }
   if (action === 'back') { if (step > 1) { step -= 1; render(); } return; }
   if (action === 'rail') {
     const n = Number(actionEl.dataset.step);
