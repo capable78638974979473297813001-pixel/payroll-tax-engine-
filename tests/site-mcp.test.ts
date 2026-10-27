@@ -105,9 +105,9 @@ describe('POST /mcp', () => {
     assert.equal(unknown.result.protocolVersion, '2025-06-18', 'an unknown version gets the newest we speak');
   });
 
-  test('tools/list names the four tools with input schemas', async () => {
+  test('tools/list names the six tools with input schemas', async () => {
     const body = await (await rpc(s.base, 'tools/list', {})).json() as any;
-    assert.deepEqual(body.result.tools.map((t: any) => t.name), ['calculate_paycheck', 'compare_paychecks', 'lookup_address', 'coverage']);
+    assert.deepEqual(body.result.tools.map((t: any) => t.name), ['calculate_paycheck', 'compare_paychecks', 'gross_up', 'employer_taxes', 'lookup_address', 'coverage']);
     for (const t of body.result.tools) {
       assert.equal(t.inputSchema.type, 'object');
       assert.ok(t.description.length > 40);

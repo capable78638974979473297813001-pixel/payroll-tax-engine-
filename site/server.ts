@@ -9,6 +9,8 @@ import { dirname, join, resolve } from 'node:path';
 import { calculatePaycheck } from '../src/calculate.ts';
 import type { PayFrequency, PaycheckInput, PaycheckResult } from '../src/types.ts';
 import { comparePaychecks, mergePatch } from './lib/compare.ts';
+import { EmployerTaxRefusal, employerTaxes, validateEmployerTaxes } from './lib/employer-taxes.ts';
+import { GrossUpRefusal, solveGrossUp, type GrossUp } from './lib/grossup.ts';
 import { handleRpc, type ToolName, type ToolOutcome } from './lib/mcp.ts';
 import { CannotComputeError, UnsupportedTaxYearError } from '../src/registry.ts';
 import { listUniqueTaxIds, payCalc, resolveUniqueTaxId, type PayCalcRequest } from '../api/ste-compat.ts';
@@ -512,7 +514,7 @@ const CSRF_COOKIE = 'omnia_csrf';
 /** Browser POSTs that authenticate with a cookie. Bearer-key and webhook routes are not in this list. */
 const CSRF_EXEMPT = new Set([
   '/api/billing/webhook', '/v1/billing/webhook',
-  '/api/paycheck', '/v1/paycheck', '/api/paycheck/compare', '/v1/paycheck/compare',
+  '/api/paycheck', '/v1/paycheck', '/api/paycheck/compare', '/v1/paycheck/compare', '/api/paycheck/gross-up', '/v1/paycheck/gross-up', '/api/employer-taxes', '/v1/employer-taxes',
   '/api/address', '/v1/address',
 ]);
 
@@ -2925,6 +2927,137 @@ async function handleCompare(req: IncomingMessage, res: ServerResponse): Promise
 }
 
 // ---------------------------------------------------------------------
+// POST /v1/paycheck/gross-up -- net to gross. The body is a paycheck
+// request plus grossUp: { targetNetPay, earningIndex? }. The engine finds
+// the amount of that one earning (earningIndex, default 0) that leaves the
+// employee targetNetPay, by running the real engine on candidate amounts
+// (site/lib/grossup.ts). The amount in earnings[earningIndex] is ignored.
+// The response has the solved request, so it can be reused, and the full
+// paycheck. Billed as one paycheck: the search is internal.
+// ---------------------------------------------------------------------
+
+type GrossUpOutcome = { status: number; body: unknown; usageError: string | null; checkDate: string | null; paychecks: number };
+
+function runGrossUp(raw: unknown, requestId: string): GrossUpOutcome {
+  const refuse = (path: string, message: string): GrossUpOutcome => ({
+    status: 422,
+    usageError: 'validation_failed',
+    checkDate: null,
+    paychecks: 0,
+    body: { error: 'The request did not pass validation.', code: 'invalid_input', details: [{ path, message }], requestId },
+  });
+  if (typeof raw !== 'object' || raw === null || Array.isArray(raw)) return refuse('', 'Send a paycheck request with a grossUp object.');
+  const { grossUp, ...request } = raw as Record<string, unknown>;
+  if (typeof grossUp !== 'object' || grossUp === null || Array.isArray(grossUp)) return refuse('grossUp', 'is required: { targetNetPay: <integer cents>, earningIndex?: <number> }.');
+  const spec = grossUp as Record<string, unknown>;
+  const target = spec.targetNetPay;
+  if (typeof target !== 'number' || !Number.isInteger(target) || target < 0 || target > 10_000_000_000) {
+    return refuse('grossUp.targetNetPay', 'must be a whole number of cents, from 0 to 10000000000 (e.g. 250000 for $2,500.00 take-home).');
+  }
+  const earnings = request.earnings;
+  const index = spec.earningIndex === undefined ? 0 : spec.earningIndex;
+  if (!Array.isArray(earnings) || earnings.length === 0) return refuse('earnings', 'is required and must contain the earning to solve for.');
+  if (typeof index !== 'number' || !Number.isInteger(index) || index < 0 || index >= earnings.length) {
+    return refuse('grossUp.earningIndex', `must be a whole number from 0 to ${earnings.length - 1}: the earning to solve for.`);
+  }
+  const unknownKeys = Object.keys(spec).filter((k) => k !== 'targetNetPay' && k !== 'earningIndex');
+  if (unknownKeys.length) return refuse('grossUp', `has fields this endpoint does not read: ${unknownKeys.join(', ')}.`);
+
+  // The amount in the solved-for earning is a placeholder. Make it large enough
+  // that the request validates (pre-tax deductions cannot exceed the cash pay).
+  const deductionTotal = Array.isArray(request.deductions)
+    ? (request.deductions as Array<{ amount?: unknown }>).reduce((n, d) => n + (typeof d?.amount === 'number' ? d.amount : 0), 0)
+    : 0;
+  const withAmount = (amount: number) => ({
+    ...request,
+    earnings: (earnings as Array<Record<string, unknown>>).map((e, i) => (i === index && typeof e === 'object' && e !== null ? { ...e, amount } : e)),
+  });
+  const probe = preparePaycheck(withAmount(target + deductionTotal), requestId);
+  if (!probe.ok) return { status: probe.status, usageError: 'validation_failed', checkDate: probe.checkDate, paychecks: 0, body: probe.body };
+
+  let solved: GrossUp;
+  try {
+    solved = solveGrossUp(probe.input, index, target, calculatePaycheck);
+  } catch (err) {
+    if (err instanceof GrossUpRefusal) {
+      return { status: 422, usageError: 'cannot_gross_up', checkDate: probe.input.checkDate, paychecks: 0, body: { error: err.message, code: err.code, requestId } };
+    }
+    console.error(`[gross-up ${requestId}] failed:`, err instanceof Error ? err.message : err);
+    return { status: 422, usageError: 'calculation_error', checkDate: probe.input.checkDate, paychecks: 0, body: { error: 'The calculation could not be completed for the input provided.', code: 'calculation_error', requestId } };
+  }
+
+  // Run the solved request through the same pipeline as a normal paycheck, so it is
+  // validated, carries any warnings and extras, and is exactly what POST /v1/paycheck would return.
+  const solvedRequest = withAmount(solved.amount);
+  const final = preparePaycheck(solvedRequest, requestId);
+  if (!final.ok) return { status: final.status, usageError: 'validation_failed', checkDate: final.checkDate, paychecks: 0, body: final.body };
+  const ran = runPaycheck(final, requestId);
+  if (ran.status !== 200) return { ...ran, checkDate: final.input.checkDate, paychecks: 0 };
+  const { input: _input, result: _result, ...summary } = solved;
+  return {
+    status: 200,
+    usageError: null,
+    checkDate: final.input.checkDate,
+    paychecks: 1,
+    body: { grossUp: summary, request: solvedRequest, ...(ran.body as object) },
+  };
+}
+
+async function handleGrossUp(req: IncomingMessage, res: ServerResponse): Promise<void> {
+  const ctx = authenticateKey(req, res, 'paycheck');
+  if (!ctx) return;
+  const { requestId, rlHeaders } = ctx;
+  let raw: unknown;
+  try {
+    raw = await readJson<unknown>(req, 'any');
+  } catch (err) {
+    noteUsage(ctx, req, { statusCode: 400, error: 'invalid_json', checkDate: null, kind: 'paycheck', paychecks: 0 });
+    sendJson(res, 400, { error: (err as Error).message, code: 'invalid_json', requestId }, rlHeaders);
+    return;
+  }
+  const out = runGrossUp(raw, requestId);
+  const recorded = noteUsage(ctx, req, { statusCode: out.status, error: out.usageError, checkDate: out.checkDate, kind: 'paycheck', paychecks: out.paychecks });
+  sendJson(res, out.status, out.body, rlHeaders);
+  if (recorded.recorded && out.paychecks > 0 && wantMeter(ctx)) flushMeterSoon();
+}
+
+// ---------------------------------------------------------------------
+// POST /v1/employer-taxes -- employer taxes charged on a quarter's total
+// payroll rather than on a paycheck: New York MCTMT and the Nevada Modified
+// Business Tax (site/lib/employer-taxes.ts). Not a paycheck, so it is
+// recorded and not metered.
+// ---------------------------------------------------------------------
+
+function runEmployerTaxes(raw: unknown, requestId: string): { status: number; body: unknown; error: string | null } {
+  const v = validateEmployerTaxes(raw);
+  if (!v.ok) return { status: 422, error: 'validation_failed', body: { error: 'The request did not pass validation.', code: 'invalid_input', details: v.errors, requestId } };
+  try {
+    return { status: 200, error: null, body: { result: employerTaxes(v.value.quarter, v.value) } };
+  } catch (err) {
+    if (err instanceof EmployerTaxRefusal) return { status: 422, error: err.code, body: { error: err.message, code: err.code, requestId } };
+    console.error(`[employer-taxes ${requestId}] failed:`, err instanceof Error ? err.message : err);
+    return { status: 422, error: 'calculation_error', body: { error: 'The calculation could not be completed for the input provided.', code: 'calculation_error', requestId } };
+  }
+}
+
+async function handleEmployerTaxes(req: IncomingMessage, res: ServerResponse): Promise<void> {
+  const ctx = authenticateKey(req, res, 'catalog');
+  if (!ctx) return;
+  const { requestId, rlHeaders } = ctx;
+  let raw: unknown;
+  try {
+    raw = await readJson<unknown>(req, 'any');
+  } catch (err) {
+    noteUsage(ctx, req, { statusCode: 400, error: 'invalid_json', checkDate: null, kind: 'catalog', paychecks: 0 });
+    sendJson(res, 400, { error: (err as Error).message, code: 'invalid_json', requestId }, rlHeaders);
+    return;
+  }
+  const out = runEmployerTaxes(raw, requestId);
+  noteUsage(ctx, req, { statusCode: out.status, error: out.error, checkDate: null, kind: 'catalog', paychecks: 0 });
+  sendJson(res, out.status, out.body, rlHeaders);
+}
+
+// ---------------------------------------------------------------------
 // POST /mcp -- the Model Context Protocol endpoint (site/lib/mcp.ts is the
 // protocol; this is the glue). A tool call runs the same functions the REST
 // endpoints run and is recorded and billed the same way: calculate_paycheck
@@ -2971,6 +3104,16 @@ async function handleMcp(req: IncomingMessage, res: ServerResponse): Promise<voi
     if (name === 'compare_paychecks') {
       const out = runCompare(args, requestId);
       note(out.status, out.usageError, out.checkDate, 'paycheck', out.paychecks);
+      return { isError: out.status !== 200, body: out.body };
+    }
+    if (name === 'gross_up') {
+      const out = runGrossUp(args, requestId);
+      note(out.status, out.usageError, out.checkDate, 'paycheck', out.paychecks);
+      return { isError: out.status !== 200, body: out.body };
+    }
+    if (name === 'employer_taxes') {
+      const out = runEmployerTaxes(args, requestId);
+      note(out.status, out.error, null, 'catalog', 0);
       return { isError: out.status !== 200, body: out.body };
     }
     if (name === 'lookup_address') {
@@ -3691,6 +3834,8 @@ createServer((req, res) => {
     if (method === 'GET' && (url === '/api/me' || url === '/v1/me')) return handleMe(req, res);
     if (method === 'POST' && (url === '/api/paycheck' || url === '/v1/paycheck')) return handlePaycheck(req, res);
     if (method === 'POST' && (url === '/api/paycheck/compare' || url === '/v1/paycheck/compare')) return handleCompare(req, res);
+    if (method === 'POST' && (url === '/api/paycheck/gross-up' || url === '/v1/paycheck/gross-up')) return handleGrossUp(req, res);
+    if (method === 'POST' && (url === '/api/employer-taxes' || url === '/v1/employer-taxes')) return handleEmployerTaxes(req, res);
     if (url === '/mcp') {
       if (method === 'POST') return handleMcp(req, res);
       // No server-initiated stream and no sessions to end.
