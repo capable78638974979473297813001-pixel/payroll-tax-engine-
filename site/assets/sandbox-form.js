@@ -34,7 +34,7 @@ export const CERT_KEYS = new Set([
   'filingStatus', 'hawaiiMaritalStatus', 'withholdingCode', 'allowanceRate', 'rateTableOverride',
   'personalExemptionCode', 'spouseExemptionCode', 'alabamaExemptionCode', 'electedRate',
   'zeroElection', 'severanceExemptYtd', 'severanceApprovalOnFile', 'paidLeaveExempt',
-  'paidLeaveEmployeeRateOverride', 'wacaresExempt', 'employerLiableForPaidLeaveShare',
+  'paidLeaveEmployeeRateOverride', 'wacaresExempt', 'employerLiableForPaidLeaveShare', 'stLouisPayrollExpenseTaxExempt',
 ]);
 
 const MONEY_CERT = new Set([
@@ -127,7 +127,7 @@ export function stepForPath(path) {
   const p = String(path ?? '');
   if (p.startsWith('federalW4')) return 3;
   if (p.startsWith('earnings') || p === 'hoursWorked' || p.startsWith('priorRegularPayment')) return 5;
-  if (p.startsWith('deductions') || p.startsWith('ytd')) return 6;
+  if (p.startsWith('deductions') || p.startsWith('ytd') || p.startsWith('employee')) return 6;
   if (p.startsWith('employer') || p.startsWith('garnishments') || p.startsWith('minimumWageCheck')) return 7;
   if (p.startsWith('residenceStateWithholding') || p.startsWith('residenceState')) return 4;
   if (p.includes('workCityIsPrincipalWorkplace') || p.includes('daysWorked')) return 2;
@@ -164,6 +164,9 @@ export function createModel() {
     w4Exempt: false,
     w4Nra: false,
     w4Voluntary: false,
+    legacyW4: false,
+    legacyAllowances: '',
+    ageAtYearEnd: '',
     workCode: '',
     homeCode: '',
     workCert: {},
@@ -260,6 +263,10 @@ export function loadRequest(model, request) {
   model.w4Exempt = w4.exempt === true;
   model.w4Nra = w4.nonresidentAlien === true;
   model.w4Voluntary = w4.voluntaryWithholdingAgreement === true;
+  model.legacyW4 = w4.legacyAllowances !== undefined && w4.legacyAllowances !== null;
+  model.legacyAllowances = model.legacyW4 ? String(w4.legacyAllowances) : '';
+  const emp = req.employee && typeof req.employee === 'object' ? req.employee : {};
+  model.ageAtYearEnd = emp.ageAtYearEnd == null || emp.ageAtYearEnd === '' ? '' : String(emp.ageAtYearEnd);
   const kids = Math.floor(model.dependentCredit / 200000);
   const rem = model.dependentCredit - kids * 200000;
   if (rem % 50000 === 0) {
@@ -366,6 +373,14 @@ export function serialize(model) {
     deductions: Math.round(Number(model.w4Deductions) || 0),
     extraWithholding: Math.round(Number(model.extraWithholding) || 0),
   };
+  if (model.legacyW4) {
+    // A 2019-or-earlier form has allowances and a Single/Married status, and none of Steps 2-4(b).
+    federalW4.legacyAllowances = Math.round(Number(model.legacyAllowances) || 0);
+    federalW4.multipleJobs = false;
+    federalW4.dependentCredit = 0;
+    federalW4.otherIncome = 0;
+    federalW4.deductions = 0;
+  }
   if (model.w4Exempt) federalW4.exempt = true;
   if (model.w4Nra) federalW4.nonresidentAlien = true;
   if (model.w4Voluntary && model.employmentCategory === 'clergy') federalW4.voluntaryWithholdingAgreement = true;
@@ -416,6 +431,10 @@ export function serialize(model) {
     if (model.voluntaryWh) hold.voluntary = true;
     out.residenceStateWithholding = hold;
   }
+  if (model.ageAtYearEnd !== '' && model.ageAtYearEnd != null) {
+    const age = Number(model.ageAtYearEnd);
+    if (Number.isFinite(age)) out.employee = { ageAtYearEnd: age };
+  }
   if (model.employmentCategory && model.employmentCategory !== 'standard') out.employmentCategory = model.employmentCategory;
   if (model.roundToWholeDollars) out.roundToWholeDollars = true;
   if (model.priorWages != null) {
@@ -457,7 +476,7 @@ export function stepSlice(full, step) {
   if (step === 3) return pick(['federalW4']);
   if (step === 4) return pick(['workState', 'residenceState', 'residenceStateWithholding']);
   if (step === 5) return pick(['earnings', 'hoursWorked', 'priorRegularPayment']);
-  if (step === 6) return pick(['deductions', 'ytd']);
+  if (step === 6) return pick(['deductions', 'ytd', 'employee']);
   if (step === 7) return pick(['employer', 'garnishments', 'minimumWageCheck']);
   return full;
 }
@@ -493,6 +512,11 @@ export function validateStep(model, step, ctx) {
   }
   if (step === 3) {
     if (!FILING.has(model.filingStatus)) bad('federalW4.filingStatus', 'Choose a filing status.');
+    if (model.legacyW4) {
+      const n = Number(model.legacyAllowances);
+      if (model.legacyAllowances === '' || !Number.isInteger(n) || n < 0 || n > 99) bad('federalW4.legacyAllowances', 'Enter the allowances on line 5, a whole number from 0 to 99.');
+      if (model.filingStatus === 'head_of_household') bad('federalW4.filingStatus', 'A form from 2019 or earlier has only Single and Married.');
+    }
     for (const [path, n] of [['federalW4.dependentCredit', model.dependentCredit], ['federalW4.otherIncome', model.otherIncome], ['federalW4.deductions', model.w4Deductions], ['federalW4.extraWithholding', model.extraWithholding]]) {
       if (!moneyOk(Math.round(Number(n) || 0))) bad(path, 'Enter zero or more.');
     }
@@ -525,6 +549,10 @@ export function validateStep(model, step, ctx) {
     }
   }
   if (step === 6) {
+    if (model.ageAtYearEnd !== '' && model.ageAtYearEnd != null) {
+      const age = Number(model.ageAtYearEnd);
+      if (!Number.isInteger(age) || age < 0 || age > 120) bad('employee.ageAtYearEnd', 'Enter a whole number of years, 0 to 120: the age reached by December 31.');
+    }
     for (const [path, n] of [['ytd.socialSecurity', model.ytdSS], ['ytd.medicare', model.ytdMed], ['ytd.futa', model.ytdFuta]]) {
       if (!moneyOk(Math.round(Number(n) || 0))) bad(path, 'Enter zero or more.');
     }
