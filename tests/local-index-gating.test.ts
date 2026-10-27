@@ -49,10 +49,20 @@ describe('the large local address index is a keyed-API feature', () => {
   });
 
   test('the key-authenticated /v1/address endpoint authenticates first and never switches the index off', () => {
-    const keyed = handlerSource('handleAddress');
-    assert.match(keyed, /authenticateKey\(req, res, 'address'\)/);
+    // handleAddress authenticates, then hands the body to runAddress, which resolves it.
+    const handler = handlerSource('handleAddress');
+    assert.match(handler, /authenticateKey\(req, res, 'address'\)/);
+    assert.match(handler, /runAddress\(/);
+    const keyed = handlerSource('runAddress');
     assert.match(keyed, /resolveEmployee\([^;]*useLocalIndex:\s*true/s);
     assert.doesNotMatch(keyed, /useLocalIndex:\s*false/);
+  });
+
+  test('the MCP lookup_address tool reaches the index only through runAddress, after authenticating', () => {
+    const mcp = handlerSource('handleMcp');
+    assert.match(mcp, /authenticateKey\(req, res, 'mcp'\)/);
+    assert.ok(mcp.indexOf('authenticateKey(') < mcp.indexOf('runAddress('), 'authenticates before any lookup');
+    assert.doesNotMatch(mcp, /resolveEmployee\(/);
   });
 
   test('no other caller in the site server resolves addresses', () => {

@@ -106,15 +106,17 @@ test('rate text is read from the detail and never invented', () => {
   for (const [detail, rate] of cases) assert.equal(parseRate(detail), rate, detail.slice(0, 40));
 });
 
-test('the page does not claim a test mode, an unbilled call, or a test key', () => {
+test('the page offers test keys honestly: real engine, not billed only when the key says so, no fake data', () => {
   const html = readFileSync(join(REPO, 'site/sandbox.html'), 'utf8');
   const js = readFileSync(join(REPO, 'site/assets/sandbox.js'), 'utf8');
   const css = readFileSync(join(REPO, 'site/assets/sandbox.css'), 'utf8');
   const blob = (html + js + css).toLowerCase();
-  assert.equal(blob.includes('test mode'), false);
-  assert.equal(blob.includes('not billed'), false);
-  assert.equal(blob.includes('test key'), false);
-  assert.equal(blob.includes('sk_test'), false);
+  assert.equal(blob.includes('test mode'), false, 'there is no mode switch on the page');
+  assert.equal(blob.includes('sk_test'), false, 'no key literal on the page');
+  for (const word of ['mock', 'canned', 'simulated', 'fake', 'sample data', 'dummy']) assert.equal(blob.includes(word), false, word);
+  // "not billed" is only ever said about a run the server itself marked as made with a test key.
+  const lines = js.split('\n').filter((l) => /not billed/i.test(l));
+  assert.ok(lines.every((l) => /lastMode === 'test'/.test(l)), 'not billed must depend on the Omnia-Mode header');
   assert.equal(html.includes('tokens.css'), false);
   assert.equal(html.includes('site.css'), false);
 });

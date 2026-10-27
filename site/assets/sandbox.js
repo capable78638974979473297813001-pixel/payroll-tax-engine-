@@ -151,6 +151,7 @@ let resultTab = 'taxes';
 let exampleTitle = '';
 let exampleId = '';
 let lastResult = null;
+let lastMode = '';
 let lastRequest = null;
 let booted = false;
 let lookupTimer = 0;
@@ -232,15 +233,15 @@ function setKeyGate(forLookup) {
   bannerExample = !signedIn();
   if (!signedIn()) {
     banner = forLookup
-      ? 'Sign up to get an API key before an address can be looked up. This page does not issue a key.'
-      : 'Sign up to get an API key before this calculation can run. This page does not issue a key.';
+      ? 'Sign up to get an API key before an address can be looked up. A test key is free and needs no card. This page does not issue a key.'
+      : 'Sign up to get an API key before this calculation can run. A test key is free and needs no card. This page does not issue a key.';
     bannerHref = '/signup';
     bannerLinkLabel = 'Create an account';
     return;
   }
   banner = forLookup
-    ? 'Create an API key in your account, then paste it here, before an address can be looked up.'
-    : 'Create an API key in your account, then paste it here, before this calculation can run.';
+    ? 'Create a test key (free, no card) or a live key in your account, then paste it here, before an address can be looked up.'
+    : 'Create a test key (free, no card) or a live key in your account, then paste it here, before this calculation can run.';
   bannerHref = '/dashboard';
   bannerLinkLabel = 'Open your account';
   bannerExample = false;
@@ -789,6 +790,7 @@ function resultsView() {
   }
   const cards = [['Gross pay', r.grossPay], ['Employee taxes', r.employeeTaxTotal], ['Employer taxes', r.employerTaxTotal], ['Net pay', r.netPay]];
   return `${bannerHtml()}<p class="eyebrow">Result</p><h2 class="step-title">${esc(exampleTitle || 'Your paycheck')}</h2><p class="sub">${esc(sub)}</p>
+    ${lastMode === 'test' ? '<p class="hint">Run with a test key: same engine and data as a live key, and not billed.</p>' : ''}
     <div class="cards">${cards.map(([n, v], i) => `<div class="card${i === 3 ? ' netc' : ''}"><span>${n}</span><b>${formatMoney(v || 0)}</b></div>`).join('')}</div>
     <div class="tabs">${tab('taxes', 'Taxes')}${tab('req', 'Request JSON')}${tab('res', 'Response JSON')}</div>
     ${body}
@@ -1140,6 +1142,7 @@ async function runCalc() {
     const res = await fetch('/v1/paycheck', { method: 'POST', headers, body: JSON.stringify(request) });
     const body = await res.json().catch(() => ({}));
     busy = false;
+    lastMode = res.headers.get('Omnia-Mode') || '';
     if (res.status === 422 && Array.isArray(body.details)) { showErrors(body.details); return; }
     if (res.status === 401) {
       setKeyGate(false);

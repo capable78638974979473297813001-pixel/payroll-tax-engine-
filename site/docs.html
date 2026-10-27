@@ -68,7 +68,7 @@
     <p class="sub">POST JSON to <span data-origin>/v1/paycheck</span> with <code>Authorization: Bearer</code> and <code>Content-Type: application/json</code>. A successful body is <code>{ "result": { … } }</code>. Amounts are integer cents.</p>
 
     <h2 id="authentication" style="margin-top:36px">Authentication</h2>
-    <p class="sub">Keys are shown once, stored as a hash, and sent as a bearer token. Issued keys start with <code>sk_live_</code> and return real calculations. An older key that is no longer accepted returns <code>401</code> <code>key_not_accepted</code>. Sign in and issue a new key. Every response from an accepted key includes <code>Omnia-Mode: live</code>.</p>
+    <p class="sub">Keys are shown once, stored as a hash, and sent as a bearer token. A live key starts with <code>sk_live_</code> and needs a card on file. A test key starts with <code>sk_test_</code>, needs only a verified account that has accepted the terms, and is free: it is never billed and is not counted in your usage. Both run the same engine and the same data and return real calculations. A test key is held to <span id="testRpm">30</span> requests per minute and <span id="testRpd">500</span> per day (UTC), and expires after 90 days; a live key has no daily cap. Create either from the console; a new key replaces the previous key of the same kind and never the other kind. An older <code>sk_test_</code> key from before test keys existed is no longer accepted and returns <code>401</code> <code>key_not_accepted</code>. Every response from an accepted key includes <code>Omnia-Mode: live</code> or <code>Omnia-Mode: test</code>.</p>
     <p class="fine" id="navKey">No key in this session</p>
     <p class="fine" id="navKeyNote">The full key is shown once, on the key screen.</p>
     <p class="fine" id="tierNote">14-day free trial, then $0.08 per paycheck calculation, pay as you go.</p>
@@ -101,6 +101,12 @@
     <h2 id="result" style="margin-top:36px">PaycheckResult</h2>
     <p class="sub"><code>grossPay</code>, <code>pretaxDeductions</code>, <code>posttaxDeductions</code>, <code>taxes[]</code> with <code>id</code>, <code>name</code>, <code>payer</code>, <code>jurisdiction</code>, <code>taxableWages</code>, <code>amount</code>, <code>detail</code>, <code>employeeTaxTotal</code>, <code>employerTaxTotal</code>, <code>netPay</code>, plus <code>notices</code> and <code>warnings</code> when an input needs a second look.</p>
 
+    <h2 id="compare" style="margin-top:36px">POST /v1/paycheck/compare</h2>
+    <p class="sub">Two paychecks and what moved between them. Send <code>before</code> and either <code>after</code>, a full second request, or <code>change</code>, only the fields that differ, merged onto <code>before</code>. Both are validated and calculated exactly as <a class="text-link" href="/docs/paycheck">POST /v1/paycheck</a> does. The explanation is built by applying each input difference to <code>before</code> one at a time and re-running the engine, so every figure is an engine result and the steps add up to the whole difference. When changes interact, another order can split the credit differently; the total does not change. Billed as two paychecks when it succeeds, nothing when it is refused.</p>
+
+    <h2 id="mcp" style="margin-top:36px">MCP server</h2>
+    <p class="sub">Point an AI assistant or agent at <code>https://api.omnia.tax/mcp</code> with the same bearer key. It speaks the Model Context Protocol over streamable HTTP and offers four tools: <code>calculate_paycheck</code>, <code>compare_paychecks</code>, <code>lookup_address</code> and <code>coverage</code>. A call is recorded and billed like the REST endpoint it matches: one paycheck, two for a comparison, none for an address lookup or coverage. A refused call is not billed. It takes one message per request, no batches, and there is no server-initiated stream.</p>
+
     <h2 id="address" style="margin-top:36px">POST /v1/address</h2>
     <p class="sub">Send a work address and, when you have it, a home address. The response includes a <code>workState</code> certificate you can reuse. Address lookups are not charged; only the paycheck calculation is.</p>
 
@@ -108,7 +114,7 @@
     <p class="sub">Lists state codes the engine will calculate for the requested year.</p>
 
     <h2 id="me" style="margin-top:36px">GET /v1/me</h2>
-    <p class="sub">Describes the key: mode, and how many calls it has made today.</p>
+    <p class="sub">Describes the key: mode (<code>live</code> or <code>test</code>), whether it is billed, its limits, and how many calls it has made today.</p>
 
     <h2 id="health" style="margin-top:36px">GET /v1/health</h2>
     <p class="sub">Returns ok when the API process is up.</p>
@@ -130,6 +136,7 @@
           <tr><td>422</td><td class="mono">unsupported_tax_year</td><td>No rules for the year of checkDate.</td></tr>
           <tr><td>422</td><td class="mono">cannot_compute</td><td>The input is valid but the engine cannot compute it, for example a missing certificate field. The message says which.</td></tr>
           <tr><td>429</td><td class="mono">rate_limited</td><td>Too many requests this minute. Retry later.</td></tr>
+          <tr><td>429</td><td class="mono">test_daily_limit</td><td>A test key reached its requests for the day (UTC). <code>Retry-After</code> is the seconds until it resets. A live key has no daily cap.</td></tr>
         </tbody>
       </table>
     </div>

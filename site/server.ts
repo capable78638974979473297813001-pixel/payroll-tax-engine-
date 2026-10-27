@@ -7,7 +7,9 @@ import { fileURLToPath } from 'node:url';
 import { dirname, join, resolve } from 'node:path';
 
 import { calculatePaycheck } from '../src/calculate.ts';
-import type { PayFrequency } from '../src/types.ts';
+import type { PayFrequency, PaycheckInput, PaycheckResult } from '../src/types.ts';
+import { comparePaychecks, mergePatch } from './lib/compare.ts';
+import { handleRpc, type ToolName, type ToolOutcome } from './lib/mcp.ts';
 import { CannotComputeError, UnsupportedTaxYearError } from '../src/registry.ts';
 import { listUniqueTaxIds, payCalc, resolveUniqueTaxId, type PayCalcRequest } from '../api/ste-compat.ts';
 import { runEmbeddedPayroll, type PlatformEmployeeInput } from '../payroll/platform.ts';
@@ -510,7 +512,7 @@ const CSRF_COOKIE = 'omnia_csrf';
 /** Browser POSTs that authenticate with a cookie. Bearer-key and webhook routes are not in this list. */
 const CSRF_EXEMPT = new Set([
   '/api/billing/webhook', '/v1/billing/webhook',
-  '/api/paycheck', '/v1/paycheck',
+  '/api/paycheck', '/v1/paycheck', '/api/paycheck/compare', '/v1/paycheck/compare',
   '/api/address', '/v1/address',
 ]);
 
@@ -1662,7 +1664,7 @@ async function handleBillingReturn(req: IncomingMessage, res: ServerResponse): P
     // Promote the key to live for the committed term.
     const life = keyLifeFor(sub, now);
     for (const k of Object.values(db.keys)) {
-      if (k.ownerEmail === session.email && k.isActive) {
+      if (k.ownerEmail === session.email && k.isActive && k.mode !== 'test') {
         k.plan = life.plan;
         k.expiresAt = life.expiresAt;
       }
@@ -1771,7 +1773,7 @@ function applyCheckoutCompletion(
     if (acct) acct.stage = 'trialing';
     const life = keyLifeFor(sub, now);
     for (const k of Object.values(db.keys)) {
-      if (k.ownerEmail === sub.email && k.isActive) {
+      if (k.ownerEmail === sub.email && k.isActive && k.mode !== 'test') {
         k.plan = life.plan;
         k.expiresAt = life.expiresAt;
       }
@@ -1931,7 +1933,7 @@ async function handleStartTrial(req: IncomingMessage, res: ServerResponse): Prom
     // committed term instead of expiring at the end of the 14-day window.
     const life = keyLifeFor(sub, now);
     for (const k of Object.values(db.keys)) {
-      if (k.ownerEmail === session.email && k.isActive) {
+      if (k.ownerEmail === session.email && k.isActive && k.mode !== 'test') {
         k.plan = life.plan;
         k.expiresAt = life.expiresAt;
       }
@@ -2057,6 +2059,11 @@ function paymentOnFile(db: { paymentMethods: Record<string, PaymentMethodRecord 
 // POST /api/issue-key
 // ---------------------------------------------------------------------
 
+/** A test key: the same engine and data, never billed, capped per minute and per day. */
+const TEST_KEY_TTL_DAYS = 90;
+const testPerMinute = () => Number(process.env.TEST_RATE_LIMIT_PER_MIN ?? 30);
+const testPerDay = () => Number(process.env.TEST_DAILY_LIMIT ?? 500);
+
 async function handleIssueKey(req: IncomingMessage, res: ServerResponse): Promise<void> {
   const session = requireSession(req, res);
   if (!session) {
@@ -2064,35 +2071,57 @@ async function handleIssueKey(req: IncomingMessage, res: ServerResponse): Promis
     return;
   }
 
-  if (!readDb((db) => paymentOnFile(db, session.email))) {
+  let body: { mode?: unknown };
+  try {
+    body = await readJson(req);
+  } catch (err) {
+    sendJson(res, 400, { error: (err as Error).message });
+    return;
+  }
+  if (body.mode !== undefined && body.mode !== 'live' && body.mode !== 'test') {
+    sendJson(res, 400, { error: 'mode must be "live" or "test".', field: 'mode' });
+    return;
+  }
+  const test = body.mode === 'test';
+
+  if (test) {
+    // A test key needs a verified address (the session) and the terms accepted,
+    // which is what creates the subscription record. It needs no card.
+    if (!readDb((db) => Boolean(db.subscriptions[session.email]))) {
+      sendJson(res, 409, { error: 'Agree to the terms before issuing a test key.', code: 'terms_required' });
+      return;
+    }
+  } else if (!readDb((db) => paymentOnFile(db, session.email))) {
     sendJson(res, 402, { error: 'Add a card or bank account before issuing an API key.', code: 'payment_method_required' });
     return;
   }
 
   // A stolen session can't churn keys: a handful of issues an hour per account.
-  const issueLimit = withDb((db) => hitStoredLimit(db, 'issue-key:' + session.email, 5, HOUR_MS));
+  const issueLimit = withDb((db) => hitStoredLimit(db, `issue-key${test ? '-test' : ''}:` + session.email, 5, HOUR_MS));
   if (!issueLimit.allowed) {
     sendJson(res, 429, { error: 'Too many keys issued. Try again later.', code: 'rate_limited' }, { 'Retry-After': String(issueLimit.retryAfterSec) });
     return;
   }
 
-  // Every issued key is a real key. OMNIA_ISSUE_LIVE_KEYS no longer chooses the prefix.
-  const key = 'sk_live_' + randomBytes(24).toString('base64url');
+  const key = (test ? 'sk_test_' : 'sk_live_') + randomBytes(24).toString('base64url');
   const keyHash = sha256Hex(key);
   const keyPrefix = key.slice(0, 'sk_live_'.length + 6);
   const now = Date.now();
 
   const life = withDb((db) => {
-    // Revoking any prior key for this email on reissue -- one live key per
-    // account, same as "generate a new one invalidates the old" that the
-    // docs page tells the user before they click the button.
+    // Issuing a key replaces this account's previous key of the SAME kind:
+    // one live key and one test key at a time. A new test key never touches
+    // the live key, and the reverse.
     for (const existing of Object.values(db.keys)) {
-      if (existing.ownerEmail === session.email) existing.isActive = false;
+      if (existing.ownerEmail === session.email && (existing.mode === 'test') === test) existing.isActive = false;
     }
-    const l = keyLifeFor(db.subscriptions[session.email], now);
+    const l = test
+      ? { plan: 'test', expiresAt: new Date(now + TEST_KEY_TTL_DAYS * 86_400_000).toISOString() }
+      : keyLifeFor(db.subscriptions[session.email], now);
     const record: KeyRecord = {
       keyHash,
       keyPrefix,
+      ...(test ? { mode: 'test' as const } : {}),
       ownerEmail: session.email,
       ownerName: session.name,
       company: session.company,
@@ -2107,7 +2136,14 @@ async function handleIssueKey(req: IncomingMessage, res: ServerResponse): Promis
     return l;
   });
 
-  sendJson(res, 200, { key, keyPrefix, plan: life.plan, expiresAt: life.expiresAt });
+  sendJson(res, 200, {
+    key,
+    keyPrefix,
+    mode: test ? 'test' : 'live',
+    plan: life.plan,
+    expiresAt: life.expiresAt,
+    ...(test ? { limits: { requestsPerMinute: testPerMinute(), requestsPerDay: testPerDay() } } : {}),
+  });
 }
 
 // ---------------------------------------------------------------------
@@ -2385,15 +2421,17 @@ function paycheckLimiterLimit(): number {
   return Number(process.env.RATE_LIMIT_PER_MIN ?? 120);
 }
 
-function keyMode(k: { keyPrefix: string }): 'test' | 'live' {
+function keyMode(k: { keyPrefix: string; mode?: 'live' | 'test' }): 'test' | 'live' {
+  if (k.mode === 'test') return 'test';
   return k.keyPrefix.startsWith('sk_live_') ? 'live' : 'test';
 }
 
 /** Shown when a stored sk_test_ key is presented. Does not echo the key. */
 const RETIRED_KEY_ERROR = 'This API key is no longer accepted. Sign in to the console and issue a new API key. The new key returns real calculations.';
 
-function retiredCustomerKey(presented: string, record: { keyPrefix: string } | undefined): boolean {
-  if (!record) return false;
+/** The old sk_test_ keys stay retired. A test key issued now carries mode: 'test' and is not one of them. */
+function retiredCustomerKey(presented: string, record: { keyPrefix: string; mode?: 'live' | 'test' } | undefined): boolean {
+  if (!record || record.mode === 'test') return false;
   return presented.startsWith('sk_test_') || record.keyPrefix.startsWith('sk_test_');
 }
 
@@ -2418,7 +2456,9 @@ function handleMe(req: IncomingMessage, res: ServerResponse): void {
   const info = readDb((db) => {
     const k = db.keys[keyHash];
     if (!k) return null;
-    return { k, callsToday: callsInLastDay(db, keyHash) };
+    const today = new Date().toISOString().slice(0, 10);
+    // Test keys are not in the usage log; they keep a counter on the key.
+    return { k, callsToday: k.mode === 'test' ? (k.testDay?.date === today ? k.testDay.calls : 0) : callsInLastDay(db, keyHash) };
   });
   if (info && retiredCustomerKey(key, info.k)) {
     sendJson(res, 401, { error: RETIRED_KEY_ERROR, code: 'key_not_accepted' });
@@ -2440,7 +2480,10 @@ function handleMe(req: IncomingMessage, res: ServerResponse): void {
     lastUsedAt: k.lastUsedAt,
     totalCalls: k.totalCalls ?? 0,
     callsToday,
-    limits: { requestsPerMinute: paycheckLimiterLimit() },
+    limits: mode === 'test' && k.mode === 'test'
+      ? { requestsPerMinute: testPerMinute(), requestsPerDay: testPerDay() }
+      : { requestsPerMinute: paycheckLimiterLimit() },
+    billed: !(k.mode === 'test'),
   });
 }
 
@@ -2458,7 +2501,26 @@ function handleUsage(req: IncomingMessage, res: ServerResponse): void {
   // Counts come from the site store, not from Stripe. Trial rows, $0 rows,
   // and rows whose meter event failed are included. Another account's keys
   // are not.
-  const summary = readDb((db) => dashboardUsage(db, session.email, { metering: meteringConfigured() }));
+  const summary = readDb((db) => {
+    const base = dashboardUsage(db, session.email, { metering: meteringConfigured() });
+    const test = Object.values(db.keys).filter((k) => k.ownerEmail === session.email && k.mode === 'test' && k.isActive).sort((a, b) => b.createdAt.localeCompare(a.createdAt))[0];
+    const today = new Date().toISOString().slice(0, 10);
+    return {
+      ...base,
+      testKey: test
+        ? {
+            keyMasked: maskKey(test.keyPrefix),
+            createdAt: test.createdAt,
+            expiresAt: test.expiresAt,
+            expired: Date.now() > new Date(test.expiresAt).getTime(),
+            lastUsedAt: test.lastUsedAt,
+            callsToday: test.testDay?.date === today ? test.testDay.calls : 0,
+            totalCalls: test.totalCalls ?? 0,
+            limits: { requestsPerMinute: testPerMinute(), requestsPerDay: testPerDay() },
+          }
+        : null,
+    };
+  });
   sendJson(res, 200, summary);
 }
 
@@ -2473,6 +2535,8 @@ interface KeyContext {
   rlHeaders: Record<string, string>;
   customerId: string | null;
   meteredSubscription: boolean;
+  /** A test key: same engine, never metered, not recorded in the account's usage. */
+  testMode: boolean;
 }
 
 /**
@@ -2524,21 +2588,24 @@ function authenticateKey(req: IncomingMessage, res: ServerResponse, limiter: str
   }
   const mode = keyMode(keyRecord);
   baseHeaders['Omnia-Mode'] = mode;
-  if (!auth.paymentOnFile) {
+  const testMode = keyRecord.mode === 'test';
+  // A test key needs no card and is not stopped by a billing problem, and it
+  // is never billed. It is capped instead, so it cannot stand in for a live key.
+  if (!testMode && !auth.paymentOnFile) {
     sendJson(res, 402, { error: 'This account has no card or bank account on file. Add one in the console to use the API.', code: 'payment_method_required', requestId }, baseHeaders);
     return null;
   }
-  if (auth.cancelled) {
+  if (!testMode && auth.cancelled) {
     sendJson(res, 402, { error: 'This account\'s subscription was cancelled. Start a new subscription in the console to resume.', code: 'subscription_cancelled', requestId }, baseHeaders);
     return null;
   }
-  if (auth.suspended) {
+  if (!testMode && auth.suspended) {
     sendJson(res, 402, { error: 'This account is suspended for a billing issue. Update your payment method to resume.', code: 'account_suspended', reason: auth.suspendedReason, requestId }, baseHeaders);
     return null;
   }
 
   // --- rate limit (per key, stored: shared by instances, kept across restarts)
-  const rl = withDb((db) => hitStoredLimit(db, limiter + ':' + keyHash, paycheckLimiterLimit(), 60_000));
+  const rl = withDb((db) => hitStoredLimit(db, limiter + ':' + keyHash, testMode ? testPerMinute() : paycheckLimiterLimit(), 60_000));
   const rlHeaders = {
     ...baseHeaders,
     'RateLimit-Limit': String(rl.limit),
@@ -2554,10 +2621,43 @@ function authenticateKey(req: IncomingMessage, res: ServerResponse, limiter: str
     );
     return null;
   }
-  // Every accepted key is real. A trialing subscription still has a Stripe
-  // subscription id, so paycheck usage during the trial is reported. Stripe
-  // does not bill usage recorded during trial_period_days.
-  return { requestId, keyHash, rlHeaders, customerId: auth.customerId, meteredSubscription: auth.meteredSubscription };
+  if (testMode) {
+    // The daily cap counts every request that got past the rate limit, errors included.
+    const day = withDb((db) => {
+      const k = db.keys[keyHash];
+      if (!k) return { allowed: false, limit: testPerDay(), calls: 0 };
+      const today = new Date().toISOString().slice(0, 10);
+      if (!k.testDay || k.testDay.date !== today) k.testDay = { date: today, calls: 0 };
+      if (k.testDay.calls >= testPerDay()) return { allowed: false, limit: testPerDay(), calls: k.testDay.calls };
+      k.testDay.calls += 1;
+      k.lastUsedAt = new Date().toISOString();
+      k.totalCalls = (k.totalCalls ?? 0) + 1;
+      return { allowed: true, limit: testPerDay(), calls: k.testDay.calls };
+    });
+    if (!day.allowed) {
+      const midnight = new Date();
+      midnight.setUTCHours(24, 0, 0, 0);
+      sendJson(
+        res,
+        429,
+        { error: `This test key reached its limit of ${day.limit} requests for today (UTC). It resets at ${midnight.toISOString()}. A live key has no daily cap.`, code: 'test_daily_limit', requestId },
+        { ...rlHeaders, 'Retry-After': String(Math.ceil((midnight.getTime() - Date.now()) / 1000)) },
+      );
+      return null;
+    }
+  }
+  // Every accepted key runs the real engine. A live key's trialing subscription
+  // still has a Stripe subscription id, so paycheck usage during the trial is
+  // reported (Stripe does not bill usage recorded during trial_period_days). A
+  // test key is never metered.
+  return {
+    requestId,
+    keyHash,
+    rlHeaders,
+    customerId: testMode ? null : auth.customerId,
+    meteredSubscription: testMode ? false : auth.meteredSubscription,
+    testMode,
+  };
 }
 
 function idempotencyKeyOf(req: IncomingMessage): string | null {
@@ -2576,6 +2676,7 @@ function endpointOf(req: IncomingMessage): string {
 
 /** Meter when this key's account has a metered subscription. Trial subscriptions qualify. */
 function wantMeter(auth: KeyContext): boolean {
+  if (auth.testMode) return false;
   return meteringConfigured() && auth.meteredSubscription && Boolean(auth.customerId);
 }
 
@@ -2594,14 +2695,17 @@ function noteUsage(
     kind: RecordUsageInput['kind'];
     paychecks: number;
     matched?: boolean;
+    endpoint?: string;
   },
 ): { recorded: boolean } {
+  // A test key is counted on the key (for its daily cap), not in the account's usage or billing.
+  if (ctx.testMode) return { recorded: false };
   return recordAccountUsage({
     keyHash: ctx.keyHash,
     statusCode: input.statusCode,
     error: input.error,
     checkDate: input.checkDate,
-    endpoint: endpointOf(req),
+    endpoint: input.endpoint ?? endpointOf(req),
     requestId: ctx.requestId,
     idempotencyKey: idempotencyKeyOf(req),
     kind: input.kind,
@@ -2610,6 +2714,81 @@ function noteUsage(
     meterCustomerId: ctx.customerId,
     wantMeter: wantMeter(ctx),
   });
+}
+
+type PaycheckPrep =
+  | { ok: true; input: PaycheckInput; extras: Extract<ReturnType<typeof validatePaycheckExtras>, { ok: true }>['value']; raw: Record<string, unknown> }
+  | { ok: false; status: number; body: unknown; checkDate: string | null };
+
+/**
+ * Validate a paycheck request body the way POST /v1/paycheck does: the
+ * structured field-level checks, then the optional garnishments and
+ * minimumWageCheck. Shared by every endpoint that runs a paycheck, so they
+ * accept and refuse exactly the same inputs.
+ */
+function preparePaycheck(raw: unknown, requestId: string): PaycheckPrep {
+  const validation = validatePaycheckInput(raw, {
+    validStateCodes: validStateCodes(),
+    supportedYears: supportedYears(),
+    stateHasYear: (code, year) => stateYears(code).includes(year),
+  });
+  if (!validation.ok) {
+    return {
+      ok: false,
+      status: 422,
+      checkDate: (raw as { checkDate?: string } | null)?.checkDate ?? null,
+      body: { error: 'The request did not pass validation.', code: 'invalid_input', details: validation.errors, requestId },
+    };
+  }
+  const extrasCheck = validatePaycheckExtras(raw as Record<string, unknown>, validation.value.workState?.code);
+  if (!extrasCheck.ok) {
+    return {
+      ok: false,
+      status: 422,
+      checkDate: validation.value.checkDate,
+      body: { error: 'The request did not pass validation.', code: 'invalid_input', details: extrasCheck.errors, requestId },
+    };
+  }
+  return { ok: true, input: validation.value, extras: extrasCheck.value, raw: raw as Record<string, unknown> };
+}
+
+/** Run the engine on a prepared request. A throw becomes a 422 with a safe message; the real reason is logged under the request id. */
+function runPaycheck(prep: Extract<PaycheckPrep, { ok: true }>, requestId: string): { status: number; body: unknown; usageError: string | null } {
+  try {
+    const result = calculatePaycheck(prep.input);
+    const extras = runPaycheckExtras(prep.input, result, prep.extras);
+    const ignored = unknownFieldWarnings(prep.raw);
+    return {
+      status: 200,
+      usageError: null,
+      body: {
+        result: {
+          ...result,
+          ...(ignored.length > 0 ? { warnings: [...(result.warnings ?? []), ...ignored] } : {}),
+          ...(extras.garnishment ? { garnishment: extras.garnishment } : {}),
+          ...(extras.minimumWage ? { minimumWage: extras.minimumWage } : {}),
+        },
+      },
+    };
+  } catch (err) {
+    // Validation covers the common bad-input cases, so a throw here is
+    // unexpected. Log the real reason for support (keyed by requestId);
+    // hand the caller a safe message, never an engine stack detail.
+    const usageError = err instanceof Error ? err.message : 'calculation_error';
+    console.error(`[paycheck ${requestId}] calculation failed:`, usageError);
+    return {
+      status: 422,
+      usageError,
+      body:
+        err instanceof ExtrasRefusal
+          ? { error: err.message, code: 'invalid_input', details: [{ path: err.path, message: err.message }], requestId }
+          : err instanceof UnsupportedTaxYearError
+          ? { error: err.message, code: 'unsupported_tax_year', requestId }
+          : err instanceof CannotComputeError
+          ? { error: err.message, code: 'cannot_compute', requestId }
+          : { error: 'The calculation could not be completed for the input provided.', code: 'calculation_error', requestId },
+    };
+  }
 }
 
 async function handlePaycheck(req: IncomingMessage, res: ServerResponse): Promise<void> {
@@ -2628,84 +2807,18 @@ async function handlePaycheck(req: IncomingMessage, res: ServerResponse): Promis
     return;
   }
 
-  // --- validate (structured, field-level) ------------------------------
-  const validation = validatePaycheckInput(raw, {
-    validStateCodes: validStateCodes(),
-    supportedYears: supportedYears(),
-    stateHasYear: (code, year) => stateYears(code).includes(year),
-  });
-  if (!validation.ok) {
-    noteUsage(ctx, req, {
-      statusCode: 422,
-      error: 'validation_failed',
-      checkDate: (raw as { checkDate?: string } | null)?.checkDate ?? null,
-      kind: 'paycheck',
-      paychecks: 0,
-    });
-    sendJson(
-      res,
-      422,
-      {
-        error: 'The request did not pass validation.',
-        code: 'invalid_input',
-        details: validation.errors,
-        requestId,
-      },
-      rlHeaders,
-    );
+  // --- validate, then calculate: the same two steps every endpoint that runs a paycheck shares ---
+  const prep = preparePaycheck(raw, requestId);
+  if (!prep.ok) {
+    noteUsage(ctx, req, { statusCode: prep.status, error: 'validation_failed', checkDate: prep.checkDate, kind: 'paycheck', paychecks: 0 });
+    sendJson(res, prep.status, prep.body, rlHeaders);
     return;
   }
-
-  // --- optional extras: garnishments[] and minimumWageCheck -------------
-  // Answered in this same call and billed as this same call.
-  const extrasCheck = validatePaycheckExtras(raw as Record<string, unknown>, validation.value.workState?.code);
-  if (!extrasCheck.ok) {
-    noteUsage(ctx, req, { statusCode: 422, error: 'validation_failed', checkDate: validation.value.checkDate, kind: 'paycheck', paychecks: 0 });
-    sendJson(
-      res,
-      422,
-      { error: 'The request did not pass validation.', code: 'invalid_input', details: extrasCheck.errors, requestId },
-      rlHeaders,
-    );
-    return;
-  }
-
-  // --- calculate --------------------------------------------------------
-  let status = 200;
-  let responseBody: unknown;
-  let usageError: string | null = null;
-  try {
-    const result = calculatePaycheck(validation.value);
-    const extras = runPaycheckExtras(validation.value, result, extrasCheck.value);
-    const ignored = unknownFieldWarnings(raw as Record<string, unknown>);
-    responseBody = {
-      result: {
-        ...result,
-        ...(ignored.length > 0 ? { warnings: [...(result.warnings ?? []), ...ignored] } : {}),
-        ...(extras.garnishment ? { garnishment: extras.garnishment } : {}),
-        ...(extras.minimumWage ? { minimumWage: extras.minimumWage } : {}),
-      },
-    };
-  } catch (err) {
-    // Validation covers the common bad-input cases, so a throw here is
-    // unexpected. Log the real reason for support (keyed by requestId);
-    // hand the caller a safe message, never an engine stack detail.
-    status = 422;
-    usageError = err instanceof Error ? err.message : 'calculation_error';
-    console.error(`[paycheck ${requestId}] calculation failed:`, usageError);
-    responseBody =
-      err instanceof ExtrasRefusal
-        ? { error: err.message, code: 'invalid_input', details: [{ path: err.path, message: err.message }], requestId }
-        : err instanceof UnsupportedTaxYearError
-        ? { error: err.message, code: 'unsupported_tax_year', requestId }
-        : err instanceof CannotComputeError
-        ? { error: err.message, code: 'cannot_compute', requestId }
-        : {
-            error: 'The calculation could not be completed for the input provided.',
-            code: 'calculation_error',
-            requestId,
-          };
-  }
+  const validation = { value: prep.input };
+  const ran = runPaycheck(prep, requestId);
+  const status = ran.status;
+  const responseBody = ran.body;
+  const usageError = ran.usageError;
 
   // The usage row and its meter events are one store write. Stripe is
   // called afterwards, off the response path. A failed or skipped meter
@@ -2723,6 +2836,170 @@ async function handlePaycheck(req: IncomingMessage, res: ServerResponse): Promis
 }
 
 // ---------------------------------------------------------------------
+// POST /v1/paycheck/compare -- two paychecks and what moved between them.
+// Body: { before: <paycheck request>, after: <paycheck request> }, or
+// { before, change: <partial request merged onto before> } to ask "what
+// if". Both go through the same validation as POST /v1/paycheck, both are
+// calculated by the engine, and the explanation (site/lib/compare.ts) is
+// built by re-running the engine as each input difference is applied, so
+// every figure in it is an engine result. Billed as two paychecks when it
+// succeeds, nothing when it is refused.
+// ---------------------------------------------------------------------
+
+type CompareOutcome = { status: number; body: unknown; usageError: string | null; checkDate: string | null; paychecks: number };
+
+function runCompare(raw: unknown, requestId: string): CompareOutcome {
+  const bad = (details: string, code = 'invalid_input'): CompareOutcome => ({
+    status: 422,
+    usageError: 'validation_failed',
+    checkDate: null,
+    paychecks: 0,
+    body: { error: 'The request did not pass validation.', code, details: [{ path: '', message: details }], requestId },
+  });
+  if (typeof raw !== 'object' || raw === null || Array.isArray(raw)) return bad('Send an object with before and after (or before and change).');
+  const body = raw as Record<string, unknown>;
+  const hasAfter = body.after !== undefined;
+  const hasChange = body.change !== undefined;
+  if (typeof body.before !== 'object' || body.before === null || Array.isArray(body.before)) return bad('before must be a paycheck request object.');
+  if (hasAfter === hasChange) return bad('Send exactly one of after (a full second paycheck request) or change (the fields that differ).');
+  const second = hasAfter ? body.after : mergePatch(body.before, body.change);
+  if (typeof second !== 'object' || second === null || Array.isArray(second)) return bad(hasAfter ? 'after must be a paycheck request object.' : 'change must be an object.');
+
+  const prefixed = (which: string, prep: Extract<PaycheckPrep, { ok: false }>): CompareOutcome => {
+    const b = prep.body as { details?: Array<{ path?: string; message?: string }> } & Record<string, unknown>;
+    return {
+      status: prep.status,
+      usageError: 'validation_failed',
+      checkDate: prep.checkDate,
+      paychecks: 0,
+      body: { ...b, details: (b.details ?? []).map((d) => ({ ...d, path: d.path ? `${which}.${d.path}` : which })) },
+    };
+  };
+  const a = preparePaycheck(body.before, requestId);
+  if (!a.ok) return prefixed('before', a);
+  const b = preparePaycheck(second, requestId);
+  if (!b.ok) return prefixed(hasAfter ? 'after' : 'change', b);
+
+  const first = runPaycheck(a, requestId);
+  if (first.status !== 200) return { ...first, checkDate: a.input.checkDate, paychecks: 0, body: relabel(first.body, 'before') };
+  const next = runPaycheck(b, requestId);
+  if (next.status !== 200) return { ...next, checkDate: b.input.checkDate, paychecks: 0, body: relabel(next.body, hasAfter ? 'after' : 'change') };
+
+  const results = {
+    before: (first.body as { result: PaycheckResult }).result,
+    after: (next.body as { result: PaycheckResult }).result,
+  };
+  const comparison = comparePaychecks(a.input, b.input, results);
+  const notes = [...comparison.notes];
+  if (Object.keys(a.extras).length || Object.keys(b.extras).length) notes.push('Garnishment and minimum-wage extras are not part of the comparison; it covers the engine inputs and taxes.');
+  return {
+    status: 200,
+    usageError: null,
+    checkDate: b.input.checkDate,
+    paychecks: 2,
+    body: { before: results.before, after: results.after, comparison: { ...comparison, notes } },
+  };
+}
+
+function relabel(body: unknown, which: string): unknown {
+  const b = body as { details?: Array<{ path?: string; message?: string }> };
+  return b.details ? { ...b, details: b.details.map((d) => ({ ...d, path: d.path ? `${which}.${d.path}` : which })) } : body;
+}
+
+async function handleCompare(req: IncomingMessage, res: ServerResponse): Promise<void> {
+  const ctx = authenticateKey(req, res, 'paycheck');
+  if (!ctx) return;
+  const { requestId, rlHeaders } = ctx;
+  let raw: unknown;
+  try {
+    raw = await readJson<unknown>(req, 'any');
+  } catch (err) {
+    noteUsage(ctx, req, { statusCode: 400, error: 'invalid_json', checkDate: null, kind: 'paycheck', paychecks: 0 });
+    sendJson(res, 400, { error: (err as Error).message, code: 'invalid_json', requestId }, rlHeaders);
+    return;
+  }
+  const out = runCompare(raw, requestId);
+  const recorded = noteUsage(ctx, req, { statusCode: out.status, error: out.usageError, checkDate: out.checkDate, kind: 'paycheck', paychecks: out.paychecks });
+  sendJson(res, out.status, out.body, rlHeaders);
+  if (recorded.recorded && out.paychecks > 0 && wantMeter(ctx)) flushMeterSoon();
+}
+
+// ---------------------------------------------------------------------
+// POST /mcp -- the Model Context Protocol endpoint (site/lib/mcp.ts is the
+// protocol; this is the glue). A tool call runs the same functions the REST
+// endpoints run and is recorded and billed the same way: calculate_paycheck
+// is one paycheck, compare_paychecks two, lookup_address and coverage none.
+// The usage row's endpoint reads "POST /mcp <tool>".
+// ---------------------------------------------------------------------
+
+async function handleMcp(req: IncomingMessage, res: ServerResponse): Promise<void> {
+  // A browser page on another origin must not be able to drive a key from here.
+  // Native MCP clients send no Origin header at all.
+  if (req.headers.origin && Object.keys(corsHeaders(req)).length === 0) {
+    sendJson(res, 403, { jsonrpc: '2.0', id: null, error: { code: -32600, message: 'Origin not allowed.' } });
+    return;
+  }
+  const ctx = authenticateKey(req, res, 'mcp');
+  if (!ctx) return;
+  const { requestId, rlHeaders } = ctx;
+
+  let message: unknown;
+  try {
+    message = await readJson<unknown>(req, 'any');
+  } catch (err) {
+    sendJson(res, 400, { jsonrpc: '2.0', id: null, error: { code: -32700, message: (err as Error).message } }, rlHeaders);
+    return;
+  }
+
+  let billed = 0;
+  const call = async (name: ToolName, args: Record<string, unknown>): Promise<ToolOutcome> => {
+    const endpoint = `POST /mcp ${name}`;
+    const note = (statusCode: number, error: string | null, checkDate: string | null, kind: 'paycheck' | 'address' | 'catalog', paychecks: number, matched?: boolean) => {
+      const r = noteUsage(ctx, req, { statusCode, error, checkDate, kind, paychecks, endpoint, ...(matched === undefined ? {} : { matched }) });
+      if (r.recorded && paychecks > 0) billed += paychecks;
+    };
+    if (name === 'calculate_paycheck') {
+      const prep = preparePaycheck(args, requestId);
+      if (!prep.ok) {
+        note(prep.status, 'validation_failed', prep.checkDate, 'paycheck', 0);
+        return { isError: true, body: prep.body };
+      }
+      const ran = runPaycheck(prep, requestId);
+      note(ran.status, ran.usageError, prep.input.checkDate, 'paycheck', ran.status === 200 ? 1 : 0);
+      return { isError: ran.status !== 200, body: ran.body };
+    }
+    if (name === 'compare_paychecks') {
+      const out = runCompare(args, requestId);
+      note(out.status, out.usageError, out.checkDate, 'paycheck', out.paychecks);
+      return { isError: out.status !== 200, body: out.body };
+    }
+    if (name === 'lookup_address') {
+      const out = await runAddress(args, requestId);
+      note(out.status, out.error, null, 'address', 0, out.matched);
+      return { isError: out.status !== 200, body: out.body };
+    }
+    const state = typeof args.state === 'string' ? args.state.trim().toUpperCase() : '';
+    const { year, summary, states } = coverage();
+    const rows = state ? states.filter((row: { code?: string }) => row.code === state) : states;
+    if (state && rows.length === 0) {
+      note(422, 'validation_failed', null, 'catalog', 0);
+      return { isError: true, body: { error: `No state "${state}" in this build's coverage.`, code: 'invalid_input', requestId } };
+    }
+    note(200, null, null, 'catalog', 0);
+    return { isError: false, body: { year, summary: state ? undefined : summary, states: rows } };
+  };
+
+  const out = await handleRpc(message, call);
+  if (out.response === null) {
+    res.writeHead(out.httpStatus, { ...securityHeaders(req), ...rlHeaders, 'Content-Length': '0' });
+    res.end();
+  } else {
+    sendJson(res, out.httpStatus, out.response, rlHeaders);
+  }
+  if (billed > 0 && wantMeter(ctx)) flushMeterSoon();
+}
+
+// ---------------------------------------------------------------------
 // POST /v1/address -- key-authenticated address resolution. Turns a work
 // address (and optionally a home address) into the state, the local
 // jurisdictions and the certificate facts a paycheck needs, so the caller
@@ -2731,19 +3008,10 @@ async function handlePaycheck(req: IncomingMessage, res: ServerResponse): Promis
 // Not a paycheck calculation: the lookup is recorded and is not metered.
 // ---------------------------------------------------------------------
 
-async function handleAddress(req: IncomingMessage, res: ServerResponse): Promise<void> {
-  const ctx = authenticateKey(req, res, 'address');
-  if (!ctx) return;
-  const { requestId, rlHeaders } = ctx;
+type AddressOutcome = { status: number; body: unknown; error: string | null; matched?: boolean };
 
-  let body: Record<string, unknown>;
-  try {
-    body = await readJson<Record<string, unknown>>(req);
-  } catch (err) {
-    noteUsage(ctx, req, { statusCode: 400, error: 'invalid_json', checkDate: null, kind: 'address', paychecks: 0 });
-    sendJson(res, 400, { error: (err as Error).message, code: 'invalid_json', requestId }, rlHeaders);
-    return;
-  }
+/** Resolve a work and/or home address. Shared by POST /v1/address and the MCP lookup_address tool. */
+async function runAddress(body: Record<string, unknown>, requestId: string): Promise<AddressOutcome> {
   const clean = (v: unknown) => (typeof v === 'string' ? v.replace(/\s+/g, ' ').trim() : '');
   const work = clean(body.workAddress);
   const home = clean(body.residenceAddress);
@@ -2753,11 +3021,7 @@ async function handleAddress(req: IncomingMessage, res: ServerResponse): Promise
     : work.length > 200 || home.length > 200 ? 'An address can be at most 200 characters.'
     : body.checkDate !== undefined && !/^\d{4}-\d{2}-\d{2}$/.test(checkDate) ? 'checkDate must be ISO yyyy-mm-dd.'
     : null;
-  if (problem) {
-    noteUsage(ctx, req, { statusCode: 422, error: 'validation_failed', checkDate: null, kind: 'address', paychecks: 0 });
-    sendJson(res, 422, { error: problem, code: 'invalid_input', requestId }, rlHeaders);
-    return;
-  }
+  if (problem) return { status: 422, error: 'validation_failed', body: { error: problem, code: 'invalid_input', requestId } };
 
   try {
     // Key-authenticated, so the large local address index is allowed here.
@@ -2775,26 +3039,51 @@ async function handleAddress(req: IncomingMessage, res: ServerResponse): Promise
     const matched = Boolean(r.work?.matched || r.residence?.matched);
     const state = (r.work?.matched ? r.work.resolved?.state : null) ?? (r.residence?.matched ? r.residence.resolved?.state : null) ?? null;
     const homeState = r.residence?.matched ? r.residence.resolved?.state ?? null : null;
-    // An address lookup is not a paycheck calculation and is not metered.
-    noteUsage(ctx, req, { statusCode: 200, error: null, checkDate: null, kind: 'address', paychecks: 0, matched });
-    sendJson(res, 200, {
+    return {
+      status: 200,
+      error: null,
       matched,
-      state,
-      residenceState: homeState && homeState !== state ? homeState : null,
-      certificate: r.certificateFields,
-      work: side(r.work),
-      residence: side(r.residence),
-      notResolvable: r.notResolvable,
-      lookupFailures: r.lookupFailures,
-      warnings: r.lowConfidenceReasons,
-      fullyResolved: r.fullyResolved,
-      requestId,
-    }, rlHeaders);
+      body: {
+        matched,
+        state,
+        residenceState: homeState && homeState !== state ? homeState : null,
+        certificate: r.certificateFields,
+        work: side(r.work),
+        residence: side(r.residence),
+        notResolvable: r.notResolvable,
+        lookupFailures: r.lookupFailures,
+        warnings: r.lowConfidenceReasons,
+        fullyResolved: r.fullyResolved,
+        requestId,
+      },
+    };
   } catch (err) {
     console.error(`[address ${requestId}] lookup failed:`, err instanceof Error ? err.message : err);
-    noteUsage(ctx, req, { statusCode: 502, error: 'geocode_unavailable', checkDate: null, kind: 'address', paychecks: 0 });
-    sendJson(res, 502, { error: 'The address lookup is unavailable right now. Retry shortly; nothing was billed.', code: 'geocode_unavailable', requestId }, rlHeaders);
+    return {
+      status: 502,
+      error: 'geocode_unavailable',
+      body: { error: 'The address lookup is unavailable right now. Retry shortly; nothing was billed.', code: 'geocode_unavailable', requestId },
+    };
   }
+}
+
+async function handleAddress(req: IncomingMessage, res: ServerResponse): Promise<void> {
+  const ctx = authenticateKey(req, res, 'address');
+  if (!ctx) return;
+  const { requestId, rlHeaders } = ctx;
+
+  let body: Record<string, unknown>;
+  try {
+    body = await readJson<Record<string, unknown>>(req);
+  } catch (err) {
+    noteUsage(ctx, req, { statusCode: 400, error: 'invalid_json', checkDate: null, kind: 'address', paychecks: 0 });
+    sendJson(res, 400, { error: (err as Error).message, code: 'invalid_json', requestId }, rlHeaders);
+    return;
+  }
+  const out = await runAddress(body, requestId);
+  // An address lookup is not a paycheck calculation and is not metered.
+  noteUsage(ctx, req, { statusCode: out.status, error: out.error, checkDate: null, kind: 'address', paychecks: 0, ...(out.matched === undefined ? {} : { matched: out.matched }) });
+  sendJson(res, out.status, out.body, rlHeaders);
 }
 
 /** Deliver queued meter events now, off the response path. Failures stay queued. */
@@ -3191,7 +3480,7 @@ function handleBilling(req: IncomingMessage, res: ServerResponse): void {
   }
 
   readDb((db) => {
-    const key = Object.values(db.keys).find((k) => k.ownerEmail === session.email && k.isActive);
+    const key = Object.values(db.keys).find((k) => k.ownerEmail === session.email && k.isActive && k.mode !== 'test');
     const sub = db.subscriptions[session.email] ?? null;
     const pm = db.paymentMethods[session.email] ?? null;
     const calls = key ? db.usage.filter((u) => u.keyHash === key.keyHash).length : 0;
@@ -3401,6 +3690,14 @@ createServer((req, res) => {
     if (method === 'GET' && url === '/api/usage') return handleUsage(req, res);
     if (method === 'GET' && (url === '/api/me' || url === '/v1/me')) return handleMe(req, res);
     if (method === 'POST' && (url === '/api/paycheck' || url === '/v1/paycheck')) return handlePaycheck(req, res);
+    if (method === 'POST' && (url === '/api/paycheck/compare' || url === '/v1/paycheck/compare')) return handleCompare(req, res);
+    if (url === '/mcp') {
+      if (method === 'POST') return handleMcp(req, res);
+      // No server-initiated stream and no sessions to end.
+      res.writeHead(405, { Allow: 'POST', ...securityHeaders(req), 'Content-Length': '0' });
+      res.end();
+      return;
+    }
     if (method === 'POST' && (url === '/api/payCalc' || url === '/v1/payCalc')) return handlePayCalc(req, res);
     if (method === 'POST' && (url === '/api/payroll/run' || url === '/v1/payroll/run')) return handlePayrollRun(req, res);
     if (method === 'GET' && (url === '/api/uniqueTaxIds' || url === '/v1/uniqueTaxIds')) return handleUniqueTaxIds(req, res);
