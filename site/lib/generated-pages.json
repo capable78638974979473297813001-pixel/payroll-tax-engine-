@@ -73,12 +73,16 @@
     "path": "/symmetry-tax-engine-alternative",
     "file": "symmetry-tax-engine-alternative.html",
     "title": "Symmetry Tax Engine alternative: payroll tax API | Omnia.tax",
-    "description": "Comparing Symmetry Tax Engine with Omnia.tax: what each covers, how each is sold, and when a self-serve payroll tax API is and is not a fit.",
+    "description": "A smaller, easier, self-serve Symmetry Tax Engine alternative: the same gross-to-net calculation, local coverage and address geocoding, $0.08 per paycheck.",
     "h1": "A Symmetry Tax Engine alternative",
     "faq": [
       {
         "q": "Is Omnia.tax a Symmetry Tax Engine alternative?",
-        "a": "For some teams. If you need a self-serve HTTP API for gross-to-net payroll tax with public per-call pricing and you can work with state-level coverage plus the local taxes listed on our coverage page, it can replace a tax engine. If you need Symmetry's breadth of local jurisdictions, withholding forms, I-9 or a vendor with decades of production history, it is not a like-for-like replacement."
+        "a": "Yes, if you want a smaller, easier, self-serve payroll tax engine. It does the same core job: gross-to-net for federal, all 50 states and DC and local taxes, plus employer taxes, garnishments and minimum wage, with address geocoding that finds the right local jurisdictions. You sign up, get a key and call it, at a published $0.08 per paycheck calculation. If you also need withholding forms, I-9 or Canadian payroll from the same vendor, those are outside Omnia.tax."
+      },
+      {
+        "q": "Does Omnia.tax cover local payroll taxes?",
+        "a": "Yes: 4,141 local tax jurisdictions in the 15 states where we found local wage taxes, each listed by name on the coverage page, and chosen from the employee's work and home address by geocoding."
       },
       {
         "q": "Is the Omnia.tax API compatible with Symmetry's?",
@@ -104,12 +108,16 @@
     "path": "/payroll-tax-engine-comparison",
     "file": "payroll-tax-engine-comparison.html",
     "title": "Payroll tax engine comparison: Symmetry, Vertex, Check, Omnia.tax",
-    "description": "Compare payroll tax calculation options: Symmetry Tax Engine, Vertex Payroll Tax, Check, a self-serve API, or build it yourself. What each covers.",
+    "description": "Compare payroll tax calculation options: Symmetry, Vertex, Check, a self-serve API with local coverage and geocoding, or build it yourself.",
     "h1": "Payroll tax engine comparison",
     "faq": [
       {
         "q": "What are the alternatives to Symmetry Software?",
         "a": "Other ways to get payroll tax calculation include Vertex Payroll Tax, an embedded payroll API such as Check, a self-serve payroll tax API such as Omnia.tax, or building the rules in-house from IRS and state publications. Which fits depends on whether you need only calculation or a full payroll platform."
+      },
+      {
+        "q": "Which payroll tax engine has local tax coverage and address geocoding?",
+        "a": "Several do. Omnia.tax covers 4,141 local jurisdictions in 15 states and finds the right ones from the work and home address with geocoding, in a self-serve API. Symmetry describes local withholding from address coordinates, and Vertex describes geocode-based jurisdiction assignment, on their own sites."
       },
       {
         "q": "Should I build payroll tax calculation myself?",
@@ -2292,16 +2300,20 @@
     "path": "/local-payroll-tax-api",
     "file": "local-payroll-tax-api.html",
     "title": "Local payroll tax API: city, county, school district | Omnia.tax",
-    "description": "A local payroll tax API covering 4,141 city, county and school district taxes in 15 states, chosen from the work and home address.",
+    "description": "Local payroll tax in one call: 4,141 city, county and school district taxes in 15 states, found from the work and home address by geocoding.",
     "h1": "Local payroll tax API",
     "faq": [
       {
         "q": "Which states have local payroll taxes?",
-        "a": "Omnia.tax carries local taxes in 15 states, 4,141 jurisdictions in all. The coverage page lists them by state and says where a state's local layer is only partly listed."
+        "a": "Omnia.tax carries local taxes in 15 states, 4,141 jurisdictions in all, each listed by name on the coverage page. Pennsylvania and Ohio have the most; Kentucky, Indiana, Michigan, Alabama, Maryland and others have them too."
       },
       {
         "q": "How does the API know which city tax applies?",
-        "a": "It resolves the work address, and the home address when it differs, to a city, county and school district, and the paycheck calculation applies the local taxes for those places."
+        "a": "It geocodes the work address, and the home address when it differs, to a city, county and school district, and the paycheck calculation applies the local taxes for those places."
+      },
+      {
+        "q": "Does it include local minimum wage?",
+        "a": "Yes. 69 city and county minimum wage ordinances are checked on the same call as the tax."
       }
     ],
     "breadcrumb": [
@@ -2322,9 +2334,9 @@
   {
     "path": "/address-tax-jurisdiction-lookup-api",
     "file": "address-tax-jurisdiction-lookup-api.html",
-    "title": "Address to tax jurisdiction lookup API for payroll | Omnia.tax",
-    "description": "Turn a work and home street address into the state, local tax jurisdictions and withholding certificate a paycheck needs. Reports what it could not resolve.",
-    "h1": "Address to tax jurisdiction lookup API",
+    "title": "Payroll tax geocoding: address to tax jurisdiction API | Omnia.tax",
+    "description": "Payroll tax geocoding: turn a work and home address into the state, local tax jurisdictions and certificate a paycheck needs, with match precision reported.",
+    "h1": "Payroll tax geocoding: address to tax jurisdiction",
     "faq": [
       {
         "q": "Why does payroll need a home address?",

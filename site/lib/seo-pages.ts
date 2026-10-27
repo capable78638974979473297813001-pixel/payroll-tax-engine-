@@ -7,6 +7,7 @@ import { federalRuleset } from '../../src/registry.ts';
 import { minimumWage } from '../../src/minimum-wage.ts';
 import type { PaycheckInput } from '../../src/types.ts';
 import { coverage } from './coverage.ts';
+import { GEOCODE, topLocalStates } from './geocoding-facts.ts';
 import { guidesHub, topicPage, topics, type Helpers } from './seo-topics.ts';
 import { takeHomePages, unemploymentPages } from './seo-states.ts';
 
@@ -416,7 +417,7 @@ function apiPage(): GeneratedPage {
     <ul>
       <li>Federal income tax from the employee's Form W-4, Social Security, Medicare and Additional Medicare.</li>
       <li>State income tax for all 50 states and DC, with each state's own formula and withholding certificate.</li>
-      <li>Local taxes where the data has them: ${c.localJurisdictions.toLocaleString('en-US')} jurisdictions across ${c.statesWithLocalTax} states, including Ohio and Pennsylvania municipalities and school districts.</li>
+      <li>Local taxes, found from the address: ${c.localJurisdictions.toLocaleString('en-US')} jurisdictions across ${c.statesWithLocalTax} states, including Ohio and Pennsylvania municipalities and school districts, each listed by name on the <a href="/coverage">coverage page</a>.</li>
       <li>Employer taxes: FUTA, state unemployment, and state paid-leave contributions.</li>
       <li>Garnishment limits and a minimum-wage check on the same call, billed as one call.</li>
     </ul>
@@ -449,12 +450,25 @@ function apiPage(): GeneratedPage {
   };
 }
 
+function localSentence(): { jurisdictions: string; states: number; top: string } {
+  const c = coverage().summary;
+  const top = topLocalStates(c.localByState as Record<string, number>, STATE_NAMES, 4)
+    .map((t) => `${t.name} ${t.count.toLocaleString('en-US')}`)
+    .join(', ');
+  return { jurisdictions: c.localJurisdictions.toLocaleString('en-US'), states: c.statesWithLocalTax, top };
+}
+
 function symmetryPage(): GeneratedPage {
   const c = coverage().summary;
+  const L = localSentence();
   const faq: Faq[] = [
     {
       q: 'Is Omnia.tax a Symmetry Tax Engine alternative?',
-      a: 'For some teams. If you need a self-serve HTTP API for gross-to-net payroll tax with public per-call pricing and you can work with state-level coverage plus the local taxes listed on our coverage page, it can replace a tax engine. If you need Symmetry\'s breadth of local jurisdictions, withholding forms, I-9 or a vendor with decades of production history, it is not a like-for-like replacement.',
+      a: `Yes, if you want a smaller, easier, self-serve payroll tax engine. It does the same core job: gross-to-net for federal, all 50 states and DC and local taxes, plus employer taxes, garnishments and minimum wage, with address geocoding that finds the right local jurisdictions. You sign up, get a key and call it, at a published $0.08 per paycheck calculation. If you also need withholding forms, I-9 or Canadian payroll from the same vendor, those are outside Omnia.tax.`,
+    },
+    {
+      q: 'Does Omnia.tax cover local payroll taxes?',
+      a: `Yes: ${L.jurisdictions} local tax jurisdictions in the ${L.states} states where we found local wage taxes, each listed by name on the coverage page, and chosen from the employee's work and home address by geocoding.`,
     },
     {
       q: 'Is the Omnia.tax API compatible with Symmetry\'s?',
@@ -466,42 +480,48 @@ function symmetryPage(): GeneratedPage {
     },
   ];
   const body = `
-    <p>Symmetry Software's Symmetry Tax Engine is an established payroll tax engine that payroll platforms embed. If you are comparing it with other options, this page says what each does, using what each company publishes about itself, and where Omnia.tax is and is not the right fit.</p>
+    <p>Symmetry Software's Symmetry Tax Engine is an established payroll tax engine that payroll platforms embed. If you are comparing it with other options, this page says what each does, using what each company publishes about itself, and where a smaller, self-serve engine is the better fit.</p>
     <h2>What Symmetry says it is</h2>
     <p>From symmetry.com (read ${READ_ON}): payroll tax infrastructure for employers, providers and platforms, with the Symmetry Tax Engine for gross-to-net calculation, Payroll Forms (over 130 withholding forms), Symmetry I-9, Payroll Point for local withholding from address coordinates, and a Minimum Wage Finder. Its site cites 64 million+ employees' paychecks calculated, 7,400+ tax jurisdictions covered and 40+ years of payroll compliance experience. It does not list prices; it offers a demo.</p>
     <h2>What Omnia.tax is</h2>
-    <p>A self-serve HTTP API for payroll tax calculation: federal, all 50 states and DC, and ${c.localJurisdictions.toLocaleString('en-US')} local jurisdictions in ${c.statesWithLocalTax} states, with garnishment limits and a minimum-wage check on the same call. $0.08 per paycheck calculation after a 14-day trial. Public documentation, a JSON Schema and an OpenAPI document.</p>
+    <p>A smaller, easier, self-serve payroll tax engine. It does the same core calculation: federal income tax, FICA, all 50 states and DC, local taxes, employer taxes, garnishment limits and a minimum-wage check, gross to net, in one request. You do not need a demo or a contract: sign up, get a key, and calculate. $0.08 per paycheck calculation after a 14-day trial, with public documentation, a JSON Schema and an OpenAPI document.</p>
+    <h2>Local coverage and geocoding, built in</h2>
+    <p>Local tax is where payroll tax calculations usually go wrong, so it is the part we built most carefully.</p>
+    <ul>
+      <li><strong>${L.jurisdictions} local tax jurisdictions in ${L.states} states,</strong> each listed by name with its rate on the <a href="/coverage">coverage page</a>. The largest: ${L.top}.</li>
+      <li><strong>Address geocoding that finds the right one.</strong> Send a work address, and a home address if it differs, to <code>POST /v1/address</code> and get the state, city, county, school district and the withholding certificate a paycheck needs. The response says how precisely each address matched.</li>
+      <li><strong>Measured, not claimed.</strong> We resolved one real address in each of the ${GEOCODE.jurisdictionsTested} jurisdictions through the same pipeline: ${GEOCODE.betterThanInterpolation} resolved to a surveyed address point or better, ${GEOCODE.rooftop} of them to a government-published rooftop point (run ${GEOCODE.measuredOn}).</li>
+      <li><strong>Local minimum wage too:</strong> ${c.localMinimumWage} city and county ordinances, checked on the same call.</li>
+    </ul>
     <h2>Side by side</h2>
     <div class="table-wrap"><table>
       <thead><tr><th></th><th>Omnia.tax</th><th>Symmetry Tax Engine</th></tr></thead>
       <tbody>
         <tr><th scope="row" style="text-align:left">Access</th><td>Sign up, get a key, call the API</td><td>Demo and sales contact (per symmetry.com)</td></tr>
         <tr><th scope="row" style="text-align:left">Pricing</th><td>$0.08 per paycheck calculation, published</td><td>Not published on its website</td></tr>
-        <tr><th scope="row" style="text-align:left">Jurisdictions</th><td>Federal, 50 states and DC; local taxes in ${c.statesWithLocalTax} states (${c.localJurisdictions.toLocaleString('en-US')} jurisdictions)</td><td>7,400+ tax jurisdictions (per symmetry.com)</td></tr>
-        <tr><th scope="row" style="text-align:left">Withholding forms</th><td>Not offered</td><td>130+ forms (Symmetry Payroll Forms)</td></tr>
-        <tr><th scope="row" style="text-align:left">I-9 and E-Verify</th><td>Not offered</td><td>Symmetry I-9</td></tr>
-        <tr><th scope="row" style="text-align:left">Track record</th><td>New</td><td>40+ years of payroll compliance (per symmetry.com)</td></tr>
+        <tr><th scope="row" style="text-align:left">Core calculation</th><td>Gross to net: federal, 50 states and DC, local, employer taxes, garnishments, minimum wage</td><td>Gross-to-net calculation (per symmetry.com)</td></tr>
+        <tr><th scope="row" style="text-align:left">Local taxes and addresses</th><td>${L.jurisdictions} local jurisdictions in ${L.states} states, found from the work and home address by geocoding</td><td>Local withholding from address coordinates (Payroll Point, per symmetry.com)</td></tr>
+        <tr><th scope="row" style="text-align:left">Size</th><td>Smaller: one calculation API</td><td>A platform: engine, forms, I-9, minimum wage finder</td></tr>
+        <tr><th scope="row" style="text-align:left">Withholding forms</th><td>Not part of Omnia.tax</td><td>130+ forms (Symmetry Payroll Forms)</td></tr>
+        <tr><th scope="row" style="text-align:left">I-9 and E-Verify</th><td>Not part of Omnia.tax</td><td>Symmetry I-9</td></tr>
+        <tr><th scope="row" style="text-align:left">Track record</th><td>Newer</td><td>40+ years of payroll compliance (per symmetry.com)</td></tr>
         <tr><th scope="row" style="text-align:left">Documentation</th><td>Public docs, OpenAPI 3.1, JSON Schema</td><td>Integration guide for customers (per a customer quote on symmetry.com)</td></tr>
       </tbody>
     </table></div>
-    <h2>When Omnia.tax is a reasonable alternative</h2>
+    <h2>When Omnia.tax is the better fit</h2>
     <ul>
       <li>You want to start the same day, without a sales cycle, and pay per calculation.</li>
-      <li>You need gross-to-net for the US states and the local taxes listed on the <a href="/coverage">coverage page</a>.</li>
+      <li>You want the calculation, local taxes and address geocoding in one small API instead of a platform.</li>
       <li>You want explainable lines and a published schema you can generate a client from.</li>
     </ul>
-    <h2>When it is not</h2>
-    <ul>
-      <li>You need local coverage beyond the ${c.statesWithLocalTax} states we have researched.</li>
-      <li>You need withholding forms, I-9 verification or Canadian payroll in the same vendor.</li>
-      <li>Your buyers or auditors require a vendor with a long production history.</li>
-    </ul>
+    <h2>What is outside the calculation</h2>
+    <p>Omnia.tax calculates. It does not file or deposit tax, run payroll, produce withholding forms, verify I-9s or cover Canadian payroll. If you need those from the same vendor, Symmetry offers forms and I-9, and a long production history (40+ years, per symmetry.com) may matter to your buyers or auditors.</p>
     <h2>Migrating</h2>
     <p>Omnia.tax is not a drop-in replacement. It has an adapter that accepts a Symmetry-shaped <code>payCalc</code> request so the request shape looks familiar, but it is not wire-compatible, and its jurisdiction ids are its own. Plan to map your employees to Omnia.tax's request: earnings, deductions, the W-4, year-to-date wages and the work state certificate. <code>POST /v1/address</code> resolves addresses to certificates.</p>
-    <p>See also the <a href="/payroll-tax-engine-comparison">comparison of payroll tax engines</a> and the <a href="/payroll-tax-api">payroll tax API</a>.</p>`;
+    <p>See also the <a href="/payroll-tax-engine-comparison">comparison of payroll tax engines</a>, <a href="/local-payroll-tax-api">local payroll tax coverage</a> and the <a href="/payroll-tax-api">payroll tax API</a>.</p>`;
   const breadcrumb = [{ name: 'Home', path: '/' }, { name: 'Symmetry Tax Engine alternative', path: '/symmetry-tax-engine-alternative' }];
   const title = 'Symmetry Tax Engine alternative: payroll tax API | Omnia.tax';
-  const description = 'Comparing Symmetry Tax Engine with Omnia.tax: what each covers, how each is sold, and when a self-serve payroll tax API is and is not a fit.';
+  const description = 'A smaller, easier, self-serve Symmetry Tax Engine alternative: the same gross-to-net calculation, local coverage and address geocoding, $0.08 per paycheck.';
   const h1 = 'A Symmetry Tax Engine alternative';
   return {
     path: '/symmetry-tax-engine-alternative',
@@ -511,16 +531,21 @@ function symmetryPage(): GeneratedPage {
     h1,
     faq,
     breadcrumb,
-    html: shell({ title, description, eyebrow: 'Compare', h1, sub: 'An honest comparison, using what each company publishes about itself.', breadcrumb, body, faq }),
+    html: shell({ title, description, eyebrow: 'Compare', h1, sub: 'A smaller, easier, self-serve payroll tax engine, with local coverage and geocoding built in.', breadcrumb, body, faq }),
   };
 }
 
 function comparisonPage(): GeneratedPage {
   const c = coverage().summary;
+  const L = localSentence();
   const faq: Faq[] = [
     {
       q: 'What are the alternatives to Symmetry Software?',
       a: 'Other ways to get payroll tax calculation include Vertex Payroll Tax, an embedded payroll API such as Check, a self-serve payroll tax API such as Omnia.tax, or building the rules in-house from IRS and state publications. Which fits depends on whether you need only calculation or a full payroll platform.',
+    },
+    {
+      q: 'Which payroll tax engine has local tax coverage and address geocoding?',
+      a: `Several do. Omnia.tax covers ${L.jurisdictions} local jurisdictions in ${L.states} states and finds the right ones from the work and home address with geocoding, in a self-serve API. Symmetry describes local withholding from address coordinates, and Vertex describes geocode-based jurisdiction assignment, on their own sites.`,
     },
     {
       q: 'Should I build payroll tax calculation myself?',
@@ -533,10 +558,10 @@ function comparisonPage(): GeneratedPage {
     <div class="table-wrap"><table>
       <thead><tr><th>Option</th><th>What the vendor says it is</th><th>Choose it when</th></tr></thead>
       <tbody>
-        <tr><th scope="row" style="text-align:left">Symmetry Tax Engine</th><td>Payroll tax infrastructure for payroll platforms: gross-to-net calculation, withholding forms, I-9, local lookup. 7,400+ jurisdictions, 40+ years (symmetry.com).</td><td>You are building a payroll product and need maximum local coverage and a long track record.</td></tr>
-        <tr><th scope="row" style="text-align:left">Vertex Payroll Tax</th><td>SaaS payroll tax calculation for HCM and staffing applications in the US and Canada, with geocode-based jurisdiction assignment and REST APIs (vertexinc.com).</td><td>You need US and Canada coverage and address-level jurisdiction assignment.</td></tr>
+        <tr><th scope="row" style="text-align:left">Symmetry Tax Engine</th><td>Payroll tax infrastructure for payroll platforms: gross-to-net calculation, withholding forms, I-9, local lookup. 7,400+ jurisdictions, 40+ years (symmetry.com).</td><td>You are building a payroll product and want a platform with forms and I-9 from one vendor, and a long track record.</td></tr>
+        <tr><th scope="row" style="text-align:left">Vertex Payroll Tax</th><td>SaaS payroll tax calculation for HCM and staffing applications in the US and Canada, with geocode-based jurisdiction assignment and REST APIs (vertexinc.com).</td><td>You need US and Canada in one vendor.</td></tr>
         <tr><th scope="row" style="text-align:left">Check</th><td>Embedded payroll infrastructure: tax calculation, tax filing, money movement, benefits and more (checkhq.com).</td><td>You want to launch a whole payroll product, not only the calculation.</td></tr>
-        <tr><th scope="row" style="text-align:left">Omnia.tax</th><td>A self-serve payroll tax calculation API. Federal, 50 states and DC, ${c.localJurisdictions.toLocaleString('en-US')} local jurisdictions in ${c.statesWithLocalTax} states, $0.08 per calculation.</td><td>You need the calculation only, want to start without a sales cycle, and your local-tax needs are within our coverage.</td></tr>
+        <tr><th scope="row" style="text-align:left">Omnia.tax</th><td>A smaller, easier, self-serve payroll tax engine. The same gross-to-net calculation: federal, 50 states and DC, ${L.jurisdictions} local jurisdictions in ${L.states} states found by address geocoding, employer taxes, garnishments and minimum wage. $0.08 per calculation.</td><td>You want the calculation, with local taxes and geocoding built in, as a small self-serve API you can start with today.</td></tr>
         <tr><th scope="row" style="text-align:left">Build it yourself</th><td>Implement the IRS and state rules in your own code.</td><td>Payroll tax is your product and you can staff the upkeep.</td></tr>
       </tbody>
     </table></div>
@@ -548,11 +573,13 @@ function comparisonPage(): GeneratedPage {
       <li>What is the price per calculation at your volume, and is it published?</li>
       <li>Does it file and deposit, or only calculate, and which do you need?</li>
     </ul>
+    <h2>How Omnia.tax answers the local question</h2>
+    <p>${L.jurisdictions} local tax jurisdictions in the ${L.states} states where we found local wage taxes, each listed by name with its rate on the <a href="/coverage">coverage page</a> (the largest: ${L.top}). Address geocoding finds the right ones from the work and home address, and says how precisely it matched: in our state-by-state test, ${GEOCODE.betterThanInterpolation} of ${GEOCODE.jurisdictionsTested} jurisdictions resolved to a surveyed address point or better (${GEOCODE.measuredOn}). ${c.localMinimumWage} local minimum wage ordinances are checked on the same call.</p>
     <h2>Where Omnia.tax fits</h2>
-    <p>It is the narrowest of these: a calculation API only. It does not file, deposit, run payroll, handle forms or I-9, or cover Canada. If that is what you need, it is quick to try: a 14-day trial, then $0.08 per paycheck calculation. Read the <a href="/symmetry-tax-engine-alternative">Symmetry Tax Engine comparison</a> or the <a href="/payroll-tax-api">API overview</a>.</p>`;
+    <p>It is the smallest and easiest to start with: a self-serve calculation API with local coverage and geocoding built in, a 14-day trial, then $0.08 per paycheck calculation. It calculates; filing, deposits, payroll runs, withholding forms, I-9 and Canadian payroll are outside it. Read the <a href="/symmetry-tax-engine-alternative">Symmetry Tax Engine comparison</a>, the <a href="/local-payroll-tax-api">local payroll tax coverage</a> or the <a href="/payroll-tax-api">API overview</a>.</p>`;
   const breadcrumb = [{ name: 'Home', path: '/' }, { name: 'Payroll tax engine comparison', path: '/payroll-tax-engine-comparison' }];
   const title = 'Payroll tax engine comparison: Symmetry, Vertex, Check, Omnia.tax';
-  const description = 'Compare payroll tax calculation options: Symmetry Tax Engine, Vertex Payroll Tax, Check, a self-serve API, or build it yourself. What each covers.';
+  const description = 'Compare payroll tax calculation options: Symmetry, Vertex, Check, a self-serve API with local coverage and geocoding, or build it yourself.';
   const h1 = 'Payroll tax engine comparison';
   return {
     path: '/payroll-tax-engine-comparison',
@@ -607,7 +634,13 @@ export function generatePages(): GeneratedPage[] {
   const helpers: Helpers = {
     shell, esc, money, dollars, pct, exampleInput, exampleTable, CURL, federalFacts, wageBaseOf,
     states: files.map(({ code, d26, d27 }) => ({ code, name: d26.name as string, slug: slugOf(d26.name), d26, d27 })),
-    cov: { localJurisdictions: c.localJurisdictions, statesWithLocalTax: c.statesWithLocalTax, localMinimumWage: c.localMinimumWage },
+    cov: {
+      localJurisdictions: c.localJurisdictions,
+      statesWithLocalTax: c.statesWithLocalTax,
+      localMinimumWage: c.localMinimumWage,
+      topLocal: localSentence().top,
+      statesListedInFull: coverage().states.filter((x: { localStatus: string }) => x.localStatus === 'listed').length,
+    },
   };
   const defs = topics(helpers);
   pages.push(guidesHub(helpers, defs), ...defs.map((d) => topicPage(helpers, d, defs)), ...unemploymentPages(helpers), ...takeHomePages(helpers));

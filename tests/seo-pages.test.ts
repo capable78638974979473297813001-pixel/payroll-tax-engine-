@@ -124,9 +124,10 @@ describe('what the pages say about other companies', () => {
     assert.doesNotMatch(symmetry + comparison, /cheaper than|best-in-class|#1|better than Symmetry/i);
   });
 
-  test('it says where Omnia.tax is the wrong choice', () => {
-    assert.match(symmetry, /When it is not/);
-    assert.match(comparison, /narrowest of these/);
+  test('it says what is outside the calculation, as scope', () => {
+    assert.match(symmetry, /What is outside the calculation/);
+    assert.match(symmetry, /does not file or deposit tax, run payroll, produce withholding forms, verify I-9s or cover Canadian payroll/);
+    assert.match(comparison, /filing, deposits, payroll runs, withholding forms, I-9 and Canadian payroll are outside it/);
   });
 });
 
