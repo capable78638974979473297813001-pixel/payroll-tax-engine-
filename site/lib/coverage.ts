@@ -339,3 +339,49 @@ export function searchLocal(query: LocalQuery): {
   });
   return { total: filtered.length, page, size, items: filtered.slice(page * size, page * size + size), stateCounts };
 }
+
+const esc = (v: unknown) => String(v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+const fmtNum = (n: number) => n.toLocaleString('en-US');
+const slugOf = (name: string) => name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+
+function fmtRate(rate: number | null): string {
+  if (typeof rate !== 'number') return '—';
+  return (rate * 100).toFixed(4).replace(/0+$/, '').replace(/\.$/, '') + '%';
+}
+
+/**
+ * The coverage page builds its tables in the browser from /api/coverage. A
+ * crawler that does not run the script, or cannot fetch that endpoint, would
+ * see "Loading coverage." and nothing else. This fills the same tables into
+ * the HTML so the page is complete before any script runs; the script then
+ * replaces them exactly as before. `hasPage` says whether a state has its own
+ * /payroll-tax/<state> page to link to.
+ */
+export function renderCoverageHtml(html: string, hasPage: (path: string) => boolean = () => false): string {
+  const cov = coverage();
+  const td = (label: string, content: string, cls = '') => `<td data-label="${label}"${cls ? ` class="${cls}"` : ''}>${content}</td>`;
+  const stateRows = [
+    `<tr>${td('Jurisdiction', 'Federal', 'name')}${td('Income tax', 'Income tax, FICA, FUTA', 'yes')}${td('Unemployment', '✓', 'yes')}${td('Local taxes', '—', 'dim')}${td('Minimum wage', 'Federal')}${td('Garnishment', '✓', 'yes')}</tr>`,
+    ...cov.states.map((s) => {
+      const path = `/payroll-tax/${slugOf(s.name)}`;
+      const name = hasPage(path) ? `<a href="${path}">${esc(s.name)}</a>` : esc(s.name);
+      const local = (s.localCount ? `${s.localTax} (${fmtNum(s.localCount)})` : s.localTax) + (s.localStatus === 'partial' ? ', partial' : '');
+      const wage = s.minimumWageLocalCount ? `State + ${fmtNum(s.minimumWageLocalCount)} local` : s.minimumWage ? 'State' : '—';
+      return `<tr>${td('Jurisdiction', name, 'name')}${td('Income tax', s.incomeTax === 'none' ? 'None' : '✓', s.incomeTax === 'none' ? 'dim' : 'yes')}${td('Unemployment', s.unemployment ? '✓' : '—', s.unemployment ? 'yes' : 'dim')}${td('Local taxes', esc(local), s.localCount ? '' : 'dim')}${td('Minimum wage', esc(wage), wage === '—' ? 'dim' : '')}${td('Garnishment', s.garnishment ? '✓' : '—', s.garnishment ? 'yes' : 'dim')}</tr>`;
+    }),
+  ].join('');
+  const first = searchLocal({ kind: 'tax', size: 15 });
+  const localRows = first.items
+    .map((it) => `<tr>${td('Jurisdiction', esc(it.name), 'name')}${td('State', esc(it.state))}${td('Type', esc(it.kind))}${td('Rate', esc(it.value || fmtRate(it.rate)), 'num' + (it.value || typeof it.rate === 'number' ? '' : ' dim'))}${td('Detail', esc(it.detail), 'dim')}</tr>`)
+    .join('');
+
+  const swap = (src: string, pattern: RegExp, replacement: string) => (pattern.test(src) ? src.replace(pattern, () => replacement) : src);
+  let out = html;
+  out = swap(out, /<tbody id="rows">[\s\S]*?<\/tbody>/, `<tbody id="rows">${stateRows}</tbody>`);
+  out = swap(out, /<tbody id="lrows">[\s\S]*?<\/tbody>/, `<tbody id="lrows">${localRows}</tbody>`);
+  out = swap(out, /<b id="s-states">[^<]*<\/b>/, `<b id="s-states">${cov.summary.states}</b>`);
+  out = swap(out, /<b id="s-local">[^<]*<\/b>/, `<b id="s-local">${fmtNum(cov.summary.localJurisdictions)}</b>`);
+  out = swap(out, /<b id="s-wage">[^<]*<\/b>/, `<b id="s-wage">${fmtNum(cov.summary.localMinimumWage)}</b>`);
+  out = swap(out, /<noscript>[\s\S]*?<\/noscript>/, `<noscript><p class="fine">Showing the first page of each list. Turn on JavaScript to search and page through all ${fmtNum(cov.summary.localJurisdictions)} local jurisdictions, or call <code>/api/coverage</code>.</p></noscript>`);
+  return out;
+}

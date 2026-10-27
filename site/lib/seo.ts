@@ -246,19 +246,31 @@ export function indexablePages(): PageMeta[] {
   return PAGES.filter((p) => p.index);
 }
 
-/** Paths a crawler should not request. Also listed in robots.txt. */
-export const ROBOTS_DISALLOW = [
-  '/dashboard',
-  '/signin',
-  '/signup',
-  '/console',
-  '/_states',
-  '/api/',
-  '/v1/',
-];
+/**
+ * Paths a crawler should not request: the JSON API. The account and sign-up
+ * pages are NOT here. They carry noindex (meta tag and X-Robots-Tag header),
+ * and a crawler blocked by robots.txt never sees a noindex, so a blocked page
+ * can still be listed as a bare URL. Let them be fetched and they stay out.
+ */
+export const ROBOTS_DISALLOW = ['/api/', '/v1/'];
+
+/**
+ * Read-only endpoints that public pages call to draw themselves (the coverage
+ * tables, the status light). Google renders pages with JavaScript and obeys
+ * robots.txt for those calls too, so blocking them leaves the page empty.
+ */
+export const ROBOTS_ALLOW_API = ['/api/coverage', '/v1/coverage', '/v1/health'];
 
 export function robotsTxt(origin = canonicalOrigin()): string {
-  const lines = ['User-agent: *', 'Allow: /', ...ROBOTS_DISALLOW.map((p) => `Disallow: ${p}`), '', `Sitemap: ${origin}/sitemap.xml`, ''];
+  const lines = [
+    'User-agent: *',
+    'Allow: /',
+    ...ROBOTS_ALLOW_API.map((p) => `Allow: ${p}`),
+    ...ROBOTS_DISALLOW.map((p) => `Disallow: ${p}`),
+    '',
+    `Sitemap: ${origin}/sitemap.xml`,
+    '',
+  ];
   return lines.join('\n');
 }
 

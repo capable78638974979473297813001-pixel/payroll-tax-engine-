@@ -25,7 +25,7 @@ import { validatePaycheckInput } from './lib/validate.ts';
 import { openApiDocument, paycheckRequestSchema, unknownFieldWarnings } from './lib/api-spec.ts';
 import { ExtrasRefusal, runPaycheckExtras, validatePaycheckExtras } from './lib/extras.ts';
 import { keyLifeFor } from './lib/keylife.ts';
-import { coverage, searchLocal } from './lib/coverage.ts';
+import { coverage, renderCoverageHtml, searchLocal } from './lib/coverage.ts';
 import { verifierConfigured, issueCode, checkCode } from './lib/verifier.ts';
 import { checkoutInProduction, isAllowedCheckoutUrl, resolveCheckoutOrigin, stripeConfigured, stripeKeyRefused } from '../api/stripe.ts';
 import { hashPassword, verifyPassword, passwordNeedsRehash, passwordProblem, MAX_PASSWORD } from './lib/password.ts';
@@ -420,16 +420,16 @@ function apiOrigin(): string {
 
 function sendPage(req: IncomingMessage, res: ServerResponse, path: string, route: string): void {
   const nonce = randomBytes(16).toString('base64url');
-  const html = decorateHtml(
-    readFileSync(path, 'utf8')
-      .replace('<!--OMNIA_CONFIG-->', `<script>window.OMNIA=${JSON.stringify(clientConfig())};</script>`)
-      .replaceAll('https://api.omnia.tax', apiOrigin()),
-    route,
-    nonce,
-  );
+  let source = readFileSync(path, 'utf8')
+    .replace('<!--OMNIA_CONFIG-->', `<script>window.OMNIA=${JSON.stringify(clientConfig())};</script>`)
+    .replaceAll('https://api.omnia.tax', apiOrigin());
+  // Complete before any script runs, so a crawler that skips JavaScript still sees the tables.
+  if (route === '/coverage') source = renderCoverageHtml(source, (p) => Boolean(pageForRoute(p)));
+  const html = decorateHtml(source, route, nonce);
   const headers: Record<string, string | number | readonly string[]> = {
     'Content-Type': 'text/html; charset=utf-8',
     'Cache-Control': 'no-store',
+    ...(pageForRoute(route)?.index === false ? { 'X-Robots-Tag': 'noindex, nofollow' } : {}),
     ...securityHeaders(req, nonce),
     ...corsHeaders(req),
   };
@@ -3336,6 +3336,17 @@ createServer((req, res) => {
       res.end();
       return;
     }
+    // Links in the wild add a trailing slash, an .html, or different capitals.
+    // Send them to the one address that has a page, so they are not 404s.
+    if (method === 'GET') {
+      const tidy = url.replace(/\.html$/, '').replace(/\/+$/, '').toLowerCase();
+      if (tidy && tidy !== url && pageForRoute(tidy)) {
+        const search = (req.url ?? '').includes('?') ? '?' + (req.url ?? '').split('?').slice(1).join('?') : '';
+        res.writeHead(301, { Location: tidy + search, ...securityHeaders(req) });
+        res.end();
+        return;
+      }
+    }
 
     // Legal pages (served, so customers can read them).
     if (method === 'GET' && url === '/legal/legal.css') {
@@ -3410,6 +3421,7 @@ createServer((req, res) => {
       const headers: Record<string, string | number> = {
         'Content-Type': 'text/html; charset=utf-8',
         'Cache-Control': 'no-store',
+        'X-Robots-Tag': 'noindex, nofollow',
         ...securityHeaders(req, nonce),
       };
       const body = maybeGzip(req, Buffer.from(html), headers);
