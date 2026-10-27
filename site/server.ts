@@ -134,6 +134,22 @@ function logCodesToConsole(): boolean {
   return !isEmailConfigured() && !verifierConfigured() && !inProduction();
 }
 
+/**
+ * Whether the last real attempt to email a code worked. A fact about the mail
+ * provider, not about any address, so it can be shown to everyone: the sign-in
+ * form reports it instead of claiming a send, and /healthz exposes it as
+ * ok | failing | untested. A cooldown or a rate limit says nothing about it.
+ */
+const mailHealth: { lastOk: boolean | null; at: string | null } = { lastOk: null, at: null };
+function noteMailAttempt(ok: boolean): void {
+  mailHealth.lastOk = ok;
+  mailHealth.at = new Date().toISOString();
+}
+function mailStatus(): 'ok' | 'failing' | 'untested' | 'not_configured' {
+  if (!isEmailConfigured() && !verifierConfigured()) return 'not_configured';
+  return mailHealth.lastOk === null ? 'untested' : mailHealth.lastOk ? 'ok' : 'failing';
+}
+
 type CodeDelivery =
   | { limited: true; retryAfterSec: number }
   | { limited: false; emailSent: boolean; cooldown: boolean; devCodeHint: boolean };
@@ -148,10 +164,11 @@ async function deliverCodeEmail(
   acct: { name: string; email: string; code: string; codeExpiresAt: string },
 ): Promise<CodeDelivery> {
   if (verifierConfigured()) {
-    const issued = await issueCode(acct.email, acct.name);
+    const issued = await issueCode(acct.email, acct.name, where === 'sign-in' ? 'signin' : 'signup');
     if (issued.status === 429) return { limited: true, retryAfterSec: issued.retryAfterSec ?? 3600 };
     const cooldown = issued.cooldown === true;
     const emailSent = issued.sent || cooldown;
+    if (!cooldown) noteMailAttempt(issued.ok && issued.sent);
     if (!issued.ok) console.error(`[${where}] verifier could not issue a code`);
     else if (!emailSent) console.error(`[${where}] verification email failed`);
     return { limited: false, emailSent, cooldown, devCodeHint: false };
@@ -175,7 +192,9 @@ async function deliverCodeEmail(
     email: acct.email,
     code: acct.code,
     expiresAt: acct.codeExpiresAt,
+    purpose: where === 'sign-in' ? 'signin' : 'signup',
   });
+  noteMailAttempt(result.sent);
   // The provider's status and message only (mail.ts already removed keys and codes), under the
   // [mail] tag the verifier client also uses, so one grep finds a delivery failure on either path.
   if (!result.sent) console.error(`[mail] verification email failed: ${where}: ${scrubMailLog(result.reason ?? 'unknown error')}`);
@@ -849,7 +868,9 @@ async function handleSignin(req: IncomingMessage, res: ServerResponse): Promise<
   // whether or not the provider accepted the message. A different
   // emailSent for a real mailbox is an existence oracle. Failures are logged.
   const devHint = !configured && !inProduction();
-  const publicBody = { ok: true, emailConfigured: configured, emailSent: configured, cooldown: false, devCodeHint: devHint };
+  // emailSent is the mail provider's health (see mailHealth), not a claim about this address:
+  // a send that is known to be failing is reported as failing, to everyone alike.
+  const publicBody = { ok: true, emailConfigured: configured, emailSent: configured && mailHealth.lastOk !== false, cooldown: false, devCodeHint: devHint };
   const acct = outcome.acct;
   if (!acct) {
     sendJson(res, 200, publicBody);
@@ -857,7 +878,17 @@ async function handleSignin(req: IncomingMessage, res: ServerResponse): Promise<
   }
   if (!acct.cooling) {
     const delivery = await deliverCodeEmail('sign-in', acct);
-    if (delivery.limited || !delivery.emailSent) console.error('[sign-in] verification email failed');
+    if (delivery.limited || (!delivery.emailSent && !delivery.devCodeHint)) {
+      console.error('[sign-in] verification email failed');
+      // Nothing reached the person, so the 30-second wait that follows a send must not apply:
+      // their next request has to try again.
+      if (!delivery.limited) {
+        withDb((db) => {
+          const a = db.accounts[acct.email];
+          if (a) a.codeRequestedAt = null;
+        });
+      }
+    }
   }
   sendJson(res, 200, publicBody);
 }
@@ -3413,6 +3444,7 @@ function handleHealth(res: ServerResponse): void {
     payments: stripeConfigured(),
     metering: meteringConfigured(),
     email: isEmailConfigured() || verifierConfigured(),
+    mail: mailStatus(),
     time: new Date().toISOString(),
   });
 }

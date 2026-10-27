@@ -245,7 +245,7 @@
   }
   if (pending.emailSent === false && !pending.devCodeHint && !pending.cooldown) {
     showStatus(signin
-      ? 'We couldn’t send a sign-in code just now. Try again in a moment.'
+      ? 'Email delivery is having trouble right now. If no code arrives within a minute, request another.'
       : 'We couldn’t send the email just now. Try again in a moment.', false);
   }
   resend.addEventListener('click', function () {
@@ -272,7 +272,7 @@
         paintLead();
         if (!sent && !cooling && !hint) {
           showStatus(signin
-            ? 'We couldn’t send a sign-in code just now. Try again in a moment.'
+            ? 'Email delivery is having trouble right now. If no code arrives within a minute, request another.'
             : 'We couldn’t send the email just now. Try again in a moment.', false);
           resend.disabled = false;
           return;

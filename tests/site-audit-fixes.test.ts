@@ -227,7 +227,9 @@ describe('verification email tells the truth', { concurrency: 1 }, () => {
     const unknown = await post(site, '/api/signin', { email: 'nobody@audit.test' });
     assert.equal(unknown.status, 200);
     const unknownBody = await unknown.json();
-    assert.equal(unknownBody.emailSent, true);
+    // The provider refused the signup message, so sign-in says delivery is failing. That is the
+    // provider's health, the same for every address, not a claim about this one.
+    assert.equal(unknownBody.emailSent, false);
     assert.equal(seen.length, 1, 'an unknown address must not send mail');
 
     const v = await post(site, '/api/verify-email', { email, code });
@@ -235,9 +237,9 @@ describe('verification email tells the truth', { concurrency: 1 }, () => {
     const again = await post(site, '/api/signin', { email });
     assert.equal(again.status, 200);
     const againBody = await again.json();
-    // A configured provider reports the same emailSent for every address,
-    // including when the provider refused the previous message.
-    assert.equal(againBody.emailSent, true);
+    // A configured provider reports the same emailSent for every address. While the provider is
+    // refusing messages that is false for all of them, so a failure is never reported as a send.
+    assert.equal(againBody.emailSent, false);
     assert.equal(againBody.devCodeHint, false);
     assert.deepEqual(
       { ok: againBody.ok, emailConfigured: againBody.emailConfigured, emailSent: againBody.emailSent, cooldown: againBody.cooldown, devCodeHint: againBody.devCodeHint },

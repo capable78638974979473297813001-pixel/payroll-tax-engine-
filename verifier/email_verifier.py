@@ -95,7 +95,7 @@ class Verifier:
         self,
         db_path: str,
         pepper: str,
-        send: Callable[[str, str, str, int], None],
+        send: Callable[..., None],
         clock: Callable[[], float] = time.time,
         cooldown_seconds: float = COOLDOWN_SECONDS,
     ) -> None:
@@ -153,7 +153,7 @@ class Verifier:
 
     # -- public ------------------------------------------------------------
 
-    def issue(self, email_raw: object, name: str = "") -> dict:
+    def issue(self, email_raw: object, name: str = "", purpose: str = "signup") -> dict:
         email = normalise_email(email_raw)
         if email is None:
             return {"ok": False, "status": 400, "error": "A valid email is required."}
@@ -180,11 +180,15 @@ class Verifier:
         self._record("issue", email, now)
 
         try:
-            self._send(email, name, code, CODE_TTL_SECONDS // 60)
+            self._send(email, name, code, CODE_TTL_SECONDS // 60, "signin" if purpose == "signin" else "signup")
             sent = True
         except Exception as exc:  # delivery failure must not leak the code
             reason = scrub_log(str(exc)) or type(exc).__name__
             print(f"[verifier] mail delivery failed: {type(exc).__name__}: {reason}", file=sys.stderr)
+            # Nothing reached the person, so the code they were never shown must not
+            # block a retry (the cooldown) or use up their hourly allowance.
+            self._db.execute("DELETE FROM codes WHERE email=?", (email,))
+            self._db.execute("DELETE FROM events WHERE kind='issue' AND email=? AND at=?", (email, now))
             # `error` stays on this loopback service. The site logs it and does not
             # forward it to the browser.
             return {"ok": True, "sent": False, "cooldown": False, "error": reason}
@@ -228,66 +232,103 @@ class Verifier:
 # mail transports
 # ---------------------------------------------------------------------------
 
-def _message_parts(name: str, code: str, minutes: int) -> tuple[str, str, str]:
+def _message_parts(name: str, code: str, minutes: int, purpose: str = "signup") -> tuple[str, str, str]:
     first = (name.split() or [""])[0]
     hello = f"Hi {first}, " if first else ""
-    subject = f"{code} is your Omnia verification code"
-    text = (
-        f"{hello}your Omnia verification code is {code}. It expires in {minutes} minutes.\n\n"
+    signin = purpose == "signin"
+    subject = f"{code} is your Omnia sign-in code" if signin else f"{code} is your Omnia verification code"
+    ignore = (
+        "If you didn't ask to sign in, ignore this email. Nothing happens without the code."
+        if signin else
         "If you didn't start a signup, ignore this email. Nothing happens without the code."
     )
+    text = (
+        f"{hello}your Omnia {'sign-in' if signin else 'verification'} code is {code}. It expires in {minutes} minutes.\n\n{ignore}"
+    )
+    heading = f"Your sign-in code{', ' + html.escape(first) if first else ''}" if signin else f"Confirm your email{', ' + html.escape(first) if first else ''}"
+    lead = "Enter this code to sign in to Omnia.tax." if signin else "Enter this code to verify your address."
     body = (
         '<div style="font-family:Helvetica,Arial,sans-serif;max-width:440px;margin:0 auto;padding:32px 8px;color:#0a0a0a">'
         '<p style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#6b6b6b;margin:0 0 18px">Omnia.tax</p>'
-        f'<h1 style="font-size:22px;margin:0 0 12px">Confirm your email{", " + html.escape(first) if first else ""}</h1>'
-        f'<p style="font-size:15px;line-height:1.6;color:#4a4a4a;margin:0 0 22px">Enter this code to verify your address. '
+        f'<h1 style="font-size:22px;margin:0 0 12px">{heading}</h1>'
+        f'<p style="font-size:15px;line-height:1.6;color:#4a4a4a;margin:0 0 22px">{lead} '
         f"It expires in {minutes} minutes.</p>"
         f'<div style="font-family:Menlo,Consolas,monospace;font-size:30px;letter-spacing:.34em;background:#0a0a0a;color:#fff;'
         f'text-align:center;padding:18px 8px;margin-bottom:22px">{html.escape(code)}</div>'
-        '<p style="font-size:12.5px;color:#6b6b6b;margin:0;border-top:1px solid #ddd;padding-top:12px">'
-        "Didn&#39;t start a signup? Ignore this. Nothing happens without the code.</p></div>"
+        f'<p style="font-size:12.5px;color:#6b6b6b;margin:0;border-top:1px solid #ddd;padding-top:12px">'
+        f"{html.escape(ignore, quote=False).replace(chr(39), '&#39;')}</p></div>"
     )
     return subject, text, body
 
 
-def resend_sender(api_key: str, sender: str) -> Callable[[str, str, str, int], None]:
+RESEND_TEST_SENDER = "Omnia.tax <onboarding@resend.dev>"
+
+
+def _resend_post(base: str, api_key: str, payload: dict) -> None:
+    req = urllib.request.Request(
+        f"{base}/emails",
+        data=json.dumps(payload).encode(),
+        headers={
+            "Authorization": f"Bearer {api_key}",
+            "Content-Type": "application/json",
+            # Resend sits behind a firewall that rejects Python's default
+            # "Python-urllib" signature with a 403, so identify ourselves.
+            "User-Agent": "omniatax-verifier/1.0",
+            "Accept": "application/json",
+        },
+        method="POST",
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=10) as resp:
+            if resp.status >= 300:
+                raise RuntimeError(f"Resend responded {resp.status}")
+    except urllib.error.HTTPError as err:
+        # Resend says why in the body ("domain is not verified", "API key is
+        # invalid", ...). It never contains the code, so it is safe to log.
+        detail = err.read(400).decode("utf-8", "replace").replace("\n", " ")
+        raise ResendRejected(err.code, detail) from None
+    except urllib.error.URLError as err:
+        raise RuntimeError(f"could not reach Resend: {err.reason}") from None
+
+
+class ResendRejected(RuntimeError):
+    def __init__(self, status: int, detail: str) -> None:
+        super().__init__(f"Resend answered {status}: {detail}")
+        self.status = status
+        self.detail = detail
+
+
+def _domain_not_verified(err: ResendRejected) -> bool:
+    return err.status in (403, 422) and "domain" in err.detail.lower() and "verif" in err.detail.lower()
+
+
+def resend_sender(api_key: str, sender: str) -> Callable[..., None]:
     base = os.environ.get("RESEND_API_BASE", "https://api.resend.com")
 
-    def send(email: str, name: str, code: str, minutes: int) -> None:
-        subject, text, body = _message_parts(name, code, minutes)
-        req = urllib.request.Request(
-            f"{base}/emails",
-            data=json.dumps({"from": sender, "to": [email], "subject": subject, "text": text, "html": body}).encode(),
-            headers={
-                "Authorization": f"Bearer {api_key}",
-                "Content-Type": "application/json",
-                # Resend sits behind a firewall that rejects Python's default
-                # "Python-urllib" signature with a 403, so identify ourselves.
-                "User-Agent": "omniatax-verifier/1.0",
-                "Accept": "application/json",
-            },
-            method="POST",
-        )
+    def send(email: str, name: str, code: str, minutes: int, purpose: str = "signup") -> None:
+        subject, text, body = _message_parts(name, code, minutes, purpose)
+        payload = {"from": sender, "to": [email], "subject": subject, "text": text, "html": body}
         try:
-            with urllib.request.urlopen(req, timeout=10) as resp:
-                if resp.status >= 300:
-                    raise RuntimeError(f"Resend responded {resp.status}")
-        except urllib.error.HTTPError as err:
-            # Resend says why in the body ("domain is not verified", "API key is
-            # invalid", ...). It never contains the code, so it is safe to log.
-            detail = err.read(400).decode("utf-8", "replace").replace("\n", " ")
-            raise RuntimeError(f"Resend answered {err.code}: {detail}") from None
-        except urllib.error.URLError as err:
-            raise RuntimeError(f"could not reach Resend: {err.reason}") from None
+            _resend_post(base, api_key, payload)
+        except ResendRejected as err:
+            # The sending domain is not verified in Resend yet. Resend's own test
+            # address still delivers to the Resend account's owner, which is enough
+            # for the owner to sign in while the domain is being verified; anyone
+            # else gets the same failure as before.
+            if sender != RESEND_TEST_SENDER and _domain_not_verified(err):
+                print("[verifier] sending domain is not verified in Resend; retrying from Resend's test address (reaches only the Resend account owner)", file=sys.stderr)
+                _resend_post(base, api_key, {**payload, "from": RESEND_TEST_SENDER})
+                return
+            raise RuntimeError(str(err)) from None
 
     return send
 
 
 def smtp_sender(
     host: str, port: int, user: str, password: str, sender: str
-) -> Callable[[str, str, str, int], None]:
-    def send(email: str, name: str, code: str, minutes: int) -> None:
-        subject, text, body = _message_parts(name, code, minutes)
+) -> Callable[..., None]:
+    def send(email: str, name: str, code: str, minutes: int, purpose: str = "signup") -> None:
+        subject, text, body = _message_parts(name, code, minutes, purpose)
         msg = EmailMessage()
         msg["From"], msg["To"], msg["Subject"] = sender, email, subject
         msg.set_content(text)
@@ -308,7 +349,7 @@ def smtp_sender(
     return send
 
 
-def dev_sender(email: str, name: str, code: str, minutes: int) -> None:
+def dev_sender(email: str, name: str, code: str, minutes: int, purpose: str = "signup") -> None:
     print(f"[verifier dev] {email}: {code} (expires in {minutes} min)", file=sys.stderr)
 
 
@@ -351,7 +392,7 @@ def default_from() -> str:
     return "Omnia.tax <onboarding@resend.dev>"
 
 
-def sender_from_env() -> Callable[[str, str, str, int], None]:
+def sender_from_env() -> Callable[..., None]:
     api_key = os.environ.get("RESEND_API_KEY", "").strip()
     if api_key:
         return resend_sender(api_key, normalise_from(os.environ.get("RESEND_FROM")))
@@ -428,7 +469,7 @@ def make_handler(verifier: Verifier, secret: str) -> type[BaseHTTPRequestHandler
 
             if self.path == "/issue":
                 name = body.get("name") if isinstance(body.get("name"), str) else ""
-                result = verifier.issue(body.get("email"), name[:200])
+                result = verifier.issue(body.get("email"), name[:200], "signin" if body.get("purpose") == "signin" else "signup")
             elif self.path == "/check":
                 result = verifier.check(body.get("email"), body.get("code"))
             else:

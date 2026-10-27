@@ -90,51 +90,81 @@ export function isEmailConfigured(): boolean {
   return Boolean(resendApiKey());
 }
 
+export const RESEND_TEST_SENDER = 'Omnia.tax <onboarding@resend.dev>';
+
+/** Resend's refusal for a sending domain that is not verified yet. */
+export function domainNotVerified(status: number, body: string): boolean {
+  const text = body.toLowerCase();
+  return (status === 403 || status === 422) && text.includes('domain') && text.includes('verif');
+}
+
 export async function sendVerificationEmail(args: {
   name: string;
   email: string;
   code: string;
   expiresAt: string;
+  /** What the code is for. A sign-in email must not talk about a signup. */
+  purpose?: 'signup' | 'signin';
 }): Promise<SendResult> {
   const apiKey = resendApiKey();
   if (!apiKey) return { sent: false, reason: 'RESEND_API_KEY is not set.' };
 
+  const signin = args.purpose === 'signin';
   const from = resendFromAddress();
   const firstName = args.name.split(' ')[0] || args.name;
   const minutes = Math.max(1, Math.round((new Date(args.expiresAt).getTime() - Date.now()) / 60_000));
 
+  const heading = signin ? `Your sign-in code, ${escapeHtml(firstName)}` : `Confirm your email, ${escapeHtml(firstName)}`;
+  const lead = signin
+    ? 'Enter this code to sign in to the Omnia.tax console.'
+    : 'Enter this code in the Omnia.tax console to verify your address and continue setting up your account.';
+  const ignore = signin
+    ? 'Didn\u2019t ask to sign in? Ignore this &mdash; nothing happens without this code.'
+    : 'Didn\u2019t start a signup? Ignore this &mdash; nothing happens without this code, and no payment method is collected until you review the terms.';
   const html = `
     <div style="font-family:'Inter Tight',Helvetica,Arial,sans-serif;max-width:440px;margin:0 auto;padding:32px 8px;color:#0A0A0A">
       <p style="font-family:'JetBrains Mono',Menlo,Consolas,monospace;font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#1F3BFF;margin:0 0 18px">Omnia.tax</p>
-      <h1 style="font-size:24px;font-weight:700;margin:0 0 12px;letter-spacing:-.02em">Confirm your email, ${escapeHtml(firstName)}</h1>
+      <h1 style="font-size:24px;font-weight:700;margin:0 0 12px;letter-spacing:-.02em">${heading}</h1>
       <p style="font-size:15px;line-height:1.6;color:#6E7079;margin:0 0 22px">
-        Enter this code in the Omnia.tax console to verify your address and continue setting up your account.
+        ${lead}
         It expires in ${minutes} minute${minutes === 1 ? '' : 's'}.
       </p>
       <div style="font-family:'JetBrains Mono',Menlo,Consolas,monospace;font-size:30px;font-weight:700;letter-spacing:.34em;background:#0A0A0A;color:#FFFFFF;text-align:center;padding:18px 8px;margin-bottom:22px">
         ${escapeHtml(args.code)}
       </div>
       <p style="font-size:12.5px;color:#6E7079;margin:0;border-top:1px solid #E1E3E8;padding-top:12px">
-        Didn't start a signup? Ignore this &mdash; nothing happens without this code, and no payment method is
-        collected until you review the terms.
+        ${ignore}
       </p>
     </div>
   `.trim();
 
-  try {
-    const res = await fetch(resendEndpoint(), {
+  const post = (sender: string) =>
+    fetch(resendEndpoint(), {
       method: 'POST',
       headers: mailHeaders(apiKey),
       body: JSON.stringify({
-        from,
+        from: sender,
         to: [args.email],
-        subject: `${args.code} is your Omnia verification code`,
+        subject: signin ? `${args.code} is your Omnia sign-in code` : `${args.code} is your Omnia verification code`,
         html,
-        text: `Hi ${firstName}, your Omnia verification code is ${args.code}. It expires in ${minutes} minute(s).`,
+        text: `Hi ${firstName}, your Omnia ${signin ? 'sign-in' : 'verification'} code is ${args.code}. It expires in ${minutes} minute(s).`,
       }),
     });
+
+  try {
+    let res = await post(from);
     if (!res.ok) {
       const body = await res.text().catch(() => '');
+      // The sending domain is not verified in Resend yet. Resend's own test address
+      // still delivers to the Resend account's owner, which lets the owner sign in
+      // while the domain is being verified. Anyone else gets the same failure.
+      if (from !== RESEND_TEST_SENDER && domainNotVerified(res.status, body)) {
+        console.error('[mail] sending domain is not verified in Resend; retrying from Resend\u2019s test address (reaches only the Resend account owner)');
+        res = await post(RESEND_TEST_SENDER);
+        if (res.ok) return { sent: true };
+        const retryBody = await res.text().catch(() => '');
+        return { sent: false, reason: scrubMailLog(`Resend responded ${res.status}: ${retryBody}`) };
+      }
       return { sent: false, reason: scrubMailLog(`Resend responded ${res.status}: ${body}`) };
     }
     return { sent: true };

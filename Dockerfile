@@ -15,7 +15,7 @@ COPY data ./data
 COPY site ./site
 COPY payroll/platform.ts payroll/embeddedProvider.ts ./payroll/
 COPY verifier/email_verifier.py ./verifier/email_verifier.py
-COPY scripts/check-stripe.ts scripts/meter-queue.ts scripts/build-address-index.ts scripts/ensure-address-index.ts scripts/address-index-lib.ts scripts/address-index-stats.ts ./scripts/
+COPY scripts/check-stripe.ts scripts/check-mail.ts scripts/meter-queue.ts scripts/build-address-index.ts scripts/ensure-address-index.ts scripts/address-index-lib.ts scripts/address-index-stats.ts ./scripts/
 COPY deploy/start.sh ./deploy/start.sh
 RUN chmod +x deploy/start.sh
 
