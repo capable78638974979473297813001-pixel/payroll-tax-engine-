@@ -5384,6 +5384,7 @@ function coloradoOccupationalPrivilegeTax(
 interface WVServiceFeeCityConfig {
   weeklyRate: number; // dollars per week, effective on/after rateEffectiveDate (or always, if that field is absent)
   monthlyAmount?: number; // city-published payroll-cycle amount, in dollars
+  semimonthlyAmount?: number; // city-published twice-monthly amount, in dollars
   nonResidentOnly?: boolean; // Fairmont: only non-resident duty-station employees are payroll-withheld; residents are billed directly, not through payroll (see WV-2026.json's serviceFeeCities.Fairmont note)
   priorWeeklyRate?: number; // Weirton: the rate in effect before rateEffectiveDate — undefined for every city with no known rate history
   rateEffectiveDate?: string; // ISO yyyy-mm-dd the CURRENT weeklyRate took effect; a check date before this uses priorWeeklyRate instead
@@ -5396,7 +5397,7 @@ interface WVServiceFeeCityConfig {
  * caller-supplied certificate facts. An omitted day count assumes eligibility.
  * Weirton is $2/week before May 17, 2026 and $5/week from that date.
  * Wheeling's threshold is 30 days per calendar year, not consecutive days.
- * City-published monthly amounts take precedence where specified; other
+ * City-published payroll-cycle amounts take precedence where specified; other
  * nonweekly amounts use weeklyRate x 52 / periods, rounded down, which is
  * not verified for every city. Coverage and unresolved source
  * conflicts (especially Madison and Smithers) are documented in the WV data
@@ -5434,8 +5435,8 @@ function westVirginiaMunicipalServiceFee(
   const weeklyRate = usePriorRate ? city.priorWeeklyRate! : city.weeklyRate;
 
   const annualFee = dollars(weeklyRate) * 52;
-  const publishedMonthly = !usePriorRate && input.payFrequency === 'monthly' ? city.monthlyAmount : undefined;
-  const amount = publishedMonthly === undefined ? roundDownToCent(annualFee / ctx.periodsPerYear) : dollars(publishedMonthly);
+  const publishedAmount = usePriorRate ? undefined : input.payFrequency === 'monthly' ? city.monthlyAmount : input.payFrequency === 'semimonthly' ? city.semimonthlyAmount : undefined;
+  const amount = publishedAmount === undefined ? roundDownToCent(annualFee / ctx.periodsPerYear) : dollars(publishedAmount);
 
   return {
     id: 'WV_LOCAL_FEE',
@@ -5449,9 +5450,9 @@ function westVirginiaMunicipalServiceFee(
       (usePriorRate
         ? ` — pre-${city.rateEffectiveDate} rate, since the check date is before the ordinance's own effective date`
         : '') +
-      (publishedMonthly === undefined
+      (publishedAmount === undefined
         ? `, annualized (×52) and divided across ${ctx.periodsPerYear} pay periods/yr, rounded down to the cent`
-        : `, city-published monthly payroll amount $${publishedMonthly.toFixed(2)}`) +
+        : `, city-published ${input.payFrequency} payroll amount $${publishedAmount.toFixed(2)}`) +
       ` — certificate.locality = "${locality}"`,
   };
 }

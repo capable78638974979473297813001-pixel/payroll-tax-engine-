@@ -703,7 +703,7 @@
       "notYetChecked": [],
       "$status": "Historical research log, superseded by the 2026-10-26 review. The register is partial; Rivesville was missing and Smithers remains unresolved. No claim that every municipality has been verified."
     },
-    "knownGap": "Not complete statewide. Smithers is not configured because sources disagree between $0.50/week and $52/year. Madison remains configured at the legacy $3/week pending current-city-form verification, but a 2020 cancellation report and later payroll guides report $1.25/week: do not treat Madison as verified. Rivesville lacks a current town primary document. Fairmont and Wheeling use their published $8.67 monthly amount; other nonweekly conversion remains weeklyRate x 52 / pay periods rounded down and is not verified for every city; Madison guides suggest a different monthly schedule. Missing daysWorkedInLocality assumes the threshold has been met; cross-employer deduplication requires wvLocalFeeAlreadyWithheld. 2027 local values are carry-forwards, not a 2027 ordinance certification. Separate property/service charges, including Glen Dale Article 751, are not represented as employee payroll fees without evidence.",
+    "knownGap": "Not complete statewide. Smithers is not configured because sources disagree between $0.50/week and $52/year. Madison remains configured at the legacy $3/week pending current-city-form verification, but a 2020 cancellation report and later payroll guides report $1.25/week: do not treat Madison as verified. Rivesville lacks a current town primary document. Fairmont and Wheeling use their published $8.67 monthly amount; Parkersburg and Romney use their published semimonthly amounts; other nonweekly conversion remains weeklyRate x 52 / pay periods rounded down and is not verified for every city; Madison guides suggest a different monthly schedule. Missing daysWorkedInLocality assumes the threshold has been met; cross-employer deduplication requires wvLocalFeeAlreadyWithheld. 2027 local values are carry-forwards, not a 2027 ordinance certification. Separate property/service charges, including Glen Dale Article 751, are not represented as employee payroll fees without evidence.",
     "serviceFeeCities": {
       "Charleston": {
         "weeklyRate": 3,
@@ -717,7 +717,16 @@
         "$note": "RE-VERIFIED 2026-09-05, still correct: confirmed directly from the City of Morgantown's own 'Safe Streets and Safe Community' service-fee page (morgantownwv.gov/310/Safe-Streets-Safe-Community — the fee's own official name, first approved by council in October 2015): 'A fee of $3 per week or $156 annually.' WATCH ITEM found this pass: WV MetroNews/WAJR news coverage from April-May 2026 shows City Council held multiple public workshops on a PROPOSED increase to this fee (driven by a ~$2M revenue decline), but no search result found a final council vote or a new effective rate/date as of late May 2026 — the city's own page above still states $3/week with no revision date shown. Re-check this specific fee before trusting $3.00 for a check date after mid-2026 the way Weirton's own dated rate change is already handled."
       },
       "Parkersburg": {
-        "weeklyRate": 2.5
+        "weeklyRate": 2.5,
+        "semimonthlyAmount": 5.42,
+        "$semimonthlyAmountNote": "City-published twice-monthly payroll amount; 2027 is a carry-forward.",
+        "sources": [
+          {
+            "title": "City of Parkersburg employer worksheet CSUF-4",
+            "url": "https://cms2.revize.com/revize/parkersburg/Document%20Center/Department/Finance/Frequently%20Requested%20Forms/CSUF-EMPLOYER-WORKSHEET.pdf",
+            "reviewedOn": "2026-10-26"
+          }
+        ]
       },
       "Wheeling": {
         "weeklyRate": 2,
@@ -773,7 +782,16 @@
       "Romney": {
         "weeklyRate": 1,
         "nonResidentOnly": true,
-        "$addedNote": "ADDED 2026-08-31 (same follow-up session, second pass): found via the WV Municipal League's own city list (surfaced through a Clarksburg search), then confirmed directly from the ordinance text itself (published as a legal notice on wvlegals.com, cross-checked against a WV Dept of Revenue Home Rule Program amendment filing dated 2026-01-07). Verbatim: 'There is hereby imposed an annual city service fee upon each employer, employee and self-employed individual at the rate of One Dollar ($1.00) per calendar week of employment within the City,' with Section 5 explicitly excluding 'Residents of the City of Romney... who resides at a property that concurrently pays the City user fee' -- the same nonresident-only structure as Fairmont, so nonResidentOnly:true here too. Called an 'annual' fee in the ordinance's own title despite being assessed and collected weekly/quarterly like every other WV city's fee -- a naming quirk of this specific ordinance, not a different mechanism."
+        "$addedNote": "ADDED 2026-08-31 (same follow-up session, second pass): found via the WV Municipal League's own city list (surfaced through a Clarksburg search), then confirmed directly from the ordinance text itself (published as a legal notice on wvlegals.com, cross-checked against a WV Dept of Revenue Home Rule Program amendment filing dated 2026-01-07). Verbatim: 'There is hereby imposed an annual city service fee upon each employer, employee and self-employed individual at the rate of One Dollar ($1.00) per calendar week of employment within the City,' with Section 5 explicitly excluding 'Residents of the City of Romney... who resides at a property that concurrently pays the City user fee' -- the same nonresident-only structure as Fairmont, so nonResidentOnly:true here too. Called an 'annual' fee in the ordinance's own title despite being assessed and collected weekly/quarterly like every other WV city's fee -- a naming quirk of this specific ordinance, not a different mechanism.",
+        "semimonthlyAmount": 2.17,
+        "$semimonthlyAmountNote": "City-published twice-monthly payroll amount; 2027 is a carry-forward.",
+        "sources": [
+          {
+            "title": "Town of Romney annual service fee remittance form RASF-1",
+            "url": "https://www.townofromney.com/sites/default/files/2022-10/annual-service-fee-remittance-form-2.pdf",
+            "reviewedOn": "2026-10-26"
+          }
+        ]
       },
       "Montgomery": {
         "weeklyRate": 2,
