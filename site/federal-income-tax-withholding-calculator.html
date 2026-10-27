@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="color-scheme" content="light" />
+<title>Federal income tax withholding calculation (Form W-4) | Omnia.tax</title>
+<meta name="description" content="How federal income tax withholding is calculated from the Form W-4 percentage method, with a worked paycheck run through the engine and each step explained." />
+<link rel="stylesheet" href="/assets/v5.css" />
+</head>
+<body>
+<header class="site-header"><div class="bar">
+  <a class="mark" href="/">Omnia<span class="dot" aria-hidden="true"></span>tax</a>
+  <nav class="nav-links" aria-label="Primary"><a href="/product">Product</a><a href="/coverage">Coverage</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a></nav>
+  <div class="nav-end"><a class="signin" href="/signin">Sign in</a><a class="btn sm" href="/signup">Get API key</a></div>
+  <button class="menu-btn" type="button" aria-expanded="false" aria-label="Menu"><span></span><span></span></button>
+</div></header>
+<main class="wrap">
+  <div class="page-head">
+    <nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a> <span aria-hidden="true">/</span> <a href="/guides">Guides</a> <span aria-hidden="true">/</span> <span aria-current="page">Federal income tax withholding calculation</span></nav>
+    <p class="eyebrow">Calculations</p>
+    <h1 class="page">Federal income tax withholding calculation</h1>
+    <p class="sub">The percentage method behind a W-4 paycheck, with a real example.</p>
+  </div>
+  <div class="prose seo" style="margin-top:32px;max-width:720px">
+
+    <p>Federal withholding is worked out per paycheck from the employee's Form W-4 and the IRS percentage method. The steps below are what the engine does for the 2020-or-later form.</p>
+    <h2>The steps</h2>
+    <ol>
+      <li><strong>Taxable wages for the check:</strong> gross pay less the pre-tax deductions that reduce income tax wages.</li>
+      <li><strong>Annualise:</strong> multiply by the number of pay periods in the year.</li>
+      <li><strong>Adjust:</strong> add other income (step 4a), subtract deductions (step 4b), and apply the filing-status adjustment. The multiple-jobs box (step 2) selects the higher-withholding table.</li>
+      <li><strong>Find the bracket</strong> in the table for the filing status and compute the annual tentative tax.</li>
+      <li><strong>Subtract credits:</strong> the dependent amount from step 3.</li>
+      <li><strong>Divide back</strong> to one paycheck, then add extra withholding from step 4(c).</li>
+    </ol>
+    <h2>A worked paycheck</h2>
+    <p>A single employee paid $3,000.00 biweekly, no W-4 adjustments. The engine's explanation of its federal income tax line:</p>
+    <p><em>annualised $78000.00 → adjusted $69400.00; bracket 22% over $57900.00; tentative/yr $8330.00 ÷ 26</em></p>
+    <p>That is $320.38 withheld on $3,000.00 of wages. Change one W-4 entry and the line changes with it.</p>
+    <h2>Special cases</h2>
+    <ul>
+      <li><strong>Exempt:</strong> an employee who claims exemption has no federal income tax withheld; Social Security and Medicare still apply.</li>
+      <li><strong>Pre-2020 Form W-4:</strong> an employee who never filed the newer form is calculated from the old allowance method.</li>
+      <li><strong>Bonuses:</strong> may use a flat supplemental rate; see <a href="/bonus-tax-withholding-calculation">bonus withholding</a>.</li>
+      <li><strong>Pension and annuity payments</strong> use a different form and are not modelled by this engine.</li>
+    </ul>
+    <p>The same calculation is available through the <a href="/income-tax-withholding-api">income tax withholding API</a>.</p>
+    <h2>Keep reading</h2>
+    <p><a href="/income-tax-calculation-engine">Income tax calculation engine</a> · <a href="/income-tax-withholding-api">Income tax withholding API</a> · <a href="/fica-tax-calculation">FICA tax calculation</a> · <a href="/bonus-tax-withholding-calculation">Bonus tax withholding</a> · <a href="/guides">All guides</a></p>
+  </div>
+<section class="faq" aria-labelledby="faq-h" style="margin-top:44px;max-width:720px"><h2 id="faq-h" style="font-size:22px;line-height:30px">Questions</h2><article><h3>How is federal income tax withholding calculated?</h3><p>From the Form W-4 using the IRS percentage method: annualise the check, adjust for filing status and the W-4 entries, find the bracket, subtract credits, then divide back to one paycheck and add any extra withholding.</p></article><article><h3>What does the multiple-jobs checkbox do?</h3><p>It selects the higher-withholding table, because each job is withheld as if it were the only one. It is on the Form W-4 as step 2.</p></article><article><h3>Does this cover pensions?</h3><p>No. Pension and annuity withholding use a different form and are not modelled. The engine assumes ordinary wage and salary payroll.</p></article></section>
+  <div class="seo-cta" style="margin:48px 0 8px;max-width:720px"><a class="btn" href="/signup">Start the 14-day trial</a> <a class="text-link" href="/docs">Read the docs →</a><p class="fine">14-day free trial, then $0.08 per paycheck calculation. Omnia.tax calculates; it does not file, deposit tax, or give tax advice. <a href="/disclaimer">Disclaimer</a>.</p></div>
+</main>
+<footer class="site-footer">
+  <div class="wrap foot-grid">
+    <a class="mark" href="/">Omnia<span class="dot" aria-hidden="true"></span>tax</a>
+    <div><h2>Product</h2><a href="/coverage">Coverage</a><a href="/pricing">Pricing</a><a href="/changelog">Changelog</a></div>
+    <div><h2>Developers</h2><a href="/docs">Docs</a><a href="/docs/paycheck">API reference</a><a href="/status">Status</a></div>
+    <div><h2>Guides</h2><a href="/guides">All guides</a><a href="/payroll-tax-calculation">Payroll tax calculation</a><a href="/payroll-tax-calculation-engine">Payroll tax calculation engine</a><a href="/income-tax-calculation-engine">Income tax calculation engine</a><a href="/take-home-pay">Take-home pay by state</a><a href="/payroll-tax-api">Payroll tax API</a><a href="/payroll-tax">Payroll tax by state</a><a href="/symmetry-tax-engine-alternative">Symmetry alternative</a><a href="/payroll-tax-engine-comparison">Engine comparison</a></div>
+    <div><h2>Company</h2><a href="/about">About</a><a href="/contact">Contact</a><a href="/terms">Terms</a><a href="/privacy">Privacy</a></div>
+  </div>
+  <p class="wrap copy">© 2026 OMNIA TAX LLC. A Michigan limited liability company.</p>
+</footer>
+<script src="/assets/v5.js"></script>
+</body>
+</html>

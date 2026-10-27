@@ -201,7 +201,7 @@ describe('every page', () => {
         assert.equal(app.offers.priceCurrency, 'USD');
         assert.match(app.offers.description, /14-day trial/);
         assert.equal(JSON.stringify(app).match(/"@type":"Offer"/g)?.length ?? 0, 1);
-        assert.equal(json.includes('0.09'), false);
+        assert.equal(/(?<![\d.,])0\.09(?!\d)/.test(json), false, `${page.path} has a $0.09 figure`);
         assert.match(html, /nonce="/);
       } else {
         assert.equal(blocks.length, 0, page.path);

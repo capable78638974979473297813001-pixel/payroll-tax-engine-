@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="color-scheme" content="light" />
+<title>Payroll tax reciprocity agreements between states | Omnia.tax</title>
+<meta name="description" content="Which states have income tax reciprocity agreements, so a commuter is withheld for the home state only. The list from our 2026 rules." />
+<link rel="stylesheet" href="/assets/v5.css" />
+</head>
+<body>
+<header class="site-header"><div class="bar">
+  <a class="mark" href="/">Omnia<span class="dot" aria-hidden="true"></span>tax</a>
+  <nav class="nav-links" aria-label="Primary"><a href="/product">Product</a><a href="/coverage">Coverage</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a></nav>
+  <div class="nav-end"><a class="signin" href="/signin">Sign in</a><a class="btn sm" href="/signup">Get API key</a></div>
+  <button class="menu-btn" type="button" aria-expanded="false" aria-label="Menu"><span></span><span></span></button>
+</div></header>
+<main class="wrap">
+  <div class="page-head">
+    <nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a> <span aria-hidden="true">/</span> <a href="/guides">Guides</a> <span aria-hidden="true">/</span> <span aria-current="page">Payroll tax reciprocity agreements</span></nav>
+    <p class="eyebrow">States and rates</p>
+    <h1 class="page">Payroll tax reciprocity agreements</h1>
+    <p class="sub">When two states agree, an employee who works in one and lives in the other is withheld for the home state only.</p>
+  </div>
+  <div class="prose seo" style="margin-top:32px;max-width:720px">
+
+    <p>A reciprocity agreement between two states means an employer in one state withholds the other state's income tax, not its own, for an employee who lives in the other, usually when the employee files a form saying so. It prevents a commuter from being withheld for two states.</p>
+    <h2>The agreements in the 2026 rules</h2>
+    <div class="table-wrap"><table><thead><tr><th>Work state</th><th style="text-align:left">Residents of these states are covered</th></tr></thead><tbody><tr><td><a href="/payroll-tax/arizona">Arizona</a></td><td style="text-align:left">California, Indiana, Oregon, Virginia</td></tr><tr><td><a href="/payroll-tax/iowa">Iowa</a></td><td style="text-align:left">Illinois</td></tr><tr><td><a href="/payroll-tax/illinois">Illinois</a></td><td style="text-align:left">Iowa, Kentucky, Michigan, Wisconsin</td></tr><tr><td><a href="/payroll-tax/indiana">Indiana</a></td><td style="text-align:left">Kentucky, Michigan, Ohio, Pennsylvania, Wisconsin</td></tr><tr><td><a href="/payroll-tax/kentucky">Kentucky</a></td><td style="text-align:left">Illinois, Indiana, Michigan, Ohio, Virginia, West Virginia, Wisconsin</td></tr><tr><td><a href="/payroll-tax/maryland">Maryland</a></td><td style="text-align:left">District of Columbia, Pennsylvania, Virginia, West Virginia</td></tr><tr><td><a href="/payroll-tax/michigan">Michigan</a></td><td style="text-align:left">Illinois, Indiana, Kentucky, Minnesota, Ohio, Wisconsin</td></tr><tr><td><a href="/payroll-tax/minnesota">Minnesota</a></td><td style="text-align:left">Michigan, North Dakota</td></tr><tr><td><a href="/payroll-tax/montana">Montana</a></td><td style="text-align:left">North Dakota</td></tr><tr><td><a href="/payroll-tax/north-dakota">North Dakota</a></td><td style="text-align:left">Minnesota, Montana</td></tr><tr><td><a href="/payroll-tax/new-jersey">New Jersey</a></td><td style="text-align:left">Pennsylvania</td></tr><tr><td><a href="/payroll-tax/ohio">Ohio</a></td><td style="text-align:left">Indiana, Kentucky, Michigan, Pennsylvania, West Virginia</td></tr><tr><td><a href="/payroll-tax/pennsylvania">Pennsylvania</a></td><td style="text-align:left">Indiana, Maryland, New Jersey, Ohio, Virginia, West Virginia</td></tr><tr><td><a href="/payroll-tax/virginia">Virginia</a></td><td style="text-align:left">Maryland, Pennsylvania, West Virginia, Kentucky, District of Columbia</td></tr><tr><td><a href="/payroll-tax/wisconsin">Wisconsin</a></td><td style="text-align:left">Illinois, Indiana, Kentucky, Michigan</td></tr><tr><td><a href="/payroll-tax/west-virginia">West Virginia</a></td><td style="text-align:left">Kentucky, Maryland, Ohio, Pennsylvania, Virginia</td></tr></tbody></table></div>
+    <h2>An example from the engine</h2>
+    <p>An employee who works in Pennsylvania and lives in New Jersey, paid $3,000.00 biweekly. Instead of Pennsylvania income tax, the engine withholds New Jersey's, as the agreement requires:</p>
+    <div class="table-wrap"><table><thead><tr><th>Tax</th><th style="text-align:right">Amount</th></tr></thead><tbody><tr><td>Pennsylvania Unemployment Compensation (Employee)</td><td style="text-align:right">$2.10</td></tr><tr><td>PA Local Earned Income Tax</td><td style="text-align:right">$102.75</td></tr><tr><td>New Jersey Income Tax (withheld by PA employer under reciprocity)</td><td style="text-align:right">$121.05</td></tr></tbody></table></div>
+    <h2>What the engine needs</h2>
+    <p>The work state, the residence state, and whether the employee has filed the state's reciprocity certificate. Where reciprocity does not apply, <a href="/multi-state-payroll-tax-calculation">other rules decide</a>.</p>
+    <h2>Keep reading</h2>
+    <p><a href="/multi-state-payroll-tax-calculation">Multi-state payroll tax calculation</a> · <a href="/state-income-tax-withholding-api">State income tax withholding API</a> · <a href="/address-tax-jurisdiction-lookup-api">Address to tax jurisdiction API</a> · <a href="/payroll-tax">Payroll tax by state</a> · <a href="/guides">All guides</a></p>
+  </div>
+<section class="faq" aria-labelledby="faq-h" style="margin-top:44px;max-width:720px"><h2 id="faq-h" style="font-size:22px;line-height:30px">Questions</h2><article><h3>What is a state tax reciprocity agreement?</h3><p>An agreement between two states that an employee who lives in one and works in the other is taxed only by the home state, so the employer withholds for the home state.</p></article><article><h3>Does reciprocity apply automatically?</h3><p>Usually not. The employee typically has to file a certificate with the employer. The engine applies it when the request says the certificate is on file.</p></article></section>
+  <div class="seo-cta" style="margin:48px 0 8px;max-width:720px"><a class="btn" href="/signup">Start the 14-day trial</a> <a class="text-link" href="/docs">Read the docs →</a><p class="fine">14-day free trial, then $0.08 per paycheck calculation. Omnia.tax calculates; it does not file, deposit tax, or give tax advice. <a href="/disclaimer">Disclaimer</a>.</p></div>
+</main>
+<footer class="site-footer">
+  <div class="wrap foot-grid">
+    <a class="mark" href="/">Omnia<span class="dot" aria-hidden="true"></span>tax</a>
+    <div><h2>Product</h2><a href="/coverage">Coverage</a><a href="/pricing">Pricing</a><a href="/changelog">Changelog</a></div>
+    <div><h2>Developers</h2><a href="/docs">Docs</a><a href="/docs/paycheck">API reference</a><a href="/status">Status</a></div>
+    <div><h2>Guides</h2><a href="/guides">All guides</a><a href="/payroll-tax-calculation">Payroll tax calculation</a><a href="/payroll-tax-calculation-engine">Payroll tax calculation engine</a><a href="/income-tax-calculation-engine">Income tax calculation engine</a><a href="/take-home-pay">Take-home pay by state</a><a href="/payroll-tax-api">Payroll tax API</a><a href="/payroll-tax">Payroll tax by state</a><a href="/symmetry-tax-engine-alternative">Symmetry alternative</a><a href="/payroll-tax-engine-comparison">Engine comparison</a></div>
+    <div><h2>Company</h2><a href="/about">About</a><a href="/contact">Contact</a><a href="/terms">Terms</a><a href="/privacy">Privacy</a></div>
+  </div>
+  <p class="wrap copy">© 2026 OMNIA TAX LLC. A Michigan limited liability company.</p>
+</footer>
+<script src="/assets/v5.js"></script>
+</body>
+</html>

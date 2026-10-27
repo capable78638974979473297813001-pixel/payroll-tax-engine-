@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="color-scheme" content="light" />
+<title>Income tax calculation engine for payroll withholding | Omnia.tax</title>
+<meta name="description" content="An income tax calculation engine for payroll: federal withholding from the Form W-4 and state withholding for all 50 states and DC, with each step explained." />
+<link rel="stylesheet" href="/assets/v5.css" />
+</head>
+<body>
+<header class="site-header"><div class="bar">
+  <a class="mark" href="/">Omnia<span class="dot" aria-hidden="true"></span>tax</a>
+  <nav class="nav-links" aria-label="Primary"><a href="/product">Product</a><a href="/coverage">Coverage</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a></nav>
+  <div class="nav-end"><a class="signin" href="/signin">Sign in</a><a class="btn sm" href="/signup">Get API key</a></div>
+  <button class="menu-btn" type="button" aria-expanded="false" aria-label="Menu"><span></span><span></span></button>
+</div></header>
+<main class="wrap">
+  <div class="page-head">
+    <nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a> <span aria-hidden="true">/</span> <a href="/guides">Guides</a> <span aria-hidden="true">/</span> <span aria-current="page">Income tax calculation engine</span></nav>
+    <p class="eyebrow">Engines and APIs</p>
+    <h1 class="page">Income tax calculation engine for payroll</h1>
+    <p class="sub">How an engine works out the income tax to withhold from a paycheck: the federal W-4 method, and what each state does differently.</p>
+  </div>
+  <div class="prose seo" style="margin-top:32px;max-width:720px">
+
+    <p>An income tax calculation engine for payroll answers one question per paycheck: how much income tax should the employer withhold? That is withholding, an estimate spread across pay periods, not the employee's final tax liability. The employee settles the difference on their return.</p>
+    <h2>Federal income tax withholding</h2>
+    <p>The federal amount comes from the employee's Form W-4 using the IRS percentage method: annualise the wages, apply the filing-status adjustment and any W-4 entries (the multiple-jobs box, dependent credit, other income, deductions), find the bracket, then divide the annual figure back to one paycheck and add any extra withholding. For the $3,000.00 biweekly paycheck in our Ohio example, the engine's own explanation of that line reads:</p>
+    <p><em>annualised $78000.00 → adjusted $69400.00; bracket 22% over $57900.00; tentative/yr $8330.00 ÷ 26</em></p>
+    <p>The result is $320.38 of federal income tax on $3,000.00 of taxable wages.</p>
+    <h2>State income tax withholding</h2>
+    <p>States do not share a method. In the 2026 rules Omnia.tax carries: 9 jurisdictions with no tax on wages (Alaska, Florida, New Hampshire, Nevada, South Dakota, Tennessee, Texas, Washington, Wyoming); 5 with a flat rate; and 37 that use their own tables or formulas, where the result depends on pay, pay frequency and the employee's state certificate. See <a href="/state-income-tax-withholding-api">state income tax withholding</a>.</p>
+    <h2>Local income tax</h2>
+    <p>Some cities, counties and school districts tax wages as well, and which one applies can depend on both the work and home address. The engine covers 4,141 jurisdictions in 15 states. <a href="/local-payroll-tax-api">Local payroll tax</a> explains how the right one is chosen.</p>
+    <h2>Supplemental wages</h2>
+    <p>Bonuses and commissions can be withheld at a flat supplemental rate or aggregated with regular pay. See <a href="/bonus-tax-withholding-calculation">bonus withholding</a>.</p>
+    <h2>Run it</h2>
+    <p>Send a paycheck to the <a href="/income-tax-withholding-api">income tax withholding API</a> and every federal, state and local income tax line comes back in one response.</p>
+    <h2>Keep reading</h2>
+    <p><a href="/income-tax-withholding-api">Income tax withholding API</a> · <a href="/federal-income-tax-withholding-calculator">Federal income tax withholding calculation</a> · <a href="/state-income-tax-withholding-api">State income tax withholding API</a> · <a href="/payroll-tax-calculation-engine">Payroll tax calculation engine</a> · <a href="/guides">All guides</a></p>
+  </div>
+<section class="faq" aria-labelledby="faq-h" style="margin-top:44px;max-width:720px"><h2 id="faq-h" style="font-size:22px;line-height:30px">Questions</h2><article><h3>What is an income tax calculation engine?</h3><p>A component that works out how much income tax to withhold from each paycheck, using the employee's withholding certificates and the federal, state and local rules for the check date.</p></article><article><h3>Is withholding the same as the tax an employee owes?</h3><p>No. Withholding is an estimate collected through the year from the employee's W-4 and pay. The employee's actual tax is settled on their return, so a refund or a balance due is normal.</p></article><article><h3>How does federal withholding use the Form W-4?</h3><p>The engine annualises the wages, adjusts for filing status and the W-4 entries (multiple jobs, dependents, other income, deductions), finds the bracket, then divides back to one paycheck and adds any extra withholding.</p></article></section>
+  <div class="seo-cta" style="margin:48px 0 8px;max-width:720px"><a class="btn" href="/signup">Start the 14-day trial</a> <a class="text-link" href="/docs">Read the docs →</a><p class="fine">14-day free trial, then $0.08 per paycheck calculation. Omnia.tax calculates; it does not file, deposit tax, or give tax advice. <a href="/disclaimer">Disclaimer</a>.</p></div>
+</main>
+<footer class="site-footer">
+  <div class="wrap foot-grid">
+    <a class="mark" href="/">Omnia<span class="dot" aria-hidden="true"></span>tax</a>
+    <div><h2>Product</h2><a href="/coverage">Coverage</a><a href="/pricing">Pricing</a><a href="/changelog">Changelog</a></div>
+    <div><h2>Developers</h2><a href="/docs">Docs</a><a href="/docs/paycheck">API reference</a><a href="/status">Status</a></div>
+    <div><h2>Guides</h2><a href="/guides">All guides</a><a href="/payroll-tax-calculation">Payroll tax calculation</a><a href="/payroll-tax-calculation-engine">Payroll tax calculation engine</a><a href="/income-tax-calculation-engine">Income tax calculation engine</a><a href="/take-home-pay">Take-home pay by state</a><a href="/payroll-tax-api">Payroll tax API</a><a href="/payroll-tax">Payroll tax by state</a><a href="/symmetry-tax-engine-alternative">Symmetry alternative</a><a href="/payroll-tax-engine-comparison">Engine comparison</a></div>
+    <div><h2>Company</h2><a href="/about">About</a><a href="/contact">Contact</a><a href="/terms">Terms</a><a href="/privacy">Privacy</a></div>
+  </div>
+  <p class="wrap copy">© 2026 OMNIA TAX LLC. A Michigan limited liability company.</p>
+</footer>
+<script src="/assets/v5.js"></script>
+</body>
+</html>

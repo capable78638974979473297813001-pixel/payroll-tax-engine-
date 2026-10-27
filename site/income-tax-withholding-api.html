@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="color-scheme" content="light" />
+<title>Income tax withholding API: federal, state, local | Omnia.tax</title>
+<meta name="description" content="An income tax withholding API: send a Form W-4 and a work location, get federal, state and local income tax for one paycheck in cents, each line explained." />
+<link rel="stylesheet" href="/assets/v5.css" />
+</head>
+<body>
+<header class="site-header"><div class="bar">
+  <a class="mark" href="/">Omnia<span class="dot" aria-hidden="true"></span>tax</a>
+  <nav class="nav-links" aria-label="Primary"><a href="/product">Product</a><a href="/coverage">Coverage</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a></nav>
+  <div class="nav-end"><a class="signin" href="/signin">Sign in</a><a class="btn sm" href="/signup">Get API key</a></div>
+  <button class="menu-btn" type="button" aria-expanded="false" aria-label="Menu"><span></span><span></span></button>
+</div></header>
+<main class="wrap">
+  <div class="page-head">
+    <nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a> <span aria-hidden="true">/</span> <a href="/guides">Guides</a> <span aria-hidden="true">/</span> <span aria-current="page">Income tax withholding API</span></nav>
+    <p class="eyebrow">Engines and APIs</p>
+    <h1 class="page">Income tax withholding API</h1>
+    <p class="sub">Which request fields drive income tax withholding, and what comes back.</p>
+  </div>
+  <div class="prose seo" style="margin-top:32px;max-width:720px">
+
+    <p>The income tax part of <code>POST /v1/paycheck</code> is driven by four groups of fields. Everything else on the request (earnings, deductions, year-to-date wages) shapes the wages the tax is applied to.</p>
+    <h2>The fields that matter</h2>
+    <div class="table-wrap"><table><thead><tr><th>Field</th><th style="text-align:left">What it controls</th></tr></thead><tbody><tr><td><code>federalW4.filingStatus</code></td><td style="text-align:left">The standard-deduction adjustment and which bracket table applies.</td></tr><tr><td><code>federalW4.multipleJobs</code></td><td style="text-align:left">Step 2 of the 2020-or-later Form W-4: uses the higher-withholding table.</td></tr><tr><td><code>federalW4.dependentCredit</code>, <code>otherIncome</code>, <code>deductions</code></td><td style="text-align:left">Steps 3, 4(a) and 4(b), in cents.</td></tr><tr><td><code>federalW4.extraWithholding</code></td><td style="text-align:left">Extra federal tax per paycheck, step 4(c).</td></tr><tr><td><code>workState.code</code> and <code>certificate</code></td><td style="text-align:left">Which state formula runs and the state-specific withholding certificate answers.</td></tr><tr><td><code>residenceState</code></td><td style="text-align:left">Needed when the employee lives in a different state, for reciprocity and residence-based tax.</td></tr></tbody></table></div>
+    <h2>An example response</h2>
+    <p>For a single employee in Texas paid $3,000.00 biweekly (Texas has no state income tax), the income tax line is:</p>
+    <div class="table-wrap"><table><thead><tr><th>Tax</th><th style="text-align:right">Taxable wages</th><th style="text-align:right">Amount</th></tr></thead><tbody><tr><td>Federal Income Tax</td><td style="text-align:right">$3,000.00</td><td style="text-align:right">$320.38</td></tr></tbody></table></div>
+    <p>There is no state income tax line, because the engine returns a line only where a tax applies.</p>
+    <div class="panel" style="margin-top:14px"><pre style="margin:0;padding:18px 22px;overflow:auto">curl https://api.omnia.tax/v1/paycheck \
+  -H &quot;Authorization: Bearer $KEY&quot; \
+  -H &quot;Content-Type: application/json&quot; \
+  -d '{
+  &quot;checkDate&quot;: &quot;2026-09-15&quot;,
+  &quot;payFrequency&quot;: &quot;biweekly&quot;,
+  &quot;earnings&quot;: [{ &quot;code&quot;: &quot;REG&quot;, &quot;category&quot;: &quot;regular&quot;, &quot;amount&quot;: 300000 }],
+  &quot;deductions&quot;: [],
+  &quot;federalW4&quot;: { &quot;filingStatus&quot;: &quot;single&quot;, &quot;multipleJobs&quot;: false,
+    &quot;dependentCredit&quot;: 0, &quot;otherIncome&quot;: 0, &quot;deductions&quot;: 0, &quot;extraWithholding&quot;: 0 },
+  &quot;ytd&quot;: { &quot;socialSecurity&quot;: 0, &quot;medicare&quot;: 0, &quot;futa&quot;: 0 },
+  &quot;workState&quot;: { &quot;code&quot;: &quot;TX&quot; }
+}'</pre></div>
+    <h2>Exempt employees and overrides</h2>
+    <p>The request accepts the W-4 exempt flag, extra withholding, and the voluntary-withholding agreement for categories that are otherwise exempt, so the response follows what the employee actually filed.</p>
+    <p>See the <a href="/docs/paycheck">API reference</a> for every field, or try a paycheck in the <a href="/sandbox">calculator</a>.</p>
+    <h2>Keep reading</h2>
+    <p><a href="/income-tax-calculation-engine">Income tax calculation engine</a> · <a href="/federal-income-tax-withholding-calculator">Federal income tax withholding calculation</a> · <a href="/payroll-tax-api">Payroll tax API</a> · <a href="/docs/paycheck">API reference</a> · <a href="/guides">All guides</a></p>
+  </div>
+<section class="faq" aria-labelledby="faq-h" style="margin-top:44px;max-width:720px"><h2 id="faq-h" style="font-size:22px;line-height:30px">Questions</h2><article><h3>What does an income tax withholding API return?</h3><p>For one paycheck, each federal, state and local income tax line with the wages it applied to, the amount in cents and a short explanation, plus the totals and net pay.</p></article><article><h3>Does it support the current Form W-4?</h3><p>Yes. It implements the 2020-or-later Form W-4: filing status, the multiple-jobs checkbox, the dependent credit, other income, deductions and extra withholding.</p></article><article><h3>Are amounts in dollars or cents?</h3><p>Integer cents everywhere, in requests and responses. A request that sends dollars with a decimal is rejected with a field-level error.</p></article></section>
+  <div class="seo-cta" style="margin:48px 0 8px;max-width:720px"><a class="btn" href="/signup">Start the 14-day trial</a> <a class="text-link" href="/docs">Read the docs →</a><p class="fine">14-day free trial, then $0.08 per paycheck calculation. Omnia.tax calculates; it does not file, deposit tax, or give tax advice. <a href="/disclaimer">Disclaimer</a>.</p></div>
+</main>
+<footer class="site-footer">
+  <div class="wrap foot-grid">
+    <a class="mark" href="/">Omnia<span class="dot" aria-hidden="true"></span>tax</a>
+    <div><h2>Product</h2><a href="/coverage">Coverage</a><a href="/pricing">Pricing</a><a href="/changelog">Changelog</a></div>
+    <div><h2>Developers</h2><a href="/docs">Docs</a><a href="/docs/paycheck">API reference</a><a href="/status">Status</a></div>
+    <div><h2>Guides</h2><a href="/guides">All guides</a><a href="/payroll-tax-calculation">Payroll tax calculation</a><a href="/payroll-tax-calculation-engine">Payroll tax calculation engine</a><a href="/income-tax-calculation-engine">Income tax calculation engine</a><a href="/take-home-pay">Take-home pay by state</a><a href="/payroll-tax-api">Payroll tax API</a><a href="/payroll-tax">Payroll tax by state</a><a href="/symmetry-tax-engine-alternative">Symmetry alternative</a><a href="/payroll-tax-engine-comparison">Engine comparison</a></div>
+    <div><h2>Company</h2><a href="/about">About</a><a href="/contact">Contact</a><a href="/terms">Terms</a><a href="/privacy">Privacy</a></div>
+  </div>
+  <p class="wrap copy">© 2026 OMNIA TAX LLC. A Michigan limited liability company.</p>
+</footer>
+<script src="/assets/v5.js"></script>
+</body>
+</html>
