@@ -31,6 +31,22 @@
   </div>
 </header>
 <main class="calc">
+  <div class="formcol">
+  <div class="welcome" id="welcome" hidden></div>
+  <div class="intro">
+    <h2 class="intro-h">Run a paycheck through the engine</h2>
+    <p>Every calculation here is the real engine on the real data. <span id="modeNote" hidden></span></p>
+    <div class="examples">
+      <label for="example">Start from an example</label>
+      <select id="example" class="inp">
+        <option value="">Choose one</option>
+        <option value="mi">Salaried, Michigan, $85,000 a year</option>
+        <option value="tx">Hourly, Texas, $22 an hour</option>
+        <option value="ca">California, married, $120,000 plus a bonus</option>
+        <option value="oh">Ohio, weekly, $1,400</option>
+      </select>
+    </div>
+  </div>
   <form class="sheet-form" id="form">
     <fieldset>
       <legend>Work Address (optional)</legend>
@@ -105,7 +121,7 @@
       <div class="grid g2">
         <div class="f">
           <div class="lab"><label for="grossPay">Gross Pay ($)</label></div>
-          <div class="money"><em>$</em><input id="grossPay" class="inp" inputmode="decimal" value="0" /></div>
+          <div class="money"><em>$</em><input id="grossPay" class="inp" inputmode="decimal" value="85000" /></div>
         </div>
         <div class="f">
           <div class="lab"><label for="grossPayMethod">Gross Pay Method</label></div>
@@ -224,8 +240,9 @@
       </div>
     </fieldset>
 
-    <button id="calc" class="btn pri block" type="submit">Calculate</button>
+    <div class="actionbar"><button id="calc" class="btn pri block" type="submit">Calculate</button></div>
   </form>
+  </div>
 
   <aside class="result-panel" id="result-panel" aria-live="polite">
     <div id="placeholder">Fill in the form and press Calculate — the result appears here.</div>

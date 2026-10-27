@@ -3089,6 +3089,75 @@ async function handleEmployerTaxes(req: IncomingMessage, res: ServerResponse): P
 }
 
 // ---------------------------------------------------------------------
+// POST /api/console/paycheck and /api/console/address -- the console's
+// calculator for a signed-in visitor, so it works with no key to paste.
+// Authenticated by the session cookie (and the CSRF check every cookie
+// POST gets), it runs exactly the functions POST /v1/paycheck and
+// POST /v1/address run, is never billed or counted in usage, and is held
+// to the test-key caps per account. A key the visitor pastes still goes to
+// /v1/*, so their own key can be tried too.
+// ---------------------------------------------------------------------
+
+function consoleGate(req: IncomingMessage, res: ServerResponse, what: 'paycheck' | 'address'): { requestId: string; headers: Record<string, string> } | null {
+  const requestId = 'req_' + randomBytes(8).toString('hex');
+  const session = requireSession(req, res);
+  if (!session) {
+    sendJson(res, 401, { error: 'Sign in to run the calculator, or paste an API key.', code: 'sign_in_required', requestId });
+    return null;
+  }
+  const now = Date.now();
+  const verdict = withDb((db) => {
+    const minute = hitStoredLimit(db, `console-${what}:${session.email}`, testPerMinute(), 60_000, now);
+    if (!minute.allowed) return { minute };
+    const day = hitStoredLimit(db, `console-day:${session.email}`, testPerDay(), 24 * 60 * 60_000, now);
+    return { minute, day };
+  });
+  const headers: Record<string, string> = { 'X-Request-Id': requestId, 'Omnia-Mode': 'test' };
+  if (!verdict.minute.allowed) {
+    sendJson(res, 429, { error: `Rate limit of ${verdict.minute.limit} requests/minute exceeded. Retry in ${verdict.minute.retryAfterSec}s.`, code: 'rate_limited', requestId }, { ...headers, 'Retry-After': String(verdict.minute.retryAfterSec) });
+    return null;
+  }
+  if (verdict.day && !verdict.day.allowed) {
+    sendJson(res, 429, { error: `The console reached its limit of ${verdict.day.limit} calculations for today. Try again later, or use an API key.`, code: 'test_daily_limit', requestId }, { ...headers, 'Retry-After': String(verdict.day.retryAfterSec) });
+    return null;
+  }
+  return { requestId, headers };
+}
+
+async function handleConsolePaycheck(req: IncomingMessage, res: ServerResponse): Promise<void> {
+  const gate = consoleGate(req, res, 'paycheck');
+  if (!gate) return;
+  let raw: unknown;
+  try {
+    raw = await readJson<unknown>(req, 'any');
+  } catch (err) {
+    sendJson(res, 400, { error: (err as Error).message, code: 'invalid_json', requestId: gate.requestId }, gate.headers);
+    return;
+  }
+  const prep = preparePaycheck(raw, gate.requestId);
+  if (!prep.ok) {
+    sendJson(res, prep.status, prep.body, gate.headers);
+    return;
+  }
+  const ran = runPaycheck(prep, gate.requestId);
+  sendJson(res, ran.status, ran.body, gate.headers);
+}
+
+async function handleConsoleAddress(req: IncomingMessage, res: ServerResponse): Promise<void> {
+  const gate = consoleGate(req, res, 'address');
+  if (!gate) return;
+  let body: Record<string, unknown>;
+  try {
+    body = await readJson<Record<string, unknown>>(req);
+  } catch (err) {
+    sendJson(res, 400, { error: (err as Error).message, code: 'invalid_json', requestId: gate.requestId }, gate.headers);
+    return;
+  }
+  const out = await runAddress(body, gate.requestId);
+  sendJson(res, out.status, out.body, gate.headers);
+}
+
+// ---------------------------------------------------------------------
 // POST /mcp -- the Model Context Protocol endpoint (site/lib/mcp.ts is the
 // protocol; this is the glue). A tool call runs the same functions the REST
 // endpoints run and is recorded and billed the same way: calculate_paycheck
@@ -3868,6 +3937,8 @@ createServer((req, res) => {
     if (method === 'POST' && (url === '/api/paycheck/compare' || url === '/v1/paycheck/compare')) return handleCompare(req, res);
     if (method === 'POST' && (url === '/api/paycheck/gross-up' || url === '/v1/paycheck/gross-up')) return handleGrossUp(req, res);
     if (method === 'POST' && (url === '/api/employer-taxes' || url === '/v1/employer-taxes')) return handleEmployerTaxes(req, res);
+    if (method === 'POST' && url === '/api/console/paycheck') return handleConsolePaycheck(req, res);
+    if (method === 'POST' && url === '/api/console/address') return handleConsoleAddress(req, res);
     if (url === '/mcp') {
       if (method === 'POST') return handleMcp(req, res);
       // No server-initiated stream and no sessions to end.

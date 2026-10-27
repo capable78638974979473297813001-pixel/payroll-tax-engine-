@@ -84,7 +84,8 @@
       Omnia.setLoading(start, false);
       if (!keyRes.ok) { showErr((keyRes.body && keyRes.body.error) || 'Could not issue a key.'); return; }
       Omnia.setApiKey({ key: keyRes.body.key, prefix: keyRes.body.keyPrefix, plan: keyRes.body.plan, expiresAt: keyRes.body.expiresAt });
-      location.href = '/signup/key';
+      // A new key goes straight to the console, which shows it once and runs the first calculation with it.
+      location.href = '/sandbox?welcome=key';
     });
   }
 

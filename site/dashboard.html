@@ -238,10 +238,13 @@
     Omnia.api('/api/issue-key', { method: 'POST', headers: Omnia.authHeaders(), body: '{}' }).then(function (r) {
       Omnia.setLoading(btn, false);
       if (!r.ok) { $('reissueNote').textContent = (r.body && r.body.error) || 'Could not issue a key.'; return; }
+      Omnia.setApiKey({ key: r.body.key, prefix: r.body.keyPrefix, plan: r.body.plan, expiresAt: r.body.expiresAt });
       $('newKeyText').textContent = r.body.key;
       $('newKey').hidden = false;
-      $('reissueNote').textContent = 'Done. The previous key no longer works.';
+      $('reissueNote').textContent = 'Done. The previous key no longer works. Opening the console…';
       loadUsage();
+      // A new key goes straight to the console, which shows it once and runs the first calculation with it.
+      setTimeout(function () { location.href = '/sandbox?welcome=key'; }, 600);
     });
   });
   $('makeTest').addEventListener('click', function () {
@@ -249,10 +252,12 @@
     Omnia.api('/api/issue-key', { method: 'POST', headers: Omnia.authHeaders(), body: JSON.stringify({ mode: 'test' }) }).then(function (r) {
       Omnia.setLoading(btn, false);
       if (!r.ok) { $('makeTestNote').textContent = (r.body && r.body.error) || 'Could not create a test key.'; return; }
+      Omnia.setApiKey({ key: r.body.key, prefix: r.body.keyPrefix, plan: r.body.plan, expiresAt: r.body.expiresAt });
       $('newTestKeyText').textContent = r.body.key;
       $('newTestKey').hidden = false;
-      $('makeTestNote').textContent = 'Done. Any earlier test key no longer works.';
+      $('makeTestNote').textContent = 'Done. Any earlier test key no longer works. Opening the console…';
       loadUsage();
+      setTimeout(function () { location.href = '/sandbox?welcome=key'; }, 600);
     });
   });
   $('copyTest').addEventListener('click', function () {
