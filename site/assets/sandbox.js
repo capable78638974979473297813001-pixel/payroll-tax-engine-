@@ -26,6 +26,9 @@ let states = [];
 let busy = false;
 let lookupBusy = false;
 let lastMode = '';
+/** True when the browser holds a live sign-in (the session cookie), found by asking the server. */
+let sessionActive = false;
+let lastRequest = null;
 
 function num(id) {
   const el = $(id);
@@ -95,7 +98,17 @@ function hasApiKey() {
   return !!(key && key.key);
 }
 function signedIn() {
-  return !!(window.Omnia && Omnia.session && Omnia.session() && Omnia.session().email);
+  return sessionActive;
+}
+/** Which door a run goes through: a key the visitor pasted or saved, else their sign-in, else neither. */
+function route() {
+  if (currentKey()) return 'key';
+  return sessionActive ? 'session' : 'none';
+}
+function endpoint(kind) {
+  const how = route();
+  const base = how === 'session' ? '/api/console/' : '/v1/';
+  return base + kind;
 }
 function currentKey() {
   const typed = ($('keyInput') && $('keyInput').value || '').trim();
@@ -117,23 +130,18 @@ function setKeyGate(forLookup) {
   const gate = $('gate');
   const example = !signedIn();
   let text;
-  let href;
-  let label;
+  let links;
   if (!signedIn()) {
     text = forLookup
       ? 'Sign up to get an API key before an address can be looked up. A test key is free and needs no card. This page does not issue a key.'
       : 'Sign up to get an API key before this calculation can run. A test key is free and needs no card. This page does not issue a key.';
-    href = '/signup';
-    label = 'Create an account';
+    links = '<a href="/signup">Create an account</a> or <a href="/signin">sign in</a>';
   } else {
-    text = forLookup
-      ? 'Create a test key (free, no card) or a live key in your account, then paste it here, before an address can be looked up.'
-      : 'Create a test key (free, no card) or a live key in your account, then paste it here, before this calculation can run.';
-    href = '/dashboard';
-    label = 'Open your account';
+    text = 'Your session ended. Sign in again, or paste an API key.';
+    links = '<a href="/signin">Sign in</a>';
   }
   gate.hidden = false;
-  gate.innerHTML = `<div class="banner banner-bad" role="alert">${esc(text)} <a href="${esc(href)}">${esc(label)}</a>.${example ? exampleOutputHtml() : ''}</div>`;
+  gate.innerHTML = `<div class="banner banner-bad" role="alert">${esc(text)} ${links}.${example ? exampleOutputHtml() : ''}</div>`;
   $('placeholder').hidden = true;
   $('result').hidden = true;
 }
@@ -280,35 +288,63 @@ function money(cents) {
 function lineRows(lines) {
   return lines.map((line) => `<tr>
     <td><b>${esc(line.name)}</b>${line.detail ? `<div class="line-detail">${esc(line.detail)}</div>` : ''}</td>
-    <td>${esc(line.payer || '')}</td>
     <td class="num">${money(line.taxableWages || 0)}</td>
     <td class="num">${money(line.amount || 0)}</td>
   </tr>`).join('');
 }
 
-function showResult(result) {
+function curlFor(req) {
+  const body = JSON.stringify(req.request, null, 2).replace(/'/g, "'\\''");
+  return `curl https://api.omnia.tax/v1/paycheck \\\n  -H "Authorization: Bearer $OMNIA_API_KEY" \\\n  -H "Content-Type: application/json" \\\n  -d '${body}'`;
+}
+
+function showResult(result, whole) {
   const taxes = Array.isArray(result.taxes) ? result.taxes : [];
   const employee = taxes.filter((t) => t.payer === 'employee');
   const employer = taxes.filter((t) => t.payer === 'employer');
   const table = (title, lines, total) => {
     if (!lines.length) return '';
-    return `<h2>${esc(title)}</h2><table class="lines"><thead><tr><th>Tax</th><th>Who pays</th><th class="num">Taxable wages</th><th class="num">Amount</th></tr></thead><tbody>${lineRows(lines)}<tr class="total"><td colspan="3">${esc(title)} total</td><td class="num">${money(total)}</td></tr></tbody></table>`;
+    return `<h2>${esc(title)}</h2><div class="tablewrap"><table class="lines"><thead><tr><th>Tax</th><th class="num">Taxable wages</th><th class="num">Amount</th></tr></thead><tbody>${lineRows(lines)}<tr class="total"><td colspan="2">${esc(title)} total</td><td class="num">${money(total)}</td></tr></tbody></table></div>`;
   };
   const notices = (result.notices || []).map((n) => `<div class="note note-warn"><b>${esc(n.taxId || '')}</b> ${esc(n.note || '')}</div>`).join('');
   const warnings = (result.warnings || []).map((w) => `<div class="note note-warn">${esc(typeof w === 'string' ? w : JSON.stringify(w))}</div>`).join('');
   const testNote = lastMode === 'test' ? '<p class="hint">Run with a test key: same engine and data as a live key, and not billed.</p>' : '';
+  const sent = lastRequest ? JSON.stringify(lastRequest.request, null, 2) : '';
+  const developer = lastRequest ? `<details class="dev"><summary>Request and response</summary>
+      <div class="dev-h"><span>Request body (POST /v1/paycheck)</span><button type="button" class="lnk" data-copy="request">Copy</button></div>
+      <pre>${esc(sent)}</pre>
+      <div class="dev-h"><span>As cURL</span><button type="button" class="lnk" data-copy="curl">Copy</button></div>
+      <pre>${esc(curlFor(lastRequest))}</pre>
+      <div class="dev-h"><span>Response</span><button type="button" class="lnk" data-copy="response">Copy</button></div>
+      <pre>${esc(JSON.stringify(whole || { result }, null, 2))}</pre>
+    </details>` : '';
   $('result').innerHTML = `<div class="paystub">
     ${testNote}
-    <p class="meta">${esc(result.checkDate || '')}</p>
+    <p class="meta">Check date ${esc(result.checkDate || '')}</p>
     <div class="net-pay"><span>Net pay</span><b>${money(result.netPay || 0)}</b></div>
-    <p class="meta">Gross ${money(result.grossPay || 0)} · Pre-tax deductions ${money(result.pretaxDeductions || 0)} · Post-tax deductions ${money(result.posttaxDeductions || 0)}</p>
+    <dl class="sumgrid">
+      <div><dt>Gross pay</dt><dd>${money(result.grossPay || 0)}</dd></div>
+      <div><dt>Pre-tax deductions</dt><dd>${money(result.pretaxDeductions || 0)}</dd></div>
+      <div><dt>Employee taxes</dt><dd>${money(result.employeeTaxTotal || 0)}</dd></div>
+      <div><dt>Post-tax deductions</dt><dd>${money(result.posttaxDeductions || 0)}</dd></div>
+      <div><dt>Employer taxes</dt><dd>${money(result.employerTaxTotal || 0)}</dd></div>
+      <div><dt>Tax lines</dt><dd>${taxes.length}</dd></div>
+    </dl>
     ${table('Withheld from the employee', employee, result.employeeTaxTotal || 0)}
     ${table('Paid by the employer', employer, result.employerTaxTotal || 0)}
     ${notices}${warnings}
+    ${developer}
   </div>`;
+  const copyText = { request: sent, curl: lastRequest ? curlFor(lastRequest) : '', response: JSON.stringify(whole || { result }, null, 2) };
+  $('result').querySelectorAll('[data-copy]').forEach((btn) => btn.addEventListener('click', () => {
+    const text = copyText[btn.getAttribute('data-copy')] || '';
+    const done = () => { btn.textContent = 'Copied'; setTimeout(() => { btn.textContent = 'Copy'; }, 1500); };
+    if (navigator.clipboard) navigator.clipboard.writeText(text).then(done, done); else done();
+  }));
   $('result').hidden = false;
   $('placeholder').hidden = true;
   $('gate').hidden = true;
+  if (window.matchMedia && window.matchMedia('(max-width: 980px)').matches) $('result-panel').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 function showError(message) {
@@ -326,7 +362,7 @@ async function runLookup() {
     showAddressStatus('Fill in at least one address (street, city, and state). ZIP is optional.', true);
     return;
   }
-  if (!currentKey()) {
+  if (route() === 'none') {
     setKeyGate(true);
     return;
   }
@@ -334,9 +370,13 @@ async function runLookup() {
   const btn = $('addressLookup');
   btn.disabled = true;
   btn.textContent = 'Looking up…';
+  showAddressStatus('Looking up the address. This checks the live address services and can take up to 30 seconds.', false);
+  const abort = new AbortController();
+  const timer = setTimeout(() => abort.abort(), 90000);
   try {
-    const res = await fetch('/v1/address', {
+    const res = await fetch(endpoint('address'), {
       method: 'POST',
+      signal: abort.signal,
       headers: authHeaders(),
       body: JSON.stringify({
         workAddress: work || undefined,
@@ -346,6 +386,8 @@ async function runLookup() {
     });
     const body = await res.json().catch(() => ({}));
     if (res.status === 401) {
+      if (route() === 'session') sessionActive = false;
+      paintKey();
       setKeyGate(true);
       return;
     }
@@ -360,8 +402,9 @@ async function runLookup() {
     syncFromDom();
     applyLookup(body);
   } catch {
-    showAddressStatus('The address lookup is unavailable right now.', true);
+    showAddressStatus('The address lookup is unavailable right now. Try again in a minute, or pick the state yourself below.', true);
   } finally {
+    clearTimeout(timer);
     lookupBusy = false;
     btn.disabled = false;
     btn.textContent = 'Look Up Jurisdiction(s)';
@@ -372,7 +415,7 @@ async function runCalc(ev) {
   if (ev) ev.preventDefault();
   if (busy) return;
   syncFromDom();
-  if (!currentKey()) {
+  if (route() === 'none') {
     setKeyGate(false);
     return;
   }
@@ -384,12 +427,17 @@ async function runCalc(ev) {
     showError(problems.join('\n'));
     return;
   }
+  if (!(request.earnings || []).some((e) => Number(e.amount) > 0)) {
+    showError('Enter a gross pay above $0 (or an hourly rate and hours) before calculating.');
+    return;
+  }
   busy = true;
   const btn = $('calc');
   btn.disabled = true;
   btn.textContent = 'Calculating…';
   try {
-    const res = await fetch('/v1/paycheck', {
+    lastRequest = { request, how: route(), key: currentKey() };
+    const res = await fetch(endpoint('paycheck'), {
       method: 'POST',
       headers: authHeaders(),
       body: JSON.stringify(request),
@@ -397,6 +445,8 @@ async function runCalc(ev) {
     const body = await res.json().catch(() => ({}));
     lastMode = res.headers.get('Omnia-Mode') || '';
     if (res.status === 401) {
+      if (lastRequest.how === 'session') sessionActive = false;
+      paintKey();
       setKeyGate(false);
       return;
     }
@@ -408,7 +458,7 @@ async function runCalc(ev) {
       showError(body.error || 'The calculation could not be completed.');
       return;
     }
-    showResult(body.result || body);
+    showResult(body.result || body, body);
   } catch {
     showError('The calculation could not be completed.');
   } finally {
@@ -427,10 +477,52 @@ function paintKey() {
     label.textContent = Omnia.maskKey ? Omnia.maskKey(key.key) : 'Key saved';
     dot.classList.add('on');
     if ($('keyInput') && !$('keyInput').value) $('keyInput').value = key.key;
+  } else if (sessionActive) {
+    label.textContent = 'Signed in · no key needed';
+    dot.classList.add('on');
   } else {
     label.textContent = 'Your API key';
     dot.classList.remove('on');
   }
+  const note = $('modeNote');
+  if (note) {
+    note.textContent = key && key.key
+      ? 'Calculations use the key saved in this tab.'
+      : sessionActive ? 'You are signed in, so calculations run without a key. They are free and do not count toward your usage.' : '';
+    note.hidden = !note.textContent;
+  }
+}
+
+/** Ask the server whether the sign-in cookie is live. Per-tab storage cannot answer that. */
+async function checkSession() {
+  try {
+    const res = await fetch('/api/account', { headers: { Accept: 'application/json' } });
+    sessionActive = res.ok;
+    if (res.ok && window.Omnia && Omnia.setSession) {
+      const who = await res.json().catch(() => null);
+      if (who && who.email) Omnia.setSession({ email: who.email, name: who.name, company: who.company });
+    }
+  } catch { sessionActive = false; }
+}
+
+/** After a key is issued the visitor lands here. Show it once, saved in this tab. */
+function showWelcome() {
+  const params = new URLSearchParams(location.search);
+  if (params.get('welcome') !== 'key') return;
+  const key = window.Omnia && Omnia.apiKey && Omnia.apiKey();
+  history.replaceState(null, '', location.pathname);
+  if (!key || !key.key) return;
+  const box = $('welcome');
+  const live = key.key.indexOf('sk_live_') === 0;
+  box.hidden = false;
+  box.innerHTML = `<div class="welcome-h"><b>Your ${live ? 'live' : 'test'} API key is ready.</b><button type="button" class="lnk" id="welcomeClose">Dismiss</button></div>
+    <p>It is saved in this tab, so Calculate uses it now. Copy it somewhere safe: the full key is shown only once.</p>
+    <div class="keyline"><code>${esc(key.key)}</code><button type="button" class="btn sec" id="welcomeCopy">Copy key</button></div>`;
+  $('welcomeCopy').addEventListener('click', () => {
+    const done = () => { $('welcomeCopy').textContent = 'Copied'; };
+    if (navigator.clipboard) navigator.clipboard.writeText(key.key).then(done, done); else done();
+  });
+  $('welcomeClose').addEventListener('click', () => { box.hidden = true; });
 }
 
 async function loadStates() {
@@ -445,6 +537,36 @@ async function loadStates() {
     if (selected) $('state').value = selected;
   } catch { /* the dropdown keeps Federal taxes only */ }
 }
+
+const EXAMPLES = {
+  mi: { state: 'MI', method: 'annual', gross: 85000, frequency: 'biweekly' },
+  tx: { state: 'TX', method: 'hourly', rate: 22, hours: 80, frequency: 'biweekly' },
+  ca: { state: 'CA', method: 'annual', gross: 120000, frequency: 'semimonthly', filing: 'married_joint', bonus: 5000 },
+  oh: { state: 'OH', method: 'perPeriod', gross: 1400, frequency: 'weekly' },
+};
+function fire(id) { $(id).dispatchEvent(new Event('change', { bubbles: true })); }
+function applyExample(id) {
+  const ex = EXAMPLES[id];
+  if (!ex) return;
+  $('state').value = ex.state; fire('state');
+  $('grossPayMethod').value = ex.method; fire('grossPayMethod');
+  $('payFrequency').value = ex.frequency;
+  $('grossPay').value = String(ex.gross || 0);
+  $('hourlyRate').value = String(ex.rate || 0);
+  $('hoursPerPeriod').value = String(ex.hours || 0);
+  $('filingStatus').value = ex.filing || 'single';
+  $('payItems').replaceChildren();
+  if (ex.bonus) {
+    const row = payRow('bonus');
+    row.querySelector('.pay-amount').value = String(ex.bonus);
+    $('payItems').appendChild(row);
+  }
+  syncFromDom();
+  $('result').hidden = true;
+  $('gate').hidden = true;
+  $('placeholder').hidden = false;
+}
+$('example').addEventListener('change', () => { applyExample($('example').value); });
 
 $('checkDate').value = form.checkDate;
 $('grossPayMethod').addEventListener('change', () => {
@@ -482,6 +604,7 @@ $('keySave').addEventListener('click', () => {
   const v = $('keyInput').value.trim();
   if (v && window.Omnia) Omnia.setApiKey({ key: v });
   $('keyMenu').hidden = true;
+  $('gate').hidden = true;
   paintKey();
 });
 $('keyForget').addEventListener('click', () => {
@@ -499,7 +622,9 @@ window.OmniaSandbox = {
 };
 
 (async function boot() {
+  await checkSession();
   paintKey();
+  showWelcome();
   try {
     const res = await fetch('/assets/state-cert-fields.json');
     registry = await res.json();
