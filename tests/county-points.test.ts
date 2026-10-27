@@ -381,8 +381,8 @@ describe('pointSourceOf()', () => {
 
   test('the keyed /v1/address response carries pointSource and the public demo response does not', () => {
     const server = readFileSync(join(dirname(fileURLToPath(import.meta.url)), '..', 'site', 'server.ts'), 'utf8');
-    const keyed = server.slice(server.indexOf('async function handleAddress('));
-    const demo = server.slice(server.indexOf('async function handleDemoResolveAddress('), server.indexOf('async function handleAddress('));
+    const keyed = server.slice(server.indexOf('async function runAddress('));
+    const demo = server.slice(server.indexOf('async function handleDemoResolveAddress('), server.indexOf('async function runAddress('));
     assert.match(keyed, /pointSource:/);
     assert.doesNotMatch(demo, /pointSource/);
   });

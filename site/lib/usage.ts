@@ -396,7 +396,8 @@ export interface DashboardUsageReady {
  */
 export function dashboardUsage(db: DB, email: string, opts: { metering: boolean; now?: number }): DashboardUsage | DashboardUsageReady {
   const now = opts.now ?? Date.now();
-  const ownKeys = Object.values(db.keys).filter((key) => key.ownerEmail === email);
+  // Test keys are never billed and are not part of the account's usage.
+  const ownKeys = Object.values(db.keys).filter((key) => key.ownerEmail === email && key.mode !== 'test');
   const active = ownKeys.find((key) => key.isActive);
   if (!active) return { hasKey: false };
 
