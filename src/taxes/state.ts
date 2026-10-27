@@ -5390,91 +5390,15 @@ interface WVServiceFeeCityConfig {
 }
 
 /**
- * West Virginia's per-city Municipal/City Service Fee (WV Code 8-13-13) —
- * a FLAT FEE PER WEEK, not a percentage of wages, imposed by an employee's
- * DUTY-STATION city (work-location-based, like Newark's tax, not
- * residence-based) rather than any bracket or flat-rate income tax. A
- * genuinely different shape from every other local tax in this project:
- * even PA's Local Services Tax — this project's other flat-fee local tax —
- * is stated as an ANNUAL cap ($52/yr) prorated across pay periods; West
- * Virginia's cities instead each publish a bare WEEKLY dollar figure with
- * no per-pay-period breakdown in any source consulted. This function
- * infers a per-period amount the same way PA's LST prorates ($weeklyRate
- * × 52 annualized, then divided across this employee's actual pay
- * periods, rounded DOWN to the cent) — a reasonable but NOT verbatim-
- * sourced convention, disclosed as an assumption in WV-2026.json's own
- * knownGap rather than presented as confirmed.
- *
- * Gated on certificate.locality, the same caller-resolved-locality shape
- * as Newark's/Denver's/Missouri's local taxes — this engine does not
- * resolve an address to a city itself.
- *
- * Fairmont (added 2026-08-31) is a genuine exception to the work-location-
- * for-everyone rule: its own Ordinance No. 1812 withholds the fee only from
- * NON-resident duty-station employees — residents are billed an $8.67/month
- * fee directly, not through payroll — so its config carries
- * nonResidentOnly:true and is skipped here when certificate.residenceCity
- * also names Fairmont.
- *
- * NOT modelled, disclosed rather than guessed at: Wheeling's own 30-
- * consecutive-day-in-the-city threshold before the fee first attaches
- * (no employment-duration input exists anywhere in this engine — every
- * duty-station-in-Wheeling case is treated as already past the
- * threshold); and the multi-job dedup rule (an employee working multiple
- * jobs in the same WV city is only assessed once — the same class of
- * un-modelled multi-employer coordination as Newark's Form-based
- * exemption elsewhere in this project).
- *
- * Weirton's mid-2026 rate change ($2.00/week through 2026-05-13, then
- * $5.00/week from Ordinance 2272's 2026-05-14 effective date onward, per
- * WV-2026.json's own serviceFeeCities.Weirton note) IS effective-dated,
- * via priorWeeklyRate/rateEffectiveDate on the city config — the same
- * class of gap Ohio's HB96 had before midYearEffectiveDating existed, but
- * scoped per-city rather than per-state since only one WV city in this
- * file has a documented rate history so far.
- *
- * THREE REAL OVER/WRONG-WITHHOLDING BUGS CLOSED (2026-09-06 "go to every
- * state" pass) — all three were previously disclosed as un-modelled gaps
- * rather than fixed; a payroll engine that always over-withholds on a
- * known, sourced rule is a bug, not a confidence-tier caveat, so this pass
- * treated them as such:
- *
- * 1. MULTI-JOB DEDUP — every WV city's own ordinance says an employee
- *    working 2+ jobs in the same city is charged once (Charleston's own
- *    Prior Payment Form CSF-1 is literally built for this: the employee
- *    tells their SECOND employer not to withhold once the first already
- *    has). certificate.wvLocalFeeAlreadyWithheld:true (caller-supplied —
- *    this engine has no cross-employer visibility, the same "only the
- *    caller can know this" shape as Denver's OPT
- *    denverOPTWithheldThisMonth) skips this line entirely. Defaults to
- *    false/undefined (charge), so a caller who doesn't supply it gets the
- *    same behavior as before this fix — this is an ADDITIVE fix, not a
- *    behavior change for existing callers.
- *
- * 2. EMPLOYMENT-DURATION THRESHOLD — Wheeling (30 consecutive days) and
- *    Glen Dale (30 days per calendar year, Art. 752.03(b)) don't charge
- *    the fee until a duration threshold is crossed; every other city's
- *    own source has no such threshold. city.minDaysBeforeAttaching (only
- *    set on those two configs) is compared against caller-supplied
- *    certificate.daysWorkedInLocality; the fee is skipped when the
- *    supplied count is below the threshold. Genuinely approximate for
- *    Wheeling specifically: this engine counts a single cumulative
- *    "days worked in this locality" number and cannot distinguish a
- *    CONSECUTIVE run from a total-with-gaps the way Wheeling's own FAQ
- *    literally requires — correct for Glen Dale's calendar-year-total
- *    rule, an approximation for Wheeling's consecutive-day rule,
- *    disclosed here rather than silently assumed exact. certificate.
- *    daysWorkedInLocality left UNSUPPLIED preserves the pre-fix
- *    behavior (treated as past threshold, i.e. charged) rather than
- *    silently flipping existing callers to $0.
- *
- * 3. WEIRTON MID-2026 RATE CHANGE — city.rateChange.effectiveDate /
- *    .priorWeeklyRate (same input.checkDate string-compare pattern as
- *    Utah's cfg.effectiveDateOfNewTable and Ohio's midYearEffectiveDating
- *    elsewhere in this file) picks $2.00/wk for any checkDate before the
- *    ordinance's 2026-05-14 effective date and $5.00/wk (the plain
- *    weeklyRate field) on/after it, instead of always using the current
- *    figure regardless of the check date being calculated.
+ * WV employee service fees, selected by work locality. Resident exemptions,
+ * calendar-year day thresholds and cross-employer deduplication depend on
+ * caller-supplied certificate facts. An omitted day count assumes eligibility.
+ * Weirton is $2/week before May 17, 2026 and $5/week from that date.
+ * Wheeling's threshold is 30 days per calendar year, not consecutive days.
+ * Nonweekly amounts use weeklyRate x 52 / periods, rounded down; this
+ * convention is not verified for every city. Coverage and unresolved source
+ * conflicts (especially Madison and Smithers) are documented in the WV data
+ * and docs/WV-local-payroll-review.md.
  */
 function westVirginiaMunicipalServiceFee(
   input: PaycheckInput,
@@ -5490,7 +5414,8 @@ function westVirginiaMunicipalServiceFee(
 
   if (city.nonResidentOnly) {
     const residenceCityName = typeof cert.residenceCity === 'string' ? cert.residenceCity : undefined;
-    if (residenceCityName?.toLowerCase() === locality.toLowerCase()) return null;
+    const livesInWV = input.residenceState === undefined || input.residenceState.code === 'WV';
+    if (livesInWV && residenceCityName?.toLowerCase() === locality.toLowerCase()) return null;
   }
 
   if (cert.wvLocalFeeAlreadyWithheld === true) return null;

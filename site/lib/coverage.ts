@@ -95,7 +95,7 @@ const INFO_NOTES: Record<string, string> = {
 const PARTIAL_NOTES: Record<string, string> = {
   CO: 'Flat monthly occupational privilege tax in Denver, Glendale, Greenwood Village and Sheridan, the only Colorado cities we have found that charge one. Aurora repealed its tax on January 1, 2025.',
   AL: '29 municipalities and Macon County; seven of those rates come from a survey rather than the city\'s own document.',
-  WV: '11 cities that charge a per-week service fee; other municipalities are not enumerated yet.',
+  WV: 'Partial city service-fee coverage. Smithers is missing; Madison has an unresolved rate conflict; Rivesville relies on secondary payroll sources.',
 };
 
 function localRowsFor(state: string, year: number): { rows: LocalRow[]; label: string } {

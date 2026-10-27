@@ -8504,11 +8504,11 @@ describe('West Virginia', () => {
       assert.equal(amountOf(r, 'WV_LOCAL_FEE'), dollars(4.0));
     });
 
-    test('Weirton, monthly pay, check date on/after the 2026-05-14 rate increase: $5.00/wk x 52 / 12 periods = $21.6666, rounded DOWN to $21.66', () => {
+    test('Weirton, monthly pay, check date on/after the 2026-05-17 rate increase: $5.00/wk x 52 / 12 periods = $21.6666, rounded DOWN to $21.66', () => {
       const r = calculatePaycheck(
         input({
           payFrequency: 'monthly',
-          checkDate: '2026-05-14',
+          checkDate: '2026-05-17',
           earnings: [{ code: 'REG', category: 'regular', amount: dollars(4000) }],
           workState: { code: 'WV', certificate: { locality: 'Weirton' } },
         }),
@@ -8516,7 +8516,7 @@ describe('West Virginia', () => {
       assert.equal(amountOf(r, 'WV_LOCAL_FEE'), dollars(21.66));
     });
 
-    test('Weirton, monthly pay, check date BEFORE the 2026-05-14 rate increase: pre-ordinance $2.00/wk applies instead', () => {
+    test('Weirton, monthly pay, check date BEFORE the 2026-05-17 rate increase: pre-ordinance $2.00/wk applies instead', () => {
       const r = calculatePaycheck(
         input({
           payFrequency: 'monthly',
@@ -8644,7 +8644,7 @@ describe('West Virginia', () => {
 
     // Three formerly-disclosed-but-unmodelled gaps, closed 2026-09-06.
 
-    test('Weirton, check date BEFORE the 2026-05-14 ordinance effective date: prior $2.00/wk rate applies, not the current $5.00', () => {
+    test('Weirton, check date BEFORE the 2026-05-17 ordinance effective date: prior $2.00/wk rate applies, not the current $5.00', () => {
       const r = calculatePaycheck(
         input({
           checkDate: '2026-03-01',
@@ -8659,7 +8659,7 @@ describe('West Virginia', () => {
     test('Weirton, check date on the effective date itself: new $5.00/wk rate applies', () => {
       const r = calculatePaycheck(
         input({
-          checkDate: '2026-05-14',
+          checkDate: '2026-05-17',
           payFrequency: 'weekly',
           earnings: [{ code: 'REG', category: 'regular', amount: dollars(800) }],
           workState: { code: 'WV', certificate: { locality: 'Weirton' } },

@@ -1080,6 +1080,9 @@ export async function resolveEmployee(
     else delete fields.county;
     // Ohio's school district tax is for Ohio residents; a non-Ohio residence sets none.
     if (residenceStateCode !== 'OH') delete fields.schoolDistrictCode;
+    // WV's resident exemption means residency in that WV municipality.
+    // Montgomery, Alabama must not exempt a worker in Montgomery, WV.
+    if (workStateCode === 'WV') delete fields.residenceCity;
   }
 
   const workFlags = work?.resolved?.flags;
@@ -1247,3 +1250,4 @@ export async function resolveEmployee(
 
   return { work, residence, certificateFields: fields, notResolvable, lowConfidenceReasons, lookupFailures, fullyResolved };
 }
+
