@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="color-scheme" content="light" />
+<title>Net-to-gross calculator API: find gross pay for a net | Omnia.tax</title>
+<meta name="description" content="A net-to-gross payroll calculator API: give a take-home pay, get the gross that produces it, found by running the real engine. Worked example to the cent." />
+<link rel="stylesheet" href="/assets/v5.css" />
+</head>
+<body>
+<header class="site-header"><div class="bar">
+  <a class="mark" href="/">Omnia<span class="dot" aria-hidden="true"></span>tax</a>
+  <nav class="nav-links" aria-label="Primary"><a href="/product">Product</a><a href="/coverage">Coverage</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a></nav>
+  <div class="nav-end"><a class="signin" href="/signin">Sign in</a><a class="btn sm" href="/signup">Get API key</a></div>
+  <button class="menu-btn" type="button" aria-expanded="false" aria-label="Menu"><span></span><span></span></button>
+</div></header>
+<main class="wrap">
+  <div class="page-head">
+    <nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a> <span aria-hidden="true">/</span> <a href="/guides">Guides</a> <span aria-hidden="true">/</span> <span aria-current="page">Net-to-gross (gross-up) API</span></nav>
+    <p class="eyebrow">Calculations</p>
+    <h1 class="page">Net-to-gross calculator API</h1>
+    <p class="sub">When the promise is a take-home amount, the gross has to be found. The engine only goes forward, so ours searches it.</p>
+  </div>
+  <div class="prose seo" style="margin-top:32px;max-width:720px">
+
+    <p>Net-to-gross, or gross-up, answers: what gross pay leaves the employee a given take-home amount? It comes up in sign-on bonuses promised after tax, relocation payments, and offers quoted as net.</p>
+    <h2>Why it is not a formula</h2>
+    <p>Withholding has brackets, caps and per-tax wage bases, so net pay is not a straight multiple of gross. <code>POST /v1/paycheck/gross-up</code> runs the real engine on candidate amounts, in whole cents, and returns the smallest amount whose net pay reaches the target. The answer and the returned paycheck are engine results, not an estimate.</p>
+    <h2>Two worked examples</h2>
+    <p>Target take-home of $2,500.00 on a biweekly paycheck:</p>
+    <div class="table-wrap"><table><thead><tr><th>Location</th><th style="text-align:right">Gross needed</th><th style="text-align:right">Net pay</th><th style="text-align:right">Exact</th></tr></thead><tbody><tr><td>Texas (no state income tax)</td><td style="text-align:right">$3,070.92</td><td style="text-align:right">$2,500.00</td><td style="text-align:right">Yes</td></tr><tr><td>Columbus, Ohio (state and city tax)</td><td style="text-align:right">$3,309.36</td><td style="text-align:right">$2,500.00</td><td style="text-align:right">Yes</td></tr></tbody></table></div>
+    <p>The Ohio employee needs $238.44 more gross for the same take-home, because of state and city tax.</p>
+    <h2>When the target is skipped</h2>
+    <p>Occasionally a tax step or rounding rule makes a one-cent change in gross move net by two cents, so an exact target does not exist. The response then returns the smallest amount that reaches it with <code>exact: false</code> and how many cents it is over.</p>
+    <h2>The request</h2>
+    <div class="panel" style="margin-top:14px"><pre style="margin:0;padding:18px 22px;overflow:auto">POST /v1/paycheck/gross-up
+{ ...a paycheck request..., &quot;grossUp&quot;: { &quot;targetNetPay&quot;: 250000, &quot;earningIndex&quot;: 0 } }</pre></div>
+    <p>The earning at <code>earningIndex</code> is the one solved for; its amount is ignored. The response includes <code>request</code> with the solved amount filled in, so you can reuse it, and <code>result</code>, the full paycheck. Billed as one paycheck.</p>
+    <h2>Keep reading</h2>
+    <p><a href="/gross-to-net-api">Gross-to-net API</a> · <a href="/bonus-tax-withholding-calculation">Bonus tax withholding</a> · <a href="/paycheck-calculator-api">Paycheck calculator API</a> · <a href="/compare-two-paychecks-api">Compare two paychecks API</a> · <a href="/guides">All guides</a></p>
+  </div>
+<section class="faq" aria-labelledby="faq-h" style="margin-top:44px;max-width:720px"><h2 id="faq-h" style="font-size:22px;line-height:30px">Questions</h2><article><h3>How do you calculate gross pay from net pay?</h3><p>There is no single formula, because withholding uses brackets and caps. The usual method is to search: try a gross, calculate the net, and adjust until the net matches. Omnia.tax does this with the real engine, in whole cents.</p></article><article><h3>What is a payroll gross-up?</h3><p>Paying an employee enough gross that the amount they take home after tax equals an agreed figure, common for after-tax bonuses and relocation payments.</p></article><article><h3>Is the gross-up answer exact?</h3><p>Usually to the cent. If a tax step skips the target, the response returns the smallest gross that reaches it, marks exact as false and shows how many cents over it is.</p></article></section>
+  <div class="seo-cta" style="margin:48px 0 8px;max-width:720px"><a class="btn" href="/signup">Start the 14-day trial</a> <a class="text-link" href="/docs">Read the docs →</a><p class="fine">14-day free trial, then $0.08 per paycheck calculation. Omnia.tax calculates; it does not file, deposit tax, or give tax advice. <a href="/disclaimer">Disclaimer</a>.</p></div>
+</main>
+<footer class="site-footer">
+  <div class="wrap foot-grid">
+    <a class="mark" href="/">Omnia<span class="dot" aria-hidden="true"></span>tax</a>
+    <div><h2>Product</h2><a href="/coverage">Coverage</a><a href="/pricing">Pricing</a><a href="/changelog">Changelog</a></div>
+    <div><h2>Developers</h2><a href="/docs">Docs</a><a href="/docs/paycheck">API reference</a><a href="/status">Status</a></div>
+    <div><h2>Guides</h2><a href="/guides">All guides</a><a href="/payroll-tax-calculation">Payroll tax calculation</a><a href="/payroll-tax-calculation-engine">Payroll tax calculation engine</a><a href="/income-tax-calculation-engine">Income tax calculation engine</a><a href="/take-home-pay">Take-home pay by state</a><a href="/payroll-tax-api">Payroll tax API</a><a href="/payroll-tax">Payroll tax by state</a><a href="/symmetry-tax-engine-alternative">Symmetry alternative</a><a href="/payroll-tax-engine-comparison">Engine comparison</a></div>
+    <div><h2>Company</h2><a href="/about">About</a><a href="/contact">Contact</a><a href="/terms">Terms</a><a href="/privacy">Privacy</a></div>
+  </div>
+  <p class="wrap copy">© 2026 OMNIA TAX LLC. A Michigan limited liability company.</p>
+</footer>
+<script src="/assets/v5.js"></script>
+</body>
+</html>

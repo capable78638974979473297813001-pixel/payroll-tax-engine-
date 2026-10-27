@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="color-scheme" content="light" />
+<title>Embedded payroll tax engine for HR and payroll software | Omnia.tax</title>
+<meta name="description" content="Embed payroll tax calculation in your HR, payroll or staffing product through an API. What the engine covers, what you still build, and how pricing scales." />
+<link rel="stylesheet" href="/assets/v5.css" />
+</head>
+<body>
+<header class="site-header"><div class="bar">
+  <a class="mark" href="/">Omnia<span class="dot" aria-hidden="true"></span>tax</a>
+  <nav class="nav-links" aria-label="Primary"><a href="/product">Product</a><a href="/coverage">Coverage</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a></nav>
+  <div class="nav-end"><a class="signin" href="/signin">Sign in</a><a class="btn sm" href="/signup">Get API key</a></div>
+  <button class="menu-btn" type="button" aria-expanded="false" aria-label="Menu"><span></span><span></span></button>
+</div></header>
+<main class="wrap">
+  <div class="page-head">
+    <nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a> <span aria-hidden="true">/</span> <a href="/guides">Guides</a> <span aria-hidden="true">/</span> <span aria-current="page">Embedded payroll tax engine</span></nav>
+    <p class="eyebrow">Buying and building</p>
+    <h1 class="page">Embedded payroll tax engine</h1>
+    <p class="sub">For teams building a payroll, HR or staffing product who want the tax math as a service.</p>
+  </div>
+  <div class="prose seo" style="margin-top:32px;max-width:720px">
+
+    <p>If your product pays people, or shows what people are paid, it needs payroll tax math. Embedding an engine means your code sends a paycheck and renders the result, and someone else keeps the rules current.</p>
+    <h2>What the engine covers</h2>
+    <ul>
+      <li>Federal, state and local income tax withholding, Social Security, Medicare.</li>
+      <li>Employer taxes: federal and state unemployment, state paid-leave contributions, and quarterly employer taxes in New York and Nevada.</li>
+      <li>Garnishment limits and a minimum-wage check on the same call.</li>
+      <li>Address resolution so you can store an employee once.</li>
+    </ul>
+    <h2>What you still build</h2>
+    <p>The employee and pay-run data model, approvals, paying employees, filing and depositing of the tax, and the screens. Omnia.tax calculates and does not do those.</p>
+    <h2>Integration shape</h2>
+    <ul>
+      <li>One <code>POST /v1/paycheck</code> per employee per pay run; <code>POST /v1/payCalc</code> for batches.</li>
+      <li>A published <a href="/v1/openapi.json">OpenAPI document</a> to generate a client from.</li>
+      <li>Field-level validation errors you can show to your users.</li>
+      <li>Idempotency keys so a retry is not counted twice.</li>
+    </ul>
+    <h2>Pricing that scales with use</h2>
+    <p>$0.08 per paycheck calculation, no seat fees and no minimum. See <a href="/payroll-tax-api-pricing">what that costs at your volume</a>.</p>
+    <h2>Keep reading</h2>
+    <p><a href="/payroll-tax-engine">Payroll tax engine</a> · <a href="/build-vs-buy-payroll-tax-engine">Build vs buy a payroll tax engine</a> · <a href="/payroll-tax-api-pricing">Payroll tax API pricing</a> · <a href="/payroll-tax-engine-comparison">Payroll tax engine comparison</a> · <a href="/guides">All guides</a></p>
+  </div>
+<section class="faq" aria-labelledby="faq-h" style="margin-top:44px;max-width:720px"><h2 id="faq-h" style="font-size:22px;line-height:30px">Questions</h2><article><h3>What is an embedded payroll tax engine?</h3><p>A tax calculation service you call from inside your own payroll or HR product, so you do not build and maintain the federal, state and local rules yourself.</p></article><article><h3>Does Omnia.tax handle filing and deposits?</h3><p>No. It calculates only. Filing returns, depositing tax and paying employees are separate services you provide or buy elsewhere.</p></article></section>
+  <div class="seo-cta" style="margin:48px 0 8px;max-width:720px"><a class="btn" href="/signup">Start the 14-day trial</a> <a class="text-link" href="/docs">Read the docs →</a><p class="fine">14-day free trial, then $0.08 per paycheck calculation. Omnia.tax calculates; it does not file, deposit tax, or give tax advice. <a href="/disclaimer">Disclaimer</a>.</p></div>
+</main>
+<footer class="site-footer">
+  <div class="wrap foot-grid">
+    <a class="mark" href="/">Omnia<span class="dot" aria-hidden="true"></span>tax</a>
+    <div><h2>Product</h2><a href="/coverage">Coverage</a><a href="/pricing">Pricing</a><a href="/changelog">Changelog</a></div>
+    <div><h2>Developers</h2><a href="/docs">Docs</a><a href="/docs/paycheck">API reference</a><a href="/status">Status</a></div>
+    <div><h2>Guides</h2><a href="/guides">All guides</a><a href="/payroll-tax-calculation">Payroll tax calculation</a><a href="/payroll-tax-calculation-engine">Payroll tax calculation engine</a><a href="/income-tax-calculation-engine">Income tax calculation engine</a><a href="/take-home-pay">Take-home pay by state</a><a href="/payroll-tax-api">Payroll tax API</a><a href="/payroll-tax">Payroll tax by state</a><a href="/symmetry-tax-engine-alternative">Symmetry alternative</a><a href="/payroll-tax-engine-comparison">Engine comparison</a></div>
+    <div><h2>Company</h2><a href="/about">About</a><a href="/contact">Contact</a><a href="/terms">Terms</a><a href="/privacy">Privacy</a></div>
+  </div>
+  <p class="wrap copy">© 2026 OMNIA TAX LLC. A Michigan limited liability company.</p>
+</footer>
+<script src="/assets/v5.js"></script>
+</body>
+</html>

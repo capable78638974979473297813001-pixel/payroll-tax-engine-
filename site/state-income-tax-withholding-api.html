@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="color-scheme" content="light" />
+<title>State income tax withholding API: all 50 states and DC | Omnia.tax</title>
+<meta name="description" content="State income tax withholding for all 50 states and DC through one API: flat-rate, table and no-tax states, state certificates and reciprocity." />
+<link rel="stylesheet" href="/assets/v5.css" />
+</head>
+<body>
+<header class="site-header"><div class="bar">
+  <a class="mark" href="/">Omnia<span class="dot" aria-hidden="true"></span>tax</a>
+  <nav class="nav-links" aria-label="Primary"><a href="/product">Product</a><a href="/coverage">Coverage</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a></nav>
+  <div class="nav-end"><a class="signin" href="/signin">Sign in</a><a class="btn sm" href="/signup">Get API key</a></div>
+  <button class="menu-btn" type="button" aria-expanded="false" aria-label="Menu"><span></span><span></span></button>
+</div></header>
+<main class="wrap">
+  <div class="page-head">
+    <nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a> <span aria-hidden="true">/</span> <a href="/guides">Guides</a> <span aria-hidden="true">/</span> <span aria-current="page">State income tax withholding API</span></nav>
+    <p class="eyebrow">Calculations</p>
+    <h1 class="page">State income tax withholding API</h1>
+    <p class="sub">Fifty-one jurisdictions, three kinds of method, and one request shape.</p>
+  </div>
+  <div class="prose seo" style="margin-top:32px;max-width:720px">
+
+    <p>State withholding is where a payroll tax engine earns its keep: no two states agree on the form, the formula or the certificate. One request, <code>workState: { code }</code>, selects the right one.</p>
+    <h2>Three kinds of state</h2>
+    <div class="table-wrap"><table><thead><tr><th>Method</th><th>States in the 2026 rules</th><th>What the engine does</th></tr></thead><tbody><tr><td>No tax on wages</td><td>9: Alaska, Florida, New Hampshire, Nevada, South Dakota, Tennessee, Texas, Washington, Wyoming</td><td>Returns no state income tax line. Employer unemployment tax still applies.</td></tr><tr><td>Flat rate</td><td>5: Illinois 4.95%, Indiana 2.95%, Kentucky 3.5%, Michigan 4.25%, Pennsylvania 3.07%</td><td>Applies the rate to wages after the state's allowances and deductions.</td></tr><tr><td>Own tables or formula</td><td>37 states</td><td>Runs the state's published method from pay, pay frequency and the employee's certificate.</td></tr></tbody></table></div>
+    <h2>State certificates</h2>
+    <p>Many states have their own withholding form with its own questions: allowances, filing status, additional withholding, exemptions. They go in <code>workState.certificate</code>. Where the engine needs a fact it was not given, it refuses with a <code>cannot_compute</code> error that names the missing field, rather than guessing.</p>
+    <h2>Employees who cross a state line</h2>
+    <p>Reciprocity agreements, resident-state credit and nexus rules decide which state or states withhold. See <a href="/multi-state-payroll-tax-calculation">multi-state payroll tax</a> and the <a href="/payroll-tax-reciprocity-agreements">list of reciprocity agreements</a>.</p>
+    <h2>Per-state detail</h2>
+    <p>Rates, wage bases and a worked paycheck for each state are on the <a href="/payroll-tax">payroll tax by state</a> pages, and what a salary takes home in each state is under <a href="/take-home-pay">take-home pay by state</a>.</p>
+    <h2>Keep reading</h2>
+    <p><a href="/income-tax-withholding-api">Income tax withholding API</a> · <a href="/payroll-tax">Payroll tax by state</a> · <a href="/payroll-tax-reciprocity-agreements">Payroll tax reciprocity agreements</a> · <a href="/states-with-no-income-tax">States with no income tax</a> · <a href="/guides">All guides</a></p>
+  </div>
+<section class="faq" aria-labelledby="faq-h" style="margin-top:44px;max-width:720px"><h2 id="faq-h" style="font-size:22px;line-height:30px">Questions</h2><article><h3>Which states have no income tax on wages?</h3><p>Alaska, Florida, New Hampshire, Nevada, South Dakota, Tennessee, Texas, Washington, Wyoming do not tax wages in Omnia.tax's 2026 rules, so employers there withhold no state income tax.</p></article><article><h3>How many states use a flat income tax rate?</h3><p>5 of the 51 jurisdictions use a flat rate in Omnia.tax's 2026 rules. 37 use the state's own tables or formula, and 9 have no tax on wages.</p></article><article><h3>What if a state needs information the request does not have?</h3><p>The engine returns a cannot_compute error that names the missing certificate field. It does not guess.</p></article></section>
+  <div class="seo-cta" style="margin:48px 0 8px;max-width:720px"><a class="btn" href="/signup">Start the 14-day trial</a> <a class="text-link" href="/docs">Read the docs →</a><p class="fine">14-day free trial, then $0.08 per paycheck calculation. Omnia.tax calculates; it does not file, deposit tax, or give tax advice. <a href="/disclaimer">Disclaimer</a>.</p></div>
+</main>
+<footer class="site-footer">
+  <div class="wrap foot-grid">
+    <a class="mark" href="/">Omnia<span class="dot" aria-hidden="true"></span>tax</a>
+    <div><h2>Product</h2><a href="/coverage">Coverage</a><a href="/pricing">Pricing</a><a href="/changelog">Changelog</a></div>
+    <div><h2>Developers</h2><a href="/docs">Docs</a><a href="/docs/paycheck">API reference</a><a href="/status">Status</a></div>
+    <div><h2>Guides</h2><a href="/guides">All guides</a><a href="/payroll-tax-calculation">Payroll tax calculation</a><a href="/payroll-tax-calculation-engine">Payroll tax calculation engine</a><a href="/income-tax-calculation-engine">Income tax calculation engine</a><a href="/take-home-pay">Take-home pay by state</a><a href="/payroll-tax-api">Payroll tax API</a><a href="/payroll-tax">Payroll tax by state</a><a href="/symmetry-tax-engine-alternative">Symmetry alternative</a><a href="/payroll-tax-engine-comparison">Engine comparison</a></div>
+    <div><h2>Company</h2><a href="/about">About</a><a href="/contact">Contact</a><a href="/terms">Terms</a><a href="/privacy">Privacy</a></div>
+  </div>
+  <p class="wrap copy">© 2026 OMNIA TAX LLC. A Michigan limited liability company.</p>
+</footer>
+<script src="/assets/v5.js"></script>
+</body>
+</html>

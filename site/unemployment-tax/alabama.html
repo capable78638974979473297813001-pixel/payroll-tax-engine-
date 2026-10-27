@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="color-scheme" content="light" />
+<title>Alabama unemployment tax: wage base, rate | Omnia.tax</title>
+<meta name="description" content="Alabama SUTA: $8,000 wage base for 2026, 2.7% new-employer rate, up to $216.00 per employee. How it is calculated and an API example." />
+<link rel="stylesheet" href="/assets/v5.css" />
+</head>
+<body>
+<header class="site-header"><div class="bar">
+  <a class="mark" href="/">Omnia<span class="dot" aria-hidden="true"></span>tax</a>
+  <nav class="nav-links" aria-label="Primary"><a href="/product">Product</a><a href="/coverage">Coverage</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a></nav>
+  <div class="nav-end"><a class="signin" href="/signin">Sign in</a><a class="btn sm" href="/signup">Get API key</a></div>
+  <button class="menu-btn" type="button" aria-expanded="false" aria-label="Menu"><span></span><span></span></button>
+</div></header>
+<main class="wrap">
+  <div class="page-head">
+    <nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a> <span aria-hidden="true">/</span> <a href="/unemployment-tax">Unemployment tax by state</a> <span aria-hidden="true">/</span> <span aria-current="page">Alabama</span></nav>
+    <p class="eyebrow">Unemployment tax by state</p>
+    <h1 class="page">Alabama unemployment tax: wage base and rate</h1>
+    <p class="sub">What an employer pays in Alabama, from the same rule files the API uses.</p>
+  </div>
+  <div class="prose seo" style="margin-top:32px;max-width:720px">
+
+    <p>Alabama's state unemployment tax (SUTA, also called SUI) is paid by the employer, on each employee's wages up to the state's wage base, which is $8,000 in 2026. Once an employee's wages for the year pass the base, no more state unemployment tax is due on them.</p>
+    <h2>Alabama unemployment tax at a glance</h2>
+    <div class="table-wrap"><table><tbody><tr><th scope="row" style="text-align:left">2026 state wage base</th><td>$8,000</td></tr><tr><th scope="row" style="text-align:left">2027 state wage base</th><td>$8,000</td></tr><tr><th scope="row" style="text-align:left">New-employer rate (2026)</th><td>2.7%</td></tr><tr><th scope="row" style="text-align:left">Most per employee at the new-employer rate</th><td>$216.00</td></tr><tr><th scope="row" style="text-align:left">Federal FUTA per employee, with the normal credit</th><td>$42 (0.6% of the first $7,000)</td></tr><tr><th scope="row" style="text-align:left">Wage base rank among the 51</th><td>44 of 51 (1 is the highest)</td></tr></tbody></table></div>
+    <h2>What the engine returns</h2>
+    <p>For a Alabama employee paid $3,000.00 biweekly with no year-to-date wages, the engine's employer line for state unemployment reads: <em>$3000.00 @ 2.700% — the state's published new-employer rate (no employer rate supplied — see input.employer.stateUnemploymentRate), capped at $8000.00/yr ($0.00 YTD already counted)</em> The amount is $81.00.</p>
+    <h2>Use your own rate</h2>
+    <p>The new-employer rate is a starting point. After your first period the state assigns a rate from your experience, and it is on your rate notice. Send it and the engine uses it instead:</p>
+    <div class="panel" style="margin-top:14px"><pre style="margin:0;padding:18px 22px;overflow:auto">&quot;employer&quot;: { &quot;stateUnemploymentRate&quot;: { &quot;AL&quot;: 0.031 } }</pre></div>
+    <p class="fine">2026 rules from Omnia.tax's rule files, with 2027 figures that are already published; 2027 is provisional until the state publishes its own. Confirm against Alabama's workforce agency before relying on a figure.</p>
+    <h2>Related</h2>
+    <p><a href="/payroll-tax/alabama">Alabama payroll tax</a> · <a href="/take-home-pay/alabama">Take-home pay in Alabama</a> · <a href="/state-unemployment-tax-rates">All state unemployment rates</a> · <a href="/futa-suta-calculation">How FUTA and SUTA work</a> · <a href="/unemployment-tax/arkansas">Arkansas</a> · <a href="/unemployment-tax/alaska">Alaska</a></p>
+  </div>
+<section class="faq" aria-labelledby="faq-h" style="margin-top:44px;max-width:720px"><h2 id="faq-h" style="font-size:22px;line-height:30px">Questions</h2><article><h3>What is the unemployment tax wage base in Alabama?</h3><p>$8,000 for 2026 in Omnia.tax's rule files. Alabama's state unemployment tax applies only to each employee's wages up to that amount in a year.</p></article><article><h3>What unemployment tax rate does a new employer pay in Alabama?</h3><p>2.7% in Omnia.tax's 2026 rules, unless you send your own assigned rate in employer.stateUnemploymentRate. An established employer's rate is assigned by the state, so check your rate notice.</p></article><article><h3>How much is the maximum state unemployment tax per employee in Alabama?</h3><p>At the new-employer rate of 2.7%, up to $216.00 per employee per year ($8,000 × 2.7%). Your own rate changes that figure.</p></article></section>
+  <div class="seo-cta" style="margin:48px 0 8px;max-width:720px"><a class="btn" href="/signup">Start the 14-day trial</a> <a class="text-link" href="/docs">Read the docs →</a><p class="fine">14-day free trial, then $0.08 per paycheck calculation. Omnia.tax calculates; it does not file, deposit tax, or give tax advice. <a href="/disclaimer">Disclaimer</a>.</p></div>
+</main>
+<footer class="site-footer">
+  <div class="wrap foot-grid">
+    <a class="mark" href="/">Omnia<span class="dot" aria-hidden="true"></span>tax</a>
+    <div><h2>Product</h2><a href="/coverage">Coverage</a><a href="/pricing">Pricing</a><a href="/changelog">Changelog</a></div>
+    <div><h2>Developers</h2><a href="/docs">Docs</a><a href="/docs/paycheck">API reference</a><a href="/status">Status</a></div>
+    <div><h2>Guides</h2><a href="/guides">All guides</a><a href="/payroll-tax-calculation">Payroll tax calculation</a><a href="/payroll-tax-calculation-engine">Payroll tax calculation engine</a><a href="/income-tax-calculation-engine">Income tax calculation engine</a><a href="/take-home-pay">Take-home pay by state</a><a href="/payroll-tax-api">Payroll tax API</a><a href="/payroll-tax">Payroll tax by state</a><a href="/symmetry-tax-engine-alternative">Symmetry alternative</a><a href="/payroll-tax-engine-comparison">Engine comparison</a></div>
+    <div><h2>Company</h2><a href="/about">About</a><a href="/contact">Contact</a><a href="/terms">Terms</a><a href="/privacy">Privacy</a></div>
+  </div>
+  <p class="wrap copy">© 2026 OMNIA TAX LLC. A Michigan limited liability company.</p>
+</footer>
+<script src="/assets/v5.js"></script>
+</body>
+</html>

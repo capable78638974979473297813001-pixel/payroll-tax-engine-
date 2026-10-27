@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="color-scheme" content="light" />
+<title>FUTA and SUTA calculation: unemployment tax for employers | Omnia.tax</title>
+<meta name="description" content="How FUTA and SUTA are calculated: $7,000 federal base, state wage bases from $7,000 to $78,200, new-employer rates and the credit." />
+<link rel="stylesheet" href="/assets/v5.css" />
+</head>
+<body>
+<header class="site-header"><div class="bar">
+  <a class="mark" href="/">Omnia<span class="dot" aria-hidden="true"></span>tax</a>
+  <nav class="nav-links" aria-label="Primary"><a href="/product">Product</a><a href="/coverage">Coverage</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a></nav>
+  <div class="nav-end"><a class="signin" href="/signin">Sign in</a><a class="btn sm" href="/signup">Get API key</a></div>
+  <button class="menu-btn" type="button" aria-expanded="false" aria-label="Menu"><span></span><span></span></button>
+</div></header>
+<main class="wrap">
+  <div class="page-head">
+    <nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a> <span aria-hidden="true">/</span> <a href="/guides">Guides</a> <span aria-hidden="true">/</span> <span aria-current="page">FUTA and SUTA calculation</span></nav>
+    <p class="eyebrow">Employer taxes</p>
+    <h1 class="page">FUTA and SUTA calculation</h1>
+    <p class="sub">Unemployment tax is paid by the employer, on a capped slice of each employee's wages.</p>
+  </div>
+  <div class="prose seo" style="margin-top:32px;max-width:720px">
+
+    <p>Two unemployment taxes are paid by the employer: federal (FUTA) and state (SUTA, also called SUI). Both apply only to the first part of each employee's wages for the year, so they are heaviest early in the year and stop once an employee passes the wage base.</p>
+    <h2>FUTA</h2>
+    <p>6.0% of the first $7,000 of each employee's wages, before the credit. An employer who pays state unemployment tax on time normally takes a credit that brings the rate to 0.6%, which is $42 per employee per year. The engine uses year-to-date wages to stop FUTA once the $7,000 is reached.</p>
+    <h2>SUTA</h2>
+    <p>Each state sets its own wage base and its own rate for each employer. In the 2026 rules the wage base ranges from $7,000 in Arkansas to $78,200 in Washington. Where a state publishes one, the new-employer rate runs from 1% (Alaska) to 4.1% (New York).</p>
+    <h2>Your rate, or the new-employer rate</h2>
+    <p>An established employer's rate is assigned by the state from its experience and printed on a rate notice. Send it as <code>employer.stateUnemploymentRate</code> and the engine uses it. If you do not, the engine uses the state's new-employer rate and says so in the line's detail; where a state publishes no single new-employer rate, it produces no line rather than a guess.</p>
+    <h2>An example</h2>
+    <p>The Texas paycheck from our <a href="/paycheck-calculator-api">paycheck calculator API page</a> carries these unemployment lines:</p>
+    <div class="table-wrap"><table><thead><tr><th>Tax</th><th style="text-align:right">Taxable wages</th><th style="text-align:right">Amount</th></tr></thead><tbody><tr><td>FUTA</td><td style="text-align:right">$3,000.00</td><td style="text-align:right">$18.00</td></tr><tr><td>Texas Unemployment Insurance (Employer)</td><td style="text-align:right">$3,000.00</td><td style="text-align:right">$81.00</td></tr></tbody></table></div>
+    <p>Every state's wage base and new-employer rate is listed on <a href="/state-unemployment-tax-rates">state unemployment tax rates</a>.</p>
+    <h2>Keep reading</h2>
+    <p><a href="/state-unemployment-tax-rates">State unemployment tax rates 2026</a> · <a href="/unemployment-tax">Unemployment tax by state</a> · <a href="/employer-payroll-tax-calculator">Employer payroll tax calculator</a> · <a href="/payroll-tax-rates-2026">Payroll tax rates 2026</a> · <a href="/guides">All guides</a></p>
+  </div>
+<section class="faq" aria-labelledby="faq-h" style="margin-top:44px;max-width:720px"><h2 id="faq-h" style="font-size:22px;line-height:30px">Questions</h2><article><h3>What is the difference between FUTA and SUTA?</h3><p>FUTA is the federal unemployment tax, 6.0% of the first $7,000 per employee before a credit. SUTA is the state unemployment tax, with a different wage base and rate in each state. Both are paid by the employer.</p></article><article><h3>How is SUTA calculated?</h3><p>The employer's assigned rate times the employee's wages up to the state wage base for the year. A new employer pays the state's new-employer rate until it has an experience-based rate.</p></article><article><h3>Do employees pay unemployment tax?</h3><p>In most states no, it is employer-paid. A few states also collect a small employee contribution for related programs, which the engine returns as its own line.</p></article></section>
+  <div class="seo-cta" style="margin:48px 0 8px;max-width:720px"><a class="btn" href="/signup">Start the 14-day trial</a> <a class="text-link" href="/docs">Read the docs →</a><p class="fine">14-day free trial, then $0.08 per paycheck calculation. Omnia.tax calculates; it does not file, deposit tax, or give tax advice. <a href="/disclaimer">Disclaimer</a>.</p></div>
+</main>
+<footer class="site-footer">
+  <div class="wrap foot-grid">
+    <a class="mark" href="/">Omnia<span class="dot" aria-hidden="true"></span>tax</a>
+    <div><h2>Product</h2><a href="/coverage">Coverage</a><a href="/pricing">Pricing</a><a href="/changelog">Changelog</a></div>
+    <div><h2>Developers</h2><a href="/docs">Docs</a><a href="/docs/paycheck">API reference</a><a href="/status">Status</a></div>
+    <div><h2>Guides</h2><a href="/guides">All guides</a><a href="/payroll-tax-calculation">Payroll tax calculation</a><a href="/payroll-tax-calculation-engine">Payroll tax calculation engine</a><a href="/income-tax-calculation-engine">Income tax calculation engine</a><a href="/take-home-pay">Take-home pay by state</a><a href="/payroll-tax-api">Payroll tax API</a><a href="/payroll-tax">Payroll tax by state</a><a href="/symmetry-tax-engine-alternative">Symmetry alternative</a><a href="/payroll-tax-engine-comparison">Engine comparison</a></div>
+    <div><h2>Company</h2><a href="/about">About</a><a href="/contact">Contact</a><a href="/terms">Terms</a><a href="/privacy">Privacy</a></div>
+  </div>
+  <p class="wrap copy">© 2026 OMNIA TAX LLC. A Michigan limited liability company.</p>
+</footer>
+<script src="/assets/v5.js"></script>
+</body>
+</html>

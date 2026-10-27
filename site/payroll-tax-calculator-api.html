@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="color-scheme" content="light" />
+<title>Payroll tax calculator API vs a calculator page | Omnia.tax</title>
+<meta name="description" content="A payroll tax calculator you can call: the engine behind our paycheck calculator as an HTTP API with a free test key. When to use the page and when the API." />
+<link rel="stylesheet" href="/assets/v5.css" />
+</head>
+<body>
+<header class="site-header"><div class="bar">
+  <a class="mark" href="/">Omnia<span class="dot" aria-hidden="true"></span>tax</a>
+  <nav class="nav-links" aria-label="Primary"><a href="/product">Product</a><a href="/coverage">Coverage</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a></nav>
+  <div class="nav-end"><a class="signin" href="/signin">Sign in</a><a class="btn sm" href="/signup">Get API key</a></div>
+  <button class="menu-btn" type="button" aria-expanded="false" aria-label="Menu"><span></span><span></span></button>
+</div></header>
+<main class="wrap">
+  <div class="page-head">
+    <nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a> <span aria-hidden="true">/</span> <a href="/guides">Guides</a> <span aria-hidden="true">/</span> <span aria-current="page">Payroll tax calculator API</span></nav>
+    <p class="eyebrow">Engines and APIs</p>
+    <h1 class="page">Payroll tax calculator API</h1>
+    <p class="sub">The calculator page is for trying a paycheck. The API is for calculating them from your own software.</p>
+  </div>
+  <div class="prose seo" style="margin-top:32px;max-width:720px">
+
+    <p>People search for a payroll tax calculator when they want to see what a paycheck costs. People search for a payroll tax calculator API when they want their software to do that for them. Omnia.tax is both, and they run the same engine and the same rules.</p>
+    <h2>The calculator</h2>
+    <p>The <a href="/sandbox">paycheck calculator</a> takes an address or a state, pay, a Form W-4 and deductions, and shows each tax line with a one-line explanation. Signed-in visitors run it with no key. It also shows the exact request it sent, as JSON and as cURL, so you can copy it into your own code.</p>
+    <h2>The API</h2>
+    <p>The same request goes to <code>POST /v1/paycheck</code> with an API key. It returns JSON in integer cents, and it is documented in an <a href="/v1/openapi.json">OpenAPI 3.1 document</a> and a <a href="/v1/schemas/paycheck-request.json">JSON Schema</a>.</p>
+    <h2>Try it before you pay</h2>
+    <p>A <strong>test key</strong> runs the same engine and data as a live key, needs no card, and is never billed. It is capped at 30 requests a minute and 500 a day. A live key is $0.08 per paycheck calculation after a 14-day free trial.</p>
+    <div class="panel" style="margin-top:14px"><pre style="margin:0;padding:18px 22px;overflow:auto">curl https://api.omnia.tax/v1/paycheck \
+  -H &quot;Authorization: Bearer $KEY&quot; \
+  -H &quot;Content-Type: application/json&quot; \
+  -d '{
+  &quot;checkDate&quot;: &quot;2026-09-15&quot;,
+  &quot;payFrequency&quot;: &quot;biweekly&quot;,
+  &quot;earnings&quot;: [{ &quot;code&quot;: &quot;REG&quot;, &quot;category&quot;: &quot;regular&quot;, &quot;amount&quot;: 300000 }],
+  &quot;deductions&quot;: [],
+  &quot;federalW4&quot;: { &quot;filingStatus&quot;: &quot;single&quot;, &quot;multipleJobs&quot;: false,
+    &quot;dependentCredit&quot;: 0, &quot;otherIncome&quot;: 0, &quot;deductions&quot;: 0, &quot;extraWithholding&quot;: 0 },
+  &quot;ytd&quot;: { &quot;socialSecurity&quot;: 0, &quot;medicare&quot;: 0, &quot;futa&quot;: 0 },
+  &quot;workState&quot;: { &quot;code&quot;: &quot;TX&quot; }
+}'</pre></div>
+    <h2>Which to use</h2>
+    <div class="table-wrap"><table><thead><tr><th>You want to</th><th style="text-align:left">Use</th></tr></thead><tbody><tr><td>See what one paycheck costs</td><td style="text-align:left">The calculator</td></tr><tr><td>Calculate paychecks from your software</td><td style="text-align:left">The API with a key</td></tr><tr><td>Check a result against your payroll provider</td><td style="text-align:left">The calculator, then copy the request as cURL</td></tr><tr><td>Explain why two paychecks differ</td><td style="text-align:left"><a href="/compare-two-paychecks-api">The compare endpoint</a></td></tr></tbody></table></div>
+    <h2>Keep reading</h2>
+    <p><a href="/payroll-tax-api-test-keys">Payroll tax API test keys</a> · <a href="/paycheck-calculator-api">Paycheck calculator API</a> · <a href="/payroll-tax-api">Payroll tax API</a> · <a href="/payroll-tax-api-pricing">Payroll tax API pricing</a> · <a href="/guides">All guides</a></p>
+  </div>
+<section class="faq" aria-labelledby="faq-h" style="margin-top:44px;max-width:720px"><h2 id="faq-h" style="font-size:22px;line-height:30px">Questions</h2><article><h3>Is there a free payroll tax calculator API?</h3><p>Omnia.tax has free test keys: the same engine and data as a live key, no card needed, never billed, capped at 30 requests a minute and 500 a day. A live key is $0.08 per paycheck calculation after a 14-day trial.</p></article><article><h3>Does the calculator page use the same rules as the API?</h3><p>Yes. The page and the API call the same engine and the same rule files.</p></article></section>
+  <div class="seo-cta" style="margin:48px 0 8px;max-width:720px"><a class="btn" href="/signup">Start the 14-day trial</a> <a class="text-link" href="/docs">Read the docs →</a><p class="fine">14-day free trial, then $0.08 per paycheck calculation. Omnia.tax calculates; it does not file, deposit tax, or give tax advice. <a href="/disclaimer">Disclaimer</a>.</p></div>
+</main>
+<footer class="site-footer">
+  <div class="wrap foot-grid">
+    <a class="mark" href="/">Omnia<span class="dot" aria-hidden="true"></span>tax</a>
+    <div><h2>Product</h2><a href="/coverage">Coverage</a><a href="/pricing">Pricing</a><a href="/changelog">Changelog</a></div>
+    <div><h2>Developers</h2><a href="/docs">Docs</a><a href="/docs/paycheck">API reference</a><a href="/status">Status</a></div>
+    <div><h2>Guides</h2><a href="/guides">All guides</a><a href="/payroll-tax-calculation">Payroll tax calculation</a><a href="/payroll-tax-calculation-engine">Payroll tax calculation engine</a><a href="/income-tax-calculation-engine">Income tax calculation engine</a><a href="/take-home-pay">Take-home pay by state</a><a href="/payroll-tax-api">Payroll tax API</a><a href="/payroll-tax">Payroll tax by state</a><a href="/symmetry-tax-engine-alternative">Symmetry alternative</a><a href="/payroll-tax-engine-comparison">Engine comparison</a></div>
+    <div><h2>Company</h2><a href="/about">About</a><a href="/contact">Contact</a><a href="/terms">Terms</a><a href="/privacy">Privacy</a></div>
+  </div>
+  <p class="wrap copy">© 2026 OMNIA TAX LLC. A Michigan limited liability company.</p>
+</footer>
+<script src="/assets/v5.js"></script>
+</body>
+</html>

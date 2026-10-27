@@ -7,6 +7,8 @@ import { federalRuleset } from '../../src/registry.ts';
 import { minimumWage } from '../../src/minimum-wage.ts';
 import type { PaycheckInput } from '../../src/types.ts';
 import { coverage } from './coverage.ts';
+import { guidesHub, topicPage, topics, type Helpers } from './seo-topics.ts';
+import { takeHomePages, unemploymentPages } from './seo-states.ts';
 
 /**
  * The search-landing pages: how payroll tax is calculated, the API, an honest look at
@@ -42,10 +44,10 @@ export interface GeneratedPage {
 
 export const READ_ON = '2026-10-26';
 
-const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-const money = (cents: number) => `$${(cents / 100).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-const dollars = (n: number) => `$${n.toLocaleString('en-US')}`;
-const pct = (r: number) => `${+(r * 100).toFixed(4)}%`;
+export const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+export const money = (cents: number) => `$${(cents / 100).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+export const dollars = (n: number) => `$${n.toLocaleString('en-US')}`;
+export const pct = (r: number) => `${+(r * 100).toFixed(4)}%`;
 
 const HEADER = `<header class="site-header"><div class="bar">
   <a class="mark" href="/">Omnia<span class="dot" aria-hidden="true"></span>tax</a>
@@ -60,13 +62,13 @@ export const FOOTER = `<footer class="site-footer">
     <a class="mark" href="/">Omnia<span class="dot" aria-hidden="true"></span>tax</a>
     <div><h2>Product</h2><a href="/coverage">Coverage</a><a href="/pricing">Pricing</a><a href="/changelog">Changelog</a></div>
     <div><h2>Developers</h2><a href="/docs">Docs</a><a href="/docs/paycheck">API reference</a><a href="/status">Status</a></div>
-    <div><h2>Guides</h2><a href="/payroll-tax-calculation">Payroll tax calculation</a><a href="/payroll-tax-api">Payroll tax API</a><a href="/payroll-tax">Payroll tax by state</a><a href="/symmetry-tax-engine-alternative">Symmetry alternative</a><a href="/payroll-tax-engine-comparison">Engine comparison</a></div>
+    <div><h2>Guides</h2><a href="/guides">All guides</a><a href="/payroll-tax-calculation">Payroll tax calculation</a><a href="/payroll-tax-calculation-engine">Payroll tax calculation engine</a><a href="/income-tax-calculation-engine">Income tax calculation engine</a><a href="/take-home-pay">Take-home pay by state</a><a href="/payroll-tax-api">Payroll tax API</a><a href="/payroll-tax">Payroll tax by state</a><a href="/symmetry-tax-engine-alternative">Symmetry alternative</a><a href="/payroll-tax-engine-comparison">Engine comparison</a></div>
     <div><h2>Company</h2><a href="/about">About</a><a href="/contact">Contact</a><a href="/terms">Terms</a><a href="/privacy">Privacy</a></div>
   </div>
   <p class="wrap copy">© 2026 OMNIA TAX LLC. A Michigan limited liability company.</p>
 </footer>`;
 
-function shell(p: { title: string; description: string; eyebrow: string; h1: string; sub: string; breadcrumb: { name: string; path: string }[]; body: string; faq: Faq[] }): string {
+export function shell(p: { title: string; description: string; eyebrow: string; h1: string; sub: string; breadcrumb: { name: string; path: string }[]; body: string; faq: Faq[] }): string {
   const crumbs = p.breadcrumb
     .map((c, i) => (i === p.breadcrumb.length - 1 ? `<span aria-current="page">${esc(c.name)}</span>` : `<a href="${c.path}">${esc(c.name)}</a>`))
     .join(' <span aria-hidden="true">/</span> ');
@@ -144,7 +146,7 @@ export function exampleTable(input: PaycheckInput): { html: string; net: number;
   return { html, net: r.netPay, gross: r.grossPay };
 }
 
-const CURL = (state: string, certificate: string) => `curl https://api.omnia.tax/v1/paycheck \\
+export const CURL = (state: string, certificate: string) => `curl https://api.omnia.tax/v1/paycheck \\
   -H "Authorization: Bearer $KEY" \\
   -H "Content-Type: application/json" \\
   -d '{
@@ -162,7 +164,7 @@ const CURL = (state: string, certificate: string) => `curl https://api.omnia.tax
 // Facts from the rule files
 // ---------------------------------------------------------------------------------------------
 
-function federalFacts() {
+export function federalFacts() {
   const f26 = federalRuleset('2026-06-15') as any;
   const f27 = federalRuleset('2027-06-15') as any;
   return {
@@ -176,7 +178,7 @@ function federalFacts() {
 }
 
 export const STATE_NAMES: Record<string, string> = {};
-function stateFiles(): { code: string; d26: Record<string, any>; d27: Record<string, any> }[] {
+export function stateFiles(): { code: string; d26: Record<string, any>; d27: Record<string, any> }[] {
   return readdirSync(join(REPO, 'data', 'states'))
     .filter((f) => /^[A-Z]{2}-2026\.json$/.test(f))
     .sort()
@@ -201,13 +203,20 @@ const LEAVE_KEYS: [string, string][] = [
   ['stateDisabilityEmployee', 'an employee-paid state disability insurance contribution'],
   ['stateLongTermCareEmployee', 'an employee-paid long-term care insurance contribution'],
 ];
-function leaveList(d: Record<string, any>): string[] {
+export function leaveList(d: Record<string, any>): string[] {
   return LEAVE_KEYS.filter(([k]) => d[k]).map(([, label]) => label);
 }
 
-function wageBaseText(d26: Record<string, any>, d27: Record<string, any>): string {
-  const a = d26.suiEmployer?.wageBase as number | undefined;
-  const b = d27.suiEmployer?.wageBase as number | undefined;
+/** A wage base is a number, or (Michigan) a default and a reduced base for qualified employers. The default is the one that applies unless the employer qualifies. */
+export function wageBaseOf(raw: unknown): number | undefined {
+  if (typeof raw === 'number') return raw;
+  if (raw && typeof raw === 'object' && typeof (raw as { default?: unknown }).default === 'number') return (raw as { default: number }).default;
+  return undefined;
+}
+
+export function wageBaseText(d26: Record<string, any>, d27: Record<string, any>): string {
+  const a = wageBaseOf(d26.suiEmployer?.wageBase);
+  const b = wageBaseOf(d27.suiEmployer?.wageBase);
   if (!a) return 'not recorded';
   if (b && b !== a) return `${dollars(a)} for 2026 and ${dollars(b)} for 2027`;
   return `${dollars(a)} for 2026`;
@@ -279,7 +288,7 @@ function statePage(code: string, d26: Record<string, any>, d27: Record<string, a
     <p><a href="/payroll-tax">Payroll tax by state</a> · <a href="/payroll-tax-calculation">How payroll tax calculation works</a> · <a href="/coverage">Coverage</a> · <a href="/pricing">Pricing</a>${neighbours.map((n) => ` · <a href="/payroll-tax/${n.slug}">${esc(n.name)}</a>`).join('')}</p>`;
 
   const title = `${name} payroll tax calculation: rates, wage base, API | Omnia.tax`;
-  const baseNow = typeof sui.wageBase === 'number' ? dollars(sui.wageBase) : null;
+  const baseNow = wageBaseOf(sui.wageBase) !== undefined ? dollars(wageBaseOf(sui.wageBase)!) : null;
   const description = `${name} payroll tax for employers: ${noTax ? 'no state income tax' : typeof d26.flatRate?.rate === 'number' ? `flat ${pct(d26.flatRate.rate)} income tax` : 'state withholding tables'}${baseNow ? `, ${baseNow} unemployment wage base` : ''}${rate ? `, ${rate} new-employer rate` : ''}. Worked paycheck and API example.`;
   const h1 = `${name} payroll tax calculation`;
   const breadcrumb = [
@@ -582,7 +591,7 @@ function hubPage(states: { name: string; slug: string; code: string; noTax: bool
   };
 }
 
-/** Every generated page: the guides, the state hub and one page per state. */
+/** Every generated page: the guides, the state hub and one page per state, then the topic guides and the per-state unemployment and take-home families. */
 export function generatePages(): GeneratedPage[] {
   const files = stateFiles();
   const local = coverage().summary.localByState as Record<string, number>;
@@ -593,5 +602,14 @@ export function generatePages(): GeneratedPage[] {
     const near = [bySlug[(i + 1) % bySlug.length], bySlug[(i + bySlug.length - 1) % bySlug.length]].map((n) => ({ name: n.name, slug: n.slug }));
     pages.push(statePage(code, d26, d27, local[code] ?? 0, near));
   });
+
+  const c = coverage().summary;
+  const helpers: Helpers = {
+    shell, esc, money, dollars, pct, exampleInput, exampleTable, CURL, federalFacts, wageBaseOf,
+    states: files.map(({ code, d26, d27 }) => ({ code, name: d26.name as string, slug: slugOf(d26.name), d26, d27 })),
+    cov: { localJurisdictions: c.localJurisdictions, statesWithLocalTax: c.statesWithLocalTax, localMinimumWage: c.localMinimumWage },
+  };
+  const defs = topics(helpers);
+  pages.push(guidesHub(helpers, defs), ...defs.map((d) => topicPage(helpers, d, defs)), ...unemploymentPages(helpers), ...takeHomePages(helpers));
   return pages;
 }

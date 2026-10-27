@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="color-scheme" content="light" />
+<title>MCP server for payroll tax: tools for AI agents | Omnia.tax</title>
+<meta name="description" content="A Model Context Protocol server for payroll tax. AI assistants can calculate and compare paychecks, gross up, look up addresses and check coverage." />
+<link rel="stylesheet" href="/assets/v5.css" />
+</head>
+<body>
+<header class="site-header"><div class="bar">
+  <a class="mark" href="/">Omnia<span class="dot" aria-hidden="true"></span>tax</a>
+  <nav class="nav-links" aria-label="Primary"><a href="/product">Product</a><a href="/coverage">Coverage</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a></nav>
+  <div class="nav-end"><a class="signin" href="/signin">Sign in</a><a class="btn sm" href="/signup">Get API key</a></div>
+  <button class="menu-btn" type="button" aria-expanded="false" aria-label="Menu"><span></span><span></span></button>
+</div></header>
+<main class="wrap">
+  <div class="page-head">
+    <nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a> <span aria-hidden="true">/</span> <a href="/guides">Guides</a> <span aria-hidden="true">/</span> <span aria-current="page">MCP payroll tax server</span></nav>
+    <p class="eyebrow">Engines and APIs</p>
+    <h1 class="page">MCP server for payroll tax</h1>
+    <p class="sub">Give an AI assistant or agent the real payroll tax engine as tools, instead of letting it guess the rules.</p>
+  </div>
+  <div class="prose seo" style="margin-top:32px;max-width:720px">
+
+    <p>Language models are unreliable at payroll tax arithmetic: the rules are specific, dated and local. The Omnia.tax MCP server hands an assistant the actual engine as tools, so it calls the calculation and reports the result rather than reciting a rate from memory.</p>
+    <h2>The tools</h2>
+    <div class="table-wrap"><table><thead><tr><th>Tool</th><th>What it does</th><th style="text-align:left">Billed as</th></tr></thead><tbody><tr><td><code>calculate_paycheck</code></td><td>One paycheck: every federal, state, local and employer tax line, and net pay.</td><td style="text-align:left">1 paycheck</td></tr><tr><td><code>compare_paychecks</code></td><td>Two paychecks and a step-by-step explanation of the difference.</td><td style="text-align:left">2 paychecks</td></tr><tr><td><code>gross_up</code></td><td>The gross pay that leaves a target take-home amount.</td><td style="text-align:left">1 paycheck</td></tr><tr><td><code>employer_taxes</code></td><td>New York MCTMT and the Nevada Modified Business Tax from a quarter's payroll.</td><td style="text-align:left">Not billed</td></tr><tr><td><code>lookup_address</code></td><td>A work and home address to the state, local jurisdictions and certificate.</td><td style="text-align:left">Not billed</td></tr><tr><td><code>coverage</code></td><td>The states and tax year the engine can compute.</td><td style="text-align:left">Not billed</td></tr></tbody></table></div>
+    <h2>How it connects</h2>
+    <p>The server is at <code>https://api.omnia.tax/mcp</code>, speaks the Model Context Protocol over streamable HTTP with one JSON-RPC message per request, and authenticates with the same bearer key as the REST API. Per-key rate limits and billing match the REST endpoints, and a refused call is not billed. A test key works too, unbilled.</p>
+    <h2>Why use it</h2>
+    <ul>
+      <li>An HR or finance assistant can answer "what does this offer take home in Ohio?" with an engine result.</li>
+      <li>Validation failures come back as tool results the model can read and fix, naming the field.</li>
+      <li>Every figure is the same one the REST API would return.</li>
+    </ul>
+    <p>See the <a href="/docs">docs</a> for the connection details.</p>
+    <h2>Keep reading</h2>
+    <p><a href="/payroll-tax-api">Payroll tax API</a> · <a href="/compare-two-paychecks-api">Compare two paychecks API</a> · <a href="/net-to-gross-calculator-api">Net-to-gross (gross-up) API</a> · <a href="/payroll-tax-api-test-keys">Payroll tax API test keys</a> · <a href="/guides">All guides</a></p>
+  </div>
+<section class="faq" aria-labelledby="faq-h" style="margin-top:44px;max-width:720px"><h2 id="faq-h" style="font-size:22px;line-height:30px">Questions</h2><article><h3>What is an MCP server?</h3><p>A Model Context Protocol server exposes tools that AI assistants and agents can call. Here the tools are payroll tax calculations.</p></article><article><h3>Does the MCP server cost extra?</h3><p>No separate fee. Each call is billed like the REST endpoint it matches: one paycheck for a calculation or gross-up, two for a comparison, and nothing for address lookups, employer-tax estimates or coverage.</p></article><article><h3>Can an AI model calculate payroll tax on its own?</h3><p>It should not. Rates, caps and local rules are specific and dated, and a model can state them with confidence and be wrong. Calling an engine gives a result you can trace.</p></article></section>
+  <div class="seo-cta" style="margin:48px 0 8px;max-width:720px"><a class="btn" href="/signup">Start the 14-day trial</a> <a class="text-link" href="/docs">Read the docs →</a><p class="fine">14-day free trial, then $0.08 per paycheck calculation. Omnia.tax calculates; it does not file, deposit tax, or give tax advice. <a href="/disclaimer">Disclaimer</a>.</p></div>
+</main>
+<footer class="site-footer">
+  <div class="wrap foot-grid">
+    <a class="mark" href="/">Omnia<span class="dot" aria-hidden="true"></span>tax</a>
+    <div><h2>Product</h2><a href="/coverage">Coverage</a><a href="/pricing">Pricing</a><a href="/changelog">Changelog</a></div>
+    <div><h2>Developers</h2><a href="/docs">Docs</a><a href="/docs/paycheck">API reference</a><a href="/status">Status</a></div>
+    <div><h2>Guides</h2><a href="/guides">All guides</a><a href="/payroll-tax-calculation">Payroll tax calculation</a><a href="/payroll-tax-calculation-engine">Payroll tax calculation engine</a><a href="/income-tax-calculation-engine">Income tax calculation engine</a><a href="/take-home-pay">Take-home pay by state</a><a href="/payroll-tax-api">Payroll tax API</a><a href="/payroll-tax">Payroll tax by state</a><a href="/symmetry-tax-engine-alternative">Symmetry alternative</a><a href="/payroll-tax-engine-comparison">Engine comparison</a></div>
+    <div><h2>Company</h2><a href="/about">About</a><a href="/contact">Contact</a><a href="/terms">Terms</a><a href="/privacy">Privacy</a></div>
+  </div>
+  <p class="wrap copy">© 2026 OMNIA TAX LLC. A Michigan limited liability company.</p>
+</footer>
+<script src="/assets/v5.js"></script>
+</body>
+</html>
