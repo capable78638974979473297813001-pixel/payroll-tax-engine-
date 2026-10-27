@@ -618,7 +618,7 @@
       "notYetChecked": [],
       "$status": "Historical research log, superseded by the 2026-10-26 review. The register is partial; Rivesville was missing and Smithers remains unresolved. No claim that every municipality has been verified."
     },
-    "knownGap": "Not complete statewide. Smithers is not configured because sources disagree between $0.50/week and $52/year. Madison remains configured at the legacy $3/week pending current-city-form verification, but a 2020 cancellation report and later payroll guides report $1.25/week: do not treat Madison as verified. Rivesville lacks a current town primary document. Nonweekly conversion remains weeklyRate x 52 / pay periods rounded down and is not verified for every city; Madison guides suggest a different monthly schedule. Missing daysWorkedInLocality assumes the threshold has been met; cross-employer deduplication requires wvLocalFeeAlreadyWithheld. 2027 local values are carry-forwards, not a 2027 ordinance certification. Separate property/service charges, including Glen Dale Article 751, are not represented as employee payroll fees without evidence.",
+    "knownGap": "Not complete statewide. Smithers is not configured because sources disagree between $0.50/week and $52/year. Madison remains configured at the legacy $3/week pending current-city-form verification, but a 2020 cancellation report and later payroll guides report $1.25/week: do not treat Madison as verified. Rivesville lacks a current town primary document. Fairmont and Wheeling use their published $8.67 monthly amount; other nonweekly conversion remains weeklyRate x 52 / pay periods rounded down and is not verified for every city; Madison guides suggest a different monthly schedule. Missing daysWorkedInLocality assumes the threshold has been met; cross-employer deduplication requires wvLocalFeeAlreadyWithheld. 2027 local values are carry-forwards, not a 2027 ordinance certification. Separate property/service charges, including Glen Dale Article 751, are not represented as employee payroll fees without evidence.",
     "serviceFeeCities": {
       "Charleston": {
         "weeklyRate": 3,
@@ -643,8 +643,15 @@
             "title": "City of Wheeling Article 797 City Service Fee",
             "url": "https://www.wheelingwv.gov/media/Finance/City%20Service%20Fee/City%20Service%20Fee-%20Ordinance%20Final.pdf",
             "reviewedOn": "2026-10-26"
+          },
+          {
+            "title": "Wheeling employer worksheet CSF-3",
+            "url": "https://www.wheelingwv.gov/media/Finance/City%20Service%20Fee/City%20Service%20Fee%20-%20Employer%20Worksheet%20Form%20CSF-3.pdf",
+            "reviewedOn": "2026-10-26"
           }
-        ]
+        ],
+        "monthlyAmount": 8.67,
+        "$monthlyAmountNote": "City-published monthly payroll amount is $8.67; weekly $2, biweekly $4, semimonthly $4.33. Other pay frequencies retain the approximate conversion. 2027 is a carry-forward."
       },
       "Weirton": {
         "weeklyRate": 5,
@@ -663,7 +670,16 @@
       "Fairmont": {
         "weeklyRate": 2,
         "nonResidentOnly": true,
-        "$addedNote": "ADDED 2026-08-31: confirmed directly from the City of Fairmont's own Ordinance No. 1812 (fetched and parsed as a primary PDF, not a secondary summary), which states verbatim: 'there is hereby imposed, established and charged upon each non-resident employee employed within the corporate limits of the City of Fairmont by an employer, a special charge of two and 00/100 dollars ($2.00) per week.' This is explicitly a NON-RESIDENT charge withheld via payroll -- Fairmont residents instead pay an $8.67/month fee billed directly (not payroll-withheld), per a secondary source that surfaced this ordinance. WIRED: westVirginiaMunicipalServiceFee() reads nonResidentOnly and skips the fee when certificate.residenceCity also names Fairmont, so a resident is not incorrectly charged through payroll."
+        "$addedNote": "ADDED 2026-08-31: confirmed directly from the City of Fairmont's own Ordinance No. 1812 (fetched and parsed as a primary PDF, not a secondary summary), which states verbatim: 'there is hereby imposed, established and charged upon each non-resident employee employed within the corporate limits of the City of Fairmont by an employer, a special charge of two and 00/100 dollars ($2.00) per week.' This is explicitly a NON-RESIDENT charge withheld via payroll -- Fairmont residents instead pay an $8.67/month fee billed directly (not payroll-withheld), per a secondary source that surfaced this ordinance. WIRED: westVirginiaMunicipalServiceFee() reads nonResidentOnly and skips the fee when certificate.residenceCity also names Fairmont, so a resident is not incorrectly charged through payroll.",
+        "monthlyAmount": 8.67,
+        "$monthlyAmountNote": "City-published monthly payroll amount is $8.67; weekly $2, biweekly $4, semimonthly $4.33. Other pay frequencies retain the approximate conversion. 2027 is a carry-forward.",
+        "sources": [
+          {
+            "title": "Fairmont administrative regulations section 1.2",
+            "url": "https://fairmontwv.gov/DocumentCenter/View/2198",
+            "reviewedOn": "2026-10-26"
+          }
+        ]
       },
       "Madison": {
         "weeklyRate": 3,
