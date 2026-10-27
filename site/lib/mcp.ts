@@ -17,7 +17,7 @@ import { paycheckRequestSchema } from './api-spec.ts';
 export const SERVER_INFO = { name: 'omnia-tax', title: 'Omnia payroll tax engine', version: '1.0.0' };
 export const SUPPORTED_VERSIONS = ['2025-06-18', '2025-03-26', '2024-11-05'] as const;
 
-export type ToolName = 'calculate_paycheck' | 'compare_paychecks' | 'lookup_address' | 'coverage';
+export type ToolName = 'calculate_paycheck' | 'compare_paychecks' | 'gross_up' | 'employer_taxes' | 'lookup_address' | 'coverage';
 
 export interface ToolOutcome {
   /** True when the call was refused or failed; the body explains. */
@@ -61,6 +61,51 @@ export const TOOLS: Array<{ name: ToolName; title: string; description: string; 
       },
       required: ['before'],
       $defs: { paycheck: paycheckSchema },
+    },
+    annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false },
+  },
+  {
+    name: 'gross_up',
+    title: 'Find the gross pay for a take-home target',
+    description:
+      'Net to gross: find the amount of one earning that leaves the employee a given take-home pay. Send a paycheck request plus grossUp: { targetNetPay (integer cents), earningIndex (default 0) }; the amount in that earning is ignored. ' +
+      'The engine is run on candidate amounts, so the answer and the full paycheck are engine results. Where a tax step skips the exact target, the smallest amount that reaches it is returned with exact: false. Billed as one paycheck on a live key.',
+    inputSchema: {
+      ...paycheckSchema,
+      properties: {
+        ...(paycheckSchema.properties as Record<string, unknown>),
+        grossUp: {
+          type: 'object',
+          required: ['targetNetPay'],
+          additionalProperties: false,
+          properties: {
+            targetNetPay: { type: 'integer', minimum: 0, description: 'The take-home pay wanted, in cents.' },
+            earningIndex: { type: 'integer', minimum: 0, description: 'Which entry in earnings[] to solve for. Defaults to 0.' },
+          },
+        },
+      },
+      required: [...((paycheckSchema.required as string[] | undefined) ?? []), 'grossUp'],
+    },
+    annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false },
+  },
+  {
+    name: 'employer_taxes',
+    title: 'Employer taxes on a quarter\'s payroll',
+    description:
+      'New York MCTMT and the Nevada Modified Business Tax: employer taxes charged on a quarter\'s total payroll, not on one paycheck. Send quarter ("2026-Q2") and mctmt { zone1PayrollExpense, zone2PayrollExpense } and/or nevadaMbt { category, grossWages, healthBenefitsPaid }, all money in integer cents. ' +
+      'An estimate for planning and accruals; the state return is the filing. Not billed.',
+    inputSchema: {
+      type: 'object',
+      required: ['quarter'],
+      properties: {
+        quarter: { type: 'string', pattern: '^\\d{4}-Q[1-4]$', description: 'The calendar quarter, e.g. 2026-Q2.' },
+        mctmt: { type: 'object', properties: { zone1PayrollExpense: { type: 'integer', minimum: 0 }, zone2PayrollExpense: { type: 'integer', minimum: 0 } } },
+        nevadaMbt: {
+          type: 'object',
+          required: ['category', 'grossWages'],
+          properties: { category: { enum: ['general', 'financial'] }, grossWages: { type: 'integer', minimum: 0 }, healthBenefitsPaid: { type: 'integer', minimum: 0 } },
+        },
+      },
     },
     annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false },
   },

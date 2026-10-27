@@ -35,9 +35,9 @@ async function call(path: string, body: unknown): Promise<{ status: number; json
   return { status: res.status, json, retryAfter };
 }
 
-export async function issueCode(email: string, name: string): Promise<IssueResult> {
+export async function issueCode(email: string, name: string, purpose: 'signup' | 'signin' = 'signup'): Promise<IssueResult> {
   try {
-    const { status, json, retryAfter } = await call('/issue', { email, name });
+    const { status, json, retryAfter } = await call('/issue', { email, name, purpose });
     if (status === 200) {
       const sent = json.sent === true;
       const cooldown = json.cooldown === true;

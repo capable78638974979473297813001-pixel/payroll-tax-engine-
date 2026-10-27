@@ -497,14 +497,94 @@ export function openApiDocument(version: string): Record<string, unknown> {
           },
         },
       },
+      '/v1/paycheck/gross-up': {
+        post: {
+          operationId: 'grossUp',
+          summary: 'Net to gross: the pay that leaves a take-home amount',
+          description:
+            'Send a paycheck request plus `grossUp: { targetNetPay, earningIndex }`. The engine finds the amount of `earnings[earningIndex]` (default 0; the amount you send there is ignored) that leaves the employee `targetNetPay` in cents. ' +
+            'It runs the real engine on candidate amounts, so the answer and the paycheck are engine results. ' +
+            'The response has `grossUp` (the amount found, the net pay it produces, `exact`, and `overTarget`), `request` (your request with the solved amount, ready to reuse) and `result` (the paycheck, as from `POST /v1/paycheck`). ' +
+            'Where a tax step skips the exact target, the smallest amount that reaches it is returned with `exact: false` and `overTarget` cents over. An imputed earning cannot raise take-home pay and is refused with `cannot_gross_up`. Billed as one paycheck.',
+          requestBody: {
+            required: true,
+            content: {
+              'application/json': {
+                schema: {
+                  allOf: [
+                    { $ref: '#/components/schemas/PaycheckRequest' },
+                    {
+                      type: 'object',
+                      required: ['grossUp'],
+                      properties: {
+                        grossUp: {
+                          type: 'object',
+                          required: ['targetNetPay'],
+                          additionalProperties: false,
+                          properties: {
+                            targetNetPay: { type: 'integer', minimum: 0, description: 'The take-home pay wanted, in cents.' },
+                            earningIndex: { type: 'integer', minimum: 0, description: 'Which entry in `earnings` to solve for. Defaults to 0.' },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          responses: {
+            '200': { description: 'The solved amount, the request to reuse, and the paycheck.', content: { 'application/json': { schema: { type: 'object', required: ['grossUp', 'request', 'result'], properties: { grossUp: { type: 'object', additionalProperties: true }, request: { type: 'object', additionalProperties: true }, result: { type: 'object', additionalProperties: true } } } } } },
+            '400': errorResponse('The body is not valid JSON.', 'invalid_json'),
+            '401': errorResponse('No key, an invalid key, or an expired key.', 'invalid_key'),
+            '422': errorResponse('The request failed validation (`invalid_input`), or no amount of that earning can reach the target (`cannot_gross_up`).', 'cannot_gross_up'),
+            '429': errorResponse('Too many requests this minute.', 'rate_limited'),
+          },
+        },
+      },
+      '/v1/employer-taxes': {
+        post: {
+          operationId: 'employerTaxes',
+          summary: 'Employer taxes on a quarter\'s payroll: New York MCTMT and the Nevada MBT',
+          description:
+            'Some employer taxes are charged on a quarter\'s total payroll, not on one paycheck, so no paycheck calculation can produce them. This endpoint calculates two: ' +
+            'the New York Metropolitan Commuter Transportation Mobility Tax (`mctmt`, by zone; nothing is due at or under $312,500 of payroll expense across both zones; each zone\'s whole payroll expense is charged at the rate of the bracket it falls in) ' +
+            'and the Nevada Modified Business Tax (`nevadaMbt`, 1.17% of wages over a $50,000 quarterly exemption for general business, no exemption for financial institutions and mining; employer-paid health benefits are deducted first). ' +
+            'Money is integer cents. `quarter` is `2026-Q2`; MCTMT covers quarters 2025-Q3 to 2026-Q4 and Nevada MBT 2023-Q3 to 2026-Q4. Local government employers\' MCTMT rules are not applied. An estimate for planning and accruals; the state return is the filing. Recorded, not metered.',
+          requestBody: {
+            required: true,
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  required: ['quarter'],
+                  additionalProperties: false,
+                  properties: {
+                    quarter: { type: 'string', pattern: '^\\d{4}-Q[1-4]$', examples: ['2026-Q2'] },
+                    mctmt: { type: 'object', additionalProperties: false, properties: { zone1PayrollExpense: { type: 'integer', minimum: 0, description: 'Payroll expense in Zone 1 (New York City counties), cents.' }, zone2PayrollExpense: { type: 'integer', minimum: 0, description: 'Payroll expense in Zone 2 (Rockland, Nassau, Suffolk, Orange, Putnam, Dutchess, Westchester), cents.' } } },
+                    nevadaMbt: { type: 'object', required: ['category', 'grossWages'], additionalProperties: false, properties: { category: { enum: ['general', 'financial'] }, grossWages: { type: 'integer', minimum: 0 }, healthBenefitsPaid: { type: 'integer', minimum: 0 } } },
+                  },
+                },
+              },
+            },
+          },
+          responses: {
+            '200': { description: 'The lines, each with its basis, rate and amount, and the total.', content: { 'application/json': { schema: { type: 'object', required: ['result'], properties: { result: { type: 'object', additionalProperties: true } } } } } },
+            '400': errorResponse('The body is not valid JSON.', 'invalid_json'),
+            '401': errorResponse('No key, an invalid key, or an expired key.', 'invalid_key'),
+            '422': errorResponse('The request failed validation (`invalid_input`), or the quarter is outside the verified range (`unsupported_quarter`).', 'invalid_input'),
+            '429': errorResponse('Too many requests this minute.', 'rate_limited'),
+          },
+        },
+      },
       '/mcp': {
         post: {
           operationId: 'mcp',
           summary: 'Model Context Protocol endpoint',
           description:
             'A Model Context Protocol server over streamable HTTP, for AI assistants and agents. One JSON-RPC 2.0 message per request (no batches); replies are JSON. ' +
-            'Supports `initialize`, `ping`, `tools/list` and `tools/call`. Tools: `calculate_paycheck`, `compare_paychecks`, `lookup_address`, `coverage`. ' +
-            'Authenticate with the same bearer key. A tool call is recorded and billed like the REST endpoint it matches: one paycheck, two for a comparison, none for an address lookup or coverage. A refused call is not billed. A call that fails validation comes back as a result with `isError: true`, not as a JSON-RPC error.',
+            'Supports `initialize`, `ping`, `tools/list` and `tools/call`. Tools: `calculate_paycheck`, `compare_paychecks`, `gross_up`, `employer_taxes`, `lookup_address`, `coverage`. ' +
+            'Authenticate with the same bearer key. A tool call is recorded and billed like the REST endpoint it matches: one paycheck (also for `gross_up`), two for a comparison, none for an employer-tax estimate, an address lookup or coverage. A refused call is not billed. A call that fails validation comes back as a result with `isError: true`, not as a JSON-RPC error.',
           requestBody: {
             required: true,
             content: { 'application/json': { schema: { type: 'object', required: ['jsonrpc', 'method'], properties: { jsonrpc: { const: '2.0' }, id: { type: ['string', 'integer'] }, method: { type: 'string' }, params: { type: 'object', additionalProperties: true } } } } },

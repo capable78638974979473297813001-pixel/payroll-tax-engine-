@@ -34,6 +34,13 @@ touches the codebase.
    `RESEND_FROM="Omnia.tax <verify@omniatax.io>"`. Until then Resend only
    delivers to its own account owner. If you run the Python verifier with SMTP
    instead, set `SMTP_FROM` the same way and add your mail provider's SPF record.
+   Until the domain is verified the site falls back to Resend's test address,
+   so the Resend account owner can still sign in. To see exactly why a code is
+   not arriving, run `npm run check:mail -- you@example.com` in the Render shell:
+   it sends one real email through the same path and prints Resend's answer and
+   the usual fix. `/healthz` reports `mail` as `ok`, `failing`, `untested` or
+   `not_configured` (the last real send), and the sign-in form says delivery is
+   having trouble instead of claiming a send when it is `failing`.
 4. **Contact address:** the site and legal pages all use
    `scottholdan@gmail.com`, so no extra inboxes are needed. Keep
    `verify@omniatax.io` as the sending address only (step 3).

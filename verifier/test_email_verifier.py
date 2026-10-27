@@ -182,11 +182,111 @@ class ResendFailureTest(unittest.TestCase):
             self.assertNotIn("123456", text)
             self.assertNotIn("123456", result.get("error", ""))
             row = v._db.execute("SELECT code_hash FROM codes").fetchone()
-            self.assertTrue(row)  # a code was minted, but is not in the log
+            self.assertIsNone(row)  # nothing was delivered, so no code is left to block a retry
             self.assertNotRegex(text, r"\b\d{6}\b")
         finally:
             os.environ.pop("RESEND_API_BASE", None)
             server.shutdown()
+
+
+class FakeResend:
+    """A Resend stand-in that records what it was sent and can refuse by sender."""
+
+    def __init__(self, reject) -> None:  # reject(payload) -> (status, body) | None
+        self.posts: list[dict] = []
+        outer = self
+
+        class Handler(BaseHTTPRequestHandler):
+            def do_POST(self) -> None:  # noqa: N802
+                payload = json.loads(self.rfile.read(int(self.headers.get("Content-Length", "0"))))
+                outer.posts.append(payload)
+                refusal = reject(payload)
+                status, body = refusal if refusal else (200, {"id": "em_1"})
+                data = json.dumps(body).encode()
+                self.send_response(status)
+                self.send_header("Content-Length", str(len(data)))
+                self.end_headers()
+                self.wfile.write(data)
+
+            def log_message(self, *_a: object) -> None:
+                pass
+
+        self.server = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
+        threading.Thread(target=self.server.serve_forever, daemon=True).start()
+        os.environ["RESEND_API_BASE"] = f"http://127.0.0.1:{self.server.server_port}"
+
+    def close(self) -> None:
+        os.environ.pop("RESEND_API_BASE", None)
+        self.server.shutdown()
+
+
+class DeliveryRecoveryTest(unittest.TestCase):
+    def test_a_failed_send_does_not_block_the_retry_or_use_the_hourly_allowance(self) -> None:
+        clock = Clock()
+        attempts = {"n": 0}
+
+        def flaky(*_a: object) -> None:
+            attempts["n"] += 1
+            if attempts["n"] <= ev.MAX_ISSUES_PER_HOUR + 2:
+                raise OSError("provider down")
+
+        v = ev.Verifier(":memory:", PEPPER, flaky, clock)
+        with contextlib.redirect_stderr(io.StringIO()):
+            for _ in range(ev.MAX_ISSUES_PER_HOUR + 2):
+                result = v.issue("a@b.com")
+                self.assertFalse(result["sent"])
+                self.assertFalse(result.get("cooldown"), "a code that never went out must not start a cooldown")
+        self.assertTrue(v.issue("a@b.com")["sent"], "after many failures the first good send still goes out")
+
+    def test_sign_in_mail_says_sign_in(self) -> None:
+        subject, text, body = ev._message_parts("Ada Lovelace", "123456", 10, "signin")
+        self.assertIn("sign-in code", subject)
+        self.assertIn("sign-in code is 123456", text)
+        self.assertIn("Your sign-in code", body)
+        self.assertNotIn("signup", (text + body).lower())
+        subject, text, _ = ev._message_parts("Ada", "123456", 10)
+        self.assertIn("verification code", subject)
+        self.assertIn("signup", text)
+
+    def test_purpose_reaches_the_sender(self) -> None:
+        sent = []
+        v = ev.Verifier(":memory:", PEPPER, lambda *a: sent.append(a), Clock())
+        v.issue("a@b.com", "Ada", "signin")
+        self.assertEqual(sent[-1][4], "signin")
+        v.issue("c@d.com", "Cy")
+        self.assertEqual(sent[-1][4], "signup")
+
+    def test_unverified_domain_falls_back_to_the_resend_test_address(self) -> None:
+        def reject(payload: dict):
+            if "onboarding@resend.dev" not in payload["from"]:
+                return 403, {"message": "The omniatax.io domain is not verified."}
+            return None
+
+        fake = FakeResend(reject)
+        try:
+            v = ev.Verifier(":memory:", PEPPER, ev.resend_sender("re_x", "Omnia.tax <verify@omniatax.io>"), Clock())
+            log = io.StringIO()
+            with contextlib.redirect_stderr(log):
+                result = v.issue("owner@example.com", "Owner", "signin")
+            self.assertTrue(result["sent"])
+            self.assertEqual([p["from"] for p in fake.posts], ["Omnia.tax <verify@omniatax.io>", ev.RESEND_TEST_SENDER])
+            self.assertIn("not verified", log.getvalue())
+            self.assertNotRegex(log.getvalue(), r"\b\d{6}\b")
+            self.assertIn("sign-in code", fake.posts[1]["subject"])
+        finally:
+            fake.close()
+
+    def test_other_refusals_are_not_retried(self) -> None:
+        fake = FakeResend(lambda p: (401, {"message": "API key is invalid"}))
+        try:
+            v = ev.Verifier(":memory:", PEPPER, ev.resend_sender("re_x", "Omnia.tax <verify@omniatax.io>"), Clock())
+            with contextlib.redirect_stderr(io.StringIO()):
+                result = v.issue("a@b.com")
+            self.assertFalse(result["sent"])
+            self.assertIn("401", result["error"])
+            self.assertEqual(len(fake.posts), 1)
+        finally:
+            fake.close()
 
 
 class HttpTest(unittest.TestCase):
