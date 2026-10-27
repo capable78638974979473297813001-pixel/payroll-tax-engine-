@@ -4,7 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <meta name="color-scheme" content="light" />
-<title>API Console — Omnia.tax</title>
+<title>Paycheck calculator — Omnia.tax</title>
 <meta name="description" content="Build a paycheck request and run it against the Omnia.tax engine." />
 <link rel="icon" href="/logo/favicon.svg" type="image/svg+xml" />
 <link rel="stylesheet" href="/assets/sandbox.css" />
@@ -15,12 +15,10 @@
 <header class="top">
   <a class="logo" href="/">omnia<span>.tax</span></a>
   <span class="tsep"></span>
-  <h1 class="tword">API Console</h1>
+  <h1 class="tword">Paycheck calculator</h1>
   <div class="tr-right">
-    <button type="button" class="lnk2" id="exBtn" aria-expanded="false" aria-controls="exMenu">Load example</button>
     <a class="lnk2 desk" href="/docs">API reference</a>
     <button type="button" class="key" id="keyBtn" aria-haspopup="dialog" aria-expanded="false" aria-controls="keyMenu"><span class="kd" id="keyDot"></span><span id="keyLabel">Your API key</span></button>
-    <div class="exmenu" id="exMenu" hidden></div>
     <div class="keymenu" id="keyMenu" hidden>
       <div class="lab"><label for="keyInput">Your API key</label></div>
       <input id="keyInput" class="inp" autocomplete="off" spellcheck="false" placeholder="Paste your API key" />
@@ -32,25 +30,209 @@
     </div>
   </div>
 </header>
-<div class="layout" id="layout">
-  <aside class="rail" aria-label="Steps">
-    <div class="rail-h">Steps</div>
-    <ol id="railList"></ol>
-    <p class="rail-f">Each step builds part of the request. Run it on the last step.</p>
+<main class="calc">
+  <form class="sheet-form" id="form">
+    <fieldset>
+      <legend>Work Address (optional)</legend>
+      <p class="hint">Look up a street address to auto-fill the state and local jurisdiction fields below. Fill in Residence Address below too if it's different — several local taxes (NYC/Yonkers residency, Missouri's earnings tax, reciprocity) depend on comparing both.</p>
+      <div class="f">
+        <div class="lab"><label for="addrStreet">Street Address</label></div>
+        <input id="addrStreet" class="inp" type="text" placeholder="e.g. 2 Woodward Ave" autocomplete="off" />
+      </div>
+      <div class="grid g3">
+        <div class="f">
+          <div class="lab"><label for="addrCity">City</label></div>
+          <input id="addrCity" class="inp" type="text" placeholder="e.g. Detroit" autocomplete="off" />
+        </div>
+        <div class="f">
+          <div class="lab"><label for="addrState">State</label></div>
+          <input id="addrState" class="inp" type="text" maxlength="2" placeholder="e.g. MI" autocomplete="off" />
+        </div>
+        <div class="f">
+          <div class="lab"><label for="addrZip">ZIP Code</label></div>
+          <input id="addrZip" class="inp" type="text" placeholder="e.g. 48226" autocomplete="off" />
+        </div>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Residence Address (optional)</legend>
+      <p class="hint">Where the employee lives, if different from where they work. Needed for residence-based local taxes (e.g. NYC/Yonkers residents) and for state reciprocity.</p>
+      <div class="f">
+        <div class="lab"><label for="addrResStreet">Street</label></div>
+        <input id="addrResStreet" class="inp" type="text" placeholder="e.g. 233 Broadway" autocomplete="off" />
+      </div>
+      <div class="grid g3">
+        <div class="f">
+          <div class="lab"><label for="addrResCity">City</label></div>
+          <input id="addrResCity" class="inp" type="text" placeholder="e.g. Yonkers" autocomplete="off" />
+        </div>
+        <div class="f">
+          <div class="lab"><label for="addrResState">State</label></div>
+          <input id="addrResState" class="inp" type="text" maxlength="2" placeholder="e.g. NY" autocomplete="off" />
+        </div>
+        <div class="f">
+          <div class="lab"><label for="addrResZip">ZIP</label></div>
+          <input id="addrResZip" class="inp" type="text" placeholder="e.g. 10701" autocomplete="off" />
+        </div>
+      </div>
+    </fieldset>
+
+    <div class="btn-row">
+      <button type="button" class="btn sec" id="addressLookup">Look Up Jurisdiction(s)</button>
+    </div>
+    <div id="addressStatus" class="lookup-status" hidden></div>
+
+    <fieldset>
+      <legend>State &amp; Date</legend>
+      <div class="grid g2">
+        <div class="f">
+          <div class="lab"><label for="state">State</label></div>
+          <select id="state" class="inp">
+            <option value="">Federal taxes only</option>
+          </select>
+          <p class="hint" id="stateHint">Select a state to include state &amp; local taxes.</p>
+        </div>
+        <div class="f">
+          <div class="lab"><label for="checkDate">Check Date</label></div>
+          <input id="checkDate" class="inp" type="date" />
+        </div>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Earnings</legend>
+      <div class="grid g2">
+        <div class="f">
+          <div class="lab"><label for="grossPay">Gross Pay ($)</label></div>
+          <div class="money"><em>$</em><input id="grossPay" class="inp" inputmode="decimal" value="0" /></div>
+        </div>
+        <div class="f">
+          <div class="lab"><label for="grossPayMethod">Gross Pay Method</label></div>
+          <select id="grossPayMethod" class="inp">
+            <option value="annual" selected>Annually</option>
+            <option value="perPeriod">Per Pay Period</option>
+            <option value="hourly">Hourly</option>
+          </select>
+        </div>
+      </div>
+      <div class="grid g2" id="hourlyRow" hidden>
+        <div class="f">
+          <div class="lab"><label for="hourlyRate">Hourly Rate</label></div>
+          <div class="money"><em>$</em><input id="hourlyRate" class="inp" inputmode="decimal" value="0" /></div>
+        </div>
+        <div class="f">
+          <div class="lab"><label for="hoursPerPeriod">Hours per Pay Period</label></div>
+          <input id="hoursPerPeriod" class="inp" inputmode="decimal" value="0" />
+        </div>
+      </div>
+      <div class="grid g2">
+        <div class="f">
+          <div class="lab"><label for="grossPayYTD">Gross Pay YTD ($)</label></div>
+          <div class="money"><em>$</em><input id="grossPayYTD" class="inp" inputmode="decimal" value="0" /></div>
+        </div>
+        <div class="f">
+          <div class="lab"><label for="payFrequency">Pay Frequency</label></div>
+          <select id="payFrequency" class="inp">
+            <option value="weekly">Weekly</option>
+            <option value="biweekly" selected>Biweekly</option>
+            <option value="semimonthly">Semimonthly</option>
+            <option value="monthly">Monthly</option>
+            <option value="quarterly">Quarterly</option>
+            <option value="semiannual">Semiannual</option>
+            <option value="annual">Annual</option>
+            <option value="daily">Daily</option>
+          </select>
+        </div>
+      </div>
+      <div class="subblock">
+        <h2>Additional Pay (optional)</h2>
+        <p class="hint">Bonuses, commissions, delivery runs, shift differentials, paid time off, tips and reimbursements. Each is taxed the way the law treats it; bonuses and delivery pay also feed the overtime calculation.</p>
+        <div id="payItems"></div>
+        <div class="btn-row">
+          <button type="button" class="btn sec" id="addPayItem">+ Add pay item</button>
+          <button type="button" class="btn sec" id="clearPay">Clear</button>
+        </div>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Federal Taxes (enter your W-4 info)</legend>
+      <p class="hint">This engine implements the 2020-or-later Form W-4 only — there is no legacy pre-2020 allowance-based path.</p>
+      <div class="grid g2">
+        <div class="f">
+          <div class="lab"><label for="filingStatus">Federal Filing Status</label></div>
+          <select id="filingStatus" class="inp">
+            <option value="single" selected>Single or Married filing separately</option>
+            <option value="married_joint">Married filing jointly</option>
+            <option value="head_of_household">Head of household</option>
+          </select>
+        </div>
+        <div class="f">
+          <div class="lab"><label for="dependentCredit">Step 3: Dependents Amount</label></div>
+          <div class="money"><em>$</em><input id="dependentCredit" class="inp" inputmode="decimal" value="0" /></div>
+        </div>
+      </div>
+      <label class="chk"><input class="tick" type="checkbox" id="multipleJobs" /><span class="cl">Step 2: Two Jobs</span></label>
+      <div class="grid g2">
+        <div class="f">
+          <div class="lab"><label for="otherIncome">Step 4a: Other Income</label></div>
+          <div class="money"><em>$</em><input id="otherIncome" class="inp" inputmode="decimal" value="0" /></div>
+        </div>
+        <div class="f">
+          <div class="lab"><label for="w4Deductions">Step 4b: Deductions</label></div>
+          <div class="money"><em>$</em><input id="w4Deductions" class="inp" inputmode="decimal" value="0" /></div>
+        </div>
+      </div>
+      <div class="f">
+        <div class="lab"><label for="extraWithholding">Additional Federal Withholding (per cheque)</label></div>
+        <div class="money"><em>$</em><input id="extraWithholding" class="inp" inputmode="decimal" value="0" /></div>
+      </div>
+      <label class="chk"><input class="tick" type="checkbox" id="roundToWholeDollars" /><span class="cl">Round Withholding to Whole Dollars</span></label>
+      <label class="chk"><input class="tick" type="checkbox" id="federalExempt" /><span class="cl">Exempt from Federal Withholding</span></label>
+      <div class="f">
+        <div class="lab"><label for="employmentCategory">Employment Category</label></div>
+        <select id="employmentCategory" class="inp">
+          <option value="standard" selected>Standard employee</option>
+          <option value="clergy">Clergy / minister</option>
+          <option value="statutory_employee">Statutory employee</option>
+          <option value="household">Household / domestic worker</option>
+          <option value="agricultural">Agricultural worker</option>
+          <option value="railroad">Railroad employee</option>
+          <option value="election_worker">Election worker</option>
+        </select>
+        <p class="hint">Drives Social Security/Medicare/FUTA treatment — this engine has no standalone "exempt from Social Security" or "exempt from Medicare" checkbox because those exemptions are always a consequence of the worker's category, never an independent election.</p>
+      </div>
+      <label class="chk"><input class="tick" type="checkbox" id="voluntaryWithholdingAgreement" /><span class="cl">Voluntary Federal Withholding Agreement</span></label>
+      <p class="hint">Only matters for Clergy, Household, and Election Worker above — those categories are exempt from federal withholding by default; check this if the employer and employee agreed in writing to withhold anyway.</p>
+    </fieldset>
+
+    <fieldset>
+      <legend>State and Local Taxes</legend>
+      <div id="stateFieldsBox">
+        <p class="muted-box" id="noStateMsg">No state selected. Select state above to see its withholding certificate fields.</p>
+      </div>
+      <div id="residenceBox" hidden></div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Benefits and Deductions (optional)</legend>
+      <div id="deductionsList"></div>
+      <div class="btn-row">
+        <button type="button" class="btn sec" id="addDeduction">+ Add Deduction</button>
+        <button type="button" class="btn sec" id="clearDeductions">Clear</button>
+      </div>
+    </fieldset>
+
+    <button id="calc" class="btn pri block" type="submit">Calculate</button>
+  </form>
+
+  <aside class="result-panel" id="result-panel" aria-live="polite">
+    <div id="placeholder">Fill in the form and press Calculate — the result appears here.</div>
+    <div id="gate" hidden></div>
+    <div id="result" hidden></div>
   </aside>
-  <main class="main" id="main"></main>
-  <aside class="side" aria-label="Request so far">
-    <div class="side-h"><span>Request so far</span><span class="dim" id="sideStep"></span></div>
-    <pre id="sidePre"></pre>
-    <p class="side-f">The JSON this step adds. Review shows the full request.</p>
-  </aside>
-</div>
-<div class="sheet" id="sheet">
-  <div class="panel">
-    <div class="code-h"><span>Request so far</span><button type="button" class="lnk" id="sheetClose">Close</button></div>
-    <pre id="sheetPre"></pre>
-  </div>
-</div>
+</main>
 <script src="/assets/session.js"></script>
 <script type="module" src="/assets/sandbox.js"></script>
 </body>

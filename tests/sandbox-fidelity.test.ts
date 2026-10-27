@@ -11,6 +11,8 @@ import { fileURLToPath } from 'node:url';
 import { calculatePaycheck } from '../src/calculate.ts';
 // @ts-expect-error plain JS module shared with the browser
 import { CERT_KEYS, createModel, loadRequest, serialize, stepForPath, validateStep } from '../site/assets/sandbox-form.js';
+// @ts-expect-error plain JS module shared with the browser
+import { fieldsForState, LOCAL_FIELDS } from '../site/assets/calculator-form.js';
 
 /**
  * The sandbox must be the engine, not a picture of it. What it sends is what
@@ -60,14 +62,22 @@ describe('the sandbox has a way to set everything the engine reads', () => {
   test('every year-to-date field is built by the form', () => {
     assert.deepEqual(interfaceKeys('YearToDate').filter((k) => !new RegExp(`\\b${k}\\b`).test(form)), []);
   });
-  test('every certificate field can be sent and has a control on the page', () => {
+  test('every certificate field can be sent, and the calculator renders registry plus local geography', () => {
     const certKeys = interfaceKeys('StateCertificate');
     assert.deepEqual(certKeys.filter((k) => !CERT_KEYS.has(k)), [], 'dropped by the form before it reaches the API');
-    const inRegistry = new Set(Object.values(registry).flat().map((f) => f.key));
-    const noControl = certKeys.filter((k) => !inRegistry.has(k) && !new RegExp(`\\b${k}\\b`).test(page));
-    // Set by the address lookup rather than typed: the lookup fills them from the geocoder.
-    const fromLookup = new Set(['workCity', 'residenceCity', 'workCounty', 'residenceCounty', 'county', 'workSchoolDistrict', 'residenceSchoolDistrict', 'workPSD', 'residencePSD', 'schoolDistrictCode', 'workJEDDId', 'locality', 'localities']);
-    assert.deepEqual(noControl.filter((k) => !fromLookup.has(k)), []);
+    for (const [state, fields] of Object.entries(registry)) {
+      const rendered = new Set(fieldsForState(state, registry).map((f: { key: string }) => f.key));
+      for (const field of fields) assert.equal(rendered.has(field.key), true, `${state}.${field.key}`);
+      assert.equal(rendered.has('exempt'), true, state);
+      assert.equal(rendered.has('additionalWithholding'), true, state);
+    }
+    const localKeys = new Set(Object.values(LOCAL_FIELDS).flat().map((f: { key: string }) => f.key));
+    for (const key of ['workCity', 'residenceCity', 'workCounty', 'residenceCounty', 'county', 'workSchoolDistrict', 'residenceSchoolDistrict', 'workPSD', 'residencePSD', 'schoolDistrictCode', 'workJEDDId', 'locality', 'localities']) {
+      assert.equal(localKeys.has(key), true, key);
+    }
+    assert.match(page, /fieldsForState/);
+    assert.match(page, /\/v1\/address/);
+    assert.doesNotMatch(page, /geocoding\.geo\.census\.gov|Census geocoder/);
   });
   test('nothing on the page still says a thing the engine does now is "not supported"', () => {
     assert.doesNotMatch(page, /Pre-2020 forms with allowances aren't supported/);
