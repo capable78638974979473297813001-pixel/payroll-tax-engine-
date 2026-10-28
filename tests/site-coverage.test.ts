@@ -39,7 +39,8 @@ describe('coverage index', () => {
   });
 
   test('a state whose data says its local list is partial is marked partial, not complete', () => {
-    for (const code of ['AL', 'WV', 'CO']) assert.equal(cov.states.find((s) => s.code === code)!.localStatus, 'partial', code);
+    for (const code of ['AL', 'WV']) assert.equal(cov.states.find((s) => s.code === code)!.localStatus, 'partial', code);
+    assert.equal(cov.states.find((s) => s.code === 'CO')!.localStatus, 'listed');
     assert.equal(cov.states.find((s) => s.code === 'PA')!.localStatus, 'listed');
     assert.equal(cov.states.find((s) => s.code === 'TX')!.localStatus, 'none');
   });

@@ -75,7 +75,10 @@ export const paycheckRequestSchema = {
     'Body of POST /v1/paycheck: one employee, one pay date. All money is integer cents. ' +
     'Unknown top-level fields are ignored by the server, so a misspelled optional field does nothing: check the names against this schema.',
   type: 'object',
-  required: ['checkDate', 'payFrequency', 'earnings', 'deductions', 'federalW4', 'ytd'],
+  required: ['checkDate', 'payFrequency', 'earnings', 'deductions'],
+  // federalW4 and ytd are required for wages. A pension, annuity or IRA payment carries its own form in `pension` and needs neither.
+  if: { not: { required: ['pension'] } },
+  then: { required: ['federalW4', 'ytd'] },
   properties: {
     checkDate: {
       type: 'string',
@@ -199,6 +202,50 @@ export const paycheckRequestSchema = {
       properties: {
         nexus: { type: 'boolean', description: 'The employer has a presence in the residence state.' },
         voluntary: { type: 'boolean', description: 'The employee asked for residence-state withholding.' },
+      },
+      additionalProperties: false,
+    },
+    pension: {
+      type: 'object',
+      required: ['kind'],
+      description:
+        'Set this for a pension, annuity, profit-sharing, stock-bonus or IRA payment instead of wages. `earnings` is then the payment. ' +
+        'The response is one federal line, `US_FIT_PENSION`: no Social Security, Medicare, FUTA, unemployment or state tax is calculated, and a warning says state and local withholding is not. ' +
+        'Periodic payments follow Pub 15-T Worksheet 1B and the payee\u2019s Form W-4P; nonperiodic payments and eligible rollover distributions follow the payee\u2019s Form W-4R. `federalW4` and `ytd` are not needed. ' +
+        'Periodic payments can be monthly, semimonthly, biweekly, weekly or daily. 2026 rules.',
+      properties: {
+        kind: {
+          enum: ['periodic', 'nonperiodic', 'eligible_rollover'],
+          description:
+            'periodic: installments at regular intervals over more than one year (Form W-4P). nonperiodic: any other payment, including an IRA distribution payable on demand (Form W-4R, 10% unless the payee chose another rate). eligible_rollover: a distribution from a qualified plan, 403(b) or governmental 457(b) that could be rolled over (Form W-4R, 20% unless the payee chose a higher rate).',
+        },
+        taxableAmount: { type: 'integer', minimum: 0, description: 'The taxable part of the payment, in cents. Defaults to the whole payment. Withholding applies to this part only.' },
+        deliveredOutsideUS: { type: 'boolean', description: 'The payment is delivered outside the United States and its territories. Then the payee cannot elect less than the default withholding.' },
+        w4p: {
+          type: 'object',
+          description: 'Periodic payments: what the payee put on Form W-4P. Absent, the payee is treated as Single with no entries in Steps 2 to 4.',
+          properties: {
+            form: { enum: ['2022_or_later', '2021_or_earlier'], default: '2022_or_later' },
+            filingStatus: { enum: [...FILING_STATUSES], description: '2022 or later, Step 1(c). married_separate is treated as single.' },
+            multiplePensionsAmount: { type: 'integer', minimum: 0, description: '2022 or later, Step 2(b)(iii): taxable annual pay from other jobs plus lower-paying pensions, in cents.' },
+            credits: { type: 'integer', minimum: 0, description: '2022 or later, Step 3 total, annual, in cents.' },
+            otherIncome: { type: 'integer', minimum: 0, description: '2022 or later, Step 4(a), annual, in cents.' },
+            deductions: { type: 'integer', minimum: 0, description: '2022 or later, Step 4(b), annual, in cents.' },
+            extraWithholding: { type: 'integer', minimum: 0, description: 'Step 4(c), or line 3 of a 2021-or-earlier form: extra tax withheld from each payment, in cents.' },
+            maritalStatus: { enum: ['single', 'married'], description: '2021 or earlier, line 2.' },
+            allowances: { type: 'integer', minimum: 0, maximum: 99, description: '2021 or earlier, line 2: allowances claimed.' },
+            noWithholding: { type: 'boolean', description: 'The payee elected no withholding. Not honored for a payment delivered outside the United States and its territories.' },
+          },
+          additionalProperties: false,
+        },
+        w4r: {
+          type: 'object',
+          description: 'Nonperiodic payments and eligible rollover distributions: what the payee put on Form W-4R.',
+          properties: {
+            withholdingRate: { type: 'integer', minimum: 0, maximum: 100, description: 'Form W-4R line 2, a whole-number percent. Absent means the default (10% nonperiodic, 20% eligible rollover). An eligible rollover distribution cannot go below 20%.' },
+          },
+          additionalProperties: false,
+        },
       },
       additionalProperties: false,
     },

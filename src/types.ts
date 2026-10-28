@@ -644,6 +644,55 @@ export type EmploymentCategory =
   | 'railroad'
   | 'election_worker';
 
+/**
+ * A pension, annuity, profit-sharing, stock-bonus or IRA payment, withheld for federal income tax
+ * the way the payer must: not as wages. When PaycheckInput.pension is set, earnings is the payment
+ * (gross), no Social Security, Medicare, FUTA, unemployment or state tax is calculated, and the
+ * result is one federal line (US_FIT_PENSION). See src/taxes/pension.ts.
+ */
+export interface PensionPayment {
+  /**
+   * 'periodic': installments at regular intervals over more than one year; Form W-4P and Pub 15-T
+   * Worksheet 1B. 'nonperiodic': any other payment, including an IRA distribution payable on demand;
+   * Form W-4R, 10% unless the payee chose another rate. 'eligible_rollover': a distribution from a
+   * qualified plan, 403(b) or governmental 457(b) that could be rolled over; Form W-4R, 20% unless the
+   * payee chose a higher rate.
+   */
+  kind: 'periodic' | 'nonperiodic' | 'eligible_rollover';
+  /** The taxable part of the payment, in cents. Defaults to the whole payment. Withholding applies to this part only. */
+  taxableAmount?: Cents;
+  /** Periodic payments: what the payee put on Form W-4P. With none, the payee is treated as Single with no entries. */
+  w4p?: {
+    /** Which form the payee filed. Defaults to '2022_or_later'. */
+    form?: '2022_or_later' | '2021_or_earlier';
+    /** 2022-or-later Step 1(c). 'married_separate' is treated as single. */
+    filingStatus?: FilingStatus;
+    /** 2022-or-later Step 2(b)(iii): taxable annual pay from other jobs plus lower-paying pensions, in cents. */
+    multiplePensionsAmount?: Cents;
+    /** 2022-or-later Step 3 total (credits), annual, in cents. */
+    credits?: Cents;
+    /** 2022-or-later Step 4(a) other income, annual, in cents. */
+    otherIncome?: Cents;
+    /** 2022-or-later Step 4(b) deductions, annual, in cents. */
+    deductions?: Cents;
+    /** Step 4(c) (2022 or later) or line 3 (2021 or earlier): extra tax withheld from each payment, in cents. */
+    extraWithholding?: Cents;
+    /** 2021-or-earlier line 2: marital status. */
+    maritalStatus?: 'single' | 'married';
+    /** 2021-or-earlier line 2: number of allowances claimed. */
+    allowances?: number;
+    /** The payee checked "No withholding" (2026 and later) or wrote it (2022 to 2025), or checked line 1 of the 2021 form. */
+    noWithholding?: boolean;
+  };
+  /** Nonperiodic payments and eligible rollover distributions: what the payee put on Form W-4R line 2. */
+  w4r?: {
+    /** A whole-number percent, 0 to 100. Absent means the default rate. */
+    withholdingRate?: number;
+  };
+  /** The payment is delivered outside the United States and its territories. Then a payee cannot elect less than the default. */
+  deliveredOutsideUS?: boolean;
+}
+
 export interface PaycheckInput {
   /**
    * Check date. Determines WHICH ruleset applies — never "today".
@@ -661,6 +710,8 @@ export interface PaycheckInput {
   employee?: EmployeeContext;
   /** Which employment-tax rules apply to this worker. Defaults to 'standard'. */
   employmentCategory?: EmploymentCategory;
+  /** Set for a pension, annuity or IRA payment instead of wages. See PensionPayment. */
+  pension?: PensionPayment;
   /**
    * The employee's most recent REGULAR payment, for states whose rule for a
    * bonus paid on its own cheque is "aggregate it with the last regular

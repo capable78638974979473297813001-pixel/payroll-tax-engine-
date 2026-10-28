@@ -74,6 +74,8 @@ export function validatePaycheckInput(raw: unknown, opts: ValidateOptions = {}):
     return { ok: false, errors: [{ path: '(body)', message: 'The request body must be a JSON object.' }] };
   }
   const body = raw as Record<string, unknown>;
+  // A pension, annuity or IRA payment is withheld on its own rules and needs no W-4 or year-to-date wages.
+  const isPension = body.pension !== undefined;
 
   // ---- integer-cents helper -------------------------------------------
   // Rejects floats (the classic "$3,000.00" → 3000 dollars mistake) and
@@ -154,7 +156,9 @@ export function validatePaycheckInput(raw: unknown, opts: ValidateOptions = {}):
   }
 
   // ---- federalW4 -------------------------------------------------------
-  if (!isObject(body.federalW4)) {
+  if (isPension && body.federalW4 === undefined) {
+    // not needed: the pension block carries the payee's own form
+  } else if (!isObject(body.federalW4)) {
     err('federalW4', 'is required and must be a Form W-4 object.');
   } else {
     const w4 = body.federalW4;
@@ -196,7 +200,9 @@ export function validatePaycheckInput(raw: unknown, opts: ValidateOptions = {}):
   }
 
   // ---- ytd -------------------------------------------------------------
-  if (!isObject(body.ytd)) {
+  if (isPension && body.ytd === undefined) {
+    // not needed: no Social Security, Medicare, FUTA or elective-deferral limit applies to a pension payment
+  } else if (!isObject(body.ytd)) {
     err('ytd', 'is required and must be a year-to-date object.');
   } else {
     cents(body.ytd.socialSecurity, 'ytd.socialSecurity');
@@ -247,6 +253,65 @@ export function validatePaycheckInput(raw: unknown, opts: ValidateOptions = {}):
   if (body.employmentCategory !== undefined) {
     if (typeof body.employmentCategory !== 'string' || !EMPLOYMENT_CATEGORIES.includes(body.employmentCategory)) {
       err('employmentCategory', `must be one of: ${EMPLOYMENT_CATEGORIES.join(', ')}.`);
+    }
+  }
+
+  // ---- optional: pension (a pension, annuity or IRA payment) ----------
+  if (body.pension !== undefined) {
+    const p = body.pension;
+    if (!isObject(p)) {
+      err('pension', 'must be an object { kind, ... } when present.');
+    } else {
+      if (!['periodic', 'nonperiodic', 'eligible_rollover'].includes(String(p.kind))) {
+        err('pension.kind', 'is required: "periodic" (Form W-4P), "nonperiodic" or "eligible_rollover" (Form W-4R).');
+      }
+      if (p.taxableAmount !== undefined) cents(p.taxableAmount, 'pension.taxableAmount');
+      if (p.deliveredOutsideUS !== undefined && typeof p.deliveredOutsideUS !== 'boolean') err('pension.deliveredOutsideUS', 'must be a boolean when present.');
+      if (p.w4p !== undefined) {
+        if (!isObject(p.w4p)) {
+          err('pension.w4p', 'must be an object when present.');
+        } else {
+          const w = p.w4p;
+          if (p.kind !== undefined && p.kind !== 'periodic') err('pension.w4p', 'is the Form W-4P for periodic payments. Use pension.w4r for nonperiodic payments and eligible rollover distributions.');
+          if (w.form !== undefined && w.form !== '2022_or_later' && w.form !== '2021_or_earlier') err('pension.w4p.form', 'must be "2022_or_later" or "2021_or_earlier".');
+          if (w.filingStatus !== undefined && !FILING_STATUSES.includes(String(w.filingStatus))) err('pension.w4p.filingStatus', `must be one of: ${FILING_STATUSES.join(', ')}.`);
+          for (const k of ['multiplePensionsAmount', 'credits', 'otherIncome', 'deductions', 'extraWithholding'] as const) {
+            if (w[k] !== undefined) cents(w[k], `pension.w4p.${k}`);
+          }
+          if (w.maritalStatus !== undefined && w.maritalStatus !== 'single' && w.maritalStatus !== 'married') err('pension.w4p.maritalStatus', 'must be "single" or "married" (line 2 of a 2021-or-earlier Form W-4P).');
+          if (w.allowances !== undefined && (typeof w.allowances !== 'number' || !Number.isInteger(w.allowances) || w.allowances < 0 || w.allowances > 99)) {
+            err('pension.w4p.allowances', 'must be a whole number of allowances from 0 to 99.');
+          }
+          if (w.noWithholding !== undefined && typeof w.noWithholding !== 'boolean') err('pension.w4p.noWithholding', 'must be a boolean when present.');
+          const old = w.form === '2021_or_earlier';
+          if (old && (w.filingStatus !== undefined || w.multiplePensionsAmount !== undefined || w.credits !== undefined || w.otherIncome !== undefined || w.deductions !== undefined)) {
+            err('pension.w4p', 'a 2021-or-earlier Form W-4P has only marital status, allowances and extra withholding. Use maritalStatus, allowances and extraWithholding, or set form to "2022_or_later".');
+          }
+          if (!old && (w.maritalStatus !== undefined || w.allowances !== undefined)) {
+            err('pension.w4p', 'maritalStatus and allowances belong to a 2021-or-earlier Form W-4P. Use filingStatus, or set form to "2021_or_earlier".');
+          }
+        }
+      }
+      if (p.w4r !== undefined) {
+        if (!isObject(p.w4r)) {
+          err('pension.w4r', 'must be an object when present.');
+        } else {
+          if (p.kind === 'periodic') err('pension.w4r', 'is the Form W-4R for nonperiodic payments and eligible rollover distributions. Use pension.w4p for periodic payments.');
+          const r = p.w4r.withholdingRate;
+          if (r !== undefined && (typeof r !== 'number' || !Number.isInteger(r) || r < 0 || r > 100)) {
+            err('pension.w4r.withholdingRate', 'must be a whole-number percent from 0 to 100 (Form W-4R line 2).');
+          }
+        }
+      }
+      if (p.kind === 'periodic' && typeof body.payFrequency === 'string' && !['monthly', 'semimonthly', 'biweekly', 'weekly', 'daily'].includes(body.payFrequency)) {
+        err('payFrequency', 'a periodic pension payment can be paid monthly, semimonthly, biweekly, weekly or daily: those are the payment periods Pub 15-T lists for Worksheet 1B.');
+      }
+      if (Array.isArray(body.deductions) && body.deductions.some((d) => isObject(d) && d.category !== null && d.category !== undefined)) {
+        err('deductions', 'a pension payment takes no pre-tax deductions. Send only post-tax deductions (category null).');
+      }
+      if (body.employmentCategory !== undefined && body.employmentCategory !== 'standard') {
+        err('employmentCategory', 'cannot be combined with pension. A pension payment is not wages.');
+      }
     }
   }
 
@@ -306,5 +371,11 @@ export function validatePaycheckInput(raw: unknown, opts: ValidateOptions = {}):
   }
 
   if (errors.length > 0) return { ok: false, errors };
-  return { ok: true, value: body as unknown as PaycheckInput };
+  const value = body as unknown as PaycheckInput;
+  if (isPension) {
+    // The engine reads neither for a pension payment; fill them so the input is whole.
+    const w4 = value.federalW4 ?? { filingStatus: 'single', multipleJobs: false, dependentCredit: 0, otherIncome: 0, deductions: 0, extraWithholding: 0 };
+    return { ok: true, value: { ...value, federalW4: w4, ytd: value.ytd ?? { socialSecurity: 0, medicare: 0, futa: 0 } } };
+  }
+  return { ok: true, value };
 }

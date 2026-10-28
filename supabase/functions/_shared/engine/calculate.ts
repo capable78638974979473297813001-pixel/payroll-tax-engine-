@@ -33,6 +33,7 @@ import type {
 } from './types.ts';
 import { assertTaxYearCovered, CannotComputeError, federalRuleset, provisionalYearWarnings, yearOf } from './registry.ts';
 import { federalTaxes } from './taxes/federal.ts';
+import { calculatePension } from './taxes/pension.ts';
 import { stateIncomeTax } from './taxes/state.ts';
 import { inputContractWarnings } from './contracts.ts';
 import { assertEmploymentCategory } from './validate.ts';
@@ -56,6 +57,7 @@ export function calculatePaycheck(input: PaycheckInput): PaycheckResult {
   if (!periodsPerYear) {
     throw new Error(`Unknown pay frequency: ${input.payFrequency}`);
   }
+  if (input.pension) return calculatePension(input);
   assertEmploymentCategory(input.employmentCategory);
   // 2025 is covered for federal tax and only some states; a paycheck
   // touching any other state that year is refused, not computed federal-only.

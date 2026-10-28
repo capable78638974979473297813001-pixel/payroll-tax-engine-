@@ -499,7 +499,7 @@ function symmetryPage(): GeneratedPage {
       <tbody>
         <tr><th scope="row" style="text-align:left">Access</th><td>Sign up, get a key, call the API</td><td>Demo and sales contact (per symmetry.com)</td></tr>
         <tr><th scope="row" style="text-align:left">Pricing</th><td>$0.08 per paycheck calculation, published</td><td>Not published on its website</td></tr>
-        <tr><th scope="row" style="text-align:left">Core calculation</th><td>Gross to net: federal, 50 states and DC, local, employer taxes, garnishments, minimum wage</td><td>Gross-to-net calculation (per symmetry.com)</td></tr>
+        <tr><th scope="row" style="text-align:left">Core calculation</th><td>Gross to net: federal, 50 states and DC, local, employer taxes, garnishments, minimum wage, federal pension withholding</td><td>Gross-to-net calculation (per symmetry.com)</td></tr>
         <tr><th scope="row" style="text-align:left">Local taxes and addresses</th><td>${L.jurisdictions} local jurisdictions in ${L.states} states, found from the work and home address by geocoding</td><td>Local withholding from address coordinates (Payroll Point, per symmetry.com)</td></tr>
         <tr><th scope="row" style="text-align:left">Size</th><td>Smaller: one calculation API</td><td>A platform: engine, forms, I-9, minimum wage finder</td></tr>
         <tr><th scope="row" style="text-align:left">Withholding forms</th><td>Not part of Omnia.tax</td><td>130+ forms (Symmetry Payroll Forms)</td></tr>

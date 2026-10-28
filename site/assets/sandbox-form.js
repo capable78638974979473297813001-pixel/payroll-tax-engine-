@@ -188,6 +188,8 @@ export function createModel() {
     employerExtra: {},
     garnishments: null,
     minimumWage: null,
+    /** A pension, annuity or IRA payment (PaycheckInput.pension), carried through as the API shapes it. Null for wages. */
+    pension: null,
     homeLookup: null,
     workLookup: null,
   };
@@ -286,6 +288,7 @@ export function loadRequest(model, request) {
     }))
     : [blankEarning()];
   model.hoursWorked = req.hoursWorked == null || req.hoursWorked === '' ? '' : String(req.hoursWorked);
+  model.pension = req.pension && typeof req.pension === 'object' ? clone(req.pension) : null;
   if (req.priorRegularPayment && typeof req.priorRegularPayment === 'object') {
     model.priorWages = Number(req.priorRegularPayment.taxableWages) || 0;
     model.priorTax = req.priorRegularPayment.stateIncomeTaxWithheld == null
@@ -408,6 +411,7 @@ export function serialize(model) {
     const h = Number(model.hoursWorked);
     if (Number.isFinite(h)) out.hoursWorked = h;
   }
+  if (model.pension) out.pension = clone(model.pension);
   out.earnings = model.earnings.map(earningOut).filter(Boolean);
   out.deductions = model.deductions.map(deductionOut).filter(Boolean);
   out.federalW4 = federalW4;

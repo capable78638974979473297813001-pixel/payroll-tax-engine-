@@ -104,6 +104,19 @@ export function topics(h: Helpers): TopicDef[] {
   const employerOH = oh.taxes.filter((t) => t.payer === 'employer' && t.amount > 0);
   const ssMax = Math.round(f.ssBase26 * f.ssRate * 100);
 
+  const penBase = (amount: number, pension: Record<string, unknown>, freq = 'monthly') => ({ ...h.exampleInput('TX', {}, amount), payFrequency: freq, earnings: [{ code: 'PENSION', category: 'regular', amount }], pension } as unknown as PaycheckInput);
+  const penAmount = (amount: number, pension: Record<string, unknown>, freq = 'monthly') => run(penBase(amount, pension, freq)).taxes[0]!.amount;
+  const pen = {
+    none: penAmount(200_000, { kind: 'periodic' }),
+    mfj: penAmount(200_000, { kind: 'periodic', w4p: { filingStatus: 'married_joint' } }),
+    other: penAmount(200_000, { kind: 'periodic', w4p: { multiplePensionsAmount: 4_000_000 } }),
+    credit: penAmount(500_000, { kind: 'periodic', w4p: { credits: 100_000 } }),
+    big: penAmount(500_000, { kind: 'periodic' }),
+    extra: penAmount(500_000, { kind: 'periodic', w4p: { extraWithholding: 5_000 } }),
+  };
+  const penDetail = run(penBase(200_000, { kind: 'periodic' })).taxes[0]!.detail ?? '';
+  const lump = (p: Record<string, unknown>) => penAmount(1_000_000, p);
+
   const D: TopicDef[] = [];
   const add = (t: TopicDef) => D.push(t);
 
@@ -592,13 +605,13 @@ export function topics(h: Helpers): TopicDef[] {
       <li><strong>Exempt:</strong> an employee who claims exemption has no federal income tax withheld; Social Security and Medicare still apply.</li>
       <li><strong>Pre-2020 Form W-4:</strong> an employee who never filed the newer form is calculated from the old allowance method.</li>
       <li><strong>Bonuses:</strong> may use a flat supplemental rate; see <a href="/bonus-tax-withholding-calculation">bonus withholding</a>.</li>
-      <li><strong>Pension and annuity payments</strong> use a different form and are not modelled by this engine.</li>
+      <li><strong>Pension and annuity payments</strong> are withheld on a different form and worksheet: see <a href="/pension-withholding-calculation">pension and annuity withholding</a>.</li>
     </ul>
     <p>The same calculation is available through the <a href="/income-tax-withholding-api">income tax withholding API</a>.</p>`,
     faq: [
       { q: 'How is federal income tax withholding calculated?', a: 'From the Form W-4 using the IRS percentage method: annualise the check, adjust for filing status and the W-4 entries, find the bracket, subtract credits, then divide back to one paycheck and add any extra withholding.' },
       { q: 'What does the multiple-jobs checkbox do?', a: 'It selects the higher-withholding table, because each job is withheld as if it were the only one. It is on the Form W-4 as step 2.' },
-      { q: 'Does this cover pensions?', a: 'No. Pension and annuity withholding use a different form and are not modelled. The engine assumes ordinary wage and salary payroll.' },
+      { q: 'Does this cover pensions?', a: 'Pension and annuity payments are withheld by a different method: Form W-4P and Pub 15-T Worksheet 1B for periodic payments, and Form W-4R for lump sums and rollovers. Omnia.tax calculates federal withholding on them in a separate pension request, and does not calculate state withholding on them.' },
     ],
     related: ['/income-tax-calculation-engine', '/income-tax-withholding-api', '/fica-tax-calculation', '/bonus-tax-withholding-calculation'],
   });
@@ -714,6 +727,97 @@ export function topics(h: Helpers): TopicDef[] {
       { q: 'Why is my net pay not gross minus a flat percentage?', a: 'Each tax has its own rate, cap and taxable wages, federal income tax uses brackets, and deductions affect each tax differently. The effective rate changes with pay level and location.' },
     ],
     related: ['/gross-to-net-api', '/paycheck-calculator-api', '/pre-tax-deduction-tax-treatment', '/take-home-pay'],
+  });
+
+  add({
+    path: '/pension-withholding-calculation', label: 'Pension and annuity withholding', group: 'Calculations',
+    title: 'Pension and annuity withholding calculation (Form W-4P) | Omnia.tax',
+    description: "How federal withholding on periodic pension and annuity payments is calculated from Form W-4P (Pub 15-T Worksheet 1B), with worked examples from the engine.",
+    h1: 'Pension and annuity withholding calculation', eyebrow: 'Calculations',
+    sub: 'Pension payments are not wages. They are withheld on Form W-4P and their own worksheet, and carry no Social Security or Medicare tax.',
+    body: `
+    <p>A payer of periodic pension, annuity, profit-sharing, stock-bonus or IRA payments withholds federal income tax from the taxable part of each payment, using the payee's Form W-4P. The method is Publication 15-T's Worksheet 1B, which looks like the wage worksheet and differs from it in four places.</p>
+    <h2>How it differs from wage withholding</h2>
+    <ul>
+      <li><strong>No FICA, FUTA or unemployment tax.</strong> The only tax on the payment is federal income tax.</li>
+      <li><strong>The standard adjustment always applies.</strong> Annual payments are reduced by $8,600 ($12,900 if married filing jointly) with no multiple-jobs exception; the Form W-4P has Step 2 for other jobs and pensions instead.</li>
+      <li><strong>Credits come off the annual tax first.</strong> The Step 3 credit is subtracted from the annual tentative tax before it is divided into payments.</li>
+      <li><strong>With no form, the payee is Single with no entries.</strong> There is no "Married" default for payees whose payments began after 2021.</li>
+    </ul>
+    <h2>The steps in Worksheet 1B</h2>
+    <ol>
+      <li>Annualise the payment (monthly ×12, semimonthly ×24, biweekly ×26, weekly ×52, daily ×260).</li>
+      <li>Add Step 4(a) other income; subtract Step 4(b) deductions and the standard adjustment. This can be negative.</li>
+      <li>If Step 2(b)(iii) has an amount, work out the extra tax the other jobs and pensions call for (Parts I to III); otherwise look up the annual tax on the standard schedule for the filing status.</li>
+      <li>Subtract the Step 3 credits, never below zero.</li>
+      <li>Divide by the number of payments, and add Step 4(c) extra withholding.</li>
+    </ol>
+    <h2>Worked examples, run through the engine</h2>
+    ${table(h, ['Payee, paid monthly', 'Payment', 'Federal tax withheld'], [
+      ['No Form W-4P (Single, no entries)', money(200_000), money(pen.none)],
+      ['Married filing jointly', money(200_000), money(pen.mfj)],
+      ['Single, $40,000 a year from a job (Step 2)', money(200_000), money(pen.other)],
+      ['Single, no entries', money(500_000), money(pen.big)],
+      ['Single, $1,000 a year of credits (Step 3)', money(500_000), money(pen.credit)],
+      ['Single, $50 extra on each payment (Step 4(c))', money(500_000), money(pen.extra)],
+    ], 1)}
+    <p>For the first row, the engine explains itself: <em>${h.esc(penDetail)}</em></p>
+    <h2>Checked against the IRS's own tables</h2>
+    <p>The result for a payee with no form equals the tax on annual payments above the standard deduction, from the 2026 Marginal Rate Tables printed on Form W-4R, divided by the number of payments. We test the engine against those tables across three filing statuses and four payment frequencies.</p>
+    <h2>In the API</h2>
+    ${code(h, `POST /v1/paycheck\n{ "checkDate": "2026-06-15", "payFrequency": "monthly",\n  "earnings": [{ "code": "PENSION", "category": "regular", "amount": 200000 }],\n  "deductions": [],\n  "pension": { "kind": "periodic",\n    "w4p": { "filingStatus": "single", "multiplePensionsAmount": 4000000 } } }`)}
+    <p>No <code>federalW4</code> or <code>ytd</code> is needed. The response has one line, <code>US_FIT_PENSION</code>.</p>
+    <h2>What it does not do</h2>
+    <ul>
+      <li><strong>State and local withholding</strong> on pension payments is not calculated, because states differ on whether and how they withhold. The response says so.</li>
+      <li><strong>Quarterly, semiannual and annual</strong> periodic payments are refused: Pub 15-T's table lists monthly, semimonthly, biweekly, weekly and daily.</li>
+      <li><strong>Nonresident aliens</strong> are outside these methods (Pub 515).</li>
+      <li><strong>Lump sums and rollovers</strong> use Form W-4R: see <a href="/eligible-rollover-withholding">eligible rollover and nonperiodic withholding</a>.</li>
+    </ul>`,
+    faq: [
+      { q: 'How is withholding on a pension calculated?', a: 'For periodic payments, from the payee\'s Form W-4P using Pub 15-T Worksheet 1B: annualise the payment, apply the standard adjustment and the form\'s entries, find the annual tax on the standard schedule, subtract credits, and divide by the number of payments.' },
+      { q: 'What if a retiree gave the payer no Form W-4P?', a: 'The payer withholds as if the payee were Single with no entries in Steps 2 to 4. For payments that began before 2022 with no form, the payee is treated as married claiming three allowances, under the older rules.' },
+      { q: 'Is Social Security or Medicare tax withheld from a pension?', a: 'No. FICA applies to wages. A pension payment has federal income tax withheld and, depending on the state, state income tax.' },
+      { q: 'Does Omnia.tax calculate state tax on pensions?', a: 'No. It calculates federal withholding on pension, annuity and IRA payments. State and local withholding on them varies by state and is not calculated.' },
+    ],
+    related: ['/eligible-rollover-withholding', '/federal-income-tax-withholding-calculator', '/income-tax-withholding-api', '/gross-to-net-api'],
+  });
+
+  add({
+    path: '/eligible-rollover-withholding', label: 'Eligible rollover and nonperiodic withholding', group: 'Calculations',
+    title: 'Eligible rollover and lump-sum withholding (Form W-4R) | Omnia.tax',
+    description: "How 10% and 20% withholding works for lump sums, IRA distributions and eligible rollover distributions (Form W-4R), with examples from the engine.",
+    h1: 'Eligible rollover and nonperiodic payment withholding', eyebrow: 'Calculations',
+    sub: 'Lump sums and rollovers are withheld at a rate, not by a worksheet. The rate depends on the type of payment and what the payee chose.',
+    body: `
+    <p>Payments that are not periodic installments are withheld at a flat percentage of the taxable amount. The payee sets the rate on Form W-4R; with no form, the default applies.</p>
+    <h2>The rates</h2>
+    ${table(h, ['Payment', 'Default', 'The payee can choose'], [
+      ['Nonperiodic payment, including an IRA distribution payable on demand', '10%', 'Any whole percent from 0% to 100% (not less than 10% if delivered outside the United States and its territories)'],
+      ['Eligible rollover distribution (qualified plan, 403(b), governmental 457(b))', '20%', 'A higher whole percent. Never lower than 20%, including 0%'],
+    ]).replace(/text-align:right/g, 'text-align:left')}
+    <p>With no Form W-4R, or no valid taxpayer ID, the payer withholds the default and cannot honor a request for less.</p>
+    <h2>On a $10,000 taxable payment, from the engine</h2>
+    ${table(h, ['Payment and election', 'Federal tax withheld'], [
+      ['Nonperiodic, default', money(lump({ kind: 'nonperiodic' }))],
+      ['Nonperiodic, payee chose 0%', money(lump({ kind: 'nonperiodic', w4r: { withholdingRate: 0 } }))],
+      ['Nonperiodic, payee chose 19%', money(lump({ kind: 'nonperiodic', w4r: { withholdingRate: 19 } }))],
+      ['Eligible rollover, default', money(lump({ kind: 'eligible_rollover' }))],
+      ['Eligible rollover, payee asked for 10%', `${money(lump({ kind: 'eligible_rollover', w4r: { withholdingRate: 10 } }))} (the 20% floor applies)`],
+      ['Eligible rollover, payee chose 30%', money(lump({ kind: 'eligible_rollover', w4r: { withholdingRate: 30 } }))],
+    ], 1)}
+    <h2>Only the taxable part</h2>
+    <p>Withholding applies to the taxable amount of the payment. If part is a return of after-tax contributions, send <code>pension.taxableAmount</code> and the rate applies to that part only.</p>
+    <h2>What counts as an eligible rollover distribution</h2>
+    <p>Form W-4R lists payments that are <em>not</em> eligible rollover distributions for these rules: hardship distributions, required minimum distributions, distributions from a pension-linked emergency savings account, and several qualified disaster, birth or adoption, long-term care, domestic abuse and emergency-expense distributions. Those are nonperiodic payments, so send them as <code>nonperiodic</code>; whether a payment is one or the other is a fact about the plan that you supply.</p>
+    ${code(h, `"pension": { "kind": "eligible_rollover", "w4r": { "withholdingRate": 30 } }`)}
+    <p>See also <a href="/pension-withholding-calculation">withholding on periodic pension payments</a>. State and local withholding on these payments is not calculated.</p>`,
+    faq: [
+      { q: 'How much is withheld from an eligible rollover distribution?', a: 'The payer must withhold 20% of the taxable amount unless the payment is rolled over directly. The payee can ask for a higher rate on Form W-4R but not a lower one, including zero.' },
+      { q: 'What is the default withholding on a 401(k) or IRA lump sum?', a: 'An IRA distribution payable on demand or any other nonperiodic payment defaults to 10%, and the payee can choose 0% to 100%. A lump sum from a 401(k) that could be rolled over is an eligible rollover distribution and defaults to 20%.' },
+      { q: 'Can a payee choose no withholding?', a: 'On a nonperiodic payment, yes, by entering 0% on Form W-4R, unless the payment is delivered outside the United States and its territories. On an eligible rollover distribution, no.' },
+    ],
+    related: ['/pension-withholding-calculation', '/federal-income-tax-withholding-calculator', '/bonus-tax-withholding-calculation', '/income-tax-withholding-api'],
   });
 
   // ============================== Employer taxes =============================================

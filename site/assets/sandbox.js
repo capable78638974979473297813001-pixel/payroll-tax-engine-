@@ -62,6 +62,17 @@ function syncFromDom() {
   form.federalExempt = checked('federalExempt');
   form.employmentCategory = $('employmentCategory').value;
   form.voluntaryWithholdingAgreement = checked('voluntaryWithholdingAgreement');
+  form.pensionKind = $('pensionKind').value;
+  form.pensionTaxableAmount = $('pensionTaxableAmount').value;
+  form.pensionFilingStatus = $('pensionFilingStatus').value;
+  form.pensionStep2 = num('pensionStep2');
+  form.pensionCredits = num('pensionCredits');
+  form.pensionOtherIncome = num('pensionOtherIncome');
+  form.pensionDeductions = num('pensionDeductions');
+  form.pensionExtra = num('pensionExtra');
+  form.pensionNoWithholding = checked('pensionNoWithholding');
+  form.pensionRate = $('pensionRate').value;
+  form.pensionAbroad = checked('pensionAbroad');
   form.stateCode = $('state').value;
   const home = $('residenceState');
   form.residenceStateCode = home ? home.value : form.residenceStateCode;
@@ -543,6 +554,7 @@ const EXAMPLES = {
   tx: { state: 'TX', method: 'hourly', rate: 22, hours: 80, frequency: 'biweekly' },
   ca: { state: 'CA', method: 'annual', gross: 120000, frequency: 'semimonthly', filing: 'married_joint', bonus: 5000 },
   oh: { state: 'OH', method: 'perPeriod', gross: 1400, frequency: 'weekly' },
+  pension: { state: '', method: 'perPeriod', gross: 2000, frequency: 'monthly', pension: 'periodic' },
 };
 function fire(id) { $(id).dispatchEvent(new Event('change', { bubbles: true })); }
 function applyExample(id) {
@@ -555,6 +567,7 @@ function applyExample(id) {
   $('hourlyRate').value = String(ex.rate || 0);
   $('hoursPerPeriod').value = String(ex.hours || 0);
   $('filingStatus').value = ex.filing || 'single';
+  $('pensionKind').value = ex.pension || ''; paintPension();
   $('payItems').replaceChildren();
   if (ex.bonus) {
     const row = payRow('bonus');
@@ -569,6 +582,13 @@ function applyExample(id) {
 $('example').addEventListener('change', () => { applyExample($('example').value); });
 
 $('checkDate').value = form.checkDate;
+function paintPension() {
+  const kind = $('pensionKind').value;
+  $('pensionBox').hidden = !kind;
+  $('pensionPeriodic').hidden = kind !== 'periodic';
+  $('pensionRateBox').hidden = !(kind === 'nonperiodic' || kind === 'eligible_rollover');
+}
+$('pensionKind').addEventListener('change', paintPension);
 $('grossPayMethod').addEventListener('change', () => {
   $('hourlyRow').hidden = $('grossPayMethod').value !== 'hourly';
 });
