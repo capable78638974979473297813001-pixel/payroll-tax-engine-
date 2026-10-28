@@ -42,6 +42,8 @@ describe('flat defaults a state publishes', () => {
     assert.equal(stateAmount(pay('AR', { kind: 'nonperiodic' }, amt)), 30_000);
     assert.equal(stateAmount(pay('AR', { kind: 'eligible_rollover' }, amt)), 50_000);
     assert.equal(stateAmount(pay('NC', { kind: 'nonperiodic' }, amt)), 40_000);
+    assert.equal(stateAmount(pay('ME', { kind: 'nonperiodic' }, amt)), 50_000);
+    assert.equal(stateAmount(pay('GA', { kind: 'nonperiodic' }, amt)), undefined, 'Georgia withholds a lump sum only if the payee elects it');
     assert.equal(stateAmount(pay('NC', { kind: 'eligible_rollover' }, amt)), 40_000);
     assert.equal(stateAmount(pay('NE', { kind: 'nonperiodic' }, amt)), 35_000);
     assert.equal(stateAmount(pay('CT', { kind: 'nonperiodic' }, amt)), 69_900);
@@ -78,7 +80,7 @@ describe('periodic payments withheld as on wages', () => {
 
   test('each state matches its own wage withholding on the same amount', () => {
     assert.equal(stateAmount(pay('AR', { kind: 'periodic' })), wageTax('AR', { exemptions: 3 }), 'AR4P default: married, three allowances');
-    for (const st of ['NC', 'NE', 'VT', 'VA', 'MA']) assert.equal(stateAmount(pay(st, { kind: 'periodic' })), wageTax(st), st);
+    for (const st of ['NC', 'NE', 'VT', 'VA', 'MA', 'ME', 'GA']) assert.equal(stateAmount(pay(st, { kind: 'periodic' })), wageTax(st), st);
   });
 
   test("the payee's certificate replaces the default", () => {
@@ -93,9 +95,32 @@ describe('periodic payments withheld as on wages', () => {
   });
 });
 
+describe('Oklahoma and Maryland, from their own regulation and release', () => {
+  test('Oklahoma: periodic as wages (married, three allowances by default); nonperiodic at the 4.5% top rate', () => {
+    const wage = (cert: Record<string, unknown>) => calculatePaycheck({
+      checkDate: '2026-06-15', payFrequency: 'monthly', earnings: [{ code: 'REG', category: 'regular', amount: 300_000 }], deductions: [],
+      federalW4: { filingStatus: 'single', multipleJobs: false, dependentCredit: 0, otherIncome: 0, deductions: 0, extraWithholding: 0 },
+      ytd: { socialSecurity: 0, medicare: 0, futa: 0 }, workState: { code: 'OK', certificate: cert },
+    } as PaycheckInput).taxes.find((t) => t.id === 'OK_SIT')!.amount;
+    assert.equal(stateAmount(pay('OK', { kind: 'periodic' })), wage({ filingStatus: 'married', allowances: 3 }));
+    assert.equal(stateAmount(pay('OK', { kind: 'periodic', stateElection: { certificate: { filingStatus: 'single', allowances: 0 } } })), wage({ filingStatus: 'single', allowances: 0 }));
+    assert.equal(stateAmount(pay('OK', { kind: 'nonperiodic' }, 1_000_000)), 45_000);
+    assert.equal(stateAmount(pay('OK', { kind: 'eligible_rollover' }, 1_000_000)), 45_000);
+    assert.equal(stateAmount(pay('OK', { kind: 'nonperiodic', stateElection: { none: true } }, 1_000_000)), undefined);
+  });
+
+  test('Maryland: 7.75% on an eligible rollover distribution with no opt-out; anything else only when the payee asks', () => {
+    assert.equal(stateAmount(pay('MD', { kind: 'eligible_rollover' }, 1_000_000)), 77_500);
+    assert.throws(() => calculatePaycheck(pay('MD', { kind: 'eligible_rollover', stateElection: { none: true } })), /opt out/);
+    assert.equal(stateAmount(pay('MD', { kind: 'periodic' })), undefined);
+    assert.equal(stateAmount(pay('MD', { kind: 'nonperiodic' }, 1_000_000)), undefined);
+    assert.equal(stateAmount(pay('MD', { kind: 'periodic', stateElection: { amount: 5_000 } })), 5_000);
+  });
+});
+
 describe('states that only withhold when asked', () => {
   test('nothing by default, with a warning that says why', () => {
-    for (const st of ['AL', 'AZ', 'ID', 'IL', 'IN', 'MO', 'NJ', 'NM', 'NY', 'ND']) {
+    for (const st of ['AL', 'AZ', 'ID', 'IL', 'IN', 'LA', 'MO', 'NJ', 'NM', 'NY', 'ND']) {
       const r = calculatePaycheck(pay(st, { kind: 'periodic' }));
       assert.equal(r.taxes.some((t) => t.id.endsWith('_PENSION_SIT')), false, st);
       assert.match(r.warnings!.join(' '), new RegExp(`${st} withholds on pension payments only when the payee asks`), st);
@@ -131,7 +156,10 @@ describe('what a payee may and may not choose', () => {
     refuses(pay('NC', { kind: 'eligible_rollover', stateElection: { none: true } }), /opt out/);
     refuses(pay('CT', { kind: 'nonperiodic', entireAccountBalance: true, stateElection: { none: true } }), /entire account balance/);
     refuses(pay('MI', { kind: 'periodic', stateElection: { none: true } }), /opt out/);
-    refuses(pay('AL', { kind: 'periodic', stateElection: { none: true } }), /nothing to opt out of/);
+    // Alabama withholds nothing unless asked, so "none" is accepted and changes nothing.
+    const al = calculatePaycheck(pay('AL', { kind: 'periodic', stateElection: { none: true } }));
+    assert.equal(al.taxes.length, 1);
+    assert.match(al.warnings!.join(' '), /only when the payee asks/);
   });
 
   test('a state that does not let a payee name a percent or amount says so', () => {
@@ -156,7 +184,7 @@ describe('when a state does not withhold', () => {
     const tx = calculatePaycheck(pay('TX', { kind: 'periodic' }));
     assert.equal(tx.taxes.length, 1);
     assert.match(tx.warnings!.join(' '), /TX has no state income tax/);
-    for (const st of ['OH', 'GA', 'KS', 'DE', 'OR', 'PA', 'CO']) {
+    for (const st of ['OH', 'KS', 'DE', 'OR', 'PA', 'CO', 'KY']) {
       const r = calculatePaycheck(pay(st, { kind: 'periodic' }));
       assert.equal(r.taxes.length, 1, st);
       assert.match(r.warnings!.join(' '), new RegExp(`not calculated for ${st}`), st);
@@ -173,7 +201,7 @@ describe('when a state does not withhold', () => {
   });
 
   test('NC and MA follow the federal opt-out; NE and VT too', () => {
-    for (const st of ['NC', 'MA', 'NE', 'VT']) {
+    for (const st of ['NC', 'MA', 'NE', 'VT', 'ME']) {
       const r = calculatePaycheck(pay(st, { kind: 'periodic', w4p: { noWithholding: true } }));
       assert.equal(r.taxes.some((t) => t.id.endsWith('_PENSION_SIT')), false, st);
     }
@@ -232,7 +260,7 @@ describe('the published description names the states the file calculates', () =>
   test('api-spec lists exactly the modelled states', async () => {
     const { paycheckRequestSchema } = await import('../site/lib/api-spec.ts');
     const text = JSON.stringify(paycheckRequestSchema);
-    const listed = /State withholding is calculated for ([^.]*?);/.exec(text)![1]!;
+    const listed = /State withholding is calculated for ([^;]*?);/.exec(text)![1]!;
     const codes = [...listed.matchAll(/\b([A-Z]{2})\b/g)].map((m) => m[1]!).sort();
     const modelled = Object.entries(DATA.states).filter(([, e]) => e.status !== 'not_modelled').map(([c]) => c).sort();
     assert.deepEqual(codes, modelled);

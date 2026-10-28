@@ -560,7 +560,7 @@ const EXAMPLES = {
   tx: { state: 'TX', method: 'hourly', rate: 22, hours: 80, frequency: 'biweekly' },
   ca: { state: 'CA', method: 'annual', gross: 120000, frequency: 'semimonthly', filing: 'married_joint', bonus: 5000 },
   oh: { state: 'OH', method: 'perPeriod', gross: 1400, frequency: 'weekly' },
-  pension: { state: '', method: 'perPeriod', gross: 2000, frequency: 'monthly', pension: 'periodic' },
+  pension: { state: 'NC', method: 'perPeriod', gross: 2000, frequency: 'monthly', pension: 'periodic' },
 };
 function fire(id) { $(id).dispatchEvent(new Event('change', { bubbles: true })); }
 function applyExample(id) {

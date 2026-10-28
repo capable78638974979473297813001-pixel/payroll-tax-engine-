@@ -95,9 +95,10 @@ export function statePensionLines(input: PaycheckInput, taxable: Cents, federalA
   // What the payee chose, checked against what the state lets a payee choose.
   const chosen = [election.none && 'none', election.percent !== undefined && 'percent', election.amount !== undefined && 'amount', election.certificate && 'certificate'].filter(Boolean);
   if (chosen.length > 1) refuse(`state election can use only one of none, percent, amount or certificate (got ${chosen.join(', ')}).`);
-  if (election.none && !optOutAllowed) {
-    refuse(entry.status === 'required' ? `does not let a payee opt out of withholding on ${kind === 'eligibleRollover' ? 'an eligible rollover distribution' : kind === 'periodic' ? 'periodic payments' : 'this kind of payment'}${entry.entireBalanceNoOptOut && pension.entireAccountBalance ? ' of the entire account balance' : ''}.`
-      : 'withholds nothing unless asked, so there is nothing to opt out of; send a percent or amount to ask for withholding.');
+  // A state that withholds nothing by default has nothing to opt out of: accept the choice and say so.
+  const defaultIsNone = entry.status !== 'required' || entry[kind]?.kind === 'none';
+  if (election.none && !defaultIsNone && !optOutAllowed) {
+    refuse(`does not let a payee opt out of withholding on ${kind === 'eligibleRollover' ? 'an eligible rollover distribution' : kind === 'periodic' ? 'periodic payments' : 'this kind of payment'}${entry.entireBalanceNoOptOut && pension.entireAccountBalance ? ' of the entire account balance' : ''}.`);
   }
   if (election.percent !== undefined) {
     if (!electable.has('percent')) refuse('does not let a payee choose a percentage.');
@@ -132,7 +133,7 @@ export function statePensionLines(input: PaycheckInput, taxable: Cents, federalA
   if (entry.status === 'not_required') {
     return { lines: [], warnings: [`${code} does not withhold income tax on pension payments. ${entry.notes ?? ''}`.trim()] };
   }
-  if (election.none) return { lines: [], warnings: [`No ${code} income tax withheld: the payee opted out.`] };
+  if (election.none) return { lines: [], warnings: [`No ${code} income tax withheld: ${defaultIsNone ? `${code} withholds on this kind of payment only when the payee asks` : 'the payee opted out'}.`] };
 
   if (asked && election.percent !== undefined) {
     return finish(roundHalfUp((taxable * election.percent) / 100), `Payee chose ${election.percent}% of the taxable ${fmt(taxable)}`);

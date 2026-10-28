@@ -1,4 +1,5 @@
 import { PERIODS_PER_YEAR } from '../../src/types.ts';
+import { statePensionRules } from '../../src/registry.ts';
 import {
   EARNING_CATEGORIES,
   EMPLOYMENT_CATEGORIES,
@@ -7,6 +8,17 @@ import {
   PRETAX_CATEGORIES,
 } from './validate.ts';
 import { MAX_ORDERS, OCCUPATIONS, ORDER_TYPES } from './extras.ts';
+
+/** The states with a pension withholding rule on file, with the kinds of payment a partial rule covers. */
+function pensionStateList(): string {
+  const partial: Record<string, string> = { MA: ' (periodic)', VA: ' (periodic)', DC: ' (lump sums)' };
+  const codes = Object.entries(statePensionRules('2026-06-15')?.states ?? {})
+    .filter(([, e]) => e.status !== 'not_modelled')
+    .map(([c]) => c)
+    .sort();
+  const withNotes = codes.map((c) => c + (partial[c] ?? ''));
+  return withNotes.length > 1 ? `${withNotes.slice(0, -1).join(', ')} and ${withNotes[withNotes.length - 1]}` : withNotes.join('');
+}
 
 /**
  * The machine-readable description of the public API: a JSON Schema for the
@@ -227,7 +239,7 @@ export const paycheckRequestSchema = {
           additionalProperties: false,
           description:
             'What the payee told the payer about state income tax, for the state they live in (`residenceState`, or `workState` when that is all you send). With none, the state\'s default applies: some states withhold unless the payee opts out, some only when asked, and some not at all. ' +
-            'Only choices the state allows are accepted. State withholding is calculated for AL, AR, AZ, CA, CT, IA, ID, IL, IN, MA (periodic), MI, MN, MO, MS, NC, ND, NE, NJ, NM, NY, VA (periodic), VT and DC (lump sums); every other state returns no state line and a warning.',
+            `Only choices the state allows are accepted. State withholding is calculated for ${pensionStateList()}; every other state returns no state line and a warning.`,
           properties: {
             none: { type: 'boolean', description: 'Opt out of state withholding, where the state lets the payee.' },
             percent: { type: 'number', exclusiveMinimum: 0, maximum: 100, description: 'A percent of the taxable payment, e.g. 2.5.' },
