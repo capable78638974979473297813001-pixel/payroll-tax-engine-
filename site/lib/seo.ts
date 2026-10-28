@@ -47,7 +47,7 @@ export const PAGES: PageMeta[] = [
     path: '/coverage',
     file: 'coverage.html',
     title: 'Payroll tax coverage: all 50 states, DC and local taxes | Omnia.tax',
-    description: 'Federal income tax, FICA and state withholding for every state and DC, plus thousands of local jurisdictions and local minimum wage ordinances.',
+    description: 'Federal income tax, FICA and state withholding for every state and DC, plus thousands of local jurisdictions found by address geocoding, and local minimum wage.',
     index: true,
   },
   {

@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <meta name="color-scheme" content="light" />
 <title>Symmetry Tax Engine alternative: payroll tax API | Omnia.tax</title>
-<meta name="description" content="Comparing Symmetry Tax Engine with Omnia.tax: what each covers, how each is sold, and when a self-serve payroll tax API is and is not a fit." />
+<meta name="description" content="A smaller, easier, self-serve Symmetry Tax Engine alternative: the same gross-to-net calculation, local coverage and address geocoding, $0.08 per paycheck." />
 <link rel="stylesheet" href="/assets/v5.css" />
 </head>
 <body>
@@ -20,45 +20,51 @@
     <nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a> <span aria-hidden="true">/</span> <span aria-current="page">Symmetry Tax Engine alternative</span></nav>
     <p class="eyebrow">Compare</p>
     <h1 class="page">A Symmetry Tax Engine alternative</h1>
-    <p class="sub">An honest comparison, using what each company publishes about itself.</p>
+    <p class="sub">A smaller, easier, self-serve payroll tax engine, with local coverage and geocoding built in.</p>
   </div>
   <div class="prose seo" style="margin-top:32px;max-width:720px">
 
-    <p>Symmetry Software's Symmetry Tax Engine is an established payroll tax engine that payroll platforms embed. If you are comparing it with other options, this page says what each does, using what each company publishes about itself, and where Omnia.tax is and is not the right fit.</p>
+    <p>Symmetry Software's Symmetry Tax Engine is an established payroll tax engine that payroll platforms embed. If you are comparing it with other options, this page says what each does, using what each company publishes about itself, and where a smaller, self-serve engine is the better fit.</p>
     <h2>What Symmetry says it is</h2>
     <p>From symmetry.com (read 2026-10-26): payroll tax infrastructure for employers, providers and platforms, with the Symmetry Tax Engine for gross-to-net calculation, Payroll Forms (over 130 withholding forms), Symmetry I-9, Payroll Point for local withholding from address coordinates, and a Minimum Wage Finder. Its site cites 64 million+ employees' paychecks calculated, 7,400+ tax jurisdictions covered and 40+ years of payroll compliance experience. It does not list prices; it offers a demo.</p>
     <h2>What Omnia.tax is</h2>
-    <p>A self-serve HTTP API for payroll tax calculation: federal, all 50 states and DC, and 4,141 local jurisdictions in 15 states, with garnishment limits and a minimum-wage check on the same call. $0.08 per paycheck calculation after a 14-day trial. Public documentation, a JSON Schema and an OpenAPI document.</p>
+    <p>A smaller, easier, self-serve payroll tax engine. It does the same core calculation: federal income tax, FICA, all 50 states and DC, local taxes, employer taxes, garnishment limits and a minimum-wage check, gross to net, in one request. You do not need a demo or a contract: sign up, get a key, and calculate. $0.08 per paycheck calculation after a 14-day trial, with public documentation, a JSON Schema and an OpenAPI document.</p>
+    <h2>Local coverage and geocoding, built in</h2>
+    <p>Local tax is where payroll tax calculations usually go wrong, so it is the part we built most carefully.</p>
+    <ul>
+      <li><strong>4,141 local tax jurisdictions in 15 states,</strong> each listed by name with its rate on the <a href="/coverage">coverage page</a>. The largest: Pennsylvania 2,627, Ohio 1,054, Kentucky 256, Indiana 92.</li>
+      <li><strong>Address geocoding that finds the right one.</strong> Send a work address, and a home address if it differs, to <code>POST /v1/address</code> and get the state, city, county, school district and the withholding certificate a paycheck needs. The response says how precisely each address matched.</li>
+      <li><strong>Measured, not claimed.</strong> We resolved one real address in each of the 51 jurisdictions through the same pipeline: 50 resolved to a surveyed address point or better, 36 of them to a government-published rooftop point (run 2026-10-07).</li>
+      <li><strong>Local minimum wage too:</strong> 69 city and county ordinances, checked on the same call.</li>
+    </ul>
     <h2>Side by side</h2>
     <div class="table-wrap"><table>
       <thead><tr><th></th><th>Omnia.tax</th><th>Symmetry Tax Engine</th></tr></thead>
       <tbody>
         <tr><th scope="row" style="text-align:left">Access</th><td>Sign up, get a key, call the API</td><td>Demo and sales contact (per symmetry.com)</td></tr>
         <tr><th scope="row" style="text-align:left">Pricing</th><td>$0.08 per paycheck calculation, published</td><td>Not published on its website</td></tr>
-        <tr><th scope="row" style="text-align:left">Jurisdictions</th><td>Federal, 50 states and DC; local taxes in 15 states (4,141 jurisdictions)</td><td>7,400+ tax jurisdictions (per symmetry.com)</td></tr>
-        <tr><th scope="row" style="text-align:left">Withholding forms</th><td>Not offered</td><td>130+ forms (Symmetry Payroll Forms)</td></tr>
-        <tr><th scope="row" style="text-align:left">I-9 and E-Verify</th><td>Not offered</td><td>Symmetry I-9</td></tr>
-        <tr><th scope="row" style="text-align:left">Track record</th><td>New</td><td>40+ years of payroll compliance (per symmetry.com)</td></tr>
+        <tr><th scope="row" style="text-align:left">Core calculation</th><td>Gross to net: federal, 50 states and DC, local, employer taxes, garnishments, minimum wage</td><td>Gross-to-net calculation (per symmetry.com)</td></tr>
+        <tr><th scope="row" style="text-align:left">Local taxes and addresses</th><td>4,141 local jurisdictions in 15 states, found from the work and home address by geocoding</td><td>Local withholding from address coordinates (Payroll Point, per symmetry.com)</td></tr>
+        <tr><th scope="row" style="text-align:left">Size</th><td>Smaller: one calculation API</td><td>A platform: engine, forms, I-9, minimum wage finder</td></tr>
+        <tr><th scope="row" style="text-align:left">Withholding forms</th><td>Not part of Omnia.tax</td><td>130+ forms (Symmetry Payroll Forms)</td></tr>
+        <tr><th scope="row" style="text-align:left">I-9 and E-Verify</th><td>Not part of Omnia.tax</td><td>Symmetry I-9</td></tr>
+        <tr><th scope="row" style="text-align:left">Track record</th><td>Newer</td><td>40+ years of payroll compliance (per symmetry.com)</td></tr>
         <tr><th scope="row" style="text-align:left">Documentation</th><td>Public docs, OpenAPI 3.1, JSON Schema</td><td>Integration guide for customers (per a customer quote on symmetry.com)</td></tr>
       </tbody>
     </table></div>
-    <h2>When Omnia.tax is a reasonable alternative</h2>
+    <h2>When Omnia.tax is the better fit</h2>
     <ul>
       <li>You want to start the same day, without a sales cycle, and pay per calculation.</li>
-      <li>You need gross-to-net for the US states and the local taxes listed on the <a href="/coverage">coverage page</a>.</li>
+      <li>You want the calculation, local taxes and address geocoding in one small API instead of a platform.</li>
       <li>You want explainable lines and a published schema you can generate a client from.</li>
     </ul>
-    <h2>When it is not</h2>
-    <ul>
-      <li>You need local coverage beyond the 15 states we have researched.</li>
-      <li>You need withholding forms, I-9 verification or Canadian payroll in the same vendor.</li>
-      <li>Your buyers or auditors require a vendor with a long production history.</li>
-    </ul>
+    <h2>What is outside the calculation</h2>
+    <p>Omnia.tax calculates. It does not file or deposit tax, run payroll, produce withholding forms, verify I-9s or cover Canadian payroll. If you need those from the same vendor, Symmetry offers forms and I-9, and a long production history (40+ years, per symmetry.com) may matter to your buyers or auditors.</p>
     <h2>Migrating</h2>
     <p>Omnia.tax is not a drop-in replacement. It has an adapter that accepts a Symmetry-shaped <code>payCalc</code> request so the request shape looks familiar, but it is not wire-compatible, and its jurisdiction ids are its own. Plan to map your employees to Omnia.tax's request: earnings, deductions, the W-4, year-to-date wages and the work state certificate. <code>POST /v1/address</code> resolves addresses to certificates.</p>
-    <p>See also the <a href="/payroll-tax-engine-comparison">comparison of payroll tax engines</a> and the <a href="/payroll-tax-api">payroll tax API</a>.</p>
+    <p>See also the <a href="/payroll-tax-engine-comparison">comparison of payroll tax engines</a>, <a href="/local-payroll-tax-api">local payroll tax coverage</a> and the <a href="/payroll-tax-api">payroll tax API</a>.</p>
   </div>
-<section class="faq" aria-labelledby="faq-h" style="margin-top:44px;max-width:720px"><h2 id="faq-h" style="font-size:22px;line-height:30px">Questions</h2><article><h3>Is Omnia.tax a Symmetry Tax Engine alternative?</h3><p>For some teams. If you need a self-serve HTTP API for gross-to-net payroll tax with public per-call pricing and you can work with state-level coverage plus the local taxes listed on our coverage page, it can replace a tax engine. If you need Symmetry's breadth of local jurisdictions, withholding forms, I-9 or a vendor with decades of production history, it is not a like-for-like replacement.</p></article><article><h3>Is the Omnia.tax API compatible with Symmetry's?</h3><p>No. Omnia.tax has an adapter that accepts a Symmetry-shaped payCalc request, but it is not wire-compatible with Symmetry's API, and its tax jurisdiction ids are its own, not Symmetry's. Expect to change your integration.</p></article><article><h3>How is Omnia.tax priced compared with Symmetry?</h3><p>Omnia.tax is $0.08 per paycheck calculation after a 14-day trial, published on the pricing page. Symmetry does not publish a price on its website; it directs buyers to a demo. We have not seen Symmetry's pricing and do not compare it.</p></article></section>
+<section class="faq" aria-labelledby="faq-h" style="margin-top:44px;max-width:720px"><h2 id="faq-h" style="font-size:22px;line-height:30px">Questions</h2><article><h3>Is Omnia.tax a Symmetry Tax Engine alternative?</h3><p>Yes, if you want a smaller, easier, self-serve payroll tax engine. It does the same core job: gross-to-net for federal, all 50 states and DC and local taxes, plus employer taxes, garnishments and minimum wage, with address geocoding that finds the right local jurisdictions. You sign up, get a key and call it, at a published $0.08 per paycheck calculation. If you also need withholding forms, I-9 or Canadian payroll from the same vendor, those are outside Omnia.tax.</p></article><article><h3>Does Omnia.tax cover local payroll taxes?</h3><p>Yes: 4,141 local tax jurisdictions in the 15 states where we found local wage taxes, each listed by name on the coverage page, and chosen from the employee's work and home address by geocoding.</p></article><article><h3>Is the Omnia.tax API compatible with Symmetry's?</h3><p>No. Omnia.tax has an adapter that accepts a Symmetry-shaped payCalc request, but it is not wire-compatible with Symmetry's API, and its tax jurisdiction ids are its own, not Symmetry's. Expect to change your integration.</p></article><article><h3>How is Omnia.tax priced compared with Symmetry?</h3><p>Omnia.tax is $0.08 per paycheck calculation after a 14-day trial, published on the pricing page. Symmetry does not publish a price on its website; it directs buyers to a demo. We have not seen Symmetry's pricing and do not compare it.</p></article></section>
   <div class="seo-cta" style="margin:48px 0 8px;max-width:720px"><a class="btn" href="/signup">Start the 14-day trial</a> <a class="text-link" href="/docs">Read the docs →</a><p class="fine">14-day free trial, then $0.08 per paycheck calculation. Omnia.tax calculates; it does not file, deposit tax, or give tax advice. <a href="/disclaimer">Disclaimer</a>.</p></div>
 </main>
 <footer class="site-footer">

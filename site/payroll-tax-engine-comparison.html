@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <meta name="color-scheme" content="light" />
 <title>Payroll tax engine comparison: Symmetry, Vertex, Check, Omnia.tax</title>
-<meta name="description" content="Compare payroll tax calculation options: Symmetry Tax Engine, Vertex Payroll Tax, Check, a self-serve API, or build it yourself. What each covers." />
+<meta name="description" content="Compare payroll tax calculation options: Symmetry, Vertex, Check, a self-serve API with local coverage and geocoding, or build it yourself." />
 <link rel="stylesheet" href="/assets/v5.css" />
 </head>
 <body>
@@ -29,10 +29,10 @@
     <div class="table-wrap"><table>
       <thead><tr><th>Option</th><th>What the vendor says it is</th><th>Choose it when</th></tr></thead>
       <tbody>
-        <tr><th scope="row" style="text-align:left">Symmetry Tax Engine</th><td>Payroll tax infrastructure for payroll platforms: gross-to-net calculation, withholding forms, I-9, local lookup. 7,400+ jurisdictions, 40+ years (symmetry.com).</td><td>You are building a payroll product and need maximum local coverage and a long track record.</td></tr>
-        <tr><th scope="row" style="text-align:left">Vertex Payroll Tax</th><td>SaaS payroll tax calculation for HCM and staffing applications in the US and Canada, with geocode-based jurisdiction assignment and REST APIs (vertexinc.com).</td><td>You need US and Canada coverage and address-level jurisdiction assignment.</td></tr>
+        <tr><th scope="row" style="text-align:left">Symmetry Tax Engine</th><td>Payroll tax infrastructure for payroll platforms: gross-to-net calculation, withholding forms, I-9, local lookup. 7,400+ jurisdictions, 40+ years (symmetry.com).</td><td>You are building a payroll product and want a platform with forms and I-9 from one vendor, and a long track record.</td></tr>
+        <tr><th scope="row" style="text-align:left">Vertex Payroll Tax</th><td>SaaS payroll tax calculation for HCM and staffing applications in the US and Canada, with geocode-based jurisdiction assignment and REST APIs (vertexinc.com).</td><td>You need US and Canada in one vendor.</td></tr>
         <tr><th scope="row" style="text-align:left">Check</th><td>Embedded payroll infrastructure: tax calculation, tax filing, money movement, benefits and more (checkhq.com).</td><td>You want to launch a whole payroll product, not only the calculation.</td></tr>
-        <tr><th scope="row" style="text-align:left">Omnia.tax</th><td>A self-serve payroll tax calculation API. Federal, 50 states and DC, 4,141 local jurisdictions in 15 states, $0.08 per calculation.</td><td>You need the calculation only, want to start without a sales cycle, and your local-tax needs are within our coverage.</td></tr>
+        <tr><th scope="row" style="text-align:left">Omnia.tax</th><td>A smaller, easier, self-serve payroll tax engine. The same gross-to-net calculation: federal, 50 states and DC, 4,141 local jurisdictions in 15 states found by address geocoding, employer taxes, garnishments and minimum wage. $0.08 per calculation.</td><td>You want the calculation, with local taxes and geocoding built in, as a small self-serve API you can start with today.</td></tr>
         <tr><th scope="row" style="text-align:left">Build it yourself</th><td>Implement the IRS and state rules in your own code.</td><td>Payroll tax is your product and you can staff the upkeep.</td></tr>
       </tbody>
     </table></div>
@@ -44,10 +44,12 @@
       <li>What is the price per calculation at your volume, and is it published?</li>
       <li>Does it file and deposit, or only calculate, and which do you need?</li>
     </ul>
+    <h2>How Omnia.tax answers the local question</h2>
+    <p>4,141 local tax jurisdictions in the 15 states where we found local wage taxes, each listed by name with its rate on the <a href="/coverage">coverage page</a> (the largest: Pennsylvania 2,627, Ohio 1,054, Kentucky 256, Indiana 92). Address geocoding finds the right ones from the work and home address, and says how precisely it matched: in our state-by-state test, 50 of 51 jurisdictions resolved to a surveyed address point or better (2026-10-07). 69 local minimum wage ordinances are checked on the same call.</p>
     <h2>Where Omnia.tax fits</h2>
-    <p>It is the narrowest of these: a calculation API only. It does not file, deposit, run payroll, handle forms or I-9, or cover Canada. If that is what you need, it is quick to try: a 14-day trial, then $0.08 per paycheck calculation. Read the <a href="/symmetry-tax-engine-alternative">Symmetry Tax Engine comparison</a> or the <a href="/payroll-tax-api">API overview</a>.</p>
+    <p>It is the smallest and easiest to start with: a self-serve calculation API with local coverage and geocoding built in, a 14-day trial, then $0.08 per paycheck calculation. It calculates; filing, deposits, payroll runs, withholding forms, I-9 and Canadian payroll are outside it. Read the <a href="/symmetry-tax-engine-alternative">Symmetry Tax Engine comparison</a>, the <a href="/local-payroll-tax-api">local payroll tax coverage</a> or the <a href="/payroll-tax-api">API overview</a>.</p>
   </div>
-<section class="faq" aria-labelledby="faq-h" style="margin-top:44px;max-width:720px"><h2 id="faq-h" style="font-size:22px;line-height:30px">Questions</h2><article><h3>What are the alternatives to Symmetry Software?</h3><p>Other ways to get payroll tax calculation include Vertex Payroll Tax, an embedded payroll API such as Check, a self-serve payroll tax API such as Omnia.tax, or building the rules in-house from IRS and state publications. Which fits depends on whether you need only calculation or a full payroll platform.</p></article><article><h3>Should I build payroll tax calculation myself?</h3><p>Only if payroll tax is your product. The arithmetic is simple. Keeping every state and local rule current, effective-dated and tested is the permanent cost.</p></article></section>
+<section class="faq" aria-labelledby="faq-h" style="margin-top:44px;max-width:720px"><h2 id="faq-h" style="font-size:22px;line-height:30px">Questions</h2><article><h3>What are the alternatives to Symmetry Software?</h3><p>Other ways to get payroll tax calculation include Vertex Payroll Tax, an embedded payroll API such as Check, a self-serve payroll tax API such as Omnia.tax, or building the rules in-house from IRS and state publications. Which fits depends on whether you need only calculation or a full payroll platform.</p></article><article><h3>Which payroll tax engine has local tax coverage and address geocoding?</h3><p>Several do. Omnia.tax covers 4,141 local jurisdictions in 15 states and finds the right ones from the work and home address with geocoding, in a self-serve API. Symmetry describes local withholding from address coordinates, and Vertex describes geocode-based jurisdiction assignment, on their own sites.</p></article><article><h3>Should I build payroll tax calculation myself?</h3><p>Only if payroll tax is your product. The arithmetic is simple. Keeping every state and local rule current, effective-dated and tested is the permanent cost.</p></article></section>
   <div class="seo-cta" style="margin:48px 0 8px;max-width:720px"><a class="btn" href="/signup">Start the 14-day trial</a> <a class="text-link" href="/docs">Read the docs →</a><p class="fine">14-day free trial, then $0.08 per paycheck calculation. Omnia.tax calculates; it does not file, deposit tax, or give tax advice. <a href="/disclaimer">Disclaimer</a>.</p></div>
 </main>
 <footer class="site-footer">

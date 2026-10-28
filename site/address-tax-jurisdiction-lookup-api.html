@@ -4,8 +4,8 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <meta name="color-scheme" content="light" />
-<title>Address to tax jurisdiction lookup API for payroll | Omnia.tax</title>
-<meta name="description" content="Turn a work and home street address into the state, local tax jurisdictions and withholding certificate a paycheck needs. Reports what it could not resolve." />
+<title>Payroll tax geocoding: address to tax jurisdiction API | Omnia.tax</title>
+<meta name="description" content="Payroll tax geocoding: turn a work and home address into the state, local tax jurisdictions and certificate a paycheck needs, with match precision reported." />
 <link rel="stylesheet" href="/assets/v5.css" />
 </head>
 <body>
@@ -19,8 +19,8 @@
   <div class="page-head">
     <nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a> <span aria-hidden="true">/</span> <a href="/guides">Guides</a> <span aria-hidden="true">/</span> <span aria-current="page">Address to tax jurisdiction API</span></nav>
     <p class="eyebrow">Engines and APIs</p>
-    <h1 class="page">Address to tax jurisdiction lookup API</h1>
-    <p class="sub">Resolve an employee once, from their addresses, and reuse the result on every pay run.</p>
+    <h1 class="page">Payroll tax geocoding: address to tax jurisdiction</h1>
+    <p class="sub">Resolve an employee once, from their addresses, to the exact local taxes that apply, and reuse the result on every pay run.</p>
   </div>
   <div class="prose seo" style="margin-top:32px;max-width:720px">
 
@@ -32,7 +32,10 @@
   &quot;checkDate&quot;: &quot;2026-09-15&quot; }</pre></div>
     <h2>What comes back</h2>
     <div class="table-wrap"><table><thead><tr><th>Field</th><th style="text-align:left">Meaning</th></tr></thead><tbody><tr><td><code>state</code>, <code>residenceState</code></td><td style="text-align:left">The work state, and the home state when it differs.</td></tr><tr><td><code>certificate</code></td><td style="text-align:left">The state and local facts to put in <code>workState.certificate</code>: city, county, school district and the state's own codes.</td></tr><tr><td><code>work</code>, <code>residence</code></td><td style="text-align:left">For each address: whether it matched, the matched address, precision and point source, coordinates.</td></tr><tr><td><code>notResolvable</code></td><td style="text-align:left">Taxes that could not be checked, for example residence-based taxes when no home address was given.</td></tr><tr><td><code>warnings</code>, <code>fullyResolved</code></td><td style="text-align:left">Low-confidence reasons, and whether everything needed was found.</td></tr></tbody></table></div>
-    <h2>Honest about gaps</h2>
+    <h2>Address-level, and measured</h2>
+    <p>Geocoding for payroll has to land on the right side of a municipal line, so a ZIP code or a city name is not enough. Omnia.tax places the address using government-published address points (the National Address Database), county address and parcel data, OpenStreetMap, and a national address index, and reports which one answered in <code>precision</code>.</p>
+    <p>We measured it: one real address in each of the 51 jurisdictions, resolved through the same pipeline the API uses. 50 of 51 resolved to a surveyed address point or better than the Census geocoder's own position along the street, 36 of them to a government-published rooftop point and 11 to a corroborated house-level point (run 2026-10-07). That is what lets the engine pick the right city, county and school district.</p>
+    <h2>It says what it could and could not resolve</h2>
     <p>If only a work address is sent, the response lists the residence-based taxes it could not check, so a missing home address does not silently become a missing tax. A lookup is recorded and not billed; only the paycheck calculation is.</p>
     <p>The <a href="/sandbox">calculator</a> uses this endpoint to fill in the state and local fields from an address.</p>
     <h2>Keep reading</h2>

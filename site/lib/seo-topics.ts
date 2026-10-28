@@ -5,6 +5,7 @@ import { solveGrossUp } from './grossup.ts';
 import { comparePaychecks } from './compare.ts';
 import { employerTaxes, parseQuarter } from './employer-taxes.ts';
 import type { Faq, GeneratedPage } from './seo-pages.ts';
+import { GEOCODE } from './geocoding-facts.ts';
 
 /**
  * Topic landing pages for the searches a buyer of a payroll tax engine makes: the engine, the
@@ -29,7 +30,7 @@ export interface Helpers {
   federalFacts: () => { ssRate: number; ssBase26: number; ssBase27: number; medicare: number; addlMedicare: number; addlThreshold: number };
   wageBaseOf: (raw: unknown) => number | undefined;
   states: StateRow[];
-  cov: { localJurisdictions: number; statesWithLocalTax: number; localMinimumWage: number };
+  cov: { localJurisdictions: number; statesWithLocalTax: number; localMinimumWage: number; topLocal: string; statesListedInFull: number };
 }
 
 export interface TopicDef {
@@ -225,7 +226,7 @@ export function topics(h: Helpers): TopicDef[] {
     <p>Filing returns, depositing tax, paying employees and advising. Those are separate services. If you need them in one vendor, see the <a href="/payroll-tax-engine-comparison">comparison of payroll tax engines</a>.</p>
     <h2>How to choose</h2>
     <ul>
-      <li>Check the local layer first. It is where engines differ most. Ours: ${cov.localJurisdictions.toLocaleString('en-US')} jurisdictions in ${cov.statesWithLocalTax} states, listed on <a href="/coverage">coverage</a>.</li>
+      <li>Check the local layer first, and how the right jurisdiction is found from an address. Ours: ${cov.localJurisdictions.toLocaleString('en-US')} local jurisdictions in ${cov.statesWithLocalTax} states, listed by name on <a href="/coverage">coverage</a>, found by address geocoding.</li>
       <li>Ask for a worked example with your own edge cases: a bonus, a multi-state employee, a pre-tax deduction.</li>
       <li>Ask what happens when a state changes a rate mid-year.</li>
       <li>Ask for the price at your volume. Ours is published: $0.08 per paycheck calculation.</li>
@@ -411,33 +412,38 @@ export function topics(h: Helpers): TopicDef[] {
   add({
     path: '/local-payroll-tax-api', label: 'Local payroll tax API', group: 'Engines and APIs',
     title: 'Local payroll tax API: city, county, school district | Omnia.tax',
-    description: `A local payroll tax API covering ${cov.localJurisdictions.toLocaleString('en-US')} city, county and school district taxes in ${cov.statesWithLocalTax} states, chosen from the work and home address.`.slice(0, 160),
+    description: `Local payroll tax in one call: ${cov.localJurisdictions.toLocaleString('en-US')} city, county and school district taxes in ${cov.statesWithLocalTax} states, found from the work and home address by geocoding.`.slice(0, 160),
     h1: 'Local payroll tax API', eyebrow: 'Engines and APIs',
-    sub: 'Cities, counties and school districts tax wages in some states. Which one applies depends on two addresses.',
+    sub: 'Cities, counties and school districts tax wages in some states. We cover them, and find the right one from the address.',
     body: `
-    <p>Beyond federal and state tax, some places tax wages locally: municipal income tax in Ohio, earned income tax and local services tax in Pennsylvania, school-district income tax in Ohio and Kentucky, occupational taxes in Kentucky and Alabama, and others. The local layer is the most common reason a payroll tax result is wrong.</p>
+    <p>Beyond federal and state tax, some places tax wages locally: municipal income tax in Ohio, earned income tax and local services tax in Pennsylvania, school-district income tax in Ohio and Kentucky, occupational taxes in Kentucky and Alabama, city income taxes in Michigan, Missouri and Maryland, and others. The local layer is the most common reason a payroll tax result is wrong, so it is the layer we built most carefully.</p>
     <h2>What Omnia.tax covers</h2>
-    <p>${cov.localJurisdictions.toLocaleString('en-US')} local jurisdictions across ${cov.statesWithLocalTax} states, plus ${cov.localMinimumWage} local minimum wage ordinances. The full list, by state and by jurisdiction, is on the <a href="/coverage">coverage page</a>, including which states are listed in full and which only in part.</p>
-    <h2>How the right jurisdiction is chosen</h2>
-    <p>Local tax usually follows the work location, the home location, or both. A street address is resolved to the city, county, school district and the state's own codes, which become the <code>workState.certificate</code> on the paycheck request. <a href="/address-tax-jurisdiction-lookup-api">The address endpoint</a> does this, and shows what it could and could not resolve.</p>
+    <ul>
+      <li><strong>${cov.localJurisdictions.toLocaleString('en-US')} local tax jurisdictions in ${cov.statesWithLocalTax} states,</strong> every state where we found a local wage tax. The largest: ${cov.topLocal}.</li>
+      <li><strong>Each one listed by name,</strong> with its rate and where it came from, on the <a href="/coverage">coverage page</a>. ${cov.statesListedInFull} of the ${cov.statesWithLocalTax} states are listed in full; the coverage page marks the few where a list has a known gap.</li>
+      <li><strong>${cov.localMinimumWage} local minimum wage ordinances,</strong> checked on the same call as the tax.</li>
+    </ul>
+    <h2>Geocoding picks the right jurisdiction</h2>
+    <p>Local tax usually follows the work location, the home location, or both. Send a work address, and a home address if it differs, and <a href="/address-tax-jurisdiction-lookup-api">the address endpoint</a> resolves each to the city, county, school district and the state's own codes. Those become the <code>workState.certificate</code> on the paycheck request, so a paycheck is taxed for the place the address is in, not the place its ZIP code suggests. The response says how precisely each address matched.</p>
     <h2>An example</h2>
     <p>The Columbus, Ohio paycheck from our <a href="/payroll-tax-calculation-engine">engine overview</a> has a municipal line:</p>
     ${table(h, ['Tax', 'Taxable wages', 'Amount'], oh.taxes.filter((t) => t.jurisdiction === 'local' && t.payer === 'employee' && t.amount > 0).map((t) => [h.esc(t.name), money(t.taxableWages), money(t.amount)]), 1)}
-    <h2>What it says it does not know</h2>
-    <p>Where a state's local layer is only partly listed, the coverage page says so, and a lookup that cannot determine a jurisdiction says which ones it could not check. We would rather report a gap than guess a rate.</p>`,
+    <h2>Every line explains itself</h2>
+    <p>Each local tax line carries the rate, the wages it applied to and where the rate came from, so a payroll specialist can audit it. When a rate rests on a weaker source than the levying body's own document, the response says so in <code>notices</code>.</p>`,
     faq: [
-      { q: 'Which states have local payroll taxes?', a: `Omnia.tax carries local taxes in ${cov.statesWithLocalTax} states, ${cov.localJurisdictions.toLocaleString('en-US')} jurisdictions in all. The coverage page lists them by state and says where a state's local layer is only partly listed.` },
-      { q: 'How does the API know which city tax applies?', a: 'It resolves the work address, and the home address when it differs, to a city, county and school district, and the paycheck calculation applies the local taxes for those places.' },
+      { q: 'Which states have local payroll taxes?', a: `Omnia.tax carries local taxes in ${cov.statesWithLocalTax} states, ${cov.localJurisdictions.toLocaleString('en-US')} jurisdictions in all, each listed by name on the coverage page. Pennsylvania and Ohio have the most; Kentucky, Indiana, Michigan, Alabama, Maryland and others have them too.` },
+      { q: 'How does the API know which city tax applies?', a: 'It geocodes the work address, and the home address when it differs, to a city, county and school district, and the paycheck calculation applies the local taxes for those places.' },
+      { q: 'Does it include local minimum wage?', a: `Yes. ${cov.localMinimumWage} city and county minimum wage ordinances are checked on the same call as the tax.` },
     ],
     related: ['/address-tax-jurisdiction-lookup-api', '/coverage', '/multi-state-payroll-tax-calculation', '/state-income-tax-withholding-api'],
   });
 
   add({
     path: '/address-tax-jurisdiction-lookup-api', label: 'Address to tax jurisdiction API', group: 'Engines and APIs',
-    title: 'Address to tax jurisdiction lookup API for payroll | Omnia.tax',
-    description: 'Turn a work and home street address into the state, local tax jurisdictions and withholding certificate a paycheck needs. Reports what it could not resolve.',
-    h1: 'Address to tax jurisdiction lookup API', eyebrow: 'Engines and APIs',
-    sub: 'Resolve an employee once, from their addresses, and reuse the result on every pay run.',
+    title: 'Payroll tax geocoding: address to tax jurisdiction API | Omnia.tax',
+    description: 'Payroll tax geocoding: turn a work and home address into the state, local tax jurisdictions and certificate a paycheck needs, with match precision reported.',
+    h1: 'Payroll tax geocoding: address to tax jurisdiction', eyebrow: 'Engines and APIs',
+    sub: 'Resolve an employee once, from their addresses, to the exact local taxes that apply, and reuse the result on every pay run.',
     body: `
     <p>Payroll tax depends on where people work and live, but payroll systems store addresses as text. <code>POST /v1/address</code> turns a one-line work address, and optionally a home address, into the facts a paycheck needs.</p>
     <h2>What you send</h2>
@@ -450,7 +456,10 @@ export function topics(h: Helpers): TopicDef[] {
       ['<code>notResolvable</code>', 'Taxes that could not be checked, for example residence-based taxes when no home address was given.'],
       ['<code>warnings</code>, <code>fullyResolved</code>', 'Low-confidence reasons, and whether everything needed was found.'],
     ]).replace(/text-align:right/g, 'text-align:left')}
-    <h2>Honest about gaps</h2>
+    <h2>Address-level, and measured</h2>
+    <p>Geocoding for payroll has to land on the right side of a municipal line, so a ZIP code or a city name is not enough. Omnia.tax places the address using government-published address points (the National Address Database), county address and parcel data, OpenStreetMap, and a national address index, and reports which one answered in <code>precision</code>.</p>
+    <p>We measured it: one real address in each of the ${GEOCODE.jurisdictionsTested} jurisdictions, resolved through the same pipeline the API uses. ${GEOCODE.betterThanInterpolation} of ${GEOCODE.jurisdictionsTested} resolved to a surveyed address point or better than the Census geocoder's own position along the street, ${GEOCODE.rooftop} of them to a government-published rooftop point and ${GEOCODE.rooftopOsm} to a corroborated house-level point (run ${GEOCODE.measuredOn}). That is what lets the engine pick the right city, county and school district.</p>
+    <h2>It says what it could and could not resolve</h2>
     <p>If only a work address is sent, the response lists the residence-based taxes it could not check, so a missing home address does not silently become a missing tax. A lookup is recorded and not billed; only the paycheck calculation is.</p>
     <p>The <a href="/sandbox">calculator</a> uses this endpoint to fill in the state and local fields from an address.</p>`,
     faq: [
@@ -1017,7 +1026,7 @@ export function topics(h: Helpers): TopicDef[] {
     <h2>Build when</h2>
     <p>Payroll tax is your product, you have specialists to maintain it, and no vendor covers a jurisdiction you need.</p>
     <h2>Buy when</h2>
-    <p>Payroll tax is a feature of something else, or you need to ship before a rules team could exist. Check what the vendor covers before you decide: ours is ${cov.statesWithLocalTax} states of local taxes on top of all states, and it does not file, deposit or run payroll.</p>
+    <p>Payroll tax is a feature of something else, or you need to ship before a rules team could exist. Check what the vendor covers before you decide. Ours is a smaller, self-serve engine: all states, local taxes in ${cov.statesWithLocalTax} states found by address geocoding, garnishments and minimum wage. It calculates; it does not file, deposit or run payroll.</p>
     <h2>A checklist for either</h2>
     <ul>
       <li>Can it reproduce a paycheck from last year, with last year's rules?</li>
