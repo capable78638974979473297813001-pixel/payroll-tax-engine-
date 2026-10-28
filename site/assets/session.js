@@ -142,3 +142,23 @@
     toast: toast,
   };
 })(window);
+
+/* A server whose account store sits on the container's own filesystem forgets every account at the
+   next restart or redeploy, which looks like "I was signed out and my password stopped working".
+   /healthz says so; on the sign-in and sign-up pages, say it to the person who is about to rely on it. */
+(function (w) {
+  var path = (w.location && w.location.pathname) || '';
+  if (!/^\/(signin|signup)/.test(path) || typeof w.fetch !== 'function') return;
+  w.fetch('/healthz', { headers: { Accept: 'application/json' } }).then(function (res) {
+    return res.json();
+  }).then(function (body) {
+    if (!body || body.storage !== 'temporary') return;
+    var box = document.createElement('div');
+    box.className = 'alert alert-error';
+    box.setAttribute('role', 'alert');
+    box.style.margin = '0 0 16px';
+    box.textContent = 'This server is saving accounts on temporary storage. They are erased whenever it restarts or redeploys, so a new account can disappear within hours. The site owner needs to attach a persistent disk at /var/data (see docs/GO-LIVE.md).';
+    var host = document.querySelector('main') || document.body;
+    host.insertBefore(box, host.firstChild);
+  }).catch(function () { /* health unreachable: say nothing */ });
+})(window);

@@ -32,7 +32,7 @@ export const PAGES: PageMeta[] = [
   {
     path: '/',
     file: 'index.html',
-    title: 'Payroll tax calculation API for developers | Omnia.tax',
+    title: 'Omnia.tax: Payroll tax calculation engine',
     description: 'Calculate US payroll taxes with one API call: federal, state, local and employer taxes for every state. 14-day free trial, then $0.08 per paycheck calculation.',
     index: true,
   },

@@ -17,7 +17,7 @@ import { listUniqueTaxIds, payCalc, resolveUniqueTaxId, type PayCalcRequest } fr
 import { runEmbeddedPayroll, type PlatformEmployeeInput } from '../payroll/platform.ts';
 import { pointSourceOf, resolveEmployee } from '../geocode/index.ts';
 import {
-  withDb, readDb, hitStoredLimit,
+  withDb, readDb, hitStoredLimit, storageStatus,
   type AccountRecord, type AuthSession, type DB, type KeyRecord, type PaymentMethodRecord,
   type SavedScenario, type SubscriptionRecord, type TermsAcceptance, type TermsQuote,
 } from './lib/store.ts';
@@ -3485,6 +3485,8 @@ function handleUniqueTaxId(req: IncomingMessage, res: ServerResponse, path: stri
 // deploy with missing data.
 // ---------------------------------------------------------------------
 
+const STARTED_AT = new Date().toISOString();
+
 function handleHealth(res: ServerResponse): void {
   let states = 0;
   let ok = true;
@@ -3508,6 +3510,10 @@ function handleHealth(res: ServerResponse): void {
     version: API_VERSION,
     states,
     store,
+    // 'temporary' means the account store sits on the container's own filesystem: a restart or
+    // redeploy erases every account. 'unchecked' outside production.
+    storage: storageStatus().status,
+    startedAt: STARTED_AT,
     taxYears: supportedYears(),
     // Which integrations this server has been given keys for. Booleans only.
     payments: stripeConfigured(),
@@ -3991,6 +3997,13 @@ createServer((req, res) => {
     setInterval(flushMeterSoon, 60_000).unref();
   } else if (process.env.STRIPE_SECRET_KEY) {
     console.warn('Stripe is connected but metering is OFF: set STRIPE_PRICE_ID (a usage-metered price) and STRIPE_METER_EVENT_NAME to bill per call. Onboarding will only save a card.');
+  }
+  const storage = storageStatus();
+  if (storage.status === 'temporary') {
+    console.error(
+      `[storage] WARNING: ${storage.reason} Sign-ups work until the next restart, then every account is forgotten. ` +
+        'Mount a persistent disk at /var/data (Render: service > Disks, or deploy from render.yaml). See docs/GO-LIVE.md.',
+    );
   }
   console.log(`Omnia.tax:           http://localhost:${PORT}`);
   console.log(`Omnia.tax docs:      http://localhost:${PORT}/docs`);

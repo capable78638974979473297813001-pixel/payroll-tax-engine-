@@ -14,6 +14,12 @@ set -eu
 
 mkdir -p "${SITE_DB_DIR:-/var/data/site}"
 
+# Accounts live in SITE_DB_DIR. If it is on the container's own filesystem rather than a mounted
+# disk, every restart and redeploy erases them. A mounted disk is a different device than "/".
+if [ "$(stat -c %d "${SITE_DB_DIR:-/var/data/site}" 2>/dev/null || echo a)" = "$(stat -c %d / 2>/dev/null || echo b)" ] && [ "${STORAGE_IS_DURABLE:-}" != "1" ]; then
+  echo "[start] WARNING: ${SITE_DB_DIR:-/var/data/site} is not on a mounted disk. Accounts are lost at the next restart or redeploy. Attach a persistent disk at /var/data (see docs/GO-LIVE.md)." >&2
+fi
+
 if [ -n "${RESEND_API_KEY:-}" ] || [ -n "${SMTP_HOST:-}" ]; then
   SECRETS_FILE="${VERIFIER_SECRETS_FILE:-/var/data/verifier-secrets.env}"
   if [ -z "${VERIFIER_SECRET:-}" ] || [ -z "${VERIFIER_PEPPER:-}" ]; then
