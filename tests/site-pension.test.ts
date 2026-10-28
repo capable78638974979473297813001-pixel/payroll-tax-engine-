@@ -91,7 +91,8 @@ describe('a pension payment through the API', () => {
     assert.deepEqual(body.result.taxes.map((t) => t.id), ['US_FIT_PENSION']);
     assert.equal(body.result.taxes[0]!.amount, 6583);
     assert.equal(body.result.netPay, 200_000 - 6583);
-    assert.match(body.result.warnings!.join(' '), /State and local income tax withholding on pension payments is not calculated/);
+    assert.match(body.result.warnings!.join(' '), /No state was sent/);
+    assert.match(body.result.warnings!.join(' '), /Local income tax withholding on pension payments is not calculated/);
     assert.ok(!body.result.warnings!.some((w) => /pension/.test(w) && /ignored|unknown/i.test(w)), 'pension is a known field');
   });
 

@@ -5,6 +5,7 @@ import { CannotComputeError, federalRuleset } from '../registry.ts';
 import type { FilingStatus, PaycheckInput, PaycheckResult, TaxLine } from '../types.ts';
 import { PERIODS_PER_YEAR } from '../types.ts';
 import { cashEarnings, posttaxTotal } from '../wages.ts';
+import { statePensionLines } from './pension-state.ts';
 
 /**
  * Federal income tax withholding on pension, annuity, profit-sharing, stock-bonus and IRA payments.
@@ -175,10 +176,11 @@ export function calculatePension(input: PaycheckInput): PaycheckResult {
     detail,
   };
   const posttax = posttaxTotal(input.deductions);
-  const netPay = gross - posttax - withheld;
-  const warnings = [
-    'State and local income tax withholding on pension payments is not calculated: states differ on whether and how they withhold. Check the payee’s state.',
-  ];
+  const state = statePensionLines(input, taxable, withheld);
+  const taxes = [line, ...state.lines];
+  const employeeTaxTotal = taxes.reduce((sum, t) => sum + t.amount, 0);
+  const netPay = gross - posttax - employeeTaxTotal;
+  const warnings = [...state.warnings, 'Local income tax withholding on pension payments is not calculated.'];
   if (netPay < 0) {
     warnings.push(`Withholding and deductions are $${(-netPay / 100).toFixed(2)} more than the payment. Net pay is negative; nothing was reduced automatically.`);
   }
@@ -187,8 +189,8 @@ export function calculatePension(input: PaycheckInput): PaycheckResult {
     grossPay: gross,
     pretaxDeductions: 0,
     posttaxDeductions: posttax,
-    taxes: [line],
-    employeeTaxTotal: withheld,
+    taxes,
+    employeeTaxTotal,
     employerTaxTotal: 0,
     netPay,
     warnings,

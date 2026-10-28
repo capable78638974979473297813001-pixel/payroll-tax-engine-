@@ -133,7 +133,8 @@ describe('what a pension payment is not', () => {
     assert.deepEqual(r.taxes.map((t) => t.id), ['US_FIT_PENSION']);
     assert.equal(r.employerTaxTotal, 0);
     assert.equal(r.netPay, 500_000 - r.taxes[0]!.amount);
-    assert.match(r.warnings!.join(' '), /State and local income tax withholding on pension payments is not calculated/);
+    assert.match(r.warnings!.join(' '), /State income tax withholding on pension payments is not calculated for OH/);
+    assert.match(r.warnings!.join(' '), /Local income tax withholding on pension payments is not calculated/);
   });
 
   test('post-tax deductions come out of the payment; pre-tax deductions are refused', () => {

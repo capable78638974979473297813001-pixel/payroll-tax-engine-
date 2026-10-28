@@ -195,6 +195,13 @@ export function createForm() {
     pensionNoWithholding: false,
     pensionRate: '',
     pensionAbroad: false,
+    // What the payee told the payer about state tax: '' (the state's default), 'none', 'percent' or 'amount'.
+    pensionStateChoice: '',
+    pensionStatePercent: '',
+    pensionStateAmount: 0,
+    pensionStateExtra: 0,
+    pensionEntireBalance: false,
+    pensionRetirementExclusion: false,
   };
 }
 
@@ -239,6 +246,25 @@ function buildPensionInput(form, gross) {
       else pension.w4r = { withholdingRate: n };
     }
   }
+  if (form.pensionEntireBalance) pension.entireAccountBalance = true;
+  const election = {};
+  const choice = form.pensionStateChoice || '';
+  if (choice === 'none') election.none = true;
+  if (choice === 'percent') {
+    const n = Number(String(form.pensionStatePercent ?? '').trim());
+    if (!(n > 0 && n <= 100)) problems.push('State withholding percent must be more than 0 and at most 100.');
+    else election.percent = n;
+  }
+  if (choice === 'amount') {
+    const cents = dollars(form.pensionStateAmount || 0);
+    if (!Number.isFinite(cents) || cents < 0) problems.push('State withholding amount must be a dollar amount of 0 or more.');
+    else election.amount = cents;
+  }
+  const extra = dollars(form.pensionStateExtra || 0);
+  if (!Number.isFinite(extra) || extra < 0) problems.push('Extra state withholding must be a dollar amount of 0 or more.');
+  else if (extra > 0) election.additionalAmount = extra;
+  if (form.pensionRetirementExclusion) election.retirementExclusion = true;
+  if (Object.keys(election).length) pension.stateElection = election;
   if (problems.length) throw new CalculatorInputError(problems);
   return pension;
 }
@@ -368,12 +394,15 @@ export function buildPaycheckInput(form) {
       if (!Number.isFinite(amount) || amount <= 0) continue;
       deductions.push({ code: String(item.code || '').trim() || 'DED', category: null, amount });
     }
+    // The payee's own state withholds, so the state they live in decides it.
+    const payeeState = String(form.residenceStateCode || form.stateCode || '').trim().toUpperCase();
     return {
       checkDate: form.checkDate,
       payFrequency: form.payFrequency,
       earnings: [{ code: 'PENSION', category: 'regular', amount: gross }],
       deductions,
       pension,
+      ...(payeeState ? { residenceState: { code: payeeState } } : {}),
     };
   }
 
