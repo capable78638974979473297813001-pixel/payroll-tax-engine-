@@ -897,6 +897,35 @@
           "readOn": "2026-10-28"
         }
       ]
+    },
+    "WI": {
+      "status": "election_only",
+      "periodic": {
+        "kind": "none"
+      },
+      "nonperiodic": {
+        "kind": "none"
+      },
+      "eligibleRollover": {
+        "kind": "none"
+      },
+      "electable": [
+        "percent",
+        "amount"
+      ],
+      "notes": "Pension and retirement income are not wages under Wisconsin law, so withholding is not required; a recipient who asks in writing can have it withheld.",
+      "sources": [
+        {
+          "title": "Wisconsin Department of Revenue, Withholding Tax Guide (Publication W-166, January 2026)",
+          "url": "https://www.revenue.wi.gov/dor%20publications/pb166.pdf",
+          "readOn": "2026-10-28"
+        },
+        {
+          "title": "Wisconsin Withholding Tax Update, October 2025",
+          "url": "https://www.revenue.wi.gov/withholdingtaxupdate/25-1.pdf",
+          "readOn": "2026-10-28"
+        }
+      ]
     }
   }
 }

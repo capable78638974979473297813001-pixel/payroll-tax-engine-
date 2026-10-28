@@ -120,7 +120,7 @@ describe('Oklahoma and Maryland, from their own regulation and release', () => {
 
 describe('states that only withhold when asked', () => {
   test('nothing by default, with a warning that says why', () => {
-    for (const st of ['AL', 'AZ', 'ID', 'IL', 'IN', 'LA', 'MO', 'NJ', 'NM', 'NY', 'ND']) {
+    for (const st of ['AL', 'AZ', 'ID', 'IL', 'IN', 'LA', 'MO', 'NJ', 'NM', 'NY', 'ND', 'WI']) {
       const r = calculatePaycheck(pay(st, { kind: 'periodic' }));
       assert.equal(r.taxes.some((t) => t.id.endsWith('_PENSION_SIT')), false, st);
       assert.match(r.warnings!.join(' '), new RegExp(`${st} withholds on pension payments only when the payee asks`), st);
@@ -184,7 +184,7 @@ describe('when a state does not withhold', () => {
     const tx = calculatePaycheck(pay('TX', { kind: 'periodic' }));
     assert.equal(tx.taxes.length, 1);
     assert.match(tx.warnings!.join(' '), /TX has no state income tax/);
-    for (const st of ['OH', 'KS', 'DE', 'OR', 'PA', 'CO', 'KY']) {
+    for (const st of ['OH', 'KS', 'DE', 'OR', 'PA', 'CO', 'KY', 'SC']) {
       const r = calculatePaycheck(pay(st, { kind: 'periodic' }));
       assert.equal(r.taxes.length, 1, st);
       assert.match(r.warnings!.join(' '), new RegExp(`not calculated for ${st}`), st);
