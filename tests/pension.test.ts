@@ -5,6 +5,8 @@ import { calculatePaycheck } from '../src/calculate.ts';
 import { CannotComputeError } from '../src/registry.ts';
 import type { PaycheckInput, PensionPayment, PayFrequency } from '../src/types.ts';
 import { PERIODS_PER_YEAR } from '../src/types.ts';
+import { listUniqueTaxIds, payCalc } from '../api/ste-compat.ts';
+import { solveGrossUp } from '../site/lib/grossup.ts';
 
 /**
  * Federal withholding on pension, annuity and IRA payments, 2026.
@@ -131,7 +133,8 @@ describe('what a pension payment is not', () => {
     assert.deepEqual(r.taxes.map((t) => t.id), ['US_FIT_PENSION']);
     assert.equal(r.employerTaxTotal, 0);
     assert.equal(r.netPay, 500_000 - r.taxes[0]!.amount);
-    assert.match(r.warnings!.join(' '), /State and local income tax withholding on pension payments is not calculated/);
+    assert.match(r.warnings!.join(' '), /State income tax withholding on pension payments is not calculated for OH/);
+    assert.match(r.warnings!.join(' '), /Local income tax withholding on pension payments is not calculated/);
   });
 
   test('post-tax deductions come out of the payment; pre-tax deductions are refused', () => {
@@ -203,5 +206,36 @@ describe('Form W-4R: nonperiodic payments and eligible rollover distributions', 
     assert.ok(wages.taxes.some((t) => t.id === 'US_SS_EE'));
     assert.ok(wages.taxes.some((t) => t.id === 'US_FIT'));
     assert.equal(wages.taxes.some((t) => t.id === 'US_FIT_PENSION'), false);
+  });
+});
+
+describe('pension through the other entry points', () => {
+  test('payCalc takes a pension and returns the one federal line against the federal id', () => {
+    const tx = listUniqueTaxIds('2026-06-15').find((e) => e.state === 'TX' && e.type === 'state')!;
+    const [r] = payCalc([{ checkDate: '2026-06-15', frequency: 'monthly', grossPay: 2000, workUniqueTaxIds: [tx.uniqueTaxId], pension: { kind: 'periodic' } }]);
+    assert.equal(r!.error, undefined);
+    assert.equal(r!.taxJurisdictionParms.length, 1);
+    assert.equal(r!.taxJurisdictionParms[0]!.amount, 65.83);
+    assert.equal(r!.netPay, 2000 - 65.83);
+  });
+
+  test('payCalc reports a pension the engine refuses on that row, not for the batch', () => {
+    const tx = listUniqueTaxIds('2026-06-15').find((e) => e.state === 'TX' && e.type === 'state')!;
+    const rows = payCalc([
+      { checkDate: '2026-06-15', frequency: 'quarterly', grossPay: 2000, workUniqueTaxIds: [tx.uniqueTaxId], pension: { kind: 'periodic' } },
+      { checkDate: '2026-06-15', frequency: 'monthly', grossPay: 2000, workUniqueTaxIds: [tx.uniqueTaxId], pension: { kind: 'nonperiodic' } },
+    ]);
+    assert.match(rows[0]!.error ?? '', /Table 4/);
+    assert.equal(rows[1]!.error, undefined);
+    assert.equal(rows[1]!.taxJurisdictionParms[0]!.amount, 200);
+  });
+
+  test('a gross-up solves for the pension payment that leaves a net amount', () => {
+    const base = pay(300_000, { kind: 'periodic' });
+    const solved = solveGrossUp(base, 0, 250_000, calculatePaycheck);
+    assert.equal(solved.exact, true);
+    assert.equal(solved.netPay, 250_000);
+    assert.equal(solved.result.taxes[0]!.id, 'US_FIT_PENSION');
+    assert.equal(solved.amount - solved.result.employeeTaxTotal, 250_000);
   });
 });

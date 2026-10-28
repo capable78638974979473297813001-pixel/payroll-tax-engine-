@@ -243,7 +243,7 @@
 
     <fieldset id="pensionSet">
       <legend>Pension, Annuity or IRA Payment (optional)</legend>
-      <p class="hint">Use this when the payment is a pension, annuity, profit-sharing or IRA payment, not wages. Enter the payment in Earnings above. Only federal income tax is withheld: no Social Security, Medicare or unemployment tax applies, and state and local withholding on pension payments is not calculated.</p>
+      <p class="hint">Use this when the payment is a pension, annuity, profit-sharing or IRA payment, not wages. Enter the payment in Earnings above. Federal income tax is withheld, and so is state income tax for the states Omnia.tax has checked against the state's own guidance. No Social Security, Medicare or unemployment tax applies, and local withholding on pension payments is not calculated. The state is the one the payee lives in: set it under State above, or in Residence state if it differs.</p>
       <div class="f">
         <div class="lab"><label for="pensionKind">Payment type</label></div>
         <select id="pensionKind" class="inp">
@@ -305,6 +305,30 @@
           </div>
         </div>
         <label class="chk"><input class="tick" type="checkbox" id="pensionAbroad" /><span class="cl">Payment is delivered outside the United States and its territories</span></label>
+        <div class="f">
+          <div class="lab"><label for="pensionStateChoice">State withholding the payee asked for</label></div>
+          <select id="pensionStateChoice" class="inp">
+            <option value="">None given: use the state's default</option>
+            <option value="none">No state withholding</option>
+            <option value="percent">A percent of the payment</option>
+            <option value="amount">A fixed amount each payment</option>
+          </select>
+          <p class="hint">Some states withhold unless the payee opts out, some only when asked, some never. Where a state does not allow the choice, the result says so.</p>
+        </div>
+        <div id="pensionStatePercentBox" class="f" hidden>
+          <div class="lab"><label for="pensionStatePercent">State withholding (% of the taxable payment)</label></div>
+          <input id="pensionStatePercent" class="inp" inputmode="decimal" placeholder="2.5" />
+        </div>
+        <div id="pensionStateAmountBox" class="f" hidden>
+          <div class="lab"><label for="pensionStateAmount">State withholding ($ each payment)</label></div>
+          <div class="money"><em>$</em><input id="pensionStateAmount" class="inp" inputmode="decimal" value="0" /></div>
+        </div>
+        <div class="f">
+          <div class="lab"><label for="pensionStateExtra">Extra state withholding ($ each payment)</label></div>
+          <div class="money"><em>$</em><input id="pensionStateExtra" class="inp" inputmode="decimal" value="0" /></div>
+        </div>
+        <label class="chk"><input class="tick" type="checkbox" id="pensionEntireBalance" /><span class="cl">Payment closes out the whole account (Connecticut allows no opt-out; DC withholds 10.75%)</span></label>
+        <label class="chk"><input class="tick" type="checkbox" id="pensionRetirementExclusion" /><span class="cl">Iowa: payee is disabled or a surviving spouse, so qualifies for the retirement-income exclusion</span></label>
       </div>
     </fieldset>
 

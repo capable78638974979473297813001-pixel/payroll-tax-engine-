@@ -173,6 +173,50 @@ export interface FederalRuleset {
   railroadRetirement?: unknown;
 }
 
+/** One way a state withholds on a pension payment. */
+export type StatePensionMethod =
+  | { kind: 'none' }
+  | { kind: 'percent'; percent: number; whenCertificate?: 'wage_method'; onlyWhen?: 'entireAccountBalance'; otherwise?: StatePensionMethod }
+  | { kind: 'percent_of_federal'; percent: number }
+  | { kind: 'wage_method'; certificate: Record<string, unknown> }
+  | { kind: 'not_modelled'; reason: string };
+
+export interface StatePensionSource {
+  title: string;
+  url: string;
+  readOn: string;
+}
+
+export interface StatePensionEntry {
+  status: 'election_only' | 'not_required' | 'required' | 'not_modelled';
+  /** Extra condition before the state requires withholding. */
+  gate?: 'federal_required' | 'iowa_exclusion';
+  periodic?: StatePensionMethod;
+  nonperiodic?: StatePensionMethod;
+  eligibleRollover?: StatePensionMethod;
+  /** Which kinds of payment a payee may opt out of. */
+  optOut?: { periodic: boolean; nonperiodic: boolean; eligibleRollover: boolean };
+  /** A distribution of the whole account balance cannot be opted out of. */
+  entireBalanceNoOptOut?: boolean;
+  /** What the payee may choose: percent, amount, certificate, additionalAmount. */
+  electable?: string[];
+  percentChoices?: number[];
+  notes?: string;
+  reason?: string;
+  sources?: StatePensionSource[];
+}
+
+export interface StatePensionRules {
+  year: number;
+  states: Record<string, StatePensionEntry>;
+}
+
+/** State pension withholding rules for the check date's year, or undefined when none have been checked for it. */
+export function statePensionRules(checkDate: string): StatePensionRules | undefined {
+  const rel = join('pension', `state-withholding-${yearOf(checkDate)}.json`);
+  return dataFileExists(rel) ? loadJson<StatePensionRules>(rel) : undefined;
+}
+
 export function federalRuleset(checkDate: string): FederalRuleset {
   return loadJson<FederalRuleset>(join('federal', `${yearOf(checkDate)}.json`));
 }
@@ -701,6 +745,11 @@ export interface ALMunicipalityEntry {
   confirmation?: {
     tier: 'primary_source' | 'league_survey_only' | 'conflicting_sources';
     conflict?: string;
+    /**
+     * A term of the city's own ordinance or form that this engine does not apply, so the
+     * amount may be too high; the paycheck line carries it as a not_modelled notice.
+     */
+    unmodelled?: string;
   };
   /**
    * Dated rates, oldest first: the latest entry whose `from` is on or

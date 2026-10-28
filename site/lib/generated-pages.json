@@ -2476,7 +2476,7 @@
       },
       {
         "q": "Does this cover pensions?",
-        "a": "Pension and annuity payments are withheld by a different method: Form W-4P and Pub 15-T Worksheet 1B for periodic payments, and Form W-4R for lump sums and rollovers. Omnia.tax calculates federal withholding on them in a separate pension request, and does not calculate state withholding on them."
+        "a": "Pension and annuity payments are withheld by a different method: Form W-4P and Pub 15-T Worksheet 1B for periodic payments, and Form W-4R for lump sums and rollovers. Omnia.tax calculates federal withholding on them in a separate pension request, and state withholding for the states listed on its state pension withholding page."
       }
     ],
     "breadcrumb": [
@@ -2651,7 +2651,7 @@
       },
       {
         "q": "Does Omnia.tax calculate state tax on pensions?",
-        "a": "No. It calculates federal withholding on pension, annuity and IRA payments. State and local withholding on them varies by state and is not calculated."
+        "a": "For the states whose revenue agency publishes a rule we have read and checked, yes: send the payee's state and any election they made. For every other state it returns no state line and a warning that says so. Local withholding is not calculated."
       }
     ],
     "breadcrumb": [
@@ -2666,6 +2666,45 @@
       {
         "name": "Pension and annuity withholding",
         "path": "/pension-withholding-calculation"
+      }
+    ]
+  },
+  {
+    "path": "/state-pension-withholding",
+    "file": "state-pension-withholding.html",
+    "title": "State income tax withholding on pensions, by state | Omnia.tax",
+    "description": "Which states withhold income tax on pension, annuity and IRA payments, and how, read from each state's revenue agency. Worked examples run through the engine.",
+    "h1": "State income tax withholding on pensions and annuities",
+    "faq": [
+      {
+        "q": "Do states withhold income tax on pensions?",
+        "a": "It depends on the state. Some require it unless the payee opts out (for example Connecticut, Minnesota, Michigan, North Carolina and Iowa), some only withhold when the payee asks (for example Alabama, Arizona, Illinois, New York and New Jersey), and Mississippi does not tax retirement income at all."
+      },
+      {
+        "q": "Which state withholds on a pension, the payer's or the payee's?",
+        "a": "The payee's. Federal law bars a state from taxing the retirement income of someone who lives elsewhere, so the state is the one the payee lives in."
+      },
+      {
+        "q": "What if the payee gave the payer no state form?",
+        "a": "Each state sets its own default. Connecticut withholds 6.99%, Minnesota 6.25%, Michigan 4.25%, North Carolina treats a periodic payee as single with no allowances and withholds 4% of a lump sum, and states that only withhold on request withhold nothing."
+      },
+      {
+        "q": "Why is my state missing?",
+        "a": "We list a state only when we have read a rule in its revenue agency's own guidance. Where the guidance was missing or unclear, the engine returns a warning instead of guessing."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Guides",
+        "path": "/guides"
+      },
+      {
+        "name": "State pension withholding",
+        "path": "/state-pension-withholding"
       }
     ]
   },

@@ -151,18 +151,14 @@
       "name": "Gadsden",
       "rate": 0.02,
       "confirmation": {
-        "tier": "league_survey_only",
+        "tier": "primary_source",
         "sources": [
           {
-            "title": "Alabama League of Municipalities survey",
-            "url": "https://almonline.org/TaxRates.aspx"
-          },
-          {
-            "title": "Gadsden-Etowah Industrial Development Authority -- Taxes and Fees",
-            "url": "https://gadsdenida.org/taxes-and-fees/",
-            "fetchedOn": "2026-09-30",
-            "says": "Gadsden and some other municipalities have an occupational license fee of 2%, withheld from employee salaries and remitted by the employer.",
-            "note": "Corroborates the survey but is not the city's own document; the city's Form G-3 (Ordinance No. 1777, as amended) prints no rate, so the tier stays league_survey_only."
+            "title": "City of Gadsden, Code of Ordinances, Sec. 74-112 (Levy of fee), Municode",
+            "url": "https://library.municode.com/al/gadsden/codes/code_of_ordinances",
+            "fetchedOn": "2026-10-28",
+            "says": "license fees ... shall be measured by two percent of the gross receipts of each such person (Code 1982, § 7-51; in force since February 1, 1962)",
+            "note": "Read in a browser session on Municode (the site blocks plain fetches). Withholding mechanics are Sec. 74-114, shown in Ordinance O-81-05 on cityofgadsden.com/Archive.aspx?ADID=548."
           }
         ]
       }
@@ -190,13 +186,17 @@
       "name": "Goodwater",
       "rate": 0.0075,
       "confirmation": {
-        "tier": "league_survey_only",
+        "tier": "primary_source",
         "sources": [
           {
-            "title": "Alabama League of Municipalities survey",
-            "url": "https://almonline.org/TaxRates.aspx"
+            "title": "City of Goodwater -- Employer's Quarterly Return of License Fee Withheld, Form G-1, Ordinance No. 453",
+            "url": "http://www.zillionforms.com/2008/F128402937.PDF",
+            "fetchedOn": "2026-10-28",
+            "says": "withhold the license fee of 3/4 of 1% from gross salaries, wages, and commissions paid; Item 3b deducts 'that portion of the compensation in excess of $20,000 for calendar year paid to individual workers'",
+            "note": "The city's own form, but this copy dates from 2008 and Goodwater's current website (checked via the Wayback Machine, 2026) publishes no occupational forms. The 3/4 of 1% matches the League survey today."
           }
-        ]
+        ],
+        "unmodelled": "Goodwater's own Form G-1 (Ordinance 453, a 2008 copy) exempts compensation above $20,000 per worker per calendar year from the 3/4 of 1% fee. This engine does not apply that cap, so the amount is too high for an employee past $20,000 in the year, if the cap is still in force. Confirm with the city."
       }
     },
     {
@@ -248,11 +248,14 @@
       "name": "Haleyville",
       "rate": 0.01,
       "confirmation": {
-        "tier": "league_survey_only",
+        "tier": "primary_source",
         "sources": [
           {
-            "title": "Alabama League of Municipalities survey",
-            "url": "https://almonline.org/TaxRates.aspx"
+            "title": "City of Haleyville -- Occupational Tax Return (2026), Ordinance 746",
+            "url": "http://www.cityofhaleyville.com/wp-content/uploads/2026/01/Occupational-Tax-Return.docx",
+            "fetchedOn": "2026-09-30",
+            "says": "Each employer of one or more persons must withhold an occupational tax at the rate of 1% from gross salaries, wages and commissions paid for work or services performed within the City of Haleyville",
+            "note": "Linked from the city's Business License & Tax Remittance page. The .docx blocks plain downloads; it was read through the Microsoft Office web viewer in a browser session."
           }
         ]
       }
@@ -436,11 +439,14 @@
       "name": "Red Bay",
       "rate": 0.005,
       "confirmation": {
-        "tier": "league_survey_only",
+        "tier": "primary_source",
         "sources": [
           {
-            "title": "Alabama League of Municipalities survey",
-            "url": "https://almonline.org/TaxRates.aspx"
+            "title": "City of Red Bay, Ordinance No. 90-2-7 (occupational privilege fee), published by the city",
+            "url": "https://irp.cdn-website.com/cf7ad1ec/files/uploaded/CORB+OCC+ORD+%281%29.pdf",
+            "fetchedOn": "2026-10-28",
+            "says": "Section 2: license fees 'shall be measured by one-half (1/2) of one (1) percent of the gross receipts of each such person'; Section 4: each employer shall deduct 'one-half (1/2) of one percent (1%) of the compensation due each employee'",
+            "note": "Linked from the city's Revenue Clerk page (cityofredbay.org/crb/revenue-clerk). The ordinance defines compensation as the gross amount including deductions before take-home pay, which this engine does not model for Red Bay (it applies the Alabama pretax exclusions)."
           }
         ]
       }
@@ -546,6 +552,12 @@
             "url": "https://www.tuskegeealabama.gov/sites/g/files/vyhlif3946/f/uploads/infobrochure_word.pdf",
             "says": "readable fragment: \"to 3% of\" in the occupational license section",
             "fetchedOn": "2026-09-28"
+          },
+          {
+            "title": "Alabama League of Municipalities survey (2%) and Gadsden Times, March 2023 ('Five Etowah County municipalities assess 2% taxes, as does Tuskegee')",
+            "url": "https://almonline.org/TaxRates.aspx",
+            "fetchedOn": "2026-10-28",
+            "note": "Still no ordinance text: Tuskegee's code is not on Municode or American Legal. The city's own current return says 3%."
           }
         ],
         "conflict": "The Alabama League of Municipalities survey (and this file until 2026-09-28) says 2%. Tuskegee's own current return form computes the tax at 3%, and the city is the levying body, so 3% is used. The ordinance itself was not found online. The 2016 ADOR notice about a 2% Tuskegee levy is a SALES tax extension and says nothing about the occupational rate. Confirm with Tuskegee's Finance Department (334-720-0500) before relying on either figure."
@@ -564,7 +576,7 @@
   },
   "notCapturedYet": "Nothing known. Macon County's 1% county fee, deliberately left out before for lack of a source, is now in counties[] on the strength of its statute and Neumo's 01/2026 return, which lists it as a live jurisdiction.",
   "knownGaps": [
-    "RESOLVED 2026-09-28 for 20 of 29 municipalities and Macon County (see confirmation on each entry). Glencoe confirmed 2026-09-30 from its own Form G-1 (2%). Still survey-only: Bear Creek, Brilliant, Gadsden, Goodwater, Haleyville, Lynn, Red Bay (Gadsden's 2% is corroborated by the Gadsden-Etowah IDA but not by a city document; Haleyville's 2026 return is a .docx no available fetcher could read; Goodwater's published fee schedule covers business licenses only) -- each carries a secondary_source notice on every paycheck.",
+    "UPDATED 2026-10-28: 24 of 29 municipalities and Macon County now rest on the levying body's own document. Still survey-only: Bear Creek, Brilliant, Lynn (no town document is published online; the town sites checked carry none). Tuskegee still conflicts (the city's own form says 3%, the League survey and a 2023 news report say 2%; no ordinance text online). Confirmed 2026-10-28 from the town's own text: Gadsden 2% (Code Sec. 74-112), Red Bay 0.5% (Ordinance 90-2-7), Haleyville 1% (2026 return, Ordinance 746, read 2026-09-30), Goodwater 3/4 of 1% (Form G-1, Ordinance 453, a 2008 copy that also caps the base at $20,000 per worker per year; the cap is disclosed on each paycheck line, not applied). RESOLVED 2026-09-28 for 20 of 29 municipalities and Macon County (see confirmation on each entry). Glencoe confirmed 2026-09-30 from its own Form G-1 (2%). Still survey-only: Bear Creek, Brilliant, Gadsden, Goodwater, Haleyville, Lynn, Red Bay (Gadsden's 2% is corroborated by the Gadsden-Etowah IDA but not by a city document; Haleyville's 2026 return is a .docx no available fetcher could read; Goodwater's published fee schedule covers business licenses only) -- each carries a secondary_source notice on every paycheck.",
     "No taxable-base detail (exemptions, minimum earnings thresholds, residency treatment) was independently confirmed per city beyond Birmingham's general 'gross pay, residents and nonresidents alike' convention -- assumed uniform across all 25 cities, not individually verified.",
     "No inter-jurisdiction credit mechanism (the OH ORC-718.121 equivalent, for an employee who lives in one taxing AL city and works in another) was found or confirmed to exist for Alabama -- unlike Ohio, no evidence was found that Alabama cities tax based on RESIDENCE at all, only work location, so this may be a non-issue rather than an unmodelled gap; not certain either way. CHECKED AGAIN (this pass) and the answer sharpened rather than repeated: Birmingham's own occupational tax code DOES contain an inter-municipal provision, but it is a refund procedure for tax ERRONEOUSLY paid to another municipality — the paying city refunds it and Birmingham holds off assessing until the refund arrives. That is a correction mechanism for a misdirected payment, not an Ohio-style credit for an employee who legitimately owes two cities. So the absence stands, and it is now an absence that was looked for in the right place.",
     "This list may not be exhaustive -- the 2026-09-28 pass found 4 towns and 1 county the League survey never listed (Beaverton, Irondale, Notasulga, Tarrant, Macon County). Alabama has no state register of occupational taxes, so another unlisted town is possible.",

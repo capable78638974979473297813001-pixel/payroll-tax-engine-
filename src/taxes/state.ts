@@ -5540,6 +5540,9 @@ function alabamaLocalTax(
         note: entry.confirmation?.conflict ?? `${entry.name}'s published sources disagree on the rate; ${pct(entry.rate)} (the city's own figure) was used.`,
       };
     }
+    if (entry.confirmation?.unmodelled && !line.dataQuality) {
+      line.dataQuality = { tier: 'not_modelled', note: entry.confirmation.unmodelled };
+    }
     lines.push(line);
   }
 

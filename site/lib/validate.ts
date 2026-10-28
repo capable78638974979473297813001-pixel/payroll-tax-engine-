@@ -267,6 +267,22 @@ export function validatePaycheckInput(raw: unknown, opts: ValidateOptions = {}):
       }
       if (p.taxableAmount !== undefined) cents(p.taxableAmount, 'pension.taxableAmount');
       if (p.deliveredOutsideUS !== undefined && typeof p.deliveredOutsideUS !== 'boolean') err('pension.deliveredOutsideUS', 'must be a boolean when present.');
+      if (p.entireAccountBalance !== undefined && typeof p.entireAccountBalance !== 'boolean') err('pension.entireAccountBalance', 'must be a boolean when present.');
+      if (p.stateElection !== undefined) {
+        if (!isObject(p.stateElection)) {
+          err('pension.stateElection', 'must be an object when present.');
+        } else {
+          const e = p.stateElection;
+          const known = ['none', 'percent', 'amount', 'additionalAmount', 'certificate', 'retirementExclusion'];
+          for (const k of Object.keys(e)) if (!known.includes(k)) err(`pension.stateElection.${k}`, `is not a field of the state election. Fields: ${known.join(', ')}.`);
+          if (e.none !== undefined && typeof e.none !== 'boolean') err('pension.stateElection.none', 'must be a boolean when present.');
+          if (e.retirementExclusion !== undefined && typeof e.retirementExclusion !== 'boolean') err('pension.stateElection.retirementExclusion', 'must be a boolean when present.');
+          if (e.percent !== undefined && (typeof e.percent !== 'number' || !Number.isFinite(e.percent) || e.percent <= 0 || e.percent > 100)) err('pension.stateElection.percent', 'must be a number greater than 0 and at most 100 (a percent of the taxable payment, e.g. 2.5).');
+          if (e.amount !== undefined) cents(e.amount, 'pension.stateElection.amount');
+          if (e.additionalAmount !== undefined) cents(e.additionalAmount, 'pension.stateElection.additionalAmount');
+          if (e.certificate !== undefined && !isObject(e.certificate)) err('pension.stateElection.certificate', 'must be an object: the payee\'s state withholding certificate fields, as in residenceState.certificate.');
+        }
+      }
       if (p.w4p !== undefined) {
         if (!isObject(p.w4p)) {
           err('pension.w4p', 'must be an object when present.');

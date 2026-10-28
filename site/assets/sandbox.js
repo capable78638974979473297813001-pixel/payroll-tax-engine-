@@ -73,6 +73,12 @@ function syncFromDom() {
   form.pensionNoWithholding = checked('pensionNoWithholding');
   form.pensionRate = $('pensionRate').value;
   form.pensionAbroad = checked('pensionAbroad');
+  form.pensionStateChoice = $('pensionStateChoice').value;
+  form.pensionStatePercent = $('pensionStatePercent').value;
+  form.pensionStateAmount = num('pensionStateAmount');
+  form.pensionStateExtra = num('pensionStateExtra');
+  form.pensionEntireBalance = checked('pensionEntireBalance');
+  form.pensionRetirementExclusion = checked('pensionRetirementExclusion');
   form.stateCode = $('state').value;
   const home = $('residenceState');
   form.residenceStateCode = home ? home.value : form.residenceStateCode;
@@ -554,7 +560,7 @@ const EXAMPLES = {
   tx: { state: 'TX', method: 'hourly', rate: 22, hours: 80, frequency: 'biweekly' },
   ca: { state: 'CA', method: 'annual', gross: 120000, frequency: 'semimonthly', filing: 'married_joint', bonus: 5000 },
   oh: { state: 'OH', method: 'perPeriod', gross: 1400, frequency: 'weekly' },
-  pension: { state: '', method: 'perPeriod', gross: 2000, frequency: 'monthly', pension: 'periodic' },
+  pension: { state: 'NC', method: 'perPeriod', gross: 2000, frequency: 'monthly', pension: 'periodic' },
 };
 function fire(id) { $(id).dispatchEvent(new Event('change', { bubbles: true })); }
 function applyExample(id) {
@@ -587,8 +593,12 @@ function paintPension() {
   $('pensionBox').hidden = !kind;
   $('pensionPeriodic').hidden = kind !== 'periodic';
   $('pensionRateBox').hidden = !(kind === 'nonperiodic' || kind === 'eligible_rollover');
+  const choice = $('pensionStateChoice').value;
+  $('pensionStatePercentBox').hidden = choice !== 'percent';
+  $('pensionStateAmountBox').hidden = choice !== 'amount';
 }
 $('pensionKind').addEventListener('change', paintPension);
+$('pensionStateChoice').addEventListener('change', paintPension);
 $('grossPayMethod').addEventListener('change', () => {
   $('hourlyRow').hidden = $('grossPayMethod').value !== 'hourly';
 });

@@ -1,5 +1,6 @@
 import { calculatePaycheck } from '../../src/calculate.ts';
 import { minimumWage } from '../../src/minimum-wage.ts';
+import { statePensionRules } from '../../src/registry.ts';
 import type { PaycheckInput } from '../../src/types.ts';
 import { solveGrossUp } from './grossup.ts';
 import { comparePaychecks } from './compare.ts';
@@ -116,6 +117,15 @@ export function topics(h: Helpers): TopicDef[] {
   };
   const penDetail = run(penBase(200_000, { kind: 'periodic' })).taxes[0]!.detail ?? '';
   const lump = (p: Record<string, unknown>) => penAmount(1_000_000, p);
+  const pr = statePensionRules('2026-06-15')!;
+  const prEntries = Object.entries(pr.states).sort((a, b) => a[0].localeCompare(b[0]));
+  const stateName = (c: string) => h.states.find((x) => x.code === c)?.name ?? c;
+  const srcLink = (e: { sources?: Array<{ title: string; url: string }> }) => (e.sources ?? []).map((x) => `<a href="${h.esc(x.url)}" rel="noopener">${h.esc(x.title)}</a>`).join('<br>');
+  const statusText = (e: { status: string; notes?: string }) =>
+    e.status === 'required' ? 'Withholds unless the payee opts out, or on a rule the state sets' : e.status === 'election_only' ? 'Only when the payee asks' : 'Nothing withheld';
+  const penState = (st: string, pension: Record<string, unknown>, amount: number) => run({ ...penBase(amount, pension), workState: undefined, residenceState: { code: st } } as unknown as PaycheckInput).taxes.find((t) => t.id.endsWith('_PENSION_SIT'))?.amount ?? 0;
+
+  const money3000 = money(300_000);
 
   const D: TopicDef[] = [];
   const add = (t: TopicDef) => D.push(t);
@@ -611,7 +621,7 @@ export function topics(h: Helpers): TopicDef[] {
     faq: [
       { q: 'How is federal income tax withholding calculated?', a: 'From the Form W-4 using the IRS percentage method: annualise the check, adjust for filing status and the W-4 entries, find the bracket, subtract credits, then divide back to one paycheck and add any extra withholding.' },
       { q: 'What does the multiple-jobs checkbox do?', a: 'It selects the higher-withholding table, because each job is withheld as if it were the only one. It is on the Form W-4 as step 2.' },
-      { q: 'Does this cover pensions?', a: 'Pension and annuity payments are withheld by a different method: Form W-4P and Pub 15-T Worksheet 1B for periodic payments, and Form W-4R for lump sums and rollovers. Omnia.tax calculates federal withholding on them in a separate pension request, and does not calculate state withholding on them.' },
+      { q: 'Does this cover pensions?', a: 'Pension and annuity payments are withheld by a different method: Form W-4P and Pub 15-T Worksheet 1B for periodic payments, and Form W-4R for lump sums and rollovers. Omnia.tax calculates federal withholding on them in a separate pension request, and state withholding for the states listed on its state pension withholding page.' },
     ],
     related: ['/income-tax-calculation-engine', '/income-tax-withholding-api', '/fica-tax-calculation', '/bonus-tax-withholding-calculation'],
   });
@@ -766,10 +776,10 @@ export function topics(h: Helpers): TopicDef[] {
     <p>The result for a payee with no form equals the tax on annual payments above the standard deduction, from the 2026 Marginal Rate Tables printed on Form W-4R, divided by the number of payments. We test the engine against those tables across three filing statuses and four payment frequencies.</p>
     <h2>In the API</h2>
     ${code(h, `POST /v1/paycheck\n{ "checkDate": "2026-06-15", "payFrequency": "monthly",\n  "earnings": [{ "code": "PENSION", "category": "regular", "amount": 200000 }],\n  "deductions": [],\n  "pension": { "kind": "periodic",\n    "w4p": { "filingStatus": "single", "multiplePensionsAmount": 4000000 } } }`)}
-    <p>No <code>federalW4</code> or <code>ytd</code> is needed. The response has one line, <code>US_FIT_PENSION</code>.</p>
+    <p>No <code>federalW4</code> or <code>ytd</code> is needed. The response has a federal line, <code>US_FIT_PENSION</code>, and, for the payee's state, a line such as <code>NC_PENSION_SIT</code>: see <a href="/state-pension-withholding">state pension withholding</a>.</p>
     <h2>What it does not do</h2>
     <ul>
-      <li><strong>State and local withholding</strong> on pension payments is not calculated, because states differ on whether and how they withhold. The response says so.</li>
+      <li><strong>Local withholding</strong> on pension payments is not calculated, and neither is state withholding for a state we have not checked against its revenue agency's guidance: see <a href="/state-pension-withholding">state pension withholding</a>. The response says so.</li>
       <li><strong>Quarterly, semiannual and annual</strong> periodic payments are refused: Pub 15-T's table lists monthly, semimonthly, biweekly, weekly and daily.</li>
       <li><strong>Nonresident aliens</strong> are outside these methods (Pub 515).</li>
       <li><strong>Lump sums and rollovers</strong> use Form W-4R: see <a href="/eligible-rollover-withholding">eligible rollover and nonperiodic withholding</a>.</li>
@@ -778,9 +788,53 @@ export function topics(h: Helpers): TopicDef[] {
       { q: 'How is withholding on a pension calculated?', a: 'For periodic payments, from the payee\'s Form W-4P using Pub 15-T Worksheet 1B: annualise the payment, apply the standard adjustment and the form\'s entries, find the annual tax on the standard schedule, subtract credits, and divide by the number of payments.' },
       { q: 'What if a retiree gave the payer no Form W-4P?', a: 'The payer withholds as if the payee were Single with no entries in Steps 2 to 4. For payments that began before 2022 with no form, the payee is treated as married claiming three allowances, under the older rules.' },
       { q: 'Is Social Security or Medicare tax withheld from a pension?', a: 'No. FICA applies to wages. A pension payment has federal income tax withheld and, depending on the state, state income tax.' },
-      { q: 'Does Omnia.tax calculate state tax on pensions?', a: 'No. It calculates federal withholding on pension, annuity and IRA payments. State and local withholding on them varies by state and is not calculated.' },
+      { q: 'Does Omnia.tax calculate state tax on pensions?', a: 'For the states whose revenue agency publishes a rule we have read and checked, yes: send the payee\'s state and any election they made. For every other state it returns no state line and a warning that says so. Local withholding is not calculated.' },
     ],
     related: ['/eligible-rollover-withholding', '/federal-income-tax-withholding-calculator', '/income-tax-withholding-api', '/gross-to-net-api'],
+  });
+
+  add({
+    path: '/state-pension-withholding', label: 'State pension withholding', group: 'Calculations',
+    title: 'State income tax withholding on pensions, by state | Omnia.tax',
+    description: "Which states withhold income tax on pension, annuity and IRA payments, and how, read from each state's revenue agency. Worked examples run through the engine.",
+    h1: 'State income tax withholding on pensions and annuities', eyebrow: 'Calculations',
+    sub: 'States do not agree. Some withhold unless the payee opts out, some only when asked, some not at all. Here is what we have checked, and what we have not.',
+    related: ['/pension-withholding-calculation', '/eligible-rollover-withholding', '/state-income-tax-withholding-api', '/payroll-tax-reciprocity-agreements'],
+    body: `
+    <p>Only the state the payee lives in withholds: federal law (4 U.S.C. 114) bars a state from taxing a nonresident's retirement income. In the API, send that state as <code>residenceState</code> (or <code>workState</code> if it is all you send), and anything the payee told the payer in <code>pension.stateElection</code>.</p>
+    <h2>The states we calculate</h2>
+    <p>${prEntries.filter(([, e]) => e.status !== 'not_modelled').length} states and the District, each read from that state's own revenue agency and dated. Where a state publishes a rule for one kind of payment and not another, the other kind is marked not calculated.</p>
+    ${table(h, ['State', 'What it does', 'Source'], prEntries.filter(([, e]) => e.status !== 'not_modelled').map(([c, e]) => [h.esc(stateName(c)), h.esc(statusText(e)) + '. ' + h.esc((e.notes ?? '').replace(/\s+/g, ' ')), srcLink(e)]), 3)}
+    <h2>Worked examples, run through the engine</h2>
+    ${table(h, ['Payee lives in', 'Payment', 'State tax withheld'], [
+      ['North Carolina, periodic, no NC-4P', money3000, money(penState('NC', { kind: 'periodic' }, 300_000))],
+      ['Connecticut, periodic, no CT-W4P', money3000, money(penState('CT', { kind: 'periodic' }, 300_000))],
+      ['Michigan, periodic, no MI W-4P', money3000, money(penState('MI', { kind: 'periodic' }, 300_000))],
+      ['Arkansas, lump sum', money(1_000_000), money(penState('AR', { kind: 'nonperiodic' }, 1_000_000))],
+      ['Arkansas, eligible rollover', money(1_000_000), money(penState('AR', { kind: 'eligible_rollover' }, 1_000_000))],
+      ['Vermont, lump sum (30% of the federal)', money(1_000_000), money(penState('VT', { kind: 'nonperiodic' }, 1_000_000))],
+      ['Alabama, nothing asked', money3000, money(penState('AL', { kind: 'periodic' }, 300_000))],
+      ['Alabama, payee asks for 2%', money3000, money(penState('AL', { kind: 'periodic', stateElection: { percent: 2 } }, 300_000))],
+    ], 1)}
+    <h2>In the API</h2>
+    ${code(h, `POST /v1/paycheck\n{ "checkDate": "2026-06-15", "payFrequency": "monthly",\n  "earnings": [{ "code": "PENSION", "category": "regular", "amount": 300000 }],\n  "deductions": [],\n  "residenceState": { "code": "AL" },\n  "pension": { "kind": "periodic", "stateElection": { "percent": 2 } } }`)}
+    <p>The response has the federal line <code>US_FIT_PENSION</code> and a state line <code>AL_PENSION_SIT</code>. The line says how the amount was found.</p>
+    <h2>The states we do not calculate</h2>
+    <p>These have either not been checked against the state's own guidance, or the guidance we read does not give a rule for the payment. They return no state line and a warning, never a zero that looks like a result:</p>
+    <ul>${prEntries.filter(([, e]) => e.status === 'not_modelled').map(([c, e]) => `<li><strong>${h.esc(stateName(c))}.</strong> ${h.esc((e as { reason?: string }).reason ?? '')}</li>`).join('')}</ul>
+    <p>Every other state that taxes wages is also not calculated for pensions. A state with no income tax on wages needs none.</p>
+    <h2>What no state result covers</h2>
+    <ul>
+      <li><strong>Local withholding</strong> on pension payments.</li>
+      <li><strong>Direct rollovers</strong> and trustee-to-trustee transfers, which states exempt; send them as no payment.</li>
+      <li><strong>Nonresident payees with a state address</strong> who file an opt-out: the engine goes by the state you send.</li>
+    </ul>`,
+    faq: [
+      { q: 'Do states withhold income tax on pensions?', a: 'It depends on the state. Some require it unless the payee opts out (for example Connecticut, Minnesota, Michigan, North Carolina and Iowa), some only withhold when the payee asks (for example Alabama, Arizona, Illinois, New York and New Jersey), and Mississippi does not tax retirement income at all.' },
+      { q: 'Which state withholds on a pension, the payer\'s or the payee\'s?', a: 'The payee\'s. Federal law bars a state from taxing the retirement income of someone who lives elsewhere, so the state is the one the payee lives in.' },
+      { q: 'What if the payee gave the payer no state form?', a: 'Each state sets its own default. Connecticut withholds 6.99%, Minnesota 6.25%, Michigan 4.25%, North Carolina treats a periodic payee as single with no allowances and withholds 4% of a lump sum, and states that only withhold on request withhold nothing.' },
+      { q: 'Why is my state missing?', a: 'We list a state only when we have read a rule in its revenue agency\'s own guidance. Where the guidance was missing or unclear, the engine returns a warning instead of guessing.' },
+    ],
   });
 
   add({
@@ -811,7 +865,7 @@ export function topics(h: Helpers): TopicDef[] {
     <h2>What counts as an eligible rollover distribution</h2>
     <p>Form W-4R lists payments that are <em>not</em> eligible rollover distributions for these rules: hardship distributions, required minimum distributions, distributions from a pension-linked emergency savings account, and several qualified disaster, birth or adoption, long-term care, domestic abuse and emergency-expense distributions. Those are nonperiodic payments, so send them as <code>nonperiodic</code>; whether a payment is one or the other is a fact about the plan that you supply.</p>
     ${code(h, `"pension": { "kind": "eligible_rollover", "w4r": { "withholdingRate": 30 } }`)}
-    <p>See also <a href="/pension-withholding-calculation">withholding on periodic pension payments</a>. State and local withholding on these payments is not calculated.</p>`,
+    <p>See also <a href="/pension-withholding-calculation">withholding on periodic pension payments</a> and <a href="/state-pension-withholding">state pension withholding</a>. Local withholding on these payments is not calculated.</p>`,
     faq: [
       { q: 'How much is withheld from an eligible rollover distribution?', a: 'The payer must withhold 20% of the taxable amount unless the payment is rolled over directly. The payee can ask for a higher rate on Form W-4R but not a lower one, including zero.' },
       { q: 'What is the default withholding on a 401(k) or IRA lump sum?', a: 'An IRA distribution payable on demand or any other nonperiodic payment defaults to 10%, and the payee can choose 0% to 100%. A lump sum from a 401(k) that could be rolled over is an eligible rollover distribution and defaults to 20%.' },

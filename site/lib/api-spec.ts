@@ -1,4 +1,5 @@
 import { PERIODS_PER_YEAR } from '../../src/types.ts';
+import { statePensionRules } from '../../src/registry.ts';
 import {
   EARNING_CATEGORIES,
   EMPLOYMENT_CATEGORIES,
@@ -7,6 +8,17 @@ import {
   PRETAX_CATEGORIES,
 } from './validate.ts';
 import { MAX_ORDERS, OCCUPATIONS, ORDER_TYPES } from './extras.ts';
+
+/** The states with a pension withholding rule on file, with the kinds of payment a partial rule covers. */
+function pensionStateList(): string {
+  const partial: Record<string, string> = { MA: ' (periodic)', VA: ' (periodic)', DC: ' (lump sums)' };
+  const codes = Object.entries(statePensionRules('2026-06-15')?.states ?? {})
+    .filter(([, e]) => e.status !== 'not_modelled')
+    .map(([c]) => c)
+    .sort();
+  const withNotes = codes.map((c) => c + (partial[c] ?? ''));
+  return withNotes.length > 1 ? `${withNotes.slice(0, -1).join(', ')} and ${withNotes[withNotes.length - 1]}` : withNotes.join('');
+}
 
 /**
  * The machine-readable description of the public API: a JSON Schema for the
@@ -210,7 +222,7 @@ export const paycheckRequestSchema = {
       required: ['kind'],
       description:
         'Set this for a pension, annuity, profit-sharing, stock-bonus or IRA payment instead of wages. `earnings` is then the payment. ' +
-        'The response is one federal line, `US_FIT_PENSION`: no Social Security, Medicare, FUTA, unemployment or state tax is calculated, and a warning says state and local withholding is not. ' +
+        'The response has a federal line, `US_FIT_PENSION`, and, for the states listed under `stateElection`, a state line `XX_PENSION_SIT`. No Social Security, Medicare, FUTA or unemployment tax is calculated, and a warning says local withholding is not. ' +
         'Periodic payments follow Pub 15-T Worksheet 1B and the payee\u2019s Form W-4P; nonperiodic payments and eligible rollover distributions follow the payee\u2019s Form W-4R. `federalW4` and `ytd` are not needed. ' +
         'Periodic payments can be monthly, semimonthly, biweekly, weekly or daily. 2026 rules.',
       properties: {
@@ -221,6 +233,22 @@ export const paycheckRequestSchema = {
         },
         taxableAmount: { type: 'integer', minimum: 0, description: 'The taxable part of the payment, in cents. Defaults to the whole payment. Withholding applies to this part only.' },
         deliveredOutsideUS: { type: 'boolean', description: 'The payment is delivered outside the United States and its territories. Then the payee cannot elect less than the default withholding.' },
+        entireAccountBalance: { type: 'boolean', description: 'The payment closes out the whole account. Connecticut allows no opt-out on it and the District of Columbia withholds 10.75% on it.' },
+        stateElection: {
+          type: 'object',
+          additionalProperties: false,
+          description:
+            'What the payee told the payer about state income tax, for the state they live in (`residenceState`, or `workState` when that is all you send). With none, the state\'s default applies: some states withhold unless the payee opts out, some only when asked, and some not at all. ' +
+            `Only choices the state allows are accepted. State withholding is calculated for ${pensionStateList()}; every other state returns no state line and a warning.`,
+          properties: {
+            none: { type: 'boolean', description: 'Opt out of state withholding, where the state lets the payee.' },
+            percent: { type: 'number', exclusiveMinimum: 0, maximum: 100, description: 'A percent of the taxable payment, e.g. 2.5.' },
+            amount: { type: 'integer', minimum: 0, description: 'A fixed amount per payment, in cents.' },
+            additionalAmount: { type: 'integer', minimum: 0, description: 'An extra amount per payment on top of the computed withholding, in cents.' },
+            certificate: { type: 'object', additionalProperties: true, description: 'The payee\'s state withholding certificate (NC-4P, AR4P, W-4MNP, MI W-4P, and so on), shaped like `residenceState.certificate`. States that withhold on pensions as on wages use it for periodic payments.' },
+            retirementExclusion: { type: 'boolean', description: 'Iowa: the payee qualifies for the retirement-income exclusion by disability or as a surviving spouse. Age 55 or older is read from `employee.ageAtYearEnd`.' },
+          },
+        },
         w4p: {
           type: 'object',
           description: 'Periodic payments: what the payee put on Form W-4P. Absent, the payee is treated as Single with no entries in Steps 2 to 4.',

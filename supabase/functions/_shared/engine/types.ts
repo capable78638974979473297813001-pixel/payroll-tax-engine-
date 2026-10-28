@@ -691,6 +691,32 @@ export interface PensionPayment {
   };
   /** The payment is delivered outside the United States and its territories. Then a payee cannot elect less than the default. */
   deliveredOutsideUS?: boolean;
+  /** The payment closes out the whole account (a lump sum of the entire balance). Connecticut and the District of Columbia treat this differently. */
+  entireAccountBalance?: boolean;
+  /**
+   * What the payee told the payer about state income tax, for the state they live in
+   * (residenceState, or workState when that is all that is sent). With none, the state's default applies.
+   */
+  stateElection?: PensionStateElection;
+}
+
+/** A payee's state withholding choices on a pension, annuity or IRA payment. Only choices the state allows are accepted. */
+export interface PensionStateElection {
+  /** Opt out of state withholding, where the state lets the payee. */
+  none?: boolean;
+  /** A percent of the taxable payment, e.g. 2.5, where the state lets the payee choose one. */
+  percent?: number;
+  /** A fixed amount per payment, in cents. */
+  amount?: Cents;
+  /** An extra amount per payment on top of the computed withholding, in cents. */
+  additionalAmount?: Cents;
+  /**
+   * The payee's state withholding certificate (Form NC-4P, AR4P, W-4MNP, MI W-4P and so on), in the same
+   * shape as `residenceState.certificate`. States that withhold on pensions as on wages use it.
+   */
+  certificate?: StateCertificate;
+  /** Iowa: the payee qualifies for the retirement-income exclusion because of disability or as a surviving spouse (age 55 or older is read from employee.ageAtYearEnd). */
+  retirementExclusion?: boolean;
 }
 
 export interface PaycheckInput {

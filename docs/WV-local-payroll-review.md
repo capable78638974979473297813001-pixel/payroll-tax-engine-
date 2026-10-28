@@ -59,3 +59,13 @@ The [WV Secretary of State city charter index](https://sos.wv.gov/city-charters-
 The [published Romney ordinance](https://wvlegals.com/ordinance-of-the-city-of-romney/) allows workers under 20 hours per week to seek an exemption by written application; this is not an automatic exemption and the current certificate does not model approval. Weirton and Wheeling documents say the employee must work at least 30 days per calendar year; whether withholding begins only after the 30th day or starts earlier when that duration is expected requires city clarification. The current implementation uses days worked so far.
 
 The city worksheets for [Parkersburg](https://cms2.revize.com/revize/parkersburg/Document%20Center/Department/Finance/Frequently%20Requested%20Forms/CSUF-EMPLOYER-WORKSHEET.pdf) and [Romney](https://www.townofromney.com/sites/default/files/2022-10/annual-service-fee-remittance-form-2.pdf) specify $5.42 and $2.17 for semimonthly pay, respectively. Both replace a rounded-down amount one cent lower. Romney specifies $4.33 for monthly pay and Parkersburg $10.83; the existing monthly amounts already match. The Romney form states a 20-hour weekly condition while its ordinance describes an application for exemption below 20 hours: the distinction and approval process need clarification.
+
+## Follow-up, October 28, 2026
+
+Smithers, Madison and Rivesville were searched again. None is settled.
+
+- **Madison.** The city's code on Municode, codified through the ordinance of September 13, 2021, still reads $3.00 per calendar week from January 1, 2020 (Sec. 8-4, source ordinance of 7-18-2016(3)). That is the published law and agrees with the configured $3. It conflicts with Bloomberg Tax (January 9, 2020, behind a login) reporting that council cancelled the increase, and with payroll guides that still print $1.25. A cancelling ordinance has not been found, and Municode warns its text may lag current legislation. The configured $3 now has a primary source behind it, but the contradiction is open, so Madison stays flagged.
+- **Smithers.** The city's official page (local.wv.gov/smithers) carries no fee, ordinance or form, and the city's own domain returns a placeholder. No current ordinance or return was found. Smithers stays unconfigured.
+- **Rivesville.** No town ordinance or remittance form is reachable online. The $2 per week, nonresident-only fee stays on payroll-vendor sources.
+
+WV remains partial.

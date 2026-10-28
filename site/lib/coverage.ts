@@ -94,7 +94,7 @@ const INFO_NOTES: Record<string, string> = {
 
 /** Where the data itself says the local list is not the whole story. */
 const PARTIAL_NOTES: Record<string, string> = {
-  AL: '29 municipalities and Macon County. Seven rates (Bear Creek, Brilliant, Gadsden, Goodwater, Haleyville, Lynn, Red Bay) come from the Alabama League of Municipalities survey rather than the city\'s own document, and Tuskegee\'s rate has conflicting sources.',
+  AL: '29 municipalities and Macon County. Three rates (Bear Creek, Brilliant, Lynn) come from the Alabama League of Municipalities survey because the towns publish no document online; Tuskegee\'s rate has conflicting sources; Goodwater\'s own form caps the base at $20,000 a year per worker, which we flag but do not apply.',
   WV: 'Partial city service-fee coverage. Smithers is missing; Madison has an unresolved rate conflict; Rivesville relies on secondary payroll sources.',
 };
 
