@@ -64,6 +64,7 @@ import type {
   Earning,
   FederalW4,
   PayFrequency,
+  PensionPayment,
   StateCertificate,
   YearToDate,
 } from '../src/types.ts';
@@ -342,6 +343,8 @@ export interface PayCalcRequest {
   deductions?: Deduction[];
   federalW4?: FederalW4;
   ytd?: YearToDate;
+  /** Set for a pension, annuity or IRA payment instead of wages; `earnings`/`grossPay` is then the payment. Same object as the paycheck API's `pension`. */
+  pension?: PensionPayment;
   /** This employee's WORK-location tax profile — state plus every applicable local, as ids from this catalog. */
   workUniqueTaxIds: string[];
   /** This employee's LIVE (residence) tax profile, if different from work — omit for a single-state, single-address employee. */
@@ -507,6 +510,7 @@ export function payCalc(requests: PayCalcRequest[]): PayCalcResult[] {
         ytd: req.ytd ?? { socialSecurity: 0, medicare: 0, futa: 0 },
         workState: { code: work.stateCode, certificate },
         residenceState: live.stateCode ? { code: live.stateCode, certificate: residenceCertificate } : undefined,
+        ...(req.pension ? { pension: req.pension } : {}),
       });
 
       // Disclosed simplification: every result line is returned regardless

@@ -28,7 +28,7 @@ describe('data-quality notices on the paycheck result', () => {
   });
 
   test('an Alabama city with only the League survey behind its rate is marked survey-sourced', () => {
-    const r = calculatePaycheck(base('AL', { workCity: 'Gadsden', exemptions: 'S', dependents: 0 }));
+    const r = calculatePaycheck(base('AL', { workCity: 'Lynn', exemptions: 'S', dependents: 0 }));
     const line = r.taxes.find((t) => t.id === 'AL_LOCAL')!;
     assert.ok(line, 'expected an AL_LOCAL line');
     assert.equal(line.dataQuality?.tier, 'secondary_source');

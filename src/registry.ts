@@ -701,6 +701,11 @@ export interface ALMunicipalityEntry {
   confirmation?: {
     tier: 'primary_source' | 'league_survey_only' | 'conflicting_sources';
     conflict?: string;
+    /**
+     * A term of the city's own ordinance or form that this engine does not apply, so the
+     * amount may be too high; the paycheck line carries it as a not_modelled notice.
+     */
+    unmodelled?: string;
   };
   /**
    * Dated rates, oldest first: the latest entry whose `from` is on or

@@ -98,3 +98,31 @@ describe('the Alabama-specific API carries workCounty through', () => {
     assert.ok(out.alabama.explanation.some((l) => /2019-06-10/.test(l)));
   });
 });
+
+describe('towns confirmed from their own documents on 2026-10-28', () => {
+  const base = (city: string, amount = 500_000) => ({
+    checkDate: '2026-06-15', payFrequency: 'biweekly', earnings: [{ code: 'REG', category: 'regular', amount }], deductions: [],
+    federalW4: { filingStatus: 'single', multipleJobs: false, dependentCredit: 0, otherIncome: 0, deductions: 0, extraWithholding: 0 },
+    ytd: { socialSecurity: 0, medicare: 0, futa: 0 }, workState: { code: 'AL', certificate: { workCity: city } },
+  } as never);
+  const line = (city: string) => calculatePaycheck(base(city)).taxes.find((t) => t.id === 'AL_LOCAL')!;
+
+  test('Gadsden, Red Bay and Haleyville carry no secondary-source notice', () => {
+    for (const [city, rate] of [['Gadsden', 0.02], ['Red Bay', 0.005], ['Haleyville', 0.01]] as const) {
+      const l = line(city);
+      assert.equal(l.amount, Math.round(500_000 * rate), city);
+      assert.equal(l.dataQuality, undefined, city);
+    }
+  });
+
+  test('Goodwater says its own form caps the base at $20,000 a year, which the engine does not apply', () => {
+    const l = line('Goodwater');
+    assert.equal(l.amount, Math.round(500_000 * 0.0075));
+    assert.equal(l.dataQuality?.tier, 'not_modelled');
+    assert.match(l.dataQuality?.note ?? '', /\$20,000/);
+  });
+
+  test('the towns with no published document still carry the survey notice', () => {
+    for (const city of ['Bear Creek', 'Brilliant', 'Lynn']) assert.equal(line(city).dataQuality?.tier, 'secondary_source', city);
+  });
+});
