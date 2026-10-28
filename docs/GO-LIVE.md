@@ -257,6 +257,17 @@ refuses to use it: account and API requests return 500, `GET /api/health`
 returns `503` with `"store":"unreadable"`, and the file is left untouched —
 restore it from backup. It never silently starts over empty.
 
+**If accounts disappear after a while.** Sign-up and password sign-in both work while the server
+runs, and then, hours later, the same email and password are refused: the server has restarted
+and the account store came back empty. That happens when `SITE_DB_DIR` is on the container's own
+filesystem instead of a mounted disk, because every restart and every redeploy (each merge to
+`main` redeploys when `autoDeploy` is on) replaces the container. The server checks for this: it
+prints `[storage] WARNING` and `[start] WARNING ... is not on a mounted disk` when it starts,
+`GET /healthz` returns `"storage":"temporary"`, and the sign-in and sign-up pages show a notice.
+The fix is on the host: a persistent disk mounted at `/var/data` (on Render, service > Disks, or
+deploy from `render.yaml`, which declares one; a disk needs a paid instance). Set
+`STORAGE_IS_DURABLE=1` only if the disk is genuinely durable and the check cannot see it.
+
 **How accounts are saved.** Every change (signup, verification, signed terms,
 card on file, subscription, API key, usage) is written to
 `$SITE_DB_DIR/db.json` before the request returns: temp file, `fsync`, atomic

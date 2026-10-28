@@ -1,3 +1,4 @@
+import { existsSync, statSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -29,6 +30,51 @@ import { readJsonFile, withFileLock, writeJsonFileAtomic } from '../../api/json-
 // volume (and so tests get an isolated directory). Absent, it defaults to
 // site/.data, which is gitignored.
 const DATA_DIR = process.env.SITE_DB_DIR ?? join(dirname(fileURLToPath(import.meta.url)), '..', '.data');
+
+/**
+ * Whether the store's folder is on a disk that outlives the container.
+ *
+ * A container's own filesystem is thrown away on every restart and redeploy. The folder looks
+ * perfectly normal while the server runs (sign-up works, sign-in works, the password is accepted),
+ * and then the next restart brings it back empty: every account is forgotten and no sign-in works
+ * until someone signs up again. A mounted volume sits on a different device than the root
+ * filesystem, so comparing the two tells the difference. Only checked in production, where a
+ * wrongly-wired host is the failure that matters; set STORAGE_IS_DURABLE=1 to assert a setup this
+ * check cannot see (a network filesystem that reports the root device, say).
+ */
+export type StorageStatus = 'durable' | 'temporary' | 'unchecked';
+
+export function storageStatusFor(
+  dataDir: string,
+  env: Record<string, string | undefined>,
+  deviceOf: (path: string) => number | null,
+): { status: StorageStatus; reason: string } {
+  if (env.STORAGE_IS_DURABLE === '1') return { status: 'durable', reason: 'STORAGE_IS_DURABLE=1 asserts a durable disk.' };
+  if (env.NODE_ENV !== 'production') return { status: 'unchecked', reason: 'Not a production server.' };
+  if (!env.SITE_DB_DIR) {
+    return { status: 'temporary', reason: 'SITE_DB_DIR is not set, so accounts are saved inside the application folder, which a restart or redeploy replaces.' };
+  }
+  // The nearest folder that exists: the store creates its own subfolder on first write.
+  let probe = dataDir;
+  while (probe && deviceOf(probe) === null && dirname(probe) !== probe) probe = dirname(probe);
+  const here = deviceOf(probe);
+  const root = deviceOf('/');
+  if (here === null || root === null) return { status: 'unchecked', reason: 'The disk could not be inspected here.' };
+  if (here === root) {
+    return { status: 'temporary', reason: `${dataDir} is on the container's own filesystem, not a mounted disk, so a restart or redeploy erases every account.` };
+  }
+  return { status: 'durable', reason: `${dataDir} is on a mounted disk.` };
+}
+
+export function storageStatus(): { status: StorageStatus; reason: string } {
+  return storageStatusFor(DATA_DIR, process.env, (path) => {
+    try {
+      return existsSync(path) ? statSync(path).dev : null;
+    } catch {
+      return null;
+    }
+  });
+}
 
 /**
  * The usage log is append-only and would otherwise grow without bound —
