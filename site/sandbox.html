@@ -44,6 +44,7 @@
         <option value="tx">Hourly, Texas, $22 an hour</option>
         <option value="ca">California, married, $120,000 plus a bonus</option>
         <option value="oh">Ohio, weekly, $1,400</option>
+        <option value="pension">Pension, $2,000 a month</option>
       </select>
     </div>
   </div>
@@ -237,6 +238,73 @@
       <div class="btn-row">
         <button type="button" class="btn sec" id="addDeduction">+ Add Deduction</button>
         <button type="button" class="btn sec" id="clearDeductions">Clear</button>
+      </div>
+    </fieldset>
+
+    <fieldset id="pensionSet">
+      <legend>Pension, Annuity or IRA Payment (optional)</legend>
+      <p class="hint">Use this when the payment is a pension, annuity, profit-sharing or IRA payment, not wages. Enter the payment in Earnings above. Only federal income tax is withheld: no Social Security, Medicare or unemployment tax applies, and state and local withholding on pension payments is not calculated.</p>
+      <div class="f">
+        <div class="lab"><label for="pensionKind">Payment type</label></div>
+        <select id="pensionKind" class="inp">
+          <option value="">Wages, not a pension payment</option>
+          <option value="periodic">Periodic payments (Form W-4P)</option>
+          <option value="nonperiodic">Nonperiodic payment (Form W-4R)</option>
+          <option value="eligible_rollover">Eligible rollover distribution (Form W-4R)</option>
+        </select>
+      </div>
+      <div id="pensionBox" hidden>
+        <div class="f">
+          <div class="lab"><label for="pensionTaxableAmount">Taxable part of the payment ($)</label></div>
+          <div class="money"><em>$</em><input id="pensionTaxableAmount" class="inp" inputmode="decimal" placeholder="The whole payment" /></div>
+          <p class="hint">Withholding applies to the taxable part. Leave blank to withhold on the whole payment.</p>
+        </div>
+        <div id="pensionPeriodic">
+          <div class="grid g2">
+            <div class="f">
+              <div class="lab"><label for="pensionFilingStatus">Form W-4P Step 1(c): Filing Status</label></div>
+              <select id="pensionFilingStatus" class="inp">
+                <option value="single" selected>Single or Married filing separately</option>
+                <option value="married_joint">Married filing jointly</option>
+                <option value="head_of_household">Head of household</option>
+              </select>
+            </div>
+            <div class="f">
+              <div class="lab"><label for="pensionStep2">Step 2(b)(iii): Other Jobs and Pensions ($ a year)</label></div>
+              <div class="money"><em>$</em><input id="pensionStep2" class="inp" inputmode="decimal" value="0" /></div>
+            </div>
+          </div>
+          <div class="grid g2">
+            <div class="f">
+              <div class="lab"><label for="pensionCredits">Step 3: Credits ($ a year)</label></div>
+              <div class="money"><em>$</em><input id="pensionCredits" class="inp" inputmode="decimal" value="0" /></div>
+            </div>
+            <div class="f">
+              <div class="lab"><label for="pensionOtherIncome">Step 4(a): Other Income ($ a year)</label></div>
+              <div class="money"><em>$</em><input id="pensionOtherIncome" class="inp" inputmode="decimal" value="0" /></div>
+            </div>
+          </div>
+          <div class="grid g2">
+            <div class="f">
+              <div class="lab"><label for="pensionDeductions">Step 4(b): Deductions ($ a year)</label></div>
+              <div class="money"><em>$</em><input id="pensionDeductions" class="inp" inputmode="decimal" value="0" /></div>
+            </div>
+            <div class="f">
+              <div class="lab"><label for="pensionExtra">Step 4(c): Extra Withholding (each payment)</label></div>
+              <div class="money"><em>$</em><input id="pensionExtra" class="inp" inputmode="decimal" value="0" /></div>
+            </div>
+          </div>
+          <label class="chk"><input class="tick" type="checkbox" id="pensionNoWithholding" /><span class="cl">Payee chose no withholding</span></label>
+          <p class="hint">With no Form W-4P the payee is treated as Single with no entries. Periodic payments can be monthly, semimonthly, biweekly, weekly or daily.</p>
+        </div>
+        <div id="pensionRateBox" hidden>
+          <div class="f">
+            <div class="lab"><label for="pensionRate">Form W-4R Line 2: Withholding Rate (%)</label></div>
+            <input id="pensionRate" class="inp" inputmode="numeric" placeholder="Default" />
+            <p class="hint">A whole number from 0 to 100. Blank is the default: 10% for a nonperiodic payment, 20% for an eligible rollover distribution. A rollover cannot go below 20%.</p>
+          </div>
+        </div>
+        <label class="chk"><input class="tick" type="checkbox" id="pensionAbroad" /><span class="cl">Payment is delivered outside the United States and its territories</span></label>
       </div>
     </fieldset>
 

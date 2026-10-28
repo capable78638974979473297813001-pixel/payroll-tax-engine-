@@ -183,7 +183,64 @@ export function createForm() {
     residenceCertificate: {},
     payItems: [],
     deductionItems: [],
+    // A pension, annuity or IRA payment instead of wages. '' means wages.
+    pensionKind: '',
+    pensionTaxableAmount: '',
+    pensionFilingStatus: 'single',
+    pensionStep2: 0,
+    pensionCredits: 0,
+    pensionOtherIncome: 0,
+    pensionDeductions: 0,
+    pensionExtra: 0,
+    pensionNoWithholding: false,
+    pensionRate: '',
+    pensionAbroad: false,
   };
+}
+
+/** Payment periods Pub 15-T Table 4 lists for periodic pension payments. */
+export const PERIODIC_PENSION_FREQUENCIES = ['monthly', 'semimonthly', 'biweekly', 'weekly', 'daily'];
+
+function buildPensionInput(form, gross) {
+  const problems = [];
+  const kind = form.pensionKind;
+  if (kind === 'periodic' && !PERIODIC_PENSION_FREQUENCIES.includes(form.payFrequency)) {
+    problems.push('A periodic pension payment can be paid monthly, semimonthly, biweekly, weekly or daily. Choose one of those pay frequencies.');
+  }
+  if (!(gross > 0)) problems.push('Enter the payment amount above $0.');
+  const pretax = (form.deductionItems || []).some((item) => {
+    const amount = dollars(item.amount);
+    return Number.isFinite(amount) && amount > 0 && item.category !== 'posttax' && item.category != null;
+  });
+  if (pretax) problems.push('A pension payment takes no pre-tax deductions. Use Post-tax, or clear the deduction.');
+  const pension = { kind };
+  const taxable = String(form.pensionTaxableAmount ?? '').trim();
+  if (taxable !== '') {
+    const cents = dollars(taxable);
+    if (!Number.isFinite(cents) || cents < 0) problems.push('Taxable amount must be a dollar amount of 0 or more.');
+    else if (cents > gross) problems.push('Taxable amount cannot be more than the payment.');
+    else pension.taxableAmount = cents;
+  }
+  if (form.pensionAbroad) pension.deliveredOutsideUS = true;
+  if (kind === 'periodic') {
+    const w4p = { form: '2022_or_later', filingStatus: form.pensionFilingStatus || 'single' };
+    for (const [key, field] of [['multiplePensionsAmount', 'pensionStep2'], ['credits', 'pensionCredits'], ['otherIncome', 'pensionOtherIncome'], ['deductions', 'pensionDeductions'], ['extraWithholding', 'pensionExtra']]) {
+      const cents = dollars(form[field] || 0);
+      if (!Number.isFinite(cents) || cents < 0) problems.push(`${field} must be a dollar amount of 0 or more.`);
+      else if (cents > 0) w4p[key] = cents;
+    }
+    if (form.pensionNoWithholding) w4p.noWithholding = true;
+    pension.w4p = w4p;
+  } else {
+    const rate = String(form.pensionRate ?? '').trim();
+    if (rate !== '') {
+      const n = Number(rate);
+      if (!Number.isInteger(n) || n < 0 || n > 100) problems.push('Withholding rate must be a whole number from 0 to 100.');
+      else pension.w4r = { withholdingRate: n };
+    }
+  }
+  if (problems.length) throw new CalculatorInputError(problems);
+  return pension;
 }
 
 export class CalculatorInputError extends Error {
@@ -301,6 +358,24 @@ export function buildPaycheckInput(form) {
   const gross = periodGrossCents(form);
   if (!Number.isFinite(gross) || gross < 0) problems.push('Gross pay cannot be negative.');
   if (problems.length) throw new CalculatorInputError(problems);
+
+  if (form.pensionKind) {
+    // A pension, annuity or IRA payment is not wages: one payment, post-tax deductions only, no state or W-4.
+    const pension = buildPensionInput(form, gross);
+    const deductions = [];
+    for (const item of form.deductionItems || []) {
+      const amount = dollars(item.amount);
+      if (!Number.isFinite(amount) || amount <= 0) continue;
+      deductions.push({ code: String(item.code || '').trim() || 'DED', category: null, amount });
+    }
+    return {
+      checkDate: form.checkDate,
+      payFrequency: form.payFrequency,
+      earnings: [{ code: 'PENSION', category: 'regular', amount: gross }],
+      deductions,
+      pension,
+    };
+  }
 
   const earnings = [{ code: 'REG', category: 'regular', amount: gross }];
   const seen = new Set(['REG']);

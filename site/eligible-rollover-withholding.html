@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="color-scheme" content="light" />
+<title>Eligible rollover and lump-sum withholding (Form W-4R) | Omnia.tax</title>
+<meta name="description" content="How 10% and 20% withholding works for lump sums, IRA distributions and eligible rollover distributions (Form W-4R), with examples from the engine." />
+<link rel="stylesheet" href="/assets/v5.css" />
+</head>
+<body>
+<header class="site-header"><div class="bar">
+  <a class="mark" href="/">Omnia<span class="dot" aria-hidden="true"></span>tax</a>
+  <nav class="nav-links" aria-label="Primary"><a href="/product">Product</a><a href="/coverage">Coverage</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a></nav>
+  <div class="nav-end"><a class="signin" href="/signin">Sign in</a><a class="btn sm" href="/signup">Get API key</a></div>
+  <button class="menu-btn" type="button" aria-expanded="false" aria-label="Menu"><span></span><span></span></button>
+</div></header>
+<main class="wrap">
+  <div class="page-head">
+    <nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a> <span aria-hidden="true">/</span> <a href="/guides">Guides</a> <span aria-hidden="true">/</span> <span aria-current="page">Eligible rollover and nonperiodic withholding</span></nav>
+    <p class="eyebrow">Calculations</p>
+    <h1 class="page">Eligible rollover and nonperiodic payment withholding</h1>
+    <p class="sub">Lump sums and rollovers are withheld at a rate, not by a worksheet. The rate depends on the type of payment and what the payee chose.</p>
+  </div>
+  <div class="prose seo" style="margin-top:32px;max-width:720px">
+
+    <p>Payments that are not periodic installments are withheld at a flat percentage of the taxable amount. The payee sets the rate on Form W-4R; with no form, the default applies.</p>
+    <h2>The rates</h2>
+    <div class="table-wrap"><table><thead><tr><th>Payment</th><th style="text-align:left">Default</th><th style="text-align:left">The payee can choose</th></tr></thead><tbody><tr><td>Nonperiodic payment, including an IRA distribution payable on demand</td><td style="text-align:left">10%</td><td style="text-align:left">Any whole percent from 0% to 100% (not less than 10% if delivered outside the United States and its territories)</td></tr><tr><td>Eligible rollover distribution (qualified plan, 403(b), governmental 457(b))</td><td style="text-align:left">20%</td><td style="text-align:left">A higher whole percent. Never lower than 20%, including 0%</td></tr></tbody></table></div>
+    <p>With no Form W-4R, or no valid taxpayer ID, the payer withholds the default and cannot honor a request for less.</p>
+    <h2>On a $10,000 taxable payment, from the engine</h2>
+    <div class="table-wrap"><table><thead><tr><th>Payment and election</th><th style="text-align:right">Federal tax withheld</th></tr></thead><tbody><tr><td>Nonperiodic, default</td><td style="text-align:right">$1,000.00</td></tr><tr><td>Nonperiodic, payee chose 0%</td><td style="text-align:right">$0.00</td></tr><tr><td>Nonperiodic, payee chose 19%</td><td style="text-align:right">$1,900.00</td></tr><tr><td>Eligible rollover, default</td><td style="text-align:right">$2,000.00</td></tr><tr><td>Eligible rollover, payee asked for 10%</td><td style="text-align:right">$2,000.00 (the 20% floor applies)</td></tr><tr><td>Eligible rollover, payee chose 30%</td><td style="text-align:right">$3,000.00</td></tr></tbody></table></div>
+    <h2>Only the taxable part</h2>
+    <p>Withholding applies to the taxable amount of the payment. If part is a return of after-tax contributions, send <code>pension.taxableAmount</code> and the rate applies to that part only.</p>
+    <h2>What counts as an eligible rollover distribution</h2>
+    <p>Form W-4R lists payments that are <em>not</em> eligible rollover distributions for these rules: hardship distributions, required minimum distributions, distributions from a pension-linked emergency savings account, and several qualified disaster, birth or adoption, long-term care, domestic abuse and emergency-expense distributions. Those are nonperiodic payments, so send them as <code>nonperiodic</code>; whether a payment is one or the other is a fact about the plan that you supply.</p>
+    <div class="panel" style="margin-top:14px"><pre style="margin:0;padding:18px 22px;overflow:auto">&quot;pension&quot;: { &quot;kind&quot;: &quot;eligible_rollover&quot;, &quot;w4r&quot;: { &quot;withholdingRate&quot;: 30 } }</pre></div>
+    <p>See also <a href="/pension-withholding-calculation">withholding on periodic pension payments</a>. State and local withholding on these payments is not calculated.</p>
+    <h2>Keep reading</h2>
+    <p><a href="/pension-withholding-calculation">Pension and annuity withholding</a> · <a href="/federal-income-tax-withholding-calculator">Federal income tax withholding calculation</a> · <a href="/bonus-tax-withholding-calculation">Bonus tax withholding</a> · <a href="/income-tax-withholding-api">Income tax withholding API</a> · <a href="/guides">All guides</a></p>
+  </div>
+<section class="faq" aria-labelledby="faq-h" style="margin-top:44px;max-width:720px"><h2 id="faq-h" style="font-size:22px;line-height:30px">Questions</h2><article><h3>How much is withheld from an eligible rollover distribution?</h3><p>The payer must withhold 20% of the taxable amount unless the payment is rolled over directly. The payee can ask for a higher rate on Form W-4R but not a lower one, including zero.</p></article><article><h3>What is the default withholding on a 401(k) or IRA lump sum?</h3><p>An IRA distribution payable on demand or any other nonperiodic payment defaults to 10%, and the payee can choose 0% to 100%. A lump sum from a 401(k) that could be rolled over is an eligible rollover distribution and defaults to 20%.</p></article><article><h3>Can a payee choose no withholding?</h3><p>On a nonperiodic payment, yes, by entering 0% on Form W-4R, unless the payment is delivered outside the United States and its territories. On an eligible rollover distribution, no.</p></article></section>
+  <div class="seo-cta" style="margin:48px 0 8px;max-width:720px"><a class="btn" href="/signup">Start the 14-day trial</a> <a class="text-link" href="/docs">Read the docs →</a><p class="fine">14-day free trial, then $0.08 per paycheck calculation. Omnia.tax calculates; it does not file, deposit tax, or give tax advice. <a href="/disclaimer">Disclaimer</a>.</p></div>
+</main>
+<footer class="site-footer">
+  <div class="wrap foot-grid">
+    <a class="mark" href="/">Omnia<span class="dot" aria-hidden="true"></span>tax</a>
+    <div><h2>Product</h2><a href="/coverage">Coverage</a><a href="/pricing">Pricing</a><a href="/changelog">Changelog</a></div>
+    <div><h2>Developers</h2><a href="/docs">Docs</a><a href="/docs/paycheck">API reference</a><a href="/status">Status</a></div>
+    <div><h2>Guides</h2><a href="/guides">All guides</a><a href="/payroll-tax-calculation">Payroll tax calculation</a><a href="/payroll-tax-calculation-engine">Payroll tax calculation engine</a><a href="/income-tax-calculation-engine">Income tax calculation engine</a><a href="/take-home-pay">Take-home pay by state</a><a href="/payroll-tax-api">Payroll tax API</a><a href="/payroll-tax">Payroll tax by state</a><a href="/symmetry-tax-engine-alternative">Symmetry alternative</a><a href="/payroll-tax-engine-comparison">Engine comparison</a></div>
+    <div><h2>Company</h2><a href="/about">About</a><a href="/contact">Contact</a><a href="/terms">Terms</a><a href="/privacy">Privacy</a></div>
+  </div>
+  <p class="wrap copy">© 2026 OMNIA TAX LLC. A Michigan limited liability company.</p>
+</footer>
+<script src="/assets/v5.js"></script>
+</body>
+</html>

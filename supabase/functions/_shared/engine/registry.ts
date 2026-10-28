@@ -117,6 +117,12 @@ export interface FederalRuleset {
       nonresidentAlienAdjustment: Record<string, number>;
     };
   };
+  /** Pension, annuity and IRA withholding (Pub 15-T Worksheet 1B, Forms W-4P and W-4R). Absent for a year this build has not verified. */
+  pensionWithholding?: {
+    periodicPaymentFrequencies: string[];
+    nonperiodicDefaultRate: number;
+    eligibleRolloverDefaultRate: number;
+  };
   socialSecurity: {
     employeeRate: number;
     employerRate: number;

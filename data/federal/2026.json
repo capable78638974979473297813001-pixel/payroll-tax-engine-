@@ -486,7 +486,7 @@
   },
   "knownGaps": [
     "Nonresident alien withholding is modelled: federalW4.nonresidentAlien adds Pub 15-T's per-period amount to wages before annualizing, Table 2 for a 2020-or-later Form W-4 and Table 1 when federalW4.legacyAllowances marks a 2019-or-earlier form (the amount is not reported as wages). The India student/business-apprentice carve-out is the caller's to apply.",
-    "Pension/annuity withholding (Pub 15-T's separate periodic-payment tables, Form W-4P) is not modelled -- this engine assumes ordinary W-2 wage/salary payroll only.",
+    "Pension and annuity withholding is modelled for federal income tax only: periodic payments by Pub 15-T Worksheet 1B (Form W-4P, 2022 or later or 2021 and earlier), and nonperiodic payments and eligible rollover distributions at the Form W-4R rate (see pensionWithholding). State and local withholding on these payments is not calculated; states differ on whether and how they withhold, and the result says so. Periodic payments paid less often than monthly (quarterly, semiannual, annual) are refused: Pub 15-T Table 4 does not list them.",
     "Nonpayroll withholding (Form 945 categories: IRA distributions, gambling winnings, certain government/Indian gaming payments) is out of scope -- these aren't wage payroll at all.",
     "Employment categories are modelled through input.employmentCategory (see the employmentCategories and railroadRetirement blocks): clergy (including the housing-allowance exclusion and the voluntary withholding agreement), statutory employees, household, agricultural, election workers and railroad (Tier I, Tier II and RUIA). Not modelled: the railroad supplemental annuity work-hour tax, and the allocated-tips rules for tipped employees.",
     "FUTA credit-reduction states (the DOL's annual list of which states' net FUTA rate exceeds 0.6%) are modelled: futa() (src/taxes/federal.ts) adds the state's additional rate from futa.creditReduction.states, and where that map is empty the line says the determination is pending rather than implying 0.6% is final. The 2026 map IS empty as shipped, because DOL makes the determination after November 10, 2026 — 2025's finals (CA 1.2%, VI 4.5%) ride along as priorYear reference only. STILL OPEN, structurally: this map needs a human edit once DOL actually publishes the 2026 list — nothing automates that step.",
@@ -589,5 +589,21 @@
       "quote": "Tier II tax rates in 2026 remain at 4.9 percent for employees and 13.1 percent for employers; the maximum amount of earnings subject to tier II taxes increases from $130,800 to $137,100. The tier I payroll tax rate remains 7.65 percent, divided into 6.20 percent for retirement (on earnings up to $184,500 in 2026, up from $176,100) and 1.45 percent for Medicare hospital insurance with no maximum."
     },
     "notModelled": "WIRED: RUIA contributions are now computed — see the ruia block above (employer rate from input.employer.railroadUnemploymentRate, otherwise the published new-employer rate, capped at the monthly compensation base). STILL NOT MODELLED: the supplemental annuity work-hour tax, which is levied per work-hour rather than per dollar and has no wage base for this engine to work from."
+  },
+  "pensionWithholding": {
+    "source": "pub15t_worksheet_1b_form_w4p_form_w4r",
+    "comment": "Withholding from pension, annuity, profit-sharing, stock-bonus and IRA payments. Periodic payments: Pub 15-T (2026) Worksheet 1B with the STANDARD schedules above (read 2026-10-28 from irs.gov/pub/irs-pdf/p15t.pdf, Dec 3, 2025 edition), driven by Form W-4P. Nonperiodic payments and eligible rollover distributions: Form W-4R (2026), irs.gov/pub/irs-pdf/fw4r.pdf. Withholding applies to the taxable part of the payment. No Social Security, Medicare, FUTA or state unemployment tax applies to these payments.",
+    "periodicPaymentFrequencies": [
+      "monthly",
+      "semimonthly",
+      "biweekly",
+      "weekly",
+      "daily"
+    ],
+    "periodicFrequenciesComment": "Pub 15-T Table 4 lists monthly (12), semimonthly (24), biweekly (26), weekly (52) and daily (260). Other frequencies (quarterly, semiannual, annual) are refused rather than guessed, because the worksheet's table does not list them.",
+    "nonperiodicDefaultRate": 0.1,
+    "eligibleRolloverDefaultRate": 0.2,
+    "rateComment": "Form W-4R: nonperiodic payments default to 10% and the payee may choose any whole-number rate from 0% to 100% (not below 10% for payments delivered outside the United States and its territories). An eligible rollover distribution defaults to 20% and the payee may choose a higher rate, never a lower one. With no Form W-4R, or no valid SSN, the payer withholds the default and cannot honor a lower request.",
+    "noFormDefault": "Periodic payments with no Form W-4P (first payment after 2021): treated as Single with no entries in Steps 2 to 4 of a 2022-or-later Form W-4P (Pub 15-T and Form W-4P instructions)."
   }
 }

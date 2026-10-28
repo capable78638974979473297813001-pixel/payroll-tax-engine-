@@ -267,6 +267,7 @@ test('the calculator keeps a visible field border and a near-black primary', { t
       'Federal Taxes (enter your W-4 info)',
       'State and Local Taxes',
       'Benefits and Deductions (optional)',
+      'Pension, Annuity or IRA Payment (optional)',
     ]);
     assert.match(fresh.text, /Look up a street address to auto-fill the state and local jurisdiction fields below/);
     assert.match(fresh.text, /Where the employee lives, if different from where they work/);

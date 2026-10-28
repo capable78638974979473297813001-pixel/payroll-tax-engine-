@@ -85,6 +85,7 @@ function describeIncomeTax(raw: Record<string, any>): Pick<StateRow, 'incomeTax'
 
 /** Context for a state whose local layer is not a wage tax. */
 const INFO_NOTES: Record<string, string> = {
+  CO: 'Colorado has no local wage tax. The only local layer is a flat monthly occupational privilege tax in Denver, Glendale, Greenwood Village and Sheridan; each city\'s own page was read, and independent payroll guides list the same four. Aurora repealed its tax on January 1, 2025.',
   IA: 'School district surtax is settled on the return, not withheld from pay.',
   WA: 'Seattle taxes are paid by employers; there is no employee withholding.',
   NJ: 'Newark\'s payroll tax is paid by the employer.',
@@ -93,8 +94,7 @@ const INFO_NOTES: Record<string, string> = {
 
 /** Where the data itself says the local list is not the whole story. */
 const PARTIAL_NOTES: Record<string, string> = {
-  CO: 'Flat monthly occupational privilege tax in Denver, Glendale, Greenwood Village and Sheridan, the only Colorado cities we have found that charge one. Aurora repealed its tax on January 1, 2025.',
-  AL: '29 municipalities and Macon County; seven of those rates come from a survey rather than the city\'s own document.',
+  AL: '29 municipalities and Macon County. Seven rates (Bear Creek, Brilliant, Gadsden, Goodwater, Haleyville, Lynn, Red Bay) come from the Alabama League of Municipalities survey rather than the city\'s own document, and Tuskegee\'s rate has conflicting sources.',
   WV: 'Partial city service-fee coverage. Smithers is missing; Madison has an unresolved rate conflict; Rivesville relies on secondary payroll sources.',
 };
 

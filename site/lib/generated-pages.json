@@ -2476,7 +2476,7 @@
       },
       {
         "q": "Does this cover pensions?",
-        "a": "No. Pension and annuity withholding use a different form and are not modelled. The engine assumes ordinary wage and salary payroll."
+        "a": "Pension and annuity payments are withheld by a different method: Form W-4P and Pub 15-T Worksheet 1B for periodic payments, and Form W-4R for lump sums and rollovers. Omnia.tax calculates federal withholding on them in a separate pension request, and does not calculate state withholding on them."
       }
     ],
     "breadcrumb": [
@@ -2627,6 +2627,80 @@
       {
         "name": "Paycheck calculation formula",
         "path": "/paycheck-calculation-formula"
+      }
+    ]
+  },
+  {
+    "path": "/pension-withholding-calculation",
+    "file": "pension-withholding-calculation.html",
+    "title": "Pension and annuity withholding calculation (Form W-4P) | Omnia.tax",
+    "description": "How federal withholding on periodic pension and annuity payments is calculated from Form W-4P (Pub 15-T Worksheet 1B), with worked examples from the engine.",
+    "h1": "Pension and annuity withholding calculation",
+    "faq": [
+      {
+        "q": "How is withholding on a pension calculated?",
+        "a": "For periodic payments, from the payee's Form W-4P using Pub 15-T Worksheet 1B: annualise the payment, apply the standard adjustment and the form's entries, find the annual tax on the standard schedule, subtract credits, and divide by the number of payments."
+      },
+      {
+        "q": "What if a retiree gave the payer no Form W-4P?",
+        "a": "The payer withholds as if the payee were Single with no entries in Steps 2 to 4. For payments that began before 2022 with no form, the payee is treated as married claiming three allowances, under the older rules."
+      },
+      {
+        "q": "Is Social Security or Medicare tax withheld from a pension?",
+        "a": "No. FICA applies to wages. A pension payment has federal income tax withheld and, depending on the state, state income tax."
+      },
+      {
+        "q": "Does Omnia.tax calculate state tax on pensions?",
+        "a": "No. It calculates federal withholding on pension, annuity and IRA payments. State and local withholding on them varies by state and is not calculated."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Guides",
+        "path": "/guides"
+      },
+      {
+        "name": "Pension and annuity withholding",
+        "path": "/pension-withholding-calculation"
+      }
+    ]
+  },
+  {
+    "path": "/eligible-rollover-withholding",
+    "file": "eligible-rollover-withholding.html",
+    "title": "Eligible rollover and lump-sum withholding (Form W-4R) | Omnia.tax",
+    "description": "How 10% and 20% withholding works for lump sums, IRA distributions and eligible rollover distributions (Form W-4R), with examples from the engine.",
+    "h1": "Eligible rollover and nonperiodic payment withholding",
+    "faq": [
+      {
+        "q": "How much is withheld from an eligible rollover distribution?",
+        "a": "The payer must withhold 20% of the taxable amount unless the payment is rolled over directly. The payee can ask for a higher rate on Form W-4R but not a lower one, including zero."
+      },
+      {
+        "q": "What is the default withholding on a 401(k) or IRA lump sum?",
+        "a": "An IRA distribution payable on demand or any other nonperiodic payment defaults to 10%, and the payee can choose 0% to 100%. A lump sum from a 401(k) that could be rolled over is an eligible rollover distribution and defaults to 20%."
+      },
+      {
+        "q": "Can a payee choose no withholding?",
+        "a": "On a nonperiodic payment, yes, by entering 0% on Form W-4R, unless the payment is delivered outside the United States and its territories. On an eligible rollover distribution, no."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Guides",
+        "path": "/guides"
+      },
+      {
+        "name": "Eligible rollover and nonperiodic withholding",
+        "path": "/eligible-rollover-withholding"
       }
     ]
   },
