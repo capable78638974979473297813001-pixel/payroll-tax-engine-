@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="color-scheme" content="light" />
+<title>Relocation paycheck comparison: same pay, new state | Omnia.tax</title>
+<meta name="description" content="Compare a paycheck before and after a move, Texas to California as the worked case, with each tax that changes and the explanation, from one API call." />
+<link rel="stylesheet" href="/assets/v5.css" />
+</head>
+<body>
+<header class="site-header"><div class="bar">
+  <a class="mark" href="/">Omnia<span class="dot" aria-hidden="true"></span>tax</a>
+  <nav class="nav-links" aria-label="Primary"><a href="/product">Product</a><a href="/coverage">Coverage</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a></nav>
+  <div class="nav-end"><a class="signin" href="/signin">Sign in</a><a class="btn sm" href="/signup">Get API key</a></div>
+  <button class="menu-btn" type="button" aria-expanded="false" aria-label="Menu"><span></span><span></span></button>
+</div></header>
+<main class="wrap">
+  <div class="page-head">
+    <nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a> <span aria-hidden="true">/</span> <a href="/guides">Guides</a> <span aria-hidden="true">/</span> <span aria-current="page">Relocation paycheck comparison</span></nav>
+    <p class="eyebrow">Calculations</p>
+    <h1 class="page">Relocation paycheck comparison</h1>
+    <p class="sub">What does a move do to take-home pay? Ask for the difference, not two numbers.</p>
+  </div>
+  <div class="prose seo" style="margin-top:32px;max-width:720px">
+
+    <p>When an employee is offered a role in another state, the question is not what each paycheck is. It is what changes and why. The compare endpoint runs both paychecks through the engine and walks from one to the other one input change at a time, so every step is an engine result.</p>
+    <h2>Texas to California</h2>
+    <p>The same $3,000.00 biweekly check. Net pay moves from $2,450.12 in Texas to $2,277.06 in California, a drop of $173.06.</p><div class="table-wrap"><table><thead><tr><th>Tax that moved</th><th style="text-align:right">Texas</th><th style="text-align:right">California</th></tr></thead><tbody><tr><td>Texas Unemployment Insurance (Employer)</td><td style="text-align:right">$81.00</td><td style="text-align:right">$0.00</td></tr><tr><td>California Income Tax</td><td style="text-align:right">$0.00</td><td style="text-align:right">$134.06</td></tr><tr><td>California Unemployment Insurance (Employer)</td><td style="text-align:right">$0.00</td><td style="text-align:right">$102.00</td></tr><tr><td>California Disability Benefits (Employee)</td><td style="text-align:right">$0.00</td><td style="text-align:right">$39.00</td></tr></tbody></table></div>
+    <h2>The request</h2>
+    <div class="panel" style="margin-top:14px"><pre style="margin:0;padding:18px 22px;overflow:auto">POST /v1/paycheck/compare
+{ &quot;before&quot;: { …the Texas paycheck… },
+  &quot;change&quot;: { &quot;workState&quot;: { &quot;code&quot;: &quot;CA&quot;, &quot;certificate&quot;: {} } } }</pre></div><p>Send <code>after</code> as a full second paycheck, or <code>change</code> with only the fields that differ. The response has <code>totals</code>, <code>taxes</code> (only those that moved), <code>inputChanges</code> and <code>steps</code>.</p>
+    <h2>Billing</h2>
+    <p>A successful comparison is billed as two paycheck calculations and nothing when refused. See <a href="/compare-two-paychecks-api">the compare endpoint</a>.</p>
+    <h2>Limits</h2>
+    <p>A paycheck comparison does not account for the cost of living, income taxes beyond withholding, property or sales taxes, or the employee's total return. It compares withholding on one check.</p>
+    <h2>Three salaries, Texas to California</h2>
+    <p>Net pay per biweekly check at three annual salaries. The cost of the move grows with pay.</p><div class="table-wrap"><table><thead><tr><th>Annual salary</th><th style="text-align:right">Net in Texas</th><th style="text-align:right">Net in California</th><th style="text-align:right">Difference per check</th></tr></thead><tbody><tr><td>$15,000.00</td><td style="text-align:right">$532.78</td><td style="text-align:right">$525.28</td><td style="text-align:right">$7.50</td></tr><tr><td>$78,000.00</td><td style="text-align:right">$2,450.12</td><td style="text-align:right">$2,277.06</td><td style="text-align:right">$173.06</td></tr><tr><td>$156,000.00</td><td style="text-align:right">$4,534.31</td><td style="text-align:right">$4,015.60</td><td style="text-align:right">$518.71</td></tr></tbody></table></div>
+    <h2>Keep reading</h2>
+    <p><a href="/compare-two-paychecks-api">Compare two paychecks API</a> · <a href="/take-home-pay">Take-home pay by state</a> · <a href="/multi-state-payroll-tax-calculation">Multi-state payroll tax calculation</a> · <a href="/payroll-tax-api-for-hr-software">Payroll tax API for HR software</a> · <a href="/guides">All guides</a></p>
+  </div>
+<section class="faq" aria-labelledby="faq-h" style="margin-top:44px;max-width:720px"><h2 id="faq-h" style="font-size:22px;line-height:30px">Questions</h2><article><h3>How do I compare take-home pay between two states?</h3><p>Use the compare endpoint with the same paycheck and a changed work state. It returns both results and a step-by-step explanation of the difference.</p></article><article><h3>Does the comparison include cost of living?</h3><p>No. It compares tax withholding on one paycheck, not living costs or other taxes.</p></article></section>
+  <div class="seo-cta" style="margin:48px 0 8px;max-width:720px"><a class="btn" href="/signup">Start the 14-day trial</a> <a class="text-link" href="/docs">Read the docs →</a><p class="fine">14-day free trial, then $0.08 per paycheck calculation. Omnia.tax calculates; it does not file, deposit tax, or give tax advice. <a href="/disclaimer">Disclaimer</a>.</p></div>
+</main>
+<footer class="site-footer">
+  <div class="wrap foot-grid">
+    <a class="mark" href="/">Omnia<span class="dot" aria-hidden="true"></span>tax</a>
+    <div><h2>Product</h2><a href="/coverage">Coverage</a><a href="/pricing">Pricing</a><a href="/changelog">Changelog</a></div>
+    <div><h2>Developers</h2><a href="/docs">Docs</a><a href="/docs/paycheck">API reference</a><a href="/status">Status</a></div>
+    <div><h2>Guides</h2><a href="/guides">All guides</a><a href="/payroll-tax-calculation">Payroll tax calculation</a><a href="/payroll-tax-calculation-engine">Payroll tax calculation engine</a><a href="/income-tax-calculation-engine">Income tax calculation engine</a><a href="/take-home-pay">Take-home pay by state</a><a href="/payroll-tax-api">Payroll tax API</a><a href="/payroll-tax">Payroll tax by state</a><a href="/symmetry-tax-engine-alternative">Symmetry alternative</a><a href="/payroll-tax-engine-comparison">Engine comparison</a></div>
+    <div><h2>Company</h2><a href="/about">About</a><a href="/contact">Contact</a><a href="/terms">Terms</a><a href="/privacy">Privacy</a></div>
+  </div>
+  <p class="wrap copy">© 2026 OMNIA TAX LLC. A Michigan limited liability company.</p>
+</footer>
+<script src="/assets/v5.js"></script>
+</body>
+</html>

@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="color-scheme" content="light" />
+<title>Payroll tax API money in cents: why integers, not decimals | Omnia.tax</title>
+<meta name="description" content="Why a payroll tax API uses integer cents: no floating-point drift, exact totals that tie to deposits, and where rounding happens once per tax." />
+<link rel="stylesheet" href="/assets/v5.css" />
+</head>
+<body>
+<header class="site-header"><div class="bar">
+  <a class="mark" href="/">Omnia<span class="dot" aria-hidden="true"></span>tax</a>
+  <nav class="nav-links" aria-label="Primary"><a href="/product">Product</a><a href="/coverage">Coverage</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a></nav>
+  <div class="nav-end"><a class="signin" href="/signin">Sign in</a><a class="btn sm" href="/signup">Get API key</a></div>
+  <button class="menu-btn" type="button" aria-expanded="false" aria-label="Menu"><span></span><span></span></button>
+</div></header>
+<main class="wrap">
+  <div class="page-head">
+    <nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a> <span aria-hidden="true">/</span> <a href="/guides">Guides</a> <span aria-hidden="true">/</span> <span aria-current="page">Payroll tax API money in cents</span></nav>
+    <p class="eyebrow">Developers</p>
+    <h1 class="page">Payroll tax API: money in integer cents</h1>
+    <p class="sub">Why every amount is a whole number, and where rounding happens.</p>
+  </div>
+  <div class="prose seo" style="margin-top:32px;max-width:720px">
+
+    <p>Payroll amounts must tie to the penny. Withheld tax is deposited and reported, and a one-cent difference per paycheck becomes a reconciliation problem across thousands of them. The Omnia.tax API therefore uses integer cents for every amount, in requests and responses.</p>
+    <h2>The floating-point problem</h2>
+    <p>In most programming languages <code>0.1 + 0.2</code> is not <code>0.3</code>. Add enough dollar amounts stored as floating point and totals drift by fractions of a cent, which then round the wrong way on one line. Integers do not drift. $3,000.00 is <code>300000</code>, and 300000 plus 300000 is exactly 600000.</p>
+    <h2>What the API does</h2>
+    <ul><li>Requests must send whole cents. <code>3000.5</code> is refused with a message showing what to send instead.</li><li>Responses return whole cents in every amount field.</li><li>Rounding happens once per tax, at the point that tax's amount is produced from its base and rate. Nothing accumulates a fraction.</li><li>Totals are sums of integers, so <code>employeeTaxTotal</code> equals the sum of the employee lines exactly.</li></ul>
+    <h2>Check it yourself</h2>
+    <p>In the Columbus example the employee lines add up to $700.65 and <code>employeeTaxTotal</code> is $700.65. They match because there is nothing to disagree about.</p>
+    <h2>On your side</h2>
+    <ul><li>Store amounts as integer cents in your database.</li><li>Convert to dollars only for display, and format with a currency formatter.</li><li>If you receive dollars from a form, convert with rounding at the edge: <code>Math.round(dollars * 100)</code>, then never touch floats again.</li></ul>
+    <h2>Keep reading</h2>
+    <p><a href="/json-payroll-tax-api">JSON payroll tax API</a> · <a href="/payroll-tax-api-error-codes">Payroll tax API error codes</a> · <a href="/paycheck-calculation-formula">Paycheck calculation formula</a> · <a href="/payroll-tax-api-python-example">Payroll tax API Python example</a> · <a href="/guides">All guides</a></p>
+  </div>
+<section class="faq" aria-labelledby="faq-h" style="margin-top:44px;max-width:720px"><h2 id="faq-h" style="font-size:22px;line-height:30px">Questions</h2><article><h3>Why does the API use cents instead of dollars?</h3><p>Integers add exactly. Dollar amounts stored as floating point drift by fractions of a cent, which can round the wrong way and break reconciliation to deposits.</p></article><article><h3>What happens if I send a decimal amount?</h3><p>The request is refused with a 422 invalid_input error that names the field and shows the whole-cent value to send.</p></article></section>
+  <div class="seo-cta" style="margin:48px 0 8px;max-width:720px"><a class="btn" href="/signup">Start the 14-day trial</a> <a class="text-link" href="/docs">Read the docs →</a><p class="fine">14-day free trial, then $0.08 per paycheck calculation. Omnia.tax calculates; it does not file, deposit tax, or give tax advice. <a href="/disclaimer">Disclaimer</a>.</p></div>
+</main>
+<footer class="site-footer">
+  <div class="wrap foot-grid">
+    <a class="mark" href="/">Omnia<span class="dot" aria-hidden="true"></span>tax</a>
+    <div><h2>Product</h2><a href="/coverage">Coverage</a><a href="/pricing">Pricing</a><a href="/changelog">Changelog</a></div>
+    <div><h2>Developers</h2><a href="/docs">Docs</a><a href="/docs/paycheck">API reference</a><a href="/status">Status</a></div>
+    <div><h2>Guides</h2><a href="/guides">All guides</a><a href="/payroll-tax-calculation">Payroll tax calculation</a><a href="/payroll-tax-calculation-engine">Payroll tax calculation engine</a><a href="/income-tax-calculation-engine">Income tax calculation engine</a><a href="/take-home-pay">Take-home pay by state</a><a href="/payroll-tax-api">Payroll tax API</a><a href="/payroll-tax">Payroll tax by state</a><a href="/symmetry-tax-engine-alternative">Symmetry alternative</a><a href="/payroll-tax-engine-comparison">Engine comparison</a></div>
+    <div><h2>Company</h2><a href="/about">About</a><a href="/contact">Contact</a><a href="/terms">Terms</a><a href="/privacy">Privacy</a></div>
+  </div>
+  <p class="wrap copy">© 2026 OMNIA TAX LLC. A Michigan limited liability company.</p>
+</footer>
+<script src="/assets/v5.js"></script>
+</body>
+</html>

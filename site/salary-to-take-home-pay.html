@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="color-scheme" content="light" />
+<title>Salary to take-home pay: annual salary to net per paycheck | Omnia.tax</title>
+<meta name="description" content="Turn an annual salary into take-home pay per paycheck: divide by pay periods, run it through the tax engine, and compare Texas, California and Ohio." />
+<link rel="stylesheet" href="/assets/v5.css" />
+</head>
+<body>
+<header class="site-header"><div class="bar">
+  <a class="mark" href="/">Omnia<span class="dot" aria-hidden="true"></span>tax</a>
+  <nav class="nav-links" aria-label="Primary"><a href="/product">Product</a><a href="/coverage">Coverage</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a></nav>
+  <div class="nav-end"><a class="signin" href="/signin">Sign in</a><a class="btn sm" href="/signup">Get API key</a></div>
+  <button class="menu-btn" type="button" aria-expanded="false" aria-label="Menu"><span></span><span></span></button>
+</div></header>
+<main class="wrap">
+  <div class="page-head">
+    <nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a> <span aria-hidden="true">/</span> <a href="/guides">Guides</a> <span aria-hidden="true">/</span> <span aria-current="page">Salary to take-home pay</span></nav>
+    <p class="eyebrow">Calculations</p>
+    <h1 class="page">Salary to take-home pay</h1>
+    <p class="sub">An annual salary is not a paycheck. The tax engine turns one into the other.</p>
+  </div>
+  <div class="prose seo" style="margin-top:32px;max-width:720px">
+
+    <p>To find take-home pay from a yearly salary, divide the salary by the number of pay periods to get the gross per check, then run the check through the tax rules. Skipping the second step is the common mistake: a rule of thumb like "take-home is about 75%" is wrong by hundreds of dollars a year in either direction depending on the state.</p>
+    <h2>A $78,000.00 salary, biweekly, in three places</h2>
+    <div class="table-wrap"><table><thead><tr><th>Location</th><th style="text-align:right">Gross per check</th><th style="text-align:right">Employee taxes</th><th style="text-align:right">Net per check</th><th style="text-align:right">Net per year</th></tr></thead><tbody><tr><td>Texas</td><td style="text-align:right">$3,000.00</td><td style="text-align:right">$549.88</td><td style="text-align:right">$2,450.12</td><td style="text-align:right">$63,703.12</td></tr><tr><td>California</td><td style="text-align:right">$3,000.00</td><td style="text-align:right">$722.94</td><td style="text-align:right">$2,277.06</td><td style="text-align:right">$59,203.56</td></tr><tr><td>Columbus, Ohio</td><td style="text-align:right">$3,000.00</td><td style="text-align:right">$700.65</td><td style="text-align:right">$2,299.35</td><td style="text-align:right">$59,783.10</td></tr></tbody></table></div>
+    <h2>Make it your own</h2>
+    <ul><li>Change the filing status and the W-4 entries: they change federal withholding.</li><li>Add pre-tax deductions: a 401(k) deferral or health premium raises take-home relative to what it costs.</li><li>Change the work address: local tax follows it.</li></ul>
+    <h2>By state</h2>
+    <p>For nine salaries in every state, see <a href="/take-home-pay">take-home pay by state</a>. For the API form of this calculation, see <a href="/gross-to-net-api">the gross-to-net API</a>.</p>
+    <h2>Estimates</h2>
+    <p>Take-home pay calculated this way is an estimate of withholding for a typical year. Actual withholding depends on the employee's W-4 and the employer's choices, and the final tax is settled on the return.</p>
+    <h2>Keep reading</h2>
+    <p><a href="/take-home-pay">Take-home pay by state</a> · <a href="/gross-to-net-api">Gross-to-net API</a> · <a href="/net-to-gross-calculator-api">Net-to-gross (gross-up) API</a> · <a href="/pay-frequency-withholding">Pay frequency and withholding</a> · <a href="/guides">All guides</a></p>
+  </div>
+<section class="faq" aria-labelledby="faq-h" style="margin-top:44px;max-width:720px"><h2 id="faq-h" style="font-size:22px;line-height:30px">Questions</h2><article><h3>How do I convert an annual salary to take-home pay?</h3><p>Divide the salary by the pay periods to get gross per check, then apply federal, state and local taxes and any deductions to reach net pay. A tax engine does the second step.</p></article><article><h3>Is take-home pay a fixed percentage of salary?</h3><p>No. It depends on the state, filing status, deductions and pay frequency, so a single percentage is wrong for most people.</p></article></section>
+  <div class="seo-cta" style="margin:48px 0 8px;max-width:720px"><a class="btn" href="/signup">Start the 14-day trial</a> <a class="text-link" href="/docs">Read the docs →</a><p class="fine">14-day free trial, then $0.08 per paycheck calculation. Omnia.tax calculates; it does not file, deposit tax, or give tax advice. <a href="/disclaimer">Disclaimer</a>.</p></div>
+</main>
+<footer class="site-footer">
+  <div class="wrap foot-grid">
+    <a class="mark" href="/">Omnia<span class="dot" aria-hidden="true"></span>tax</a>
+    <div><h2>Product</h2><a href="/coverage">Coverage</a><a href="/pricing">Pricing</a><a href="/changelog">Changelog</a></div>
+    <div><h2>Developers</h2><a href="/docs">Docs</a><a href="/docs/paycheck">API reference</a><a href="/status">Status</a></div>
+    <div><h2>Guides</h2><a href="/guides">All guides</a><a href="/payroll-tax-calculation">Payroll tax calculation</a><a href="/payroll-tax-calculation-engine">Payroll tax calculation engine</a><a href="/income-tax-calculation-engine">Income tax calculation engine</a><a href="/take-home-pay">Take-home pay by state</a><a href="/payroll-tax-api">Payroll tax API</a><a href="/payroll-tax">Payroll tax by state</a><a href="/symmetry-tax-engine-alternative">Symmetry alternative</a><a href="/payroll-tax-engine-comparison">Engine comparison</a></div>
+    <div><h2>Company</h2><a href="/about">About</a><a href="/contact">Contact</a><a href="/terms">Terms</a><a href="/privacy">Privacy</a></div>
+  </div>
+  <p class="wrap copy">© 2026 OMNIA TAX LLC. A Michigan limited liability company.</p>
+</footer>
+<script src="/assets/v5.js"></script>
+</body>
+</html>

@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="color-scheme" content="light" />
+<title>Payroll tax API rate limits: headers, 429s, retries | Omnia.tax</title>
+<meta name="description" content="How rate limiting works on the payroll tax API: per-minute limits, RateLimit headers, Retry-After on a 429, test-key caps of 30 a minute and 500 a day." />
+<link rel="stylesheet" href="/assets/v5.css" />
+</head>
+<body>
+<header class="site-header"><div class="bar">
+  <a class="mark" href="/">Omnia<span class="dot" aria-hidden="true"></span>tax</a>
+  <nav class="nav-links" aria-label="Primary"><a href="/product">Product</a><a href="/coverage">Coverage</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a></nav>
+  <div class="nav-end"><a class="signin" href="/signin">Sign in</a><a class="btn sm" href="/signup">Get API key</a></div>
+  <button class="menu-btn" type="button" aria-expanded="false" aria-label="Menu"><span></span><span></span></button>
+</div></header>
+<main class="wrap">
+  <div class="page-head">
+    <nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a> <span aria-hidden="true">/</span> <a href="/guides">Guides</a> <span aria-hidden="true">/</span> <span aria-current="page">Payroll tax API rate limits</span></nav>
+    <p class="eyebrow">Developers</p>
+    <h1 class="page">Payroll tax API rate limits</h1>
+    <p class="sub">What the limits are, how to see them, and how to back off.</p>
+  </div>
+  <div class="prose seo" style="margin-top:32px;max-width:720px">
+
+    <p>Rate limits protect the service and tell you how fast you can safely call it. Omnia.tax limits calls per minute for every key, and caps test keys per day as well. The limits are visible on every response, so a client never has to guess.</p>
+    <h2>Test keys</h2>
+    <div class="table-wrap"><table><thead><tr><th>Limit</th><th style="text-align:left">Value</th></tr></thead><tbody><tr><td>Per minute</td><td style="text-align:left">30 requests</td></tr><tr><td>Per day (UTC)</td><td style="text-align:left">500 requests</td></tr><tr><td>Billed</td><td style="text-align:left">Never</td></tr></tbody></table></div>
+    <h2>Live keys</h2>
+    <p>A live key has a higher per-minute limit and no daily cap. Billing is $0.08 per paycheck calculation after the 14-day trial, so volume is limited by speed, not by a quota you must buy in advance.</p>
+    <h2>What a response tells you</h2>
+    <ul><li><code>RateLimit-Limit</code>: calls allowed in the window.</li><li><code>RateLimit-Remaining</code>: calls left in this window.</li><li><code>Retry-After</code>: on a <code>429</code>, the seconds to wait.</li></ul>
+    <h2>Backing off</h2>
+    <div class="panel" style="margin-top:14px"><pre style="margin:0;padding:18px 22px;overflow:auto">async function calc(body, attempts = 4) {
+  for (let i = 0; i &lt; attempts; i++) {
+    const res = await fetch(URL, { method: &quot;POST&quot;, headers, body: JSON.stringify(body) });
+    if (res.status !== 429) return res;
+    const wait = Number(res.headers.get(&quot;Retry-After&quot;) ?? 1);
+    await new Promise((r) =&gt; setTimeout(r, wait * 1000));
+  }
+  throw new Error(&quot;still rate limited&quot;);
+}</pre></div><p>For a payroll run, send calls through a small queue sized to your limit, not all at once. A run of 500 paychecks at 30 a minute on a test key takes about 17 minutes; ask for a live key when you need to run at production speed.</p>
+    <h2>Keep reading</h2>
+    <p><a href="/payroll-tax-api-error-codes">Payroll tax API error codes</a> · <a href="/payroll-tax-api-test-keys">Payroll tax API test keys</a> · <a href="/payroll-tax-api-pricing">Payroll tax API pricing</a> · <a href="/payroll-tax-api-integration-guide">Payroll tax API integration guide</a> · <a href="/guides">All guides</a></p>
+  </div>
+<section class="faq" aria-labelledby="faq-h" style="margin-top:44px;max-width:720px"><h2 id="faq-h" style="font-size:22px;line-height:30px">Questions</h2><article><h3>What are the rate limits on test keys?</h3><p>30 requests a minute and 500 a day. The daily cap resets at midnight UTC. Test calls are never billed.</p></article><article><h3>What do I do on a 429?</h3><p>Wait the number of seconds in the Retry-After header, then retry. Calls are stateless, so a retry returns the same answer.</p></article><article><h3>Is there a daily limit on live keys?</h3><p>No. Live keys have no daily cap, only a per-minute limit.</p></article></section>
+  <div class="seo-cta" style="margin:48px 0 8px;max-width:720px"><a class="btn" href="/signup">Start the 14-day trial</a> <a class="text-link" href="/docs">Read the docs →</a><p class="fine">14-day free trial, then $0.08 per paycheck calculation. Omnia.tax calculates; it does not file, deposit tax, or give tax advice. <a href="/disclaimer">Disclaimer</a>.</p></div>
+</main>
+<footer class="site-footer">
+  <div class="wrap foot-grid">
+    <a class="mark" href="/">Omnia<span class="dot" aria-hidden="true"></span>tax</a>
+    <div><h2>Product</h2><a href="/coverage">Coverage</a><a href="/pricing">Pricing</a><a href="/changelog">Changelog</a></div>
+    <div><h2>Developers</h2><a href="/docs">Docs</a><a href="/docs/paycheck">API reference</a><a href="/status">Status</a></div>
+    <div><h2>Guides</h2><a href="/guides">All guides</a><a href="/payroll-tax-calculation">Payroll tax calculation</a><a href="/payroll-tax-calculation-engine">Payroll tax calculation engine</a><a href="/income-tax-calculation-engine">Income tax calculation engine</a><a href="/take-home-pay">Take-home pay by state</a><a href="/payroll-tax-api">Payroll tax API</a><a href="/payroll-tax">Payroll tax by state</a><a href="/symmetry-tax-engine-alternative">Symmetry alternative</a><a href="/payroll-tax-engine-comparison">Engine comparison</a></div>
+    <div><h2>Company</h2><a href="/about">About</a><a href="/contact">Contact</a><a href="/terms">Terms</a><a href="/privacy">Privacy</a></div>
+  </div>
+  <p class="wrap copy">© 2026 OMNIA TAX LLC. A Michigan limited liability company.</p>
+</footer>
+<script src="/assets/v5.js"></script>
+</body>
+</html>

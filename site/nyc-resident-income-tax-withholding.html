@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="color-scheme" content="light" />
+<title>New York City resident income tax withholding | Omnia.tax</title>
+<meta name="description" content="How New York City resident income tax is withheld: an extra line beside New York State tax, with the engine's numbers for a $3,000 biweekly check." />
+<link rel="stylesheet" href="/assets/v5.css" />
+</head>
+<body>
+<header class="site-header"><div class="bar">
+  <a class="mark" href="/">Omnia<span class="dot" aria-hidden="true"></span>tax</a>
+  <nav class="nav-links" aria-label="Primary"><a href="/product">Product</a><a href="/coverage">Coverage</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a></nav>
+  <div class="nav-end"><a class="signin" href="/signin">Sign in</a><a class="btn sm" href="/signup">Get API key</a></div>
+  <button class="menu-btn" type="button" aria-expanded="false" aria-label="Menu"><span></span><span></span></button>
+</div></header>
+<main class="wrap">
+  <div class="page-head">
+    <nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a> <span aria-hidden="true">/</span> <a href="/guides">Guides</a> <span aria-hidden="true">/</span> <span aria-current="page">New York City resident income tax withholding</span></nav>
+    <p class="eyebrow">Local taxes</p>
+    <h1 class="page">New York City resident income tax withholding</h1>
+    <p class="sub">A separate city line for residents of the five boroughs.</p>
+  </div>
+  <div class="prose seo" style="margin-top:32px;max-width:720px">
+
+    <p>Residents of New York City pay a city income tax on top of New York State income tax. Employers withhold it as its own line, based on where the employee lives, not where they work. The engine switches it on with a single certificate flag, <code>nycResident</code>.</p>
+    <h2>Same pay, resident and not</h2>
+    <div class="table-wrap"><table><thead><tr><th></th><th style="text-align:right">State income tax</th><th style="text-align:right">City income tax</th><th style="text-align:right">Net pay</th></tr></thead><tbody><tr><td>Lives outside the city</td><td style="text-align:right">$140.28</td><td style="text-align:right">$0.00</td><td style="text-align:right">$2,295.68</td></tr><tr><td>City resident</td><td style="text-align:right">$140.28</td><td style="text-align:right">$107.24</td><td style="text-align:right">$2,188.44</td></tr></tbody></table></div><p>On $3,000.00 biweekly the city tax is <strong>$107.24</strong> and net pay falls by $107.24. The engine's detail: <em>$3000.00 gross less $192.30 allowance = $2807.70 net @ 4.25% over $2308.00, base $86.00</em></p>
+    <h2>In the request</h2>
+    <div class="panel" style="margin-top:14px"><pre style="margin:0;padding:18px 22px;overflow:auto">&quot;workState&quot;: { &quot;code&quot;: &quot;NY&quot;, &quot;certificate&quot;: { &quot;nycResident&quot;: true } }</pre></div>
+    <h2>Points to remember</h2>
+    <ul><li>It follows residence. A New York State resident who lives in Westchester and works in Manhattan owes no city tax.</li><li>Yonkers has its own resident tax: see <a href="/yonkers-income-tax-withholding">Yonkers income tax withholding</a>.</li><li>Employers in the New York City area also owe the quarterly MCTMT, calculated by <code>/v1/employer-taxes</code>.</li><li>Paid Family Leave and DBL lines appear as well: see <a href="/new-york-paid-family-leave-withholding">New York PFL</a>.</li></ul>
+    <h2>The same line at three pay levels</h2>
+    <p>Every figure below is a New York City resident tax on a biweekly check, run through the engine.</p><div class="table-wrap"><table><thead><tr><th>Gross pay</th><th style="text-align:right">Line</th><th style="text-align:right">Net pay</th></tr></thead><tbody><tr><td>$1,500.00</td><td style="text-align:right">$44.47</td><td style="text-align:right">$1,177.67</td></tr><tr><td>$3,000.00</td><td style="text-align:right">$107.24</td><td style="text-align:right">$2,188.44</td></tr><tr><td>$6,000.00</td><td style="text-align:right">$234.74</td><td style="text-align:right">$3,926.67</td></tr></tbody></table></div>
+    <h2>Keep reading</h2>
+    <p><a href="/yonkers-income-tax-withholding">Yonkers income tax withholding</a> · <a href="/payroll-tax/new-york">New York payroll tax</a> · <a href="/new-york-paid-family-leave-withholding">New York Paid Family Leave withholding</a> · <a href="/states-with-local-income-tax">States with local income tax</a> · <a href="/guides">All guides</a></p>
+  </div>
+<section class="faq" aria-labelledby="faq-h" style="margin-top:44px;max-width:720px"><h2 id="faq-h" style="font-size:22px;line-height:30px">Questions</h2><article><h3>Who pays New York City income tax?</h3><p>Residents of the five boroughs. It is withheld by the employer as a separate line from New York State income tax, based on where the employee lives.</p></article><article><h3>Does working in New York City make me pay city tax?</h3><p>Not by itself. The city resident tax follows residence, so a commuter who lives outside the city does not have it withheld.</p></article></section>
+  <div class="seo-cta" style="margin:48px 0 8px;max-width:720px"><a class="btn" href="/signup">Start the 14-day trial</a> <a class="text-link" href="/docs">Read the docs →</a><p class="fine">14-day free trial, then $0.08 per paycheck calculation. Omnia.tax calculates; it does not file, deposit tax, or give tax advice. <a href="/disclaimer">Disclaimer</a>.</p></div>
+</main>
+<footer class="site-footer">
+  <div class="wrap foot-grid">
+    <a class="mark" href="/">Omnia<span class="dot" aria-hidden="true"></span>tax</a>
+    <div><h2>Product</h2><a href="/coverage">Coverage</a><a href="/pricing">Pricing</a><a href="/changelog">Changelog</a></div>
+    <div><h2>Developers</h2><a href="/docs">Docs</a><a href="/docs/paycheck">API reference</a><a href="/status">Status</a></div>
+    <div><h2>Guides</h2><a href="/guides">All guides</a><a href="/payroll-tax-calculation">Payroll tax calculation</a><a href="/payroll-tax-calculation-engine">Payroll tax calculation engine</a><a href="/income-tax-calculation-engine">Income tax calculation engine</a><a href="/take-home-pay">Take-home pay by state</a><a href="/payroll-tax-api">Payroll tax API</a><a href="/payroll-tax">Payroll tax by state</a><a href="/symmetry-tax-engine-alternative">Symmetry alternative</a><a href="/payroll-tax-engine-comparison">Engine comparison</a></div>
+    <div><h2>Company</h2><a href="/about">About</a><a href="/contact">Contact</a><a href="/terms">Terms</a><a href="/privacy">Privacy</a></div>
+  </div>
+  <p class="wrap copy">© 2026 OMNIA TAX LLC. A Michigan limited liability company.</p>
+</footer>
+<script src="/assets/v5.js"></script>
+</body>
+</html>

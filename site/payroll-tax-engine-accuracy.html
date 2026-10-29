@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="color-scheme" content="light" />
+<title>Payroll tax engine accuracy: how it is tested | Omnia.tax</title>
+<meta name="description" content="How the Omnia.tax engine is tested: independently derived fixtures, rounding rules written first, edge-case tests, and what it does not claim about accuracy." />
+<link rel="stylesheet" href="/assets/v5.css" />
+</head>
+<body>
+<header class="site-header"><div class="bar">
+  <a class="mark" href="/">Omnia<span class="dot" aria-hidden="true"></span>tax</a>
+  <nav class="nav-links" aria-label="Primary"><a href="/product">Product</a><a href="/coverage">Coverage</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a></nav>
+  <div class="nav-end"><a class="signin" href="/signin">Sign in</a><a class="btn sm" href="/signup">Get API key</a></div>
+  <button class="menu-btn" type="button" aria-expanded="false" aria-label="Menu"><span></span><span></span></button>
+</div></header>
+<main class="wrap">
+  <div class="page-head">
+    <nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a> <span aria-hidden="true">/</span> <a href="/guides">Guides</a> <span aria-hidden="true">/</span> <span aria-current="page">Payroll tax engine accuracy</span></nav>
+    <p class="eyebrow">Buying and building</p>
+    <h1 class="page">Payroll tax engine accuracy</h1>
+    <p class="sub">What is tested, how, and what we do not claim.</p>
+  </div>
+  <div class="prose seo" style="margin-top:32px;max-width:720px">
+
+    <p>Accuracy claims without a method are decoration. Here is how the engine is checked, and what it does not promise. There is no single accuracy percentage, because "accurate" has to mean accurate against a defined source for a defined input, and some places are covered less firmly than others.</p>
+    <h2>How it is checked</h2>
+    <ul><li>Rounding and precision rules are written down first and every fixture follows them: integer cents, one rounding per tax. <a href="/payroll-tax-api-money-in-cents">Why</a>.</li><li>Federal tables are re-derived independently of the IRS worksheet and compared; the rule file records the check.</li><li>State methods are tested against the agency's own worked examples where the agency publishes them.</li><li>Boundary tests run at bracket edges, wage-base limits and thresholds.</li><li>The published examples on these pages are run through the engine at build time, so a page cannot show a number the engine would not return.</li></ul>
+    <h2>Where the claim stops</h2>
+    <ul><li>It calculates withholding. The employee's tax is settled on their return.</li><li>Where a rate rests on a weaker source, the response says so rather than hiding it.</li><li>Local coverage is partial in some states; the coverage page says which.</li><li>It does not decide worker classification, taxability of a payment, or exempt status. The caller supplies those facts.</li></ul>
+    <h2>Check it yourself</h2>
+    <p>Take the Columbus example: $3,000.00 biweekly, single, no deductions. The engine returns federal income tax of $320.38. Compare with IRS Publication 15-T for the same wages: the line's own explanation is <em>annualised $78000.00 → adjusted $69400.00; bracket 22% over $57900.00; tentative/yr $8330.00 ÷ 26</em> Run the same worksheet by hand and the numbers should match to the cent.</p>
+    <h2>Tell us if it is wrong</h2>
+    <p>If a line differs from the agency's published method, send the inputs and the agency document through <a href="/contact">contact</a>. A correction is dated in the <a href="/changelog">changelog</a>.</p>
+    <h2>Keep reading</h2>
+    <p><a href="/payroll-tax-data-sources">Payroll tax data sources</a> · <a href="/payroll-tax-api-explainable-tax-lines">Explainable payroll tax lines</a> · <a href="/payroll-tax-audit-withholding-check">Payroll tax audit: withholding check</a> · <a href="/payroll-tax-api-testing-fixtures">Payroll tax API testing fixtures</a> · <a href="/guides">All guides</a></p>
+  </div>
+<section class="faq" aria-labelledby="faq-h" style="margin-top:44px;max-width:720px"><h2 id="faq-h" style="font-size:22px;line-height:30px">Questions</h2><article><h3>How accurate is the payroll tax engine?</h3><p>It is tested against independently derived federal fixtures, agency worked examples and boundary cases, with rounding rules written first. It makes no single accuracy percentage claim, and it flags lines that rest on weaker sources.</p></article><article><h3>What if I find a difference from an agency calculation?</h3><p>Send the inputs and the agency document through the contact page. Corrections are recorded in the changelog.</p></article></section>
+  <div class="seo-cta" style="margin:48px 0 8px;max-width:720px"><a class="btn" href="/signup">Start the 14-day trial</a> <a class="text-link" href="/docs">Read the docs →</a><p class="fine">14-day free trial, then $0.08 per paycheck calculation. Omnia.tax calculates; it does not file, deposit tax, or give tax advice. <a href="/disclaimer">Disclaimer</a>.</p></div>
+</main>
+<footer class="site-footer">
+  <div class="wrap foot-grid">
+    <a class="mark" href="/">Omnia<span class="dot" aria-hidden="true"></span>tax</a>
+    <div><h2>Product</h2><a href="/coverage">Coverage</a><a href="/pricing">Pricing</a><a href="/changelog">Changelog</a></div>
+    <div><h2>Developers</h2><a href="/docs">Docs</a><a href="/docs/paycheck">API reference</a><a href="/status">Status</a></div>
+    <div><h2>Guides</h2><a href="/guides">All guides</a><a href="/payroll-tax-calculation">Payroll tax calculation</a><a href="/payroll-tax-calculation-engine">Payroll tax calculation engine</a><a href="/income-tax-calculation-engine">Income tax calculation engine</a><a href="/take-home-pay">Take-home pay by state</a><a href="/payroll-tax-api">Payroll tax API</a><a href="/payroll-tax">Payroll tax by state</a><a href="/symmetry-tax-engine-alternative">Symmetry alternative</a><a href="/payroll-tax-engine-comparison">Engine comparison</a></div>
+    <div><h2>Company</h2><a href="/about">About</a><a href="/contact">Contact</a><a href="/terms">Terms</a><a href="/privacy">Privacy</a></div>
+  </div>
+  <p class="wrap copy">© 2026 OMNIA TAX LLC. A Michigan limited liability company.</p>
+</footer>
+<script src="/assets/v5.js"></script>
+</body>
+</html>

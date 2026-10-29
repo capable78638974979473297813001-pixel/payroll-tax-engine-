@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="color-scheme" content="light" />
+<title>Payroll tax API JSON Schema: validate before you send | Omnia.tax</title>
+<meta name="description" content="A published JSON Schema for the payroll tax paycheck request. Validate payloads in your own code and tests so a bad request never costs a call." />
+<link rel="stylesheet" href="/assets/v5.css" />
+</head>
+<body>
+<header class="site-header"><div class="bar">
+  <a class="mark" href="/">Omnia<span class="dot" aria-hidden="true"></span>tax</a>
+  <nav class="nav-links" aria-label="Primary"><a href="/product">Product</a><a href="/coverage">Coverage</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a></nav>
+  <div class="nav-end"><a class="signin" href="/signin">Sign in</a><a class="btn sm" href="/signup">Get API key</a></div>
+  <button class="menu-btn" type="button" aria-expanded="false" aria-label="Menu"><span></span><span></span></button>
+</div></header>
+<main class="wrap">
+  <div class="page-head">
+    <nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a> <span aria-hidden="true">/</span> <a href="/guides">Guides</a> <span aria-hidden="true">/</span> <span aria-current="page">Payroll tax request JSON Schema</span></nav>
+    <p class="eyebrow">Developers</p>
+    <h1 class="page">Payroll tax API JSON Schema</h1>
+    <p class="sub">Validate a paycheck request on your side, before it is sent.</p>
+  </div>
+  <div class="prose seo" style="margin-top:32px;max-width:720px">
+
+    <p>The paycheck request is published as a <a href="/v1/schemas/paycheck-request.json">JSON Schema</a> at <code>https://api.omnia.tax/v1/schemas/paycheck-request.json</code>. Using it in your own code catches a wrong type or a missing field at the point you build the request, instead of as a <code>422</code> from the network.</p>
+    <h2>Where it helps</h2>
+    <ul><li><strong>Form and import validation.</strong> An imported spreadsheet of pay data can be checked against the schema row by row before anything is sent.</li><li><strong>Unit tests.</strong> Assert that every request your payroll code can build validates against the schema.</li><li><strong>Editor support.</strong> Point your editor at the schema for autocompletion while you write fixtures.</li></ul>
+    <h2>What the schema enforces</h2>
+    <p>Amounts are integers (cents), dates are ISO dates, and categories come from a fixed list. The server runs the same checks, so a request that passes the schema will not be refused for its shape. The schema is permissive about extra top-level properties, so a misspelt optional field is not an error by itself; assert on the fields you mean to send in your own tests.</p>
+    <h2>What it cannot check</h2>
+    <p>A schema checks shape, not meaning. Whether a state needs a particular certificate answer for a given employee depends on the state's rules, so the server can still return <code>cannot_compute</code> naming the missing field. See <a href="/payroll-tax-api-error-codes">the error codes</a>.</p>
+    <h2>An invalid request, as the server reports it</h2>
+    <div class="panel" style="margin-top:14px"><pre style="margin:0;padding:18px 22px;overflow:auto">{
+  &quot;error&quot;: &quot;The request did not pass validation.&quot;,
+  &quot;code&quot;: &quot;invalid_input&quot;,
+  &quot;details&quot;: [{ &quot;path&quot;: &quot;earnings[0].amount&quot;,
+    &quot;message&quot;: &quot;must be integer cents, not 3000.5 — send whole cents (e.g. 300050 for $3,000.50), never dollars.&quot; }],
+  &quot;requestId&quot;: &quot;req_01J9Z6Q8X3&quot;
+}</pre></div>
+    <h2>Keep reading</h2>
+    <p><a href="/payroll-tax-api-openapi">Payroll tax API OpenAPI spec</a> · <a href="/payroll-tax-api-error-codes">Payroll tax API error codes</a> · <a href="/json-payroll-tax-api">JSON payroll tax API</a> · <a href="/payroll-tax-api-for-developers">Payroll tax API for developers</a> · <a href="/guides">All guides</a></p>
+  </div>
+<section class="faq" aria-labelledby="faq-h" style="margin-top:44px;max-width:720px"><h2 id="faq-h" style="font-size:22px;line-height:30px">Questions</h2><article><h3>Is there a JSON Schema for the payroll tax request?</h3><p>Yes, at https://api.omnia.tax/v1/schemas/paycheck-request.json. The OpenAPI document embeds the same definitions.</p></article><article><h3>Does passing the schema guarantee a calculation?</h3><p>It guarantees the shape is valid. A state can still need a certificate answer the schema cannot know about, in which case the API returns cannot_compute and names the missing field.</p></article></section>
+  <div class="seo-cta" style="margin:48px 0 8px;max-width:720px"><a class="btn" href="/signup">Start the 14-day trial</a> <a class="text-link" href="/docs">Read the docs →</a><p class="fine">14-day free trial, then $0.08 per paycheck calculation. Omnia.tax calculates; it does not file, deposit tax, or give tax advice. <a href="/disclaimer">Disclaimer</a>.</p></div>
+</main>
+<footer class="site-footer">
+  <div class="wrap foot-grid">
+    <a class="mark" href="/">Omnia<span class="dot" aria-hidden="true"></span>tax</a>
+    <div><h2>Product</h2><a href="/coverage">Coverage</a><a href="/pricing">Pricing</a><a href="/changelog">Changelog</a></div>
+    <div><h2>Developers</h2><a href="/docs">Docs</a><a href="/docs/paycheck">API reference</a><a href="/status">Status</a></div>
+    <div><h2>Guides</h2><a href="/guides">All guides</a><a href="/payroll-tax-calculation">Payroll tax calculation</a><a href="/payroll-tax-calculation-engine">Payroll tax calculation engine</a><a href="/income-tax-calculation-engine">Income tax calculation engine</a><a href="/take-home-pay">Take-home pay by state</a><a href="/payroll-tax-api">Payroll tax API</a><a href="/payroll-tax">Payroll tax by state</a><a href="/symmetry-tax-engine-alternative">Symmetry alternative</a><a href="/payroll-tax-engine-comparison">Engine comparison</a></div>
+    <div><h2>Company</h2><a href="/about">About</a><a href="/contact">Contact</a><a href="/terms">Terms</a><a href="/privacy">Privacy</a></div>
+  </div>
+  <p class="wrap copy">© 2026 OMNIA TAX LLC. A Michigan limited liability company.</p>
+</footer>
+<script src="/assets/v5.js"></script>
+</body>
+</html>

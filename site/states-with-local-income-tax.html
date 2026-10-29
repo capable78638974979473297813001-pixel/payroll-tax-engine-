@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="color-scheme" content="light" />
+<title>States with local income and wage taxes for payroll | Omnia.tax</title>
+<meta name="description" content="The 15 states where cities, counties or school districts tax wages in the engine's data, how many jurisdictions each has, and what is partial." />
+<link rel="stylesheet" href="/assets/v5.css" />
+</head>
+<body>
+<header class="site-header"><div class="bar">
+  <a class="mark" href="/">Omnia<span class="dot" aria-hidden="true"></span>tax</a>
+  <nav class="nav-links" aria-label="Primary"><a href="/product">Product</a><a href="/coverage">Coverage</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a></nav>
+  <div class="nav-end"><a class="signin" href="/signin">Sign in</a><a class="btn sm" href="/signup">Get API key</a></div>
+  <button class="menu-btn" type="button" aria-expanded="false" aria-label="Menu"><span></span><span></span></button>
+</div></header>
+<main class="wrap">
+  <div class="page-head">
+    <nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a> <span aria-hidden="true">/</span> <a href="/guides">Guides</a> <span aria-hidden="true">/</span> <span aria-current="page">States with local income tax</span></nav>
+    <p class="eyebrow">Local taxes</p>
+    <h1 class="page">States with local income and wage taxes</h1>
+    <p class="sub">4,141 jurisdictions in 15 states in the Omnia.tax data.</p>
+  </div>
+  <div class="prose seo" style="margin-top:32px;max-width:720px">
+
+    <p>Local income tax is the part of payroll tax most engines treat as an afterthought, and the part most likely to be wrong. A city, county or school district can tax wages by where the employee works, where they live or both. The engine carries 4,141 such jurisdictions in 15 states and publishes the list.</p>
+    <h2>Where local tax exists</h2>
+    <p>The <a href="/coverage">coverage page</a> lists every state and whether its local layer is listed in full or partial, with a count of jurisdictions. Highlights of the structures:</p><ul><li><strong>Ohio</strong>: municipal income tax, plus school district income taxes, found by address.</li><li><strong>Pennsylvania</strong>: earned income tax by taxing district, plus the local services tax.</li><li><strong>Michigan</strong>: 24 cities with their own resident and nonresident rates.</li><li><strong>Kentucky</strong>: occupational license taxes by city, county and school district.</li><li><strong>Indiana</strong>: county income taxes.</li><li><strong>Maryland</strong>: county rates built into state withholding.</li><li><strong>New York</strong>: New York City and Yonkers resident taxes.</li><li><strong>Alabama and West Virginia</strong>: partial coverage, with the gaps stated.</li></ul>
+    <h2>Finding the right one</h2>
+    <p>The address decides. <code>POST /v1/address</code> takes a work address and a home address and returns the state, the local jurisdictions and the certificate fields a paycheck needs. See <a href="/address-tax-jurisdiction-lookup-api">address tax jurisdiction lookup</a>.</p>
+    <h2>Partial is stated, not hidden</h2>
+    <p>Where a state's local data is incomplete the response says so and the coverage page lists which places are not covered. A rate that rests on a survey instead of the town's ordinance appears as a notice on the line. See <a href="/payroll-tax-api-data-quality-notices">data quality notices</a>.</p>
+    <h2>Keep reading</h2>
+    <p><a href="/local-payroll-tax-api">Local payroll tax API</a> · <a href="/address-tax-jurisdiction-lookup-api">Address to tax jurisdiction API</a> · <a href="/coverage">Coverage</a> · <a href="/ohio-municipal-income-tax-withholding">Ohio municipal income tax withholding</a> · <a href="/guides">All guides</a></p>
+  </div>
+<section class="faq" aria-labelledby="faq-h" style="margin-top:44px;max-width:720px"><h2 id="faq-h" style="font-size:22px;line-height:30px">Questions</h2><article><h3>Which states have local income taxes?</h3><p>In the Omnia.tax data, 15 states, including Ohio, Pennsylvania, Michigan, Kentucky, Indiana, Maryland, New York, Alabama and West Virginia. The coverage page lists each.</p></article><article><h3>How does the engine know which local tax applies?</h3><p>From the work and home addresses. The address endpoint returns the jurisdictions and the certificate fields for the paycheck call.</p></article></section>
+  <div class="seo-cta" style="margin:48px 0 8px;max-width:720px"><a class="btn" href="/signup">Start the 14-day trial</a> <a class="text-link" href="/docs">Read the docs →</a><p class="fine">14-day free trial, then $0.08 per paycheck calculation. Omnia.tax calculates; it does not file, deposit tax, or give tax advice. <a href="/disclaimer">Disclaimer</a>.</p></div>
+</main>
+<footer class="site-footer">
+  <div class="wrap foot-grid">
+    <a class="mark" href="/">Omnia<span class="dot" aria-hidden="true"></span>tax</a>
+    <div><h2>Product</h2><a href="/coverage">Coverage</a><a href="/pricing">Pricing</a><a href="/changelog">Changelog</a></div>
+    <div><h2>Developers</h2><a href="/docs">Docs</a><a href="/docs/paycheck">API reference</a><a href="/status">Status</a></div>
+    <div><h2>Guides</h2><a href="/guides">All guides</a><a href="/payroll-tax-calculation">Payroll tax calculation</a><a href="/payroll-tax-calculation-engine">Payroll tax calculation engine</a><a href="/income-tax-calculation-engine">Income tax calculation engine</a><a href="/take-home-pay">Take-home pay by state</a><a href="/payroll-tax-api">Payroll tax API</a><a href="/payroll-tax">Payroll tax by state</a><a href="/symmetry-tax-engine-alternative">Symmetry alternative</a><a href="/payroll-tax-engine-comparison">Engine comparison</a></div>
+    <div><h2>Company</h2><a href="/about">About</a><a href="/contact">Contact</a><a href="/terms">Terms</a><a href="/privacy">Privacy</a></div>
+  </div>
+  <p class="wrap copy">© 2026 OMNIA TAX LLC. A Michigan limited liability company.</p>
+</footer>
+<script src="/assets/v5.js"></script>
+</body>
+</html>

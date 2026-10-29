@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="color-scheme" content="light" />
+<title>Explainable payroll tax lines: audit every figure | Omnia.tax</title>
+<meta name="description" content="Why every payroll tax line should say how it was reached, and how the detail field lets a payroll specialist audit a withholding figure without reading code." />
+<link rel="stylesheet" href="/assets/v5.css" />
+</head>
+<body>
+<header class="site-header"><div class="bar">
+  <a class="mark" href="/">Omnia<span class="dot" aria-hidden="true"></span>tax</a>
+  <nav class="nav-links" aria-label="Primary"><a href="/product">Product</a><a href="/coverage">Coverage</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a></nav>
+  <div class="nav-end"><a class="signin" href="/signin">Sign in</a><a class="btn sm" href="/signup">Get API key</a></div>
+  <button class="menu-btn" type="button" aria-expanded="false" aria-label="Menu"><span></span><span></span></button>
+</div></header>
+<main class="wrap">
+  <div class="page-head">
+    <nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a> <span aria-hidden="true">/</span> <a href="/guides">Guides</a> <span aria-hidden="true">/</span> <span aria-current="page">Explainable payroll tax lines</span></nav>
+    <p class="eyebrow">Developers</p>
+    <h1 class="page">Explainable payroll tax lines</h1>
+    <p class="sub">A figure you cannot explain is a figure you cannot defend.</p>
+  </div>
+  <div class="prose seo" style="margin-top:32px;max-width:720px">
+
+    <p>A payroll tax number with no reasoning attached is hard to trust and impossible to dispute. When an employee asks why their withholding changed, or an auditor asks how a figure was reached, "the system said so" is not an answer. Each Omnia.tax tax line carries a <code>detail</code> sentence that states the method and the intermediate numbers.</p>
+    <h2>What the detail says</h2>
+    <p>For the Columbus, Ohio paycheck of $3,000.00, the federal income tax line reads:</p><blockquote>annualised $78000.00 → adjusted $69400.00; bracket 22% over $57900.00; tentative/yr $8330.00 ÷ 26</blockquote><p>That is the whole calculation: the annualised wages, the adjusted wages after the filing-status adjustment, the bracket, the tentative annual tax and the number of pay periods it was divided by. Check it against IRS Publication 15-T and it ties.</p>
+    <h2>Other lines explain themselves too</h2>
+    <ul><li><strong>Social Security</strong> ($186.00): <em>$3000.00 @ 6.2%</em></li><li><strong>Medicare</strong> ($43.50): <em>$3000.00 @ 1.45%, no wage cap</em></li><li><strong>Ohio Income Tax</strong> ($75.77): <em>$3000.00 less $0.00 exemptions (0 × $25) = $3000.00 net @ 2.99% over $1001.92, base $16.03</em></li><li><strong>Ohio Municipal Income Tax</strong> ($75.00): <em>$75.00 to Columbus @ 2.50% (residence and work municipality are the same)</em></li></ul>
+    <h2>Who uses it</h2>
+    <ul><li><strong>Payroll specialists</strong> reconciling the engine against a legacy system line by line.</li><li><strong>Support teams</strong> answering "why is my check lower this week".</li><li><strong>Auditors</strong> who want the method, not just the result.</li><li><strong>Developers</strong> who need to show a user the reason, not only the number.</li></ul>
+    <h2>When the source is weaker</h2>
+    <p>Not every rate has the same quality of source. Where a rate rests on something weaker than the levying body's own form, the response adds a <code>notices</code> entry naming the tax and the tier. See <a href="/payroll-tax-api-data-quality-notices">data quality notices</a>.</p>
+    <h2>Keep reading</h2>
+    <p><a href="/payroll-tax-api-response-fields">Payroll tax API response fields</a> · <a href="/payroll-tax-api-data-quality-notices">Payroll tax data quality notices</a> · <a href="/payroll-tax-calculation-engine">Payroll tax calculation engine</a> · <a href="/payroll-tax-audit-withholding-check">Payroll tax audit: withholding check</a> · <a href="/guides">All guides</a></p>
+  </div>
+<section class="faq" aria-labelledby="faq-h" style="margin-top:44px;max-width:720px"><h2 id="faq-h" style="font-size:22px;line-height:30px">Questions</h2><article><h3>What is an explainable payroll tax line?</h3><p>A tax line that states how its amount was reached: the method, the wages it applied to and the intermediate figures, so a person can audit it.</p></article><article><h3>Can I show the detail text to employees?</h3><p>Yes. It is plain language written for payroll specialists, and you can show it on a pay stub explanation or in a support tool.</p></article></section>
+  <div class="seo-cta" style="margin:48px 0 8px;max-width:720px"><a class="btn" href="/signup">Start the 14-day trial</a> <a class="text-link" href="/docs">Read the docs →</a><p class="fine">14-day free trial, then $0.08 per paycheck calculation. Omnia.tax calculates; it does not file, deposit tax, or give tax advice. <a href="/disclaimer">Disclaimer</a>.</p></div>
+</main>
+<footer class="site-footer">
+  <div class="wrap foot-grid">
+    <a class="mark" href="/">Omnia<span class="dot" aria-hidden="true"></span>tax</a>
+    <div><h2>Product</h2><a href="/coverage">Coverage</a><a href="/pricing">Pricing</a><a href="/changelog">Changelog</a></div>
+    <div><h2>Developers</h2><a href="/docs">Docs</a><a href="/docs/paycheck">API reference</a><a href="/status">Status</a></div>
+    <div><h2>Guides</h2><a href="/guides">All guides</a><a href="/payroll-tax-calculation">Payroll tax calculation</a><a href="/payroll-tax-calculation-engine">Payroll tax calculation engine</a><a href="/income-tax-calculation-engine">Income tax calculation engine</a><a href="/take-home-pay">Take-home pay by state</a><a href="/payroll-tax-api">Payroll tax API</a><a href="/payroll-tax">Payroll tax by state</a><a href="/symmetry-tax-engine-alternative">Symmetry alternative</a><a href="/payroll-tax-engine-comparison">Engine comparison</a></div>
+    <div><h2>Company</h2><a href="/about">About</a><a href="/contact">Contact</a><a href="/terms">Terms</a><a href="/privacy">Privacy</a></div>
+  </div>
+  <p class="wrap copy">© 2026 OMNIA TAX LLC. A Michigan limited liability company.</p>
+</footer>
+<script src="/assets/v5.js"></script>
+</body>
+</html>

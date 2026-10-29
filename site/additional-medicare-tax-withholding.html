@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="color-scheme" content="light" />
+<title>Additional Medicare tax withholding: 0.9% over $200,000 | Omnia.tax</title>
+<meta name="description" content="How employers withhold Additional Medicare tax: 0.9% on wages over $200,000 in the year, no employer match, with a worked check that crosses the threshold." />
+<link rel="stylesheet" href="/assets/v5.css" />
+</head>
+<body>
+<header class="site-header"><div class="bar">
+  <a class="mark" href="/">Omnia<span class="dot" aria-hidden="true"></span>tax</a>
+  <nav class="nav-links" aria-label="Primary"><a href="/product">Product</a><a href="/coverage">Coverage</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a></nav>
+  <div class="nav-end"><a class="signin" href="/signin">Sign in</a><a class="btn sm" href="/signup">Get API key</a></div>
+  <button class="menu-btn" type="button" aria-expanded="false" aria-label="Menu"><span></span><span></span></button>
+</div></header>
+<main class="wrap">
+  <div class="page-head">
+    <nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a> <span aria-hidden="true">/</span> <a href="/guides">Guides</a> <span aria-hidden="true">/</span> <span aria-current="page">Additional Medicare tax withholding</span></nav>
+    <p class="eyebrow">Withholding and wages</p>
+    <h1 class="page">Additional Medicare tax withholding</h1>
+    <p class="sub">The 0.9% employee-only tax that starts partway through the year.</p>
+  </div>
+  <div class="prose seo" style="margin-top:32px;max-width:720px">
+
+    <p>Additional Medicare tax is 0.9% on an employee's Medicare wages above $200,000 in a calendar year. The employer withholds it once wages pass that figure, regardless of the employee's filing status, and does not match it. It is separate from regular Medicare, which is 1.45% on every dollar with no cap.</p>
+    <h2>How the threshold works</h2>
+    <p>The engine needs to know the Medicare wages already paid this year, in <code>ytd.medicare</code>. A $10,000.00 check with no earlier wages owes no Additional Medicare tax, since it does not reach $200,000. The same check after $195,000.00 has already been paid crosses the line by $5,000.00:</p><div class="table-wrap"><table><thead><tr><th>Tax</th><th style="text-align:right">Taxable wages</th><th style="text-align:right">Amount</th></tr></thead><tbody><tr><td>Medicare</td><td style="text-align:right">$10,000.00</td><td style="text-align:right">$145.00</td></tr><tr><td>Medicare (Employer)</td><td style="text-align:right">$10,000.00</td><td style="text-align:right">$145.00</td></tr><tr><td>Additional Medicare</td><td style="text-align:right">$5,000.00</td><td style="text-align:right">$45.00</td></tr></tbody></table></div>
+    <h2>Reading the example</h2>
+    <p>Regular Medicare is $145.00 on the whole $10,000.00, and the employer pays a matching $145.00. Additional Medicare is $45.00, which is 0.9% of the $5,000.00 over the threshold. There is no employer share of that line.</p>
+    <h2>Without year-to-date wages</h2>
+    <p>Run the same $10,000.00 check with <code>ytd.medicare</code> at zero and the engine returns no Additional Medicare line ($0.00). If your system does not track year-to-date wages, it will under-withhold in the check that should have started the tax. See <a href="/payroll-tax-api-ytd-wages">year-to-date wages</a>.</p>
+    <h2>What it is not</h2>
+    <ul><li>It is not a second Medicare match for the employer.</li><li>It does not depend on filing status for withholding, although the employee's actual liability on Form 8959 does.</li><li>It is not capped.</li></ul>
+    <h2>Keep reading</h2>
+    <p><a href="/medicare-tax-calculation">Medicare tax calculation</a> · <a href="/fica-tax-calculation">FICA tax calculation</a> · <a href="/payroll-tax-api-ytd-wages">Payroll tax API year-to-date wages</a> · <a href="/bonus-over-one-million-withholding">Bonus over $1 million withholding</a> · <a href="/guides">All guides</a></p>
+  </div>
+<section class="faq" aria-labelledby="faq-h" style="margin-top:44px;max-width:720px"><h2 id="faq-h" style="font-size:22px;line-height:30px">Questions</h2><article><h3>When does Additional Medicare tax start?</h3><p>Employers begin withholding 0.9% on the part of an employee's Medicare wages that exceeds $200,000 in the calendar year, whatever the employee's filing status.</p></article><article><h3>Does the employer match Additional Medicare tax?</h3><p>No. It is paid by the employee only.</p></article></section>
+  <div class="seo-cta" style="margin:48px 0 8px;max-width:720px"><a class="btn" href="/signup">Start the 14-day trial</a> <a class="text-link" href="/docs">Read the docs →</a><p class="fine">14-day free trial, then $0.08 per paycheck calculation. Omnia.tax calculates; it does not file, deposit tax, or give tax advice. <a href="/disclaimer">Disclaimer</a>.</p></div>
+</main>
+<footer class="site-footer">
+  <div class="wrap foot-grid">
+    <a class="mark" href="/">Omnia<span class="dot" aria-hidden="true"></span>tax</a>
+    <div><h2>Product</h2><a href="/coverage">Coverage</a><a href="/pricing">Pricing</a><a href="/changelog">Changelog</a></div>
+    <div><h2>Developers</h2><a href="/docs">Docs</a><a href="/docs/paycheck">API reference</a><a href="/status">Status</a></div>
+    <div><h2>Guides</h2><a href="/guides">All guides</a><a href="/payroll-tax-calculation">Payroll tax calculation</a><a href="/payroll-tax-calculation-engine">Payroll tax calculation engine</a><a href="/income-tax-calculation-engine">Income tax calculation engine</a><a href="/take-home-pay">Take-home pay by state</a><a href="/payroll-tax-api">Payroll tax API</a><a href="/payroll-tax">Payroll tax by state</a><a href="/symmetry-tax-engine-alternative">Symmetry alternative</a><a href="/payroll-tax-engine-comparison">Engine comparison</a></div>
+    <div><h2>Company</h2><a href="/about">About</a><a href="/contact">Contact</a><a href="/terms">Terms</a><a href="/privacy">Privacy</a></div>
+  </div>
+  <p class="wrap copy">© 2026 OMNIA TAX LLC. A Michigan limited liability company.</p>
+</footer>
+<script src="/assets/v5.js"></script>
+</body>
+</html>

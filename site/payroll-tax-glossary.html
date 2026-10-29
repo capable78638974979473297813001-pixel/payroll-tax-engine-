@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="color-scheme" content="light" />
+<title>Payroll tax glossary: FIT, FICA, FUTA, SUTA, SDI and more | Omnia.tax</title>
+<meta name="description" content="A plain glossary of payroll tax terms: FIT, FICA, FUTA, SUTA, SDI, PFML, W-4, wage base, supplemental wages, imputed income, gross-to-net and more." />
+<link rel="stylesheet" href="/assets/v5.css" />
+</head>
+<body>
+<header class="site-header"><div class="bar">
+  <a class="mark" href="/">Omnia<span class="dot" aria-hidden="true"></span>tax</a>
+  <nav class="nav-links" aria-label="Primary"><a href="/product">Product</a><a href="/coverage">Coverage</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a></nav>
+  <div class="nav-end"><a class="signin" href="/signin">Sign in</a><a class="btn sm" href="/signup">Get API key</a></div>
+  <button class="menu-btn" type="button" aria-expanded="false" aria-label="Menu"><span></span><span></span></button>
+</div></header>
+<main class="wrap">
+  <div class="page-head">
+    <nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a> <span aria-hidden="true">/</span> <a href="/guides">Guides</a> <span aria-hidden="true">/</span> <span aria-current="page">Payroll tax glossary</span></nav>
+    <p class="eyebrow">Who it is for</p>
+    <h1 class="page">Payroll tax glossary</h1>
+    <p class="sub">The abbreviations on a pay stub and in the API, in plain words.</p>
+  </div>
+  <div class="prose seo" style="margin-top:32px;max-width:720px">
+
+    <p>Payroll is full of abbreviations that mean one narrow thing. This glossary covers the ones that appear on a pay stub and in the Omnia.tax API's tax line ids, with a pointer to the page that explains each in depth.</p>
+    <h2>Taxes</h2>
+    <div class="table-wrap"><table><thead><tr><th>Term</th><th style="text-align:left">Meaning</th></tr></thead><tbody><tr><td>FIT</td><td style="text-align:left">Federal income tax withholding, from the employee's Form W-4. <a href="/federal-income-tax-withholding-calculator">How it is calculated</a>.</td></tr><tr><td>FICA</td><td style="text-align:left">Social Security (6.2% up to $184,500 in 2026) plus Medicare (1.45%). <a href="/fica-tax-calculation">FICA</a>.</td></tr><tr><td>Additional Medicare</td><td style="text-align:left">0.9% on wages above $200,000, employee only. <a href="/additional-medicare-tax-withholding">More</a>.</td></tr><tr><td>FUTA</td><td style="text-align:left">Federal unemployment tax, paid by the employer. <a href="/futa-suta-calculation">More</a>.</td></tr><tr><td>SUTA or SUI</td><td style="text-align:left">State unemployment tax, paid by the employer in most states. <a href="/state-unemployment-tax-rates">Rates</a>.</td></tr><tr><td>SDI, TDI, DBL</td><td style="text-align:left">State disability insurance programs. <a href="/state-disability-insurance-payroll">States</a>.</td></tr><tr><td>PFML, PFL, FAMLI</td><td style="text-align:left">State paid family and medical leave contributions. <a href="/state-paid-family-leave-payroll">States</a>.</td></tr><tr><td>EIT, LST</td><td style="text-align:left">Pennsylvania earned income tax and local services tax. <a href="/pennsylvania-eit-lst-withholding">More</a>.</td></tr><tr><td>MCTMT</td><td style="text-align:left">New York Metropolitan Commuter Transportation Mobility Tax, an employer tax on quarterly payroll.</td></tr></tbody></table></div>
+    <h2>Pay and forms</h2>
+    <div class="table-wrap"><table><thead><tr><th>Term</th><th style="text-align:left">Meaning</th></tr></thead><tbody><tr><td>Gross pay</td><td style="text-align:left">Total earnings before any deduction or tax.</td></tr><tr><td>Net pay</td><td style="text-align:left">Take-home pay: gross less employee taxes and deductions.</td></tr><tr><td>Gross-to-net</td><td style="text-align:left">The calculation from gross to net. <a href="/gross-to-net-api">More</a>.</td></tr><tr><td>Net-to-gross</td><td style="text-align:left">The reverse: the gross that leaves a target net. <a href="/net-to-gross-calculator-api">More</a>.</td></tr><tr><td>Wage base</td><td style="text-align:left">The yearly wage limit above which a tax stops.</td></tr><tr><td>Supplemental wages</td><td style="text-align:left">Pay on top of regular wages: bonuses, commissions. <a href="/supplemental-wage-withholding-rates">Rates</a>.</td></tr><tr><td>Imputed income</td><td style="text-align:left">Taxable value of a benefit not paid in cash. <a href="/imputed-income-payroll-tax">More</a>.</td></tr><tr><td>Pre-tax deduction</td><td style="text-align:left">Taken before a tax is calculated. <a href="/pre-tax-deduction-tax-treatment">Treatment by tax</a>.</td></tr><tr><td>Form W-4</td><td style="text-align:left">The employee's federal withholding certificate.</td></tr><tr><td>Check date</td><td style="text-align:left">The date wages are paid; it decides the tax year. <a href="/payroll-tax-api-effective-dating">More</a>.</td></tr><tr><td>Reciprocity</td><td style="text-align:left">An agreement between states that avoids double withholding. <a href="/payroll-tax-reciprocity-agreements">More</a>.</td></tr></tbody></table></div>
+    <h2>API terms</h2>
+    <div class="table-wrap"><table><thead><tr><th>Term</th><th style="text-align:left">Meaning</th></tr></thead><tbody><tr><td>Tax line</td><td style="text-align:left">One entry in <code>result.taxes</code> with an id, payer, taxable wages and amount.</td></tr><tr><td>Certificate</td><td style="text-align:left">The state-specific answers an employee gives for withholding.</td></tr><tr><td>ytd</td><td style="text-align:left">Year-to-date wages sent with a request so caps stop at the right check. <a href="/payroll-tax-api-ytd-wages">More</a>.</td></tr><tr><td>Notice</td><td style="text-align:left">A flag that a line rests on a weaker source. <a href="/payroll-tax-api-data-quality-notices">More</a>.</td></tr></tbody></table></div>
+    <h2>Keep reading</h2>
+    <p><a href="/payroll-tax-calculation">How payroll tax calculation works</a> · <a href="/guides">All guides</a> · <a href="/payroll-tax-api-response-fields">Payroll tax API response fields</a> · <a href="/fica-tax-calculation">FICA tax calculation</a> · <a href="/guides">All guides</a></p>
+  </div>
+<section class="faq" aria-labelledby="faq-h" style="margin-top:44px;max-width:720px"><h2 id="faq-h" style="font-size:22px;line-height:30px">Questions</h2><article><h3>What does FICA stand for?</h3><p>Federal Insurance Contributions Act. It covers Social Security and Medicare tax, paid half by the employee and half by the employer.</p></article><article><h3>What is the difference between FUTA and SUTA?</h3><p>FUTA is the federal unemployment tax and SUTA is the state unemployment tax. Both are paid by the employer in most cases.</p></article></section>
+  <div class="seo-cta" style="margin:48px 0 8px;max-width:720px"><a class="btn" href="/signup">Start the 14-day trial</a> <a class="text-link" href="/docs">Read the docs →</a><p class="fine">14-day free trial, then $0.08 per paycheck calculation. Omnia.tax calculates; it does not file, deposit tax, or give tax advice. <a href="/disclaimer">Disclaimer</a>.</p></div>
+</main>
+<footer class="site-footer">
+  <div class="wrap foot-grid">
+    <a class="mark" href="/">Omnia<span class="dot" aria-hidden="true"></span>tax</a>
+    <div><h2>Product</h2><a href="/coverage">Coverage</a><a href="/pricing">Pricing</a><a href="/changelog">Changelog</a></div>
+    <div><h2>Developers</h2><a href="/docs">Docs</a><a href="/docs/paycheck">API reference</a><a href="/status">Status</a></div>
+    <div><h2>Guides</h2><a href="/guides">All guides</a><a href="/payroll-tax-calculation">Payroll tax calculation</a><a href="/payroll-tax-calculation-engine">Payroll tax calculation engine</a><a href="/income-tax-calculation-engine">Income tax calculation engine</a><a href="/take-home-pay">Take-home pay by state</a><a href="/payroll-tax-api">Payroll tax API</a><a href="/payroll-tax">Payroll tax by state</a><a href="/symmetry-tax-engine-alternative">Symmetry alternative</a><a href="/payroll-tax-engine-comparison">Engine comparison</a></div>
+    <div><h2>Company</h2><a href="/about">About</a><a href="/contact">Contact</a><a href="/terms">Terms</a><a href="/privacy">Privacy</a></div>
+  </div>
+  <p class="wrap copy">© 2026 OMNIA TAX LLC. A Michigan limited liability company.</p>
+</footer>
+<script src="/assets/v5.js"></script>
+</body>
+</html>

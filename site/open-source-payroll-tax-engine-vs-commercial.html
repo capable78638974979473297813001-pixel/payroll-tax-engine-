@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="color-scheme" content="light" />
+<title>Open-source vs commercial payroll tax engine | Omnia.tax</title>
+<meta name="description" content="Open-source payroll tax engine or a commercial API? What the licence does not include: rate upkeep, local data, testing, effective dating, and when each wins." />
+<link rel="stylesheet" href="/assets/v5.css" />
+</head>
+<body>
+<header class="site-header"><div class="bar">
+  <a class="mark" href="/">Omnia<span class="dot" aria-hidden="true"></span>tax</a>
+  <nav class="nav-links" aria-label="Primary"><a href="/product">Product</a><a href="/coverage">Coverage</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a></nav>
+  <div class="nav-end"><a class="signin" href="/signin">Sign in</a><a class="btn sm" href="/signup">Get API key</a></div>
+  <button class="menu-btn" type="button" aria-expanded="false" aria-label="Menu"><span></span><span></span></button>
+</div></header>
+<main class="wrap">
+  <div class="page-head">
+    <nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a> <span aria-hidden="true">/</span> <a href="/guides">Guides</a> <span aria-hidden="true">/</span> <span aria-current="page">Open-source vs commercial payroll tax engine</span></nav>
+    <p class="eyebrow">Buying and building</p>
+    <h1 class="page">Open-source vs commercial payroll tax engine</h1>
+    <p class="sub">The software may be free. The rules are the cost.</p>
+  </div>
+  <div class="prose seo" style="margin-top:32px;max-width:720px">
+
+    <p>An open-source payroll tax engine gives you code you can read and change. What it cannot give you is a continuously updated body of tax rules, because the rules change every year in fifty states and thousands of localities. That upkeep is where the cost sits, and it falls on whoever runs the engine.</p>
+    <h2>What is the same</h2>
+    <ul><li>Both can calculate a paycheck correctly on the day the rules were last verified.</li><li>Both can be tested against known results.</li><li>Both can be wrapped in your own service.</li></ul>
+    <h2>What differs</h2>
+    <div class="table-wrap"><table><thead><tr><th>Question</th><th style="text-align:left">Open source</th><th style="text-align:left">Commercial API</th></tr></thead><tbody><tr><td>Who updates rates in January?</td><td style="text-align:left">You, or a community with no obligation.</td><td style="text-align:left">The vendor.</td></tr><tr><td>Mid-year changes</td><td style="text-align:left">When someone contributes them.</td><td style="text-align:left">When the vendor publishes them.</td></tr><tr><td>Local tax by address</td><td style="text-align:left">Usually not included; you add data and geocoding.</td><td style="text-align:left">Included in some; check coverage.</td></tr><tr><td>Reproduce an old year</td><td style="text-align:left">If the project keeps old tables.</td><td style="text-align:left">Effective dating, where offered.</td></tr><tr><td>Audit and inspection</td><td style="text-align:left">Full source.</td><td style="text-align:left">Documentation, explainable lines, tests of your own.</td></tr><tr><td>Cost</td><td style="text-align:left">Engineering time.</td><td style="text-align:left">Per calculation or subscription.</td></tr></tbody></table></div>
+    <h2>How to decide</h2>
+    <ul><li>If you must inspect and modify the code, or run offline, open source may be required. Budget the upkeep.</li><li>If you want the calculation to be someone else's ongoing job, buy it.</li><li>Whichever you choose, keep a fixture set and rerun it each January. See <a href="/payroll-tax-api-testing-fixtures">testing fixtures</a>.</li></ul>
+    <h2>The honest middle</h2>
+    <p>Some teams use a commercial API in production and an open-source library for fast offline previews, checking one against the other. That catches drift in either.</p>
+    <h2>Keep reading</h2>
+    <p><a href="/build-vs-buy-payroll-tax-engine">Build vs buy a payroll tax engine</a> · <a href="/payroll-tax-library-vs-api">Payroll tax library vs API</a> · <a href="/payroll-tax-api-alternatives">Payroll tax API alternatives</a> · <a href="/payroll-tax-engine-evaluation-checklist">Payroll tax engine evaluation checklist</a> · <a href="/guides">All guides</a></p>
+  </div>
+<section class="faq" aria-labelledby="faq-h" style="margin-top:44px;max-width:720px"><h2 id="faq-h" style="font-size:22px;line-height:30px">Questions</h2><article><h3>Is there a free open-source payroll tax engine?</h3><p>There are open-source libraries and rule sets of varying scope and currency. The code is free; keeping every state and local rule current is the cost, and it falls on you.</p></article><article><h3>When is open source the better choice?</h3><p>When you must inspect or modify the code, run offline, or have a team to maintain the rules.</p></article></section>
+  <div class="seo-cta" style="margin:48px 0 8px;max-width:720px"><a class="btn" href="/signup">Start the 14-day trial</a> <a class="text-link" href="/docs">Read the docs →</a><p class="fine">14-day free trial, then $0.08 per paycheck calculation. Omnia.tax calculates; it does not file, deposit tax, or give tax advice. <a href="/disclaimer">Disclaimer</a>.</p></div>
+</main>
+<footer class="site-footer">
+  <div class="wrap foot-grid">
+    <a class="mark" href="/">Omnia<span class="dot" aria-hidden="true"></span>tax</a>
+    <div><h2>Product</h2><a href="/coverage">Coverage</a><a href="/pricing">Pricing</a><a href="/changelog">Changelog</a></div>
+    <div><h2>Developers</h2><a href="/docs">Docs</a><a href="/docs/paycheck">API reference</a><a href="/status">Status</a></div>
+    <div><h2>Guides</h2><a href="/guides">All guides</a><a href="/payroll-tax-calculation">Payroll tax calculation</a><a href="/payroll-tax-calculation-engine">Payroll tax calculation engine</a><a href="/income-tax-calculation-engine">Income tax calculation engine</a><a href="/take-home-pay">Take-home pay by state</a><a href="/payroll-tax-api">Payroll tax API</a><a href="/payroll-tax">Payroll tax by state</a><a href="/symmetry-tax-engine-alternative">Symmetry alternative</a><a href="/payroll-tax-engine-comparison">Engine comparison</a></div>
+    <div><h2>Company</h2><a href="/about">About</a><a href="/contact">Contact</a><a href="/terms">Terms</a><a href="/privacy">Privacy</a></div>
+  </div>
+  <p class="wrap copy">© 2026 OMNIA TAX LLC. A Michigan limited liability company.</p>
+</footer>
+<script src="/assets/v5.js"></script>
+</body>
+</html>

@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="color-scheme" content="light" />
+<title>Colorado FAMLI premium withholding: rate, cap and split | Omnia.tax</title>
+<meta name="description" content="How the Colorado FAMLI paid leave premium is withheld: the percentage of wages up to the Social Security wage base, the employee share, and a worked check." />
+<link rel="stylesheet" href="/assets/v5.css" />
+</head>
+<body>
+<header class="site-header"><div class="bar">
+  <a class="mark" href="/">Omnia<span class="dot" aria-hidden="true"></span>tax</a>
+  <nav class="nav-links" aria-label="Primary"><a href="/product">Product</a><a href="/coverage">Coverage</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a></nav>
+  <div class="nav-end"><a class="signin" href="/signin">Sign in</a><a class="btn sm" href="/signup">Get API key</a></div>
+  <button class="menu-btn" type="button" aria-expanded="false" aria-label="Menu"><span></span><span></span></button>
+</div></header>
+<main class="wrap">
+  <div class="page-head">
+    <nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a> <span aria-hidden="true">/</span> <a href="/guides">Guides</a> <span aria-hidden="true">/</span> <span aria-current="page">Colorado FAMLI premium</span></nav>
+    <p class="eyebrow">State programs</p>
+    <h1 class="page">Colorado FAMLI premium</h1>
+    <p class="sub">Paid family and medical leave, funded by a shared premium.</p>
+  </div>
+  <div class="prose seo" style="margin-top:32px;max-width:720px">
+
+    <p>Colorado's Family and Medical Leave Insurance (FAMLI) program is funded by a premium on wages up to the Social Security wage base. The employee share applies whatever the employer's size; the employer share applies to employers with ten or more employees, and fewer than ten owe none.</p>
+    <h2>On a $3,000.00 biweekly check in Colorado</h2>
+    <p>The engine returns <strong>$13.20</strong> on taxable wages of $3,000.00, paid by the employee. In its own words: <em>$3000.00 @ 0.44%, capped at $184500.00/yr ($0.00 YTD already counted)</em></p><div class="table-wrap"><table><thead><tr><th>Tax</th><th style="text-align:right">Taxable wages</th><th style="text-align:right">Amount</th></tr></thead><tbody><tr><td>Colorado Paid Leave (Employee)</td><td style="text-align:right">$3,000.00</td><td style="text-align:right">$13.20</td></tr></tbody></table></div><p>Near the yearly limit the contribution stops. With $183,500.00 already counted this year against a $184,500.00 limit, only $1,000.00 of the same $3,000.00 check is left to charge, and the line becomes $4.40 (against $13.20 early in the year). The engine explains it: <em>$1000.00 @ 0.44%, capped at $184500.00/yr ($183500.00 YTD already counted)</em></p>
+    <h2>Who pays</h2>
+    <p>Shared. The engine returns the employee line; the employer share is a separate employer line when the employer owes it.</p>
+    <h2>Points to remember</h2>
+    <ul><li>The premium is capped by the Social Security wage base for the year.</li><li>Employer size affects the employer share, a determination the caller supplies with <code>employerLiableForPaidLeaveShare</code>.</li><li>Track year-to-date in <code>ytd.statePaidLeave.CO</code>.</li><li>A few Colorado cities add an occupational privilege tax, which is separate from FAMLI.</li></ul>
+    <h2>In the API</h2>
+    <p>The line comes back from <code>POST /v1/paycheck</code> with <code>workState.code</code> set to <code>CO</code>, as <code>CO_PFML_EE</code> with <code>payer: "employee"</code>. No extra field is needed to turn it on. See <a href="/payroll-tax/colorado">Colorado payroll tax</a> for the rest of the state.</p>
+    <h2>Keep reading</h2>
+    <p><a href="/payroll-tax/colorado">Colorado payroll tax</a> · <a href="/state-paid-family-leave-payroll">States with paid family leave payroll deductions</a> · <a href="/states-with-local-income-tax">States with local income tax</a> · <a href="/take-home-pay/colorado">Take-home pay in Colorado</a> · <a href="/guides">All guides</a></p>
+  </div>
+<section class="faq" aria-labelledby="faq-h" style="margin-top:44px;max-width:720px"><h2 id="faq-h" style="font-size:22px;line-height:30px">Questions</h2><article><h3>What is the Colorado FAMLI premium?</h3><p>A percentage of wages up to the Social Security wage base that funds paid family and medical leave, shared between employer and employee.</p></article><article><h3>Is the employer share always owed?</h3><p>No. Employers with fewer than ten employees owe no employer share, though the employee share is still withheld.</p></article></section>
+  <div class="seo-cta" style="margin:48px 0 8px;max-width:720px"><a class="btn" href="/signup">Start the 14-day trial</a> <a class="text-link" href="/docs">Read the docs →</a><p class="fine">14-day free trial, then $0.08 per paycheck calculation. Omnia.tax calculates; it does not file, deposit tax, or give tax advice. <a href="/disclaimer">Disclaimer</a>.</p></div>
+</main>
+<footer class="site-footer">
+  <div class="wrap foot-grid">
+    <a class="mark" href="/">Omnia<span class="dot" aria-hidden="true"></span>tax</a>
+    <div><h2>Product</h2><a href="/coverage">Coverage</a><a href="/pricing">Pricing</a><a href="/changelog">Changelog</a></div>
+    <div><h2>Developers</h2><a href="/docs">Docs</a><a href="/docs/paycheck">API reference</a><a href="/status">Status</a></div>
+    <div><h2>Guides</h2><a href="/guides">All guides</a><a href="/payroll-tax-calculation">Payroll tax calculation</a><a href="/payroll-tax-calculation-engine">Payroll tax calculation engine</a><a href="/income-tax-calculation-engine">Income tax calculation engine</a><a href="/take-home-pay">Take-home pay by state</a><a href="/payroll-tax-api">Payroll tax API</a><a href="/payroll-tax">Payroll tax by state</a><a href="/symmetry-tax-engine-alternative">Symmetry alternative</a><a href="/payroll-tax-engine-comparison">Engine comparison</a></div>
+    <div><h2>Company</h2><a href="/about">About</a><a href="/contact">Contact</a><a href="/terms">Terms</a><a href="/privacy">Privacy</a></div>
+  </div>
+  <p class="wrap copy">© 2026 OMNIA TAX LLC. A Michigan limited liability company.</p>
+</footer>
+<script src="/assets/v5.js"></script>
+</body>
+</html>

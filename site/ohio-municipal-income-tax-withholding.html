@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="color-scheme" content="light" />
+<title>Ohio municipal income tax withholding by city | Omnia.tax</title>
+<meta name="description" content="How Ohio municipal income tax is withheld: the work-city rule, resident credits, and numbers for Columbus, Cincinnati and Youngstown on a $3,000 check." />
+<link rel="stylesheet" href="/assets/v5.css" />
+</head>
+<body>
+<header class="site-header"><div class="bar">
+  <a class="mark" href="/">Omnia<span class="dot" aria-hidden="true"></span>tax</a>
+  <nav class="nav-links" aria-label="Primary"><a href="/product">Product</a><a href="/coverage">Coverage</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a></nav>
+  <div class="nav-end"><a class="signin" href="/signin">Sign in</a><a class="btn sm" href="/signup">Get API key</a></div>
+  <button class="menu-btn" type="button" aria-expanded="false" aria-label="Menu"><span></span><span></span></button>
+</div></header>
+<main class="wrap">
+  <div class="page-head">
+    <nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a> <span aria-hidden="true">/</span> <a href="/guides">Guides</a> <span aria-hidden="true">/</span> <span aria-current="page">Ohio municipal income tax withholding</span></nav>
+    <p class="eyebrow">Local taxes</p>
+    <h1 class="page">Ohio municipal income tax withholding</h1>
+    <p class="sub">1,054 Ohio local entries are in the data, the most of any state.</p>
+  </div>
+  <div class="prose seo" style="margin-top:32px;max-width:720px">
+
+    <p>Ohio cities tax wages, and employers withhold for the city where the employee works. That is the biggest difference from state tax, which follows residence. Ohio has many taxing municipalities, plus joint economic districts and school districts, and the rates differ. The engine resolves them by name from the certificate.</p>
+    <h2>Three cities, the same pay</h2>
+    <div class="table-wrap"><table><thead><tr><th>City</th><th style="text-align:right">Rate</th><th style="text-align:right">City tax on $3,000.00</th><th style="text-align:right">Net pay</th></tr></thead><tbody><tr><td>Columbus</td><td style="text-align:right">2.5%</td><td style="text-align:right">$75.00</td><td style="text-align:right">$2,299.35</td></tr><tr><td>Cincinnati</td><td style="text-align:right">1.8%</td><td style="text-align:right">$54.00</td><td style="text-align:right">$2,320.35</td></tr><tr><td>Youngstown</td><td style="text-align:right">2.75%</td><td style="text-align:right">$82.50</td><td style="text-align:right">$2,291.85</td></tr></tbody></table></div><p>The engine's explanation for Columbus: <em>$75.00 to Columbus @ 2.50% (residence and work municipality are the same)</em> For Cincinnati: <em>$54.00 to Cincinnati @ 1.80% (residence and work municipality are the same)</em></p>
+    <h2>The rule that trips people</h2>
+    <ul><li>The work city is the one the employer withholds for, subject to the city's rules about days worked there.</li><li>The home city may tax too, usually with a credit for tax paid to the work city. That credit is settled on the return, so the engine withholds for the work city.</li><li>Some cities exempt nonresident workers below a threshold of days. The certificate carries that.</li></ul>
+    <h2>In the request</h2>
+    <div class="panel" style="margin-top:14px"><pre style="margin:0;padding:18px 22px;overflow:auto">&quot;workState&quot;: { &quot;code&quot;: &quot;OH&quot;,
+  &quot;certificate&quot;: { &quot;residenceCity&quot;: &quot;Columbus&quot;, &quot;workCity&quot;: &quot;Columbus&quot; } }</pre></div><p>You can skip the names and resolve the address with <code>POST /v1/address</code>. See <a href="/address-tax-jurisdiction-lookup-api">address lookup</a>.</p>
+    <h2>Count and coverage</h2>
+    <p>The Ohio data lists 1,054 municipal, school district and joint economic district entries. The <a href="/coverage">coverage page</a> shows which are in the data and names them.</p>
+    <h2>Keep reading</h2>
+    <p><a href="/states-with-local-income-tax">States with local income tax</a> · <a href="/local-payroll-tax-api">Local payroll tax API</a> · <a href="/address-tax-jurisdiction-lookup-api">Address to tax jurisdiction API</a> · <a href="/payroll-tax/ohio">Ohio payroll tax</a> · <a href="/guides">All guides</a></p>
+  </div>
+<section class="faq" aria-labelledby="faq-h" style="margin-top:44px;max-width:720px"><h2 id="faq-h" style="font-size:22px;line-height:30px">Questions</h2><article><h3>Which Ohio city tax is withheld?</h3><p>The tax of the city where the employee works. The home city may also tax the wages, usually with a credit for tax paid to the work city, which is settled on the return.</p></article><article><h3>How do I find the right Ohio municipality?</h3><p>Resolve the work address with the address endpoint, or pass the city names in the certificate.</p></article></section>
+  <div class="seo-cta" style="margin:48px 0 8px;max-width:720px"><a class="btn" href="/signup">Start the 14-day trial</a> <a class="text-link" href="/docs">Read the docs →</a><p class="fine">14-day free trial, then $0.08 per paycheck calculation. Omnia.tax calculates; it does not file, deposit tax, or give tax advice. <a href="/disclaimer">Disclaimer</a>.</p></div>
+</main>
+<footer class="site-footer">
+  <div class="wrap foot-grid">
+    <a class="mark" href="/">Omnia<span class="dot" aria-hidden="true"></span>tax</a>
+    <div><h2>Product</h2><a href="/coverage">Coverage</a><a href="/pricing">Pricing</a><a href="/changelog">Changelog</a></div>
+    <div><h2>Developers</h2><a href="/docs">Docs</a><a href="/docs/paycheck">API reference</a><a href="/status">Status</a></div>
+    <div><h2>Guides</h2><a href="/guides">All guides</a><a href="/payroll-tax-calculation">Payroll tax calculation</a><a href="/payroll-tax-calculation-engine">Payroll tax calculation engine</a><a href="/income-tax-calculation-engine">Income tax calculation engine</a><a href="/take-home-pay">Take-home pay by state</a><a href="/payroll-tax-api">Payroll tax API</a><a href="/payroll-tax">Payroll tax by state</a><a href="/symmetry-tax-engine-alternative">Symmetry alternative</a><a href="/payroll-tax-engine-comparison">Engine comparison</a></div>
+    <div><h2>Company</h2><a href="/about">About</a><a href="/contact">Contact</a><a href="/terms">Terms</a><a href="/privacy">Privacy</a></div>
+  </div>
+  <p class="wrap copy">© 2026 OMNIA TAX LLC. A Michigan limited liability company.</p>
+</footer>
+<script src="/assets/v5.js"></script>
+</body>
+</html>

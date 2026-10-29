@@ -3124,6 +3124,3510 @@
     ]
   },
   {
+    "path": "/payroll-tax-calculation-api",
+    "file": "payroll-tax-calculation-api.html",
+    "title": "Payroll tax calculation API: one call, every tax line | Omnia.tax",
+    "description": "A payroll tax calculation API: POST one paycheck, get federal, state, local and employer tax lines and net pay back as JSON in cents. $0.08 per calculation.",
+    "h1": "Payroll tax calculation API",
+    "faq": [
+      {
+        "q": "What does a payroll tax calculation API do?",
+        "a": "It takes the earnings, deductions, withholding certificates, year-to-date wages and work location of one paycheck and returns each payroll tax with the wages it applied to, who pays it, and net pay."
+      },
+      {
+        "q": "Does the API file or pay the tax?",
+        "a": "No. Omnia.tax calculates withholding and employer taxes. You, or your payroll provider, still file returns and deposit the tax."
+      },
+      {
+        "q": "What format are the requests and responses?",
+        "a": "JSON over HTTPS, with every money amount in integer cents. A request that sends a decimal dollar amount is rejected with a field-level error."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Guides",
+        "path": "/guides"
+      },
+      {
+        "name": "Payroll tax calculation API",
+        "path": "/payroll-tax-calculation-api"
+      }
+    ]
+  },
+  {
+    "path": "/payroll-tax-api-for-developers",
+    "file": "payroll-tax-api-for-developers.html",
+    "title": "Payroll tax API for developers: docs, schema, test keys | Omnia.tax",
+    "description": "What a developer needs from a payroll tax API: a published OpenAPI document, a JSON Schema, integer cents, stable error codes, test keys and an MCP server.",
+    "h1": "Payroll tax API for developers",
+    "faq": [
+      {
+        "q": "Does the payroll tax API have an OpenAPI spec?",
+        "a": "Yes. It publishes an OpenAPI 3.1 document at /v1/openapi.json and a JSON Schema for the paycheck request at /v1/schemas/paycheck-request.json."
+      },
+      {
+        "q": "Can I try the API without paying?",
+        "a": "Yes. Test keys use the same engine and data as live keys, need no card, and are never billed. They are capped at 30 requests a minute and 500 a day."
+      },
+      {
+        "q": "Are the amounts safe to add up in code?",
+        "a": "Yes. Every amount is an integer number of cents, so sums are exact and nothing depends on floating-point rounding."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Guides",
+        "path": "/guides"
+      },
+      {
+        "name": "Payroll tax API for developers",
+        "path": "/payroll-tax-api-for-developers"
+      }
+    ]
+  },
+  {
+    "path": "/rest-api-payroll-taxes",
+    "file": "rest-api-payroll-taxes.html",
+    "title": "REST API for payroll taxes: endpoints and conventions | Omnia.tax",
+    "description": "A REST API for payroll taxes over HTTPS and JSON: resource-style endpoints, bearer-key auth, integer cents, standard status codes and rate-limit headers.",
+    "h1": "REST API for payroll taxes",
+    "faq": [
+      {
+        "q": "Is there a REST API for payroll taxes?",
+        "a": "Yes. Omnia.tax exposes the payroll tax engine as a JSON REST API over HTTPS with bearer-key authentication."
+      },
+      {
+        "q": "Do I need an SDK?",
+        "a": "No. Any language that can send an HTTPS request with a JSON body works. The OpenAPI document can generate a typed client if you want one."
+      },
+      {
+        "q": "Which status code does a validation failure return?",
+        "a": "422 with the code invalid_input and a details array naming each invalid field. Malformed JSON returns 400."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Guides",
+        "path": "/guides"
+      },
+      {
+        "name": "REST API for payroll taxes",
+        "path": "/rest-api-payroll-taxes"
+      }
+    ]
+  },
+  {
+    "path": "/json-payroll-tax-api",
+    "file": "json-payroll-tax-api.html",
+    "title": "JSON payroll tax API: request and response shapes | Omnia.tax",
+    "description": "A JSON payroll tax API with plain request and response shapes: earnings, deductions, W-4, year-to-date and location in; tax lines in cents and net pay out.",
+    "h1": "JSON payroll tax API",
+    "faq": [
+      {
+        "q": "What does the JSON response contain?",
+        "a": "A result object with gross pay, deduction totals, an array of tax lines (id, name, payer, jurisdiction, taxable wages, amount, detail), employee and employer totals, and net pay, plus optional notices and warnings."
+      },
+      {
+        "q": "Are tax line ids stable?",
+        "a": "Yes. Ids such as US_FIT and US_SS_EE are identifiers to branch on; names are for display and may be reworded."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Guides",
+        "path": "/guides"
+      },
+      {
+        "name": "JSON payroll tax API",
+        "path": "/json-payroll-tax-api"
+      }
+    ]
+  },
+  {
+    "path": "/payroll-tax-api-openapi",
+    "file": "payroll-tax-api-openapi.html",
+    "title": "Payroll tax API OpenAPI spec: generate a client | Omnia.tax",
+    "description": "The Omnia.tax payroll tax API is described by an OpenAPI 3.1 document. Generate a typed client, import it into Postman, or validate requests before you send.",
+    "h1": "Payroll tax API OpenAPI spec",
+    "faq": [
+      {
+        "q": "Where is the OpenAPI document?",
+        "a": "At https://api.omnia.tax/v1/openapi.json, and also at /openapi.json. It is OpenAPI 3.1."
+      },
+      {
+        "q": "Can I generate a client from it?",
+        "a": "Yes. Any OpenAPI 3.1 generator can produce a typed client. The request schema is also published separately as JSON Schema."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Guides",
+        "path": "/guides"
+      },
+      {
+        "name": "Payroll tax API OpenAPI spec",
+        "path": "/payroll-tax-api-openapi"
+      }
+    ]
+  },
+  {
+    "path": "/payroll-tax-api-json-schema",
+    "file": "payroll-tax-api-json-schema.html",
+    "title": "Payroll tax API JSON Schema: validate before you send | Omnia.tax",
+    "description": "A published JSON Schema for the payroll tax paycheck request. Validate payloads in your own code and tests so a bad request never costs a call.",
+    "h1": "Payroll tax API JSON Schema",
+    "faq": [
+      {
+        "q": "Is there a JSON Schema for the payroll tax request?",
+        "a": "Yes, at https://api.omnia.tax/v1/schemas/paycheck-request.json. The OpenAPI document embeds the same definitions."
+      },
+      {
+        "q": "Does passing the schema guarantee a calculation?",
+        "a": "It guarantees the shape is valid. A state can still need a certificate answer the schema cannot know about, in which case the API returns cannot_compute and names the missing field."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Guides",
+        "path": "/guides"
+      },
+      {
+        "name": "Payroll tax request JSON Schema",
+        "path": "/payroll-tax-api-json-schema"
+      }
+    ]
+  },
+  {
+    "path": "/payroll-tax-api-python-example",
+    "file": "payroll-tax-api-python-example.html",
+    "title": "Payroll tax API Python example with requests | Omnia.tax",
+    "description": "A working Python example that calls a payroll tax API with requests: build the paycheck, send it with a bearer key, read the tax lines and handle errors.",
+    "h1": "Payroll tax API: a Python example",
+    "faq": [
+      {
+        "q": "How do I call a payroll tax API from Python?",
+        "a": "Send a POST with the requests library to https://api.omnia.tax/v1/paycheck with a JSON body and an Authorization: Bearer header, then read result.taxes and result.netPay from the JSON response."
+      },
+      {
+        "q": "Should I convert cents to dollars in Python?",
+        "a": "Keep integers for all arithmetic and divide by 100 only for display. That avoids floating-point rounding errors in totals."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Guides",
+        "path": "/guides"
+      },
+      {
+        "name": "Payroll tax API Python example",
+        "path": "/payroll-tax-api-python-example"
+      }
+    ]
+  },
+  {
+    "path": "/payroll-tax-api-javascript-example",
+    "file": "payroll-tax-api-javascript-example.html",
+    "title": "Payroll tax API JavaScript example for Node | Omnia.tax",
+    "description": "A working JavaScript example that calls a payroll tax API with fetch: send the paycheck, read the tax lines, handle 422 and 429, and keep the key server-side.",
+    "h1": "Payroll tax API: a JavaScript example",
+    "faq": [
+      {
+        "q": "How do I call a payroll tax API from Node.js?",
+        "a": "Use fetch to POST a JSON paycheck to https://api.omnia.tax/v1/paycheck with an Authorization: Bearer header, then read result.taxes and result.netPay from the response."
+      },
+      {
+        "q": "Can I call the API from browser JavaScript?",
+        "a": "Avoid it. A bearer key in front-end code can be copied by any visitor. Call the API from your server and expose only what your page needs."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Guides",
+        "path": "/guides"
+      },
+      {
+        "name": "Payroll tax API JavaScript example",
+        "path": "/payroll-tax-api-javascript-example"
+      }
+    ]
+  },
+  {
+    "path": "/payroll-tax-api-curl-example",
+    "file": "payroll-tax-api-curl-example.html",
+    "title": "Payroll tax API cURL example: copy, paste, run | Omnia.tax",
+    "description": "A copy-and-paste cURL example for a payroll tax API: a Texas paycheck, a California paycheck and a Columbus, Ohio paycheck, with the net pay each returns.",
+    "h1": "Payroll tax API: a cURL example",
+    "faq": [
+      {
+        "q": "How do I test a payroll tax API with cURL?",
+        "a": "Set an environment variable KEY to a test key, then POST a JSON paycheck to https://api.omnia.tax/v1/paycheck with an Authorization: Bearer header and a Content-Type of application/json."
+      },
+      {
+        "q": "Where do I get a key to try?",
+        "a": "Create a free test key from your account. Test keys use the same engine and data as live keys, need no card and are never billed."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Guides",
+        "path": "/guides"
+      },
+      {
+        "name": "Payroll tax API cURL example",
+        "path": "/payroll-tax-api-curl-example"
+      }
+    ]
+  },
+  {
+    "path": "/payroll-tax-api-error-codes",
+    "file": "payroll-tax-api-error-codes.html",
+    "title": "Payroll tax API error codes and how to handle them | Omnia.tax",
+    "description": "Every error code the payroll tax API returns, its status, what it means and what your code should do: invalid_input, cannot_compute, rate_limited and more.",
+    "h1": "Payroll tax API error codes",
+    "faq": [
+      {
+        "q": "What does cannot_compute mean?",
+        "a": "The request is valid, but the engine needs an answer it was not given, usually a field on a state withholding certificate. The error message names the missing field."
+      },
+      {
+        "q": "Should I retry a 422?",
+        "a": "Not unchanged. A 422 means the input needs to change, so fix the fields named in details or supply the missing certificate answer first."
+      },
+      {
+        "q": "How do I report a problem?",
+        "a": "Quote the requestId from the error body, or the X-Request-Id response header, when you contact support."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Guides",
+        "path": "/guides"
+      },
+      {
+        "name": "Payroll tax API error codes",
+        "path": "/payroll-tax-api-error-codes"
+      }
+    ]
+  },
+  {
+    "path": "/payroll-tax-api-rate-limits",
+    "file": "payroll-tax-api-rate-limits.html",
+    "title": "Payroll tax API rate limits: headers, 429s, retries | Omnia.tax",
+    "description": "How rate limiting works on the payroll tax API: per-minute limits, RateLimit headers, Retry-After on a 429, test-key caps of 30 a minute and 500 a day.",
+    "h1": "Payroll tax API rate limits",
+    "faq": [
+      {
+        "q": "What are the rate limits on test keys?",
+        "a": "30 requests a minute and 500 a day. The daily cap resets at midnight UTC. Test calls are never billed."
+      },
+      {
+        "q": "What do I do on a 429?",
+        "a": "Wait the number of seconds in the Retry-After header, then retry. Calls are stateless, so a retry returns the same answer."
+      },
+      {
+        "q": "Is there a daily limit on live keys?",
+        "a": "No. Live keys have no daily cap, only a per-minute limit."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Guides",
+        "path": "/guides"
+      },
+      {
+        "name": "Payroll tax API rate limits",
+        "path": "/payroll-tax-api-rate-limits"
+      }
+    ]
+  },
+  {
+    "path": "/payroll-tax-api-authentication",
+    "file": "payroll-tax-api-authentication.html",
+    "title": "Payroll tax API authentication: bearer keys, test vs live | Omnia.tax",
+    "description": "How authentication works on the payroll tax API: a bearer key in the Authorization header, sk_test and sk_live keys, how to store them and what 401 means.",
+    "h1": "Payroll tax API authentication",
+    "faq": [
+      {
+        "q": "How do I authenticate to the payroll tax API?",
+        "a": "Send your key as a bearer token in the Authorization header: the word Bearer, a space, then the key. Test keys start sk_test_ and live keys start sk_live_."
+      },
+      {
+        "q": "Can I put the key in front-end code?",
+        "a": "No. Anyone who opens the page could copy it. Call the API from your server."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Guides",
+        "path": "/guides"
+      },
+      {
+        "name": "Payroll tax API authentication",
+        "path": "/payroll-tax-api-authentication"
+      }
+    ]
+  },
+  {
+    "path": "/payroll-tax-api-test-environment",
+    "file": "payroll-tax-api-test-environment.html",
+    "title": "Payroll tax API test environment: try it free | Omnia.tax",
+    "description": "A payroll tax API test environment that runs the real engine: a browser calculator that shows the JSON and cURL it sent, plus free test keys for your own code.",
+    "h1": "Payroll tax API test environment",
+    "faq": [
+      {
+        "q": "Is the test data real?",
+        "a": "Yes. The browser calculator and test keys use the same engine and rule files as live keys, so the figures match what production returns."
+      },
+      {
+        "q": "Does the test environment cost anything?",
+        "a": "No. The browser calculator needs no key once you are signed in, and test keys are never billed."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Guides",
+        "path": "/guides"
+      },
+      {
+        "name": "Payroll tax API test environment",
+        "path": "/payroll-tax-api-test-environment"
+      }
+    ]
+  },
+  {
+    "path": "/payroll-tax-api-integration-guide",
+    "file": "payroll-tax-api-integration-guide.html",
+    "title": "Payroll tax API integration guide: build order and checks | Omnia.tax",
+    "description": "How to integrate a payroll tax API into payroll or HR software: order of work, what to store, how to test against known paychecks and what to check at go-live.",
+    "h1": "Payroll tax API integration guide",
+    "faq": [
+      {
+        "q": "What do I need to integrate a payroll tax API?",
+        "a": "Employee work and home addresses, the Form W-4 and any state certificate answers, categorised earnings and deductions, and year-to-date wages. The API call itself is a single POST."
+      },
+      {
+        "q": "How do I test the integration?",
+        "a": "Run known paychecks from your current system through a test key, read the detail text on any line that differs, and keep the requests as fixtures to rerun after upgrades."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Guides",
+        "path": "/guides"
+      },
+      {
+        "name": "Payroll tax API integration guide",
+        "path": "/payroll-tax-api-integration-guide"
+      }
+    ]
+  },
+  {
+    "path": "/payroll-tax-api-response-fields",
+    "file": "payroll-tax-api-response-fields.html",
+    "title": "Payroll tax API response fields explained | Omnia.tax",
+    "description": "Every field in a payroll tax API paycheck response explained: taxes, payer, jurisdiction, taxableWages, amount, detail, totals, netPay, notices and warnings.",
+    "h1": "Payroll tax API response fields",
+    "faq": [
+      {
+        "q": "What is the difference between taxableWages and grossPay?",
+        "a": "grossPay is total earnings. taxableWages is the amount a particular tax was applied to, after deductions that are pre-tax for that tax and after any cap, so it can differ from line to line."
+      },
+      {
+        "q": "Why is employerTaxTotal not part of net pay?",
+        "a": "Employer taxes are a cost the employer pays on top of gross pay. They are never deducted from the employee, so net pay ignores them."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Guides",
+        "path": "/guides"
+      },
+      {
+        "name": "Payroll tax API response fields",
+        "path": "/payroll-tax-api-response-fields"
+      }
+    ]
+  },
+  {
+    "path": "/payroll-tax-api-effective-dating",
+    "file": "payroll-tax-api-effective-dating.html",
+    "title": "Payroll tax effective dating: the check date sets the year | Omnia.tax",
+    "description": "How effective-dated payroll tax rules work: the check date selects the tax year, corrections use the original year, and a year with no rules returns an error.",
+    "h1": "Payroll tax API effective dating",
+    "faq": [
+      {
+        "q": "Which year does the API use for a paycheck?",
+        "a": "The year of the checkDate on the request. The pay period dates do not decide it."
+      },
+      {
+        "q": "Can I run a correction for last year?",
+        "a": "Yes. Send the original check date and the engine applies that year's rules, so the correction ties to what should have been withheld then."
+      },
+      {
+        "q": "What happens if there are no rules for the year?",
+        "a": "The API returns 422 with unsupported_tax_year rather than using another year's numbers."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Guides",
+        "path": "/guides"
+      },
+      {
+        "name": "Payroll tax API effective dating",
+        "path": "/payroll-tax-api-effective-dating"
+      }
+    ]
+  },
+  {
+    "path": "/payroll-tax-api-ytd-wages",
+    "file": "payroll-tax-api-ytd-wages.html",
+    "title": "Payroll tax API year-to-date wages: caps and thresholds | Omnia.tax",
+    "description": "How year-to-date wages drive payroll tax caps: the Social Security wage base, the Additional Medicare threshold and FUTA, with a worked paycheck at the cap.",
+    "h1": "Payroll tax API year-to-date wages",
+    "faq": [
+      {
+        "q": "Why does the API need year-to-date wages?",
+        "a": "Social Security stops at a wage base and Additional Medicare starts above a threshold. Knowing the year so far lets the engine tax only the part of a check that is still under or over the line."
+      },
+      {
+        "q": "Does the API store year-to-date totals?",
+        "a": "No. Calls are stateless. You send the year-to-date figures with each request, so a replay returns the same answer."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Guides",
+        "path": "/guides"
+      },
+      {
+        "name": "Payroll tax API year-to-date wages",
+        "path": "/payroll-tax-api-ytd-wages"
+      }
+    ]
+  },
+  {
+    "path": "/payroll-tax-api-explainable-tax-lines",
+    "file": "payroll-tax-api-explainable-tax-lines.html",
+    "title": "Explainable payroll tax lines: audit every figure | Omnia.tax",
+    "description": "Why every payroll tax line should say how it was reached, and how the detail field lets a payroll specialist audit a withholding figure without reading code.",
+    "h1": "Explainable payroll tax lines",
+    "faq": [
+      {
+        "q": "What is an explainable payroll tax line?",
+        "a": "A tax line that states how its amount was reached: the method, the wages it applied to and the intermediate figures, so a person can audit it."
+      },
+      {
+        "q": "Can I show the detail text to employees?",
+        "a": "Yes. It is plain language written for payroll specialists, and you can show it on a pay stub explanation or in a support tool."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Guides",
+        "path": "/guides"
+      },
+      {
+        "name": "Explainable payroll tax lines",
+        "path": "/payroll-tax-api-explainable-tax-lines"
+      }
+    ]
+  },
+  {
+    "path": "/payroll-tax-api-data-quality-notices",
+    "file": "payroll-tax-api-data-quality-notices.html",
+    "title": "Payroll tax data quality notices and source tiers | Omnia.tax",
+    "description": "How the payroll tax API flags a rate resting on a weaker source than the levying body's own form, the tiers it uses and what your product should do with them.",
+    "h1": "Payroll tax data quality notices",
+    "faq": [
+      {
+        "q": "What is a data quality notice?",
+        "a": "A notice on a paycheck response saying a tax line rests on a weaker source than the levying body's own form, with the tax id, how it is sourced and a plain-language note."
+      },
+      {
+        "q": "Does a notice mean the number is wrong?",
+        "a": "No. It means the source is weaker than ideal and worth verifying once. The number is still the engine's best result."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Guides",
+        "path": "/guides"
+      },
+      {
+        "name": "Payroll tax data quality notices",
+        "path": "/payroll-tax-api-data-quality-notices"
+      }
+    ]
+  },
+  {
+    "path": "/payroll-tax-mcp-tools",
+    "file": "payroll-tax-mcp-tools.html",
+    "title": "Payroll tax MCP tools for AI agents and assistants | Omnia.tax",
+    "description": "The six tools the Omnia.tax MCP server gives an AI agent: calculate_paycheck, compare_paychecks, gross_up, employer_taxes, lookup_address, coverage.",
+    "h1": "Payroll tax MCP tools",
+    "faq": [
+      {
+        "q": "What tools does the MCP server expose?",
+        "a": "calculate_paycheck, compare_paychecks, gross_up, employer_taxes, lookup_address and coverage."
+      },
+      {
+        "q": "How are MCP tool calls billed?",
+        "a": "Like the matching REST endpoint: one paycheck for calculate_paycheck and gross_up, two for compare_paychecks, and nothing for employer_taxes, lookup_address or coverage."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Guides",
+        "path": "/guides"
+      },
+      {
+        "name": "Payroll tax MCP tools",
+        "path": "/payroll-tax-mcp-tools"
+      }
+    ]
+  },
+  {
+    "path": "/ai-payroll-tax-calculator",
+    "file": "ai-payroll-tax-calculator.html",
+    "title": "AI payroll tax calculator that calls a real engine | Omnia.tax",
+    "description": "An AI payroll tax calculator that does not guess: connect an assistant to a real tax engine over MCP so answers match the API and each line is explained.",
+    "h1": "AI payroll tax calculator",
+    "faq": [
+      {
+        "q": "Can an AI assistant calculate payroll taxes accurately?",
+        "a": "Not from memory. It can if it calls a tax engine, because then the answer is the engine's result rather than an estimate."
+      },
+      {
+        "q": "How do I connect an assistant to Omnia.tax?",
+        "a": "Point it at the POST /mcp endpoint with a bearer key. It speaks JSON-RPC 2.0 over streamable HTTP and exposes six tools."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Guides",
+        "path": "/guides"
+      },
+      {
+        "name": "AI payroll tax calculator",
+        "path": "/ai-payroll-tax-calculator"
+      }
+    ]
+  },
+  {
+    "path": "/payroll-tax-api-testing-fixtures",
+    "file": "payroll-tax-api-testing-fixtures.html",
+    "title": "Payroll tax API testing: build fixtures that catch drift | Omnia.tax",
+    "description": "How to test a payroll tax integration: golden paychecks as fixtures, cases that find bugs, a CI job on a test key, and how to read a difference from your old.",
+    "h1": "Testing a payroll tax API integration",
+    "faq": [
+      {
+        "q": "How should I test a payroll tax integration?",
+        "a": "Run paychecks whose answers you know against a test key, assert on tax ids and integer cents, include edge cases such as a bonus, a deferral and a Social Security cap, and review any difference when rules change."
+      },
+      {
+        "q": "Do test calls cost money?",
+        "a": "No. Test keys use the same engine and data as live keys and are never billed. They are capped at 30 requests a minute and 500 a day."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Guides",
+        "path": "/guides"
+      },
+      {
+        "name": "Payroll tax API testing fixtures",
+        "path": "/payroll-tax-api-testing-fixtures"
+      }
+    ]
+  },
+  {
+    "path": "/payroll-tax-api-money-in-cents",
+    "file": "payroll-tax-api-money-in-cents.html",
+    "title": "Payroll tax API money in cents: why integers, not decimals | Omnia.tax",
+    "description": "Why a payroll tax API uses integer cents: no floating-point drift, exact totals that tie to deposits, and where rounding happens once per tax.",
+    "h1": "Payroll tax API: money in integer cents",
+    "faq": [
+      {
+        "q": "Why does the API use cents instead of dollars?",
+        "a": "Integers add exactly. Dollar amounts stored as floating point drift by fractions of a cent, which can round the wrong way and break reconciliation to deposits."
+      },
+      {
+        "q": "What happens if I send a decimal amount?",
+        "a": "The request is refused with a 422 invalid_input error that names the field and shows the whole-cent value to send."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Guides",
+        "path": "/guides"
+      },
+      {
+        "name": "Payroll tax API money in cents",
+        "path": "/payroll-tax-api-money-in-cents"
+      }
+    ]
+  },
+  {
+    "path": "/payroll-tax-api-for-saas-platforms",
+    "file": "payroll-tax-api-for-saas-platforms.html",
+    "title": "Payroll tax API for SaaS platforms and vertical software | Omnia.tax",
+    "description": "A payroll tax API for SaaS platforms that need gross-to-net inside the product: per-calculation pricing, no seat fee, stateless calls and published coverage.",
+    "h1": "Payroll tax API for SaaS platforms",
+    "faq": [
+      {
+        "q": "Can I embed a payroll tax API in my SaaS product?",
+        "a": "Yes. Omnia.tax is built for it: stateless calls, JSON in cents, per-calculation pricing and published coverage. It calculates tax only; it does not pay workers or file returns."
+      },
+      {
+        "q": "How is it priced for a platform?",
+        "a": "$0.08 per paycheck calculation after a 14-day free trial, with no seat or platform fee."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Guides",
+        "path": "/guides"
+      },
+      {
+        "name": "Payroll tax API for SaaS platforms",
+        "path": "/payroll-tax-api-for-saas-platforms"
+      }
+    ]
+  },
+  {
+    "path": "/payroll-tax-api-for-hr-software",
+    "file": "payroll-tax-api-for-hr-software.html",
+    "title": "Payroll tax API for HR software: offers, comp and cost | Omnia.tax",
+    "description": "Use a payroll tax API inside HR software for offer letters, compensation planning, employee cost and take-home pay by location, without owning the tax rules.",
+    "h1": "Payroll tax API for HR software",
+    "faq": [
+      {
+        "q": "How can HR software use a payroll tax API?",
+        "a": "To show take-home pay on offers, employer cost on compensation plans, before-and-after paychecks for relocations and W-4 what-ifs for employees, all by calling the engine with the person's location and pay."
+      },
+      {
+        "q": "Does it store employee data?",
+        "a": "The calculation API is stateless: you send the facts of a paycheck and get a result. It is not an employee records system."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Guides",
+        "path": "/guides"
+      },
+      {
+        "name": "Payroll tax API for HR software",
+        "path": "/payroll-tax-api-for-hr-software"
+      }
+    ]
+  },
+  {
+    "path": "/payroll-tax-api-for-staffing-agencies",
+    "file": "payroll-tax-api-for-staffing-agencies.html",
+    "title": "Payroll tax API for staffing agencies: pay and bill rates | Omnia.tax",
+    "description": "A payroll tax API for staffing software: quote a candidate their take-home, model employer cost for a bill rate, and handle workers across many states.",
+    "h1": "Payroll tax API for staffing agencies",
+    "faq": [
+      {
+        "q": "How do staffing agencies use a payroll tax API?",
+        "a": "To quote a worker's take-home and the agency's employer-tax cost for an assignment location, to apply local tax where the work is done, and to compare placements in different states."
+      },
+      {
+        "q": "Does it handle workers who live in a different state?",
+        "a": "Yes. Send the work state and the residence state; the engine applies reciprocity and residence-based rules where they exist."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Guides",
+        "path": "/guides"
+      },
+      {
+        "name": "Payroll tax API for staffing agencies",
+        "path": "/payroll-tax-api-for-staffing-agencies"
+      }
+    ]
+  },
+  {
+    "path": "/payroll-tax-api-for-fintech",
+    "file": "payroll-tax-api-for-fintech.html",
+    "title": "Payroll tax API for fintech: take-home for lending | Omnia.tax",
+    "description": "A payroll tax API for fintech teams: estimate take-home for earned wage access, affordability checks and benefits products, from pay, location and withholding.",
+    "h1": "Payroll tax API for fintech",
+    "faq": [
+      {
+        "q": "Can a payroll tax API support affordability checks?",
+        "a": "It can turn a gross pay, pay frequency and location into a net pay estimate that follows federal, state and local rules, which is more accurate than a flat percentage. It estimates withholding; it does not verify income."
+      },
+      {
+        "q": "What do I do without the employee's W-4?",
+        "a": "Assume a stated default such as single filing status with no adjustments, and tell the user that is the assumption."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Guides",
+        "path": "/guides"
+      },
+      {
+        "name": "Payroll tax API for fintech",
+        "path": "/payroll-tax-api-for-fintech"
+      }
+    ]
+  },
+  {
+    "path": "/payroll-tax-api-for-payroll-startups",
+    "file": "payroll-tax-api-for-payroll-startups.html",
+    "title": "Payroll tax API for payroll startups: buy the rules | Omnia.tax",
+    "description": "If you are building a payroll product, buy the tax rules and build the experience. What to take from an API, what you still own, and how to stage the build.",
+    "h1": "Payroll tax API for payroll startups",
+    "faq": [
+      {
+        "q": "Should a payroll startup build its own tax engine?",
+        "a": "Usually not first. The first version is straightforward; the permanent cost is keeping every state and local rule current and effective-dated. Many startups buy the rules and build the experience."
+      },
+      {
+        "q": "Does the API handle filing?",
+        "a": "No. Omnia.tax calculates withholding and employer taxes only. Filing and deposits are separate work you build or buy elsewhere."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Guides",
+        "path": "/guides"
+      },
+      {
+        "name": "Payroll tax API for payroll startups",
+        "path": "/payroll-tax-api-for-payroll-startups"
+      }
+    ]
+  },
+  {
+    "path": "/payroll-tax-library-vs-api",
+    "file": "payroll-tax-library-vs-api.html",
+    "title": "Payroll tax library vs API: which to choose | Omnia.tax",
+    "description": "Payroll tax library or API? Compare update speed, local coverage, offline use, latency, audit trail and cost, and the cases where each one is the better choice.",
+    "h1": "Payroll tax library vs API",
+    "faq": [
+      {
+        "q": "Is it better to use a payroll tax library or an API?",
+        "a": "A library suits offline use and extreme volume if you can maintain it; an API suits teams that do not want to track state and local rule changes. Many use the API for anything paid or reported."
+      },
+      {
+        "q": "How does an API handle old paychecks?",
+        "a": "Rules are effective-dated, so sending the original check date reproduces the original year's result."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Guides",
+        "path": "/guides"
+      },
+      {
+        "name": "Payroll tax library vs API",
+        "path": "/payroll-tax-library-vs-api"
+      }
+    ]
+  },
+  {
+    "path": "/supplemental-wage-withholding-rates",
+    "file": "supplemental-wage-withholding-rates.html",
+    "title": "Supplemental wage withholding: 22% flat, 37% over $1M | Omnia.tax",
+    "description": "The federal supplemental wage withholding rates for bonuses and commissions: the 22% flat rate, the mandatory 37% over $1 million, and the aggregate method.",
+    "h1": "Supplemental wage withholding rates",
+    "faq": [
+      {
+        "q": "What is the federal supplemental wage withholding rate?",
+        "a": "Under the flat-rate method it is 22% on supplemental wages identified separately from regular wages. Cumulative supplemental wages over $1,000,000 in a year are withheld at a mandatory 37% on the excess."
+      },
+      {
+        "q": "Can an employer use the aggregate method instead?",
+        "a": "Yes. The employer may add the supplemental pay to regular wages for the period and withhold on the total using the percentage method."
+      },
+      {
+        "q": "Is withholding the same as the tax owed on a bonus?",
+        "a": "No. Withholding is an advance. The employee's actual tax on the bonus is settled on their return, so a refund or a balance due is possible either way."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Guides",
+        "path": "/guides"
+      },
+      {
+        "name": "Supplemental wage withholding rates",
+        "path": "/supplemental-wage-withholding-rates"
+      }
+    ]
+  },
+  {
+    "path": "/flat-rate-vs-aggregate-bonus-withholding",
+    "file": "flat-rate-vs-aggregate-bonus-withholding.html",
+    "title": "Flat rate vs aggregate bonus withholding compared | Omnia.tax",
+    "description": "Flat rate or aggregate method for bonus withholding? Worked checks at three bonus sizes show when each withholds more, and what that does to take-home pay.",
+    "h1": "Flat rate vs aggregate bonus withholding",
+    "faq": [
+      {
+        "q": "Does the flat rate or the aggregate method withhold more?",
+        "a": "It depends. Aggregation annualises the combined check, so a large bonus on modest regular pay usually withholds more than the 22% flat rate. For a small bonus the two are close."
+      },
+      {
+        "q": "Can I switch between methods?",
+        "a": "The rules allow an employer to use either. Most apply one policy consistently, and the engine uses the method implied by how you categorise the earning."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Guides",
+        "path": "/guides"
+      },
+      {
+        "name": "Flat rate vs aggregate bonus withholding",
+        "path": "/flat-rate-vs-aggregate-bonus-withholding"
+      }
+    ]
+  },
+  {
+    "path": "/bonus-over-one-million-withholding",
+    "file": "bonus-over-one-million-withholding.html",
+    "title": "Bonus over $1 million: mandatory 37% withholding | Omnia.tax",
+    "description": "How federal withholding works once supplemental wages pass $1 million in a year: the mandatory 37% rate on the excess, with a worked check that crosses it.",
+    "h1": "Bonus over $1 million: mandatory 37% withholding",
+    "faq": [
+      {
+        "q": "What is the withholding rate on a bonus over $1 million?",
+        "a": "Federal income tax withholding on supplemental wages above $1,000,000 in a calendar year is mandatory at 37%."
+      },
+      {
+        "q": "How does the API know the total so far?",
+        "a": "You send the supplemental wages already paid this year in ytd.supplemental. The engine splits a check that crosses the line."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Guides",
+        "path": "/guides"
+      },
+      {
+        "name": "Bonus over $1 million withholding",
+        "path": "/bonus-over-one-million-withholding"
+      }
+    ]
+  },
+  {
+    "path": "/additional-medicare-tax-withholding",
+    "file": "additional-medicare-tax-withholding.html",
+    "title": "Additional Medicare tax withholding: 0.9% over $200,000 | Omnia.tax",
+    "description": "How employers withhold Additional Medicare tax: 0.9% on wages over $200,000 in the year, no employer match, with a worked check that crosses the threshold.",
+    "h1": "Additional Medicare tax withholding",
+    "faq": [
+      {
+        "q": "When does Additional Medicare tax start?",
+        "a": "Employers begin withholding 0.9% on the part of an employee's Medicare wages that exceeds $200,000 in the calendar year, whatever the employee's filing status."
+      },
+      {
+        "q": "Does the employer match Additional Medicare tax?",
+        "a": "No. It is paid by the employee only."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Guides",
+        "path": "/guides"
+      },
+      {
+        "name": "Additional Medicare tax withholding",
+        "path": "/additional-medicare-tax-withholding"
+      }
+    ]
+  },
+  {
+    "path": "/social-security-wage-cap-paycheck",
+    "file": "social-security-wage-cap-paycheck.html",
+    "title": "Social Security wage cap: a paycheck at the limit | Omnia.tax",
+    "description": "How Social Security tax stops at the wage base: a worked paycheck that straddles the 2026 limit, the employer match, and why net pay jumps when the tax ends.",
+    "h1": "Social Security wage cap on a paycheck",
+    "faq": [
+      {
+        "q": "What is the Social Security wage base for 2026?",
+        "a": "$184,500. Employee and employer each pay 6.2% on wages up to that amount."
+      },
+      {
+        "q": "Why does take-home pay jump near the end of the year for high earners?",
+        "a": "Once wages reach the wage base, Social Security tax stops, so later checks have no Social Security withholding."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Guides",
+        "path": "/guides"
+      },
+      {
+        "name": "Social Security wage cap on a paycheck",
+        "path": "/social-security-wage-cap-paycheck"
+      }
+    ]
+  },
+  {
+    "path": "/medicare-tax-calculation",
+    "file": "medicare-tax-calculation.html",
+    "title": "Medicare tax calculation: rates, no cap, employer match | Omnia.tax",
+    "description": "How Medicare tax is calculated on a paycheck: 1.45% each for employee and employer on all wages, which deductions reduce it, and when 0.9% extra starts.",
+    "h1": "Medicare tax calculation",
+    "faq": [
+      {
+        "q": "What is the Medicare tax rate?",
+        "a": "1.45% for the employee and 1.45% for the employer, on all wages with no cap. Employees also pay 0.9% Additional Medicare on wages above $200,000."
+      },
+      {
+        "q": "Does a 401(k) deferral reduce Medicare tax?",
+        "a": "No. A 401(k) deferral reduces income tax wages but remains subject to Social Security and Medicare. Section 125 premiums reduce both."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Guides",
+        "path": "/guides"
+      },
+      {
+        "name": "Medicare tax calculation",
+        "path": "/medicare-tax-calculation"
+      }
+    ]
+  },
+  {
+    "path": "/w4-multiple-jobs-withholding",
+    "file": "w4-multiple-jobs-withholding.html",
+    "title": "W-4 multiple jobs checkbox: what it does to withholding | Omnia.tax",
+    "description": "What Step 2 of the Form W-4 (the multiple jobs checkbox) does to federal withholding, shown on a real paycheck: how much more is withheld and why.",
+    "h1": "W-4 multiple jobs withholding (Step 2)",
+    "faq": [
+      {
+        "q": "What does checking the multiple jobs box on the W-4 do?",
+        "a": "It switches the employer to a higher-withholding bracket schedule so that two jobs together do not under-withhold. On a single filer paid $3,000 biweekly, it raises federal withholding noticeably each check."
+      },
+      {
+        "q": "Does it change Social Security or Medicare?",
+        "a": "No. It affects federal income tax withholding only."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Guides",
+        "path": "/guides"
+      },
+      {
+        "name": "W-4 multiple jobs withholding",
+        "path": "/w4-multiple-jobs-withholding"
+      }
+    ]
+  },
+  {
+    "path": "/w4-dependent-credit-withholding",
+    "file": "w4-dependent-credit-withholding.html",
+    "title": "W-4 Step 3 dependents credit: how it reduces withholding | Omnia.tax",
+    "description": "How the Form W-4 Step 3 dependents credit lowers federal withholding: the annual amount is spread across pay periods, shown on a real biweekly paycheck.",
+    "h1": "W-4 dependents credit (Step 3)",
+    "faq": [
+      {
+        "q": "How does the W-4 Step 3 credit change my paycheck?",
+        "a": "The annual credit is divided by the number of pay periods and subtracted from each check's federal income tax withholding. A $4,000 credit on a biweekly schedule lowers each check by about $153.85."
+      },
+      {
+        "q": "Does the credit affect Social Security or Medicare tax?",
+        "a": "No. It only reduces federal income tax withholding."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Guides",
+        "path": "/guides"
+      },
+      {
+        "name": "W-4 dependent credit withholding",
+        "path": "/w4-dependent-credit-withholding"
+      }
+    ]
+  },
+  {
+    "path": "/w4-extra-withholding",
+    "file": "w4-extra-withholding.html",
+    "title": "W-4 extra withholding (Step 4c): a fixed amount per check | Omnia.tax",
+    "description": "How extra withholding on Form W-4 line 4(c) works: a fixed amount added to each paycheck on top of the calculated federal tax, with a worked example.",
+    "h1": "W-4 extra withholding (Step 4c)",
+    "faq": [
+      {
+        "q": "What is line 4(c) on the Form W-4?",
+        "a": "Extra withholding: a fixed dollar amount the employee asks the employer to withhold from every paycheck, on top of the amount calculated from the rest of the form."
+      },
+      {
+        "q": "Does extra withholding carry to state tax?",
+        "a": "No. It applies to federal income tax. Some states have their own extra-withholding entry on the state certificate."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Guides",
+        "path": "/guides"
+      },
+      {
+        "name": "W-4 extra withholding",
+        "path": "/w4-extra-withholding"
+      }
+    ]
+  },
+  {
+    "path": "/exempt-from-withholding-w4",
+    "file": "exempt-from-withholding-w4.html",
+    "title": "Exempt on the W-4: what federal withholding still applies | Omnia.tax",
+    "description": "What exempt on the Form W-4 does: no federal income tax withheld, but Social Security and Medicare still apply. A worked paycheck shows which lines disappear.",
+    "h1": "Exempt from federal withholding on the W-4",
+    "faq": [
+      {
+        "q": "Does exempt on the W-4 stop Social Security and Medicare?",
+        "a": "No. Exempt status covers federal income tax withholding only. Social Security and Medicare are still withheld."
+      },
+      {
+        "q": "Does it stop state income tax?",
+        "a": "Not by itself. States have their own withholding certificates and exemption rules."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Guides",
+        "path": "/guides"
+      },
+      {
+        "name": "Exempt from withholding on the W-4",
+        "path": "/exempt-from-withholding-w4"
+      }
+    ]
+  },
+  {
+    "path": "/w4-filing-status-withholding",
+    "file": "w4-filing-status-withholding.html",
+    "title": "W-4 filing status and withholding compared | Omnia.tax",
+    "description": "How the filing status on the Form W-4 changes federal withholding, shown on one paycheck: single, married filing jointly and head of household side by side.",
+    "h1": "W-4 filing status and withholding",
+    "faq": [
+      {
+        "q": "How does filing status change withholding?",
+        "a": "It selects the standard-deduction adjustment and the bracket table. Married filing jointly withholds less than single on the same wages because the deduction is larger and the brackets are wider."
+      },
+      {
+        "q": "Does filing status change FICA?",
+        "a": "No. Social Security and Medicare are the same for every filing status."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Guides",
+        "path": "/guides"
+      },
+      {
+        "name": "W-4 filing status withholding",
+        "path": "/w4-filing-status-withholding"
+      }
+    ]
+  },
+  {
+    "path": "/overtime-pay-tax-withholding",
+    "file": "overtime-pay-tax-withholding.html",
+    "title": "Overtime pay tax withholding on a paycheck | Omnia.tax",
+    "description": "How overtime is taxed in payroll: ordinary wages for federal tax, Social Security and Medicare, why a big overtime check withholds more, and a worked example.",
+    "h1": "Overtime pay tax withholding",
+    "faq": [
+      {
+        "q": "Is overtime taxed at a higher rate?",
+        "a": "No. Overtime is ordinary wages. It looks higher because a bigger check annualises to a higher bracket in the withholding calculation, but the employee's actual tax is settled on their return."
+      },
+      {
+        "q": "Are Social Security and Medicare taken from overtime?",
+        "a": "Yes. They apply to all wages up to the Social Security wage base."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Guides",
+        "path": "/guides"
+      },
+      {
+        "name": "Overtime pay tax withholding",
+        "path": "/overtime-pay-tax-withholding"
+      }
+    ]
+  },
+  {
+    "path": "/commission-tax-withholding",
+    "file": "commission-tax-withholding.html",
+    "title": "Commission tax withholding: flat rate or aggregate | Omnia.tax",
+    "description": "How commissions are taxed in payroll: the flat 22% supplemental rate or aggregation with regular pay, with a worked check and what to categorise in the API.",
+    "h1": "Commission tax withholding",
+    "faq": [
+      {
+        "q": "How are commissions taxed?",
+        "a": "As supplemental wages. Federal withholding can use the flat 22% rate if the commission is separately identified, or aggregate it with regular pay. FICA applies in full."
+      },
+      {
+        "q": "Why is my commission check withheld more than expected?",
+        "a": "If it is aggregated with regular pay, the combined check annualises to a higher bracket, which withholds more. The final tax is settled on the return."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Guides",
+        "path": "/guides"
+      },
+      {
+        "name": "Commission tax withholding",
+        "path": "/commission-tax-withholding"
+      }
+    ]
+  },
+  {
+    "path": "/severance-pay-tax-withholding",
+    "file": "severance-pay-tax-withholding.html",
+    "title": "Severance pay tax withholding: federal, FICA and state | Omnia.tax",
+    "description": "How severance pay is withheld: supplemental wages for federal income tax, full Social Security and Medicare, and a worked check in Texas and California.",
+    "h1": "Severance pay tax withholding",
+    "faq": [
+      {
+        "q": "Is severance pay subject to payroll taxes?",
+        "a": "Yes. Severance is wages: federal income tax, Social Security, Medicare and state tax apply, with the supplemental wage rules available for federal withholding."
+      },
+      {
+        "q": "How is federal withholding calculated on severance?",
+        "a": "Commonly at the 22% flat supplemental rate when paid separately, or by aggregating with regular wages, and at 37% on supplemental wages over $1,000,000 in the year."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Guides",
+        "path": "/guides"
+      },
+      {
+        "name": "Severance pay tax withholding",
+        "path": "/severance-pay-tax-withholding"
+      }
+    ]
+  },
+  {
+    "path": "/final-paycheck-tax-withholding",
+    "file": "final-paycheck-tax-withholding.html",
+    "title": "Final paycheck tax withholding and unused PTO payout | Omnia.tax",
+    "description": "How a final paycheck is taxed: regular pay and PTO payout are wages, the flat or aggregate method for the payout, and the year-to-date caps that may apply.",
+    "h1": "Final paycheck and PTO payout withholding",
+    "faq": [
+      {
+        "q": "Is PTO payout taxed differently?",
+        "a": "It is wages, usually treated as supplemental: the flat 22% federal rate if identified separately, or aggregated. Social Security and Medicare apply in full."
+      },
+      {
+        "q": "Does the API decide when the final pay is due?",
+        "a": "No. The due date and whether PTO must be paid are set by state law and employer policy. The API calculates tax on the amount you send."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Guides",
+        "path": "/guides"
+      },
+      {
+        "name": "Final paycheck tax withholding",
+        "path": "/final-paycheck-tax-withholding"
+      }
+    ]
+  },
+  {
+    "path": "/401k-deferral-payroll-tax",
+    "file": "401k-deferral-payroll-tax.html",
+    "title": "401(k) deferral payroll tax treatment: income tax vs FICA | Omnia.tax",
+    "description": "How a 401(k) deferral changes payroll tax: it lowers income tax wages but not Social Security or Medicare wages, shown on a real paycheck with the 2026 limit.",
+    "h1": "401(k) deferrals and payroll tax",
+    "faq": [
+      {
+        "q": "Does a 401(k) deferral reduce Social Security tax?",
+        "a": "No. It reduces federal and most state income tax wages but remains subject to Social Security and Medicare."
+      },
+      {
+        "q": "How is a Roth 401(k) contribution handled?",
+        "a": "It is after-tax, so it is a post-tax deduction. It lowers net pay by the full amount and does not change any tax line."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Guides",
+        "path": "/guides"
+      },
+      {
+        "name": "401(k) deferral payroll tax treatment",
+        "path": "/401k-deferral-payroll-tax"
+      }
+    ]
+  },
+  {
+    "path": "/retirement-deferral-limits-2026",
+    "file": "retirement-deferral-limits-2026.html",
+    "title": "2026 retirement deferral limits in payroll: 401(k), 457 | Omnia.tax",
+    "description": "The 2026 elective deferral limits payroll applies: $24,500 for 401(k), 403(b) and 457(b), $17,000 for SIMPLE, and how pre-tax treatment stops at the limit.",
+    "h1": "2026 retirement deferral limits in payroll",
+    "faq": [
+      {
+        "q": "What is the 401(k) deferral limit for 2026?",
+        "a": "The elective deferral limit under section 402(g) is $24,500 for 401(k), 403(b) and governmental 457(b) plans, with the 401(k) and 403(b) limit shared. The SIMPLE plan limit is $17,000."
+      },
+      {
+        "q": "What happens when the limit is reached mid-year?",
+        "a": "The engine treats only the remaining part of a deferral as pre-tax and returns electiveDeferrals so you can carry the total forward."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Guides",
+        "path": "/guides"
+      },
+      {
+        "name": "Retirement deferral limits 2026",
+        "path": "/retirement-deferral-limits-2026"
+      }
+    ]
+  },
+  {
+    "path": "/hsa-payroll-tax-treatment",
+    "file": "hsa-payroll-tax-treatment.html",
+    "title": "HSA payroll tax treatment: exempt from FICA | Omnia.tax",
+    "description": "How an HSA contribution through payroll is taxed: through a Section 125 plan it is exempt from income tax and FICA, shown on a real paycheck against a 401(k).",
+    "h1": "HSA contributions and payroll tax",
+    "faq": [
+      {
+        "q": "Is an HSA contribution through payroll subject to FICA?",
+        "a": "Not when made through a Section 125 cafeteria plan. It is excluded from Social Security and Medicare wages as well as federal income tax wages."
+      },
+      {
+        "q": "Does every state exclude HSA contributions?",
+        "a": "No. A few states tax them. The engine applies each state's own rule by tax."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Guides",
+        "path": "/guides"
+      },
+      {
+        "name": "HSA payroll tax treatment",
+        "path": "/hsa-payroll-tax-treatment"
+      }
+    ]
+  },
+  {
+    "path": "/section-125-cafeteria-plan-payroll-tax",
+    "file": "section-125-cafeteria-plan-payroll-tax.html",
+    "title": "Section 125 cafeteria plan payroll tax treatment | Omnia.tax",
+    "description": "How Section 125 premiums are taxed in payroll: excluded from federal income tax, Social Security and Medicare, with employer savings, on a real paycheck.",
+    "h1": "Section 125 cafeteria plan payroll tax",
+    "faq": [
+      {
+        "q": "Are Section 125 premiums subject to Social Security tax?",
+        "a": "No. They are excluded from federal income tax, Social Security and Medicare wages, which also lowers the employer's share."
+      },
+      {
+        "q": "How do I send a premium to the API?",
+        "a": "As a deduction with category section125. The category decides which taxes it reduces."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Guides",
+        "path": "/guides"
+      },
+      {
+        "name": "Section 125 cafeteria plan payroll tax",
+        "path": "/section-125-cafeteria-plan-payroll-tax"
+      }
+    ]
+  },
+  {
+    "path": "/post-tax-deductions-net-pay",
+    "file": "post-tax-deductions-net-pay.html",
+    "title": "Post-tax deductions and net pay: what changes | Omnia.tax",
+    "description": "Post-tax deductions such as Roth contributions, union dues and charitable giving reduce net pay but not taxes. A worked paycheck proves no tax line moves.",
+    "h1": "Post-tax deductions and net pay",
+    "faq": [
+      {
+        "q": "Do post-tax deductions reduce taxes?",
+        "a": "No. They are taken after taxes are calculated and change no tax line, only net pay."
+      },
+      {
+        "q": "Is a Roth 401(k) contribution pre-tax?",
+        "a": "No. Roth contributions are made after tax, so they are post-tax deductions."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Guides",
+        "path": "/guides"
+      },
+      {
+        "name": "Post-tax deductions and net pay",
+        "path": "/post-tax-deductions-net-pay"
+      }
+    ]
+  },
+  {
+    "path": "/expense-reimbursement-payroll-tax",
+    "file": "expense-reimbursement-payroll-tax.html",
+    "title": "Expense reimbursements in payroll: not wages, not taxed | Omnia.tax",
+    "description": "How expense reimbursements are treated on a paycheck: paid in cash but not taxable under an accountable plan, with a worked check showing no tax line changes.",
+    "h1": "Expense reimbursements and payroll tax",
+    "faq": [
+      {
+        "q": "Are expense reimbursements taxable?",
+        "a": "Not under an accountable plan. They are not wages and have no income tax, Social Security or Medicare. Reimbursements that fail the plan test are wages."
+      },
+      {
+        "q": "How do I show one on the API?",
+        "a": "As an earning with category reimbursement. The engine adds it to gross pay shown but excludes it from every taxable base."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Guides",
+        "path": "/guides"
+      },
+      {
+        "name": "Expense reimbursement payroll tax",
+        "path": "/expense-reimbursement-payroll-tax"
+      }
+    ]
+  },
+  {
+    "path": "/imputed-income-payroll-tax",
+    "file": "imputed-income-payroll-tax.html",
+    "title": "Imputed income in payroll: taxable but not paid in cash | Omnia.tax",
+    "description": "How imputed income such as group-term life over $50,000 is taxed: added to taxable wages without being paid, with a worked check showing the extra tax.",
+    "h1": "Imputed income and payroll tax",
+    "faq": [
+      {
+        "q": "What is imputed income?",
+        "a": "The taxable value of a benefit that is not paid in cash, such as group-term life insurance over $50,000. It is added to taxable wages, so tax is withheld, while net pay falls."
+      },
+      {
+        "q": "How do I send it to the API?",
+        "a": "As an earning with category imputed. It raises the taxable wages but is not paid in cash."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Guides",
+        "path": "/guides"
+      },
+      {
+        "name": "Imputed income payroll tax",
+        "path": "/imputed-income-payroll-tax"
+      }
+    ]
+  },
+  {
+    "path": "/pay-frequency-withholding",
+    "file": "pay-frequency-withholding.html",
+    "title": "Pay frequency and withholding: weekly to monthly | Omnia.tax",
+    "description": "Why the same pay gets different withholding on weekly, biweekly, semimonthly and monthly schedules: annualisation and brackets, with the engine's numbers.",
+    "h1": "Pay frequency and withholding",
+    "faq": [
+      {
+        "q": "Why does pay frequency change federal withholding?",
+        "a": "The percentage method annualises each check by the number of pay periods, applies the brackets, and divides back. A larger check on a weekly schedule annualises to a higher income than the same check paid monthly."
+      },
+      {
+        "q": "Does pay frequency change Social Security or Medicare?",
+        "a": "No. They are flat percentages of wages, so the amount is the same on any schedule."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Guides",
+        "path": "/guides"
+      },
+      {
+        "name": "Pay frequency and withholding",
+        "path": "/pay-frequency-withholding"
+      }
+    ]
+  },
+  {
+    "path": "/semimonthly-vs-biweekly-pay",
+    "file": "semimonthly-vs-biweekly-pay.html",
+    "title": "Semimonthly vs biweekly pay: 24 checks or 26, and the net | Omnia.tax",
+    "description": "Semimonthly or biweekly pay on the same salary: 24 checks versus 26, different per-check withholding, the same year, and which gives a bigger check.",
+    "h1": "Semimonthly vs biweekly pay",
+    "faq": [
+      {
+        "q": "Is semimonthly or biweekly pay better?",
+        "a": "Neither pays more per year on the same salary. Semimonthly gives 24 larger checks; biweekly gives 26 smaller ones, with three checks in two months."
+      },
+      {
+        "q": "Is withholding the same over a year?",
+        "a": "Nearly. The two schedules use different tables, so total withholding differs slightly. The final tax is settled on the return."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Guides",
+        "path": "/guides"
+      },
+      {
+        "name": "Semimonthly vs biweekly pay",
+        "path": "/semimonthly-vs-biweekly-pay"
+      }
+    ]
+  },
+  {
+    "path": "/hourly-employee-paycheck-calculation",
+    "file": "hourly-employee-paycheck-calculation.html",
+    "title": "Hourly employee paycheck calculation: hours to net | Omnia.tax",
+    "description": "How to calculate an hourly employee's paycheck: hours times rate, overtime, then every tax line to net pay, with a worked example for a Columbus, Ohio worker.",
+    "h1": "Hourly employee paycheck calculation",
+    "faq": [
+      {
+        "q": "How do I calculate an hourly paycheck?",
+        "a": "Multiply hours by the hourly rate, add overtime pay, send that as gross earnings in cents with deductions, the W-4 and the work location, and the engine returns each tax and net pay."
+      },
+      {
+        "q": "Does the API check minimum wage?",
+        "a": "Yes. Add a minimumWageCheck with the hourly rate and the same call compares it with the federal, state and local minimum wage."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Guides",
+        "path": "/guides"
+      },
+      {
+        "name": "Hourly employee paycheck calculation",
+        "path": "/hourly-employee-paycheck-calculation"
+      }
+    ]
+  },
+  {
+    "path": "/minimum-wage-compliance-check",
+    "file": "minimum-wage-compliance-check.html",
+    "title": "Minimum wage compliance check API: all levels | Omnia.tax",
+    "description": "Check an hourly rate against the binding federal, state and local minimum wage in the same call as the paycheck, with tipped, region and headcount options.",
+    "h1": "Minimum wage compliance check",
+    "faq": [
+      {
+        "q": "Can the payroll API check minimum wage?",
+        "a": "Yes. Add minimumWageCheck with an hourly rate to the paycheck request and it compares the rate with the binding federal, state and local minimum wage in the same call."
+      },
+      {
+        "q": "Is the minimum wage check billed separately?",
+        "a": "No. It is answered in the same call and billed as one paycheck calculation."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Guides",
+        "path": "/guides"
+      },
+      {
+        "name": "Minimum wage compliance check",
+        "path": "/minimum-wage-compliance-check"
+      }
+    ]
+  },
+  {
+    "path": "/salary-to-take-home-pay",
+    "file": "salary-to-take-home-pay.html",
+    "title": "Salary to take-home pay: annual salary to net per paycheck | Omnia.tax",
+    "description": "Turn an annual salary into take-home pay per paycheck: divide by pay periods, run it through the tax engine, and compare Texas, California and Ohio.",
+    "h1": "Salary to take-home pay",
+    "faq": [
+      {
+        "q": "How do I convert an annual salary to take-home pay?",
+        "a": "Divide the salary by the pay periods to get gross per check, then apply federal, state and local taxes and any deductions to reach net pay. A tax engine does the second step."
+      },
+      {
+        "q": "Is take-home pay a fixed percentage of salary?",
+        "a": "No. It depends on the state, filing status, deductions and pay frequency, so a single percentage is wrong for most people."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Guides",
+        "path": "/guides"
+      },
+      {
+        "name": "Salary to take-home pay",
+        "path": "/salary-to-take-home-pay"
+      }
+    ]
+  },
+  {
+    "path": "/true-cost-of-an-employee",
+    "file": "true-cost-of-an-employee.html",
+    "title": "True cost of an employee: wages plus employer taxes | Omnia.tax",
+    "description": "What an employee really costs: gross pay plus employer Social Security, Medicare, FUTA and state unemployment, shown for Texas, California and Columbus, Ohio.",
+    "h1": "True cost of an employee: employer payroll taxes",
+    "faq": [
+      {
+        "q": "How much do employer payroll taxes add to an employee's cost?",
+        "a": "Employer Social Security and Medicare add 7.65% of wages up to the Social Security wage base, and FUTA and state unemployment add more early in the year. The exact share depends on the state."
+      },
+      {
+        "q": "Do employer taxes come out of the employee's pay?",
+        "a": "No. They are paid by the employer on top of gross pay and do not reduce net pay."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Guides",
+        "path": "/guides"
+      },
+      {
+        "name": "True cost of an employee",
+        "path": "/true-cost-of-an-employee"
+      }
+    ]
+  },
+  {
+    "path": "/relocation-paycheck-comparison",
+    "file": "relocation-paycheck-comparison.html",
+    "title": "Relocation paycheck comparison: same pay, new state | Omnia.tax",
+    "description": "Compare a paycheck before and after a move, Texas to California as the worked case, with each tax that changes and the explanation, from one API call.",
+    "h1": "Relocation paycheck comparison",
+    "faq": [
+      {
+        "q": "How do I compare take-home pay between two states?",
+        "a": "Use the compare endpoint with the same paycheck and a changed work state. It returns both results and a step-by-step explanation of the difference."
+      },
+      {
+        "q": "Does the comparison include cost of living?",
+        "a": "No. It compares tax withholding on one paycheck, not living costs or other taxes."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Guides",
+        "path": "/guides"
+      },
+      {
+        "name": "Relocation paycheck comparison",
+        "path": "/relocation-paycheck-comparison"
+      }
+    ]
+  },
+  {
+    "path": "/bonus-gross-up-calculator",
+    "file": "bonus-gross-up-calculator.html",
+    "title": "Bonus gross-up calculator: pay a bonus that nets a target | Omnia.tax",
+    "description": "How to gross up a bonus so the employee nets a target amount after tax: the solver finds the gross, with a worked example and the one earning it will not solve.",
+    "h1": "Bonus gross-up calculator",
+    "faq": [
+      {
+        "q": "How do I gross up a bonus?",
+        "a": "Use the gross-up endpoint with the paycheck, a target net pay and the index of the bonus earning. It finds the smallest bonus that leaves that take-home using the real engine."
+      },
+      {
+        "q": "Why is the answer not target ÷ (1 − rate)?",
+        "a": "Taxes are layered with thresholds, caps and different bases, so no single rate applies. The solver uses the engine itself."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Guides",
+        "path": "/guides"
+      },
+      {
+        "name": "Bonus gross-up calculator",
+        "path": "/bonus-gross-up-calculator"
+      }
+    ]
+  },
+  {
+    "path": "/year-end-bonus-net-pay",
+    "file": "year-end-bonus-net-pay.html",
+    "title": "Year-end bonus net pay: what a $5,000 bonus takes home | Omnia.tax",
+    "description": "What a year-end bonus nets after federal, state and FICA withholding, run for three states, so you can tell staff the real take-home before the check arrives.",
+    "h1": "Year-end bonus net pay",
+    "faq": [
+      {
+        "q": "How much of a $5,000 bonus do I keep?",
+        "a": "It depends on the state. In Texas about 70% after the 22% federal flat rate, Social Security and Medicare; less in states with income tax. The table above shows the engine's result for three places."
+      },
+      {
+        "q": "Why is my bonus withheld at 22%?",
+        "a": "Federal withholding on a separately identified bonus uses the flat supplemental rate of 22%. It is an advance on your tax, settled on your return."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Guides",
+        "path": "/guides"
+      },
+      {
+        "name": "Year-end bonus net pay",
+        "path": "/year-end-bonus-net-pay"
+      }
+    ]
+  },
+  {
+    "path": "/bonus-withholding-by-state",
+    "file": "bonus-withholding-by-state.html",
+    "title": "Bonus withholding by state: supplemental rates compared | Omnia.tax",
+    "description": "How each state withholds on bonuses and other supplemental wages: states with a flat rate, those that require aggregation, and those with no income tax.",
+    "h1": "Bonus withholding by state",
+    "faq": [
+      {
+        "q": "Which states have a flat withholding rate for bonuses?",
+        "a": "Several states publish a flat supplemental rate, listed in the table above from the 2026 rule files. Others require aggregation with regular pay, and some have no income tax."
+      },
+      {
+        "q": "Where is each state's source?",
+        "a": "On the state's own page under /payroll-tax, which links to the withholding guide the rule file was read from."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Guides",
+        "path": "/guides"
+      },
+      {
+        "name": "Bonus withholding by state",
+        "path": "/bonus-withholding-by-state"
+      }
+    ]
+  },
+  {
+    "path": "/employee-vs-employer-payroll-taxes",
+    "file": "employee-vs-employer-payroll-taxes.html",
+    "title": "Employee vs employer payroll taxes: who pays which tax | Omnia.tax",
+    "description": "Which payroll taxes are withheld from the employee and which the employer pays on top: Social Security, Medicare, FUTA, SUTA and paid leave, with a worked.",
+    "h1": "Employee vs employer payroll taxes",
+    "faq": [
+      {
+        "q": "Which payroll taxes does the employer pay?",
+        "a": "The employer's match of Social Security and Medicare, federal unemployment tax, state unemployment tax in most states, and some state paid-leave contributions. They are paid on top of gross pay."
+      },
+      {
+        "q": "Does the API show which side pays?",
+        "a": "Yes. Each tax line has a payer field, employee or employer, and the response totals them separately."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Guides",
+        "path": "/guides"
+      },
+      {
+        "name": "Employee vs employer payroll taxes",
+        "path": "/employee-vs-employer-payroll-taxes"
+      }
+    ]
+  },
+  {
+    "path": "/payroll-tax-audit-withholding-check",
+    "file": "payroll-tax-audit-withholding-check.html",
+    "title": "Payroll tax audit: check your provider's withholding | Omnia.tax",
+    "description": "How to check whether your payroll provider withheld the right tax: rerun a paycheck through an independent engine, compare line by line and read the detail.",
+    "h1": "Payroll tax audit: check withholding independently",
+    "faq": [
+      {
+        "q": "How can I check if my payroll provider withheld the right tax?",
+        "a": "Rerun a sample of paychecks through an independent engine with the same inputs, compare each tax line, and read the engine's detail text on any difference."
+      },
+      {
+        "q": "Does the check cost anything?",
+        "a": "Test keys run the same engine as live keys and are never billed, within a cap of 30 requests a minute and 500 a day."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Guides",
+        "path": "/guides"
+      },
+      {
+        "name": "Payroll tax audit: withholding check",
+        "path": "/payroll-tax-audit-withholding-check"
+      }
+    ]
+  },
+  {
+    "path": "/california-sdi-withholding",
+    "file": "california-sdi-withholding.html",
+    "title": "California SDI withholding: rate, no wage cap, example | Omnia.tax",
+    "description": "How California State Disability Insurance is withheld from a paycheck: the employee-paid rate, no wage cap, how it differs from income tax, and a worked check.",
+    "h1": "California SDI withholding",
+    "faq": [
+      {
+        "q": "Who pays California SDI?",
+        "a": "The employee. It is withheld from wages and the employer does not match it."
+      },
+      {
+        "q": "Does California SDI have a wage cap?",
+        "a": "No. Since January 1, 2024 all wages are subject to SDI contributions."
+      },
+      {
+        "q": "Is SDI the same as California income tax?",
+        "a": "No. It is a separate contribution with its own rate, and it appears as its own line next to California income tax."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Guides",
+        "path": "/guides"
+      },
+      {
+        "name": "California SDI withholding",
+        "path": "/california-sdi-withholding"
+      }
+    ]
+  },
+  {
+    "path": "/new-york-paid-family-leave-withholding",
+    "file": "new-york-paid-family-leave-withholding.html",
+    "title": "New York Paid Family Leave withholding and annual cap | Omnia.tax",
+    "description": "How New York Paid Family Leave (PFL) is withheld from employees: the percentage of wages, the annual maximum, and a worked check with the cap applied.",
+    "h1": "New York Paid Family Leave withholding",
+    "faq": [
+      {
+        "q": "How much is New York PFL?",
+        "a": "It is a percentage of wages up to a yearly cap set by the state. The engine states the rate and cap on each line and applies the cap using year-to-date wages."
+      },
+      {
+        "q": "Does the employer pay PFL?",
+        "a": "The employer arranges coverage, but the contribution is withheld from the employee, up to the yearly maximum."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Guides",
+        "path": "/guides"
+      },
+      {
+        "name": "New York Paid Family Leave withholding",
+        "path": "/new-york-paid-family-leave-withholding"
+      }
+    ]
+  },
+  {
+    "path": "/new-york-disability-benefits-withholding",
+    "file": "new-york-disability-benefits-withholding.html",
+    "title": "New York disability benefits (DBL) employee deduction | Omnia.tax",
+    "description": "The New York Disability Benefits Law deduction: a small percentage of wages with a weekly dollar cap, shown on a real paycheck and how it differs from PFL.",
+    "h1": "New York DBL employee deduction",
+    "faq": [
+      {
+        "q": "What is the New York DBL deduction?",
+        "a": "A percentage of wages, capped at a small weekly dollar amount, that the employee may be charged toward disability coverage required by the Disability Benefits Law."
+      },
+      {
+        "q": "Is DBL the same as Paid Family Leave?",
+        "a": "No. They are separate programs with separate rates and caps, and appear as separate lines."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Guides",
+        "path": "/guides"
+      },
+      {
+        "name": "New York DBL withholding",
+        "path": "/new-york-disability-benefits-withholding"
+      }
+    ]
+  },
+  {
+    "path": "/washington-paid-family-medical-leave-premium",
+    "file": "washington-paid-family-medical-leave-premium.html",
+    "title": "Washington Paid Family and Medical Leave premium | Omnia.tax",
+    "description": "How Washington PFML premiums are withheld: a percentage of wages up to the Social Security wage base, split between employee and employer, with a worked check.",
+    "h1": "Washington Paid Family and Medical Leave premium",
+    "faq": [
+      {
+        "q": "Does Washington have a state income tax?",
+        "a": "No. Washington does not tax wages. Its employee payroll deductions are PFML and the Washington Cares Fund premium."
+      },
+      {
+        "q": "Who pays the PFML premium?",
+        "a": "Both. The total premium is split between employer and employee, with the shares depending on employer size."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Guides",
+        "path": "/guides"
+      },
+      {
+        "name": "Washington PFML premium",
+        "path": "/washington-paid-family-medical-leave-premium"
+      }
+    ]
+  },
+  {
+    "path": "/washington-cares-fund-premium",
+    "file": "washington-cares-fund-premium.html",
+    "title": "Washington Cares Fund premium: long-term care tax | Omnia.tax",
+    "description": "How the Washington Cares Fund long-term care premium is withheld: a percentage of all wages with no cap, employee-paid, and shown on a real paycheck.",
+    "h1": "Washington Cares Fund premium",
+    "faq": [
+      {
+        "q": "Does the Washington Cares premium have a wage cap?",
+        "a": "No. It applies to all wages."
+      },
+      {
+        "q": "Who pays it?",
+        "a": "The employee only. There is no employer share."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Guides",
+        "path": "/guides"
+      },
+      {
+        "name": "Washington Cares Fund premium",
+        "path": "/washington-cares-fund-premium"
+      }
+    ]
+  },
+  {
+    "path": "/massachusetts-pfml-contribution",
+    "file": "massachusetts-pfml-contribution.html",
+    "title": "Massachusetts PFML contribution withholding and the cap | Omnia.tax",
+    "description": "How Massachusetts Paid Family and Medical Leave contributions are withheld from employees: the percentage, the wage cap and a worked paycheck.",
+    "h1": "Massachusetts PFML contribution",
+    "faq": [
+      {
+        "q": "Who pays Massachusetts PFML?",
+        "a": "The contribution is shared between employer and employee. The employer remits it and may deduct the employee's share from wages."
+      },
+      {
+        "q": "Is there a wage cap?",
+        "a": "Yes. The contribution applies up to the Social Security wage base for the year."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Guides",
+        "path": "/guides"
+      },
+      {
+        "name": "Massachusetts PFML contribution",
+        "path": "/massachusetts-pfml-contribution"
+      }
+    ]
+  },
+  {
+    "path": "/colorado-famli-premium",
+    "file": "colorado-famli-premium.html",
+    "title": "Colorado FAMLI premium withholding: rate, cap and split | Omnia.tax",
+    "description": "How the Colorado FAMLI paid leave premium is withheld: the percentage of wages up to the Social Security wage base, the employee share, and a worked check.",
+    "h1": "Colorado FAMLI premium",
+    "faq": [
+      {
+        "q": "What is the Colorado FAMLI premium?",
+        "a": "A percentage of wages up to the Social Security wage base that funds paid family and medical leave, shared between employer and employee."
+      },
+      {
+        "q": "Is the employer share always owed?",
+        "a": "No. Employers with fewer than ten employees owe no employer share, though the employee share is still withheld."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Guides",
+        "path": "/guides"
+      },
+      {
+        "name": "Colorado FAMLI premium",
+        "path": "/colorado-famli-premium"
+      }
+    ]
+  },
+  {
+    "path": "/connecticut-paid-leave-contribution",
+    "file": "connecticut-paid-leave-contribution.html",
+    "title": "Connecticut Paid Leave contribution: 0.5% withholding | Omnia.tax",
+    "description": "How the Connecticut Paid Leave employee contribution is withheld: the rate, the yearly wage cap and a worked paycheck, separate from Connecticut income tax.",
+    "h1": "Connecticut Paid Leave contribution",
+    "faq": [
+      {
+        "q": "What is the Connecticut Paid Leave contribution rate?",
+        "a": "It is a percentage of wages, charged to the employee up to the Social Security wage base. The engine states the rate on each line."
+      },
+      {
+        "q": "Does the employer pay too?",
+        "a": "No. The contribution is funded by employees."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Guides",
+        "path": "/guides"
+      },
+      {
+        "name": "Connecticut Paid Leave contribution",
+        "path": "/connecticut-paid-leave-contribution"
+      }
+    ]
+  },
+  {
+    "path": "/rhode-island-tdi-withholding",
+    "file": "rhode-island-tdi-withholding.html",
+    "title": "Rhode Island TDI withholding: Temporary Disability | Omnia.tax",
+    "description": "How Rhode Island Temporary Disability Insurance (TDI) is withheld: an employee-paid percentage up to a wage cap, with a worked paycheck through the engine.",
+    "h1": "Rhode Island Temporary Disability Insurance",
+    "faq": [
+      {
+        "q": "Who pays Rhode Island TDI?",
+        "a": "The employee, through payroll deduction, up to the yearly wage cap."
+      },
+      {
+        "q": "Is TDI the same as unemployment insurance?",
+        "a": "No. Unemployment insurance is an employer tax. TDI is a separate employee-funded program for temporary disability."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Guides",
+        "path": "/guides"
+      },
+      {
+        "name": "Rhode Island TDI withholding",
+        "path": "/rhode-island-tdi-withholding"
+      }
+    ]
+  },
+  {
+    "path": "/hawaii-tdi-withholding",
+    "file": "hawaii-tdi-withholding.html",
+    "title": "Hawaii TDI withholding: Temporary Disability Insurance | Omnia.tax",
+    "description": "How Hawaii Temporary Disability Insurance is withheld: a percentage of wages with a weekly dollar cap, split between employee and employer, on a real paycheck.",
+    "h1": "Hawaii Temporary Disability Insurance",
+    "faq": [
+      {
+        "q": "How is Hawaii TDI withheld?",
+        "a": "As a percentage of wages with a weekly dollar cap for the employee share, deducted from pay."
+      },
+      {
+        "q": "Does the employer also pay something for Hawaii TDI?",
+        "a": "Yes. The employer pays the part of the cost the employee is not charged."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Guides",
+        "path": "/guides"
+      },
+      {
+        "name": "Hawaii TDI withholding",
+        "path": "/hawaii-tdi-withholding"
+      }
+    ]
+  },
+  {
+    "path": "/minnesota-paid-leave-premium",
+    "file": "minnesota-paid-leave-premium.html",
+    "title": "Minnesota Paid Leave premium: employee and employer shares | Omnia.tax",
+    "description": "How the Minnesota Paid Leave premium is withheld: the total rate split between employee and employer, the wage cap, and a worked check with both shares.",
+    "h1": "Minnesota Paid Leave premium",
+    "faq": [
+      {
+        "q": "Who pays the Minnesota Paid Leave premium?",
+        "a": "Employer and employee share the premium. The employer withholds the employee share from pay."
+      },
+      {
+        "q": "Is there a wage cap?",
+        "a": "Yes, at the Social Security wage base."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Guides",
+        "path": "/guides"
+      },
+      {
+        "name": "Minnesota Paid Leave premium",
+        "path": "/minnesota-paid-leave-premium"
+      }
+    ]
+  },
+  {
+    "path": "/maine-paid-family-medical-leave-contribution",
+    "file": "maine-paid-family-medical-leave-contribution.html",
+    "title": "Maine Paid Family and Medical Leave contribution | Omnia.tax",
+    "description": "How the Maine paid leave contribution is withheld from employees: the rate, the Social Security wage-base cap, and a worked paycheck through the engine.",
+    "h1": "Maine Paid Family and Medical Leave contribution",
+    "faq": [
+      {
+        "q": "Who pays Maine PFML?",
+        "a": "Employer and employee share the contribution. The employee share is withheld from pay."
+      },
+      {
+        "q": "Where is the cap?",
+        "a": "At the Social Security wage base for the year."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Guides",
+        "path": "/guides"
+      },
+      {
+        "name": "Maine PFML contribution",
+        "path": "/maine-paid-family-medical-leave-contribution"
+      }
+    ]
+  },
+  {
+    "path": "/new-jersey-payroll-contributions",
+    "file": "new-jersey-payroll-contributions.html",
+    "title": "New Jersey payroll contributions: UI/WF, TDI and FLI | Omnia.tax",
+    "description": "The New Jersey payroll contributions an employee pays besides income tax: unemployment and workforce, temporary disability and family leave, on a worked check.",
+    "h1": "New Jersey employee payroll contributions",
+    "faq": [
+      {
+        "q": "Which payroll taxes does New Jersey withhold from employees?",
+        "a": "Income tax, an unemployment and workforce contribution, a temporary disability insurance contribution and a family leave insurance contribution."
+      },
+      {
+        "q": "Does the employer pay anything for New Jersey disability?",
+        "a": "Yes. The engine returns an employer disability insurance line on top of the employee lines."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Guides",
+        "path": "/guides"
+      },
+      {
+        "name": "New Jersey employee payroll contributions",
+        "path": "/new-jersey-payroll-contributions"
+      }
+    ]
+  },
+  {
+    "path": "/oregon-paid-leave-and-transit-tax",
+    "file": "oregon-paid-leave-and-transit-tax.html",
+    "title": "Oregon payroll: Paid Leave, transit tax and WBF | Omnia.tax",
+    "description": "The Oregon payroll lines beside income tax: Paid Leave Oregon, the statewide transit tax and the Workers' Benefit Fund assessment, on a real paycheck.",
+    "h1": "Oregon Paid Leave, statewide transit tax and WBF",
+    "faq": [
+      {
+        "q": "What does Oregon withhold besides income tax?",
+        "a": "Paid Leave Oregon contributions, the statewide transit tax, and the employee half of the Workers' Benefit Fund assessment, each as its own line."
+      },
+      {
+        "q": "How is the Workers' Benefit Fund assessment charged?",
+        "a": "Per hour worked, split equally between employee and employer. Send hoursWorked for an exact figure; otherwise the engine uses a flat-rate period and says so."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Guides",
+        "path": "/guides"
+      },
+      {
+        "name": "Oregon paid leave and statewide transit tax",
+        "path": "/oregon-paid-leave-and-transit-tax"
+      }
+    ]
+  },
+  {
+    "path": "/state-disability-insurance-payroll",
+    "file": "state-disability-insurance-payroll.html",
+    "title": "States with disability insurance payroll deductions | Omnia.tax",
+    "description": "Which states take a disability insurance contribution from employee pay, the line each produces on a $3,000 check, and who pays: CA, HI, NJ, NY and RI.",
+    "h1": "States with disability insurance payroll deductions",
+    "faq": [
+      {
+        "q": "Which states have state disability insurance?",
+        "a": "California, Hawaii, New Jersey, New York and Rhode Island run state-mandated disability programs funded in whole or part through employee deductions. The table above comes from running a paycheck in each state."
+      },
+      {
+        "q": "Does the employer also pay?",
+        "a": "In some of them, yes. Hawaii and New York share the cost, and New Jersey has an employer disability line. California and Rhode Island are employee-funded."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Guides",
+        "path": "/guides"
+      },
+      {
+        "name": "States with disability insurance payroll deductions",
+        "path": "/state-disability-insurance-payroll"
+      }
+    ]
+  },
+  {
+    "path": "/state-paid-family-leave-payroll",
+    "file": "state-paid-family-leave-payroll.html",
+    "title": "States with paid family leave payroll contributions | Omnia.tax",
+    "description": "Which states take paid family and medical leave contributions through payroll, who pays in each, and the line each produces on a $3,000 check.",
+    "h1": "States with paid family leave payroll contributions",
+    "faq": [
+      {
+        "q": "Which states have paid family leave contributions?",
+        "a": "In the engine's data: Colorado, Connecticut, Maine, Massachusetts, Minnesota, New Jersey, New York, Oregon and Washington, and the District of Columbia. California funds Paid Family Leave through its SDI contribution. The table above lists the lines the engine returns."
+      },
+      {
+        "q": "Do employers or employees pay?",
+        "a": "It depends on the state. Some are employee-funded, some employer-funded and some shared. The table shows which side each line is on."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Guides",
+        "path": "/guides"
+      },
+      {
+        "name": "States with paid family leave payroll deductions",
+        "path": "/state-paid-family-leave-payroll"
+      }
+    ]
+  },
+  {
+    "path": "/states-with-local-income-tax",
+    "file": "states-with-local-income-tax.html",
+    "title": "States with local income and wage taxes for payroll | Omnia.tax",
+    "description": "The 15 states where cities, counties or school districts tax wages in the engine's data, how many jurisdictions each has, and what is partial.",
+    "h1": "States with local income and wage taxes",
+    "faq": [
+      {
+        "q": "Which states have local income taxes?",
+        "a": "In the Omnia.tax data, 15 states, including Ohio, Pennsylvania, Michigan, Kentucky, Indiana, Maryland, New York, Alabama and West Virginia. The coverage page lists each."
+      },
+      {
+        "q": "How does the engine know which local tax applies?",
+        "a": "From the work and home addresses. The address endpoint returns the jurisdictions and the certificate fields for the paycheck call."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Guides",
+        "path": "/guides"
+      },
+      {
+        "name": "States with local income tax",
+        "path": "/states-with-local-income-tax"
+      }
+    ]
+  },
+  {
+    "path": "/suta-wage-base-by-state-ranked",
+    "file": "suta-wage-base-by-state-ranked.html",
+    "title": "SUTA wage base ranked: highest and lowest states in 2026 | Omnia.tax",
+    "description": "State unemployment tax wage bases for 2026 ranked from highest to lowest, with the most an employer pays per employee at the new-employer rate.",
+    "h1": "SUTA wage base ranked by state",
+    "faq": [
+      {
+        "q": "Which state has the highest SUTA wage base?",
+        "a": "Washington in the 2026 rules the engine uses, at $78,200."
+      },
+      {
+        "q": "Which has the lowest?",
+        "a": "Tennessee, at $7,000."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Guides",
+        "path": "/guides"
+      },
+      {
+        "name": "SUTA wage base ranked by state",
+        "path": "/suta-wage-base-by-state-ranked"
+      }
+    ]
+  },
+  {
+    "path": "/2027-payroll-tax-changes-by-state",
+    "file": "2027-payroll-tax-changes-by-state.html",
+    "title": "2027 payroll tax changes by state: bases and rates | Omnia.tax",
+    "description": "What changes for payroll in 2027 in the engine's rule files: the Social Security wage base, state unemployment wage bases that move, and flat rates that change.",
+    "h1": "2027 payroll tax changes by state",
+    "faq": [
+      {
+        "q": "What is the Social Security wage base for 2027?",
+        "a": "$192,300 in the engine's 2027 rule file, up from $184,500 in 2026."
+      },
+      {
+        "q": "Are the 2027 figures final?",
+        "a": "Not necessarily. Years that are provisional carry a warning in the response. Confirm with the agency before relying on one."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Guides",
+        "path": "/guides"
+      },
+      {
+        "name": "2027 payroll tax changes by state",
+        "path": "/2027-payroll-tax-changes-by-state"
+      }
+    ]
+  },
+  {
+    "path": "/nyc-resident-income-tax-withholding",
+    "file": "nyc-resident-income-tax-withholding.html",
+    "title": "New York City resident income tax withholding | Omnia.tax",
+    "description": "How New York City resident income tax is withheld: an extra line beside New York State tax, with the engine's numbers for a $3,000 biweekly check.",
+    "h1": "New York City resident income tax withholding",
+    "faq": [
+      {
+        "q": "Who pays New York City income tax?",
+        "a": "Residents of the five boroughs. It is withheld by the employer as a separate line from New York State income tax, based on where the employee lives."
+      },
+      {
+        "q": "Does working in New York City make me pay city tax?",
+        "a": "Not by itself. The city resident tax follows residence, so a commuter who lives outside the city does not have it withheld."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Guides",
+        "path": "/guides"
+      },
+      {
+        "name": "New York City resident income tax withholding",
+        "path": "/nyc-resident-income-tax-withholding"
+      }
+    ]
+  },
+  {
+    "path": "/yonkers-income-tax-withholding",
+    "file": "yonkers-income-tax-withholding.html",
+    "title": "Yonkers resident income tax withholding on a paycheck | Omnia.tax",
+    "description": "How Yonkers resident income tax is withheld alongside New York State tax, calculated as a percentage of the state tax, with the engine's numbers for $3,000.",
+    "h1": "Yonkers income tax withholding",
+    "faq": [
+      {
+        "q": "How is Yonkers income tax calculated?",
+        "a": "As a percentage of the New York State tax for residents, withheld by the employer as its own line."
+      },
+      {
+        "q": "Does it apply if I work in Yonkers but live elsewhere?",
+        "a": "The resident tax does not. Yonkers has a separate nonresident earnings tax, which depends on the rules in force."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Guides",
+        "path": "/guides"
+      },
+      {
+        "name": "Yonkers income tax withholding",
+        "path": "/yonkers-income-tax-withholding"
+      }
+    ]
+  },
+  {
+    "path": "/ohio-municipal-income-tax-withholding",
+    "file": "ohio-municipal-income-tax-withholding.html",
+    "title": "Ohio municipal income tax withholding by city | Omnia.tax",
+    "description": "How Ohio municipal income tax is withheld: the work-city rule, resident credits, and numbers for Columbus, Cincinnati and Youngstown on a $3,000 check.",
+    "h1": "Ohio municipal income tax withholding",
+    "faq": [
+      {
+        "q": "Which Ohio city tax is withheld?",
+        "a": "The tax of the city where the employee works. The home city may also tax the wages, usually with a credit for tax paid to the work city, which is settled on the return."
+      },
+      {
+        "q": "How do I find the right Ohio municipality?",
+        "a": "Resolve the work address with the address endpoint, or pass the city names in the certificate."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Guides",
+        "path": "/guides"
+      },
+      {
+        "name": "Ohio municipal income tax withholding",
+        "path": "/ohio-municipal-income-tax-withholding"
+      }
+    ]
+  },
+  {
+    "path": "/pennsylvania-eit-lst-withholding",
+    "file": "pennsylvania-eit-lst-withholding.html",
+    "title": "Pennsylvania EIT and LST withholding by PSD code | Omnia.tax",
+    "description": "How Pennsylvania Earned Income Tax and Local Services Tax are withheld by PSD code: resident and nonresident rates, with a Philadelphia worked check.",
+    "h1": "Pennsylvania Earned Income Tax and Local Services Tax",
+    "faq": [
+      {
+        "q": "What is a PSD code?",
+        "a": "A six-digit Political Subdivision code that identifies a Pennsylvania taxing district. Local tax is looked up by PSD code."
+      },
+      {
+        "q": "Which EIT rate does the employer withhold?",
+        "a": "The higher of the employee's resident rate and the nonresident rate at the work location."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Guides",
+        "path": "/guides"
+      },
+      {
+        "name": "Pennsylvania EIT and LST withholding",
+        "path": "/pennsylvania-eit-lst-withholding"
+      }
+    ]
+  },
+  {
+    "path": "/michigan-city-income-tax-withholding",
+    "file": "michigan-city-income-tax-withholding.html",
+    "title": "Michigan city income tax withholding: Detroit and more | Omnia.tax",
+    "description": "How Michigan's 24 city income taxes are withheld: resident and nonresident rates, no netting of credits at withholding, and a Detroit worked check.",
+    "h1": "Michigan city income tax withholding",
+    "faq": [
+      {
+        "q": "How many Michigan cities have an income tax?",
+        "a": "24 cities levy one under the Uniform City Income Tax Ordinance."
+      },
+      {
+        "q": "What do nonresidents pay?",
+        "a": "A lower nonresident rate on wages earned in the taxing city."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Guides",
+        "path": "/guides"
+      },
+      {
+        "name": "Michigan city income tax withholding",
+        "path": "/michigan-city-income-tax-withholding"
+      }
+    ]
+  },
+  {
+    "path": "/kentucky-occupational-license-tax-withholding",
+    "file": "kentucky-occupational-license-tax-withholding.html",
+    "title": "Kentucky occupational license tax withholding | Omnia.tax",
+    "description": "How Kentucky occupational license taxes are withheld: city, county and school district levies on wages, and the engine's Louisville worked paycheck.",
+    "h1": "Kentucky occupational license tax withholding",
+    "faq": [
+      {
+        "q": "Who pays Kentucky occupational license tax?",
+        "a": "Employees working in a taxing city or county, by payroll withholding at the local rate."
+      },
+      {
+        "q": "Is it the same as state income tax?",
+        "a": "No. It is a separate local levy on wages with its own rate and administration."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Guides",
+        "path": "/guides"
+      },
+      {
+        "name": "Kentucky occupational license tax withholding",
+        "path": "/kentucky-occupational-license-tax-withholding"
+      }
+    ]
+  },
+  {
+    "path": "/indiana-county-income-tax-withholding",
+    "file": "indiana-county-income-tax-withholding.html",
+    "title": "Indiana county income tax withholding by county | Omnia.tax",
+    "description": "How Indiana county income tax is withheld: the rate follows the employee's county on January 1, and the engine's Marion County worked check.",
+    "h1": "Indiana county income tax withholding",
+    "faq": [
+      {
+        "q": "Which Indiana county tax applies?",
+        "a": "The one for the county where the employee lives, set on a fixed date each year, with separate rules for out-of-state residents who work in Indiana."
+      },
+      {
+        "q": "Is the county tax part of the state tax?",
+        "a": "No. It is a separate line, IN_COUNTY, beside IN_SIT."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Guides",
+        "path": "/guides"
+      },
+      {
+        "name": "Indiana county income tax withholding",
+        "path": "/indiana-county-income-tax-withholding"
+      }
+    ]
+  },
+  {
+    "path": "/maryland-county-income-tax-withholding",
+    "file": "maryland-county-income-tax-withholding.html",
+    "title": "Maryland county income tax withholding: 24 jurisdictions | Omnia.tax",
+    "description": "How Maryland county income tax is withheld: the county rate is built into state withholding, nonresidents pay a special rate, and a Montgomery County check.",
+    "h1": "Maryland county income tax withholding",
+    "faq": [
+      {
+        "q": "Is Maryland county tax a separate line?",
+        "a": "In the engine it is part of the Maryland income tax line, MD_SIT, built from the state rate and the county rate together. The detail text shows both."
+      },
+      {
+        "q": "What if I do not give a county?",
+        "a": "The engine withholds at the maximum local rate and states that in the line's detail, so a missing certificate is visible."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Guides",
+        "path": "/guides"
+      },
+      {
+        "name": "Maryland county income tax withholding",
+        "path": "/maryland-county-income-tax-withholding"
+      }
+    ]
+  },
+  {
+    "path": "/kansas-city-st-louis-earnings-tax",
+    "file": "kansas-city-st-louis-earnings-tax.html",
+    "title": "Kansas City and St. Louis earnings tax withholding | Omnia.tax",
+    "description": "How Missouri's two city earnings taxes are withheld: 1% in Kansas City and St. Louis, plus the St. Louis employer payroll expense tax, from the engine.",
+    "h1": "Kansas City and St. Louis earnings tax",
+    "faq": [
+      {
+        "q": "Which Missouri cities have an earnings tax?",
+        "a": "Kansas City and St. Louis. They are the only two cities in Missouri with the power to levy one."
+      },
+      {
+        "q": "Does the employer pay anything extra in St. Louis?",
+        "a": "Yes. St. Louis has a payroll expense tax charged to employers on top of the employee earnings tax."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Guides",
+        "path": "/guides"
+      },
+      {
+        "name": "Kansas City and St. Louis earnings tax",
+        "path": "/kansas-city-st-louis-earnings-tax"
+      }
+    ]
+  },
+  {
+    "path": "/alabama-occupational-tax-withholding",
+    "file": "alabama-occupational-tax-withholding.html",
+    "title": "Alabama occupational tax withholding: Birmingham | Omnia.tax",
+    "description": "How Alabama city occupational taxes are withheld, which towns are confirmed from primary sources and which are survey-only, with a Birmingham worked check.",
+    "h1": "Alabama occupational tax withholding",
+    "faq": [
+      {
+        "q": "Does Alabama have a local income tax?",
+        "a": "Alabama cities and some counties levy occupational taxes on wages earned in their limits. They follow the work location."
+      },
+      {
+        "q": "Are all Alabama towns covered?",
+        "a": "No. Alabama is partial. The coverage page lists the jurisdictions in the data, and lines that rest on a weaker source carry a notice."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Guides",
+        "path": "/guides"
+      },
+      {
+        "name": "Alabama occupational tax withholding",
+        "path": "/alabama-occupational-tax-withholding"
+      }
+    ]
+  },
+  {
+    "path": "/payroll-tax-calculator-for-accountants",
+    "file": "payroll-tax-calculator-for-accountants.html",
+    "title": "Payroll tax calculator for accountants and CPAs | Omnia.tax",
+    "description": "A payroll tax calculator for accountants and CPAs: rerun a client's paycheck, see each line explained, compare two scenarios and cite the method.",
+    "h1": "Payroll tax calculator for accountants",
+    "faq": [
+      {
+        "q": "Can an accountant use the calculator without coding?",
+        "a": "Yes. The browser calculator takes an address or state, pay, a Form W-4 and deductions and shows every tax line with an explanation. No API key or code is needed once you are signed in."
+      },
+      {
+        "q": "Is it a substitute for the payroll provider?",
+        "a": "No. It calculates withholding and employer taxes to check or plan. It does not run payroll, file returns or deposit tax."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Guides",
+        "path": "/guides"
+      },
+      {
+        "name": "Payroll tax calculator for accountants",
+        "path": "/payroll-tax-calculator-for-accountants"
+      }
+    ]
+  },
+  {
+    "path": "/payroll-tax-calculator-for-bookkeepers",
+    "file": "payroll-tax-calculator-for-bookkeepers.html",
+    "title": "Payroll tax calculator for bookkeepers: book a check | Omnia.tax",
+    "description": "A payroll tax calculator for bookkeepers: see which lines are employee-paid and employer-paid, so a paycheck splits cleanly into expense and liability entries.",
+    "h1": "Payroll tax calculator for bookkeepers",
+    "faq": [
+      {
+        "q": "How do I book a paycheck from the tax lines?",
+        "a": "Debit wages expense for gross pay and employer payroll tax expense for the employer lines; credit liabilities for the employee and employer taxes and cash for net pay. The payer field on each line says which side owes it."
+      },
+      {
+        "q": "Do employer taxes reduce net pay?",
+        "a": "No. They are an additional cost to the employer and are not taken from the employee."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Guides",
+        "path": "/guides"
+      },
+      {
+        "name": "Payroll tax calculator for bookkeepers",
+        "path": "/payroll-tax-calculator-for-bookkeepers"
+      }
+    ]
+  },
+  {
+    "path": "/payroll-tax-calculator-for-small-business",
+    "file": "payroll-tax-calculator-for-small-business.html",
+    "title": "Payroll tax calculator for small business owners | Omnia.tax",
+    "description": "A payroll tax calculator for small business owners: what a paycheck costs you and the employee, the employer taxes, and what to check before a first hire.",
+    "h1": "Payroll tax calculator for small business owners",
+    "faq": [
+      {
+        "q": "How much does an employee cost on top of wages?",
+        "a": "The employer pays about 7.65% for Social Security and Medicare up to the Social Security wage base, plus federal and state unemployment tax early in the year and any state paid-leave contributions. The calculator shows the exact lines."
+      },
+      {
+        "q": "Do I need an API?",
+        "a": "No. The browser calculator is enough for planning and checking. The API is for software that calculates paychecks automatically."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Guides",
+        "path": "/guides"
+      },
+      {
+        "name": "Payroll tax calculator for small business",
+        "path": "/payroll-tax-calculator-for-small-business"
+      }
+    ]
+  },
+  {
+    "path": "/first-employee-payroll-taxes",
+    "file": "first-employee-payroll-taxes.html",
+    "title": "Payroll taxes on your first employee: what to expect | Omnia.tax",
+    "description": "What changes when you hire your first employee: the taxes withheld, the taxes you pay on top, the forms to collect and a worked first paycheck.",
+    "h1": "Payroll taxes on your first employee",
+    "faq": [
+      {
+        "q": "What taxes do I withhold from my first employee?",
+        "a": "Federal income tax from their Form W-4, the employee share of Social Security and Medicare, and state and local income tax where they apply, plus any state employee contributions."
+      },
+      {
+        "q": "What do I pay on top?",
+        "a": "The employer match of Social Security and Medicare, federal unemployment tax, state unemployment tax, and in some states paid-leave contributions."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Guides",
+        "path": "/guides"
+      },
+      {
+        "name": "Payroll taxes on your first employee",
+        "path": "/first-employee-payroll-taxes"
+      }
+    ]
+  },
+  {
+    "path": "/payroll-tax-calculator-for-hr-managers",
+    "file": "payroll-tax-calculator-for-hr-managers.html",
+    "title": "Payroll tax calculator for HR managers: offers, moves | Omnia.tax",
+    "description": "A payroll tax calculator for HR managers: show candidates take-home pay, model a raise or relocation, and see what a role costs including employer taxes.",
+    "h1": "Payroll tax calculator for HR managers",
+    "faq": [
+      {
+        "q": "Can HR share a take-home estimate with a candidate?",
+        "a": "Yes, as an estimate. State the assumptions (filing status, deductions, work location), because the real withholding follows the employee's own W-4."
+      },
+      {
+        "q": "Does the calculator need personal data?",
+        "a": "No. It needs pay, location and withholding choices, not a name or an identifier."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Guides",
+        "path": "/guides"
+      },
+      {
+        "name": "Payroll tax calculator for HR managers",
+        "path": "/payroll-tax-calculator-for-hr-managers"
+      }
+    ]
+  },
+  {
+    "path": "/remote-employee-payroll-tax-different-state",
+    "file": "remote-employee-payroll-tax-different-state.html",
+    "title": "Remote employee payroll tax: working from another state | Omnia.tax",
+    "description": "Which state taxes a remote employee: the work state, the home state and reciprocity, with a worked New Jersey resident working in Pennsylvania check.",
+    "h1": "Remote employee payroll tax in a different state",
+    "faq": [
+      {
+        "q": "Which state do I withhold for a remote employee?",
+        "a": "Usually the state where the work is done, unless a reciprocity agreement or the home state's rules say otherwise. The employee's home state may also tax the wages, with a credit on the return."
+      },
+      {
+        "q": "Do I have to register in the employee's home state?",
+        "a": "That is a question of employer nexus and registration, which depends on the state. The engine does not decide it."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Guides",
+        "path": "/guides"
+      },
+      {
+        "name": "Remote employee in a different state",
+        "path": "/remote-employee-payroll-tax-different-state"
+      }
+    ]
+  },
+  {
+    "path": "/nonresident-employee-state-withholding",
+    "file": "nonresident-employee-state-withholding.html",
+    "title": "Nonresident employee state withholding: rules and examples | Omnia.tax",
+    "description": "How states withhold income tax from nonresident employees: work-state withholding, reciprocity exemptions, day-count thresholds and a worked check.",
+    "h1": "Nonresident employee state withholding",
+    "faq": [
+      {
+        "q": "Does a nonresident pay state tax where they work?",
+        "a": "Generally yes: the work state may tax wages earned there, and the employer withholds, unless a reciprocity agreement or a short-stay rule exempts the employee."
+      },
+      {
+        "q": "What is a reciprocity agreement?",
+        "a": "An agreement between two states under which an employee who lives in one and works in the other pays income tax only to the home state, usually by giving the employer an exemption form."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Guides",
+        "path": "/guides"
+      },
+      {
+        "name": "Nonresident employee state withholding",
+        "path": "/nonresident-employee-state-withholding"
+      }
+    ]
+  },
+  {
+    "path": "/payroll-tax-api-vs-spreadsheet",
+    "file": "payroll-tax-api-vs-spreadsheet.html",
+    "title": "Payroll tax API vs spreadsheet: where a sheet stops | Omnia.tax",
+    "description": "A spreadsheet can calculate a paycheck until local tax, year-to-date caps and rule changes arrive. Where the line is, with a worked example, and when to switch.",
+    "h1": "Payroll tax API vs spreadsheet",
+    "faq": [
+      {
+        "q": "Can I run payroll taxes in a spreadsheet?",
+        "a": "For one employee in a no-income-tax state, yes. It gets expensive with state brackets, local tax, year-to-date caps, paid-leave programs and annual changes."
+      },
+      {
+        "q": "Can I use the API from a spreadsheet?",
+        "a": "Yes, with a script that posts the paycheck and writes the result into cells. See the Google Sheets example."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Guides",
+        "path": "/guides"
+      },
+      {
+        "name": "Payroll tax API vs spreadsheet",
+        "path": "/payroll-tax-api-vs-spreadsheet"
+      }
+    ]
+  },
+  {
+    "path": "/payroll-tax-api-google-sheets",
+    "file": "payroll-tax-api-google-sheets.html",
+    "title": "Payroll tax API in Google Sheets with Apps Script | Omnia.tax",
+    "description": "Call a payroll tax API from Google Sheets with Apps Script: a custom function that posts a paycheck and returns net pay, with the key stored outside the sheet.",
+    "h1": "Payroll tax API in Google Sheets",
+    "faq": [
+      {
+        "q": "Can Google Sheets call a payroll tax API?",
+        "a": "Yes. Apps Script can post JSON to the API with UrlFetchApp and return a value to a cell through a custom function."
+      },
+      {
+        "q": "Where should I keep the API key?",
+        "a": "In Script Properties, never in a cell. Anyone with access to the sheet could read a key stored in it."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Guides",
+        "path": "/guides"
+      },
+      {
+        "name": "Payroll tax API in Google Sheets",
+        "path": "/payroll-tax-api-google-sheets"
+      }
+    ]
+  },
+  {
+    "path": "/payroll-tax-glossary",
+    "file": "payroll-tax-glossary.html",
+    "title": "Payroll tax glossary: FIT, FICA, FUTA, SUTA, SDI and more | Omnia.tax",
+    "description": "A plain glossary of payroll tax terms: FIT, FICA, FUTA, SUTA, SDI, PFML, W-4, wage base, supplemental wages, imputed income, gross-to-net and more.",
+    "h1": "Payroll tax glossary",
+    "faq": [
+      {
+        "q": "What does FICA stand for?",
+        "a": "Federal Insurance Contributions Act. It covers Social Security and Medicare tax, paid half by the employee and half by the employer."
+      },
+      {
+        "q": "What is the difference between FUTA and SUTA?",
+        "a": "FUTA is the federal unemployment tax and SUTA is the state unemployment tax. Both are paid by the employer in most cases."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Guides",
+        "path": "/guides"
+      },
+      {
+        "name": "Payroll tax glossary",
+        "path": "/payroll-tax-glossary"
+      }
+    ]
+  },
+  {
+    "path": "/payroll-tax-engine-evaluation-checklist",
+    "file": "payroll-tax-engine-evaluation-checklist.html",
+    "title": "Payroll tax engine evaluation checklist: 15 things to test | Omnia.tax",
+    "description": "A checklist for evaluating a payroll tax engine or API: local coverage, rule updates, edge cases, explainability, errors, pricing, and what to run in a trial.",
+    "h1": "Payroll tax engine evaluation checklist",
+    "faq": [
+      {
+        "q": "How do I evaluate a payroll tax engine?",
+        "a": "Run real paychecks through a trial, including edge cases such as a Social Security cap, a bonus, a deferral, a local city and a two-state worker, and compare line by line against a known-good result."
+      },
+      {
+        "q": "What should I ask a vendor about local tax?",
+        "a": "For the list of jurisdictions by name, how addresses are resolved to a jurisdiction, and how a rate that rests on a weak source is flagged."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Guides",
+        "path": "/guides"
+      },
+      {
+        "name": "Payroll tax engine evaluation checklist",
+        "path": "/payroll-tax-engine-evaluation-checklist"
+      }
+    ]
+  },
+  {
+    "path": "/payroll-tax-engine-rfp-questions",
+    "file": "payroll-tax-engine-rfp-questions.html",
+    "title": "Payroll tax engine RFP questions to send every vendor | Omnia.tax",
+    "description": "A question set for a payroll tax engine RFP: coverage, data sourcing, updates, effective dating, errors, security, pricing, support and exit, ready to copy.",
+    "h1": "Payroll tax engine RFP questions",
+    "faq": [
+      {
+        "q": "What should a payroll tax engine RFP include?",
+        "a": "Coverage by name, data sourcing and update speed, effective dating, error behaviour, explainability, pricing at your volume, testing options, contract terms and exit."
+      },
+      {
+        "q": "How do I compare vendors fairly?",
+        "a": "Send identical questions and identical test paychecks to each, and compare the results line by line."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Guides",
+        "path": "/guides"
+      },
+      {
+        "name": "Payroll tax engine RFP questions",
+        "path": "/payroll-tax-engine-rfp-questions"
+      }
+    ]
+  },
+  {
+    "path": "/best-payroll-tax-api",
+    "file": "best-payroll-tax-api.html",
+    "title": "Best payroll tax API: how to choose for your use case | Omnia.tax",
+    "description": "There is no single best payroll tax API. How to choose by use case: embedded payroll, HR tools, fintech, staffing, and what each needs from the API.",
+    "h1": "Best payroll tax API: how to choose",
+    "faq": [
+      {
+        "q": "What is the best payroll tax API?",
+        "a": "It depends on whether you need only calculation or filing too, how much local tax matters and how fast you need to start. Compare candidates on your own paychecks using a checklist."
+      },
+      {
+        "q": "Is Omnia.tax a good fit for filing?",
+        "a": "No. It calculates only. If you need filing and deposits, use a payroll platform or provider that does them."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Guides",
+        "path": "/guides"
+      },
+      {
+        "name": "Best payroll tax API",
+        "path": "/best-payroll-tax-api"
+      }
+    ]
+  },
+  {
+    "path": "/payroll-tax-api-alternatives",
+    "file": "payroll-tax-api-alternatives.html",
+    "title": "Payroll tax API alternatives: four routes | Omnia.tax",
+    "description": "The kinds of alternatives to a payroll tax API: engine vendors, full payroll platforms, open-source libraries and building it yourself, and when each fits.",
+    "h1": "Payroll tax API alternatives",
+    "faq": [
+      {
+        "q": "What are the alternatives to a payroll tax API?",
+        "a": "Another engine vendor, a full payroll platform, an open-source library, or building the rules yourself. The right one depends on whether you need only calculation and how much upkeep you can carry."
+      },
+      {
+        "q": "Which alternative needs the least maintenance?",
+        "a": "An API or a platform. A library or an in-house build puts the rule upkeep on you."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Guides",
+        "path": "/guides"
+      },
+      {
+        "name": "Payroll tax API alternatives",
+        "path": "/payroll-tax-api-alternatives"
+      }
+    ]
+  },
+  {
+    "path": "/open-source-payroll-tax-engine-vs-commercial",
+    "file": "open-source-payroll-tax-engine-vs-commercial.html",
+    "title": "Open-source vs commercial payroll tax engine | Omnia.tax",
+    "description": "Open-source payroll tax engine or a commercial API? What the licence does not include: rate upkeep, local data, testing, effective dating, and when each wins.",
+    "h1": "Open-source vs commercial payroll tax engine",
+    "faq": [
+      {
+        "q": "Is there a free open-source payroll tax engine?",
+        "a": "There are open-source libraries and rule sets of varying scope and currency. The code is free; keeping every state and local rule current is the cost, and it falls on you."
+      },
+      {
+        "q": "When is open source the better choice?",
+        "a": "When you must inspect or modify the code, run offline, or have a team to maintain the rules."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Guides",
+        "path": "/guides"
+      },
+      {
+        "name": "Open-source vs commercial payroll tax engine",
+        "path": "/open-source-payroll-tax-engine-vs-commercial"
+      }
+    ]
+  },
+  {
+    "path": "/payroll-tax-data-sources",
+    "file": "payroll-tax-data-sources.html",
+    "title": "Payroll tax data sources: where every rate comes from | Omnia.tax",
+    "description": "Where the Omnia.tax rates come from: agency documents cited in the rule files with read dates, how a source tier is set, and what happens when sources conflict.",
+    "h1": "Payroll tax data sources",
+    "faq": [
+      {
+        "q": "Where do the tax rates come from?",
+        "a": "From the levying agency's own publications where available, cited in the rule files with the date they were read. Weaker sources are marked and flagged on the response."
+      },
+      {
+        "q": "What happens when two sources disagree?",
+        "a": "The rule file records both, and the response flags the line as a conflicting-source notice instead of choosing silently."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Guides",
+        "path": "/guides"
+      },
+      {
+        "name": "Payroll tax data sources",
+        "path": "/payroll-tax-data-sources"
+      }
+    ]
+  },
+  {
+    "path": "/payroll-tax-engine-accuracy",
+    "file": "payroll-tax-engine-accuracy.html",
+    "title": "Payroll tax engine accuracy: how it is tested | Omnia.tax",
+    "description": "How the Omnia.tax engine is tested: independently derived fixtures, rounding rules written first, edge-case tests, and what it does not claim about accuracy.",
+    "h1": "Payroll tax engine accuracy",
+    "faq": [
+      {
+        "q": "How accurate is the payroll tax engine?",
+        "a": "It is tested against independently derived federal fixtures, agency worked examples and boundary cases, with rounding rules written first. It makes no single accuracy percentage claim, and it flags lines that rest on weaker sources."
+      },
+      {
+        "q": "What if I find a difference from an agency calculation?",
+        "a": "Send the inputs and the agency document through the contact page. Corrections are recorded in the changelog."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Guides",
+        "path": "/guides"
+      },
+      {
+        "name": "Payroll tax engine accuracy",
+        "path": "/payroll-tax-engine-accuracy"
+      }
+    ]
+  },
+  {
+    "path": "/what-a-payroll-tax-engine-does-not-do",
+    "file": "what-a-payroll-tax-engine-does-not-do.html",
+    "title": "What a payroll tax engine does not do | Omnia.tax",
+    "description": "The honest boundary of a payroll tax calculation engine: it does not file returns, deposit tax, pay employees, give tax advice or decide worker status.",
+    "h1": "What a payroll tax engine does not do",
+    "faq": [
+      {
+        "q": "Does Omnia.tax file payroll taxes?",
+        "a": "No. It calculates withholding and employer taxes. Filing returns and depositing tax stay with you or your payroll provider."
+      },
+      {
+        "q": "Does it give tax advice?",
+        "a": "No. It applies published rules to the inputs you provide. See the disclaimer."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Guides",
+        "path": "/guides"
+      },
+      {
+        "name": "What a payroll tax engine does not do",
+        "path": "/what-a-payroll-tax-engine-does-not-do"
+      }
+    ]
+  },
+  {
+    "path": "/batch-payroll-tax-calculation-api",
+    "file": "batch-payroll-tax-calculation-api.html",
+    "title": "Batch payroll tax calculation API for pay runs | Omnia.tax",
+    "description": "Calculate many paychecks in one request with the payCalc batch endpoint: an array in, an array out, billed per successful paycheck, for payroll runs.",
+    "h1": "Batch payroll tax calculation API",
+    "faq": [
+      {
+        "q": "Can I calculate many paychecks in one request?",
+        "a": "Yes. POST an array of requests, or an object with a payCalc array, to /v1/payCalc and you get an array of results in the same order."
+      },
+      {
+        "q": "How is a batch billed?",
+        "a": "One usage unit per successful paycheck in the batch."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Guides",
+        "path": "/guides"
+      },
+      {
+        "name": "Batch payroll tax calculation API",
+        "path": "/batch-payroll-tax-calculation-api"
+      }
+    ]
+  },
+  {
+    "path": "/migrate-from-symmetry-paycalc",
+    "file": "migrate-from-symmetry-paycalc.html",
+    "title": "Migrating from a Symmetry-style payCalc integration | Omnia.tax",
+    "description": "What to expect moving a Symmetry-shaped payCalc integration to Omnia.tax: the request shape looks familiar, but it is not wire-compatible and ids are its own.",
+    "h1": "Migrating from a Symmetry-style payCalc integration",
+    "faq": [
+      {
+        "q": "Is Omnia.tax compatible with the Symmetry Tax Engine API?",
+        "a": "No. It has an adapter that accepts a Symmetry-shaped payCalc request, but it is not wire-compatible and its jurisdiction ids are its own. Expect to change your integration."
+      },
+      {
+        "q": "Can I try it with my existing request shape?",
+        "a": "The adapter makes a first experiment cheaper, but the results use Omnia.tax ids, so plan a real mapping before production."
+      }
+    ],
+    "breadcrumb": [
+      {
+        "name": "Home",
+        "path": "/"
+      },
+      {
+        "name": "Guides",
+        "path": "/guides"
+      },
+      {
+        "name": "Migrate from a Symmetry payCalc integration",
+        "path": "/migrate-from-symmetry-paycalc"
+      }
+    ]
+  },
+  {
     "path": "/unemployment-tax",
     "file": "unemployment-tax.html",
     "title": "Unemployment tax by state: SUTA wage bases and rates | Omnia.tax",

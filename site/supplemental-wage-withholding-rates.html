@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="color-scheme" content="light" />
+<title>Supplemental wage withholding: 22% flat, 37% over $1M | Omnia.tax</title>
+<meta name="description" content="The federal supplemental wage withholding rates for bonuses and commissions: the 22% flat rate, the mandatory 37% over $1 million, and the aggregate method." />
+<link rel="stylesheet" href="/assets/v5.css" />
+</head>
+<body>
+<header class="site-header"><div class="bar">
+  <a class="mark" href="/">Omnia<span class="dot" aria-hidden="true"></span>tax</a>
+  <nav class="nav-links" aria-label="Primary"><a href="/product">Product</a><a href="/coverage">Coverage</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a></nav>
+  <div class="nav-end"><a class="signin" href="/signin">Sign in</a><a class="btn sm" href="/signup">Get API key</a></div>
+  <button class="menu-btn" type="button" aria-expanded="false" aria-label="Menu"><span></span><span></span></button>
+</div></header>
+<main class="wrap">
+  <div class="page-head">
+    <nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a> <span aria-hidden="true">/</span> <a href="/guides">Guides</a> <span aria-hidden="true">/</span> <span aria-current="page">Supplemental wage withholding rates</span></nav>
+    <p class="eyebrow">Withholding and wages</p>
+    <h1 class="page">Supplemental wage withholding rates</h1>
+    <p class="sub">The federal flat rates for bonuses and similar pay, and when each applies.</p>
+  </div>
+  <div class="prose seo" style="margin-top:32px;max-width:720px">
+
+    <p>Supplemental wages are pay on top of regular wages: bonuses, commissions, overtime pay paid separately, severance and similar payments. For federal income tax the employer has two ways to withhold on them. One is a flat rate. The other is to add the payment to regular wages and run the ordinary percentage method on the total. The rates below are read from the federal rule file the engine uses for 2026.</p>
+    <h2>The rates</h2>
+    <div class="table-wrap"><table><thead><tr><th>Situation</th><th style="text-align:left">Federal withholding</th></tr></thead><tbody><tr><td>Supplemental wages identified separately, flat-rate method</td><td style="text-align:left">22% on the supplemental amount</td></tr><tr><td>Cumulative supplemental wages to one employee over $1,000,000 in the year</td><td style="text-align:left">37% on the part over $1,000,000, mandatory</td></tr><tr><td>Aggregate method</td><td style="text-align:left">Add to the regular payment and withhold on the total under the percentage method</td></tr></tbody></table></div>
+    <h2>A bonus, both ways</h2>
+    <p>An employee paid $3,000.00 regular biweekly pay gets a $5,000.00 bonus in the same check. Flat rate: federal withholding on the bonus is <strong>$1,100.00</strong> (22% of $5,000.00), plus $320.38 on the regular pay, $1,420.38 in total. Aggregate: the $8,000.00 is treated as one payment and federal withholding is <strong>$1,486.69</strong>. The difference is $66.31 in this check, which is withholding only; the employee's actual tax is settled on their return.</p>
+    <h2>How to ask for each</h2>
+    <p>Tag the earning <code>category: "supplemental"</code> for the flat method. Leave the bonus as <code>regular</code> to aggregate it. The engine does not guess which you intend, because the choice belongs to the employer and the rules allow either.</p>
+    <h2>The $1 million line</h2>
+    <p>Send the supplemental wages paid so far this year in <code>ytd.supplemental</code>. When a check crosses $1,000,000 the engine splits it. A $400,000.00 bonus on top of $800,000.00 already paid this year returns federal withholding of $118,000.00, and the line explains why: <em>$200000.00 @ 22% + $200000.00 @ 37% (cumulative supplemental over $1000000.00)</em></p>
+    <h2>State rules differ</h2>
+    <p>States have their own supplemental treatment. Some use a flat rate, some require aggregation, some leave it to the employer. See <a href="/bonus-withholding-by-state">bonus withholding by state</a>.</p>
+    <h2>Keep reading</h2>
+    <p><a href="/bonus-tax-withholding-calculation">Bonus tax withholding</a> · <a href="/flat-rate-vs-aggregate-bonus-withholding">Flat rate vs aggregate bonus withholding</a> · <a href="/bonus-over-one-million-withholding">Bonus over $1 million withholding</a> · <a href="/bonus-withholding-by-state">Bonus withholding by state</a> · <a href="/guides">All guides</a></p>
+  </div>
+<section class="faq" aria-labelledby="faq-h" style="margin-top:44px;max-width:720px"><h2 id="faq-h" style="font-size:22px;line-height:30px">Questions</h2><article><h3>What is the federal supplemental wage withholding rate?</h3><p>Under the flat-rate method it is 22% on supplemental wages identified separately from regular wages. Cumulative supplemental wages over $1,000,000 in a year are withheld at a mandatory 37% on the excess.</p></article><article><h3>Can an employer use the aggregate method instead?</h3><p>Yes. The employer may add the supplemental pay to regular wages for the period and withhold on the total using the percentage method.</p></article><article><h3>Is withholding the same as the tax owed on a bonus?</h3><p>No. Withholding is an advance. The employee's actual tax on the bonus is settled on their return, so a refund or a balance due is possible either way.</p></article></section>
+  <div class="seo-cta" style="margin:48px 0 8px;max-width:720px"><a class="btn" href="/signup">Start the 14-day trial</a> <a class="text-link" href="/docs">Read the docs →</a><p class="fine">14-day free trial, then $0.08 per paycheck calculation. Omnia.tax calculates; it does not file, deposit tax, or give tax advice. <a href="/disclaimer">Disclaimer</a>.</p></div>
+</main>
+<footer class="site-footer">
+  <div class="wrap foot-grid">
+    <a class="mark" href="/">Omnia<span class="dot" aria-hidden="true"></span>tax</a>
+    <div><h2>Product</h2><a href="/coverage">Coverage</a><a href="/pricing">Pricing</a><a href="/changelog">Changelog</a></div>
+    <div><h2>Developers</h2><a href="/docs">Docs</a><a href="/docs/paycheck">API reference</a><a href="/status">Status</a></div>
+    <div><h2>Guides</h2><a href="/guides">All guides</a><a href="/payroll-tax-calculation">Payroll tax calculation</a><a href="/payroll-tax-calculation-engine">Payroll tax calculation engine</a><a href="/income-tax-calculation-engine">Income tax calculation engine</a><a href="/take-home-pay">Take-home pay by state</a><a href="/payroll-tax-api">Payroll tax API</a><a href="/payroll-tax">Payroll tax by state</a><a href="/symmetry-tax-engine-alternative">Symmetry alternative</a><a href="/payroll-tax-engine-comparison">Engine comparison</a></div>
+    <div><h2>Company</h2><a href="/about">About</a><a href="/contact">Contact</a><a href="/terms">Terms</a><a href="/privacy">Privacy</a></div>
+  </div>
+  <p class="wrap copy">© 2026 OMNIA TAX LLC. A Michigan limited liability company.</p>
+</footer>
+<script src="/assets/v5.js"></script>
+</body>
+</html>

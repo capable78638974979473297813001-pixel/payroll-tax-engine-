@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="color-scheme" content="light" />
+<title>Payroll tax API for fintech: take-home for lending | Omnia.tax</title>
+<meta name="description" content="A payroll tax API for fintech teams: estimate take-home for earned wage access, affordability checks and benefits products, from pay, location and withholding." />
+<link rel="stylesheet" href="/assets/v5.css" />
+</head>
+<body>
+<header class="site-header"><div class="bar">
+  <a class="mark" href="/">Omnia<span class="dot" aria-hidden="true"></span>tax</a>
+  <nav class="nav-links" aria-label="Primary"><a href="/product">Product</a><a href="/coverage">Coverage</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a></nav>
+  <div class="nav-end"><a class="signin" href="/signin">Sign in</a><a class="btn sm" href="/signup">Get API key</a></div>
+  <button class="menu-btn" type="button" aria-expanded="false" aria-label="Menu"><span></span><span></span></button>
+</div></header>
+<main class="wrap">
+  <div class="page-head">
+    <nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a> <span aria-hidden="true">/</span> <a href="/guides">Guides</a> <span aria-hidden="true">/</span> <span aria-current="page">Payroll tax API for fintech</span></nav>
+    <p class="eyebrow">Developers</p>
+    <h1 class="page">Payroll tax API for fintech</h1>
+    <p class="sub">Turn a gross pay figure into a take-home estimate you can lend against.</p>
+  </div>
+  <div class="prose seo" style="margin-top:32px;max-width:720px">
+
+    <p>Fintech products meet payroll data in many forms: a gross salary on an application, a pay frequency, a state. The decision they need is about net pay, because that is what a person can actually spend. A rule of thumb like "gross times 0.75" ignores the state, the filing status and the pay frequency, and it is wrong by amounts that matter in an affordability check.</p>
+    <h2>Uses</h2>
+    <ul><li><strong>Earned wage access</strong>: how much of an accrued wage is safely available after taxes.</li><li><strong>Affordability checks</strong>: net monthly pay for a loan or buy-now-pay-later decision.</li><li><strong>Benefits and savings products</strong>: how a pre-tax contribution changes take-home.</li><li><strong>Gross-up</strong>: the gross pay that leaves a target net, using the <a href="/net-to-gross-calculator-api">net-to-gross endpoint</a>.</li></ul>
+    <h2>Why a flat percentage fails</h2>
+    <p>Run the same $3,000.00 biweekly pay through two states. Texas returns $2,450.12 and California returns $2,277.06. As a share of gross that is 81.7% and 75.9%. A single multiplier cannot be right for both.</p>
+    <h2>Inputs you usually have</h2>
+    <ul><li>Gross pay and pay frequency from the pay stub or the employer.</li><li>State, and ideally a work address for local tax.</li><li>Filing status. If you do not have a W-4, state your assumption (for example, single with no adjustments) and say so to the user.</li></ul>
+    <h2>Be clear it is an estimate</h2>
+    <p>Withholding follows the employee's W-4 and the employer's choices, so a calculated net pay is an estimate of an actual paycheck. Show the assumptions you made, and for a credit decision prefer verified pay data where you can get it. The API calculates tax and does not verify income.</p>
+    <h2>Keep reading</h2>
+    <p><a href="/gross-to-net-api">Gross-to-net API</a> · <a href="/net-to-gross-calculator-api">Net-to-gross (gross-up) API</a> · <a href="/paycheck-calculator-api">Paycheck calculator API</a> · <a href="/payroll-tax-api-for-saas-platforms">Payroll tax API for SaaS platforms</a> · <a href="/guides">All guides</a></p>
+  </div>
+<section class="faq" aria-labelledby="faq-h" style="margin-top:44px;max-width:720px"><h2 id="faq-h" style="font-size:22px;line-height:30px">Questions</h2><article><h3>Can a payroll tax API support affordability checks?</h3><p>It can turn a gross pay, pay frequency and location into a net pay estimate that follows federal, state and local rules, which is more accurate than a flat percentage. It estimates withholding; it does not verify income.</p></article><article><h3>What do I do without the employee's W-4?</h3><p>Assume a stated default such as single filing status with no adjustments, and tell the user that is the assumption.</p></article></section>
+  <div class="seo-cta" style="margin:48px 0 8px;max-width:720px"><a class="btn" href="/signup">Start the 14-day trial</a> <a class="text-link" href="/docs">Read the docs →</a><p class="fine">14-day free trial, then $0.08 per paycheck calculation. Omnia.tax calculates; it does not file, deposit tax, or give tax advice. <a href="/disclaimer">Disclaimer</a>.</p></div>
+</main>
+<footer class="site-footer">
+  <div class="wrap foot-grid">
+    <a class="mark" href="/">Omnia<span class="dot" aria-hidden="true"></span>tax</a>
+    <div><h2>Product</h2><a href="/coverage">Coverage</a><a href="/pricing">Pricing</a><a href="/changelog">Changelog</a></div>
+    <div><h2>Developers</h2><a href="/docs">Docs</a><a href="/docs/paycheck">API reference</a><a href="/status">Status</a></div>
+    <div><h2>Guides</h2><a href="/guides">All guides</a><a href="/payroll-tax-calculation">Payroll tax calculation</a><a href="/payroll-tax-calculation-engine">Payroll tax calculation engine</a><a href="/income-tax-calculation-engine">Income tax calculation engine</a><a href="/take-home-pay">Take-home pay by state</a><a href="/payroll-tax-api">Payroll tax API</a><a href="/payroll-tax">Payroll tax by state</a><a href="/symmetry-tax-engine-alternative">Symmetry alternative</a><a href="/payroll-tax-engine-comparison">Engine comparison</a></div>
+    <div><h2>Company</h2><a href="/about">About</a><a href="/contact">Contact</a><a href="/terms">Terms</a><a href="/privacy">Privacy</a></div>
+  </div>
+  <p class="wrap copy">© 2026 OMNIA TAX LLC. A Michigan limited liability company.</p>
+</footer>
+<script src="/assets/v5.js"></script>
+</body>
+</html>

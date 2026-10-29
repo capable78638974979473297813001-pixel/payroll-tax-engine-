@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="color-scheme" content="light" />
+<title>Payroll tax API for staffing agencies: pay and bill rates | Omnia.tax</title>
+<meta name="description" content="A payroll tax API for staffing software: quote a candidate their take-home, model employer cost for a bill rate, and handle workers across many states." />
+<link rel="stylesheet" href="/assets/v5.css" />
+</head>
+<body>
+<header class="site-header"><div class="bar">
+  <a class="mark" href="/">Omnia<span class="dot" aria-hidden="true"></span>tax</a>
+  <nav class="nav-links" aria-label="Primary"><a href="/product">Product</a><a href="/coverage">Coverage</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a></nav>
+  <div class="nav-end"><a class="signin" href="/signin">Sign in</a><a class="btn sm" href="/signup">Get API key</a></div>
+  <button class="menu-btn" type="button" aria-expanded="false" aria-label="Menu"><span></span><span></span></button>
+</div></header>
+<main class="wrap">
+  <div class="page-head">
+    <nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a> <span aria-hidden="true">/</span> <a href="/guides">Guides</a> <span aria-hidden="true">/</span> <span aria-current="page">Payroll tax API for staffing agencies</span></nav>
+    <p class="eyebrow">Developers</p>
+    <h1 class="page">Payroll tax API for staffing agencies</h1>
+    <p class="sub">Quote pay and cost accurately for workers placed in many states.</p>
+  </div>
+  <div class="prose seo" style="margin-top:32px;max-width:720px">
+
+    <p>Staffing firms place people across states and cities, often in the same week. Two numbers drive each placement: what the worker takes home, and what the worker costs the agency once employer taxes are added. Both change with the assignment location, so a single rule of thumb is wrong more often than it is right.</p>
+    <h2>Quote by assignment location</h2>
+    <p>Run the same pay through different work locations. At $3,000.00 biweekly the engine returns employer taxes of $328.50 in Texas, $349.50 in California and $333.00 in Columbus, Ohio. The spread comes from state unemployment tax and, in some states, employer-paid leave contributions.</p>
+    <h2>What a placement needs</h2>
+    <ul><li>The work address, found with <code>POST /v1/address</code>, so local tax is applied where the work happens.</li><li>The home address when it differs, for reciprocity and residence-based tax. See <a href="/multi-state-payroll-tax-calculation">multi-state calculation</a>.</li><li>The worker's W-4 and state certificate.</li><li>Year-to-date wages from your payroll, so caps stop at the right check.</li></ul>
+    <h2>Costing a bill rate</h2>
+    <p>A worker at $37.50 an hour for 80 hours earns $3,000.00 gross. In Columbus the employer taxes on that check are $333.00, so the employer cost before insurance and overhead is $3,333.00, and net pay to the worker is $2,299.35. A bill rate has to cover the higher figure.</p>
+    <h2>Limits</h2>
+    <p>The API calculates. Workers' compensation, benefits cost, filing and deposits are outside it, and a staffing agency still needs a process or a provider for those.</p>
+    <h2>Keep reading</h2>
+    <p><a href="/payroll-tax-api-for-saas-platforms">Payroll tax API for SaaS platforms</a> · <a href="/multi-state-payroll-tax-calculation">Multi-state payroll tax calculation</a> · <a href="/true-cost-of-an-employee">True cost of an employee</a> · <a href="/employer-payroll-tax-calculator">Employer payroll tax calculator</a> · <a href="/guides">All guides</a></p>
+  </div>
+<section class="faq" aria-labelledby="faq-h" style="margin-top:44px;max-width:720px"><h2 id="faq-h" style="font-size:22px;line-height:30px">Questions</h2><article><h3>How do staffing agencies use a payroll tax API?</h3><p>To quote a worker's take-home and the agency's employer-tax cost for an assignment location, to apply local tax where the work is done, and to compare placements in different states.</p></article><article><h3>Does it handle workers who live in a different state?</h3><p>Yes. Send the work state and the residence state; the engine applies reciprocity and residence-based rules where they exist.</p></article></section>
+  <div class="seo-cta" style="margin:48px 0 8px;max-width:720px"><a class="btn" href="/signup">Start the 14-day trial</a> <a class="text-link" href="/docs">Read the docs →</a><p class="fine">14-day free trial, then $0.08 per paycheck calculation. Omnia.tax calculates; it does not file, deposit tax, or give tax advice. <a href="/disclaimer">Disclaimer</a>.</p></div>
+</main>
+<footer class="site-footer">
+  <div class="wrap foot-grid">
+    <a class="mark" href="/">Omnia<span class="dot" aria-hidden="true"></span>tax</a>
+    <div><h2>Product</h2><a href="/coverage">Coverage</a><a href="/pricing">Pricing</a><a href="/changelog">Changelog</a></div>
+    <div><h2>Developers</h2><a href="/docs">Docs</a><a href="/docs/paycheck">API reference</a><a href="/status">Status</a></div>
+    <div><h2>Guides</h2><a href="/guides">All guides</a><a href="/payroll-tax-calculation">Payroll tax calculation</a><a href="/payroll-tax-calculation-engine">Payroll tax calculation engine</a><a href="/income-tax-calculation-engine">Income tax calculation engine</a><a href="/take-home-pay">Take-home pay by state</a><a href="/payroll-tax-api">Payroll tax API</a><a href="/payroll-tax">Payroll tax by state</a><a href="/symmetry-tax-engine-alternative">Symmetry alternative</a><a href="/payroll-tax-engine-comparison">Engine comparison</a></div>
+    <div><h2>Company</h2><a href="/about">About</a><a href="/contact">Contact</a><a href="/terms">Terms</a><a href="/privacy">Privacy</a></div>
+  </div>
+  <p class="wrap copy">© 2026 OMNIA TAX LLC. A Michigan limited liability company.</p>
+</footer>
+<script src="/assets/v5.js"></script>
+</body>
+</html>

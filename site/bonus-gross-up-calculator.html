@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="color-scheme" content="light" />
+<title>Bonus gross-up calculator: pay a bonus that nets a target | Omnia.tax</title>
+<meta name="description" content="How to gross up a bonus so the employee nets a target amount after tax: the solver finds the gross, with a worked example and the one earning it will not solve." />
+<link rel="stylesheet" href="/assets/v5.css" />
+</head>
+<body>
+<header class="site-header"><div class="bar">
+  <a class="mark" href="/">Omnia<span class="dot" aria-hidden="true"></span>tax</a>
+  <nav class="nav-links" aria-label="Primary"><a href="/product">Product</a><a href="/coverage">Coverage</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a></nav>
+  <div class="nav-end"><a class="signin" href="/signin">Sign in</a><a class="btn sm" href="/signup">Get API key</a></div>
+  <button class="menu-btn" type="button" aria-expanded="false" aria-label="Menu"><span></span><span></span></button>
+</div></header>
+<main class="wrap">
+  <div class="page-head">
+    <nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a> <span aria-hidden="true">/</span> <a href="/guides">Guides</a> <span aria-hidden="true">/</span> <span aria-current="page">Bonus gross-up calculator</span></nav>
+    <p class="eyebrow">Calculations</p>
+    <h1 class="page">Bonus gross-up calculator</h1>
+    <p class="sub">Net to gross for a bonus: what to pay so they take home exactly the target.</p>
+  </div>
+  <div class="prose seo" style="margin-top:32px;max-width:720px">
+
+    <p>Sometimes a bonus is promised as a take-home figure: "we will give you $2,500 after taxes". The gross that achieves it is not the target divided by one minus a tax rate, because the taxes are layered and have thresholds. The gross-up endpoint searches with the real engine until it finds the smallest amount that leaves the target.</p>
+    <h2>A worked case</h2>
+    <p>An employee in Columbus, Ohio earns $3,000.00 regular pay and is promised a bonus large enough that the whole check nets $4,500.00. The solver returns a bonus of <strong>$3,409.11</strong>, with net pay of $4,500.00 (exact).</p>
+    <h2>In the request</h2>
+    <div class="panel" style="margin-top:14px"><pre style="margin:0;padding:18px 22px;overflow:auto">POST /v1/paycheck/gross-up
+{ …a paycheck request…,
+  &quot;grossUp&quot;: { &quot;targetNetPay&quot;: 450000, &quot;earningIndex&quot;: 1 } }</pre></div><p><code>earningIndex</code> says which earning to solve for. The amount you send there is ignored. The response has <code>grossUp</code>, <code>request</code> (your request with the solved amount, ready to reuse) and <code>result</code>.</p>
+    <h2>When it cannot be exact</h2>
+    <p>Some tax steps jump, so no whole-cent amount hits the target. The engine returns the smallest amount that reaches it, with <code>exact: false</code> and the cents over in <code>overTarget</code>. An imputed earning cannot raise take-home pay and returns <code>cannot_gross_up</code>.</p>
+    <h2>A policy note</h2>
+    <p>A gross-up is a decision about who bears the tax. It is also more expensive: the employer pays tax on the grossed-up amount. Run the employer side too, as in <a href="/true-cost-of-an-employee">the true cost of an employee</a>.</p>
+    <h2>Keep reading</h2>
+    <p><a href="/net-to-gross-calculator-api">Net-to-gross (gross-up) API</a> · <a href="/flat-rate-vs-aggregate-bonus-withholding">Flat rate vs aggregate bonus withholding</a> · <a href="/year-end-bonus-net-pay">Year-end bonus net pay</a> · <a href="/bonus-tax-withholding-calculation">Bonus tax withholding</a> · <a href="/guides">All guides</a></p>
+  </div>
+<section class="faq" aria-labelledby="faq-h" style="margin-top:44px;max-width:720px"><h2 id="faq-h" style="font-size:22px;line-height:30px">Questions</h2><article><h3>How do I gross up a bonus?</h3><p>Use the gross-up endpoint with the paycheck, a target net pay and the index of the bonus earning. It finds the smallest bonus that leaves that take-home using the real engine.</p></article><article><h3>Why is the answer not target ÷ (1 − rate)?</h3><p>Taxes are layered with thresholds, caps and different bases, so no single rate applies. The solver uses the engine itself.</p></article></section>
+  <div class="seo-cta" style="margin:48px 0 8px;max-width:720px"><a class="btn" href="/signup">Start the 14-day trial</a> <a class="text-link" href="/docs">Read the docs →</a><p class="fine">14-day free trial, then $0.08 per paycheck calculation. Omnia.tax calculates; it does not file, deposit tax, or give tax advice. <a href="/disclaimer">Disclaimer</a>.</p></div>
+</main>
+<footer class="site-footer">
+  <div class="wrap foot-grid">
+    <a class="mark" href="/">Omnia<span class="dot" aria-hidden="true"></span>tax</a>
+    <div><h2>Product</h2><a href="/coverage">Coverage</a><a href="/pricing">Pricing</a><a href="/changelog">Changelog</a></div>
+    <div><h2>Developers</h2><a href="/docs">Docs</a><a href="/docs/paycheck">API reference</a><a href="/status">Status</a></div>
+    <div><h2>Guides</h2><a href="/guides">All guides</a><a href="/payroll-tax-calculation">Payroll tax calculation</a><a href="/payroll-tax-calculation-engine">Payroll tax calculation engine</a><a href="/income-tax-calculation-engine">Income tax calculation engine</a><a href="/take-home-pay">Take-home pay by state</a><a href="/payroll-tax-api">Payroll tax API</a><a href="/payroll-tax">Payroll tax by state</a><a href="/symmetry-tax-engine-alternative">Symmetry alternative</a><a href="/payroll-tax-engine-comparison">Engine comparison</a></div>
+    <div><h2>Company</h2><a href="/about">About</a><a href="/contact">Contact</a><a href="/terms">Terms</a><a href="/privacy">Privacy</a></div>
+  </div>
+  <p class="wrap copy">© 2026 OMNIA TAX LLC. A Michigan limited liability company.</p>
+</footer>
+<script src="/assets/v5.js"></script>
+</body>
+</html>

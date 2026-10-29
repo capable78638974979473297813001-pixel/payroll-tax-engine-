@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="color-scheme" content="light" />
+<title>Flat rate vs aggregate bonus withholding compared | Omnia.tax</title>
+<meta name="description" content="Flat rate or aggregate method for bonus withholding? Worked checks at three bonus sizes show when each withholds more, and what that does to take-home pay." />
+<link rel="stylesheet" href="/assets/v5.css" />
+</head>
+<body>
+<header class="site-header"><div class="bar">
+  <a class="mark" href="/">Omnia<span class="dot" aria-hidden="true"></span>tax</a>
+  <nav class="nav-links" aria-label="Primary"><a href="/product">Product</a><a href="/coverage">Coverage</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a></nav>
+  <div class="nav-end"><a class="signin" href="/signin">Sign in</a><a class="btn sm" href="/signup">Get API key</a></div>
+  <button class="menu-btn" type="button" aria-expanded="false" aria-label="Menu"><span></span><span></span></button>
+</div></header>
+<main class="wrap">
+  <div class="page-head">
+    <nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a> <span aria-hidden="true">/</span> <a href="/guides">Guides</a> <span aria-hidden="true">/</span> <span aria-current="page">Flat rate vs aggregate bonus withholding</span></nav>
+    <p class="eyebrow">Withholding and wages</p>
+    <h1 class="page">Flat rate vs aggregate bonus withholding</h1>
+    <p class="sub">Same bonus, two methods, different paychecks.</p>
+  </div>
+  <div class="prose seo" style="margin-top:32px;max-width:720px">
+
+    <p>When a bonus is paid with regular pay, an employer can withhold on it at a flat federal rate or add it to the regular wages and withhold on the total. Which one withholds more depends on the size of the bonus and the employee's regular pay. Here are three bonus sizes on a $3,000.00 biweekly paycheck, run through the engine.</p>
+    <h2>Three bonus sizes</h2>
+    <div class="table-wrap"><table><thead><tr><th>Bonus</th><th style="text-align:right">Federal withheld, flat</th><th style="text-align:right">Federal withheld, aggregate</th><th style="text-align:right">Net pay, flat</th><th style="text-align:right">Net pay, aggregate</th></tr></thead><tbody><tr><td>$1,000.00</td><td style="text-align:right">$540.38</td><td style="text-align:right">$540.38</td><td style="text-align:right">$3,153.62</td><td style="text-align:right">$3,153.62</td></tr><tr><td>$5,000.00</td><td style="text-align:right">$1,420.38</td><td style="text-align:right">$1,486.69</td><td style="text-align:right">$5,967.62</td><td style="text-align:right">$5,901.31</td></tr><tr><td>$20,000.00</td><td style="text-align:right">$4,720.38</td><td style="text-align:right">$6,632.09</td><td style="text-align:right">$16,520.12</td><td style="text-align:right">$14,608.41</td></tr></tbody></table></div>
+    <h2>What the pattern is</h2>
+    <p>Aggregate withholding annualises the combined check, so a large bonus makes the engine treat the employee as if they earn that much every pay period. That pushes it into higher brackets for that one check. The flat rate stays at 22% regardless. For a small bonus the two are close. For a large bonus on modest regular pay, aggregation usually withholds more.</p>
+    <h2>Which to choose</h2>
+    <ul><li><strong>Flat rate</strong> is simple and predictable, and employees can see the number before the check. It requires the bonus to be identified separately from regular wages.</li><li><strong>Aggregate</strong> follows the employee's W-4 more closely and can over-withhold on one large check.</li><li>Employers usually choose one policy and apply it consistently, but the rules allow the choice.</li></ul>
+    <h2>The same check, in the API</h2>
+    <p>The only difference between the two requests is one field: the bonus earning's <code>category</code>, <code>supplemental</code> or <code>regular</code>.</p><div class="panel" style="margin-top:14px"><pre style="margin:0;padding:18px 22px;overflow:auto">&quot;earnings&quot;: [
+  { &quot;code&quot;: &quot;REG&quot;, &quot;category&quot;: &quot;regular&quot;,       &quot;amount&quot;: 300000 },
+  { &quot;code&quot;: &quot;BON&quot;, &quot;category&quot;: &quot;supplemental&quot;,  &quot;amount&quot;: 500000 }   // flat rate
+]
+// or, to aggregate:
+  { &quot;code&quot;: &quot;BON&quot;, &quot;category&quot;: &quot;regular&quot;,       &quot;amount&quot;: 500000 }</pre></div>
+    <h2>Keep reading</h2>
+    <p><a href="/supplemental-wage-withholding-rates">Supplemental wage withholding rates</a> · <a href="/bonus-tax-withholding-calculation">Bonus tax withholding</a> · <a href="/bonus-gross-up-calculator">Bonus gross-up calculator</a> · <a href="/year-end-bonus-net-pay">Year-end bonus net pay</a> · <a href="/guides">All guides</a></p>
+  </div>
+<section class="faq" aria-labelledby="faq-h" style="margin-top:44px;max-width:720px"><h2 id="faq-h" style="font-size:22px;line-height:30px">Questions</h2><article><h3>Does the flat rate or the aggregate method withhold more?</h3><p>It depends. Aggregation annualises the combined check, so a large bonus on modest regular pay usually withholds more than the 22% flat rate. For a small bonus the two are close.</p></article><article><h3>Can I switch between methods?</h3><p>The rules allow an employer to use either. Most apply one policy consistently, and the engine uses the method implied by how you categorise the earning.</p></article></section>
+  <div class="seo-cta" style="margin:48px 0 8px;max-width:720px"><a class="btn" href="/signup">Start the 14-day trial</a> <a class="text-link" href="/docs">Read the docs →</a><p class="fine">14-day free trial, then $0.08 per paycheck calculation. Omnia.tax calculates; it does not file, deposit tax, or give tax advice. <a href="/disclaimer">Disclaimer</a>.</p></div>
+</main>
+<footer class="site-footer">
+  <div class="wrap foot-grid">
+    <a class="mark" href="/">Omnia<span class="dot" aria-hidden="true"></span>tax</a>
+    <div><h2>Product</h2><a href="/coverage">Coverage</a><a href="/pricing">Pricing</a><a href="/changelog">Changelog</a></div>
+    <div><h2>Developers</h2><a href="/docs">Docs</a><a href="/docs/paycheck">API reference</a><a href="/status">Status</a></div>
+    <div><h2>Guides</h2><a href="/guides">All guides</a><a href="/payroll-tax-calculation">Payroll tax calculation</a><a href="/payroll-tax-calculation-engine">Payroll tax calculation engine</a><a href="/income-tax-calculation-engine">Income tax calculation engine</a><a href="/take-home-pay">Take-home pay by state</a><a href="/payroll-tax-api">Payroll tax API</a><a href="/payroll-tax">Payroll tax by state</a><a href="/symmetry-tax-engine-alternative">Symmetry alternative</a><a href="/payroll-tax-engine-comparison">Engine comparison</a></div>
+    <div><h2>Company</h2><a href="/about">About</a><a href="/contact">Contact</a><a href="/terms">Terms</a><a href="/privacy">Privacy</a></div>
+  </div>
+  <p class="wrap copy">© 2026 OMNIA TAX LLC. A Michigan limited liability company.</p>
+</footer>
+<script src="/assets/v5.js"></script>
+</body>
+</html>

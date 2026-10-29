@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="color-scheme" content="light" />
+<title>New York Paid Family Leave withholding and annual cap | Omnia.tax</title>
+<meta name="description" content="How New York Paid Family Leave (PFL) is withheld from employees: the percentage of wages, the annual maximum, and a worked check with the cap applied." />
+<link rel="stylesheet" href="/assets/v5.css" />
+</head>
+<body>
+<header class="site-header"><div class="bar">
+  <a class="mark" href="/">Omnia<span class="dot" aria-hidden="true"></span>tax</a>
+  <nav class="nav-links" aria-label="Primary"><a href="/product">Product</a><a href="/coverage">Coverage</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a></nav>
+  <div class="nav-end"><a class="signin" href="/signin">Sign in</a><a class="btn sm" href="/signup">Get API key</a></div>
+  <button class="menu-btn" type="button" aria-expanded="false" aria-label="Menu"><span></span><span></span></button>
+</div></header>
+<main class="wrap">
+  <div class="page-head">
+    <nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a> <span aria-hidden="true">/</span> <a href="/guides">Guides</a> <span aria-hidden="true">/</span> <span aria-current="page">New York Paid Family Leave withholding</span></nav>
+    <p class="eyebrow">State programs</p>
+    <h1 class="page">New York Paid Family Leave withholding</h1>
+    <p class="sub">An employee contribution with a yearly dollar cap.</p>
+  </div>
+  <div class="prose seo" style="margin-top:32px;max-width:720px">
+
+    <p>New York Paid Family Leave (PFL) is funded by an employee contribution withheld from wages, capped at a yearly maximum set by the state. Employers insure the benefit but may recover the contribution only from employees, up to the cap.</p>
+    <h2>On a $3,000.00 biweekly check in New York</h2>
+    <p>The engine returns <strong>$12.96</strong> on taxable wages of $3,000.00, paid by the employee. In its own words: <em>$3000.00 @ 0.43%, capped at $95348.76/yr ($0.00 YTD already counted)</em></p><div class="table-wrap"><table><thead><tr><th>Tax</th><th style="text-align:right">Taxable wages</th><th style="text-align:right">Amount</th></tr></thead><tbody><tr><td>New York Paid Leave (Employee)</td><td style="text-align:right">$3,000.00</td><td style="text-align:right">$12.96</td></tr></tbody></table></div><p>Near the yearly limit the contribution stops. With $94,348.76 already counted this year against a $95,348.76 limit, only $1,000.00 of the same $3,000.00 check is left to charge, and the line becomes $4.32 (against $12.96 early in the year). The engine explains it: <em>$1000.00 @ 0.43%, capped at $95348.76/yr ($94348.76 YTD already counted)</em></p>
+    <h2>Who pays</h2>
+    <p>The employee, by payroll deduction, up to the annual maximum. The employer arranges the coverage.</p>
+    <h2>Points to remember</h2>
+    <ul><li>The cap is a yearly dollar amount, so high earners stop paying part-way through the year.</li><li>It is separate from the Disability Benefits Law (DBL) deduction, which has its own tiny weekly cap.</li><li>Track year-to-date in <code>ytd.statePaidLeave.NY</code>.</li><li>Employers in the New York City commuter zone also have quarterly MCTMT; see the <a href="/payroll-tax-api-for-developers">employer-taxes endpoint</a>.</li></ul>
+    <h2>In the API</h2>
+    <p>The line comes back from <code>POST /v1/paycheck</code> with <code>workState.code</code> set to <code>NY</code>, as <code>NY_PFML_EE</code> with <code>payer: "employee"</code>. No extra field is needed to turn it on. See <a href="/payroll-tax/new-york">New York payroll tax</a> for the rest of the state.</p>
+    <h2>Keep reading</h2>
+    <p><a href="/new-york-disability-benefits-withholding">New York DBL withholding</a> · <a href="/payroll-tax/new-york">New York payroll tax</a> · <a href="/state-paid-family-leave-payroll">States with paid family leave payroll deductions</a> · <a href="/nyc-resident-income-tax-withholding">New York City resident income tax withholding</a> · <a href="/guides">All guides</a></p>
+  </div>
+<section class="faq" aria-labelledby="faq-h" style="margin-top:44px;max-width:720px"><h2 id="faq-h" style="font-size:22px;line-height:30px">Questions</h2><article><h3>How much is New York PFL?</h3><p>It is a percentage of wages up to a yearly cap set by the state. The engine states the rate and cap on each line and applies the cap using year-to-date wages.</p></article><article><h3>Does the employer pay PFL?</h3><p>The employer arranges coverage, but the contribution is withheld from the employee, up to the yearly maximum.</p></article></section>
+  <div class="seo-cta" style="margin:48px 0 8px;max-width:720px"><a class="btn" href="/signup">Start the 14-day trial</a> <a class="text-link" href="/docs">Read the docs →</a><p class="fine">14-day free trial, then $0.08 per paycheck calculation. Omnia.tax calculates; it does not file, deposit tax, or give tax advice. <a href="/disclaimer">Disclaimer</a>.</p></div>
+</main>
+<footer class="site-footer">
+  <div class="wrap foot-grid">
+    <a class="mark" href="/">Omnia<span class="dot" aria-hidden="true"></span>tax</a>
+    <div><h2>Product</h2><a href="/coverage">Coverage</a><a href="/pricing">Pricing</a><a href="/changelog">Changelog</a></div>
+    <div><h2>Developers</h2><a href="/docs">Docs</a><a href="/docs/paycheck">API reference</a><a href="/status">Status</a></div>
+    <div><h2>Guides</h2><a href="/guides">All guides</a><a href="/payroll-tax-calculation">Payroll tax calculation</a><a href="/payroll-tax-calculation-engine">Payroll tax calculation engine</a><a href="/income-tax-calculation-engine">Income tax calculation engine</a><a href="/take-home-pay">Take-home pay by state</a><a href="/payroll-tax-api">Payroll tax API</a><a href="/payroll-tax">Payroll tax by state</a><a href="/symmetry-tax-engine-alternative">Symmetry alternative</a><a href="/payroll-tax-engine-comparison">Engine comparison</a></div>
+    <div><h2>Company</h2><a href="/about">About</a><a href="/contact">Contact</a><a href="/terms">Terms</a><a href="/privacy">Privacy</a></div>
+  </div>
+  <p class="wrap copy">© 2026 OMNIA TAX LLC. A Michigan limited liability company.</p>
+</footer>
+<script src="/assets/v5.js"></script>
+</body>
+</html>

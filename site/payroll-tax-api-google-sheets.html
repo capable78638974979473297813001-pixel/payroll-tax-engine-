@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="color-scheme" content="light" />
+<title>Payroll tax API in Google Sheets with Apps Script | Omnia.tax</title>
+<meta name="description" content="Call a payroll tax API from Google Sheets with Apps Script: a custom function that posts a paycheck and returns net pay, with the key stored outside the sheet." />
+<link rel="stylesheet" href="/assets/v5.css" />
+</head>
+<body>
+<header class="site-header"><div class="bar">
+  <a class="mark" href="/">Omnia<span class="dot" aria-hidden="true"></span>tax</a>
+  <nav class="nav-links" aria-label="Primary"><a href="/product">Product</a><a href="/coverage">Coverage</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a></nav>
+  <div class="nav-end"><a class="signin" href="/signin">Sign in</a><a class="btn sm" href="/signup">Get API key</a></div>
+  <button class="menu-btn" type="button" aria-expanded="false" aria-label="Menu"><span></span><span></span></button>
+</div></header>
+<main class="wrap">
+  <div class="page-head">
+    <nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a> <span aria-hidden="true">/</span> <a href="/guides">Guides</a> <span aria-hidden="true">/</span> <span aria-current="page">Payroll tax API in Google Sheets</span></nav>
+    <p class="eyebrow">Who it is for</p>
+    <h1 class="page">Payroll tax API in Google Sheets</h1>
+    <p class="sub">A custom function that returns net pay for a row.</p>
+  </div>
+  <div class="prose seo" style="margin-top:32px;max-width:720px">
+
+    <p>Google Apps Script can call any HTTPS API with <code>UrlFetchApp</code>, so a sheet can use the Omnia.tax engine for the calculation while you keep your own layout. The key must not live in a cell: store it in Script Properties.</p>
+    <h2>The script</h2>
+    <div class="panel" style="margin-top:14px"><pre style="margin:0;padding:18px 22px;overflow:auto">function NETPAY(state, grossDollars) {
+  const key = PropertiesService.getScriptProperties().getProperty(&quot;OMNIA_KEY&quot;);
+  const body = {
+    checkDate: &quot;2026-09-15&quot;,
+    payFrequency: &quot;biweekly&quot;,
+    earnings: [{ code: &quot;REG&quot;, category: &quot;regular&quot;, amount: Math.round(grossDollars * 100) }],
+    deductions: [],
+    federalW4: { filingStatus: &quot;single&quot;, multipleJobs: false,
+      dependentCredit: 0, otherIncome: 0, deductions: 0, extraWithholding: 0 },
+    ytd: { socialSecurity: 0, medicare: 0, futa: 0 },
+    workState: { code: state, certificate: {} },
+  };
+  const res = UrlFetchApp.fetch(&quot;https://api.omnia.tax/v1/paycheck&quot;, {
+    method: &quot;post&quot;,
+    contentType: &quot;application/json&quot;,
+    headers: { Authorization: &quot;Bearer &quot; + key },
+    payload: JSON.stringify(body),
+    muteHttpExceptions: true,
+  });
+  if (res.getResponseCode() !== 200) return &quot;error &quot; + res.getResponseCode();
+  return JSON.parse(res.getContentText()).result.netPay / 100;
+}</pre></div>
+    <h2>Use it</h2>
+    <p>In a cell: <code>=NETPAY("TX", 3000)</code>. For the Texas example it returns <strong>2450.12</strong>. <code>=NETPAY("CA", 3000)</code> returns <strong>2277.06</strong>.</p>
+    <h2>Cautions</h2>
+    <ul><li>A custom function runs again whenever the sheet recalculates, and each run is a call. Use a test key while you build; a live key bills per calculation.</li><li>Apps Script has daily limits on URL fetches. A large payroll belongs in a real integration.</li><li>Store the key under Project Settings, Script Properties. Do not put it in a cell or share it with the sheet.</li><li>Convert dollars to cents with rounding at the edge, as the script does.</li></ul>
+    <h2>Beyond one number</h2>
+    <p>Return the whole response into a range, or one line at a time, by reading <code>result.taxes</code>. See <a href="/payroll-tax-api-response-fields">the response fields</a>.</p>
+    <h2>Keep reading</h2>
+    <p><a href="/payroll-tax-api-vs-spreadsheet">Payroll tax API vs spreadsheet</a> · <a href="/payroll-tax-api-javascript-example">Payroll tax API JavaScript example</a> · <a href="/payroll-tax-api-test-keys">Payroll tax API test keys</a> · <a href="/payroll-tax-api-response-fields">Payroll tax API response fields</a> · <a href="/guides">All guides</a></p>
+  </div>
+<section class="faq" aria-labelledby="faq-h" style="margin-top:44px;max-width:720px"><h2 id="faq-h" style="font-size:22px;line-height:30px">Questions</h2><article><h3>Can Google Sheets call a payroll tax API?</h3><p>Yes. Apps Script can post JSON to the API with UrlFetchApp and return a value to a cell through a custom function.</p></article><article><h3>Where should I keep the API key?</h3><p>In Script Properties, never in a cell. Anyone with access to the sheet could read a key stored in it.</p></article></section>
+  <div class="seo-cta" style="margin:48px 0 8px;max-width:720px"><a class="btn" href="/signup">Start the 14-day trial</a> <a class="text-link" href="/docs">Read the docs →</a><p class="fine">14-day free trial, then $0.08 per paycheck calculation. Omnia.tax calculates; it does not file, deposit tax, or give tax advice. <a href="/disclaimer">Disclaimer</a>.</p></div>
+</main>
+<footer class="site-footer">
+  <div class="wrap foot-grid">
+    <a class="mark" href="/">Omnia<span class="dot" aria-hidden="true"></span>tax</a>
+    <div><h2>Product</h2><a href="/coverage">Coverage</a><a href="/pricing">Pricing</a><a href="/changelog">Changelog</a></div>
+    <div><h2>Developers</h2><a href="/docs">Docs</a><a href="/docs/paycheck">API reference</a><a href="/status">Status</a></div>
+    <div><h2>Guides</h2><a href="/guides">All guides</a><a href="/payroll-tax-calculation">Payroll tax calculation</a><a href="/payroll-tax-calculation-engine">Payroll tax calculation engine</a><a href="/income-tax-calculation-engine">Income tax calculation engine</a><a href="/take-home-pay">Take-home pay by state</a><a href="/payroll-tax-api">Payroll tax API</a><a href="/payroll-tax">Payroll tax by state</a><a href="/symmetry-tax-engine-alternative">Symmetry alternative</a><a href="/payroll-tax-engine-comparison">Engine comparison</a></div>
+    <div><h2>Company</h2><a href="/about">About</a><a href="/contact">Contact</a><a href="/terms">Terms</a><a href="/privacy">Privacy</a></div>
+  </div>
+  <p class="wrap copy">© 2026 OMNIA TAX LLC. A Michigan limited liability company.</p>
+</footer>
+<script src="/assets/v5.js"></script>
+</body>
+</html>
