@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="color-scheme" content="light" />
+<title>Employee vs employer payroll taxes: who pays which tax | Omnia.tax</title>
+<meta name="description" content="Which payroll taxes are withheld from the employee and which the employer pays on top: Social Security, Medicare, FUTA, SUTA and paid leave, with a worked." />
+<link rel="stylesheet" href="/assets/v5.css" />
+</head>
+<body>
+<header class="site-header"><div class="bar">
+  <a class="mark" href="/">Omnia<span class="dot" aria-hidden="true"></span>tax</a>
+  <nav class="nav-links" aria-label="Primary"><a href="/product">Product</a><a href="/coverage">Coverage</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a></nav>
+  <div class="nav-end"><a class="signin" href="/signin">Sign in</a><a class="btn sm" href="/signup">Get API key</a></div>
+  <button class="menu-btn" type="button" aria-expanded="false" aria-label="Menu"><span></span><span></span></button>
+</div></header>
+<main class="wrap">
+  <div class="page-head">
+    <nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a> <span aria-hidden="true">/</span> <a href="/guides">Guides</a> <span aria-hidden="true">/</span> <span aria-current="page">Employee vs employer payroll taxes</span></nav>
+    <p class="eyebrow">Employer taxes</p>
+    <h1 class="page">Employee vs employer payroll taxes</h1>
+    <p class="sub">Two sets of lines on one paycheck: one comes out of pay, one is a cost.</p>
+  </div>
+  <div class="prose seo" style="margin-top:32px;max-width:720px">
+
+    <p>A paycheck carries two kinds of tax. Employee taxes are withheld from the employee's pay: federal income tax, state and local income tax, the employee's share of Social Security and Medicare, and state employee contributions. Employer taxes are paid by the employer on top: the matching Social Security and Medicare, federal unemployment tax, state unemployment tax, and in some states paid-leave contributions. In the API each line says which: <code>payer</code>.</p>
+    <h2>One check, both sides</h2>
+    <div class="table-wrap"><table><thead><tr><th>Tax</th><th>Paid by</th><th style="text-align:right">Taxable wages</th><th style="text-align:right">Amount</th></tr></thead><tbody><tr><td>Federal Income Tax</td><td>Employee</td><td style="text-align:right">$3,000.00</td><td style="text-align:right">$320.38</td></tr><tr><td>Social Security</td><td>Employee</td><td style="text-align:right">$3,000.00</td><td style="text-align:right">$186.00</td></tr><tr><td>Social Security (Employer)</td><td>Employer</td><td style="text-align:right">$3,000.00</td><td style="text-align:right">$186.00</td></tr><tr><td>Medicare</td><td>Employee</td><td style="text-align:right">$3,000.00</td><td style="text-align:right">$43.50</td></tr><tr><td>Medicare (Employer)</td><td>Employer</td><td style="text-align:right">$3,000.00</td><td style="text-align:right">$43.50</td></tr><tr><td>FUTA</td><td>Employer</td><td style="text-align:right">$3,000.00</td><td style="text-align:right">$18.00</td></tr><tr><td>California Income Tax</td><td>Employee</td><td style="text-align:right">$2,781.00</td><td style="text-align:right">$134.06</td></tr><tr><td>California Unemployment Insurance (Employer)</td><td>Employer</td><td style="text-align:right">$3,000.00</td><td style="text-align:right">$102.00</td></tr><tr><td>California Disability Benefits (Employee)</td><td>Employee</td><td style="text-align:right">$3,000.00</td><td style="text-align:right">$39.00</td></tr></tbody></table></div><p>For this $3,000.00 California check the employee taxes total $722.94 and the employer taxes $349.50. Only the first reduces net pay.</p>
+    <h2>Who pays what</h2>
+    <div class="table-wrap"><table><thead><tr><th>Tax</th><th style="text-align:left">Employee</th><th style="text-align:left">Employer</th></tr></thead><tbody><tr><td>Federal income tax</td><td style="text-align:left">Withheld</td><td style="text-align:left">—</td></tr><tr><td>Social Security</td><td style="text-align:left">6.2%</td><td style="text-align:left">6.2%</td></tr><tr><td>Medicare</td><td style="text-align:left">1.45%</td><td style="text-align:left">1.45%</td></tr><tr><td>Additional Medicare</td><td style="text-align:left">0.9% above $200,000</td><td style="text-align:left">—</td></tr><tr><td>Federal unemployment (FUTA)</td><td style="text-align:left">—</td><td style="text-align:left">Employer only</td></tr><tr><td>State unemployment (SUTA)</td><td style="text-align:left">Rare (a few states)</td><td style="text-align:left">Employer, in most states</td></tr><tr><td>State and local income tax</td><td style="text-align:left">Withheld</td><td style="text-align:left">—</td></tr><tr><td>State disability or paid leave</td><td style="text-align:left">Varies by state</td><td style="text-align:left">Varies by state</td></tr></tbody></table></div>
+    <h2>Why the split matters</h2>
+    <ul><li>Net pay depends only on employee taxes.</li><li>Employer cost depends on both. See <a href="/true-cost-of-an-employee">the true cost of an employee</a>.</li><li>A small number of states charge employees for programs where most charge employers, so check the state page.</li></ul>
+    <h2>Keep reading</h2>
+    <p><a href="/employer-payroll-tax-calculator">Employer payroll tax calculator</a> · <a href="/true-cost-of-an-employee">True cost of an employee</a> · <a href="/fica-tax-calculation">FICA tax calculation</a> · <a href="/futa-suta-calculation">FUTA and SUTA calculation</a> · <a href="/guides">All guides</a></p>
+  </div>
+<section class="faq" aria-labelledby="faq-h" style="margin-top:44px;max-width:720px"><h2 id="faq-h" style="font-size:22px;line-height:30px">Questions</h2><article><h3>Which payroll taxes does the employer pay?</h3><p>The employer's match of Social Security and Medicare, federal unemployment tax, state unemployment tax in most states, and some state paid-leave contributions. They are paid on top of gross pay.</p></article><article><h3>Does the API show which side pays?</h3><p>Yes. Each tax line has a payer field, employee or employer, and the response totals them separately.</p></article></section>
+  <div class="seo-cta" style="margin:48px 0 8px;max-width:720px"><a class="btn" href="/signup">Start the 14-day trial</a> <a class="text-link" href="/docs">Read the docs →</a><p class="fine">14-day free trial, then $0.08 per paycheck calculation. Omnia.tax calculates; it does not file, deposit tax, or give tax advice. <a href="/disclaimer">Disclaimer</a>.</p></div>
+</main>
+<footer class="site-footer">
+  <div class="wrap foot-grid">
+    <a class="mark" href="/">Omnia<span class="dot" aria-hidden="true"></span>tax</a>
+    <div><h2>Product</h2><a href="/coverage">Coverage</a><a href="/pricing">Pricing</a><a href="/changelog">Changelog</a></div>
+    <div><h2>Developers</h2><a href="/docs">Docs</a><a href="/docs/paycheck">API reference</a><a href="/status">Status</a></div>
+    <div><h2>Guides</h2><a href="/guides">All guides</a><a href="/payroll-tax-calculation">Payroll tax calculation</a><a href="/payroll-tax-calculation-engine">Payroll tax calculation engine</a><a href="/income-tax-calculation-engine">Income tax calculation engine</a><a href="/take-home-pay">Take-home pay by state</a><a href="/payroll-tax-api">Payroll tax API</a><a href="/payroll-tax">Payroll tax by state</a><a href="/symmetry-tax-engine-alternative">Symmetry alternative</a><a href="/payroll-tax-engine-comparison">Engine comparison</a></div>
+    <div><h2>Company</h2><a href="/about">About</a><a href="/contact">Contact</a><a href="/terms">Terms</a><a href="/privacy">Privacy</a></div>
+  </div>
+  <p class="wrap copy">© 2026 OMNIA TAX LLC. A Michigan limited liability company.</p>
+</footer>
+<script src="/assets/v5.js"></script>
+</body>
+</html>

@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="color-scheme" content="light" />
+<title>Payroll tax calculation API: one call, every tax line | Omnia.tax</title>
+<meta name="description" content="A payroll tax calculation API: POST one paycheck, get federal, state, local and employer tax lines and net pay back as JSON in cents. $0.08 per calculation." />
+<link rel="stylesheet" href="/assets/v5.css" />
+</head>
+<body>
+<header class="site-header"><div class="bar">
+  <a class="mark" href="/">Omnia<span class="dot" aria-hidden="true"></span>tax</a>
+  <nav class="nav-links" aria-label="Primary"><a href="/product">Product</a><a href="/coverage">Coverage</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a></nav>
+  <div class="nav-end"><a class="signin" href="/signin">Sign in</a><a class="btn sm" href="/signup">Get API key</a></div>
+  <button class="menu-btn" type="button" aria-expanded="false" aria-label="Menu"><span></span><span></span></button>
+</div></header>
+<main class="wrap">
+  <div class="page-head">
+    <nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a> <span aria-hidden="true">/</span> <a href="/guides">Guides</a> <span aria-hidden="true">/</span> <span aria-current="page">Payroll tax calculation API</span></nav>
+    <p class="eyebrow">Developers</p>
+    <h1 class="page">Payroll tax calculation API</h1>
+    <p class="sub">POST a paycheck. Get every tax line, who pays it, and net pay.</p>
+  </div>
+  <div class="prose seo" style="margin-top:32px;max-width:720px">
+
+    <p>A payroll tax calculation API takes the facts of one paycheck and returns the taxes on it. With Omnia.tax that is a single <code>POST /v1/paycheck</code>: earnings, deductions, the employee's Form W-4, year-to-date wages and a work location go in; a list of tax lines and net pay come out, as JSON, with every amount in integer cents. It calculates. It does not file returns, deposit tax or pay anyone.</p>
+    <h2>What one call does</h2>
+    <p>The request below is a single employee in Texas paid $3,000.00 biweekly. Texas has no state income tax, so the response carries federal income tax, Social Security and Medicare for the employee, and Social Security, Medicare, federal unemployment tax and Texas unemployment tax for the employer.</p><div class="panel" style="margin-top:14px"><pre style="margin:0;padding:18px 22px;overflow:auto">{
+  &quot;checkDate&quot;: &quot;2026-09-15&quot;,
+  &quot;payFrequency&quot;: &quot;biweekly&quot;,
+  &quot;earnings&quot;: [{ &quot;code&quot;: &quot;REG&quot;, &quot;category&quot;: &quot;regular&quot;, &quot;amount&quot;: 300000 }],
+  &quot;deductions&quot;: [],
+  &quot;federalW4&quot;: { &quot;filingStatus&quot;: &quot;single&quot;, &quot;multipleJobs&quot;: false,
+    &quot;dependentCredit&quot;: 0, &quot;otherIncome&quot;: 0, &quot;deductions&quot;: 0, &quot;extraWithholding&quot;: 0 },
+  &quot;ytd&quot;: { &quot;socialSecurity&quot;: 0, &quot;medicare&quot;: 0, &quot;futa&quot;: 0 },
+  &quot;workState&quot;: { &quot;code&quot;: &quot;TX&quot; }
+}</pre></div><p>The response is shaped like this (abridged; the real one lists every line):</p><div class="panel" style="margin-top:14px"><pre style="margin:0;padding:18px 22px;overflow:auto">{
+  &quot;result&quot;: {
+    &quot;checkDate&quot;: &quot;2026-09-15&quot;,
+    &quot;grossPay&quot;: 300000,
+    &quot;taxes&quot;: [
+      { &quot;id&quot;: &quot;US_FIT&quot;, &quot;name&quot;: &quot;Federal Income Tax&quot;, &quot;payer&quot;: &quot;employee&quot;,
+        &quot;taxableWages&quot;: 300000, &quot;amount&quot;: 32038, &quot;detail&quot;: &quot;…&quot; },
+      { &quot;id&quot;: &quot;US_SS_EE&quot;, &quot;name&quot;: &quot;Social Security&quot;, &quot;payer&quot;: &quot;employee&quot;,
+        &quot;taxableWages&quot;: 300000, &quot;amount&quot;: 18600, &quot;detail&quot;: &quot;…&quot; }
+    ],
+    &quot;employeeTaxTotal&quot;: 54988,
+    &quot;employerTaxTotal&quot;: 32850,
+    &quot;netPay&quot;: 245012
+  }
+}</pre></div>
+    <h2>The lines it returned for that paycheck</h2>
+    <div class="table-wrap"><table><thead><tr><th>Tax</th><th>Paid by</th><th style="text-align:right">Taxable wages</th><th style="text-align:right">Amount</th></tr></thead><tbody><tr><td>Federal Income Tax</td><td>Employee</td><td style="text-align:right">$3,000.00</td><td style="text-align:right">$320.38</td></tr><tr><td>Social Security</td><td>Employee</td><td style="text-align:right">$3,000.00</td><td style="text-align:right">$186.00</td></tr><tr><td>Social Security (Employer)</td><td>Employer</td><td style="text-align:right">$3,000.00</td><td style="text-align:right">$186.00</td></tr><tr><td>Medicare</td><td>Employee</td><td style="text-align:right">$3,000.00</td><td style="text-align:right">$43.50</td></tr><tr><td>Medicare (Employer)</td><td>Employer</td><td style="text-align:right">$3,000.00</td><td style="text-align:right">$43.50</td></tr><tr><td>FUTA</td><td>Employer</td><td style="text-align:right">$3,000.00</td><td style="text-align:right">$18.00</td></tr><tr><td>Texas Unemployment Insurance (Employer)</td><td>Employer</td><td style="text-align:right">$3,000.00</td><td style="text-align:right">$81.00</td></tr></tbody></table></div><p>Employee taxes total $549.88, so net pay is $2,450.12. The employer's $328.50 is a cost on top of gross pay and is not taken from the employee.</p>
+    <h2>Why the rules live behind an API</h2>
+    <ul><li>The rules change: wage bases move every January, and states revise rates and formulas during the year. You call the same endpoint; the check date picks the right year.</li><li>Local tax is the long tail. The engine carries 4,141 local jurisdictions in 15 states and finds them from an address with <code>POST /v1/address</code>.</li><li>Each line says how it was reached, so a payroll specialist can audit a figure without reading code.</li><li>Money is integer cents on the way in and out. There is no floating-point dollar anywhere to round the wrong way.</li></ul>
+    <h2>Price and trial</h2>
+    <p>A live key costs $0.08 per paycheck calculation after a 14-day free trial. A <a href="/payroll-tax-api-test-keys">test key</a> runs the same engine and data with no card and is never billed. The full price table is on <a href="/payroll-tax-api-pricing">the pricing guide</a>.</p>
+    <h2>Keep reading</h2>
+    <p><a href="/payroll-tax-api">Payroll tax API</a> · <a href="/payroll-tax-api-for-developers">Payroll tax API for developers</a> · <a href="/payroll-tax-api-response-fields">Payroll tax API response fields</a> · <a href="/payroll-tax-api-integration-guide">Payroll tax API integration guide</a> · <a href="/guides">All guides</a></p>
+  </div>
+<section class="faq" aria-labelledby="faq-h" style="margin-top:44px;max-width:720px"><h2 id="faq-h" style="font-size:22px;line-height:30px">Questions</h2><article><h3>What does a payroll tax calculation API do?</h3><p>It takes the earnings, deductions, withholding certificates, year-to-date wages and work location of one paycheck and returns each payroll tax with the wages it applied to, who pays it, and net pay.</p></article><article><h3>Does the API file or pay the tax?</h3><p>No. Omnia.tax calculates withholding and employer taxes. You, or your payroll provider, still file returns and deposit the tax.</p></article><article><h3>What format are the requests and responses?</h3><p>JSON over HTTPS, with every money amount in integer cents. A request that sends a decimal dollar amount is rejected with a field-level error.</p></article></section>
+  <div class="seo-cta" style="margin:48px 0 8px;max-width:720px"><a class="btn" href="/signup">Start the 14-day trial</a> <a class="text-link" href="/docs">Read the docs →</a><p class="fine">14-day free trial, then $0.08 per paycheck calculation. Omnia.tax calculates; it does not file, deposit tax, or give tax advice. <a href="/disclaimer">Disclaimer</a>.</p></div>
+</main>
+<footer class="site-footer">
+  <div class="wrap foot-grid">
+    <a class="mark" href="/">Omnia<span class="dot" aria-hidden="true"></span>tax</a>
+    <div><h2>Product</h2><a href="/coverage">Coverage</a><a href="/pricing">Pricing</a><a href="/changelog">Changelog</a></div>
+    <div><h2>Developers</h2><a href="/docs">Docs</a><a href="/docs/paycheck">API reference</a><a href="/status">Status</a></div>
+    <div><h2>Guides</h2><a href="/guides">All guides</a><a href="/payroll-tax-calculation">Payroll tax calculation</a><a href="/payroll-tax-calculation-engine">Payroll tax calculation engine</a><a href="/income-tax-calculation-engine">Income tax calculation engine</a><a href="/take-home-pay">Take-home pay by state</a><a href="/payroll-tax-api">Payroll tax API</a><a href="/payroll-tax">Payroll tax by state</a><a href="/symmetry-tax-engine-alternative">Symmetry alternative</a><a href="/payroll-tax-engine-comparison">Engine comparison</a></div>
+    <div><h2>Company</h2><a href="/about">About</a><a href="/contact">Contact</a><a href="/terms">Terms</a><a href="/privacy">Privacy</a></div>
+  </div>
+  <p class="wrap copy">© 2026 OMNIA TAX LLC. A Michigan limited liability company.</p>
+</footer>
+<script src="/assets/v5.js"></script>
+</body>
+</html>

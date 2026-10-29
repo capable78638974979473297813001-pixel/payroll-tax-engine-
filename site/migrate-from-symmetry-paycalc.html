@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="color-scheme" content="light" />
+<title>Migrating from a Symmetry-style payCalc integration | Omnia.tax</title>
+<meta name="description" content="What to expect moving a Symmetry-shaped payCalc integration to Omnia.tax: the request shape looks familiar, but it is not wire-compatible and ids are its own." />
+<link rel="stylesheet" href="/assets/v5.css" />
+</head>
+<body>
+<header class="site-header"><div class="bar">
+  <a class="mark" href="/">Omnia<span class="dot" aria-hidden="true"></span>tax</a>
+  <nav class="nav-links" aria-label="Primary"><a href="/product">Product</a><a href="/coverage">Coverage</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a></nav>
+  <div class="nav-end"><a class="signin" href="/signin">Sign in</a><a class="btn sm" href="/signup">Get API key</a></div>
+  <button class="menu-btn" type="button" aria-expanded="false" aria-label="Menu"><span></span><span></span></button>
+</div></header>
+<main class="wrap">
+  <div class="page-head">
+    <nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a> <span aria-hidden="true">/</span> <a href="/guides">Guides</a> <span aria-hidden="true">/</span> <span aria-current="page">Migrate from a Symmetry payCalc integration</span></nav>
+    <p class="eyebrow">Buying and building</p>
+    <h1 class="page">Migrating from a Symmetry-style payCalc integration</h1>
+    <p class="sub">The request shape looks familiar. The ids and contract are not the same.</p>
+  </div>
+  <div class="prose seo" style="margin-top:32px;max-width:720px">
+
+    <p>If your product already calls a Symmetry-style <code>payCalc</code>, you may want to try Omnia.tax without rewriting everything. Omnia.tax has an adapter that accepts a Symmetry-shaped request, which makes the first experiment cheap. It is not a drop-in replacement, and this page says exactly where it differs.</p>
+    <h2>What the adapter does</h2>
+    <ul><li>Accepts an array of <code>payCalc</code> requests at <code>POST /v1/payCalc</code> and returns an array of results.</li><li>Uses the vocabulary a Symmetry integration expects: <code>payCalc</code>, <code>UniqueTaxId</code>, <code>LocationCode</code>, <code>TaxJurisdictionParms</code>.</li><li>Calculates with the same engine as <code>POST /v1/paycheck</code>.</li></ul>
+    <h2>What it does not do</h2>
+    <ul><li>It is not wire-compatible with the Symmetry Tax Engine API.</li><li>Its jurisdiction ids are Omnia.tax's own, generated from its own sourced rule files. They do not match Symmetry's numbers for the same place and must not be sent to a Symmetry integration.</li><li>It does not reproduce Symmetry's proprietary id catalog.</li></ul>
+    <h2>A migration plan</h2>
+    <ul><li>Map each employee to the Omnia.tax request: earnings, deductions, the W-4, year-to-date wages and the work-state certificate.</li><li>Resolve addresses with <code>POST /v1/address</code> to get the certificate fields instead of mapping ids by hand.</li><li>Run twenty real paychecks through both and compare line by line.</li><li>Plan to change the integration; budget for it.</li></ul>
+    <h2>Compare first</h2>
+    <p>The <a href="/symmetry-tax-engine-alternative">Symmetry alternative</a> page sets the two side by side using what each company publishes, including what Omnia.tax does not do (forms, I-9) and the longer track record of the older product. See also <a href="/batch-payroll-tax-calculation-api">the batch endpoint</a>.</p>
+    <h2>Keep reading</h2>
+    <p><a href="/symmetry-tax-engine-alternative">Symmetry Tax Engine alternative</a> · <a href="/batch-payroll-tax-calculation-api">Batch payroll tax calculation API</a> · <a href="/payroll-tax-engine-comparison">Payroll tax engine comparison</a> · <a href="/payroll-tax-api-integration-guide">Payroll tax API integration guide</a> · <a href="/guides">All guides</a></p>
+  </div>
+<section class="faq" aria-labelledby="faq-h" style="margin-top:44px;max-width:720px"><h2 id="faq-h" style="font-size:22px;line-height:30px">Questions</h2><article><h3>Is Omnia.tax compatible with the Symmetry Tax Engine API?</h3><p>No. It has an adapter that accepts a Symmetry-shaped payCalc request, but it is not wire-compatible and its jurisdiction ids are its own. Expect to change your integration.</p></article><article><h3>Can I try it with my existing request shape?</h3><p>The adapter makes a first experiment cheaper, but the results use Omnia.tax ids, so plan a real mapping before production.</p></article></section>
+  <div class="seo-cta" style="margin:48px 0 8px;max-width:720px"><a class="btn" href="/signup">Start the 14-day trial</a> <a class="text-link" href="/docs">Read the docs →</a><p class="fine">14-day free trial, then $0.08 per paycheck calculation. Omnia.tax calculates; it does not file, deposit tax, or give tax advice. <a href="/disclaimer">Disclaimer</a>.</p></div>
+</main>
+<footer class="site-footer">
+  <div class="wrap foot-grid">
+    <a class="mark" href="/">Omnia<span class="dot" aria-hidden="true"></span>tax</a>
+    <div><h2>Product</h2><a href="/coverage">Coverage</a><a href="/pricing">Pricing</a><a href="/changelog">Changelog</a></div>
+    <div><h2>Developers</h2><a href="/docs">Docs</a><a href="/docs/paycheck">API reference</a><a href="/status">Status</a></div>
+    <div><h2>Guides</h2><a href="/guides">All guides</a><a href="/payroll-tax-calculation">Payroll tax calculation</a><a href="/payroll-tax-calculation-engine">Payroll tax calculation engine</a><a href="/income-tax-calculation-engine">Income tax calculation engine</a><a href="/take-home-pay">Take-home pay by state</a><a href="/payroll-tax-api">Payroll tax API</a><a href="/payroll-tax">Payroll tax by state</a><a href="/symmetry-tax-engine-alternative">Symmetry alternative</a><a href="/payroll-tax-engine-comparison">Engine comparison</a></div>
+    <div><h2>Company</h2><a href="/about">About</a><a href="/contact">Contact</a><a href="/terms">Terms</a><a href="/privacy">Privacy</a></div>
+  </div>
+  <p class="wrap copy">© 2026 OMNIA TAX LLC. A Michigan limited liability company.</p>
+</footer>
+<script src="/assets/v5.js"></script>
+</body>
+</html>

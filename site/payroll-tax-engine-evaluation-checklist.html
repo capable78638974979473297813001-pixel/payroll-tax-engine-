@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="color-scheme" content="light" />
+<title>Payroll tax engine evaluation checklist: 15 things to test | Omnia.tax</title>
+<meta name="description" content="A checklist for evaluating a payroll tax engine or API: local coverage, rule updates, edge cases, explainability, errors, pricing, and what to run in a trial." />
+<link rel="stylesheet" href="/assets/v5.css" />
+</head>
+<body>
+<header class="site-header"><div class="bar">
+  <a class="mark" href="/">Omnia<span class="dot" aria-hidden="true"></span>tax</a>
+  <nav class="nav-links" aria-label="Primary"><a href="/product">Product</a><a href="/coverage">Coverage</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a></nav>
+  <div class="nav-end"><a class="signin" href="/signin">Sign in</a><a class="btn sm" href="/signup">Get API key</a></div>
+  <button class="menu-btn" type="button" aria-expanded="false" aria-label="Menu"><span></span><span></span></button>
+</div></header>
+<main class="wrap">
+  <div class="page-head">
+    <nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a> <span aria-hidden="true">/</span> <a href="/guides">Guides</a> <span aria-hidden="true">/</span> <span aria-current="page">Payroll tax engine evaluation checklist</span></nav>
+    <p class="eyebrow">Buying and building</p>
+    <h1 class="page">Payroll tax engine evaluation checklist</h1>
+    <p class="sub">Fifteen things to test before you commit, with the answer for Omnia.tax where it is verifiable.</p>
+  </div>
+  <div class="prose seo" style="margin-top:32px;max-width:720px">
+
+    <p>The sales page of every payroll tax engine says it is accurate. A trial lets you check. This list is what to run, and it applies to any vendor. For each item the right-hand column says what Omnia.tax does, so you can hold it to the same list.</p>
+    <h2>The list</h2>
+    <div class="table-wrap"><table><thead><tr><th>Check</th><th style="text-align:left">Omnia.tax</th></tr></thead><tbody><tr><td>1. Is local coverage listed by name?</td><td style="text-align:left">Yes, 4,141 jurisdictions in 15 states on <a href="/coverage">the coverage page</a>, with partial states labelled.</td></tr><tr><td>2. Does it say when a rate is weakly sourced?</td><td style="text-align:left">Yes, as <code>notices</code> on the response. <a href="/payroll-tax-api-data-quality-notices">How</a>.</td></tr><tr><td>3. Does it find local jurisdictions from an address?</td><td style="text-align:left">Yes, <code>POST /v1/address</code>.</td></tr><tr><td>4. Are rules effective-dated?</td><td style="text-align:left">Yes, the check date picks the year. <a href="/payroll-tax-api-effective-dating">How</a>.</td></tr><tr><td>5. What happens to a year with no rules?</td><td style="text-align:left">A <code>422 unsupported_tax_year</code> error, not a guess.</td></tr><tr><td>6. Is each line explainable?</td><td style="text-align:left">Yes, a <code>detail</code> sentence per line.</td></tr><tr><td>7. Are caps handled by year-to-date?</td><td style="text-align:left">Yes, via <code>ytd</code>. <a href="/payroll-tax-api-ytd-wages">How</a>.</td></tr><tr><td>8. Is money integer?</td><td style="text-align:left">Yes, cents. <a href="/payroll-tax-api-money-in-cents">Why</a>.</td></tr><tr><td>9. Are errors machine-readable?</td><td style="text-align:left">Yes, stable codes. <a href="/payroll-tax-api-error-codes">List</a>.</td></tr><tr><td>10. Can you try it free?</td><td style="text-align:left">Yes, test keys. <a href="/payroll-tax-api-test-keys">How</a>.</td></tr><tr><td>11. Is the price public?</td><td style="text-align:left">$0.08 per paycheck calculation, after a 14-day trial.</td></tr><tr><td>12. Is there a machine-readable spec?</td><td style="text-align:left">OpenAPI 3.1 and JSON Schema.</td></tr><tr><td>13. What is explicitly out of scope?</td><td style="text-align:left">Filing, deposits, payments, forms. <a href="/what-a-payroll-tax-engine-does-not-do">More</a>.</td></tr><tr><td>14. Does a two-state worker work?</td><td style="text-align:left">Yes, work and residence states. <a href="/remote-employee-payroll-tax-different-state">Example</a>.</td></tr><tr><td>15. Can it explain a difference between two checks?</td><td style="text-align:left">Yes, the compare endpoint.</td></tr></tbody></table></div>
+    <h2>What to run in a trial</h2>
+    <ul><li>Twenty real paychecks from your current system, across your states.</li><li>A check at the Social Security cap, one with a bonus, one with a 401(k) deferral and one with a garnishment.</li><li>An employee who lives in one state and works in another.</li><li>A city you know is hard.</li></ul><p>Keep the requests as fixtures. See <a href="/payroll-tax-api-testing-fixtures">testing fixtures</a>.</p>
+    <h2>What to ignore</h2>
+    <p>A count of jurisdictions without a list, "accuracy" figures without a method, and claims you cannot rerun. A vendor's statement of its own size is useful context, not a test.</p>
+    <h2>Keep reading</h2>
+    <p><a href="/payroll-tax-engine-rfp-questions">Payroll tax engine RFP questions</a> · <a href="/payroll-tax-engine-comparison">Payroll tax engine comparison</a> · <a href="/best-payroll-tax-api">Best payroll tax API</a> · <a href="/build-vs-buy-payroll-tax-engine">Build vs buy a payroll tax engine</a> · <a href="/guides">All guides</a></p>
+  </div>
+<section class="faq" aria-labelledby="faq-h" style="margin-top:44px;max-width:720px"><h2 id="faq-h" style="font-size:22px;line-height:30px">Questions</h2><article><h3>How do I evaluate a payroll tax engine?</h3><p>Run real paychecks through a trial, including edge cases such as a Social Security cap, a bonus, a deferral, a local city and a two-state worker, and compare line by line against a known-good result.</p></article><article><h3>What should I ask a vendor about local tax?</h3><p>For the list of jurisdictions by name, how addresses are resolved to a jurisdiction, and how a rate that rests on a weak source is flagged.</p></article></section>
+  <div class="seo-cta" style="margin:48px 0 8px;max-width:720px"><a class="btn" href="/signup">Start the 14-day trial</a> <a class="text-link" href="/docs">Read the docs →</a><p class="fine">14-day free trial, then $0.08 per paycheck calculation. Omnia.tax calculates; it does not file, deposit tax, or give tax advice. <a href="/disclaimer">Disclaimer</a>.</p></div>
+</main>
+<footer class="site-footer">
+  <div class="wrap foot-grid">
+    <a class="mark" href="/">Omnia<span class="dot" aria-hidden="true"></span>tax</a>
+    <div><h2>Product</h2><a href="/coverage">Coverage</a><a href="/pricing">Pricing</a><a href="/changelog">Changelog</a></div>
+    <div><h2>Developers</h2><a href="/docs">Docs</a><a href="/docs/paycheck">API reference</a><a href="/status">Status</a></div>
+    <div><h2>Guides</h2><a href="/guides">All guides</a><a href="/payroll-tax-calculation">Payroll tax calculation</a><a href="/payroll-tax-calculation-engine">Payroll tax calculation engine</a><a href="/income-tax-calculation-engine">Income tax calculation engine</a><a href="/take-home-pay">Take-home pay by state</a><a href="/payroll-tax-api">Payroll tax API</a><a href="/payroll-tax">Payroll tax by state</a><a href="/symmetry-tax-engine-alternative">Symmetry alternative</a><a href="/payroll-tax-engine-comparison">Engine comparison</a></div>
+    <div><h2>Company</h2><a href="/about">About</a><a href="/contact">Contact</a><a href="/terms">Terms</a><a href="/privacy">Privacy</a></div>
+  </div>
+  <p class="wrap copy">© 2026 OMNIA TAX LLC. A Michigan limited liability company.</p>
+</footer>
+<script src="/assets/v5.js"></script>
+</body>
+</html>

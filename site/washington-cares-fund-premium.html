@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="color-scheme" content="light" />
+<title>Washington Cares Fund premium: long-term care tax | Omnia.tax</title>
+<meta name="description" content="How the Washington Cares Fund long-term care premium is withheld: a percentage of all wages with no cap, employee-paid, and shown on a real paycheck." />
+<link rel="stylesheet" href="/assets/v5.css" />
+</head>
+<body>
+<header class="site-header"><div class="bar">
+  <a class="mark" href="/">Omnia<span class="dot" aria-hidden="true"></span>tax</a>
+  <nav class="nav-links" aria-label="Primary"><a href="/product">Product</a><a href="/coverage">Coverage</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a></nav>
+  <div class="nav-end"><a class="signin" href="/signin">Sign in</a><a class="btn sm" href="/signup">Get API key</a></div>
+  <button class="menu-btn" type="button" aria-expanded="false" aria-label="Menu"><span></span><span></span></button>
+</div></header>
+<main class="wrap">
+  <div class="page-head">
+    <nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a> <span aria-hidden="true">/</span> <a href="/guides">Guides</a> <span aria-hidden="true">/</span> <span aria-current="page">Washington Cares Fund premium</span></nav>
+    <p class="eyebrow">State programs</p>
+    <h1 class="page">Washington Cares Fund premium</h1>
+    <p class="sub">A long-term care premium with no wage cap.</p>
+  </div>
+  <div class="prose seo" style="margin-top:32px;max-width:720px">
+
+    <p>The Washington Cares Fund is a state long-term care insurance program funded by a premium on employee wages. Unlike most payroll premiums it has no wage cap: it applies to all wages, and the employee bears the whole premium.</p>
+    <h2>On a $3,000.00 biweekly check in Washington</h2>
+    <p>The engine returns <strong>$17.40</strong> on taxable wages of $3,000.00, paid by the employee. In its own words: <em>$3000.00 @ 0.58%, no wage cap</em></p><div class="table-wrap"><table><thead><tr><th>Tax</th><th style="text-align:right">Taxable wages</th><th style="text-align:right">Amount</th></tr></thead><tbody><tr><td>Washington Long-Term Care (Employee)</td><td style="text-align:right">$3,000.00</td><td style="text-align:right">$17.40</td></tr></tbody></table></div>
+    <h2>Who pays</h2>
+    <p>The employee, by payroll deduction. There is no employer share.</p>
+    <h2>Points to remember</h2>
+    <ul><li>No wage cap, so the line never stops during the year.</li><li>It is separate from PFML (<code>WA_PFML_EE</code>).</li><li>Washington has no income tax on wages.</li></ul>
+    <h2>In the API</h2>
+    <p>The line comes back from <code>POST /v1/paycheck</code> with <code>workState.code</code> set to <code>WA</code>, as <code>WA_LTC_EE</code> with <code>payer: "employee"</code>. No extra field is needed to turn it on. See <a href="/payroll-tax/washington">Washington payroll tax</a> for the rest of the state.</p>
+    <h2>The same line at three pay levels</h2>
+    <p>Every figure below is a Washington Cares Fund premium on a biweekly check, run through the engine.</p><div class="table-wrap"><table><thead><tr><th>Gross pay</th><th style="text-align:right">Line</th><th style="text-align:right">Net pay</th></tr></thead><tbody><tr><td>$1,500.00</td><td style="text-align:right">$8.70</td><td style="text-align:right">$1,268.29</td></tr><tr><td>$3,000.00</td><td style="text-align:right">$17.40</td><td style="text-align:right">$2,408.51</td></tr><tr><td>$6,000.00</td><td style="text-align:right">$34.80</td><td style="text-align:right">$4,451.08</td></tr></tbody></table></div>
+    <h2>Keep reading</h2>
+    <p><a href="/washington-paid-family-medical-leave-premium">Washington PFML premium</a> · <a href="/payroll-tax/washington">Washington payroll tax</a> · <a href="/states-with-no-income-tax">States with no income tax</a> · <a href="/state-paid-family-leave-payroll">States with paid family leave payroll deductions</a> · <a href="/guides">All guides</a></p>
+  </div>
+<section class="faq" aria-labelledby="faq-h" style="margin-top:44px;max-width:720px"><h2 id="faq-h" style="font-size:22px;line-height:30px">Questions</h2><article><h3>Does the Washington Cares premium have a wage cap?</h3><p>No. It applies to all wages.</p></article><article><h3>Who pays it?</h3><p>The employee only. There is no employer share.</p></article></section>
+  <div class="seo-cta" style="margin:48px 0 8px;max-width:720px"><a class="btn" href="/signup">Start the 14-day trial</a> <a class="text-link" href="/docs">Read the docs →</a><p class="fine">14-day free trial, then $0.08 per paycheck calculation. Omnia.tax calculates; it does not file, deposit tax, or give tax advice. <a href="/disclaimer">Disclaimer</a>.</p></div>
+</main>
+<footer class="site-footer">
+  <div class="wrap foot-grid">
+    <a class="mark" href="/">Omnia<span class="dot" aria-hidden="true"></span>tax</a>
+    <div><h2>Product</h2><a href="/coverage">Coverage</a><a href="/pricing">Pricing</a><a href="/changelog">Changelog</a></div>
+    <div><h2>Developers</h2><a href="/docs">Docs</a><a href="/docs/paycheck">API reference</a><a href="/status">Status</a></div>
+    <div><h2>Guides</h2><a href="/guides">All guides</a><a href="/payroll-tax-calculation">Payroll tax calculation</a><a href="/payroll-tax-calculation-engine">Payroll tax calculation engine</a><a href="/income-tax-calculation-engine">Income tax calculation engine</a><a href="/take-home-pay">Take-home pay by state</a><a href="/payroll-tax-api">Payroll tax API</a><a href="/payroll-tax">Payroll tax by state</a><a href="/symmetry-tax-engine-alternative">Symmetry alternative</a><a href="/payroll-tax-engine-comparison">Engine comparison</a></div>
+    <div><h2>Company</h2><a href="/about">About</a><a href="/contact">Contact</a><a href="/terms">Terms</a><a href="/privacy">Privacy</a></div>
+  </div>
+  <p class="wrap copy">© 2026 OMNIA TAX LLC. A Michigan limited liability company.</p>
+</footer>
+<script src="/assets/v5.js"></script>
+</body>
+</html>

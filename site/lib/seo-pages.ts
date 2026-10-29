@@ -9,6 +9,7 @@ import type { PaycheckInput } from '../../src/types.ts';
 import { coverage } from './coverage.ts';
 import { GEOCODE, topLocalStates } from './geocoding-facts.ts';
 import { guidesHub, topicPage, topics, type Helpers } from './seo-topics.ts';
+import { moreTopics } from './seo-topics-more.ts';
 import { takeHomePages, unemploymentPages } from './seo-states.ts';
 
 /**
@@ -642,7 +643,13 @@ export function generatePages(): GeneratedPage[] {
       statesListedInFull: coverage().states.filter((x: { localStatus: string }) => x.localStatus === 'listed').length,
     },
   };
-  const defs = topics(helpers);
+  const first = topics(helpers);
+  const defs = [...first, ...moreTopics(helpers)];
+  const paths = new Set<string>();
+  for (const d of defs) {
+    if (paths.has(d.path)) throw new Error(`duplicate topic path ${d.path}`);
+    paths.add(d.path);
+  }
   pages.push(guidesHub(helpers, defs), ...defs.map((d) => topicPage(helpers, d, defs)), ...unemploymentPages(helpers), ...takeHomePages(helpers));
   return pages;
 }

@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="color-scheme" content="light" />
+<title>Payroll tax audit: check your provider's withholding | Omnia.tax</title>
+<meta name="description" content="How to check whether your payroll provider withheld the right tax: rerun a paycheck through an independent engine, compare line by line and read the detail." />
+<link rel="stylesheet" href="/assets/v5.css" />
+</head>
+<body>
+<header class="site-header"><div class="bar">
+  <a class="mark" href="/">Omnia<span class="dot" aria-hidden="true"></span>tax</a>
+  <nav class="nav-links" aria-label="Primary"><a href="/product">Product</a><a href="/coverage">Coverage</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a></nav>
+  <div class="nav-end"><a class="signin" href="/signin">Sign in</a><a class="btn sm" href="/signup">Get API key</a></div>
+  <button class="menu-btn" type="button" aria-expanded="false" aria-label="Menu"><span></span><span></span></button>
+</div></header>
+<main class="wrap">
+  <div class="page-head">
+    <nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a> <span aria-hidden="true">/</span> <a href="/guides">Guides</a> <span aria-hidden="true">/</span> <span aria-current="page">Payroll tax audit: withholding check</span></nav>
+    <p class="eyebrow">Calculations</p>
+    <h1 class="page">Payroll tax audit: check withholding independently</h1>
+    <p class="sub">Do not take the pay stub on trust. Run it again.</p>
+  </div>
+  <div class="prose seo" style="margin-top:32px;max-width:720px">
+
+    <p>Payroll providers make mistakes. A rate not updated in January, a local tax missed after a move, a W-4 entered wrong. They are found when an employee asks, or when a notice arrives. A cheaper way is to rerun a sample of checks through an independent engine and read the differences.</p>
+    <h2>A method</h2>
+    <ul><li>Pick a sample: new hires, anyone who moved, anyone who changed their W-4, a few high earners and a few from each state.</li><li>For each, collect: check date, pay frequency, earnings and deductions with categories, W-4, state certificate, year-to-date wages, work and home address.</li><li>Run each through the engine (a <a href="/payroll-tax-api-test-keys">test key</a> costs nothing).</li><li>Compare line by line: federal income tax, FICA, state, local, state programs.</li><li>For every difference, read the <code>detail</code> of the engine's line and the provider's method.</li></ul>
+    <h2>What differences usually mean</h2>
+    <div class="table-wrap"><table><thead><tr><th>Difference</th><th style="text-align:left">Likely cause</th></tr></thead><tbody><tr><td>A local tax line is missing or extra</td><td style="text-align:left">Address changed, or the provider uses the home or work address wrongly.</td></tr><tr><td>Federal income tax is off by a round amount</td><td style="text-align:left">Extra withholding or credit entered differently from the W-4.</td></tr><tr><td>Social Security keeps being withheld at high earnings</td><td style="text-align:left">Year-to-date wages not tracked, or the base is the wrong year.</td></tr><tr><td>State tax differs</td><td style="text-align:left">Wrong certificate answers or an out-of-date rate.</td></tr><tr><td>Net differs by the pre-tax deduction</td><td style="text-align:left">A deduction categorised as post-tax, or the reverse.</td></tr></tbody></table></div>
+    <h2>A sample to try</h2>
+    <p>A single employee in Columbus, Ohio on $3,000.00 biweekly: federal $320.38, Ohio $75.77, Columbus $75.00, net $2,299.35. If your provider shows something different for the same inputs, find out why.</p>
+    <h2>Limits</h2>
+    <p>An independent engine can disagree with your provider and still be the one that is wrong, or both can be wrong for different reasons. Treat a difference as a question to resolve against the agency's published method, not as a verdict.</p>
+    <h2>Keep reading</h2>
+    <p><a href="/payroll-tax-api-explainable-tax-lines">Explainable payroll tax lines</a> · <a href="/payroll-tax-api-testing-fixtures">Payroll tax API testing fixtures</a> · <a href="/payroll-tax-calculator-for-accountants">Payroll tax calculator for accountants</a> · <a href="/payroll-tax-api-test-environment">Payroll tax API test environment</a> · <a href="/guides">All guides</a></p>
+  </div>
+<section class="faq" aria-labelledby="faq-h" style="margin-top:44px;max-width:720px"><h2 id="faq-h" style="font-size:22px;line-height:30px">Questions</h2><article><h3>How can I check if my payroll provider withheld the right tax?</h3><p>Rerun a sample of paychecks through an independent engine with the same inputs, compare each tax line, and read the engine's detail text on any difference.</p></article><article><h3>Does the check cost anything?</h3><p>Test keys run the same engine as live keys and are never billed, within a cap of 30 requests a minute and 500 a day.</p></article></section>
+  <div class="seo-cta" style="margin:48px 0 8px;max-width:720px"><a class="btn" href="/signup">Start the 14-day trial</a> <a class="text-link" href="/docs">Read the docs →</a><p class="fine">14-day free trial, then $0.08 per paycheck calculation. Omnia.tax calculates; it does not file, deposit tax, or give tax advice. <a href="/disclaimer">Disclaimer</a>.</p></div>
+</main>
+<footer class="site-footer">
+  <div class="wrap foot-grid">
+    <a class="mark" href="/">Omnia<span class="dot" aria-hidden="true"></span>tax</a>
+    <div><h2>Product</h2><a href="/coverage">Coverage</a><a href="/pricing">Pricing</a><a href="/changelog">Changelog</a></div>
+    <div><h2>Developers</h2><a href="/docs">Docs</a><a href="/docs/paycheck">API reference</a><a href="/status">Status</a></div>
+    <div><h2>Guides</h2><a href="/guides">All guides</a><a href="/payroll-tax-calculation">Payroll tax calculation</a><a href="/payroll-tax-calculation-engine">Payroll tax calculation engine</a><a href="/income-tax-calculation-engine">Income tax calculation engine</a><a href="/take-home-pay">Take-home pay by state</a><a href="/payroll-tax-api">Payroll tax API</a><a href="/payroll-tax">Payroll tax by state</a><a href="/symmetry-tax-engine-alternative">Symmetry alternative</a><a href="/payroll-tax-engine-comparison">Engine comparison</a></div>
+    <div><h2>Company</h2><a href="/about">About</a><a href="/contact">Contact</a><a href="/terms">Terms</a><a href="/privacy">Privacy</a></div>
+  </div>
+  <p class="wrap copy">© 2026 OMNIA TAX LLC. A Michigan limited liability company.</p>
+</footer>
+<script src="/assets/v5.js"></script>
+</body>
+</html>

@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="color-scheme" content="light" />
+<title>Payroll tax library vs API: which to choose | Omnia.tax</title>
+<meta name="description" content="Payroll tax library or API? Compare update speed, local coverage, offline use, latency, audit trail and cost, and the cases where each one is the better choice." />
+<link rel="stylesheet" href="/assets/v5.css" />
+</head>
+<body>
+<header class="site-header"><div class="bar">
+  <a class="mark" href="/">Omnia<span class="dot" aria-hidden="true"></span>tax</a>
+  <nav class="nav-links" aria-label="Primary"><a href="/product">Product</a><a href="/coverage">Coverage</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a></nav>
+  <div class="nav-end"><a class="signin" href="/signin">Sign in</a><a class="btn sm" href="/signup">Get API key</a></div>
+  <button class="menu-btn" type="button" aria-expanded="false" aria-label="Menu"><span></span><span></span></button>
+</div></header>
+<main class="wrap">
+  <div class="page-head">
+    <nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a> <span aria-hidden="true">/</span> <a href="/guides">Guides</a> <span aria-hidden="true">/</span> <span aria-current="page">Payroll tax library vs API</span></nav>
+    <p class="eyebrow">Developers</p>
+    <h1 class="page">Payroll tax library vs API</h1>
+    <p class="sub">Both are valid. They fail in different ways.</p>
+  </div>
+  <div class="prose seo" style="margin-top:32px;max-width:720px">
+
+    <p>A library runs inside your process; an API runs on someone else's server. For payroll tax, that difference matters less for speed than for what it does to updates, audit and failure.</p>
+    <h2>Side by side</h2>
+    <div class="table-wrap"><table><thead><tr><th>Question</th><th style="text-align:left">Library</th><th style="text-align:left">API</th></tr></thead><tbody><tr><td>Rate and rule updates</td><td style="text-align:left">You upgrade and redeploy.</td><td style="text-align:left">The provider updates; you call the same endpoint.</td></tr><tr><td>Mid-year changes</td><td style="text-align:left">Wait for a release, then ship it.</td><td style="text-align:left">Take effect when the provider publishes them.</td></tr><tr><td>Local tax data</td><td style="text-align:left">Bundled or fetched separately; large.</td><td style="text-align:left">Held server side; address lookup included.</td></tr><tr><td>Works offline</td><td style="text-align:left">Yes.</td><td style="text-align:left">No.</td></tr><tr><td>Latency</td><td style="text-align:left">Microseconds.</td><td style="text-align:left">A network round trip.</td></tr><tr><td>Reproducing an old result</td><td style="text-align:left">Pin the version.</td><td style="text-align:left">Send the old check date; the rules are effective-dated.</td></tr><tr><td>Cost shape</td><td style="text-align:left">Licence or maintenance.</td><td style="text-align:left">Per calculation.</td></tr></tbody></table></div>
+    <h2>Choose a library when</h2>
+    <ul><li>You must calculate with no network, for example on a device.</li><li>Volume is so high that per-call cost or latency dominates.</li><li>You have a team to track every rule change and release promptly.</li></ul>
+    <h2>Choose an API when</h2>
+    <ul><li>You would rather not carry state and local rules, which change continually.</li><li>You need local jurisdiction lookup by address.</li><li>You value a published coverage list: 4,141 local jurisdictions in 15 states, named on the <a href="/coverage">coverage page</a>.</li><li>You want each line explained for support and audit.</li></ul>
+    <h2>A hybrid is possible</h2>
+    <p>Many teams call the API for the authoritative result and cache a small number of common cases locally for previews. Keep the API call for anything that is paid or reported.</p>
+    <h2>Keep reading</h2>
+    <p><a href="/build-vs-buy-payroll-tax-engine">Build vs buy a payroll tax engine</a> · <a href="/payroll-tax-api-effective-dating">Payroll tax API effective dating</a> · <a href="/payroll-tax-engine-evaluation-checklist">Payroll tax engine evaluation checklist</a> · <a href="/payroll-tax-api-for-developers">Payroll tax API for developers</a> · <a href="/guides">All guides</a></p>
+  </div>
+<section class="faq" aria-labelledby="faq-h" style="margin-top:44px;max-width:720px"><h2 id="faq-h" style="font-size:22px;line-height:30px">Questions</h2><article><h3>Is it better to use a payroll tax library or an API?</h3><p>A library suits offline use and extreme volume if you can maintain it; an API suits teams that do not want to track state and local rule changes. Many use the API for anything paid or reported.</p></article><article><h3>How does an API handle old paychecks?</h3><p>Rules are effective-dated, so sending the original check date reproduces the original year's result.</p></article></section>
+  <div class="seo-cta" style="margin:48px 0 8px;max-width:720px"><a class="btn" href="/signup">Start the 14-day trial</a> <a class="text-link" href="/docs">Read the docs →</a><p class="fine">14-day free trial, then $0.08 per paycheck calculation. Omnia.tax calculates; it does not file, deposit tax, or give tax advice. <a href="/disclaimer">Disclaimer</a>.</p></div>
+</main>
+<footer class="site-footer">
+  <div class="wrap foot-grid">
+    <a class="mark" href="/">Omnia<span class="dot" aria-hidden="true"></span>tax</a>
+    <div><h2>Product</h2><a href="/coverage">Coverage</a><a href="/pricing">Pricing</a><a href="/changelog">Changelog</a></div>
+    <div><h2>Developers</h2><a href="/docs">Docs</a><a href="/docs/paycheck">API reference</a><a href="/status">Status</a></div>
+    <div><h2>Guides</h2><a href="/guides">All guides</a><a href="/payroll-tax-calculation">Payroll tax calculation</a><a href="/payroll-tax-calculation-engine">Payroll tax calculation engine</a><a href="/income-tax-calculation-engine">Income tax calculation engine</a><a href="/take-home-pay">Take-home pay by state</a><a href="/payroll-tax-api">Payroll tax API</a><a href="/payroll-tax">Payroll tax by state</a><a href="/symmetry-tax-engine-alternative">Symmetry alternative</a><a href="/payroll-tax-engine-comparison">Engine comparison</a></div>
+    <div><h2>Company</h2><a href="/about">About</a><a href="/contact">Contact</a><a href="/terms">Terms</a><a href="/privacy">Privacy</a></div>
+  </div>
+  <p class="wrap copy">© 2026 OMNIA TAX LLC. A Michigan limited liability company.</p>
+</footer>
+<script src="/assets/v5.js"></script>
+</body>
+</html>

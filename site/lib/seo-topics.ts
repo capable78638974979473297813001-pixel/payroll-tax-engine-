@@ -34,11 +34,14 @@ export interface Helpers {
   cov: { localJurisdictions: number; statesWithLocalTax: number; localMinimumWage: number; topLocal: string; statesListedInFull: number };
 }
 
+/** Hub sections, in the order /guides lists them. */
+export const GROUPS = ['Engines and APIs', 'Developers', 'Calculations', 'Withholding and wages', 'Employer taxes', 'State programs', 'Local taxes', 'States and rates', 'Who it is for', 'Buying and building'] as const;
+
 export interface TopicDef {
   path: string;
   /** Label used in link lists. */
   label: string;
-  group: 'Engines and APIs' | 'Calculations' | 'Employer taxes' | 'States and rates' | 'Buying and building';
+  group: (typeof GROUPS)[number];
   title: string;
   description: string;
   h1: string;
@@ -1215,10 +1218,24 @@ const EXTRA_LABELS: Record<string, string> = {
   '/take-home-pay': 'Take-home pay by state',
   '/unemployment-tax': 'Unemployment tax by state',
   '/sandbox': 'Paycheck calculator',
+  '/disclaimer': 'Disclaimer',
+  '/contact': 'Contact',
+  '/changelog': 'Changelog',
+  '/pricing': 'Pricing',
 };
 
+const SMALL = new Set(['of', 'the', 'and']);
+const titleCase = (slug: string) => slug.split('-').map((w, i) => (i > 0 && SMALL.has(w) ? w : w.charAt(0).toUpperCase() + w.slice(1))).join(' ');
+
 export function labelFor(defs: TopicDef[], path: string): string {
-  return defs.find((d) => d.path === path)?.label ?? EXTRA_LABELS[path] ?? path;
+  const known = defs.find((d) => d.path === path)?.label ?? EXTRA_LABELS[path];
+  if (known) return known;
+  const state = /^\/(payroll-tax|take-home-pay|unemployment-tax)\/([a-z-]+)$/.exec(path);
+  if (state) {
+    const name = titleCase(state[2]!);
+    return state[1] === 'payroll-tax' ? `${name} payroll tax` : state[1] === 'take-home-pay' ? `Take-home pay in ${name}` : `${name} unemployment tax`;
+  }
+  return path;
 }
 
 export function topicPage(h: Helpers, d: TopicDef, defs: TopicDef[]): GeneratedPage {
@@ -1236,7 +1253,7 @@ export function topicPage(h: Helpers, d: TopicDef, defs: TopicDef[]): GeneratedP
 }
 
 export function guidesHub(h: Helpers, defs: TopicDef[]): GeneratedPage {
-  const groups: TopicDef['group'][] = ['Engines and APIs', 'Calculations', 'Employer taxes', 'States and rates', 'Buying and building'];
+  const groups: TopicDef['group'][] = [...GROUPS];
   const section = (g: TopicDef['group']) => `<h2>${h.esc(g)}</h2><ul style="list-style:none;padding:0;line-height:30px">${defs
     .filter((d) => d.group === g)
     .map((d) => `<li><a href="${d.path}">${h.esc(d.label)}</a> <span class="fine">${h.esc(d.sub)}</span></li>`)

@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="color-scheme" content="light" />
+<title>Nonresident employee state withholding: rules and examples | Omnia.tax</title>
+<meta name="description" content="How states withhold income tax from nonresident employees: work-state withholding, reciprocity exemptions, day-count thresholds and a worked check." />
+<link rel="stylesheet" href="/assets/v5.css" />
+</head>
+<body>
+<header class="site-header"><div class="bar">
+  <a class="mark" href="/">Omnia<span class="dot" aria-hidden="true"></span>tax</a>
+  <nav class="nav-links" aria-label="Primary"><a href="/product">Product</a><a href="/coverage">Coverage</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a></nav>
+  <div class="nav-end"><a class="signin" href="/signin">Sign in</a><a class="btn sm" href="/signup">Get API key</a></div>
+  <button class="menu-btn" type="button" aria-expanded="false" aria-label="Menu"><span></span><span></span></button>
+</div></header>
+<main class="wrap">
+  <div class="page-head">
+    <nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a> <span aria-hidden="true">/</span> <a href="/guides">Guides</a> <span aria-hidden="true">/</span> <span aria-current="page">Nonresident employee state withholding</span></nav>
+    <p class="eyebrow">Who it is for</p>
+    <h1 class="page">Nonresident employee state withholding</h1>
+    <p class="sub">Working in a state you do not live in.</p>
+  </div>
+  <div class="prose seo" style="margin-top:32px;max-width:720px">
+
+    <p>A nonresident employee earns wages in a state where they do not live. In general the work state may tax those wages, and the employer withholds. States differ on the details: some exempt short stays, some have reciprocity with neighbours so only the home state taxes, and some use their own nonresident rates. The engine carries each state's rule.</p>
+    <h2>Reciprocal states</h2>
+    <p>16 states list reciprocal partners in the engine's rule files. For an employee covered by an agreement, the work state withholds nothing when the employee gives the right exemption form; the home state taxes the wages instead.</p><div class="table-wrap"><table><thead><tr><th>State</th><th style="text-align:left">Reciprocal with</th></tr></thead><tbody><tr><td><a href="/payroll-tax/arizona">Arizona</a></td><td style="text-align:left">CA, IN, OR, VA</td></tr><tr><td><a href="/payroll-tax/iowa">Iowa</a></td><td style="text-align:left">IL</td></tr><tr><td><a href="/payroll-tax/illinois">Illinois</a></td><td style="text-align:left">IA, KY, MI, WI</td></tr><tr><td><a href="/payroll-tax/indiana">Indiana</a></td><td style="text-align:left">KY, MI, OH, PA, WI</td></tr><tr><td><a href="/payroll-tax/kentucky">Kentucky</a></td><td style="text-align:left">IL, IN, MI, OH, VA, WV, WI</td></tr><tr><td><a href="/payroll-tax/maryland">Maryland</a></td><td style="text-align:left">DC, PA, VA, WV</td></tr><tr><td><a href="/payroll-tax/michigan">Michigan</a></td><td style="text-align:left">IL, IN, KY, MN, OH, WI</td></tr><tr><td><a href="/payroll-tax/minnesota">Minnesota</a></td><td style="text-align:left">MI, ND</td></tr><tr><td><a href="/payroll-tax/montana">Montana</a></td><td style="text-align:left">ND</td></tr><tr><td><a href="/payroll-tax/north-dakota">North Dakota</a></td><td style="text-align:left">MN, MT</td></tr><tr><td><a href="/payroll-tax/new-jersey">New Jersey</a></td><td style="text-align:left">PA</td></tr><tr><td><a href="/payroll-tax/ohio">Ohio</a></td><td style="text-align:left">IN, KY, MI, PA, WV</td></tr></tbody></table></div><p>The full list is on <a href="/payroll-tax-reciprocity-agreements">payroll tax reciprocity agreements</a>.</p>
+    <h2>A worked case</h2>
+    <p>New York resident status changes which line appears: an employee who works in New York but lives in New Jersey is a nonresident for New York. Compare an employee who lives in the state with one who does not, with the same pay. Differences show in <code>NY_SIT</code> and in which city lines apply.</p>
+    <h2>Day-count rules</h2>
+    <p>Some states do not tax a nonresident until they have worked more than a set number of days there; the certificate has a field for days worked, which the engine reads. The employer or the employee supplies it.</p>
+    <h2>Maryland as an example</h2>
+    <p>Maryland nonresidents pay a special local rate instead of a county rate, shown in the <a href="/maryland-county-income-tax-withholding">Maryland county tax</a> example. Other states use separate nonresident tables or a flat nonresident rate.</p>
+    <h2>Keep reading</h2>
+    <p><a href="/payroll-tax-reciprocity-agreements">Payroll tax reciprocity agreements</a> · <a href="/remote-employee-payroll-tax-different-state">Remote employee in a different state</a> · <a href="/multi-state-payroll-tax-calculation">Multi-state payroll tax calculation</a> · <a href="/maryland-county-income-tax-withholding">Maryland county income tax withholding</a> · <a href="/guides">All guides</a></p>
+  </div>
+<section class="faq" aria-labelledby="faq-h" style="margin-top:44px;max-width:720px"><h2 id="faq-h" style="font-size:22px;line-height:30px">Questions</h2><article><h3>Does a nonresident pay state tax where they work?</h3><p>Generally yes: the work state may tax wages earned there, and the employer withholds, unless a reciprocity agreement or a short-stay rule exempts the employee.</p></article><article><h3>What is a reciprocity agreement?</h3><p>An agreement between two states under which an employee who lives in one and works in the other pays income tax only to the home state, usually by giving the employer an exemption form.</p></article></section>
+  <div class="seo-cta" style="margin:48px 0 8px;max-width:720px"><a class="btn" href="/signup">Start the 14-day trial</a> <a class="text-link" href="/docs">Read the docs →</a><p class="fine">14-day free trial, then $0.08 per paycheck calculation. Omnia.tax calculates; it does not file, deposit tax, or give tax advice. <a href="/disclaimer">Disclaimer</a>.</p></div>
+</main>
+<footer class="site-footer">
+  <div class="wrap foot-grid">
+    <a class="mark" href="/">Omnia<span class="dot" aria-hidden="true"></span>tax</a>
+    <div><h2>Product</h2><a href="/coverage">Coverage</a><a href="/pricing">Pricing</a><a href="/changelog">Changelog</a></div>
+    <div><h2>Developers</h2><a href="/docs">Docs</a><a href="/docs/paycheck">API reference</a><a href="/status">Status</a></div>
+    <div><h2>Guides</h2><a href="/guides">All guides</a><a href="/payroll-tax-calculation">Payroll tax calculation</a><a href="/payroll-tax-calculation-engine">Payroll tax calculation engine</a><a href="/income-tax-calculation-engine">Income tax calculation engine</a><a href="/take-home-pay">Take-home pay by state</a><a href="/payroll-tax-api">Payroll tax API</a><a href="/payroll-tax">Payroll tax by state</a><a href="/symmetry-tax-engine-alternative">Symmetry alternative</a><a href="/payroll-tax-engine-comparison">Engine comparison</a></div>
+    <div><h2>Company</h2><a href="/about">About</a><a href="/contact">Contact</a><a href="/terms">Terms</a><a href="/privacy">Privacy</a></div>
+  </div>
+  <p class="wrap copy">© 2026 OMNIA TAX LLC. A Michigan limited liability company.</p>
+</footer>
+<script src="/assets/v5.js"></script>
+</body>
+</html>

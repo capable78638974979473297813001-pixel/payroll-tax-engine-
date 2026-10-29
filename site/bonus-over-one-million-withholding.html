@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="color-scheme" content="light" />
+<title>Bonus over $1 million: mandatory 37% withholding | Omnia.tax</title>
+<meta name="description" content="How federal withholding works once supplemental wages pass $1 million in a year: the mandatory 37% rate on the excess, with a worked check that crosses it." />
+<link rel="stylesheet" href="/assets/v5.css" />
+</head>
+<body>
+<header class="site-header"><div class="bar">
+  <a class="mark" href="/">Omnia<span class="dot" aria-hidden="true"></span>tax</a>
+  <nav class="nav-links" aria-label="Primary"><a href="/product">Product</a><a href="/coverage">Coverage</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a></nav>
+  <div class="nav-end"><a class="signin" href="/signin">Sign in</a><a class="btn sm" href="/signup">Get API key</a></div>
+  <button class="menu-btn" type="button" aria-expanded="false" aria-label="Menu"><span></span><span></span></button>
+</div></header>
+<main class="wrap">
+  <div class="page-head">
+    <nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a> <span aria-hidden="true">/</span> <a href="/guides">Guides</a> <span aria-hidden="true">/</span> <span aria-current="page">Bonus over $1 million withholding</span></nav>
+    <p class="eyebrow">Withholding and wages</p>
+    <h1 class="page">Bonus over $1 million: mandatory 37% withholding</h1>
+    <p class="sub">Past $1,000,000 of supplemental wages in a year, the flat rate is not optional.</p>
+  </div>
+  <div class="prose seo" style="margin-top:32px;max-width:720px">
+
+    <p>Once an employee has been paid more than $1,000,000 of supplemental wages in a calendar year, federal withholding on the excess must be at the highest rate, 37%, whatever method the employer normally uses. The engine tracks this from one number you send: <code>ytd.supplemental</code>.</p>
+    <h2>A check that crosses the line</h2>
+    <p>An executive has been paid $800,000.00 of supplemental wages so far this year and receives a $400,000.00 bonus. Only the first $200,000.00 of the bonus fits under $1,000,000.</p><div class="table-wrap"><table><thead><tr><th>Tax</th><th style="text-align:right">Taxable wages</th><th style="text-align:right">Amount</th></tr></thead><tbody><tr><td>Federal Income Tax (Supplemental)</td><td style="text-align:right">$400,000.00</td><td style="text-align:right">$118,000.00</td></tr><tr><td>Social Security</td><td style="text-align:right">$0.00</td><td style="text-align:right">$0.00</td></tr><tr><td>Medicare</td><td style="text-align:right">$400,000.00</td><td style="text-align:right">$5,800.00</td></tr><tr><td>Additional Medicare</td><td style="text-align:right">$400,000.00</td><td style="text-align:right">$3,600.00</td></tr></tbody></table></div><p>Federal withholding on the bonus is $118,000.00. The line's own explanation: <em>$200000.00 @ 22% + $200000.00 @ 37% (cumulative supplemental over $1000000.00)</em> Social Security is $0.00 because the year's wages already passed the wage base, and Additional Medicare of $3,600.00 applies to the whole check because the employee is already over $200,000 for the year.</p>
+    <h2>What you send</h2>
+    <div class="panel" style="margin-top:14px"><pre style="margin:0;padding:18px 22px;overflow:auto">&quot;earnings&quot;: [{ &quot;code&quot;: &quot;BON&quot;, &quot;category&quot;: &quot;supplemental&quot;, &quot;amount&quot;: 40000000 }],
+&quot;ytd&quot;: { &quot;socialSecurity&quot;: 18450000, &quot;medicare&quot;: 80000000, &quot;futa&quot;: 0, &quot;supplemental&quot;: 80000000 }</pre></div>
+    <h2>What to remember</h2>
+    <ul><li>The threshold is cumulative supplemental wages to one employee in the calendar year, not per check.</li><li>Under $1,000,000 the engine uses the flat rate for supplemental wages, or aggregation if you categorise the pay as regular.</li><li>This is withholding. The 37% rate does not change the employee's tax liability.</li><li>State supplemental rules are separate and have no such threshold in most states.</li></ul>
+    <h2>Keep reading</h2>
+    <p><a href="/supplemental-wage-withholding-rates">Supplemental wage withholding rates</a> · <a href="/additional-medicare-tax-withholding">Additional Medicare tax withholding</a> · <a href="/payroll-tax-api-ytd-wages">Payroll tax API year-to-date wages</a> · <a href="/bonus-tax-withholding-calculation">Bonus tax withholding</a> · <a href="/guides">All guides</a></p>
+  </div>
+<section class="faq" aria-labelledby="faq-h" style="margin-top:44px;max-width:720px"><h2 id="faq-h" style="font-size:22px;line-height:30px">Questions</h2><article><h3>What is the withholding rate on a bonus over $1 million?</h3><p>Federal income tax withholding on supplemental wages above $1,000,000 in a calendar year is mandatory at 37%.</p></article><article><h3>How does the API know the total so far?</h3><p>You send the supplemental wages already paid this year in ytd.supplemental. The engine splits a check that crosses the line.</p></article></section>
+  <div class="seo-cta" style="margin:48px 0 8px;max-width:720px"><a class="btn" href="/signup">Start the 14-day trial</a> <a class="text-link" href="/docs">Read the docs →</a><p class="fine">14-day free trial, then $0.08 per paycheck calculation. Omnia.tax calculates; it does not file, deposit tax, or give tax advice. <a href="/disclaimer">Disclaimer</a>.</p></div>
+</main>
+<footer class="site-footer">
+  <div class="wrap foot-grid">
+    <a class="mark" href="/">Omnia<span class="dot" aria-hidden="true"></span>tax</a>
+    <div><h2>Product</h2><a href="/coverage">Coverage</a><a href="/pricing">Pricing</a><a href="/changelog">Changelog</a></div>
+    <div><h2>Developers</h2><a href="/docs">Docs</a><a href="/docs/paycheck">API reference</a><a href="/status">Status</a></div>
+    <div><h2>Guides</h2><a href="/guides">All guides</a><a href="/payroll-tax-calculation">Payroll tax calculation</a><a href="/payroll-tax-calculation-engine">Payroll tax calculation engine</a><a href="/income-tax-calculation-engine">Income tax calculation engine</a><a href="/take-home-pay">Take-home pay by state</a><a href="/payroll-tax-api">Payroll tax API</a><a href="/payroll-tax">Payroll tax by state</a><a href="/symmetry-tax-engine-alternative">Symmetry alternative</a><a href="/payroll-tax-engine-comparison">Engine comparison</a></div>
+    <div><h2>Company</h2><a href="/about">About</a><a href="/contact">Contact</a><a href="/terms">Terms</a><a href="/privacy">Privacy</a></div>
+  </div>
+  <p class="wrap copy">© 2026 OMNIA TAX LLC. A Michigan limited liability company.</p>
+</footer>
+<script src="/assets/v5.js"></script>
+</body>
+</html>

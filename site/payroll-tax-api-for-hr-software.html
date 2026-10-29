@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="color-scheme" content="light" />
+<title>Payroll tax API for HR software: offers, comp and cost | Omnia.tax</title>
+<meta name="description" content="Use a payroll tax API inside HR software for offer letters, compensation planning, employee cost and take-home pay by location, without owning the tax rules." />
+<link rel="stylesheet" href="/assets/v5.css" />
+</head>
+<body>
+<header class="site-header"><div class="bar">
+  <a class="mark" href="/">Omnia<span class="dot" aria-hidden="true"></span>tax</a>
+  <nav class="nav-links" aria-label="Primary"><a href="/product">Product</a><a href="/coverage">Coverage</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a></nav>
+  <div class="nav-end"><a class="signin" href="/signin">Sign in</a><a class="btn sm" href="/signup">Get API key</a></div>
+  <button class="menu-btn" type="button" aria-expanded="false" aria-label="Menu"><span></span><span></span></button>
+</div></header>
+<main class="wrap">
+  <div class="page-head">
+    <nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a> <span aria-hidden="true">/</span> <a href="/guides">Guides</a> <span aria-hidden="true">/</span> <span aria-current="page">Payroll tax API for HR software</span></nav>
+    <p class="eyebrow">Developers</p>
+    <h1 class="page">Payroll tax API for HR software</h1>
+    <p class="sub">Take-home and cost numbers in the places HR software shows pay.</p>
+  </div>
+  <div class="prose seo" style="margin-top:32px;max-width:720px">
+
+    <p>HR software shows pay in many places that are not payroll runs: offer letters, compensation bands, relocation estimates, total-rewards statements. In each, the useful number is what the person takes home and what the role costs the employer. Those need tax rules by location and year, which a tax calculation API provides.</p>
+    <h2>Where it fits</h2>
+    <div class="table-wrap"><table><thead><tr><th>Screen</th><th style="text-align:left">What the API supplies</th></tr></thead><tbody><tr><td>Offer letter</td><td style="text-align:left">Net pay by pay period for the work location.</td></tr><tr><td>Compensation planning</td><td style="text-align:left">Employer cost per role including employer taxes.</td></tr><tr><td>Relocation and remote work</td><td style="text-align:left">A before-and-after paycheck with the reason for the change.</td></tr><tr><td>Total rewards statement</td><td style="text-align:left">What benefits deductions do to take-home pay.</td></tr><tr><td>Employee self-service</td><td style="text-align:left">A W-4 what-if: how extra withholding changes net.</td></tr></tbody></table></div>
+    <h2>A relocation example</h2>
+    <p>An employee on $3,000.00 biweekly considers moving from Texas to California. The engine returns net pay of $2,450.12 in Texas and $2,277.06 in California, a difference of $173.06 per paycheck. The <a href="/compare-two-paychecks-api">compare endpoint</a> returns that difference already broken down line by line.</p>
+    <h2>Employee-facing tools</h2>
+    <p>Let employees see how a change to their W-4 or a pre-tax benefit election changes take-home before they commit. Each change is a re-run of the same request with one field altered, and the <a href="/compare-two-paychecks-api">comparison</a> explains it in order.</p>
+    <h2>What it does not do</h2>
+    <p>It does not hold employee records, run payroll or file anything. It is the calculation layer you call from the screens above. For employee cost modelling with the employer's side included, see <a href="/true-cost-of-an-employee">the true cost of an employee</a>.</p>
+    <h2>Keep reading</h2>
+    <p><a href="/payroll-tax-api-for-saas-platforms">Payroll tax API for SaaS platforms</a> · <a href="/compare-two-paychecks-api">Compare two paychecks API</a> · <a href="/true-cost-of-an-employee">True cost of an employee</a> · <a href="/relocation-paycheck-comparison">Relocation paycheck comparison</a> · <a href="/guides">All guides</a></p>
+  </div>
+<section class="faq" aria-labelledby="faq-h" style="margin-top:44px;max-width:720px"><h2 id="faq-h" style="font-size:22px;line-height:30px">Questions</h2><article><h3>How can HR software use a payroll tax API?</h3><p>To show take-home pay on offers, employer cost on compensation plans, before-and-after paychecks for relocations and W-4 what-ifs for employees, all by calling the engine with the person's location and pay.</p></article><article><h3>Does it store employee data?</h3><p>The calculation API is stateless: you send the facts of a paycheck and get a result. It is not an employee records system.</p></article></section>
+  <div class="seo-cta" style="margin:48px 0 8px;max-width:720px"><a class="btn" href="/signup">Start the 14-day trial</a> <a class="text-link" href="/docs">Read the docs →</a><p class="fine">14-day free trial, then $0.08 per paycheck calculation. Omnia.tax calculates; it does not file, deposit tax, or give tax advice. <a href="/disclaimer">Disclaimer</a>.</p></div>
+</main>
+<footer class="site-footer">
+  <div class="wrap foot-grid">
+    <a class="mark" href="/">Omnia<span class="dot" aria-hidden="true"></span>tax</a>
+    <div><h2>Product</h2><a href="/coverage">Coverage</a><a href="/pricing">Pricing</a><a href="/changelog">Changelog</a></div>
+    <div><h2>Developers</h2><a href="/docs">Docs</a><a href="/docs/paycheck">API reference</a><a href="/status">Status</a></div>
+    <div><h2>Guides</h2><a href="/guides">All guides</a><a href="/payroll-tax-calculation">Payroll tax calculation</a><a href="/payroll-tax-calculation-engine">Payroll tax calculation engine</a><a href="/income-tax-calculation-engine">Income tax calculation engine</a><a href="/take-home-pay">Take-home pay by state</a><a href="/payroll-tax-api">Payroll tax API</a><a href="/payroll-tax">Payroll tax by state</a><a href="/symmetry-tax-engine-alternative">Symmetry alternative</a><a href="/payroll-tax-engine-comparison">Engine comparison</a></div>
+    <div><h2>Company</h2><a href="/about">About</a><a href="/contact">Contact</a><a href="/terms">Terms</a><a href="/privacy">Privacy</a></div>
+  </div>
+  <p class="wrap copy">© 2026 OMNIA TAX LLC. A Michigan limited liability company.</p>
+</footer>
+<script src="/assets/v5.js"></script>
+</body>
+</html>

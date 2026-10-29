@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="color-scheme" content="light" />
+<title>Pay frequency and withholding: weekly to monthly | Omnia.tax</title>
+<meta name="description" content="Why the same pay gets different withholding on weekly, biweekly, semimonthly and monthly schedules: annualisation and brackets, with the engine's numbers." />
+<link rel="stylesheet" href="/assets/v5.css" />
+</head>
+<body>
+<header class="site-header"><div class="bar">
+  <a class="mark" href="/">Omnia<span class="dot" aria-hidden="true"></span>tax</a>
+  <nav class="nav-links" aria-label="Primary"><a href="/product">Product</a><a href="/coverage">Coverage</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a></nav>
+  <div class="nav-end"><a class="signin" href="/signin">Sign in</a><a class="btn sm" href="/signup">Get API key</a></div>
+  <button class="menu-btn" type="button" aria-expanded="false" aria-label="Menu"><span></span><span></span></button>
+</div></header>
+<main class="wrap">
+  <div class="page-head">
+    <nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a> <span aria-hidden="true">/</span> <a href="/guides">Guides</a> <span aria-hidden="true">/</span> <span aria-current="page">Pay frequency and withholding</span></nav>
+    <p class="eyebrow">Withholding and wages</p>
+    <h1 class="page">Pay frequency and withholding</h1>
+    <p class="sub">Pay frequency changes the table, and the table changes the tax.</p>
+  </div>
+  <div class="prose seo" style="margin-top:32px;max-width:720px">
+
+    <p>Federal withholding annualises each paycheck: multiply by the number of pay periods in the year, apply the tax brackets, then divide back. So $3,000.00 paid weekly is a $156,000.00 yearly income; paid monthly it is only $36,000.00. The same check withholds very different amounts.</p>
+    <h2>One check, four frequencies</h2>
+    <div class="table-wrap"><table><thead><tr><th>Pay frequency</th><th style="text-align:right">Periods</th><th style="text-align:right">Annualised wages</th><th style="text-align:right">Federal income tax</th><th style="text-align:right">Net pay</th></tr></thead><tbody><tr><td>Weekly</td><td style="text-align:right">52</td><td style="text-align:right">$156,000.00</td><td style="text-align:right">$503.35</td><td style="text-align:right">$2,267.15</td></tr><tr><td>Biweekly</td><td style="text-align:right">26</td><td style="text-align:right">$78,000.00</td><td style="text-align:right">$320.38</td><td style="text-align:right">$2,450.12</td></tr><tr><td>Semimonthly</td><td style="text-align:right">24</td><td style="text-align:right">$72,000.00</td><td style="text-align:right">$292.08</td><td style="text-align:right">$2,478.42</td></tr><tr><td>Monthly</td><td style="text-align:right">12</td><td style="text-align:right">$36,000.00</td><td style="text-align:right">$178.33</td><td style="text-align:right">$2,592.17</td></tr></tbody></table></div><p>Every row is a $3,000.00 check for a single filer in Texas. Social Security and Medicare are identical in all four, at $186.00 and $43.50, because they are flat percentages.</p>
+    <h2>What this means</h2>
+    <ul><li>A comparison of "take-home per month" across employers must use the same schedule, or the annualised tax will not be comparable.</li><li>An employee who moves from monthly to weekly pay with the same annual salary has a similar yearly tax, because each check is smaller.</li><li>The annual tax is settled on the return, so withholding differences by schedule even out over the year when pay is steady.</li></ul>
+    <h2>In the request</h2>
+    <p>Set <code>payFrequency</code> to <code>weekly</code>, <code>biweekly</code>, <code>semimonthly</code>, <code>monthly</code>, <code>quarterly</code>, <code>semiannual</code>, <code>annual</code> or <code>daily</code>. State tables use the same frequency.</p>
+    <h2>Keep reading</h2>
+    <p><a href="/federal-income-tax-withholding-calculator">Federal income tax withholding calculation</a> · <a href="/semimonthly-vs-biweekly-pay">Semimonthly vs biweekly pay</a> · <a href="/paycheck-calculation-formula">Paycheck calculation formula</a> · <a href="/hourly-employee-paycheck-calculation">Hourly employee paycheck calculation</a> · <a href="/guides">All guides</a></p>
+  </div>
+<section class="faq" aria-labelledby="faq-h" style="margin-top:44px;max-width:720px"><h2 id="faq-h" style="font-size:22px;line-height:30px">Questions</h2><article><h3>Why does pay frequency change federal withholding?</h3><p>The percentage method annualises each check by the number of pay periods, applies the brackets, and divides back. A larger check on a weekly schedule annualises to a higher income than the same check paid monthly.</p></article><article><h3>Does pay frequency change Social Security or Medicare?</h3><p>No. They are flat percentages of wages, so the amount is the same on any schedule.</p></article></section>
+  <div class="seo-cta" style="margin:48px 0 8px;max-width:720px"><a class="btn" href="/signup">Start the 14-day trial</a> <a class="text-link" href="/docs">Read the docs →</a><p class="fine">14-day free trial, then $0.08 per paycheck calculation. Omnia.tax calculates; it does not file, deposit tax, or give tax advice. <a href="/disclaimer">Disclaimer</a>.</p></div>
+</main>
+<footer class="site-footer">
+  <div class="wrap foot-grid">
+    <a class="mark" href="/">Omnia<span class="dot" aria-hidden="true"></span>tax</a>
+    <div><h2>Product</h2><a href="/coverage">Coverage</a><a href="/pricing">Pricing</a><a href="/changelog">Changelog</a></div>
+    <div><h2>Developers</h2><a href="/docs">Docs</a><a href="/docs/paycheck">API reference</a><a href="/status">Status</a></div>
+    <div><h2>Guides</h2><a href="/guides">All guides</a><a href="/payroll-tax-calculation">Payroll tax calculation</a><a href="/payroll-tax-calculation-engine">Payroll tax calculation engine</a><a href="/income-tax-calculation-engine">Income tax calculation engine</a><a href="/take-home-pay">Take-home pay by state</a><a href="/payroll-tax-api">Payroll tax API</a><a href="/payroll-tax">Payroll tax by state</a><a href="/symmetry-tax-engine-alternative">Symmetry alternative</a><a href="/payroll-tax-engine-comparison">Engine comparison</a></div>
+    <div><h2>Company</h2><a href="/about">About</a><a href="/contact">Contact</a><a href="/terms">Terms</a><a href="/privacy">Privacy</a></div>
+  </div>
+  <p class="wrap copy">© 2026 OMNIA TAX LLC. A Michigan limited liability company.</p>
+</footer>
+<script src="/assets/v5.js"></script>
+</body>
+</html>

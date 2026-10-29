@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="color-scheme" content="light" />
+<title>Minimum wage compliance check API: all levels | Omnia.tax</title>
+<meta name="description" content="Check an hourly rate against the binding federal, state and local minimum wage in the same call as the paycheck, with tipped, region and headcount options." />
+<link rel="stylesheet" href="/assets/v5.css" />
+</head>
+<body>
+<header class="site-header"><div class="bar">
+  <a class="mark" href="/">Omnia<span class="dot" aria-hidden="true"></span>tax</a>
+  <nav class="nav-links" aria-label="Primary"><a href="/product">Product</a><a href="/coverage">Coverage</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a></nav>
+  <div class="nav-end"><a class="signin" href="/signin">Sign in</a><a class="btn sm" href="/signup">Get API key</a></div>
+  <button class="menu-btn" type="button" aria-expanded="false" aria-label="Menu"><span></span><span></span></button>
+</div></header>
+<main class="wrap">
+  <div class="page-head">
+    <nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a> <span aria-hidden="true">/</span> <a href="/guides">Guides</a> <span aria-hidden="true">/</span> <span aria-current="page">Minimum wage compliance check</span></nav>
+    <p class="eyebrow">Calculations</p>
+    <h1 class="page">Minimum wage compliance check</h1>
+    <p class="sub">Is this hourly rate legal at this address? Ask in the paycheck call.</p>
+  </div>
+  <div class="prose seo" style="margin-top:32px;max-width:720px">
+
+    <p>The minimum wage that binds an employer is the highest of the federal, state and any local figure that applies. Local ordinances now cover 69 jurisdictions in the data the engine carries, so a state figure alone is often wrong. Add a <code>minimumWageCheck</code> to the paycheck request and the answer comes back with the calculation.</p>
+    <h2>What you send</h2>
+    <div class="panel" style="margin-top:14px"><pre style="margin:0;padding:18px 22px;overflow:auto">&quot;workState&quot;: { &quot;code&quot;: &quot;WA&quot; },
+&quot;minimumWageCheck&quot;: { &quot;hourlyRate&quot;: 1800, &quot;locality&quot;: &quot;seattle&quot;, &quot;employeeCount&quot;: 250 }</pre></div><div class="table-wrap"><table><thead><tr><th>Field</th><th style="text-align:left">Meaning</th></tr></thead><tbody><tr><td><code>hourlyRate</code></td><td style="text-align:left">The employee's hourly rate in cents: $15.00 is 1500.</td></tr><tr><td><code>locality</code></td><td style="text-align:left">A local ordinance id or name, such as <code>seattle</code>.</td></tr><tr><td><code>employeeCount</code></td><td style="text-align:left">Employer headcount, where the ordinance has size tiers.</td></tr><tr><td><code>tipped</code></td><td style="text-align:left">Compare with the tipped cash floor.</td></tr><tr><td><code>region</code></td><td style="text-align:left">A named sub-region such as New York "downstate" or Oregon "portland_metro".</td></tr></tbody></table></div>
+    <h2>One billed call</h2>
+    <p>The check is answered in the same call as the paycheck and billed as one calculation. Federal, state and local figures are all considered, and the binding one is reported.</p>
+    <h2>What it is for</h2>
+    <ul><li>Catching a rate that fell below the floor after a state or city increase on January 1 or July 1.</li><li>Checking an offer before it is sent.</li><li>Showing a compliance flag next to the rate in a scheduling or HR tool.</li></ul>
+    <h2>Limits</h2>
+    <p>It compares a rate with a floor. It does not decide whether an employee is exempt, whether a particular tip credit is allowed for a job, or whether a sector-specific minimum applies beyond those the data covers. See <a href="/minimum-wage-by-state">minimum wage by state</a> for the state figures and <a href="/coverage">coverage</a> for the local ones.</p>
+    <h2>Keep reading</h2>
+    <p><a href="/minimum-wage-by-state">Minimum wage by state</a> · <a href="/hourly-employee-paycheck-calculation">Hourly employee paycheck calculation</a> · <a href="/garnishment-limit-calculation-api">Garnishment limit calculation</a> · <a href="/coverage">Coverage</a> · <a href="/guides">All guides</a></p>
+  </div>
+<section class="faq" aria-labelledby="faq-h" style="margin-top:44px;max-width:720px"><h2 id="faq-h" style="font-size:22px;line-height:30px">Questions</h2><article><h3>Can the payroll API check minimum wage?</h3><p>Yes. Add minimumWageCheck with an hourly rate to the paycheck request and it compares the rate with the binding federal, state and local minimum wage in the same call.</p></article><article><h3>Is the minimum wage check billed separately?</h3><p>No. It is answered in the same call and billed as one paycheck calculation.</p></article></section>
+  <div class="seo-cta" style="margin:48px 0 8px;max-width:720px"><a class="btn" href="/signup">Start the 14-day trial</a> <a class="text-link" href="/docs">Read the docs →</a><p class="fine">14-day free trial, then $0.08 per paycheck calculation. Omnia.tax calculates; it does not file, deposit tax, or give tax advice. <a href="/disclaimer">Disclaimer</a>.</p></div>
+</main>
+<footer class="site-footer">
+  <div class="wrap foot-grid">
+    <a class="mark" href="/">Omnia<span class="dot" aria-hidden="true"></span>tax</a>
+    <div><h2>Product</h2><a href="/coverage">Coverage</a><a href="/pricing">Pricing</a><a href="/changelog">Changelog</a></div>
+    <div><h2>Developers</h2><a href="/docs">Docs</a><a href="/docs/paycheck">API reference</a><a href="/status">Status</a></div>
+    <div><h2>Guides</h2><a href="/guides">All guides</a><a href="/payroll-tax-calculation">Payroll tax calculation</a><a href="/payroll-tax-calculation-engine">Payroll tax calculation engine</a><a href="/income-tax-calculation-engine">Income tax calculation engine</a><a href="/take-home-pay">Take-home pay by state</a><a href="/payroll-tax-api">Payroll tax API</a><a href="/payroll-tax">Payroll tax by state</a><a href="/symmetry-tax-engine-alternative">Symmetry alternative</a><a href="/payroll-tax-engine-comparison">Engine comparison</a></div>
+    <div><h2>Company</h2><a href="/about">About</a><a href="/contact">Contact</a><a href="/terms">Terms</a><a href="/privacy">Privacy</a></div>
+  </div>
+  <p class="wrap copy">© 2026 OMNIA TAX LLC. A Michigan limited liability company.</p>
+</footer>
+<script src="/assets/v5.js"></script>
+</body>
+</html>

@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="color-scheme" content="light" />
+<title>Payroll tax calculator for bookkeepers: book a check | Omnia.tax</title>
+<meta name="description" content="A payroll tax calculator for bookkeepers: see which lines are employee-paid and employer-paid, so a paycheck splits cleanly into expense and liability entries." />
+<link rel="stylesheet" href="/assets/v5.css" />
+</head>
+<body>
+<header class="site-header"><div class="bar">
+  <a class="mark" href="/">Omnia<span class="dot" aria-hidden="true"></span>tax</a>
+  <nav class="nav-links" aria-label="Primary"><a href="/product">Product</a><a href="/coverage">Coverage</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a></nav>
+  <div class="nav-end"><a class="signin" href="/signin">Sign in</a><a class="btn sm" href="/signup">Get API key</a></div>
+  <button class="menu-btn" type="button" aria-expanded="false" aria-label="Menu"><span></span><span></span></button>
+</div></header>
+<main class="wrap">
+  <div class="page-head">
+    <nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a> <span aria-hidden="true">/</span> <a href="/guides">Guides</a> <span aria-hidden="true">/</span> <span aria-current="page">Payroll tax calculator for bookkeepers</span></nav>
+    <p class="eyebrow">Who it is for</p>
+    <h1 class="page">Payroll tax calculator for bookkeepers</h1>
+    <p class="sub">The numbers you need to book a paycheck, already separated.</p>
+  </div>
+  <div class="prose seo" style="margin-top:32px;max-width:720px">
+
+    <p>A bookkeeper's job with a paycheck is to split it: wages expense, payroll tax expense, payroll liabilities, net pay to the bank. That needs every tax line labelled by who pays it. The engine returns exactly that, so the entries follow from the response instead of from a rate sheet.</p>
+    <h2>From response to entries</h2>
+    <p>For a $3,000.00 check in Texas with no deductions:</p><div class="table-wrap"><table><thead><tr><th></th><th style="text-align:left">Account</th><th style="text-align:left">Amount</th></tr></thead><tbody><tr><td>Debit</td><td style="text-align:left">Wages expense</td><td style="text-align:left">$3,000.00</td></tr><tr><td>Debit</td><td style="text-align:left">Employer payroll tax expense</td><td style="text-align:left">$328.50</td></tr><tr><td>Credit</td><td style="text-align:left">Employee taxes withheld (liability)</td><td style="text-align:left">$549.88</td></tr><tr><td>Credit</td><td style="text-align:left">Employer payroll taxes payable (liability)</td><td style="text-align:left">$328.50</td></tr><tr><td>Credit</td><td style="text-align:left">Cash, net pay</td><td style="text-align:left">$2,450.12</td></tr></tbody></table></div><p>Debits are $3,328.50 and credits are $3,328.50. They balance because <code>netPay = grossPay − employeeTaxTotal</code> when there are no deductions.</p>
+    <h2>Lines worth their own accounts</h2>
+    <div class="table-wrap"><table><thead><tr><th>Tax</th><th>Paid by</th><th style="text-align:right">Taxable wages</th><th style="text-align:right">Amount</th></tr></thead><tbody><tr><td>Federal Income Tax</td><td>Employee</td><td style="text-align:right">$3,000.00</td><td style="text-align:right">$320.38</td></tr><tr><td>Social Security</td><td>Employee</td><td style="text-align:right">$3,000.00</td><td style="text-align:right">$186.00</td></tr><tr><td>Social Security (Employer)</td><td>Employer</td><td style="text-align:right">$3,000.00</td><td style="text-align:right">$186.00</td></tr><tr><td>Medicare</td><td>Employee</td><td style="text-align:right">$3,000.00</td><td style="text-align:right">$43.50</td></tr><tr><td>Medicare (Employer)</td><td>Employer</td><td style="text-align:right">$3,000.00</td><td style="text-align:right">$43.50</td></tr><tr><td>FUTA</td><td>Employer</td><td style="text-align:right">$3,000.00</td><td style="text-align:right">$18.00</td></tr><tr><td>Texas Unemployment Insurance (Employer)</td><td>Employer</td><td style="text-align:right">$3,000.00</td><td style="text-align:right">$81.00</td></tr></tbody></table></div><p>Separate liability accounts for federal income tax, Social Security and Medicare, and unemployment tax make the quarterly returns easier to tie out.</p>
+    <h2>Deductions</h2>
+    <ul><li>Pre-tax benefits (health premiums, HSA) reduce taxable wages and go to a liability for the plan.</li><li>401(k) deferrals reduce income tax wages only and go to a plan liability.</li><li>Garnishments and other post-tax deductions are liabilities until paid over.</li></ul>
+    <h2>A boundary</h2>
+    <p>The engine gives the amounts. Chart-of-accounts choices, remittance timing and filing are yours or your payroll provider's. See <a href="/true-cost-of-an-employee">the true cost of an employee</a> for the employer side.</p>
+    <h2>Keep reading</h2>
+    <p><a href="/employee-vs-employer-payroll-taxes">Employee vs employer payroll taxes</a> · <a href="/true-cost-of-an-employee">True cost of an employee</a> · <a href="/payroll-tax-calculator-for-accountants">Payroll tax calculator for accountants</a> · <a href="/post-tax-deductions-net-pay">Post-tax deductions and net pay</a> · <a href="/guides">All guides</a></p>
+  </div>
+<section class="faq" aria-labelledby="faq-h" style="margin-top:44px;max-width:720px"><h2 id="faq-h" style="font-size:22px;line-height:30px">Questions</h2><article><h3>How do I book a paycheck from the tax lines?</h3><p>Debit wages expense for gross pay and employer payroll tax expense for the employer lines; credit liabilities for the employee and employer taxes and cash for net pay. The payer field on each line says which side owes it.</p></article><article><h3>Do employer taxes reduce net pay?</h3><p>No. They are an additional cost to the employer and are not taken from the employee.</p></article></section>
+  <div class="seo-cta" style="margin:48px 0 8px;max-width:720px"><a class="btn" href="/signup">Start the 14-day trial</a> <a class="text-link" href="/docs">Read the docs →</a><p class="fine">14-day free trial, then $0.08 per paycheck calculation. Omnia.tax calculates; it does not file, deposit tax, or give tax advice. <a href="/disclaimer">Disclaimer</a>.</p></div>
+</main>
+<footer class="site-footer">
+  <div class="wrap foot-grid">
+    <a class="mark" href="/">Omnia<span class="dot" aria-hidden="true"></span>tax</a>
+    <div><h2>Product</h2><a href="/coverage">Coverage</a><a href="/pricing">Pricing</a><a href="/changelog">Changelog</a></div>
+    <div><h2>Developers</h2><a href="/docs">Docs</a><a href="/docs/paycheck">API reference</a><a href="/status">Status</a></div>
+    <div><h2>Guides</h2><a href="/guides">All guides</a><a href="/payroll-tax-calculation">Payroll tax calculation</a><a href="/payroll-tax-calculation-engine">Payroll tax calculation engine</a><a href="/income-tax-calculation-engine">Income tax calculation engine</a><a href="/take-home-pay">Take-home pay by state</a><a href="/payroll-tax-api">Payroll tax API</a><a href="/payroll-tax">Payroll tax by state</a><a href="/symmetry-tax-engine-alternative">Symmetry alternative</a><a href="/payroll-tax-engine-comparison">Engine comparison</a></div>
+    <div><h2>Company</h2><a href="/about">About</a><a href="/contact">Contact</a><a href="/terms">Terms</a><a href="/privacy">Privacy</a></div>
+  </div>
+  <p class="wrap copy">© 2026 OMNIA TAX LLC. A Michigan limited liability company.</p>
+</footer>
+<script src="/assets/v5.js"></script>
+</body>
+</html>

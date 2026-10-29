@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="color-scheme" content="light" />
+<title>Payroll tax API testing: build fixtures that catch drift | Omnia.tax</title>
+<meta name="description" content="How to test a payroll tax integration: golden paychecks as fixtures, cases that find bugs, a CI job on a test key, and how to read a difference from your old." />
+<link rel="stylesheet" href="/assets/v5.css" />
+</head>
+<body>
+<header class="site-header"><div class="bar">
+  <a class="mark" href="/">Omnia<span class="dot" aria-hidden="true"></span>tax</a>
+  <nav class="nav-links" aria-label="Primary"><a href="/product">Product</a><a href="/coverage">Coverage</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a></nav>
+  <div class="nav-end"><a class="signin" href="/signin">Sign in</a><a class="btn sm" href="/signup">Get API key</a></div>
+  <button class="menu-btn" type="button" aria-expanded="false" aria-label="Menu"><span></span><span></span></button>
+</div></header>
+<main class="wrap">
+  <div class="page-head">
+    <nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a> <span aria-hidden="true">/</span> <a href="/guides">Guides</a> <span aria-hidden="true">/</span> <span aria-current="page">Payroll tax API testing fixtures</span></nav>
+    <p class="eyebrow">Developers</p>
+    <h1 class="page">Testing a payroll tax API integration</h1>
+    <p class="sub">Golden paychecks, edge cases, and what to do when numbers differ.</p>
+  </div>
+  <div class="prose seo" style="margin-top:32px;max-width:720px">
+
+    <p>The surest way to trust an integration is to run paychecks whose answers you already know. Build a set of those as fixtures, run them in CI against a test key, and treat any change as a question to answer rather than a number to update.</p>
+    <h2>Cases worth having</h2>
+    <div class="table-wrap"><table><thead><tr><th>Case</th><th style="text-align:left">What it proves</th></tr></thead><tbody><tr><td>A no-income-tax state (Texas)</td><td style="text-align:left">Baseline: net $2,450.12 on $3,000.00.</td></tr><tr><td>A state with its own disability tax (California)</td><td style="text-align:left">State lines appear: net $2,277.06.</td></tr><tr><td>A city tax (Columbus, Ohio)</td><td style="text-align:left">Local lines appear: net $2,299.35.</td></tr><tr><td>A bonus</td><td style="text-align:left">Supplemental wages follow the flat-rate or aggregate method.</td></tr><tr><td>A 401(k) deferral</td><td style="text-align:left">Income tax wages drop but Social Security wages do not.</td></tr><tr><td>A check at the Social Security cap</td><td style="text-align:left">The tax stops partway through a check.</td></tr><tr><td>A weekly and a monthly check</td><td style="text-align:left">Pay frequency changes the withholding table.</td></tr><tr><td>A bad request</td><td style="text-align:left">Your error handling shows the field-level message.</td></tr></tbody></table></div>
+    <h2>Run them in CI</h2>
+    <p>Use a <a href="/payroll-tax-api-test-keys">test key</a>, which is never billed. Store each request and the expected <code>netPay</code> and the expected amount for each important <code>id</code>. Assert on ids and cents, never on formatted strings.</p><div class="panel" style="margin-top:14px"><pre style="margin:0;padding:18px 22px;overflow:auto">test(&quot;Texas biweekly 3000&quot;, async () =&gt; {
+  const { result } = await calc(texasBiweekly3000);
+  expect(result.netPay).toBe(245012);
+  expect(result.taxes.find(t =&gt; t.id === &quot;US_FIT&quot;).amount).toBe(32038);
+});</pre></div>
+    <h2>When a number differs from your old system</h2>
+    <ul><li>Read the <code>detail</code> text on the differing line first. It states the method and the intermediate values.</li><li>Check the inputs match: check date, pay frequency, filing status, year-to-date wages.</li><li>Check which wages the tax was applied to. Different <code>taxableWages</code> is the usual cause.</li><li>If the old system and the engine disagree after that, look up the agency's published method for the line.</li></ul>
+    <h2>Re-run on upgrades</h2>
+    <p>Rules change. Rerun the fixtures when you pin a new API version or when a new tax year starts, and review every difference. A fixture that never changes is a fixture that is not testing the new year.</p>
+    <h2>Keep reading</h2>
+    <p><a href="/payroll-tax-api-test-environment">Payroll tax API test environment</a> · <a href="/payroll-tax-api-integration-guide">Payroll tax API integration guide</a> · <a href="/payroll-tax-audit-withholding-check">Payroll tax audit: withholding check</a> · <a href="/payroll-tax-api-test-keys">Payroll tax API test keys</a> · <a href="/guides">All guides</a></p>
+  </div>
+<section class="faq" aria-labelledby="faq-h" style="margin-top:44px;max-width:720px"><h2 id="faq-h" style="font-size:22px;line-height:30px">Questions</h2><article><h3>How should I test a payroll tax integration?</h3><p>Run paychecks whose answers you know against a test key, assert on tax ids and integer cents, include edge cases such as a bonus, a deferral and a Social Security cap, and review any difference when rules change.</p></article><article><h3>Do test calls cost money?</h3><p>No. Test keys use the same engine and data as live keys and are never billed. They are capped at 30 requests a minute and 500 a day.</p></article></section>
+  <div class="seo-cta" style="margin:48px 0 8px;max-width:720px"><a class="btn" href="/signup">Start the 14-day trial</a> <a class="text-link" href="/docs">Read the docs →</a><p class="fine">14-day free trial, then $0.08 per paycheck calculation. Omnia.tax calculates; it does not file, deposit tax, or give tax advice. <a href="/disclaimer">Disclaimer</a>.</p></div>
+</main>
+<footer class="site-footer">
+  <div class="wrap foot-grid">
+    <a class="mark" href="/">Omnia<span class="dot" aria-hidden="true"></span>tax</a>
+    <div><h2>Product</h2><a href="/coverage">Coverage</a><a href="/pricing">Pricing</a><a href="/changelog">Changelog</a></div>
+    <div><h2>Developers</h2><a href="/docs">Docs</a><a href="/docs/paycheck">API reference</a><a href="/status">Status</a></div>
+    <div><h2>Guides</h2><a href="/guides">All guides</a><a href="/payroll-tax-calculation">Payroll tax calculation</a><a href="/payroll-tax-calculation-engine">Payroll tax calculation engine</a><a href="/income-tax-calculation-engine">Income tax calculation engine</a><a href="/take-home-pay">Take-home pay by state</a><a href="/payroll-tax-api">Payroll tax API</a><a href="/payroll-tax">Payroll tax by state</a><a href="/symmetry-tax-engine-alternative">Symmetry alternative</a><a href="/payroll-tax-engine-comparison">Engine comparison</a></div>
+    <div><h2>Company</h2><a href="/about">About</a><a href="/contact">Contact</a><a href="/terms">Terms</a><a href="/privacy">Privacy</a></div>
+  </div>
+  <p class="wrap copy">© 2026 OMNIA TAX LLC. A Michigan limited liability company.</p>
+</footer>
+<script src="/assets/v5.js"></script>
+</body>
+</html>

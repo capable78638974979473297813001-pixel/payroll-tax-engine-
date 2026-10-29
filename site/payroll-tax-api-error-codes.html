@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="color-scheme" content="light" />
+<title>Payroll tax API error codes and how to handle them | Omnia.tax</title>
+<meta name="description" content="Every error code the payroll tax API returns, its status, what it means and what your code should do: invalid_input, cannot_compute, rate_limited and more." />
+<link rel="stylesheet" href="/assets/v5.css" />
+</head>
+<body>
+<header class="site-header"><div class="bar">
+  <a class="mark" href="/">Omnia<span class="dot" aria-hidden="true"></span>tax</a>
+  <nav class="nav-links" aria-label="Primary"><a href="/product">Product</a><a href="/coverage">Coverage</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a></nav>
+  <div class="nav-end"><a class="signin" href="/signin">Sign in</a><a class="btn sm" href="/signup">Get API key</a></div>
+  <button class="menu-btn" type="button" aria-expanded="false" aria-label="Menu"><span></span><span></span></button>
+</div></header>
+<main class="wrap">
+  <div class="page-head">
+    <nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a> <span aria-hidden="true">/</span> <a href="/guides">Guides</a> <span aria-hidden="true">/</span> <span aria-current="page">Payroll tax API error codes</span></nav>
+    <p class="eyebrow">Developers</p>
+    <h1 class="page">Payroll tax API error codes</h1>
+    <p class="sub">Branch on the code, show the message.</p>
+  </div>
+  <div class="prose seo" style="margin-top:32px;max-width:720px">
+
+    <p>Every error body has the same shape: a <code>error</code> message written for a person, a <code>code</code> that is stable enough to branch on, a <code>requestId</code> to quote to support, and for validation failures a <code>details</code> array. Your code should switch on <code>code</code>, never on the message text.</p>
+    <h2>Codes your integration will meet</h2>
+    <div class="table-wrap"><table><thead><tr><th>Code</th><th style="text-align:left">Status and what to do</th></tr></thead><tbody><tr><td><code>invalid_json</code></td><td style="text-align:left">400. The body is not valid JSON. Fix the serialiser.</td></tr><tr><td><code>invalid_input</code></td><td style="text-align:left">422. A field failed validation. Read <code>details</code>, which names each path and reason.</td></tr><tr><td><code>unsupported_tax_year</code></td><td style="text-align:left">422. The check date is in a year with no rules. Use a date in a supported year; <a href="/payroll-tax-api-effective-dating">see effective dating</a>.</td></tr><tr><td><code>cannot_compute</code></td><td style="text-align:left">422. The input is valid but the engine needs more, and the message names the missing certificate field. Collect that answer and retry.</td></tr><tr><td><code>missing_key</code></td><td style="text-align:left">401. No <code>Authorization</code> header was sent.</td></tr><tr><td><code>invalid_key</code></td><td style="text-align:left">401. The key is not recognised or has been revoked.</td></tr><tr><td><code>expired_key</code></td><td style="text-align:left">401. The key has expired. Issue a new one.</td></tr><tr><td><code>payment_method_required</code></td><td style="text-align:left">402. A live key needs a payment method on file, or the subscription is cancelled or suspended.</td></tr><tr><td><code>rate_limited</code></td><td style="text-align:left">429. Wait <code>Retry-After</code> seconds and retry.</td></tr><tr><td><code>test_daily_limit</code></td><td style="text-align:left">429. A test key reached its daily cap of 500. It resets at midnight UTC; a live key has no daily cap.</td></tr><tr><td><code>cannot_gross_up</code></td><td style="text-align:left">422, on the net-to-gross endpoint. No amount of that earning can reach the target.</td></tr></tbody></table></div>
+    <h2>A retry rule that works</h2>
+    <ul><li>Retry <code>429</code> after <code>Retry-After</code>, and any network failure, because calls are stateless.</li><li>Never retry <code>400</code>, <code>401</code> or <code>422</code> unchanged. The same request will fail the same way.</li><li>Treat <code>402</code> as a billing problem for a person to fix, not something to retry in a loop.</li></ul>
+    <h2>Example</h2>
+    <p>Sending <code>3000.5</code> instead of cents returns:</p><div class="panel" style="margin-top:14px"><pre style="margin:0;padding:18px 22px;overflow:auto">HTTP/1.1 422
+{
+  &quot;error&quot;: &quot;The request did not pass validation.&quot;,
+  &quot;code&quot;: &quot;invalid_input&quot;,
+  &quot;details&quot;: [{ &quot;path&quot;: &quot;earnings[0].amount&quot;,
+    &quot;message&quot;: &quot;must be integer cents, not 3000.5 — send whole cents (e.g. 300050 for $3,000.50), never dollars.&quot; }],
+  &quot;requestId&quot;: &quot;req_01J9Z6Q8X3&quot;
+}</pre></div>
+    <h2>Keep reading</h2>
+    <p><a href="/payroll-tax-api-rate-limits">Payroll tax API rate limits</a> · <a href="/payroll-tax-api-authentication">Payroll tax API authentication</a> · <a href="/payroll-tax-api-json-schema">Payroll tax request JSON Schema</a> · <a href="/payroll-tax-api-integration-guide">Payroll tax API integration guide</a> · <a href="/guides">All guides</a></p>
+  </div>
+<section class="faq" aria-labelledby="faq-h" style="margin-top:44px;max-width:720px"><h2 id="faq-h" style="font-size:22px;line-height:30px">Questions</h2><article><h3>What does cannot_compute mean?</h3><p>The request is valid, but the engine needs an answer it was not given, usually a field on a state withholding certificate. The error message names the missing field.</p></article><article><h3>Should I retry a 422?</h3><p>Not unchanged. A 422 means the input needs to change, so fix the fields named in details or supply the missing certificate answer first.</p></article><article><h3>How do I report a problem?</h3><p>Quote the requestId from the error body, or the X-Request-Id response header, when you contact support.</p></article></section>
+  <div class="seo-cta" style="margin:48px 0 8px;max-width:720px"><a class="btn" href="/signup">Start the 14-day trial</a> <a class="text-link" href="/docs">Read the docs →</a><p class="fine">14-day free trial, then $0.08 per paycheck calculation. Omnia.tax calculates; it does not file, deposit tax, or give tax advice. <a href="/disclaimer">Disclaimer</a>.</p></div>
+</main>
+<footer class="site-footer">
+  <div class="wrap foot-grid">
+    <a class="mark" href="/">Omnia<span class="dot" aria-hidden="true"></span>tax</a>
+    <div><h2>Product</h2><a href="/coverage">Coverage</a><a href="/pricing">Pricing</a><a href="/changelog">Changelog</a></div>
+    <div><h2>Developers</h2><a href="/docs">Docs</a><a href="/docs/paycheck">API reference</a><a href="/status">Status</a></div>
+    <div><h2>Guides</h2><a href="/guides">All guides</a><a href="/payroll-tax-calculation">Payroll tax calculation</a><a href="/payroll-tax-calculation-engine">Payroll tax calculation engine</a><a href="/income-tax-calculation-engine">Income tax calculation engine</a><a href="/take-home-pay">Take-home pay by state</a><a href="/payroll-tax-api">Payroll tax API</a><a href="/payroll-tax">Payroll tax by state</a><a href="/symmetry-tax-engine-alternative">Symmetry alternative</a><a href="/payroll-tax-engine-comparison">Engine comparison</a></div>
+    <div><h2>Company</h2><a href="/about">About</a><a href="/contact">Contact</a><a href="/terms">Terms</a><a href="/privacy">Privacy</a></div>
+  </div>
+  <p class="wrap copy">© 2026 OMNIA TAX LLC. A Michigan limited liability company.</p>
+</footer>
+<script src="/assets/v5.js"></script>
+</body>
+</html>

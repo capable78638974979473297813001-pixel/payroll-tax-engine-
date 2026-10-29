@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="color-scheme" content="light" />
+<title>Payroll tax API authentication: bearer keys, test vs live | Omnia.tax</title>
+<meta name="description" content="How authentication works on the payroll tax API: a bearer key in the Authorization header, sk_test and sk_live keys, how to store them and what 401 means." />
+<link rel="stylesheet" href="/assets/v5.css" />
+</head>
+<body>
+<header class="site-header"><div class="bar">
+  <a class="mark" href="/">Omnia<span class="dot" aria-hidden="true"></span>tax</a>
+  <nav class="nav-links" aria-label="Primary"><a href="/product">Product</a><a href="/coverage">Coverage</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a></nav>
+  <div class="nav-end"><a class="signin" href="/signin">Sign in</a><a class="btn sm" href="/signup">Get API key</a></div>
+  <button class="menu-btn" type="button" aria-expanded="false" aria-label="Menu"><span></span><span></span></button>
+</div></header>
+<main class="wrap">
+  <div class="page-head">
+    <nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a> <span aria-hidden="true">/</span> <a href="/guides">Guides</a> <span aria-hidden="true">/</span> <span aria-current="page">Payroll tax API authentication</span></nav>
+    <p class="eyebrow">Developers</p>
+    <h1 class="page">Payroll tax API authentication</h1>
+    <p class="sub">One header, two kinds of key.</p>
+  </div>
+  <div class="prose seo" style="margin-top:32px;max-width:720px">
+
+    <p>The API authenticates with a bearer key sent in the <code>Authorization</code> header. There is no OAuth dance and no signature to compute. What matters is which kind of key you hold and where you keep it.</p>
+    <h2>The header</h2>
+    <div class="panel" style="margin-top:14px"><pre style="margin:0;padding:18px 22px;overflow:auto">Authorization: Bearer sk_test_…</pre></div>
+    <h2>Two kinds of key</h2>
+    <div class="table-wrap"><table><thead><tr><th>Key</th><th style="text-align:left">Use</th></tr></thead><tbody><tr><td><code>sk_test_…</code></td><td style="text-align:left">Development and CI. Same engine and data as live. Never billed. 30 requests a minute, 500 a day.</td></tr><tr><td><code>sk_live_…</code></td><td style="text-align:left">Production. Billed at $0.08 per paycheck calculation after the 14-day trial. Needs a payment method on file.</td></tr></tbody></table></div>
+    <h2>Keeping a key safe</h2>
+    <ul><li>Read it from an environment variable or a secrets manager. Never commit it.</li><li>Call the API from your server. A key in browser code can be copied by anyone who opens the page.</li><li>Use separate keys for separate environments so one can be revoked without breaking the others.</li><li>The full key is shown once when it is issued, and only a hash is stored. Only a short prefix is shown afterwards.</li><li>A test key expires after 90 days. A new key replaces the previous key of the same kind and never the other kind.</li><li>Every response from an accepted key carries an <code>Omnia-Mode</code> header, <code>live</code> or <code>test</code>, so you can see which kind you used.</li></ul>
+    <h2>What the 401s mean</h2>
+    <div class="table-wrap"><table><thead><tr><th>Code</th><th style="text-align:left">Meaning</th></tr></thead><tbody><tr><td><code>missing_key</code></td><td style="text-align:left">No <code>Authorization: Bearer</code> header was sent.</td></tr><tr><td><code>invalid_key</code></td><td style="text-align:left">The key is not recognised or was revoked.</td></tr><tr><td><code>expired_key</code></td><td style="text-align:left">The key has passed its expiry. Issue a new one.</td></tr></tbody></table></div><p>A <code>402</code> with <code>payment_method_required</code> is different: the key is valid, but a live key needs a payment method or an active subscription. Check which key you are using with <code>GET /v1/me</code>, which returns the key's details and recent usage.</p>
+    <h2>Keep reading</h2>
+    <p><a href="/payroll-tax-api-test-keys">Payroll tax API test keys</a> · <a href="/payroll-tax-api-error-codes">Payroll tax API error codes</a> · <a href="/rest-api-payroll-taxes">REST API for payroll taxes</a> · <a href="/payroll-tax-api-rate-limits">Payroll tax API rate limits</a> · <a href="/guides">All guides</a></p>
+  </div>
+<section class="faq" aria-labelledby="faq-h" style="margin-top:44px;max-width:720px"><h2 id="faq-h" style="font-size:22px;line-height:30px">Questions</h2><article><h3>How do I authenticate to the payroll tax API?</h3><p>Send your key as a bearer token in the Authorization header: the word Bearer, a space, then the key. Test keys start sk_test_ and live keys start sk_live_.</p></article><article><h3>Can I put the key in front-end code?</h3><p>No. Anyone who opens the page could copy it. Call the API from your server.</p></article></section>
+  <div class="seo-cta" style="margin:48px 0 8px;max-width:720px"><a class="btn" href="/signup">Start the 14-day trial</a> <a class="text-link" href="/docs">Read the docs →</a><p class="fine">14-day free trial, then $0.08 per paycheck calculation. Omnia.tax calculates; it does not file, deposit tax, or give tax advice. <a href="/disclaimer">Disclaimer</a>.</p></div>
+</main>
+<footer class="site-footer">
+  <div class="wrap foot-grid">
+    <a class="mark" href="/">Omnia<span class="dot" aria-hidden="true"></span>tax</a>
+    <div><h2>Product</h2><a href="/coverage">Coverage</a><a href="/pricing">Pricing</a><a href="/changelog">Changelog</a></div>
+    <div><h2>Developers</h2><a href="/docs">Docs</a><a href="/docs/paycheck">API reference</a><a href="/status">Status</a></div>
+    <div><h2>Guides</h2><a href="/guides">All guides</a><a href="/payroll-tax-calculation">Payroll tax calculation</a><a href="/payroll-tax-calculation-engine">Payroll tax calculation engine</a><a href="/income-tax-calculation-engine">Income tax calculation engine</a><a href="/take-home-pay">Take-home pay by state</a><a href="/payroll-tax-api">Payroll tax API</a><a href="/payroll-tax">Payroll tax by state</a><a href="/symmetry-tax-engine-alternative">Symmetry alternative</a><a href="/payroll-tax-engine-comparison">Engine comparison</a></div>
+    <div><h2>Company</h2><a href="/about">About</a><a href="/contact">Contact</a><a href="/terms">Terms</a><a href="/privacy">Privacy</a></div>
+  </div>
+  <p class="wrap copy">© 2026 OMNIA TAX LLC. A Michigan limited liability company.</p>
+</footer>
+<script src="/assets/v5.js"></script>
+</body>
+</html>

@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="color-scheme" content="light" />
+<title>Pennsylvania EIT and LST withholding by PSD code | Omnia.tax</title>
+<meta name="description" content="How Pennsylvania Earned Income Tax and Local Services Tax are withheld by PSD code: resident and nonresident rates, with a Philadelphia worked check." />
+<link rel="stylesheet" href="/assets/v5.css" />
+</head>
+<body>
+<header class="site-header"><div class="bar">
+  <a class="mark" href="/">Omnia<span class="dot" aria-hidden="true"></span>tax</a>
+  <nav class="nav-links" aria-label="Primary"><a href="/product">Product</a><a href="/coverage">Coverage</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a></nav>
+  <div class="nav-end"><a class="signin" href="/signin">Sign in</a><a class="btn sm" href="/signup">Get API key</a></div>
+  <button class="menu-btn" type="button" aria-expanded="false" aria-label="Menu"><span></span><span></span></button>
+</div></header>
+<main class="wrap">
+  <div class="page-head">
+    <nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a> <span aria-hidden="true">/</span> <a href="/guides">Guides</a> <span aria-hidden="true">/</span> <span aria-current="page">Pennsylvania EIT and LST withholding</span></nav>
+    <p class="eyebrow">Local taxes</p>
+    <h1 class="page">Pennsylvania Earned Income Tax and Local Services Tax</h1>
+    <p class="sub">Local tax by Political Subdivision code, not by city name.</p>
+  </div>
+  <div class="prose seo" style="margin-top:32px;max-width:720px">
+
+    <p>Pennsylvania local tax is organised by PSD code, a six-digit identifier for the taxing district. The Earned Income Tax (EIT) is a percentage of wages, withheld at the higher of the resident rate and the work-location nonresident rate. The Local Services Tax (LST) is a flat annual amount. The engine reads PSD codes from the certificate.</p>
+    <h2>A Philadelphia check</h2>
+    <div class="table-wrap"><table><thead><tr><th>Tax</th><th style="text-align:right">Taxable wages</th><th style="text-align:right">Amount</th></tr></thead><tbody><tr><td>Pennsylvania Income Tax</td><td style="text-align:right">$3,000.00</td><td style="text-align:right">$92.10</td></tr><tr><td>Pennsylvania Unemployment Compensation (Employee)</td><td style="text-align:right">$3,000.00</td><td style="text-align:right">$2.10</td></tr><tr><td>PA Local Earned Income Tax</td><td style="text-align:right">$3,000.00</td><td style="text-align:right">$112.05</td></tr></tbody></table></div><p>The EIT line is $112.05. The engine's detail: <em>$3000.00 @ 3.74% (the resident rate is higher) — resident 3.74% (PSD 510101) vs. work-location nonresident 3.43% (PSD 510101, PHILADELPHIA CITY)</em></p>
+    <h2>Resident in a different district</h2>
+    <p>Change the home district to one with no resident EIT (PSD 880000) while the work stays in Philadelphia and the line becomes $102.75: <em>$3000.00 @ 3.43% (the nonresident rate is higher) — resident 0.00% (PSD 880000) vs. work-location nonresident 3.43% (PSD 510101, PHILADELPHIA CITY)</em> The rule is that the employer withholds the higher of the two.</p>
+    <h2>LST</h2>
+    <p>The Local Services Tax is a flat dollar amount per year, prorated over the pay periods. It has a municipal portion and a school district portion, each with its own low-income exemption threshold. Send <code>lstPSD</code> in the certificate. For PSD 010201 (Abbottstown Borough) the engine returns an LST line of $2.00 on the $3,000.00 check: <em>$52.00/yr ÷ 26 periods, rounded DOWN to the cent (Act 32's own proration rule, the opposite direction from every other tax in this engine) = $2.00/period</em> A second employer need not withhold if shown proof of LST already withheld; the certificate flag <code>lstAlreadyWithheldElsewhere</code> skips the line.</p>
+    <h2>Why it is hard</h2>
+    <ul><li>2,627 PSD entries exist in the data, and they change often.</li><li>The tax collector for a district (not the city) usually sets how to remit.</li><li>An employee can have a work PSD and a home PSD that disagree about the rate.</li><li>The address endpoint resolves the PSD codes so the form does not need to ask.</li></ul>
+    <h2>Keep reading</h2>
+    <p><a href="/states-with-local-income-tax">States with local income tax</a> · <a href="/address-tax-jurisdiction-lookup-api">Address to tax jurisdiction API</a> · <a href="/local-payroll-tax-api">Local payroll tax API</a> · <a href="/payroll-tax/pennsylvania">Pennsylvania payroll tax</a> · <a href="/guides">All guides</a></p>
+  </div>
+<section class="faq" aria-labelledby="faq-h" style="margin-top:44px;max-width:720px"><h2 id="faq-h" style="font-size:22px;line-height:30px">Questions</h2><article><h3>What is a PSD code?</h3><p>A six-digit Political Subdivision code that identifies a Pennsylvania taxing district. Local tax is looked up by PSD code.</p></article><article><h3>Which EIT rate does the employer withhold?</h3><p>The higher of the employee's resident rate and the nonresident rate at the work location.</p></article></section>
+  <div class="seo-cta" style="margin:48px 0 8px;max-width:720px"><a class="btn" href="/signup">Start the 14-day trial</a> <a class="text-link" href="/docs">Read the docs →</a><p class="fine">14-day free trial, then $0.08 per paycheck calculation. Omnia.tax calculates; it does not file, deposit tax, or give tax advice. <a href="/disclaimer">Disclaimer</a>.</p></div>
+</main>
+<footer class="site-footer">
+  <div class="wrap foot-grid">
+    <a class="mark" href="/">Omnia<span class="dot" aria-hidden="true"></span>tax</a>
+    <div><h2>Product</h2><a href="/coverage">Coverage</a><a href="/pricing">Pricing</a><a href="/changelog">Changelog</a></div>
+    <div><h2>Developers</h2><a href="/docs">Docs</a><a href="/docs/paycheck">API reference</a><a href="/status">Status</a></div>
+    <div><h2>Guides</h2><a href="/guides">All guides</a><a href="/payroll-tax-calculation">Payroll tax calculation</a><a href="/payroll-tax-calculation-engine">Payroll tax calculation engine</a><a href="/income-tax-calculation-engine">Income tax calculation engine</a><a href="/take-home-pay">Take-home pay by state</a><a href="/payroll-tax-api">Payroll tax API</a><a href="/payroll-tax">Payroll tax by state</a><a href="/symmetry-tax-engine-alternative">Symmetry alternative</a><a href="/payroll-tax-engine-comparison">Engine comparison</a></div>
+    <div><h2>Company</h2><a href="/about">About</a><a href="/contact">Contact</a><a href="/terms">Terms</a><a href="/privacy">Privacy</a></div>
+  </div>
+  <p class="wrap copy">© 2026 OMNIA TAX LLC. A Michigan limited liability company.</p>
+</footer>
+<script src="/assets/v5.js"></script>
+</body>
+</html>

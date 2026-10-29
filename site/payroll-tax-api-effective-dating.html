@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="color-scheme" content="light" />
+<title>Payroll tax effective dating: the check date sets the year | Omnia.tax</title>
+<meta name="description" content="How effective-dated payroll tax rules work: the check date selects the tax year, corrections use the original year, and a year with no rules returns an error." />
+<link rel="stylesheet" href="/assets/v5.css" />
+</head>
+<body>
+<header class="site-header"><div class="bar">
+  <a class="mark" href="/">Omnia<span class="dot" aria-hidden="true"></span>tax</a>
+  <nav class="nav-links" aria-label="Primary"><a href="/product">Product</a><a href="/coverage">Coverage</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a></nav>
+  <div class="nav-end"><a class="signin" href="/signin">Sign in</a><a class="btn sm" href="/signup">Get API key</a></div>
+  <button class="menu-btn" type="button" aria-expanded="false" aria-label="Menu"><span></span><span></span></button>
+</div></header>
+<main class="wrap">
+  <div class="page-head">
+    <nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a> <span aria-hidden="true">/</span> <a href="/guides">Guides</a> <span aria-hidden="true">/</span> <span aria-current="page">Payroll tax API effective dating</span></nav>
+    <p class="eyebrow">Developers</p>
+    <h1 class="page">Payroll tax API effective dating</h1>
+    <p class="sub">Rules belong to a date. The check date chooses which.</p>
+  </div>
+  <div class="prose seo" style="margin-top:32px;max-width:720px">
+
+    <p>Tax rules are not timeless. Wage bases, brackets and rates change each January, and some change mid-year. A payroll tax API that holds only today's rules gives wrong answers for yesterday's paycheck. Omnia.tax holds rules by effective date and lets the <code>checkDate</code> on the request choose.</p>
+    <h2>Why the check date, not the pay period</h2>
+    <p>Payroll tax follows when wages are paid, not when they were earned. A paycheck dated 2026-01-02 for work done in December 2025 is taxed under 2026 rules. So the request carries <code>checkDate</code> and nothing else decides the year.</p>
+    <h2>What changes with the year</h2>
+    <div class="table-wrap"><table><thead><tr><th>Figure</th><th style="text-align:left">2026</th><th style="text-align:left">2027</th></tr></thead><tbody><tr><td>Social Security wage base</td><td style="text-align:left">$184,500</td><td style="text-align:left">$192,300</td></tr><tr><td>Social Security employee rate</td><td style="text-align:left">6.2%</td><td style="text-align:left">6.2%</td></tr><tr><td>Medicare employee rate</td><td style="text-align:left">1.45%</td><td style="text-align:left">1.45%</td></tr><tr><td>Additional Medicare tax above</td><td style="text-align:left">$200,000</td><td style="text-align:left">$200,000</td></tr></tbody></table></div>
+    <h2>Corrections and back pay</h2>
+    <p>A correction to an earlier year's paycheck must use that year's tables. Send the original check date and the engine applies that year's rules. A run in the next year for last year's pay does not silently use new numbers.</p>
+    <h2>A year without rules</h2>
+    <p>If the check date falls in a year the engine has no rules for, the API returns <code>422</code> with the code <code>unsupported_tax_year</code> instead of guessing. <code>GET /v1/states?year=2027</code> lists which states have rules for a given year. Years that are provisional carry a note in <code>warnings</code>.</p>
+    <h2>Mid-year changes</h2>
+    <p>When a state revises a formula during the year, the rule file carries an effective date, so checks dated before it keep the old method and checks after it use the new one. The <a href="/changelog">changelog</a> records the changes.</p>
+    <h2>Keep reading</h2>
+    <p><a href="/payroll-tax-api-error-codes">Payroll tax API error codes</a> · <a href="/social-security-wage-base">Social Security wage base</a> · <a href="/payroll-tax-rates-2026">Payroll tax rates 2026</a> · <a href="/payroll-tax-api-for-developers">Payroll tax API for developers</a> · <a href="/guides">All guides</a></p>
+  </div>
+<section class="faq" aria-labelledby="faq-h" style="margin-top:44px;max-width:720px"><h2 id="faq-h" style="font-size:22px;line-height:30px">Questions</h2><article><h3>Which year does the API use for a paycheck?</h3><p>The year of the checkDate on the request. The pay period dates do not decide it.</p></article><article><h3>Can I run a correction for last year?</h3><p>Yes. Send the original check date and the engine applies that year's rules, so the correction ties to what should have been withheld then.</p></article><article><h3>What happens if there are no rules for the year?</h3><p>The API returns 422 with unsupported_tax_year rather than using another year's numbers.</p></article></section>
+  <div class="seo-cta" style="margin:48px 0 8px;max-width:720px"><a class="btn" href="/signup">Start the 14-day trial</a> <a class="text-link" href="/docs">Read the docs →</a><p class="fine">14-day free trial, then $0.08 per paycheck calculation. Omnia.tax calculates; it does not file, deposit tax, or give tax advice. <a href="/disclaimer">Disclaimer</a>.</p></div>
+</main>
+<footer class="site-footer">
+  <div class="wrap foot-grid">
+    <a class="mark" href="/">Omnia<span class="dot" aria-hidden="true"></span>tax</a>
+    <div><h2>Product</h2><a href="/coverage">Coverage</a><a href="/pricing">Pricing</a><a href="/changelog">Changelog</a></div>
+    <div><h2>Developers</h2><a href="/docs">Docs</a><a href="/docs/paycheck">API reference</a><a href="/status">Status</a></div>
+    <div><h2>Guides</h2><a href="/guides">All guides</a><a href="/payroll-tax-calculation">Payroll tax calculation</a><a href="/payroll-tax-calculation-engine">Payroll tax calculation engine</a><a href="/income-tax-calculation-engine">Income tax calculation engine</a><a href="/take-home-pay">Take-home pay by state</a><a href="/payroll-tax-api">Payroll tax API</a><a href="/payroll-tax">Payroll tax by state</a><a href="/symmetry-tax-engine-alternative">Symmetry alternative</a><a href="/payroll-tax-engine-comparison">Engine comparison</a></div>
+    <div><h2>Company</h2><a href="/about">About</a><a href="/contact">Contact</a><a href="/terms">Terms</a><a href="/privacy">Privacy</a></div>
+  </div>
+  <p class="wrap copy">© 2026 OMNIA TAX LLC. A Michigan limited liability company.</p>
+</footer>
+<script src="/assets/v5.js"></script>
+</body>
+</html>

@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="color-scheme" content="light" />
+<title>Batch payroll tax calculation API for pay runs | Omnia.tax</title>
+<meta name="description" content="Calculate many paychecks in one request with the payCalc batch endpoint: an array in, an array out, billed per successful paycheck, for payroll runs." />
+<link rel="stylesheet" href="/assets/v5.css" />
+</head>
+<body>
+<header class="site-header"><div class="bar">
+  <a class="mark" href="/">Omnia<span class="dot" aria-hidden="true"></span>tax</a>
+  <nav class="nav-links" aria-label="Primary"><a href="/product">Product</a><a href="/coverage">Coverage</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a></nav>
+  <div class="nav-end"><a class="signin" href="/signin">Sign in</a><a class="btn sm" href="/signup">Get API key</a></div>
+  <button class="menu-btn" type="button" aria-expanded="false" aria-label="Menu"><span></span><span></span></button>
+</div></header>
+<main class="wrap">
+  <div class="page-head">
+    <nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a> <span aria-hidden="true">/</span> <a href="/guides">Guides</a> <span aria-hidden="true">/</span> <span aria-current="page">Batch payroll tax calculation API</span></nav>
+    <p class="eyebrow">Developers</p>
+    <h1 class="page">Batch payroll tax calculation API</h1>
+    <p class="sub">One request for a whole pay run.</p>
+  </div>
+  <div class="prose seo" style="margin-top:32px;max-width:720px">
+
+    <p>A pay run is hundreds of paychecks. Posting them one at a time works, and a batch endpoint is neater. <code>POST /v1/payCalc</code> accepts an array of requests, or an object with a <code>payCalc</code> array, and returns an array of results. It follows the batch calling convention that the Symmetry-style adapter uses, so integrations that already call that way look familiar.</p>
+    <h2>Shape</h2>
+    <div class="panel" style="margin-top:14px"><pre style="margin:0;padding:18px 22px;overflow:auto">POST /v1/payCalc
+[ { …a payCalc request… }, { …another… }, … ]
+
+or
+
+{ &quot;payCalc&quot;: [ { … }, { … } ] }</pre></div><p>The response is an array of results in the same order. The body must be an array of requests; anything else is refused with <code>invalid_json</code>.</p>
+    <h2>Billing</h2>
+    <p>One usage unit per successful paycheck in the batch. A failed calculation counts for nothing. A batch of 200 is metered as 200 paychecks at $0.08 each ($16.00), the same as 200 single calls.</p>
+    <h2>Single calls or batch?</h2>
+    <div class="table-wrap"><table><thead><tr><th>Use</th><th style="text-align:left">When</th></tr></thead><tbody><tr><td><code>POST /v1/paycheck</code></td><td style="text-align:left">You want the full response shape, notices and warnings, and one result per request.</td></tr><tr><td><code>POST /v1/payCalc</code></td><td style="text-align:left">You are integrating with a Symmetry-shaped client, or you want a single request for a run.</td></tr></tbody></table></div>
+    <h2>Know the limits</h2>
+    <ul><li>The batch adapter uses its own jurisdiction ids, not Symmetry's. See <a href="/migrate-from-symmetry-paycalc">migrating from a payCalc integration</a>.</li><li>Rate limits apply per request, so a large batch is one call against the limit.</li><li>Keep batch sizes reasonable so one slow paycheck does not hold up the rest.</li></ul>
+    <h2>Keep reading</h2>
+    <p><a href="/migrate-from-symmetry-paycalc">Migrate from a Symmetry payCalc integration</a> · <a href="/payroll-tax-api-rate-limits">Payroll tax API rate limits</a> · <a href="/payroll-tax-api-pricing">Payroll tax API pricing</a> · <a href="/embedded-payroll-tax-engine">Embedded payroll tax engine</a> · <a href="/guides">All guides</a></p>
+  </div>
+<section class="faq" aria-labelledby="faq-h" style="margin-top:44px;max-width:720px"><h2 id="faq-h" style="font-size:22px;line-height:30px">Questions</h2><article><h3>Can I calculate many paychecks in one request?</h3><p>Yes. POST an array of requests, or an object with a payCalc array, to /v1/payCalc and you get an array of results in the same order.</p></article><article><h3>How is a batch billed?</h3><p>One usage unit per successful paycheck in the batch.</p></article></section>
+  <div class="seo-cta" style="margin:48px 0 8px;max-width:720px"><a class="btn" href="/signup">Start the 14-day trial</a> <a class="text-link" href="/docs">Read the docs →</a><p class="fine">14-day free trial, then $0.08 per paycheck calculation. Omnia.tax calculates; it does not file, deposit tax, or give tax advice. <a href="/disclaimer">Disclaimer</a>.</p></div>
+</main>
+<footer class="site-footer">
+  <div class="wrap foot-grid">
+    <a class="mark" href="/">Omnia<span class="dot" aria-hidden="true"></span>tax</a>
+    <div><h2>Product</h2><a href="/coverage">Coverage</a><a href="/pricing">Pricing</a><a href="/changelog">Changelog</a></div>
+    <div><h2>Developers</h2><a href="/docs">Docs</a><a href="/docs/paycheck">API reference</a><a href="/status">Status</a></div>
+    <div><h2>Guides</h2><a href="/guides">All guides</a><a href="/payroll-tax-calculation">Payroll tax calculation</a><a href="/payroll-tax-calculation-engine">Payroll tax calculation engine</a><a href="/income-tax-calculation-engine">Income tax calculation engine</a><a href="/take-home-pay">Take-home pay by state</a><a href="/payroll-tax-api">Payroll tax API</a><a href="/payroll-tax">Payroll tax by state</a><a href="/symmetry-tax-engine-alternative">Symmetry alternative</a><a href="/payroll-tax-engine-comparison">Engine comparison</a></div>
+    <div><h2>Company</h2><a href="/about">About</a><a href="/contact">Contact</a><a href="/terms">Terms</a><a href="/privacy">Privacy</a></div>
+  </div>
+  <p class="wrap copy">© 2026 OMNIA TAX LLC. A Michigan limited liability company.</p>
+</footer>
+<script src="/assets/v5.js"></script>
+</body>
+</html>

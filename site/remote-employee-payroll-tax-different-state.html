@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="color-scheme" content="light" />
+<title>Remote employee payroll tax: working from another state | Omnia.tax</title>
+<meta name="description" content="Which state taxes a remote employee: the work state, the home state and reciprocity, with a worked New Jersey resident working in Pennsylvania check." />
+<link rel="stylesheet" href="/assets/v5.css" />
+</head>
+<body>
+<header class="site-header"><div class="bar">
+  <a class="mark" href="/">Omnia<span class="dot" aria-hidden="true"></span>tax</a>
+  <nav class="nav-links" aria-label="Primary"><a href="/product">Product</a><a href="/coverage">Coverage</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a></nav>
+  <div class="nav-end"><a class="signin" href="/signin">Sign in</a><a class="btn sm" href="/signup">Get API key</a></div>
+  <button class="menu-btn" type="button" aria-expanded="false" aria-label="Menu"><span></span><span></span></button>
+</div></header>
+<main class="wrap">
+  <div class="page-head">
+    <nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a> <span aria-hidden="true">/</span> <a href="/guides">Guides</a> <span aria-hidden="true">/</span> <span aria-current="page">Remote employee in a different state</span></nav>
+    <p class="eyebrow">Who it is for</p>
+    <h1 class="page">Remote employee payroll tax in a different state</h1>
+    <p class="sub">Two states, one paycheck, and rules about which one withholds.</p>
+  </div>
+  <div class="prose seo" style="margin-top:32px;max-width:720px">
+
+    <p>When an employee works in one state and lives in another, the question is which state's income tax is withheld. The default is the state where the work is done. The employee's home state may tax the same wages too, usually with a credit on the return. Some pairs of states have reciprocity agreements that change the answer. Remote work makes this common.</p>
+    <h2>A New Jersey resident working in Pennsylvania</h2>
+    <p>The engine is given the work state (Pennsylvania, with a district) and the residence state (New Jersey). Pennsylvania and New Jersey have a reciprocal agreement, so the employer withholds for the state of residence and not for Pennsylvania. The state lines on a $3,000.00 check:</p><div class="table-wrap"><table><thead><tr><th>Tax</th><th style="text-align:right">Taxable wages</th><th style="text-align:right">Amount</th></tr></thead><tbody><tr><td>Pennsylvania Unemployment Compensation (Employee)</td><td style="text-align:right">$3,000.00</td><td style="text-align:right">$2.10</td></tr><tr><td>PA Local Earned Income Tax</td><td style="text-align:right">$3,000.00</td><td style="text-align:right">$102.75</td></tr><tr><td>New Jersey Income Tax (withheld by PA employer under reciprocity)</td><td style="text-align:right">$3,000.00</td><td style="text-align:right">$121.05</td></tr></tbody></table></div><p>Total employee tax is $775.78 and net pay $2,224.22. Read the detail on each line to see which state's rule produced it.</p>
+    <h2>Questions to settle for every remote employee</h2>
+    <ul><li>Where is the work physically done on each day? Some states tax by days worked in the state.</li><li>Is there a reciprocity agreement between the work and home states? See <a href="/payroll-tax-reciprocity-agreements">reciprocity</a>.</li><li>Did the employee file the work state's nonresident certificate, or the home state's exemption form?</li><li>Does the employer have a registration obligation in the employee's home state?</li></ul>
+    <h2>What the engine needs</h2>
+    <div class="panel" style="margin-top:14px"><pre style="margin:0;padding:18px 22px;overflow:auto">&quot;workState&quot;: { &quot;code&quot;: &quot;PA&quot;, &quot;certificate&quot;: { … } },
+&quot;residenceState&quot;: { &quot;code&quot;: &quot;NJ&quot;, &quot;certificate&quot;: { … } }</pre></div><p>Send both. For rules that depend on days worked, the certificate has a field for it. See <a href="/multi-state-payroll-tax-calculation">multi-state calculation</a>.</p>
+    <h2>Not legal advice</h2>
+    <p>Nexus and registration rules for remote employees are a legal and tax-planning matter. The engine applies withholding rules to the facts you give it and does not decide where an employer must register.</p>
+    <h2>Keep reading</h2>
+    <p><a href="/multi-state-payroll-tax-calculation">Multi-state payroll tax calculation</a> · <a href="/payroll-tax-reciprocity-agreements">Payroll tax reciprocity agreements</a> · <a href="/nonresident-employee-state-withholding">Nonresident employee state withholding</a> · <a href="/payroll-tax-api-for-staffing-agencies">Payroll tax API for staffing agencies</a> · <a href="/guides">All guides</a></p>
+  </div>
+<section class="faq" aria-labelledby="faq-h" style="margin-top:44px;max-width:720px"><h2 id="faq-h" style="font-size:22px;line-height:30px">Questions</h2><article><h3>Which state do I withhold for a remote employee?</h3><p>Usually the state where the work is done, unless a reciprocity agreement or the home state's rules say otherwise. The employee's home state may also tax the wages, with a credit on the return.</p></article><article><h3>Do I have to register in the employee's home state?</h3><p>That is a question of employer nexus and registration, which depends on the state. The engine does not decide it.</p></article></section>
+  <div class="seo-cta" style="margin:48px 0 8px;max-width:720px"><a class="btn" href="/signup">Start the 14-day trial</a> <a class="text-link" href="/docs">Read the docs →</a><p class="fine">14-day free trial, then $0.08 per paycheck calculation. Omnia.tax calculates; it does not file, deposit tax, or give tax advice. <a href="/disclaimer">Disclaimer</a>.</p></div>
+</main>
+<footer class="site-footer">
+  <div class="wrap foot-grid">
+    <a class="mark" href="/">Omnia<span class="dot" aria-hidden="true"></span>tax</a>
+    <div><h2>Product</h2><a href="/coverage">Coverage</a><a href="/pricing">Pricing</a><a href="/changelog">Changelog</a></div>
+    <div><h2>Developers</h2><a href="/docs">Docs</a><a href="/docs/paycheck">API reference</a><a href="/status">Status</a></div>
+    <div><h2>Guides</h2><a href="/guides">All guides</a><a href="/payroll-tax-calculation">Payroll tax calculation</a><a href="/payroll-tax-calculation-engine">Payroll tax calculation engine</a><a href="/income-tax-calculation-engine">Income tax calculation engine</a><a href="/take-home-pay">Take-home pay by state</a><a href="/payroll-tax-api">Payroll tax API</a><a href="/payroll-tax">Payroll tax by state</a><a href="/symmetry-tax-engine-alternative">Symmetry alternative</a><a href="/payroll-tax-engine-comparison">Engine comparison</a></div>
+    <div><h2>Company</h2><a href="/about">About</a><a href="/contact">Contact</a><a href="/terms">Terms</a><a href="/privacy">Privacy</a></div>
+  </div>
+  <p class="wrap copy">© 2026 OMNIA TAX LLC. A Michigan limited liability company.</p>
+</footer>
+<script src="/assets/v5.js"></script>
+</body>
+</html>

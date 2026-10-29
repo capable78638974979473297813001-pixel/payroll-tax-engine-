@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="color-scheme" content="light" />
+<title>Payroll tax API cURL example: copy, paste, run | Omnia.tax</title>
+<meta name="description" content="A copy-and-paste cURL example for a payroll tax API: a Texas paycheck, a California paycheck and a Columbus, Ohio paycheck, with the net pay each returns." />
+<link rel="stylesheet" href="/assets/v5.css" />
+</head>
+<body>
+<header class="site-header"><div class="bar">
+  <a class="mark" href="/">Omnia<span class="dot" aria-hidden="true"></span>tax</a>
+  <nav class="nav-links" aria-label="Primary"><a href="/product">Product</a><a href="/coverage">Coverage</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a></nav>
+  <div class="nav-end"><a class="signin" href="/signin">Sign in</a><a class="btn sm" href="/signup">Get API key</a></div>
+  <button class="menu-btn" type="button" aria-expanded="false" aria-label="Menu"><span></span><span></span></button>
+</div></header>
+<main class="wrap">
+  <div class="page-head">
+    <nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a> <span aria-hidden="true">/</span> <a href="/guides">Guides</a> <span aria-hidden="true">/</span> <span aria-current="page">Payroll tax API cURL example</span></nav>
+    <p class="eyebrow">Developers</p>
+    <h1 class="page">Payroll tax API: a cURL example</h1>
+    <p class="sub">The quickest way to see what the API returns.</p>
+  </div>
+  <div class="prose seo" style="margin-top:32px;max-width:720px">
+
+    <p>cURL needs no setup beyond a key. Set <code>KEY</code> to a test key, paste a request, and read the answer. Three requests follow, with the net pay each returns, so you can confirm your own run matches.</p>
+    <h2>Texas: no state income tax</h2>
+    <div class="panel" style="margin-top:14px"><pre style="margin:0;padding:18px 22px;overflow:auto">curl https://api.omnia.tax/v1/paycheck \
+  -H &quot;Authorization: Bearer $KEY&quot; \
+  -H &quot;Content-Type: application/json&quot; \
+  -d '{
+  &quot;checkDate&quot;: &quot;2026-09-15&quot;,
+  &quot;payFrequency&quot;: &quot;biweekly&quot;,
+  &quot;earnings&quot;: [{ &quot;code&quot;: &quot;REG&quot;, &quot;category&quot;: &quot;regular&quot;, &quot;amount&quot;: 300000 }],
+  &quot;deductions&quot;: [],
+  &quot;federalW4&quot;: { &quot;filingStatus&quot;: &quot;single&quot;, &quot;multipleJobs&quot;: false,
+    &quot;dependentCredit&quot;: 0, &quot;otherIncome&quot;: 0, &quot;deductions&quot;: 0, &quot;extraWithholding&quot;: 0 },
+  &quot;ytd&quot;: { &quot;socialSecurity&quot;: 0, &quot;medicare&quot;: 0, &quot;futa&quot;: 0 },
+  &quot;workState&quot;: { &quot;code&quot;: &quot;TX&quot; }
+}'</pre></div><p>Net pay on $3,000.00 is <strong>$2,450.12</strong>.</p>
+    <h2>California: state tax and disability insurance</h2>
+    <div class="panel" style="margin-top:14px"><pre style="margin:0;padding:18px 22px;overflow:auto">curl https://api.omnia.tax/v1/paycheck \
+  -H &quot;Authorization: Bearer $KEY&quot; \
+  -H &quot;Content-Type: application/json&quot; \
+  -d '{
+  &quot;checkDate&quot;: &quot;2026-09-15&quot;,
+  &quot;payFrequency&quot;: &quot;biweekly&quot;,
+  &quot;earnings&quot;: [{ &quot;code&quot;: &quot;REG&quot;, &quot;category&quot;: &quot;regular&quot;, &quot;amount&quot;: 300000 }],
+  &quot;deductions&quot;: [],
+  &quot;federalW4&quot;: { &quot;filingStatus&quot;: &quot;single&quot;, &quot;multipleJobs&quot;: false,
+    &quot;dependentCredit&quot;: 0, &quot;otherIncome&quot;: 0, &quot;deductions&quot;: 0, &quot;extraWithholding&quot;: 0 },
+  &quot;ytd&quot;: { &quot;socialSecurity&quot;: 0, &quot;medicare&quot;: 0, &quot;futa&quot;: 0 },
+  &quot;workState&quot;: { &quot;code&quot;: &quot;CA&quot; }
+}'</pre></div><p>The same pay in California returns net pay of <strong>$2,277.06</strong>. The difference from Texas is $173.06, made up of California Income Tax $134.06 and California Disability Benefits (Employee) $39.00.</p>
+    <h2>Columbus, Ohio: state and city</h2>
+    <div class="panel" style="margin-top:14px"><pre style="margin:0;padding:18px 22px;overflow:auto">curl https://api.omnia.tax/v1/paycheck \
+  -H &quot;Authorization: Bearer $KEY&quot; \
+  -H &quot;Content-Type: application/json&quot; \
+  -d '{
+  &quot;checkDate&quot;: &quot;2026-09-15&quot;,
+  &quot;payFrequency&quot;: &quot;biweekly&quot;,
+  &quot;earnings&quot;: [{ &quot;code&quot;: &quot;REG&quot;, &quot;category&quot;: &quot;regular&quot;, &quot;amount&quot;: 300000 }],
+  &quot;deductions&quot;: [],
+  &quot;federalW4&quot;: { &quot;filingStatus&quot;: &quot;single&quot;, &quot;multipleJobs&quot;: false,
+    &quot;dependentCredit&quot;: 0, &quot;otherIncome&quot;: 0, &quot;deductions&quot;: 0, &quot;extraWithholding&quot;: 0 },
+  &quot;ytd&quot;: { &quot;socialSecurity&quot;: 0, &quot;medicare&quot;: 0, &quot;futa&quot;: 0 },
+  &quot;workState&quot;: { &quot;code&quot;: &quot;OH&quot;, &quot;certificate&quot;: { &quot;residenceCity&quot;: &quot;Columbus&quot;, &quot;workCity&quot;: &quot;Columbus&quot; } }
+}'</pre></div><p>Net pay is <strong>$2,299.35</strong>, after Ohio income tax and Columbus city income tax.</p>
+    <h2>Reading the output</h2>
+    <p>Pipe the response through <code>jq</code> to see the lines on their own:</p><div class="panel" style="margin-top:14px"><pre style="margin:0;padding:18px 22px;overflow:auto">curl -s https://api.omnia.tax/v1/paycheck \
+  -H &quot;Authorization: Bearer $KEY&quot; -H &quot;Content-Type: application/json&quot; \
+  -d @paycheck.json | jq '.result.taxes[] | {id, payer, amount}'</pre></div><p>Add <code>-i</code> to see the <code>RateLimit-Remaining</code> and <code>X-Request-Id</code> headers.</p>
+    <h2>Keep reading</h2>
+    <p><a href="/payroll-tax-api-test-keys">Payroll tax API test keys</a> · <a href="/payroll-tax-api-python-example">Payroll tax API Python example</a> · <a href="/payroll-tax-api-javascript-example">Payroll tax API JavaScript example</a> · <a href="/sandbox">Paycheck calculator</a> · <a href="/guides">All guides</a></p>
+  </div>
+<section class="faq" aria-labelledby="faq-h" style="margin-top:44px;max-width:720px"><h2 id="faq-h" style="font-size:22px;line-height:30px">Questions</h2><article><h3>How do I test a payroll tax API with cURL?</h3><p>Set an environment variable KEY to a test key, then POST a JSON paycheck to https://api.omnia.tax/v1/paycheck with an Authorization: Bearer header and a Content-Type of application/json.</p></article><article><h3>Where do I get a key to try?</h3><p>Create a free test key from your account. Test keys use the same engine and data as live keys, need no card and are never billed.</p></article></section>
+  <div class="seo-cta" style="margin:48px 0 8px;max-width:720px"><a class="btn" href="/signup">Start the 14-day trial</a> <a class="text-link" href="/docs">Read the docs →</a><p class="fine">14-day free trial, then $0.08 per paycheck calculation. Omnia.tax calculates; it does not file, deposit tax, or give tax advice. <a href="/disclaimer">Disclaimer</a>.</p></div>
+</main>
+<footer class="site-footer">
+  <div class="wrap foot-grid">
+    <a class="mark" href="/">Omnia<span class="dot" aria-hidden="true"></span>tax</a>
+    <div><h2>Product</h2><a href="/coverage">Coverage</a><a href="/pricing">Pricing</a><a href="/changelog">Changelog</a></div>
+    <div><h2>Developers</h2><a href="/docs">Docs</a><a href="/docs/paycheck">API reference</a><a href="/status">Status</a></div>
+    <div><h2>Guides</h2><a href="/guides">All guides</a><a href="/payroll-tax-calculation">Payroll tax calculation</a><a href="/payroll-tax-calculation-engine">Payroll tax calculation engine</a><a href="/income-tax-calculation-engine">Income tax calculation engine</a><a href="/take-home-pay">Take-home pay by state</a><a href="/payroll-tax-api">Payroll tax API</a><a href="/payroll-tax">Payroll tax by state</a><a href="/symmetry-tax-engine-alternative">Symmetry alternative</a><a href="/payroll-tax-engine-comparison">Engine comparison</a></div>
+    <div><h2>Company</h2><a href="/about">About</a><a href="/contact">Contact</a><a href="/terms">Terms</a><a href="/privacy">Privacy</a></div>
+  </div>
+  <p class="wrap copy">© 2026 OMNIA TAX LLC. A Michigan limited liability company.</p>
+</footer>
+<script src="/assets/v5.js"></script>
+</body>
+</html>
