@@ -22,6 +22,7 @@ import {
   type SavedScenario, type SubscriptionRecord, type TermsAcceptance, type TermsQuote,
 } from './lib/store.ts';
 import { dashboardUsage, recordAccountUsage, type RecordUsageInput } from './lib/usage.ts';
+import { flushMirror, mirrorReady, mirrorStatus, startMirror } from './lib/mirror.ts';
 import { TRIAL_DAYS, estimate as computePricing } from './lib/pricing.ts';
 import { TERMS_VERSION, TERM_MONTHS, termsClauses } from './lib/terms.ts';
 import { isEmailConfigured, scrubMailLog, sendVerificationEmail, sendContactEmail } from './lib/mail.ts';
@@ -3513,6 +3514,9 @@ function handleHealth(res: ServerResponse): void {
     // 'temporary' means the account store sits on the container's own filesystem: a restart or
     // redeploy erases every account. 'unchecked' outside production.
     storage: storageStatus().status,
+    storageReason: storageStatus().reason,
+    // 'ok': every verified account is backed up in Stripe and restored into an empty store at start.
+    accountBackup: mirrorStatus(),
     startedAt: STARTED_AT,
     taxYears: supportedYears(),
     // Which integrations this server has been given keys for. Booleans only.
@@ -3777,6 +3781,9 @@ createServer((req, res) => {
   const method = asked === 'HEAD' ? 'GET' : asked;
 
   (async () => {
+    // Until the account store has been checked against its backup, account and key routes wait,
+    // so a sign-in cannot hit an empty store a moment before the accounts are restored into it.
+    if (url.startsWith('/api/') || url.startsWith('/v1/') || url === '/mcp') await mirrorReady();
     if (method === 'GET') {
       const dest = canonicalRedirect(req, req.url ?? '/');
       if (dest) {
@@ -3988,6 +3995,7 @@ createServer((req, res) => {
     if (!res.headersSent) sendJson(res, 500, { error: 'Internal server error.' });
   });
 }).listen(PORT, () => {
+  startMirror();
   const liveRefused = stripeKeyRefused();
   if (liveRefused) {
     console.error(`[billing] ${liveRefused}`);
@@ -4001,11 +4009,17 @@ createServer((req, res) => {
   const storage = storageStatus();
   if (storage.status === 'temporary') {
     console.error(
-      `[storage] WARNING: ${storage.reason} Sign-ups work until the next restart, then every account is forgotten. ` +
-        'Mount a persistent disk at /var/data (Render: service > Disks, or deploy from render.yaml). See docs/GO-LIVE.md.',
+      `[storage] WARNING: ${storage.reason} Accounts are kept safe by the Stripe account backup (see /healthz accountBackup) ` +
+        'only while STRIPE_SECRET_KEY is set; a persistent disk at /var/data is still the better home. See docs/GO-LIVE.md.',
     );
   }
   console.log(`Omnia.tax:           http://localhost:${PORT}`);
   console.log(`Omnia.tax docs:      http://localhost:${PORT}/docs`);
   console.log(`Omnia.tax console:   http://localhost:${PORT}/sandbox`);
+});
+
+// Render stops a container with SIGTERM before replacing it. Write any account change that has not
+// reached the backup yet, so a deploy right after a sign-up does not lose it.
+process.on('SIGTERM', () => {
+  void flushMirror(20_000).finally(() => process.exit(0));
 });

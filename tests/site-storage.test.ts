@@ -58,6 +58,7 @@ describe('where the warning appears', () => {
     const js = read('site/assets/session.js');
     assert.match(js, /body\.storage !== 'temporary'/);
     assert.match(js, /signin\|signup/);
+    assert.match(js, /accountBackup\.state === 'ok'/);
   });
 
   test('the start script warns before the server starts', () => {

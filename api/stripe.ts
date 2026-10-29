@@ -102,7 +102,8 @@ async function stripeRequest<T>(
   if (idempotencyKey) headers['Idempotency-Key'] = idempotencyKey;
 
   const body = method === 'POST' && params ? formEncode(params).join('&') : undefined;
-  const res = await fetch(`${stripeApi()}${path}`, { method, headers, body });
+  const query = method === 'GET' && params && Object.keys(params).length ? `?${formEncode(params).join('&')}` : '';
+  const res = await fetch(`${stripeApi()}${path}${query}`, { method, headers, body });
   const data = (await res.json().catch(() => ({}))) as Record<string, unknown>;
   if (!res.ok) {
     const err = (data.error ?? {}) as { message?: string; type?: string; code?: string };
@@ -124,6 +125,31 @@ export function createCustomer(input: { name?: string; email?: string; apiKeyId:
     email: input.email,
     metadata: { apiKeyId: input.apiKeyId },
   });
+}
+
+/**
+ * Customers that hold the site's encrypted account backup (site/lib/mirror.ts). Listed with the
+ * list endpoint, which is strongly consistent, unlike search, so a backup written seconds before a
+ * restart is still found.
+ */
+export interface StripeStoredCustomer {
+  id: string;
+  metadata?: Record<string, string>;
+}
+export function listCustomers(params: { limit?: number; startingAfter?: string } = {}): Promise<{ data: StripeStoredCustomer[]; has_more: boolean }> {
+  return stripeRequest('GET', '/v1/customers', { limit: params.limit ?? 100, starting_after: params.startingAfter });
+}
+export function createStoreCustomer(input: { metadata: Record<string, string>; idempotencyKey: string }): Promise<StripeStoredCustomer> {
+  return stripeRequest<StripeStoredCustomer>(
+    'POST',
+    '/v1/customers',
+    { name: 'Omnia account backup', description: 'Encrypted account backup written by the site. Do not delete.', metadata: input.metadata },
+    input.idempotencyKey,
+  );
+}
+/** Replace a customer's metadata. A key set to an empty string is removed by Stripe. */
+export function updateCustomerMetadata(id: string, metadata: Record<string, string>): Promise<StripeStoredCustomer> {
+  return stripeRequest<StripeStoredCustomer>('POST', `/v1/customers/${encodeURIComponent(id)}`, { metadata });
 }
 
 export interface StripeCheckoutSession {
