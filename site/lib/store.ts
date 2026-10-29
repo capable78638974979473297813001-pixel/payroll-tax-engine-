@@ -499,8 +499,30 @@ export function withDb<T>(fn: (db: DB) => T): T {
     const db = load();
     const result = fn(db);
     writeJsonFileAtomic(FILE, db, { backup: true });
+    notifyWritten(db);
     return result;
   });
+}
+
+type WriteListener = (db: DB) => void;
+const writeListeners: WriteListener[] = [];
+
+/**
+ * Called with the saved store after every write. The account backup (site/lib/mirror.ts) uses it to
+ * notice what changed. A listener that throws never fails the write that triggered it.
+ */
+export function onStoreWritten(fn: WriteListener): void {
+  writeListeners.push(fn);
+}
+
+function notifyWritten(db: DB): void {
+  for (const fn of writeListeners) {
+    try {
+      fn(db);
+    } catch (err) {
+      console.error('[store] write listener failed:', err instanceof Error ? err.message : String(err));
+    }
+  }
 }
 
 export function readDb<T>(fn: (db: DB) => T): T {

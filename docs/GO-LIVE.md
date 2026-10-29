@@ -268,6 +268,20 @@ The fix is on the host: a persistent disk mounted at `/var/data` (on Render, ser
 deploy from `render.yaml`, which declares one; a disk needs a paid instance). Set
 `STORAGE_IS_DURABLE=1` only if the disk is genuinely durable and the check cannot see it.
 
+**Account backup (no disk needed).** When the store is on temporary storage and `STRIPE_SECRET_KEY`
+is set, the site keeps an encrypted copy of every verified account (with its sign-in sessions, API
+keys, terms acceptances, subscription and saved scenarios) in Stripe, as customers named "Omnia
+account backup", and restores them into an empty store at start-up, before it answers any account
+or API request. Changes are written about two seconds after they happen and again on SIGTERM, so a
+deploy right after a sign-up keeps it. `GET /healthz` reports `accountBackup` (`state` `ok`,
+`restoring`, `failing` or `off`). The copy is encrypted (AES-256-GCM) with a key derived from
+`STORE_MIRROR_SECRET`, or from the Stripe secret key when that is unset: set `STORE_MIRROR_SECRET`
+to a long random string so rotating the Stripe key does not strand the backups. `STORE_MIRROR=0`
+turns it off and `STORE_MIRROR=1` forces it on even with a durable disk. A restricted Stripe key
+needs read and write on Customers. Do not delete those customers. The backup does not hold the
+usage log; per-key counters come back as of the last change. A durable disk is still the better
+home and needs no Stripe calls.
+
 **How accounts are saved.** Every change (signup, verification, signed terms,
 card on file, subscription, API key, usage) is written to
 `$SITE_DB_DIR/db.json` before the request returns: temp file, `fsync`, atomic
