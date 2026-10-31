@@ -49,3 +49,7 @@ Two billing paths exist on purpose. The public site reports each successful payc
 ## Requirements
 
 Node.js 22.6 or newer. No install step: the engine and its tests run on `node --test` with no third-party packages.
+
+## Restaurant payroll app
+
+Run `npm run ui:payroll` for the restaurant landing page, authenticated workspace and three-step payroll flow. See [restaurant/README.md](restaurant/README.md) for setup, POS credential requirements and supported calculation boundaries. The previous general payroll demo is available with `npm run ui:payroll:legacy`.
