@@ -14,11 +14,13 @@ import type { Company, DeductionPlan, Employee, PayRun, PayRunLine } from './typ
  * SCOPE, stated plainly: this computes the LIABILITY figures Form 941 and
  * Form 940 themselves report and the core W-2 boxes (1-6, 10, 12, 15-20).
  * It does NOT prepare a filable return or PDF, does not handle Form 941's
- * credits/adjustments (COBRA premium assistance, sick/family leave credits
- * under FFCRA-successor provisions, the research credit payroll offset —
- * none of which this engine's PaycheckInput models an input for), and does
- * not e-file anything. Those are real, separate pieces of a filing
- * subsystem, not corners cut in this one.
+ * credits/adjustments, and does not e-file anything. Those are separate
+ * pieces of a filing subsystem, and they now exist in payroll/federal/: the
+ * complete Form 941 (all lines incl. 5b tips, 7-9 adjustments, the line 11
+ * research credit, Part 2 and Schedule B), Form 940 with Schedule A,
+ * W-2/W-3 checks and the 941<->W-3 reconciliation, holiday-aware deposit
+ * deadlines, and the agency/filing-lifecycle layer. See docs/FEDERAL-FILING.md.
+ * This module stays the simple rollup those build on.
  */
 
 function quarterMonths(quarter: 1 | 2 | 3 | 4): [number, number, number] {
