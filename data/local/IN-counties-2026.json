@@ -97,9 +97,13 @@
     {
       "name": "Boone",
       "countyCode": "06",
-      "rate": 0.017,
+      "rate": 0.0171,
       "changedSinceOct2025": false,
       "rateChanges": [
+        {
+          "on": "2026-01-01",
+          "rate": 0.017
+        },
         {
           "on": "2026-10-01",
           "rate": 0.0171
@@ -631,7 +635,7 @@
     "2026-10-01: R47 / 10-26 read and diffed against all 92 rows; only Boone changed (see octoberUpdate). The notice keys the rate to periods BEGINNING on or after 2026-10-01 while this engine selects by check date."
   ],
   "octoberUpdate": {
-    "$comment": "Departmental Notice #1 R47 / 10-26, effective for withholding for periods beginning on or after 2026-10-01. READ DIRECTLY from the Indiana DOR's own PDF (https://www.in.gov/dor/files/dn01.pdf) on 2026-10-01 and all 92 rows diffed against the table above: exactly one county changed, Boone (06), 0.017 -> 0.0171, the only row the notice marks with an asterisk. Carried as a dated rateChanges entry on that county, so check dates before 2026-10-01 keep 0.017.",
+    "$comment": "Departmental Notice #1 R47 / 10-26, effective for withholding for periods beginning on or after 2026-10-01. READ DIRECTLY from the Indiana DOR's own PDF (https://www.in.gov/dor/files/dn01.pdf) on 2026-10-01 and all 92 rows diffed against the table above: exactly one county changed, Boone (06), 0.017 -> 0.0171, the only row the notice marks with an asterisk. Boone's own rate is now 0.0171, the official rate in force; the rateChanges rows keep 0.017 for check dates from 2026-01-01 through 2026-09-30 (R46 / 01-26) and 0.0171 from 2026-10-01.",
     "notice": "R47 / 10-26",
     "effectiveFrom": "2026-10-01",
     "changed": [

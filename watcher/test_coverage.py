@@ -86,7 +86,7 @@ class EveryTaxingJurisdictionIsWatched(unittest.TestCase):
 # Prior-year files that cite only frozen web.archive.org copies. The live document
 # is watched through the same state's current-year file, so these have no source
 # of their own. Anything else in data/ that feeds a paycheck must be cited.
-ARCHIVE_ONLY = {"data/states/KS-2025.json", "data/states/WV-2025.json", "data/local/IN-counties-2025.json"}
+ARCHIVE_ONLY = {"data/states/KS-2025.json", "data/local/IN-counties-2025.json"}
 PAYCHECK_DATA = ("states", "federal", "local", "minimum-wage", "garnishment", "employer-thresholds")
 
 
