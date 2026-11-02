@@ -1,5 +1,5 @@
 {
- "date": "2026-10-27",
+ "date": "2026-11-02",
  "fixed": [],
  "verified": [
   {
@@ -11,19 +11,72 @@
  ],
  "possible": [
   {
-   "jurisdiction": "MD",
-   "title": "Howard County, MD -- Minimum Wage schedule (Finance Department)",
-   "url": "https://www.howardcountymd.gov/finance/minimum-wage",
+   "jurisdiction": "AZ",
+   "title": "City of Tucson -- Tucson Minimum Wage Act (Proposition 206, November 2021)",
+   "url": "https://www.tucsonaz.gov/Departments/Business-Services-Department/Tucson-Minimum-Wage-Act",
    "figures": [
-    "$16.45"
+    "$16.00"
    ],
    "feeds": [
-    "data/minimum-wage/local/MD-local-2026.json",
-    "data/minimum-wage/local/MD-local-2027.json"
+    "data/minimum-wage/local/AZ-local-2026.json",
+    "data/minimum-wage/local/AZ-local-2027.json"
+   ]
+  },
+  {
+   "jurisdiction": "MN",
+   "title": "City of Saint Paul -- Minimum Wage Increases for Small and Micro Businesses (effective July 1, 2026)",
+   "url": "https://www.stpaul.gov/news/city-saint-paul-minimum-wage-increases-small-and-micro-businesses",
+   "figures": [
+    "$300,000"
+   ],
+   "feeds": [
+    "data/minimum-wage/local/MN-local-2026.json",
+    "data/minimum-wage/local/MN-local-2027.json"
+   ]
+  },
+  {
+   "jurisdiction": "MO",
+   "title": "Missouri unemployment insurance 2026 rate/wage-base reporting (Bloomberg Tax, Vensure, MO DOLIR's own labor.mo.gov/des/employers/tax-rates page referenced)",
+   "url": "https://labor.mo.gov/des/employers/tax-rates",
+   "figures": [
+    "$11,000",
+    "$8,500",
+    "0.6%",
+    "6%"
+   ],
+   "feeds": [
+    "data/states/MO-2026.json",
+    "data/states/MO-2027.json"
+   ]
+  },
+  {
+   "jurisdiction": "NC",
+   "title": "NC Division of Employment Security -- Tax Rate Information",
+   "url": "https://www.des.nc.gov/employers/tax-rate-information",
+   "figures": [
+    "20%"
+   ],
+   "feeds": [
+    "data/states/NC-2026.json",
+    "data/states/NC-2027.json"
+   ]
+  },
+  {
+   "jurisdiction": "NJ",
+   "title": "NJ Division of Employer Accounts -- Rate information, contributions, and due dates",
+   "url": "https://www.nj.gov/labor/ea/employer-services/rate-info/",
+   "figures": [
+    "0.0000",
+    "0.0024"
+   ],
+   "feeds": [
+    "data/states/NJ-2025.json",
+    "data/states/NJ-2026.json",
+    "data/states/NJ-2027.json"
    ]
   }
  ],
- "informational_changes": 31,
+ "informational_changes": 80,
  "blind_spots": [
   {
    "jurisdiction": "AL",
@@ -35,6 +88,16 @@
     "data/local/AL-municipalities-2025.json",
     "data/local/AL-municipalities-2026.json",
     "data/local/AL-municipalities-2027.json"
+   ]
+  },
+  {
+   "jurisdiction": "AL",
+   "title": "City of Gadsden, Code of Ordinances, Sec. 74-112 (Levy of fee), Municode",
+   "url": "https://library.municode.com/al/gadsden/codes/code_of_ordinances",
+   "why": "HTTP 403: the site refuses automated requests; a real browser was refused too",
+   "never_read": true,
+   "feeds": [
+    "data/local/AL-municipalities-2026.json"
    ]
   },
   {
@@ -332,6 +395,29 @@
    ]
   },
   {
+   "jurisdiction": "HI",
+   "title": "Haw. Rev. Stat. \u00a7 652-1 \u2014 MARGINAL brackets on monthly disposable earnings: 5% of the first $100/month, 10% of the next $100/month (i.e. the $100-$200 slice), 20% of everything over $200/month, prorated to 'an equivalent portion... per week' for other pay frequencies",
+   "url": "https://www.capitol.hawaii.gov/hrscurrent/Vol13_Ch0601-0676/HRS0652/HRS_0652-0001.htm",
+   "why": "read with a browser last time; a real browser was refused too",
+   "never_read": false,
+   "feeds": [
+    "data/garnishment/state-overrides-2026.json",
+    "data/garnishment/state-overrides-2027.json"
+   ]
+  },
+  {
+   "jurisdiction": "KY",
+   "title": "City of Augusta Code of Ordinances Sec. 110.02",
+   "url": "https://codelibrary.amlegal.com/codes/augusta/latest/augusta_ky/0-0-0-8998",
+   "why": "read with a browser last time; a real browser was refused too",
+   "never_read": false,
+   "feeds": [
+    "data/local/KY-occupational-2025.json",
+    "data/local/KY-occupational-2026.json",
+    "data/local/KY-occupational-2027.json"
+   ]
+  },
+  {
    "jurisdiction": "KY",
    "title": "City of Middlesboro Code of Ordinances, Ch. 110 (levy section)",
    "url": "https://codelibrary.amlegal.com/codes/middlesboroky/latest/middlesboro_ky/0-0-0-5065",
@@ -357,6 +443,18 @@
   },
   {
    "jurisdiction": "KY",
+   "title": "City of Nortonville Code of Ordinances \u00a7 110.03 OCCUPATIONAL LICENSE FEE PAYMENT REQUIRED",
+   "url": "https://codelibrary.amlegal.com/codes/nortonvilleky/latest/nortonville_ky/0-0-0-3279",
+   "why": "read with a browser last time; a real browser was refused too",
+   "never_read": false,
+   "feeds": [
+    "data/local/KY-occupational-2025.json",
+    "data/local/KY-occupational-2026.json",
+    "data/local/KY-occupational-2027.json"
+   ]
+  },
+  {
+   "jurisdiction": "KY",
    "title": "City of Simpsonville Code of Ordinances Sec. 110.27",
    "url": "https://codelibrary.amlegal.com/codes/simpsonville/latest/simpsonville_ky/0-0-0-6803",
    "why": "read with a browser last time; a real browser was refused too",
@@ -369,8 +467,20 @@
   },
   {
    "jurisdiction": "KY",
-   "title": "City of Georgetown, KY \u2014 Taxes and license fees (occupational license tax: net profits vs gross receipts)",
-   "url": "https://www.georgetownky.gov/2167/Taxes-License-Fees",
+   "title": "Grant County Fiscal Court -- Occupational Licensing",
+   "url": "https://grantcounty.ky.gov/occupational-licensing/",
+   "why": "URLError: <urlopen error timed out>",
+   "never_read": false,
+   "feeds": [
+    "data/local/KY-occupational-2025.json",
+    "data/local/KY-occupational-2026.json",
+    "data/local/KY-occupational-2027.json"
+   ]
+  },
+  {
+   "jurisdiction": "KY",
+   "title": "City of Hartford -- Notice of Occupational License Fees",
+   "url": "https://hartfordky.org/notice-of-occupational-license-fees/",
    "why": "read with a browser last time; a real browser was refused too",
    "never_read": false,
    "feeds": [
@@ -416,7 +526,7 @@
    "jurisdiction": "OH",
    "title": "Ohio Auditor of State, Liberty Township (Henry County) regular audit 2021-2022: 'The JEDD was dissolved June 1, 2021 by the Township and the Village.'",
    "url": "https://ohioauditor.gov/Auditsearch/Reports/2023/Liberty_Township_22_21_Henry_FINAL.pdf",
-   "why": "URLError: <urlopen error timed out>",
+   "why": "URLError: <urlopen error [Errno -5] No address associated with hostname>",
    "never_read": false,
    "feeds": [
     "data/local/OH-jedd-jedz-2025.json",

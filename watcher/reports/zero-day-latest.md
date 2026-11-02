@@ -1,4 +1,4 @@
-# Zero-day problems: 2026-10-27
+# Zero-day problems: 2026-11-02
 
 ## Verified, needs a person (1)
 
@@ -6,18 +6,23 @@ The official source disagrees with a number in `data/`, but a rule stopped the a
 
 - Whitesville: the Secretary of State's record changed 2026-10-06, after the data was scraped on 2026-08-13 (rate ''); re-read the ordinance
 
-## Possible, a person looks (1)
+## Possible, a person looks (5)
 
 A document the data cites changed and its dollar amounts or percentages changed with it:
 
-- MD [Howard County, MD -- Minimum Wage schedule (Finance Department)](https://www.howardcountymd.gov/finance/minimum-wage): figures $16.45; feeds `data/minimum-wage/local/MD-local-2026.json`, `data/minimum-wage/local/MD-local-2027.json`
+- AZ [City of Tucson -- Tucson Minimum Wage Act (Proposition 206, November 2021)](https://www.tucsonaz.gov/Departments/Business-Services-Department/Tucson-Minimum-Wage-Act): figures $16.00; feeds `data/minimum-wage/local/AZ-local-2026.json`, `data/minimum-wage/local/AZ-local-2027.json`
+- MN [City of Saint Paul -- Minimum Wage Increases for Small and Micro Businesses (effective July 1, 2026)](https://www.stpaul.gov/news/city-saint-paul-minimum-wage-increases-small-and-micro-businesses): figures $300,000; feeds `data/minimum-wage/local/MN-local-2026.json`, `data/minimum-wage/local/MN-local-2027.json`
+- MO [Missouri unemployment insurance 2026 rate/wage-base reporting (Bloomberg Tax, Vensure, MO DOLIR's own labor.mo.gov/des/employers/tax-rates page referenced)](https://labor.mo.gov/des/employers/tax-rates): figures $11,000, $8,500, 0.6%, 6%; feeds `data/states/MO-2026.json`, `data/states/MO-2027.json`
+- NC [NC Division of Employment Security -- Tax Rate Information](https://www.des.nc.gov/employers/tax-rate-information): figures 20%; feeds `data/states/NC-2026.json`, `data/states/NC-2027.json`
+- NJ [NJ Division of Employer Accounts -- Rate information, contributions, and due dates](https://www.nj.gov/labor/ea/employer-services/rate-info/): figures 0.0000, 0.0024; feeds `data/states/NJ-2025.json`, `data/states/NJ-2026.json`, `data/states/NJ-2027.json`
 
-31 other source change(s) were informational only and changed nothing.
-## Not being read (35; 25 never read)
+80 other source change(s) were informational only and changed nothing.
+## Not being read (40; 26 never read)
 
 A change on these pages cannot be caught until they can be read. Replace the address, or check them by hand:
 
 - AL [City of Birmingham -- Employers Return of Occupational Tax Withheld](https://birminghamal.hdlgov.com/base64files/TAXES_FORM_4.pdf): HTTP 403: the site refuses automated requests; a real browser was refused too; feeds `data/local/AL-municipalities-2025.json`, `data/local/AL-municipalities-2026.json`, `data/local/AL-municipalities-2027.json`
+- AL [City of Gadsden, Code of Ordinances, Sec. 74-112 (Levy of fee), Municode](https://library.municode.com/al/gadsden/codes/code_of_ordinances): HTTP 403: the site refuses automated requests; a real browser was refused too; feeds `data/local/AL-municipalities-2026.json`
 - AL [Rainbow City -- Form G-1 (Rev 12/20), occupational license fee return](https://www.rbcalabama.com/download/revenue-g-1/?wpdmdl=730&masterkey=60c8bce41072f): HTTP 403: the site refuses automated requests; a real browser was refused too; feeds `data/local/AL-municipalities-2025.json`, `data/local/AL-municipalities-2026.json`, `data/local/AL-municipalities-2027.json`
 - AL [City of Tuskegee -- Occupational Tax Reporting form](https://www.tuskegeealabama.gov/finance-department/files/occupational-tax-form): HTTP 404; feeds `data/local/AL-municipalities-2025.json`, `data/local/AL-municipalities-2026.json`, `data/local/AL-municipalities-2027.json`
 - AR [Arkansas Department of Labor and Licensing -- Minimum Wage and Overtime](https://labor.arkansas.gov/labor/labor-standards/minimum-wage-and-overtime/): HTTP 403: the site refuses automated requests; a real browser was refused too; feeds `data/minimum-wage/states/AR-2026.json`, `data/minimum-wage/states/AR-2027.json`
@@ -44,12 +49,16 @@ A change on these pages cannot be caught until they can be read. Replace the add
 - OR [City of Wilsonville Transit Payroll Tax Information](https://www.wilsonvilleoregon.gov/finance/page/transit-payroll-tax-information): HTTP 404; feeds `data/states/OR-2025.json`, `data/states/OR-2026.json`, `data/states/OR-2027.json`
 - AL [City of Fairfield -- Ordinance 1019, Occupational Tax](https://cityoffairfieldal.org/wp-content/uploads/2025/02/Ordinance-1019-Occupational-Tax_rotated.pdf): HTTP 429: the site refuses automated requests; a real browser was refused too; feeds `data/local/AL-municipalities-2025.json`, `data/local/AL-municipalities-2026.json`, `data/local/AL-municipalities-2027.json`
 - AL [City of Tuskegee -- business information brochure](https://www.tuskegeealabama.gov/sites/g/files/vyhlif3946/f/uploads/infobrochure_word.pdf): HTTP 404; feeds `data/local/AL-municipalities-2025.json`, `data/local/AL-municipalities-2026.json`, `data/local/AL-municipalities-2027.json`
+- HI [Haw. Rev. Stat. § 652-1 — MARGINAL brackets on monthly disposable earnings: 5% of the firs](https://www.capitol.hawaii.gov/hrscurrent/Vol13_Ch0601-0676/HRS0652/HRS_0652-0001.htm): read with a browser last time; a real browser was refused too; feeds `data/garnishment/state-overrides-2026.json`, `data/garnishment/state-overrides-2027.json`
+- KY [City of Augusta Code of Ordinances Sec. 110.02](https://codelibrary.amlegal.com/codes/augusta/latest/augusta_ky/0-0-0-8998): read with a browser last time; a real browser was refused too; feeds `data/local/KY-occupational-2025.json`, `data/local/KY-occupational-2026.json`, `data/local/KY-occupational-2027.json`
 - KY [City of Middlesboro Code of Ordinances, Ch. 110 (levy section)](https://codelibrary.amlegal.com/codes/middlesboroky/latest/middlesboro_ky/0-0-0-5065): read with a browser last time; a real browser was refused too; feeds `data/local/KY-occupational-2025.json`, `data/local/KY-occupational-2026.json`, `data/local/KY-occupational-2027.json`
 - KY [City of Middletown Code of Ordinances Sec. 114.23 (Ord. 07-13-2023-B, 10-12-2023-B)](https://codelibrary.amlegal.com/codes/middletownky/latest/middletown_ky/0-0-0-10846): read with a browser last time; a real browser was refused too; feeds `data/local/KY-occupational-2025.json`, `data/local/KY-occupational-2026.json`, `data/local/KY-occupational-2027.json`
+- KY [City of Nortonville Code of Ordinances § 110.03 OCCUPATIONAL LICENSE FEE PAYMENT REQUIRED](https://codelibrary.amlegal.com/codes/nortonvilleky/latest/nortonville_ky/0-0-0-3279): read with a browser last time; a real browser was refused too; feeds `data/local/KY-occupational-2025.json`, `data/local/KY-occupational-2026.json`, `data/local/KY-occupational-2027.json`
 - KY [City of Simpsonville Code of Ordinances Sec. 110.27](https://codelibrary.amlegal.com/codes/simpsonville/latest/simpsonville_ky/0-0-0-6803): read with a browser last time; a real browser was refused too; feeds `data/local/KY-occupational-2025.json`, `data/local/KY-occupational-2026.json`, `data/local/KY-occupational-2027.json`
-- KY [City of Georgetown, KY — Taxes and license fees (occupational license tax: net profits vs ](https://www.georgetownky.gov/2167/Taxes-License-Fees): read with a browser last time; a real browser was refused too; feeds `data/local/KY-occupational-2025.json`, `data/local/KY-occupational-2026.json`, `data/local/KY-occupational-2027.json`
+- KY [Grant County Fiscal Court -- Occupational Licensing](https://grantcounty.ky.gov/occupational-licensing/): URLError: <urlopen error timed out>; feeds `data/local/KY-occupational-2025.json`, `data/local/KY-occupational-2026.json`, `data/local/KY-occupational-2027.json`
+- KY [City of Hartford -- Notice of Occupational License Fees](https://hartfordky.org/notice-of-occupational-license-fees/): read with a browser last time; a real browser was refused too; feeds `data/local/KY-occupational-2025.json`, `data/local/KY-occupational-2026.json`, `data/local/KY-occupational-2027.json`
 - MN [Minnesota Paid Leave -- Premium rate and contributions](https://pl.mn.gov/resources/calculators/premium-rate-and-contributions): HTTP 405; feeds `data/states/MN-2026.json`, `data/states/MN-2027.json`
 - NJ [HHS/ASPE 2026 Poverty Guidelines for the 48 Contiguous States and DC — household of 1: $15](https://aspe.hhs.gov/topics/poverty-economic-mobility/poverty-guidelines): HTTP 403: the site refuses automated requests; a real browser was refused too; feeds `data/garnishment/state-overrides-2026.json`, `data/garnishment/state-overrides-2027.json`
 - NJ [City of Newark Q1 2026 Payroll Tax Booklet](https://www.newarknj.gov/DocumentCenter/View/2741/Payroll-Tax-Booklet-2026-PDF): read with a browser last time; a real browser was refused too; feeds `data/states/NJ-2026.json`, `data/states/NJ-2027.json`
-- OH [Ohio Auditor of State, Liberty Township (Henry County) regular audit 2021-2022: 'The JEDD ](https://ohioauditor.gov/Auditsearch/Reports/2023/Liberty_Township_22_21_Henry_FINAL.pdf): URLError: <urlopen error timed out>; feeds `data/local/OH-jedd-jedz-2025.json`, `data/local/OH-jedd-jedz-2026.json`, `data/local/OH-jedd-jedz-2027.json`
+- OH [Ohio Auditor of State, Liberty Township (Henry County) regular audit 2021-2022: 'The JEDD ](https://ohioauditor.gov/Auditsearch/Reports/2023/Liberty_Township_22_21_Henry_FINAL.pdf): URLError: <urlopen error [Errno -5] No address associated with hostname>; feeds `data/local/OH-jedd-jedz-2025.json`, `data/local/OH-jedd-jedz-2026.json`, `data/local/OH-jedd-jedz-2027.json`
 
