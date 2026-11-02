@@ -180,7 +180,7 @@ that refuses automated requests (the watch never tries to defeat bot protection)
 a dead address (replace the URL in the data file's citation, then rerun
 `build_sources.py`), or a missing repository secret (`NYSENATE_API_KEY`).
 `test_coverage.py` also fails if a data file a paycheck uses is cited by no
-source at all; the only exceptions are three prior-year files that cite frozen
+source at all; the only exceptions are two prior-year files that cite frozen
 web.archive.org copies, whose live documents are watched through the current year.
 
 ## Fixing a number on its own
