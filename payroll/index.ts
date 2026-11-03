@@ -693,3 +693,8 @@ export type { AleDetermination, CoverageOffer, EmployeeMonthlyHours, Line14Code,
 
 export { buildStateFilingWorksheets, STATE_FILING_CODES } from './stateFilings.ts';
 export type { StateFilingWorksheet, StateTaxReconciliation } from './stateFilings.ts';
+
+export { exportStateFiling, filingContentHash } from './stateFilingExports.ts';
+export type { StateFilingInput, FilingExport, CaDe9cInput, CaWageRecord, MiWageInput, MiWageRecord } from './stateFilingExports.ts';
+export { writeStateFilingPacket, recordStateFilingReceipt } from './stateFilingPackets.ts';
+export type { PortalReceipt } from './stateFilingPackets.ts';
