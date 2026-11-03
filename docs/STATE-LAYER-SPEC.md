@@ -5,6 +5,13 @@ You are building the **state** counterpart of `payroll/federal/`. Read this whol
 is the template: same architecture, same honesty rules, same standard of verification. A state
 layer that is less rigorous than the federal layer is not acceptable.
 
+> **Status (2026-11-03):** the pilot in section 6 is built: three states (CA, NY, TX), the profile format, the
+> state ledger, calendar, deposit analyzer, quarterly UI report, new-hire deadline, channel registry, property
+> tests and the coverage report. Read `docs/STATE-FILING.md` first: it records what was verified, what was not,
+> and exactly how to add a state. The remaining 50 jurisdictions are data files to write from each agency's own
+> documents (`docs/STATE-COVERAGE.md` lists them). The data layout in section 4 was adapted: facts live in
+> `data/filing/states/<ST>.json`, logic in `payroll/state/`.
+
 ## 0. The goal, in one paragraph
 
 For every US state, DC and the territories where it applies, compute exactly what an employer

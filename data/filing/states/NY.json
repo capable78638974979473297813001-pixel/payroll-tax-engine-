@@ -1,0 +1,117 @@
+{
+ "state": "NY",
+ "name": "New York",
+ "verifiedOn": "2026-11-03",
+ "sources": [
+  {
+   "id": "S1",
+   "title": "Instructions for Form NYS-45, Quarterly Combined Withholding, Wage Reporting, and Unemployment Insurance Return",
+   "url": "https://www.tax.ny.gov/pdf/current_forms/wt/nys45i.pdf",
+   "revision": "NYS-45-I (1/26)",
+   "verifiedOn": "2026-11-03",
+   "verifiedBy": "read from the stored copy in watcher/state/snapshots/ny-4527e473d4.txt.gz: due-date table, 'Important information', 'Filing requirements', UI wage base section, lines 13-22"
+  }
+ ],
+ "agencies": {
+  "withholding": {
+   "name": "NYS Department of Taxation and Finance",
+   "portalUrl": "https://www.tax.ny.gov/bus/wt/wtidx.htm",
+   "source": "S1"
+  },
+  "ui": {
+   "name": "NYS Department of Labor, Unemployment Insurance Division",
+   "source": "S1"
+  }
+ },
+ "calendar": {
+  "weekendsRoll": true,
+  "holidays": {
+   "verified": false
+  },
+  "source": "S1"
+ },
+ "mandates": {
+  "efile": {
+   "text": "You must electronically file your quarterly returns and pay any balance due.",
+   "source": "S1"
+  }
+ },
+ "withholding": {
+  "applies": true,
+  "taxLineIds": {
+   "withholding": "NY_SIT",
+   "employeeInsurance": [
+    "NY_PFML_EE",
+    "NY_DBL_EE"
+   ]
+  },
+  "notModelled": [
+   "Withholding deposit frequency and thresholds (Form NYS-1 and its instructions) are not in the NYS-45 instructions and were not read, so no deposit schedule is computed. Payments are reconciled on NYS-45 line 15 ('payments remitted with Web File, Web Upload, PrompTax, or paper Forms NYS-1')."
+  ]
+ },
+ "ui": {
+  "wageBase": 1760000,
+  "wageBaseYear": 2026,
+  "employerTaxLineId": "NY_SUI_ER",
+  "returns": [
+   {
+    "id": "NYS-45",
+    "name": "Form NYS-45, Quarterly Combined Withholding, Wage Reporting, and Unemployment Insurance Return",
+    "frequency": "quarterly",
+    "due": {
+     "kind": "last_day_of_month_after_quarter"
+    },
+    "contents": [
+     "Employers subject to both UI contributions and withholding tax complete Parts A, B and C (boxes a through j) each quarter.",
+     "Employers subject only to UI complete Part A and Part C (boxes a-f) and enter zeros in withholding fields that do not apply.",
+     "Employers subject only to withholding complete Part B and Part C (boxes a-e and g-j) and enter zeros in UI fields that do not apply.",
+     "Employers with no payroll for the quarter complete Parts A and B and enter 0 in Part C, line 24.",
+     "Complete wage information (Part C) for all employees each calendar quarter."
+    ],
+    "source": "S1"
+   }
+  ],
+  "notModelled": [
+   "The NYS-45 part and box layout and the flat-file format (Publication 72.5) were not read.",
+   "UI contribution rate notices are inputs; NY auto-populates a rate (the instructions describe the 9.9% example) and adjusts later, which is not modelled."
+  ]
+ },
+ "channels": [
+  {
+   "id": "state:NY:web_file",
+   "function": "NYS-45 return",
+   "description": "Tax Department Web File: NYS-45 and payment by ACH debit; wage data for up to 1,000 employees by manual entry or .csv, or uncapped by flat file",
+   "enrollment": [
+    "Not read: the online services account requirements."
+   ],
+   "specs": "Flat-file layout is in Publication 72.5, not read.",
+   "source": "S1"
+  },
+  {
+   "id": "state:NY:web_upload",
+   "function": "NYS-45 bulk return",
+   "description": "Tax Department Web Upload: bulk filing of NYS-45 Parts A, B and C for employers, tax preparers and payroll services (Publication 72.5)",
+   "enrollment": [
+    "Not read."
+   ],
+   "specs": "Publication 72.5 (Electronic Reporting of Form NYS-45 Information), not read.",
+   "source": "S1"
+  },
+  {
+   "id": "state:NY:fset",
+   "function": "NYS-45 via commercial software",
+   "description": "Federal/State Employment Taxes (FSET) compatible software; the Tax Department lists approved vendors",
+   "enrollment": [
+    "Not read."
+   ],
+   "specs": "Not read.",
+   "source": "S1"
+  }
+ ],
+ "notModelled": [
+  "New-hire reporting rule.",
+  "Registration trigger and deadline.",
+  "State legal-holiday list.",
+  "Withholding deposit schedule (see withholding)."
+ ]
+}

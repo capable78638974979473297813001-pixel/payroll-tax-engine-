@@ -1,0 +1,617 @@
+{
+ "$comment": "State unemployment insurance tax agencies, transcribed from the US Department of Labor, Employment and Training Administration directory \"Contacts for State UI Tax Information and Assistance\". 53 entries: 50 states, DC, Puerto Rico, US Virgin Islands. Guam, American Samoa and the Northern Mariana Islands are not listed by DOL. The Payroll Organization directory Rev. 2/9/26 lists 52 (no Virgin Islands).",
+ "source": {
+  "title": "Contacts for State UI Tax Information and Assistance",
+  "url": "https://oui.doleta.gov/unemploy/agencies.asp",
+  "verifiedOn": "2026-11-03",
+  "verifiedBy": "page fetched and every entry parsed from its text; entry count asserted in tests/state-coverage.test.ts"
+ },
+ "agencies": [
+  {
+   "code": "AL",
+   "jurisdiction": "Alabama",
+   "agencyLines": [
+    "Department of Industrial Relations",
+    "649 Monroe Street",
+    "Montgomery, AL 36131-0099"
+   ],
+   "phone": "(334) 242-8830",
+   "website": "www.labor.alabama.gov/"
+  },
+  {
+   "code": "AK",
+   "jurisdiction": "Alaska",
+   "agencyLines": [
+    "Employment Security Tax",
+    "Dept of Labor and Workforce Development",
+    "PO Box 115509",
+    "Juneau, AK 99811-5509"
+   ],
+   "phone": "(888) 448-3527",
+   "website": "www.labor.state.ak.us/estax/"
+  },
+  {
+   "code": "AZ",
+   "jurisdiction": "Arizona",
+   "agencyLines": [
+    "Unemployment Tax - 911B",
+    "Department of Economic Security",
+    "PO Box 6028",
+    "Phoenix, AZ 85005-6028"
+   ],
+   "phone": "(602) 771-6601",
+   "website": "des.az.gov/services/employment/unemployment-employer/contact-unemployment-tax-general-information"
+  },
+  {
+   "code": "AR",
+   "jurisdiction": "Arkansas",
+   "agencyLines": [
+    "Department of Workforce Services",
+    "PO Box 2981",
+    "Little Rock, AR 72203-2981"
+   ],
+   "phone": "(501) 682-3798",
+   "website": "www.dws.arkansas.gov/employers/"
+  },
+  {
+   "code": "CA",
+   "jurisdiction": "California",
+   "agencyLines": [
+    "Account Services Group, MIC-90",
+    "Employment Development Department",
+    "PO Box 942880",
+    "Sacramento, CA 94280"
+   ],
+   "phone": "(888) 745-3886",
+   "website": "www.edd.ca.gov/employers.htm"
+  },
+  {
+   "code": "CO",
+   "jurisdiction": "Colorado",
+   "agencyLines": [
+    "Unemployment Insurance Operations",
+    "Department of Labor and Employment",
+    "PO Box 8789",
+    "Denver, CO 80201-8789"
+   ],
+   "phone": "(800) 480-8299",
+   "website": "myuiemployer.coworkforce.com/"
+  },
+  {
+   "code": "CT",
+   "jurisdiction": "Connecticut",
+   "agencyLines": [
+    "Connecticut Department of Labor",
+    "200 Folly Brook Blvd",
+    "Wethersfield, CT 61091-1114"
+   ],
+   "phone": "(860) 263-6550",
+   "website": "www.ctdol.state.ct.us/uitax/txmenu.htm"
+  },
+  {
+   "code": "DE",
+   "jurisdiction": "Delaware",
+   "agencyLines": [
+    "Division of Unemployment Insurance",
+    "Department of Labor",
+    "PO Box 9950",
+    "Wilmington, DE 19809-0950"
+   ],
+   "phone": "(302) 761-8484",
+   "website": "ui.delawareworks.com/employer-handbook.php"
+  },
+  {
+   "code": "DC",
+   "jurisdiction": "District of Columbia",
+   "agencyLines": [
+    "Department of Employment Services",
+    "Office of Unemployment",
+    "Compensation Tax Division",
+    "609 H Street NE, 3rd floor",
+    "Washington, DC 20001-4347"
+   ],
+   "phone": "(202) 698-7550",
+   "website": "www.dcnetworks.org"
+  },
+  {
+   "code": "FL",
+   "jurisdiction": "Florida",
+   "agencyLines": [
+    "Unemployment Compensation Services",
+    "Agency for Workforce Innovation",
+    "107 E. Madison St. MSC 229",
+    "Tallahassee, FL 32399-0180"
+   ],
+   "phone": "(800) 482-8293",
+   "website": "floridarevenue.com/taxes/taxesfees/Pages/reemployment.aspx"
+  },
+  {
+   "code": "GA",
+   "jurisdiction": "Georgia",
+   "agencyLines": [
+    "Department of Labor",
+    "148 Andrew Young Inter Blvd, Suite 800",
+    "Atlanta, GA 30303-1732"
+   ],
+   "phone": "(404) 232-3301",
+   "website": "www.dol.state.ga.us/em/"
+  },
+  {
+   "code": "HI",
+   "jurisdiction": "Hawaii",
+   "agencyLines": [
+    "Department of Labor and Industrial Relations",
+    "830 Punchbowl Street, Room 437",
+    "Honolulu, HI 96813-5096"
+   ],
+   "phone": "(808) 586-8913",
+   "website": "labor.hawaii.gov/ui/"
+  },
+  {
+   "code": "ID",
+   "jurisdiction": "Idaho",
+   "agencyLines": [
+    "Department of Labor",
+    "317 W Main Street",
+    "Boise, ID 83735-0002"
+   ],
+   "phone": "(800) 448-2977",
+   "website": "www.labor.idaho.gov/dnn/Businesses/Help-with-Unemployment-Tax"
+  },
+  {
+   "code": "IL",
+   "jurisdiction": "Illinois",
+   "agencyLines": [
+    "Department of Employment Security",
+    "33 South State St",
+    "Chicago, IL 60603"
+   ],
+   "phone": "(800) 247-4984",
+   "website": "www.ides.illinois.gov/Pages/Unemployment_Taxes_and_Reporting.aspx"
+  },
+  {
+   "code": "IN",
+   "jurisdiction": "Indiana",
+   "agencyLines": [
+    "Department of Workforce Development",
+    "10 North Senate Ave",
+    "Room SE 106",
+    "Indianapolis, IN 46204-2277"
+   ],
+   "phone": "(317) 232-7436",
+   "website": "www.in.gov/dwd/2614.htm"
+  },
+  {
+   "code": "IA",
+   "jurisdiction": "Iowa",
+   "agencyLines": [
+    "Workforce Development",
+    "1000 East Grand Avenue",
+    "Des Moines, IA 50319-0209"
+   ],
+   "phone": "(515) 281-5339",
+   "website": "www.iowaworkforce.org/ui/uiemployers.htm"
+  },
+  {
+   "code": "KS",
+   "jurisdiction": "Kansas",
+   "agencyLines": [
+    "Department of Labor",
+    "401 SW Topeka Blvd",
+    "Topeka, KS 66603-3182"
+   ],
+   "phone": "(785) 296-5027",
+   "website": "www.dol.ks.gov/KansasEmployer.aspx"
+  },
+  {
+   "code": "KY",
+   "jurisdiction": "Kentucky",
+   "agencyLines": [
+    "Department for Employment Services",
+    "P. O. Box 948",
+    "Frankfort, KY 40602-0948"
+   ],
+   "phone": "(502) 564-2272",
+   "website": "www.oet.ky.gov/ui/ui.htm"
+  },
+  {
+   "code": "LA",
+   "jurisdiction": "Louisiana",
+   "agencyLines": [
+    "Louisiana Workforce Commission",
+    "PO Box 94094",
+    "Baton Rouge, LA 70804"
+   ],
+   "phone": "(225) 342-2944",
+   "website": "www.laworks.net/UnemploymentInsurance/UI_Employers.asp"
+  },
+  {
+   "code": "ME",
+   "jurisdiction": "Maine",
+   "agencyLines": [
+    "Department of Labor",
+    "PO Box 259",
+    "Augusta, ME 04332-0259"
+   ],
+   "phone": "(207) 621-5120",
+   "website": "www.maine.gov/unemployment/employers/"
+  },
+  {
+   "code": "MD",
+   "jurisdiction": "Maryland",
+   "agencyLines": [
+    "Department of Labor, Licensing, & Regulation",
+    "1100 North Eutaw St,",
+    "Room 414",
+    "Baltimore, MD 21201-2201"
+   ],
+   "phone": "(800) 492-5524",
+   "website": "www.dllr.state.md.us/employment/uitax.shtml"
+  },
+  {
+   "code": "MA",
+   "jurisdiction": "Massachusetts",
+   "agencyLines": [
+    "Division of Employment and Training",
+    "19 Staniford Street",
+    "Boston, MA 02114-2589"
+   ],
+   "phone": "(617) 626-5050",
+   "website": "www.mass.gov/lwd/unemployment-insur/employer-contributions/"
+  },
+  {
+   "code": "MI",
+   "jurisdiction": "Michigan",
+   "agencyLines": [
+    "Department of Licensing and Regulatory Affairs",
+    "3024 W Grand Blvd",
+    "Detroit, MI 48202-6024"
+   ],
+   "phone": "(313) 456-2180",
+   "website": "www.michigan.gov/uia#Employers"
+  },
+  {
+   "code": "MN",
+   "jurisdiction": "Minnesota",
+   "agencyLines": [
+    "Department of Employment & Economic Development",
+    "332 Minnesota Street, Suite E200",
+    "St. Paul, MN 55101-1351"
+   ],
+   "phone": "(651) 296-6141",
+   "website": "www.uimn.org/uimn/employers/"
+  },
+  {
+   "code": "MS",
+   "jurisdiction": "Mississippi",
+   "agencyLines": [
+    "Department of Employment Security",
+    "PO Box 1699",
+    "Jackson, MS"
+   ],
+   "phone": "(866) 806-0272",
+   "website": "www.mdes.ms.gov/employers/unemployment-tax/"
+  },
+  {
+   "code": "MO",
+   "jurisdiction": "Missouri",
+   "agencyLines": [
+    "Division of Employment Security",
+    "PO Box 59",
+    "Jefferson City, MO 65104-0059"
+   ],
+   "phone": "(573) 751-3340",
+   "website": "labor.mo.gov/Employers"
+  },
+  {
+   "code": "MT",
+   "jurisdiction": "Montana",
+   "agencyLines": [
+    "Unemployment Insurance Division",
+    "PO Box 6339",
+    "Helena, MT 59604-6339"
+   ],
+   "phone": "(406) 444-3834",
+   "website": "http://uid.dli.mt.gov/"
+  },
+  {
+   "code": "NE",
+   "jurisdiction": "Nebraska",
+   "agencyLines": [
+    "Department of Labor",
+    "Box 94600",
+    "State House Station",
+    "Lincoln, NE 68509-4600"
+   ],
+   "phone": "(402) 471-9898",
+   "website": "dol.nebraska.gov/UITax"
+  },
+  {
+   "code": "NV",
+   "jurisdiction": "Nevada",
+   "agencyLines": [
+    "Department of Employment Training and Rehabilitation",
+    "500 East Third Street",
+    "Carson City, NV 89713-0030"
+   ],
+   "phone": "(775) 684-6300",
+   "website": "ui.nv.gov/ess.html"
+  },
+  {
+   "code": "NH",
+   "jurisdiction": "New Hampshire",
+   "agencyLines": [
+    "Department of Employment Security",
+    "32 South Main Street",
+    "Concord, NH 03301-4857"
+   ],
+   "phone": "(603) 228-4033",
+   "website": "www.nhes.nh.gov/services/employers/claimtax.htm"
+  },
+  {
+   "code": "NJ",
+   "jurisdiction": "New Jersey",
+   "agencyLines": [
+    "Department of Labor & Workforce Development",
+    "PO Box 947",
+    "Trenton, NJ 08625-0947"
+   ],
+   "phone": "(609) 633-6400",
+   "website": "lwd.dol.state.nj.us"
+  },
+  {
+   "code": "NM",
+   "jurisdiction": "New Mexico",
+   "agencyLines": [
+    "Department of Workforce Solutions",
+    "PO Box 2281",
+    "Albuquerque, NM 87103-2281"
+   ],
+   "phone": "(505) 841-8576",
+   "website": "www.dws.state.nm.us/UI-Tax-Information"
+  },
+  {
+   "code": "NY",
+   "jurisdiction": "New York",
+   "agencyLines": [
+    "Department of Labor",
+    "State Campus, Building 12",
+    "Room 500",
+    "Albany, NY 12240-0339"
+   ],
+   "phone": "(518) 457-4179",
+   "website": "www.labor.ny.gov/home/businesses.php"
+  },
+  {
+   "code": "NC",
+   "jurisdiction": "North Carolina",
+   "agencyLines": [
+    "Employment Security Commission",
+    "PO Box 26504",
+    "Raleigh, NC 27611-6504"
+   ],
+   "phone": "(919) 707-1150",
+   "website": "des.nc.gov/need-help/faqs/employer-tax-faqs"
+  },
+  {
+   "code": "ND",
+   "jurisdiction": "North Dakota",
+   "agencyLines": [
+    "Job Service of North Dakota",
+    "PO Box 5507",
+    "Bismarck, ND 58506-5507"
+   ],
+   "phone": "(701) 328-2814",
+   "website": "www.jobsnd.com/unemployment-business"
+  },
+  {
+   "code": "OH",
+   "jurisdiction": "Ohio",
+   "agencyLines": [
+    "Department of Job & Family Services",
+    "PO Box 182404",
+    "Columbus, OH 43218-2404"
+   ],
+   "phone": "(614) 466-2319",
+   "website": "eric.ohio.gov/"
+  },
+  {
+   "code": "OK",
+   "jurisdiction": "Oklahoma",
+   "agencyLines": [
+    "Employment Security Commission",
+    "PO Box 52003",
+    "Oklahoma City, OK 73152-2003"
+   ],
+   "phone": "(405) 557-5362",
+   "website": "oklahoma.gov/oesc/employers.html"
+  },
+  {
+   "code": "OR",
+   "jurisdiction": "Oregon",
+   "agencyLines": [
+    "Employment Department",
+    "875 Union Street NE",
+    "Room 107",
+    "Salem, OR 97311-0030"
+   ],
+   "phone": "(503) 947-1488, option 5",
+   "website": "www.oregon.gov/employ/tax"
+  },
+  {
+   "code": "PA",
+   "jurisdiction": "Pennsylvania",
+   "agencyLines": [
+    "Dept of Labor and Industry",
+    "7th and Forster Street, Room 915",
+    "Harrisburg, PA 17121-0001"
+   ],
+   "phone": "(717) 787-7679",
+   "website": "www.uc.pa.gov/employers-uc-services-uc-tax/uc-overview/Pages/UC-overview.aspx"
+  },
+  {
+   "code": "PR",
+   "jurisdiction": "Puerto Rico",
+   "agencyLines": [
+    "Department of Labor and Human Resources",
+    "PO Box 1020",
+    "San Juan, PR 000919"
+   ],
+   "phone": "(787) 754-5818",
+   "website": "patronos.trabajo.pr.gov/patronos/acercade.aspx?Id=228&M=286&F=12"
+  },
+  {
+   "code": "RI",
+   "jurisdiction": "Rhode Island",
+   "agencyLines": [
+    "Division of Taxation",
+    "One Capitol Hill, Ste 36",
+    "Providence, RI 29085-5829"
+   ],
+   "phone": "(401) 574-8700",
+   "website": "www.uitax.ri.gov"
+  },
+  {
+   "code": "SC",
+   "jurisdiction": "South Carolina",
+   "agencyLines": [
+    "Employment Security Commission",
+    "PO Box 995",
+    "Columbia, SC 29202-0995"
+   ],
+   "phone": "(803) 737-3075",
+   "website": "dew.sc.gov/employers/unemployment-insurance-tax-programs"
+  },
+  {
+   "code": "SD",
+   "jurisdiction": "South Dakota",
+   "agencyLines": [
+    "Department of Labor",
+    "PO Box 4730",
+    "Aberdeen, SD 57402-4730"
+   ],
+   "phone": "(605) 626-2312",
+   "website": "dlr.sd.gov/ra/businesses/default.aspx"
+  },
+  {
+   "code": "TN",
+   "jurisdiction": "Tennessee",
+   "agencyLines": [
+    "Department of Labor and Workforce Development",
+    "220 French Landing Drive",
+    "Nashville, TN 37243"
+   ],
+   "phone": "(615) 741-2486",
+   "website": "www.tn.gov/workforce/employers/tax-and-insurance-redirect/unemployment-insurance-tax.html"
+  },
+  {
+   "code": "TX",
+   "jurisdiction": "Texas",
+   "agencyLines": [
+    "Workforce Commission",
+    "PO Box 149037",
+    "Austin, TX 78714-9037"
+   ],
+   "phone": "(512) 463-2222",
+   "website": "https://www.twc.texas.gov/businesses/unemployment-tax"
+  },
+  {
+   "code": "UT",
+   "jurisdiction": "Utah",
+   "agencyLines": [
+    "Department of Workforce Services",
+    "PO Box 45288",
+    "Salt Lake City, UT 84145-0288"
+   ],
+   "phone": "(801) 526-9400",
+   "website": "jobs.utah.gov/ui/employer/employerhome.aspx"
+  },
+  {
+   "code": "VT",
+   "jurisdiction": "Vermont",
+   "agencyLines": [
+    "Department of Labor",
+    "PO Box 488",
+    "Montpelier, VT 05601-0488"
+   ],
+   "phone": "(802) 828-4252",
+   "website": "labor.vermont.gov/unemployment-insurance/ui-employers/"
+  },
+  {
+   "code": "VI",
+   "jurisdiction": "Virgin Islands",
+   "agencyLines": [
+    "Department of Labor",
+    "PO Box 302608",
+    "St. Thomas, VI 00803-2608"
+   ],
+   "phone": "(340) 776-1440",
+   "website": "www.vidol.gov/unemployment/"
+  },
+  {
+   "code": "VA",
+   "jurisdiction": "Virginia",
+   "agencyLines": [
+    "Employment Commission",
+    "PO Box 1358",
+    "Richmond, VA 23218-1358"
+   ],
+   "phone": "(804) 786-3061",
+   "website": "www.vec.virginia.gov/unemployed"
+  },
+  {
+   "code": "WA",
+   "jurisdiction": "Washington",
+   "agencyLines": [
+    "Employment Security Department",
+    "PO Box 9046",
+    "Olympia, WA 98507-9046"
+   ],
+   "phone": "(360) 902-9360",
+   "website": "esd.wa.gov/employer-taxes"
+  },
+  {
+   "code": "WV",
+   "jurisdiction": "West Virginia",
+   "agencyLines": [
+    "Bureau of Employment Programs",
+    "112 California Avenue",
+    "Charleston, WV 25305-0016"
+   ],
+   "phone": "(304) 558-2676",
+   "website": "workforcewv.org/unemployment/employers"
+  },
+  {
+   "code": "WI",
+   "jurisdiction": "Wisconsin",
+   "agencyLines": [
+    "Department of Workforce Development",
+    "PO Box 7942",
+    "Madison, WI 57307-7942"
+   ],
+   "phone": "(608) 261-6700",
+   "website": "dwd.wisconsin.gov/uitax/"
+  },
+  {
+   "code": "WY",
+   "jurisdiction": "Wyoming",
+   "agencyLines": [
+    "Unemployment Tax Division",
+    "PO Box 2760",
+    "Casper, WY 82602-2760",
+    "Created: March 29, 2004",
+    "Updated: September 11, 2026",
+    "Frequently Asked Questions",
+    "| -->",
+    "Freedom of Information Act",
+    "|",
+    "Privacy & Security Statement",
+    "|",
+    "Disclaimers",
+    "|"
+   ],
+   "phone": "(307) 235-3217",
+   "website": "wyomingworkforce.org/businesses/ui/"
+  }
+ ]
+}

@@ -1,0 +1,219 @@
+{
+ "state": "CA",
+ "name": "California",
+ "verifiedOn": "2026-11-03",
+ "sources": [
+  {
+   "id": "S1",
+   "title": "California Employer's Guide (DE 44)",
+   "url": "https://edd.ca.gov/siteassets/files/pdf_pub_ctr/de44.pdf",
+   "revision": "DE 44 Rev. 52 (4-26)",
+   "verifiedOn": "2026-11-03",
+   "verifiedBy": "read from the stored copy in watcher/state/snapshots/ca-8949de8a07.txt.gz: '2026 Forms and Due Dates' and 'California Deposit Requirements' (p.5), 'Payroll Tax Deposit (DE 88)' (p.60-61) incl. the 2026 quarterly payment table, 'About Employers' (p.6), '2026 Payroll Tax Rates, Taxable Wage Limits' (p.8), Important Information"
+  }
+ ],
+ "agencies": {
+  "withholding": {
+   "name": "Employment Development Department (EDD)",
+   "portalUrl": "https://edd.ca.gov/eServices",
+   "source": "S1"
+  },
+  "ui": {
+   "name": "Employment Development Department (EDD)",
+   "portalUrl": "https://edd.ca.gov/eServices",
+   "source": "S1"
+  },
+  "newHire": {
+   "name": "EDD New Employee Registry (NER)",
+   "portalUrl": "https://edd.ca.gov/en/payroll_taxes/new_hire_reporting",
+   "source": "S1"
+  }
+ },
+ "calendar": {
+  "weekendsRoll": true,
+  "holidays": {
+   "verified": false
+  },
+  "source": "S1"
+ },
+ "registration": {
+  "daysAfterTrigger": 15,
+  "trigger": "paying wages over $100 in any calendar quarter",
+  "source": "S1"
+ },
+ "mandates": {
+  "efile": {
+   "text": "All employers must electronically submit employment tax returns, wage reports, and payroll tax deposits to the Employment Development Department (EDD).",
+   "source": "S1"
+  },
+  "epay": {
+   "text": "All employers must electronically submit payroll tax deposits to EDD.",
+   "source": "S1"
+  }
+ },
+ "withholding": {
+  "applies": true,
+  "taxLineIds": {
+   "withholding": "CA_SIT",
+   "employeeInsurance": [
+    "CA_DBL_EE"
+   ]
+  },
+  "deposits": {
+   "interpretation": "California's deposit schedule for State Disability Insurance (SDI) and Personal Income Tax (PIT) withholding follows the employer's federal deposit schedule and the California PIT accumulated. Bands: under $350, $350 to $400 inclusive, over $400. Rows (DE 44 p.5, p.60): federal next-day: over $400 next-day, $350-$400 monthly, under $350 quarterly; federal semiweekly: over $400 semiweekly, $350-$400 monthly, under $350 quarterly; federal monthly/quarterly/annual: $350 or more monthly, under $350 quarterly. INTERPRETATION: the guide says 'accumulate ... during one or more payroll periods' without defining the accumulation window, so each FEDERAL deposit group (a semiweekly period, a next-day group, or a calendar month for monthly federal depositors) is banded on the PIT withheld in it; a group in the $350-$400 band or a federal-monthly month at $350 or more is deposited monthly (the 15th of the next month); the rest is quarterly. Employer UI and ETT are paid quarterly with the quarterly payment (the guide says they may be paid earlier).",
+   "bands": [
+    {
+     "name": "low",
+     "maxExclusive": 35000
+    },
+    {
+     "name": "mid",
+     "maxInclusive": 40000
+    },
+    {
+     "name": "high"
+    }
+   ],
+   "rows": {
+    "next_day": {
+     "low": "quarterly",
+     "mid": "monthly",
+     "high": "next_day"
+    },
+    "semiweekly": {
+     "low": "quarterly",
+     "mid": "monthly",
+     "high": "semiweekly"
+    },
+    "monthly": {
+     "low": "quarterly",
+     "mid": "monthly",
+     "high": "monthly"
+    }
+   },
+   "due": {
+    "monthly": {
+     "kind": "day_of_month_after",
+     "day": 15
+    },
+    "quarterly": {
+     "kind": "table",
+     "dates": {
+      "2026-Q1": {
+       "due": "2026-04-30",
+       "settle": "2026-05-01"
+      },
+      "2026-Q2": {
+       "due": "2026-07-31",
+       "settle": "2026-08-03"
+      },
+      "2026-Q3": {
+       "due": "2026-11-02",
+       "settle": "2026-11-03"
+      },
+      "2026-Q4": {
+       "due": "2027-02-01",
+       "settle": "2027-02-02"
+      }
+     }
+    },
+    "semiweekly": {
+     "kind": "business_days_after_period_end",
+     "days": 3
+    },
+    "next_day": {
+     "kind": "next_business_day",
+     "settleBusinessDays": 3
+    }
+   },
+   "deposited": [
+    "withholding",
+    "employeeInsurance"
+   ],
+   "employerQuarterly": [
+    "ui"
+   ],
+   "source": "S1"
+  },
+  "notModelled": [
+   "The payroll tax deposit return form (DE 88) field layout and the e-Services bulk file format were not read.",
+   "California's own legal-holiday list was not read (due dates skip weekends only and carry a warning).",
+   "The 15% late-payment penalty is stated in DE 44 but interest and penalties are not computed."
+  ]
+ },
+ "ui": {
+  "wageBase": 700000,
+  "wageBaseYear": 2026,
+  "employerTaxLineId": "CA_SUI_ER",
+  "returns": [
+   {
+    "id": "DE9_DE9C",
+    "name": "Quarterly Contribution Return and Report of Wages (DE 9) and Continuation (DE 9C)",
+    "frequency": "quarterly",
+    "due": {
+     "kind": "table",
+     "dates": {
+      "2026-Q1": {
+       "due": "2026-04-01",
+       "delinquent": "2026-04-30"
+      },
+      "2026-Q2": {
+       "due": "2026-07-01",
+       "delinquent": "2026-07-31"
+      },
+      "2026-Q3": {
+       "due": "2026-10-01",
+       "delinquent": "2026-11-02"
+      },
+      "2026-Q4": {
+       "due": "2027-01-01",
+       "delinquent": "2027-02-01"
+      }
+     }
+    },
+    "contents": [
+     "DE 9 reconciles the tax and withholding amounts with the DE 88 deposits for the quarter.",
+     "DE 9C reports total subject wages, personal income tax (PIT) wages and PIT withheld for each employee for the quarter.",
+     "Must be submitted even if there is no payroll during the quarter."
+    ],
+    "source": "S1"
+   }
+  ],
+  "notModelled": [
+   "The DE 9 line-by-line form layout and the wage-report file format were not read.",
+   "Employment Training Tax (0.1% on the first $7,000, DE 44 p.8) is not emitted as a separate line by the paycheck engine, so it is not in these totals."
+  ]
+ },
+ "newHire": {
+  "form": "DE 34 Report of New Employee(s)",
+  "daysFromStart": 20,
+  "source": "S1"
+ },
+ "channels": [
+  {
+   "id": "state:CA:e_services",
+   "function": "returns, wage reports and deposits",
+   "description": "EDD e-Services for Business: file DE 9/DE 9C online, make DE 88 deposits, register for an account",
+   "enrollment": [
+    "Register online for an employer payroll tax account number at e-Services for Business, or submit the registration form for the industry (DE 1 and variants) by mail or fax."
+   ],
+   "specs": "Bulk file layouts for wage reports were not read.",
+   "source": "S1"
+  },
+  {
+   "id": "state:CA:ner",
+   "function": "new hire reporting",
+   "description": "Report new and rehired employees (DE 34) to the New Employee Registry within 20 calendar days of the start-of-work date",
+   "enrollment": [
+    "Not read: whether a separate registration is required."
+   ],
+   "specs": "Not read.",
+   "source": "S1"
+  }
+ ],
+ "notModelled": [
+  "State legal-holiday list.",
+  "Return form line layouts and file formats (see section notes).",
+  "Local taxes in California are outside this profile."
+ ]
+}
