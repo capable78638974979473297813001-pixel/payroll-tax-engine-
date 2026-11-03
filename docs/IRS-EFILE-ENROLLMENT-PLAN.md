@@ -25,6 +25,58 @@ You may choose several options on one application ("only choose the options your
 The IRS assigns an **EFIN to every provider and an ETIN to Transmitters and Software Developers**. They
 cannot be shared, rented, sold or transferred; a reseller of your software must obtain their own EFIN.
 
+## 1a. Embedded payroll: you are the rail, so this enrollment is necessary
+
+If the product is a set of APIs that run a payroll backend for payroll companies and platforms, the filing
+arm is not optional: someone must be the IRS-recognized filer for each employer, and that is the role you are
+building. (`docs/PAYMENTS.md` calls this Model A: the embedded provider "IS the licensed, bank-backed payroll
+company".) Three parties are involved: your customer (the platform or payroll company), its employers (the
+taxpayers, each with an EIN), and the employees. The IRS relationship is **per taxpayer EIN**, and **who is
+the filer of record** is the first design decision:
+
+| | **A. You are the filer of record** | **B. Your customer is the filer; you are the software** |
+| --- | --- | --- |
+| IRS enrollment | **You** hold the EFIN/ETIN and Reporting Agent status; each employer signs a Form 8655 naming you. | **Each customer** holds its own EFIN and Reporting Agent status and its own 8655s. You are the Software Developer (and possibly Transmitter). |
+| Verified constraint | You collect and retain every Form 8655 and submit the Reporting Agent's List (section 5). | Publication 3112: for software sold "for resale (re-branding, white label, etc.) ... The person buying the resold software must obtain their own EFIN." EFINs/ETINs cannot be rented, shared or transferred. |
+| For your customer | Simple: no IRS enrollment of their own. | Slow and heavy: each customer completes the IRS application, fingerprints and suitability. |
+| For you | Heaviest: you carry the filer-of-record, security and deposit obligations for every employer. | Lighter on filing liability, but you still need Software Developer/ATS status, and your customers' delays become your sales cycle. |
+
+Decide this with counsel before building; it determines the data model (whose EIN/EFIN signs which filing),
+the contracts, and the liability. **Unverified:** how the IRS treats an agent filing for a platform's
+employers on the platform's behalf (agent-of-agent); ask the IRS e-help Desk and counsel.
+
+### Form 8655 through an API (Publication 1474, section 01.04: verified)
+
+Remote onboarding is permitted, but the IRS prescribes it exactly, and says this is the only e-signature
+guidance for Form 8655 (guidance for other forms may not be applied):
+
+1. **Authenticate the signer's identity** by one of two approved methods:
+   - an authorized representative of the Reporting Agent visually inspects government photo ID **in person**
+     (Point of Sale), and a record of the inspection is kept; or
+   - a **third-party commercial e-signature authentication service** returns a **pass/fail** result after taking
+     information only the signer knows (the publication's examples: name, address, truncated SSN) in a secure
+     environment. This works **remotely**. You must keep a record that it returned "pass". More rigorous
+     knowledge-based authentication (several KBA questions) is optional.
+2. **Never accept a signature on a "fail"**, or when identity cannot be verified.
+3. **Capture the e-signature** by only one of: a stylus at a Point of Sale; or a **checkbox the signer selects
+   (never pre-ticked)** with language at or beside it telling them that ticking it is electronically signing
+   Form 8655, and you **record the date and time**.
+4. The **saved e-signed form must display evidence of the signature**.
+5. The signer must be someone authorized to sign for the employer (Rev. Proc. 2012-32 section 6.02 and the Form
+   8655 instructions: **not read yet**).
+
+So the onboarding API needs: an identity-verification vendor integration, an immutable record of the pass
+result, a signing step that cannot be pre-filled, timestamped capture, and a rendered, retained copy of the
+signed 8655. These can be built and tested before enrollment completes.
+
+### Design consequences of being the filer for many employers
+
+- **Tenant isolation** between platforms and employers is a security requirement as well as a product one: the
+  A2A rules make you answerable for every user and machine that touches MeF (section 6).
+- A **per-employer authorization state** gates everything: no deposit or filing for an EIN without a validated
+  8655.
+- **Money:** deposits for employers move their funds; see section 9.
+
 ## 2. The enrollment, in order
 
 1. **People first.** Decide who the **Principal(s)** and **Responsible Official(s)** are. They are personally
