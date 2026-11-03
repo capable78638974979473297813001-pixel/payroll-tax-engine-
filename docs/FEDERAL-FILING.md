@@ -30,6 +30,16 @@ the list of what is missing. See [Agency connections](#agency-connections).
   wage base is wrong in a pay run. Products use integer arithmetic (`timesRate`),
   because a float `0.124` misrounds exact half-cents.
 - Tips come out of 5a into 5b; line 12 is never below zero; lines 14 and 15a are never both filled.
+- **Adjustments reach the deposits, not just the return.** A Section 3121(q) notice
+  "is treated as accumulated ... on the Date of Notice and Demand", and sick-pay or tip
+  adjustments belong to the day they relate to, so all of them are folded into the daily
+  ledger before deposits are worked out. A negative adjustment larger than the deposit,
+  month or Schedule B day it falls in reduces the next one (never below zero); if nothing
+  later in the quarter can absorb it, the form says so (`negative_adjustment_carried_out`):
+  the deposits already made show as an overpayment on line 15a.
+- Once the $100,000 rule makes a monthly depositor semiweekly it lasts "the rest of the
+  calendar year and ... the following calendar year": `semiweeklyCarriesIntoNextYear`
+  tells the caller to pass `semiweeklyFromPriorYear: true` next year.
 - **Part 2 / Schedule B must total line 12**, entered by the date wages were paid,
   never below zero; a negative adjustment larger than the month is `-0-` and carries
   forward. A monthly depositor who trips the $100,000 rule mid-quarter becomes
@@ -61,6 +71,20 @@ Elm and Fir semiweekly examples, the $95,000/$10,000 and Sep 30/Oct 2 cases, the
 Cedar deposit-ordering example, both accuracy-of-deposits makeup dates; Schedule B's
 Cedar, Fir and Elm examples (line placement); Form 940's Joan/Sara/John ($42,500)
 and the $200/$400 FUTA deposit example; the W-2/W-3 instructions' Feb 1, 2027 due date.
+**Property tests** (`tests/federal-properties.test.ts`, seeded and reproducible) run 600
+randomized payroll years - weekly, biweekly, semimonthly, monthly and irregular paydays,
+weekend and holiday pay dates, payrolls large enough to trip the $100,000 rule, random
+adjustments and credits - through all four quarters and assert what the IRS forms
+require of *any* payroll: the line identities; that Part 2 / Schedule B and the deposits
+both total line 12; that every pay date is in exactly one deposit; that every due date is
+a business day and follows its rule; that depositing exactly what is due always reconciles
+clean; and, for the calendar, every day of 2026-2032. The same suite fuzzes Form 940's
+arithmetic and FUTA deposit plan, and runs random sequences of operations against the
+filing lifecycle to show a rehearsal or a refusal can never be recorded as a filing. A
+coverage test fails if the generator stops reaching the interesting cases (mid-quarter
+switch to semiweekly, next-day deposits, credits, unabsorbed adjustments). This is how the
+Schedule B negative-day bug and the missing adjustment-to-deposit link were found.
+
 On top of those, a full year of real engine pay runs (including an employee who
 crosses the $184,500 wage base and the $200,000 Additional Medicare threshold) is
 run through four 941s, the W-2s and the W-3, and they tie out.

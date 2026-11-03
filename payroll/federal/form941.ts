@@ -11,7 +11,7 @@ import {
   type Quarter,
   type TaxDeposit,
 } from './deposits.ts';
-import { buildLedger, sumDays, type DayLiability } from './ledger.ts';
+import { buildLedger, mergeAdjustments, sumDays, type DayLiability } from './ledger.ts';
 
 /**
  * FORM 941, Employer's QUARTERLY Federal Tax Return (Rev. March 2026), with
@@ -285,20 +285,32 @@ function buildScheduleB(
   year: number,
   quarter: Quarter,
   daily: readonly { date: string; amount: Cents }[],
-): ScheduleB {
+): { scheduleB: ScheduleB; carryOut: Cents } {
+  // Schedule B never shows a day below zero, but its total must still equal
+  // line 12. A negative day (an adjustment on a date with little or no
+  // liability) therefore reduces the NEXT day with liability, the same carry the
+  // instructions prescribe month to month for line 16.
+  let carry = 0;
+  const entries: { date: string; amount: Cents }[] = [];
+  for (const d of daily) {
+    const net = d.amount + carry;
+    if (net < 0) {
+      carry = net;
+      continue;
+    }
+    carry = 0;
+    if (net > 0) entries.push({ date: d.date, amount: net });
+  }
   const startMonth = (quarter - 1) * 3 + 1;
   const months = ([1, 2, 3] as const).map((month) => {
-    const days: ScheduleBDay[] = daily
+    const days: ScheduleBDay[] = entries
       .filter((d) => inMonth(d.date, year, quarter) === month)
-      .map((d) => ({ day: Number(d.date.slice(8, 10)), date: d.date, liability: Math.max(0, d.amount) }));
+      .map((d) => ({ day: Number(d.date.slice(8, 10)), date: d.date, liability: d.amount }));
     return { month, calendarMonth: startMonth + month - 1, days, total: days.reduce((s, d) => s + d.liability, 0) };
   });
   return {
-    year,
-    quarter,
-    ein: employer.ein,
-    months,
-    totalLiabilityForQuarter: months.reduce((s, m) => s + m.total, 0),
+    scheduleB: { year, quarter, ein: employer.ein, months, totalLiabilityForQuarter: months.reduce((s, m) => s + m.total, 0) },
+    carryOut: carry,
   };
 }
 
@@ -400,7 +412,10 @@ export function computeForm941(input: Form941Input, companyId: string): Form941 
   // ---- Part 2 / Schedule B ------------------------------------------------
   const startingSchedule: DepositSchedule =
     input.semiweeklyFromPriorYear || scheduleFromLookback(input.lookbackTotalLine12) === 'semiweekly' ? 'semiweekly' : 'monthly';
-  const analysis = analyzeDeposits(ytd, { startingSchedule, creditByDate: creditAlloc.byDate });
+  // Deposits are analysed on what is really owed: wages' taxes plus the dated
+  // adjustments (a 3121(q) notice accumulates on its notice date), from January 1.
+  const ytdAdjustments = (input.adjustments ?? []).filter((a) => a.date >= yearStart && a.date <= bounds.end);
+  const analysis = analyzeDeposits(mergeAdjustments(ytd, ytdAdjustments), { startingSchedule, creditByDate: creditAlloc.byDate });
   const quarterObligations = analysis.obligations.filter((o) => o.year === year && o.quarter === quarter);
   const scheduleAtQuarterStart: DepositSchedule =
     analysis.becameSemiweeklyOn !== undefined && analysis.becameSemiweeklyOn < bounds.start ? 'semiweekly' : startingSchedule;
@@ -420,10 +435,13 @@ export function computeForm941(input: Form941Input, companyId: string): Form941 
 
   const part2: Part2 = { choice };
   let scheduleB: ScheduleB | undefined;
+  let scheduleBCarryOut = 0;
   if (choice === 'monthly') {
     part2.monthlyLiability = { month1: monthly.month1, month2: monthly.month2, month3: monthly.month3, total: monthlyTotal };
   } else if (choice === 'semiweekly') {
-    scheduleB = buildScheduleB(employer, year, quarter, daily);
+    const built = buildScheduleB(employer, year, quarter, daily);
+    scheduleB = built.scheduleB;
+    scheduleBCarryOut = built.carryOut;
   }
   const recordedTotal = choice === 'monthly' ? monthlyTotal : scheduleB?.totalLiabilityForQuarter;
   if (recordedTotal !== undefined && recordedTotal !== line12) {
@@ -433,8 +451,14 @@ export function computeForm941(input: Form941Input, companyId: string): Form941 
       message: `The ${choice === 'monthly' ? 'line 16 monthly liability' : 'Schedule B'} total (${fmt(recordedTotal)}) must equal line 12 (${fmt(line12)}). A negative adjustment larger than the period's liability cannot be spread without going below zero, or a dated adjustment falls outside the quarter.`,
     });
   }
-  if (monthly.carryOut < 0 && choice === 'monthly') {
-    findings.push({ severity: 'warning', code: 'negative_adjustment_carried_out', message: `A negative adjustment of ${fmt(-monthly.carryOut)} was carried past the end of the quarter.` });
+  const depositCarryOut = analysis.unabsorbedNegative.find((u) => u.year === year && u.quarter === quarter)?.amount ?? 0;
+  const leftover = Math.max(choice === 'monthly' ? -monthly.carryOut : 0, -scheduleBCarryOut, depositCarryOut);
+  if (leftover > 0) {
+    findings.push({
+      severity: 'warning',
+      code: 'negative_adjustment_carried_out',
+      message: `A negative adjustment of ${fmt(leftover)} is larger than the liability left in the quarter to absorb it. It cannot reduce a deposit or a liability entry below zero, so the deposits already made will show as an overpayment on line 15a and the liability record may exceed line 12 by that amount.`,
+    });
   }
 
   // ---- Deposits -----------------------------------------------------------

@@ -73,6 +73,13 @@ export interface DepositAnalysis {
   /** Pay dates on which $100,000 or more accumulated in a deposit period. */
   nextDayTriggerDates: string[];
   obligations: DepositObligation[];
+  /**
+   * Negative adjustments (sick pay, tips) that no later deposit in the quarter
+   * could absorb, per quarter. The deposits already made for that quarter simply
+   * turn out to be an overpayment (Form 941 line 15a); nothing is deposited
+   * negative.
+   */
+  unabsorbedNegative: { year: number; quarter: Quarter; amount: Cents }[];
 }
 
 /** Lookback: more than $50,000 of Form 941 line 12 taxes is semiweekly; $50,000 or less (or no history) is monthly. */
@@ -185,12 +192,27 @@ export function analyzeDeposits(
   }
   obligations.sort((a, b) => a.dueDate.localeCompare(b.dueDate) || a.payDates[0].localeCompare(b.payDates[0]));
 
+  // A negative adjustment (sick pay, tips) can exceed the liability of the deposit
+  // it falls in. The deposit is never negative: the unused part reduces the next
+  // deposit in the same quarter, as the instructions say to do for line 16.
+  const carryByQuarter = new Map<string, Cents>();
+  for (const o of obligations) {
+    const key = `${o.year}-${o.quarter}`;
+    const net = o.liability - o.creditApplied + (carryByQuarter.get(key) ?? 0);
+    o.amountDue = Math.max(0, net);
+    carryByQuarter.set(key, Math.min(0, net));
+  }
+  const unabsorbedNegative = [...carryByQuarter.entries()]
+    .filter(([, c]) => c < 0)
+    .map(([key, c]) => ({ year: Number(key.split('-')[0]), quarter: Number(key.split('-')[1]) as Quarter, amount: -c }));
+
   return {
     startingSchedule: options.startingSchedule,
     endingSchedule: schedule,
     becameSemiweeklyOn,
     nextDayTriggerDates: triggers,
     obligations,
+    unabsorbedNegative,
   };
 }
 
@@ -199,6 +221,16 @@ export function analyzeDeposits(
  * line 12 of this return OR the prior quarter's is under $2,500 and no
  * $100,000 next-day obligation arose this quarter (Form 941 line 16, first box).
  */
+/**
+ * Whether the $100,000 rule made a monthly depositor semiweekly during this
+ * analysis. Pub. 15: such an employer "remain[s] so for at least the rest of
+ * the calendar year and for the following calendar year", so the caller must
+ * pass `semiweeklyFromPriorYear: true` to next year's returns.
+ */
+export function semiweeklyCarriesIntoNextYear(analysis: DepositAnalysis): boolean {
+  return analysis.becameSemiweeklyOn !== undefined;
+}
+
 export function qualifiesForDeMinimis(
   currentLine12: Cents,
   priorQuarterLine12: Cents | undefined,

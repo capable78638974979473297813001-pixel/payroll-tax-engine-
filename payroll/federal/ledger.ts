@@ -120,3 +120,23 @@ export function sumDays<K extends keyof DayLiability>(days: readonly DayLiabilit
   for (const d of days) total += d[key] as unknown as number;
   return total;
 }
+
+/**
+ * Fold dated adjustments (Form 941 lines 5f, 8, 9) into the daily ledger so
+ * deposits are analysed on what is really owed. A Section 3121(q) notice "is
+ * treated as accumulated by the employer on the 'Date of Notice and Demand'";
+ * sick-pay and tip adjustments belong to the day they relate to. A date with
+ * only an adjustment becomes a day with no wages. Returns a new, sorted list.
+ */
+export function mergeAdjustments(
+  days: readonly DayLiability[],
+  adjustments: readonly { date: string; amount: Cents }[],
+): DayLiability[] {
+  const byDate = new Map<string, DayLiability>(days.map((d) => [d.date, { ...d, employeeIds: [...d.employeeIds] }]));
+  for (const a of adjustments) {
+    const day = byDate.get(a.date) ?? emptyDay(a.date);
+    day.total += a.amount;
+    byDate.set(a.date, day);
+  }
+  return [...byDate.values()].sort((x, y) => x.date.localeCompare(y.date));
+}
