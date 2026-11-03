@@ -16,6 +16,10 @@ const CT = loadProfile('CT');
 const NE = loadProfile('NE');
 const CO = loadProfile('CO');
 const VA = loadProfile('VA');
+const UT = loadProfile('UT');
+const RI = loadProfile('RI');
+const ri = (days: StateDay[], opts: Parameters<typeof analyzeStateDeposits>[3] = {}) => analyzeStateDeposits(RI, days, undefined, opts);
+const ut = (days: StateDay[], opts: Parameters<typeof analyzeStateDeposits>[3] = {}) => analyzeStateDeposits(UT, days, undefined, opts);
 const va = (days: StateDay[], opts: Parameters<typeof analyzeStateDeposits>[3] = {}) => analyzeStateDeposits(VA, days, undefined, opts);
 const co = (days: StateDay[], opts: Parameters<typeof analyzeStateDeposits>[3] = {}) => analyzeStateDeposits(CO, days, undefined, opts);
 
@@ -213,6 +217,108 @@ describe('Virginia (Employer Withholding Instructions, Rev. 10/26)', () => {
     const bad = JSON.parse(JSON.stringify(VA));
     delete bad.withholding.deposits.frequencies.semiweekly.thresholdExclusive;
     assert.match(validateProfile(bad).join(';'), /semiweekly_threshold needs a positive threshold/);
+  });
+});
+
+describe('Utah (Publication 14, Rev. 4/25)', () => {
+  test('under $1,000 a month is quarterly; $1,000 or more is monthly payments', () => {
+    const status = (m: number) => ut([stDay('2025-08-07', 100)], { lookbackLiability: dollars(m) }).obligations[0].schedule;
+    assert.deepEqual([999.99, 1000].map(status), ['quarterly', 'monthly']);
+  });
+  test('monthly payments are due the last day of the following month, including the guide\'s table rows', () => {
+    const due = (d: string) => ut([stDay(d, 100)], { assignedFrequency: 'monthly' }).obligations[0].dueDate;
+    assert.equal(due('2025-01-15'), '2025-02-28'); // February 28 (or 29)
+    assert.equal(due('2024-01-15'), '2024-02-29');
+    assert.equal(due('2025-03-12'), '2025-04-30');
+    assert.equal(due('2025-04-30'), '2025-06-02'); // May 31, 2025 is a Saturday -> next business day
+  });
+  test('quarterly payments: April 30, July 31, October 31, January 31 (rolled past weekends)', () => {
+    const due = (d: string) => ut([stDay(d, 100)], { assignedFrequency: 'quarterly' }).obligations[0].dueDate;
+    assert.deepEqual(['2025-02-10', '2025-05-10', '2025-08-10', '2025-11-10'].map(due), ['2025-04-30', '2025-07-31', '2025-10-31', '2026-02-02']);
+  });
+  test('annual payers pay once, January 31 of the next year', () => {
+    const r = ut([stDay('2025-03-14', 40), stDay('2025-09-12', 60)], { assignedFrequency: 'annual' });
+    assert.deepEqual(r.obligations.map((o) => [o.schedule, o.amount, o.dueDate]), [['annual', dollars(100), '2026-02-02']]);
+  });
+  test('Utah says the IRS semiweekly and next-day rules do not apply, and requires electronic filing', () => {
+    const spec = UT.withholding!.deposits!;
+    assert.match(spec.kind === 'assigned_frequency' ? spec.interpretation : '', /semiweekly and \$100,000 next-day rules do not apply/);
+    assert.match(UT.mandates.efile!.text, /electronically/);
+  });
+  test('1,000 payroll years: monthly payments conserve every dollar and fall on weekdays after payday', () => {
+    for (let seed = 4000; seed < 5000; seed += 1) {
+      const days = randomDays(seed, 2025);
+      const r = ut(days, { assignedFrequency: 'monthly' });
+      assert.equal(r.obligations.reduce((a, o) => a + o.amount, 0), days.reduce((a, d) => a + d.withholding, 0), `seed ${seed}`);
+      for (const o of r.obligations) {
+        assert.ok(isStateBusinessDay(o.dueDate, UT), `seed ${seed}: ${o.dueDate}`);
+        assert.ok(o.dueDate > o.payDates[o.payDates.length - 1], `seed ${seed}`);
+        assert.equal(new Set(o.payDates.map((d) => d.slice(0, 7))).size, 1, `seed ${seed}`);
+      }
+    }
+  });
+});
+
+describe('Rhode Island (2026 Withholding Tax Booklet): the agency\'s printed payment calendar', () => {
+  const due = (date: string, frequency: string) => ri([stDay(date, 100)], { assignedFrequency: frequency }).obligations.map((o) => o.dueDate);
+  test('status from the monthly withholding: under $50 quarterly, $50 to under $600 monthly, $600 or more weekly', () => {
+    const s = (m: number) => ri([stDay('2026-08-07', 100)], { lookbackLiability: dollars(m) }).obligations[0].schedule;
+    assert.deepEqual([49.99, 50, 599.99, 600].map(s), ['quarterly', 'monthly', 'monthly', 'weekly']);
+  });
+  test('weekly rows as printed in the booklet', () => {
+    assert.deepEqual(due('2026-01-02', 'weekly'), ['2026-01-05']);
+    assert.deepEqual(due('2026-01-14', 'weekly'), ['2026-01-20']); // Monday Jan 19 is a holiday: the Tuesday
+    assert.deepEqual(due('2026-03-30', 'weekly'), ['2026-04-03']); // stub week Mar 22-31
+    assert.deepEqual(due('2026-04-01', 'weekly'), ['2026-04-06']); // a new week starts April 1
+    assert.deepEqual(due('2026-09-30', 'weekly'), ['2026-10-05']);
+    assert.deepEqual(due('2026-12-28', 'weekly'), ['2027-01-04']);
+  });
+  test('a quarter-end week is cut in two: separate payments for Mar 29-31 and Apr 1-4', () => {
+    const r = ri([stDay('2026-03-31', 200), stDay('2026-04-01', 300)], { assignedFrequency: 'weekly' });
+    assert.deepEqual(r.obligations.map((o) => [o.amount, o.dueDate]), [[dollars(200), '2026-04-03'], [dollars(300), '2026-04-06']]);
+  });
+  test('monthly rows as printed, including the quarter-ending months and weekend roll-forwards', () => {
+    const expected: Record<string, string> = { '2026-01-15': '2026-02-20', '2026-02-10': '2026-03-20', '2026-03-10': '2026-04-30', '2026-04-10': '2026-05-20', '2026-05-10': '2026-06-22', '2026-06-10': '2026-07-31', '2026-07-10': '2026-08-20', '2026-08-10': '2026-09-21', '2026-09-10': '2026-11-02', '2026-10-10': '2026-11-20', '2026-11-10': '2026-12-21', '2026-12-10': '2027-02-01' };
+    for (const [d, want] of Object.entries(expected)) assert.deepEqual(due(d, 'monthly'), [want], d);
+  });
+  test('quarterly rows as printed', () => {
+    assert.deepEqual(['2026-02-10', '2026-05-10', '2026-08-10', '2026-11-10'].map((d) => due(d, 'quarterly')[0]), ['2026-04-30', '2026-07-31', '2026-11-02', '2027-02-01']);
+  });
+  test('a pay date in a year with no printed calendar is an error and creates no obligation', () => {
+    const r = ri([stDay('2027-02-05', 100)], { assignedFrequency: 'weekly' });
+    assert.deepEqual(r.obligations, []);
+    assert.equal(r.findings.some((f) => f.code === 'state_calendar_not_published' && f.severity === 'error'), true);
+  });
+  test('the printed calendar is complete: 52 weeks with no gaps, 12 months, 4 quarters, every due date a weekday after its period', () => {
+    const spec = RI.withholding!.deposits!;
+    assert.equal(spec.kind, 'assigned_frequency');
+    if (spec.kind !== 'assigned_frequency') return;
+    const rows = (n: string) => spec.frequencies[n].calendar!;
+    assert.deepEqual([rows('weekly').length, rows('monthly').length, rows('quarterly').length], [52, 12, 4]);
+    assert.equal(rows('weekly')[0].from, '2026-01-01');
+    assert.equal(rows('weekly')[51].to, '2026-12-31');
+    for (const n of ['weekly', 'monthly', 'quarterly']) {
+      const rs = rows(n);
+      rs.forEach((r, i) => {
+        assert.ok(r.due > r.to, `${n} ${r.from}`);
+        assert.ok(isStateBusinessDay(r.due, RI) || r.due === '2026-07-03', `${n} ${r.from} ${r.due}`); // see the interpretation about 2026-07-03
+        if (i > 0) assert.equal(addDays(rs[i - 1].to, 1), r.from, `${n}: gap before ${r.from}`);
+      });
+    }
+  });
+  test('validator: an overlapping calendar is rejected', () => {
+    const bad = JSON.parse(JSON.stringify(RI));
+    bad.withholding.deposits.frequencies.monthly.calendar[1].from = '2026-01-15';
+    assert.match(validateProfile(bad).join(';'), /overlaps or is out of order/);
+  });
+  test('Rhode Island: 1,000 payroll years in 2026 - every dollar paid once, none before its pay date, each in its own printed period', () => {
+    for (let seed = 6000; seed < 7000; seed += 1) {
+      const days = randomDays(seed, 2026);
+      const f = (['weekly', 'monthly', 'quarterly'] as const)[seed % 3];
+      const r = ri(days, { assignedFrequency: f });
+      assert.equal(r.obligations.reduce((a, o) => a + o.amount, 0), days.reduce((a, d) => a + d.withholding, 0), `seed ${seed}`);
+      for (const o of r.obligations) assert.ok(o.dueDate > o.payDates[o.payDates.length - 1], `seed ${seed}`);
+    }
   });
 });
 

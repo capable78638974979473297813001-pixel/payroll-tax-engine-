@@ -57,12 +57,12 @@ describe('coverage: every jurisdiction is accounted for', () => {
       assert.ok(x.agencyLines.length > 0 && x.website, x.code);
     }
   });
-  test('seven states are modelled; every other row says NOT MODELLED rather than implying nothing is owed', () => {
-    assert.deepEqual(modelledStates(), ['CA', 'CO', 'CT', 'NE', 'NY', 'TX', 'VA']);
+  test('nine states are modelled; every other row says NOT MODELLED rather than implying nothing is owed', () => {
+    assert.deepEqual(modelledStates(), ['CA', 'CO', 'CT', 'NE', 'NY', 'RI', 'TX', 'UT', 'VA']);
     const c = coverage();
     assert.equal(c.length, 53);
     for (const row of c) {
-      if (['CA', 'CO', 'CT', 'NE', 'NY', 'TX', 'VA'].includes(row.code)) assert.equal(row.modelled, true);
+      if (['CA', 'CO', 'CT', 'NE', 'NY', 'RI', 'TX', 'UT', 'VA'].includes(row.code)) assert.equal(row.modelled, true);
       else {
         assert.equal(row.modelled, false, row.code);
         assert.equal(row.functions.ui, 'NOT MODELLED', row.code);
@@ -75,6 +75,8 @@ describe('coverage: every jurisdiction is accounted for', () => {
     assert.equal(by.TX.withholding, 'no wage income tax');
     assert.equal(by.FL.withholding, 'no wage income tax');
     assert.equal(by.OH.withholding, 'NOT MODELLED');
+    assert.equal(by.RI.withholding, 'modelled');
+    assert.equal(by.UT.withholding, 'modelled');
     assert.equal(by.VA.withholding, 'modelled');
     assert.equal(by.CO.withholding, 'modelled');
     assert.equal(by.CO.ui, 'NOT MODELLED');
@@ -320,7 +322,7 @@ describe('a full year of REAL engine pay runs in each pilot state', () => {
 
 describe('state filings run through the shared lifecycle, and nothing is transmitted', () => {
   test('every modelled state registers its channels, each with enrollment and a "not read" specification', () => {
-    assert.deepEqual(registerAllStateChannels(), ['CA', 'CO', 'CT', 'NE', 'NY', 'TX', 'VA']);
+    assert.deepEqual(registerAllStateChannels(), ['CA', 'CO', 'CT', 'NE', 'NY', 'RI', 'TX', 'UT', 'VA']);
     const ca = stateChannels(CA);
     assert.deepEqual(ca.map((c) => c.id), ['state:CA:e_services', 'state:CA:ner']);
     assert.match(ca[0].enrollment.join(' '), /Register online for an employer payroll tax account number/);

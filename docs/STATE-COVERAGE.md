@@ -2,9 +2,9 @@
 
 _Generated from `data/filing/` by `scripts/state-coverage.ts`; `tests/state-coverage.test.ts` fails if this file is stale. Do not edit by hand._
 
-**53 jurisdictions** (the 53 unemployment-tax agencies the US Department of Labor lists: 50 states, DC, Puerto Rico, US Virgin Islands). **7 have a state profile** (CA, CO, CT, NE, NY, TX, VA). The rest are **NOT MODELLED**: their own documents have not been read, and nothing is assumed about what they require. A row saying NOT MODELLED does not mean nothing is owed.
+**53 jurisdictions** (the 53 unemployment-tax agencies the US Department of Labor lists: 50 states, DC, Puerto Rico, US Virgin Islands). **9 have a state profile** (CA, CO, CT, NE, NY, RI, TX, UT, VA). The rest are **NOT MODELLED**: their own documents have not been read, and nothing is assumed about what they require. A row saying NOT MODELLED does not mean nothing is owed.
 
-Unemployment reporting modelled for 3 of 53. Withholding deposits modelled for 5, partly for 1. New-hire reporting modelled for 1.
+Unemployment reporting modelled for 3 of 53. Withholding deposits modelled for 7, partly for 1. New-hire reporting modelled for 1.
 
 **Nothing is transmitted to any state.** No state transport is connected; the sandbox rehearses and says so, and live transports refuse with the enrollment steps each profile records.
 
@@ -50,12 +50,12 @@ Unemployment reporting modelled for 3 of 53. Withholding deposits modelled for 5
 | OR | Oregon | Employment Department, 875 Union Street NE, Room 107, Salem, OR 97311-0030 | NOT MODELLED | NOT MODELLED | NOT MODELLED |
 | PA | Pennsylvania | Dept of Labor and Industry, 7th and Forster Street, Room 915, Harrisburg, PA 17121-0001 | NOT MODELLED | NOT MODELLED | NOT MODELLED |
 | PR | Puerto Rico | Department of Labor and Human Resources, PO Box 1020, San Juan, PR 000919 | NOT MODELLED | NOT MODELLED | NOT MODELLED |
-| RI | Rhode Island | Division of Taxation, One Capitol Hill, Ste 36, Providence, RI 29085-5829 | NOT MODELLED | NOT MODELLED | NOT MODELLED |
+| RI | Rhode Island | Division of Taxation, One Capitol Hill, Ste 36, Providence, RI 29085-5829 | modelled | NOT MODELLED | NOT MODELLED |
 | SC | South Carolina | Employment Security Commission, PO Box 995, Columbia, SC 29202-0995 | NOT MODELLED | NOT MODELLED | NOT MODELLED |
 | SD | South Dakota | Department of Labor, PO Box 4730, Aberdeen, SD 57402-4730 | no wage income tax | NOT MODELLED | NOT MODELLED |
 | TN | Tennessee | Department of Labor and Workforce Development, 220 French Landing Drive, Nashville, TN 37243 | no wage income tax | NOT MODELLED | NOT MODELLED |
 | TX | Texas | Workforce Commission, PO Box 149037, Austin, TX 78714-9037 | no wage income tax | modelled | NOT MODELLED |
-| UT | Utah | Department of Workforce Services, PO Box 45288, Salt Lake City, UT 84145-0288 | NOT MODELLED | NOT MODELLED | NOT MODELLED |
+| UT | Utah | Department of Workforce Services, PO Box 45288, Salt Lake City, UT 84145-0288 | modelled | NOT MODELLED | NOT MODELLED |
 | VT | Vermont | Department of Labor, PO Box 488, Montpelier, VT 05601-0488 | NOT MODELLED | NOT MODELLED | NOT MODELLED |
 | VI | Virgin Islands | Department of Labor, PO Box 302608, St. Thomas, VI 00803-2608 | NOT MODELLED | NOT MODELLED | NOT MODELLED |
 | VA | Virginia | Employment Commission, PO Box 1358, Richmond, VA 23218-1358 | modelled | NOT MODELLED | NOT MODELLED |

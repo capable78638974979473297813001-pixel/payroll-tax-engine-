@@ -229,7 +229,7 @@ function rulesYearFinding(profile: StateProfile, rulesYear: number | undefined, 
   };
 }
 
-function periodKey(period: 'week_sat_fri' | 'month' | 'quarter' | 'year' | 'semiweekly_threshold', date: string, weekSplit: 'quarter' | 'year' = 'quarter'): { key: string; anchor: string } {
+function periodKey(period: 'week_sat_fri' | 'month' | 'quarter' | 'year' | 'semiweekly_threshold' | 'published_calendar', date: string, weekSplit: 'quarter' | 'year' = 'quarter'): { key: string; anchor: string } {
   const q = quarterOf(date);
   switch (period) {
     case 'week_sat_fri': {
@@ -249,7 +249,8 @@ function periodKey(period: 'week_sat_fri' | 'month' | 'quarter' | 'year' | 'semi
     case 'year':
       return { key: date.slice(0, 4), anchor: date };
     case 'semiweekly_threshold':
-      throw new Error('semiweekly_threshold periods are handled by analyzeSemiweeklyThreshold');
+    case 'published_calendar':
+      throw new Error(`${period} periods are handled before periodKey is called`);
   }
 }
 
@@ -320,6 +321,35 @@ function analyzeAssignedFrequency(profile: StateProfile, spec: AssignedFrequency
   if (!f) {
     findings.push({ severity: 'error', code: 'state_unknown_frequency', message: `${profile.state}: "${frequency}" is not a frequency in the profile (${Object.keys(spec.frequencies).join(', ')}).` });
     return { obligations: [], findings };
+  }
+
+  if (f.period === 'published_calendar') {
+    const rows = f.calendar ?? [];
+    const byRow = new Map<number, StateDay[]>();
+    const uncovered = new Set<string>();
+    for (const d of days) {
+      if (d.withholding === 0 && d.employeeInsurance === 0) continue;
+      const i = rows.findIndex((r) => d.date >= r.from && d.date <= r.to);
+      if (i < 0) { uncovered.add(d.date.slice(0, 4)); continue; }
+      byRow.set(i, [...(byRow.get(i) ?? []), d]);
+    }
+    for (const y of [...uncovered].sort()) {
+      findings.push({ severity: 'error', code: 'state_calendar_not_published', message: `${profile.state}: pay dates in ${y} fall outside the agency's published ${frequency} calendar held in the profile, so no due date is computed for them. Read that year's calendar from the agency and add it; nothing is extrapolated.` });
+    }
+    const out: StateDepositObligation[] = [];
+    for (const [i, ds] of byRow) {
+      const r = rows[i];
+      const w = sum(ds, 'withholding');
+      const ins = sum(ds, 'employeeInsurance');
+      const sched: StateDepositSchedule = frequency === 'weekly' ? 'weekly' : frequency === 'monthly' ? 'monthly' : frequency === 'quarterly' ? 'quarterly' : 'annual';
+      out.push({
+        id: `${profile.state}-${sched}-${r.from}`, state: profile.state, schedule: sched, payDates: ds.map((d) => d.date),
+        year: Number(r.from.slice(0, 4)), quarter: quarterOf(r.from), withholding: w, employeeInsurance: ins, employerUi: 0, amount: w + ins,
+        dueDate: r.due, notes: [`${frequency} remitter: ${fmt(w + ins)} for pay dates ${r.from} to ${r.to}, due ${r.due} per the agency's published calendar.`],
+      });
+    }
+    out.sort((a, b) => a.dueDate.localeCompare(b.dueDate) || a.id.localeCompare(b.id));
+    return { obligations: out, findings };
   }
 
   if (f.period === 'semiweekly_threshold') {

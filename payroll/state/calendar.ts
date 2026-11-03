@@ -86,6 +86,11 @@ export function resolveDue(rule: DueRule, anchor: string, p: StateProfile, extra
       const m = endMonth > 12 ? 1 : endMonth;
       return { dueDate: roll(lastDayOfMonth(y, m)) };
     }
+    case 'last_day_of_following_month': {
+      const m = month === 12 ? 1 : month + 1;
+      const y = month === 12 ? year + 1 : year;
+      return { dueDate: roll(lastDayOfMonth(y, m)) };
+    }
     case 'day_of_month_after': {
       const m = month === 12 ? 1 : month + 1;
       const y = month === 12 ? year + 1 : year;

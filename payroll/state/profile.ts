@@ -32,6 +32,7 @@ export type DueRule =
   | { kind: 'table'; dates: Record<string, { due: string; delinquent?: string; settle?: string }> }
   | { kind: 'last_day_of_month_after_quarter' }
   | { kind: 'day_of_month_after'; day: number }
+  | { kind: 'last_day_of_following_month' }
   | { kind: 'business_days_after_period_end'; days: number }
   | { kind: 'next_business_day'; settleBusinessDays?: number }
   /** The first given weekday (0 = Sunday ... 6 = Saturday) strictly after the period's last day (Connecticut: the Wednesday after a Saturday-Friday week). */
@@ -94,7 +95,7 @@ export interface AssignedFrequencySpec {
     newEmployer: string;
   };
   frequencies: Record<string, {
-    period: 'week_sat_fri' | 'month' | 'quarter' | 'year' | 'semiweekly_threshold';
+    period: 'week_sat_fri' | 'month' | 'quarter' | 'year' | 'semiweekly_threshold' | 'published_calendar';
     /** For `semiweekly_threshold` the due rule is that of the REMAINDER (paid with the quarterly return). */
     due: DueRule;
     /**
@@ -104,6 +105,12 @@ export interface AssignedFrequencySpec {
      */
     thresholdExclusive?: Cents;
     bankingDays?: number;
+    /**
+     * Only for `published_calendar` (Rhode Island): the agency's own printed calendar. Each row is a filing
+     * period (`from`..`to` inclusive, by PAY date) and the date its payment is due. A pay date outside every
+     * row is an ERROR finding (the calendar for that year was not read), never an extrapolation.
+     */
+    calendar?: { from: string; to: string; due: string }[];
     /**
      * Only for `week_sat_fri`: where a week that runs across a boundary is cut into two periods.
      * 'quarter' (default; Connecticut) cuts at quarter ends; 'year' (Colorado) cuts only at December 31,
@@ -237,6 +244,14 @@ export function validateProfile(p: StateProfile): string[] {
       if (!d.frequencies[d.lookback.newEmployer]) bad.push(`withholding.deposits: new-employer frequency ${d.lookback.newEmployer} is not defined`);
       for (const c of d.lookback.classes) if (!d.frequencies[c.name]) bad.push(`withholding.deposits: look-back class ${c.name} has no frequency`);
       for (const [n, f] of Object.entries(d.frequencies)) {
+        if (f.period === 'published_calendar') {
+          const rows = f.calendar ?? [];
+          if (rows.length === 0) bad.push(`withholding.deposits.frequencies.${n}: published_calendar has no rows`);
+          rows.forEach((r, i) => {
+            if (!(r.from <= r.to && r.to <= r.due)) bad.push(`withholding.deposits.frequencies.${n}.calendar[${i}]: from <= to <= due is violated`);
+            if (i > 0 && !(rows[i - 1].to < r.from)) bad.push(`withholding.deposits.frequencies.${n}.calendar[${i}]: overlaps or is out of order`);
+          });
+        }
         if (f.period === 'semiweekly_threshold' && !((f.thresholdExclusive ?? 0) > 0 && (f.bankingDays ?? 0) >= 1)) bad.push(`withholding.deposits.frequencies.${n}: semiweekly_threshold needs a positive threshold and bankingDays`);
       }
     } else if (d.kind === 'quarter_month_threshold') {
