@@ -5,10 +5,10 @@ runs, using **state profiles**: data files in `data/filing/states/` with a citat
 Import it as `import { state } from './payroll/index.ts'`. Coverage is in
 [`STATE-COVERAGE.md`](STATE-COVERAGE.md) (generated; a test fails if it is stale).
 
-**Status: pilot.** Five states are modelled (California, Connecticut, Nebraska, New York, Texas), chosen to
+**Status: pilot.** Seven states are modelled (California, Colorado, Connecticut, Nebraska, New York, Texas, Virginia), chosen to
 cover the different shapes a state deposit rule takes: a table keyed to the federal schedule (CA), a frequency
-the state assigns from a look-back (CT), a monthly threshold (NE), a combined quarterly return (NY), and an
-unemployment-only state with no wage income tax (TX). The other **48 jurisdictions
+the state assigns (CT, CO, VA), a monthly threshold (NE), a combined quarterly return (NY), and an
+unemployment-only state with no wage income tax (TX). The other **46 jurisdictions
 are NOT MODELLED**: nothing is assumed for them, and a lookup for one fails loudly. **Nothing is
 transmitted to any state**: no state transport is connected.
 
@@ -24,7 +24,7 @@ transmitted to any state**: no state transport is connected.
 | `newhire.ts` | New-hire deadline from a state's days-from-start rule; refuses if the profile has none |
 | `agency.ts` | Each profile's channels as registry entries (with the enrollment steps the profile records), and filing packages for the shared `FilingBook` lifecycle |
 
-## What is verified, for the five states
+## What is verified, for the seven states
 
 From each agency's own documents, read in full (the stored watcher copy or the live page, as cited):
 
@@ -37,6 +37,17 @@ From each agency's own documents, read in full (the stored watcher copy or the l
 - **New York (NYS-45-I, 1/26).** Quarterly due dates (last day of the month after the quarter, next
   business day if needed), the electronic-filing mandate, the three electronic methods, the 2026 UI wage base
   ($17,600). **Not read: the NYS-1 deposit frequency rules**, so no New York deposit schedule is computed.
+- **Colorado (Wage Withholding Tax Guide, January 2026).** Withholding only. Frequency from annual Colorado
+  withholding: quarterly under $7,000, monthly $7,000 to $50,000, weekly above (the guide puts exactly $50,000 in
+  both rows; the profile treats it as monthly and says so). Weekly: Saturday-to-Friday, due the 3rd business day after
+  the Friday, the final period of the year ends December 31, and a week is not split at quarter ends. The guide's
+  own worked example is a test. Monthly the 15th, quarterly the last day of the month after; DR 1094; DR 1093 by
+  January 31; EFT mandatory for weekly remitters.
+- **Virginia (Employer Withholding Instructions, Rev. 10/26).** Withholding only. Status from average monthly
+  withholding: under $100 quarterly, $100 to under $1,000 monthly (the 25th), $1,000 or more semi-weekly (more than
+  $500 at the close of a Wednesday-Friday or Saturday-Tuesday period, due in 3 banking days; the remainder with
+  Form VA-16). **The booklet gives no worked example of how the $500 test accumulates**, so the reading applied
+  (balance not yet paid, restarting each quarter) is in the profile and repeated in every result. VA-6 by January 31.
 - **Connecticut (Circular CT, IP 2025(1)).** Withholding only (no unemployment guide was read). Remitter
   class from the look-back: weekly above $10,000, monthly above $2,000 up to $10,000, quarterly $2,000 or less,
   new employers quarterly. Weekly: the Saturday-to-Friday week, due the Wednesday after; monthly the 15th;
@@ -59,6 +70,8 @@ to the monthly deposit; the rest to the quarterly one. If EDD's reading differs,
   **not emitted by the paycheck engine** so it is not in the totals; California's legal-holiday list.
 - New York: deposit schedule; the NYS-45 part and box layout and Publication 72.5's flat-file format.
 - Texas: the QuickFile layout; Texas legal holidays; new-hire reporting.
+- Colorado and Virginia: unemployment (CDLE, VEC) and Colorado FAMLI; registration steps; holiday lists. Virginia:
+  seasonal status and the small-employer monthly waiver.
 - Connecticut: unemployment; the CT-941 line layout. Nebraska: unemployment; the 941N line layout.
 - Every state: no state transport is connected, so no filing is sent. Subject-wages definitions are the
   agencies' own; gross pay is used as a proxy and the report says so. SSNs are never held by the engine.
@@ -75,7 +88,8 @@ Follow `STATE-LAYER-SPEC.md`. In short:
    cites nothing.
 3. Express the state's deposit rule in `withholding.deposits` using one of the three shapes the engine
    interprets: `federal_bands` (a table of federal schedule x amount band, see CA), `assigned_frequency`
-   (the state assigns weekly/monthly/quarterly, see CT), or `quarter_month_threshold` (deposit a month's tax once
+   (the state assigns weekly/monthly/quarterly, see CT; CO adds `weekSplit: "year"`, VA adds a
+   `semiweekly_threshold` frequency), or `quarter_month_threshold` (deposit a month's tax once
    it passes a threshold, see NE). A rule that fits none of them stays out, with the reason in `notModelled`:
    adding a new shape means extending `deposits.ts` and `profile.ts` and testing it from the agency's examples.
 4. Add tests from the agency's own examples and dates, run `node scripts/state-coverage.ts`, run

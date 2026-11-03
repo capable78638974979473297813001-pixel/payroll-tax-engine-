@@ -14,6 +14,10 @@ import {
 
 const CT = loadProfile('CT');
 const NE = loadProfile('NE');
+const CO = loadProfile('CO');
+const VA = loadProfile('VA');
+const va = (days: StateDay[], opts: Parameters<typeof analyzeStateDeposits>[3] = {}) => analyzeStateDeposits(VA, days, undefined, opts);
+const co = (days: StateDay[], opts: Parameters<typeof analyzeStateDeposits>[3] = {}) => analyzeStateDeposits(CO, days, undefined, opts);
 
 function stDay(date: string, pit: number): StateDay {
   return { date, withholding: dollars(pit), withholdingWages: 0, employeeInsurance: 0, employerUi: 0, uiWages: 0, employeeIds: [] };
@@ -134,6 +138,84 @@ describe('Nebraska (2026 Circular EN): monthly deposits above $500, the rest wit
   });
 });
 
+describe('Colorado (Wage Withholding Tax Guide, January 2026)', () => {
+  const freq = (annual: number) => co([stDay('2026-08-07', 100)], { lookbackLiability: dollars(annual) }).obligations[0].schedule;
+  test('quarterly under $7,000; monthly $7,000 to $50,000; weekly above (exactly $50,000 is treated as monthly)', () => {
+    assert.deepEqual([6999.99, 7000, 50_000, 50_000.01].map(freq), ['quarterly', 'monthly', 'monthly', 'weekly']);
+    assert.match(CO.withholding!.deposits!.kind === 'assigned_frequency' ? CO.withholding!.deposits!.interpretation : '', /exactly \$50,000 as monthly/);
+  });
+  test("the guide's worked example: wages paid Tuesday the 27th are due Wednesday the 4th (Oct 27 -> Nov 4, 2026)", () => {
+    const r = co([stDay('2026-10-27', 900)], { assignedFrequency: 'weekly' });
+    assert.deepEqual(r.obligations.map((o) => [o.dueDate, o.amount]), [['2026-11-04', dollars(900)]]);
+  });
+  test('weekly paydays Saturday to Friday share one payment, and a week is not cut at a quarter end', () => {
+    // Wed Sep 30 and Fri Oct 2, 2026 are in the same Saturday-Friday week (Sep 26 - Oct 2): one payment
+    const r = co([stDay('2026-09-30', 400), stDay('2026-10-02', 250)], { assignedFrequency: 'weekly' });
+    assert.deepEqual(r.obligations.map((o) => [o.amount, o.dueDate]), [[dollars(650), '2026-10-07']]);
+  });
+  test('the final weekly period ends December 31 whatever the weekday; January wages start a new one', () => {
+    // Dec 31, 2026 is a Thursday. Wages on Dec 29 and Dec 31 are one period; Jan 1 (Friday) is the next.
+    const r = co([stDay('2026-12-29', 300), stDay('2026-12-31', 200), stDay('2027-01-01', 100)], { assignedFrequency: 'weekly' });
+    assert.deepEqual(r.obligations.map((o) => [o.payDates.join(','), o.amount]), [['2026-12-29,2026-12-31', dollars(500)], ['2027-01-01', dollars(100)]]);
+    // 3rd business day after Dec 31, 2026: Jan 1 is a holiday only if a holiday list were verified; weekends are skipped
+    assert.ok(r.obligations[0].dueDate > '2027-01-01' && r.obligations[0].dueDate <= '2027-01-06', r.obligations[0].dueDate);
+    assert.equal(r.findings.some((f) => f.code === 'state_holidays_not_modelled'), true);
+  });
+  test('monthly the 15th; quarterly the last day of the month after (rolled past the weekend)', () => {
+    const m = co([stDay('2026-08-07', 100), stDay('2026-08-28', 50)], { assignedFrequency: 'monthly' }).obligations;
+    assert.deepEqual(m.map((o) => [o.dueDate, o.amount]), [['2026-09-15', dollars(150)]]);
+    const q = co([stDay('2026-07-10', 100), stDay('2026-09-18', 50)], { assignedFrequency: 'quarterly' }).obligations;
+    assert.deepEqual(q.map((o) => [o.dueDate, o.amount]), [['2026-11-02', dollars(150)]]);
+  });
+  test('the weekly EFT mandate is stated in the guide\'s words; DR 1093 is due January 31', () => {
+    assert.match(CO.mandates.epay!.text, /remit payment via electronic funds transfer/);
+    assert.deepEqual(withholdingReturnDates(CO, '2026-06-01').map((r) => r.id), ['DR 1094', 'DR 1093']);
+    assert.equal(withholdingReturnDates(CO, '2026-06-01')[1].due.dueDate, '2027-02-01'); // Jan 31, 2027 is a Sunday
+  });
+});
+
+describe('Virginia (Employer Withholding Instructions, Rev. 10/26)', () => {
+  test('status from the average monthly liability: under $100 quarterly, $100 to under $1,000 monthly, $1,000 or more semi-weekly', () => {
+    const status = (m: number) => va([stDay('2026-08-07', 100)], { lookbackLiability: dollars(m) }).obligations[0].schedule;
+    assert.deepEqual([99.99, 100, 999.99, 1000].map(status), ['quarterly', 'monthly', 'monthly', 'quarterly']);
+    // $1,000 is semi-weekly, but $100 withheld in a quarter stays under the $500 trigger and is paid with the VA-16
+    assert.equal(va([stDay('2026-08-07', 100)], { assignedFrequency: 'semiweekly' }).obligations[0].schedule, 'quarterly');
+  });
+  test('monthly is due the 25th of the next month, December wages January 25; quarterly the last day of the month after', () => {
+    const m = va([stDay('2026-08-07', 100), stDay('2026-12-04', 80)], { assignedFrequency: 'monthly' }).obligations;
+    assert.deepEqual(m.map((o) => [o.dueDate, o.amount]), [['2026-09-25', dollars(100)], ['2027-01-25', dollars(80)]]);
+    const q = va([stDay('2026-04-10', 60), stDay('2026-06-26', 40)], { assignedFrequency: 'quarterly' }).obligations;
+    assert.deepEqual(q.map((o) => [o.dueDate, o.amount]), [['2026-07-31', dollars(100)]]);
+  });
+  test('semi-weekly: more than $500 at the close of a Wed-Fri or Sat-Tue period is due in 3 banking days', () => {
+    const r = va([stDay('2026-08-05', 300), stDay('2026-08-07', 300)], { assignedFrequency: 'semiweekly' });
+    assert.deepEqual(r.obligations.map((o) => [o.schedule, o.amount, o.dueDate]), [['semiweekly', dollars(600), '2026-08-12']]); // Fri Aug 7 close
+    const tue = va([stDay('2026-08-08', 501)], { assignedFrequency: 'semiweekly' }); // Sat -> period closes Tue Aug 11
+    assert.deepEqual(tue.obligations.map((o) => o.dueDate), ['2026-08-14']);
+  });
+  test('exactly $500 is not enough; it carries into the next period and is paid when the balance passes $500', () => {
+    const r = va([stDay('2026-08-07', 500), stDay('2026-08-11', 100)], { assignedFrequency: 'semiweekly' });
+    assert.deepEqual(r.obligations.map((o) => [o.amount, o.dueDate]), [[dollars(600), '2026-08-14']]);
+  });
+  test('the remainder at quarter end is paid with Form VA-16, due the last day of the month after', () => {
+    const r = va([stDay('2026-09-29', 200)], { assignedFrequency: 'semiweekly' });
+    assert.deepEqual(r.obligations.map((o) => [o.schedule, o.amount, o.dueDate]), [['quarterly', dollars(200), '2026-11-02']]);
+  });
+  test('the accumulation does not cross a quarter end', () => {
+    const r = va([stDay('2026-09-29', 400), stDay('2026-10-02', 400)], { assignedFrequency: 'semiweekly' });
+    assert.deepEqual(r.obligations.map((o) => [o.schedule, o.amount]), [['quarterly', dollars(400)], ['quarterly', dollars(400)]]);
+  });
+  test('VA-6 and the electronic mandate', () => {
+    assert.equal(withholdingReturnDates(VA, '2026-06-01').find((r) => r.id === 'VA-6')!.due.dueDate, '2027-02-01');
+    assert.match(VA.mandates.efile!.text, /submit all returns and payments electronically/);
+  });
+  test('a semi-weekly step with no threshold is rejected by the validator', () => {
+    const bad = JSON.parse(JSON.stringify(VA));
+    delete bad.withholding.deposits.frequencies.semiweekly.thresholdExclusive;
+    assert.match(validateProfile(bad).join(';'), /semiweekly_threshold needs a positive threshold/);
+  });
+});
+
 // ---------------------------------------------------------------------------
 
 function prng(seed: number): () => number {
@@ -179,6 +261,44 @@ describe('property: Connecticut and Nebraska over 1,000 randomized payroll years
       }
     }
     assert.ok(seen.weekly > 500 && seen.monthly > 500 && seen.quarterly > 300, JSON.stringify(seen));
+  });
+
+  test('Colorado: conserved, one payment per Saturday-Friday week, never split by quarter, cut at December 31', () => {
+    let weekly = 0;
+    for (const seed of seeds) {
+      const days = randomDays(seed, 2026);
+      const r = co(days, { assignedFrequency: 'weekly' });
+      const tag = `seed ${seed}`;
+      assert.equal(r.obligations.reduce((a, o) => a + o.amount, 0), days.reduce((a, d) => a + d.withholding, 0), `${tag}: conserved`);
+      for (const o of r.obligations) {
+        assert.ok(isStateBusinessDay(o.dueDate, CO), `${tag}: ${o.dueDate}`);
+        assert.ok(o.dueDate > o.payDates[o.payDates.length - 1], `${tag}: due before payday`);
+        assert.equal(new Set(o.payDates.map((d) => d.slice(0, 4))).size, 1, `${tag}: spans a year`);
+        weekly += 1;
+      }
+      const ids = new Set(r.obligations.map((o) => o.id));
+      assert.equal(ids.size, r.obligations.length, `${tag}: duplicate period`);
+    }
+    assert.ok(weekly > 5000, String(weekly));
+  });
+
+  test('Virginia semi-weekly: conserved; every payment over $500 and on time; each quarter ends with at most one remainder', () => {
+    let semi = 0;
+    let rem = 0;
+    for (const seed of seeds) {
+      const days = randomDays(seed, 2026);
+      const r = va(days, { assignedFrequency: 'semiweekly' });
+      const tag = `seed ${seed}`;
+      assert.equal(r.obligations.reduce((a, o) => a + o.amount, 0), days.reduce((a, d) => a + d.withholding, 0), `${tag}: conserved`);
+      for (const o of r.obligations) {
+        assert.ok(isStateBusinessDay(o.dueDate, VA), `${tag}: ${o.dueDate}`);
+        assert.ok(o.dueDate > o.payDates[o.payDates.length - 1], `${tag}: due before payday`);
+        if (o.schedule === 'semiweekly') { assert.ok(o.amount > dollars(500), `${tag}: ${o.amount}`); semi += 1; } else { rem += 1; }
+      }
+      const remainders = r.obligations.filter((o) => o.schedule === 'quarterly');
+      assert.ok(new Set(remainders.map((o) => o.quarter)).size === remainders.length, `${tag}: two remainders in a quarter`);
+    }
+    assert.ok(semi > 2000 && rem > 500, `${semi} ${rem}`);
   });
 
   test('Nebraska: conserved, month 3 never deposited, deposits only over $500 or triggered by month 1', () => {

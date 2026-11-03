@@ -1,0 +1,161 @@
+{
+ "state": "VA",
+ "name": "Virginia",
+ "verifiedOn": "2026-11-03",
+ "sources": [
+  {
+   "id": "S1",
+   "title": "Virginia Employer Withholding Instructions (Virginia Tax)",
+   "url": "https://www.tax.virginia.gov/sites/default/files/vatax-pdf/employer-withholding-instructions.pdf",
+   "revision": "Form 2614086, Rev. 10/26",
+   "verifiedOn": "2026-11-03",
+   "verifiedBy": "read from the stored copy in watcher/state/snapshots/va-b3a051ecad.txt.gz: the introduction (VA-6 due date), 'How to File and Pay the Tax' (electronic requirement, How Often to File, Semi-Weekly Filing and its special rule, Waiver, Monthly Filing with the due-date table, Quarterly Filing with its table, Seasonal Filing, Annual Summary VA-6). Not read: the registration steps, the Electronic Payment Guide, penalty tables, or any unemployment (VEC) document."
+  }
+ ],
+ "agencies": {
+  "withholding": {
+   "name": "Virginia Tax (Virginia Department of Taxation)",
+   "portalUrl": "https://www.tax.virginia.gov/",
+   "source": "S1"
+  }
+ },
+ "calendar": {
+  "weekendsRoll": true,
+  "holidays": {
+   "verified": false
+  },
+  "source": "S1"
+ },
+ "mandates": {
+  "efile": {
+   "text": "All employers are required to submit all returns and payments electronically.",
+   "source": "S1"
+  }
+ },
+ "withholding": {
+  "applies": true,
+  "taxLineIds": {
+   "withholding": "VA_SIT",
+   "employeeInsurance": []
+  },
+  "deposits": {
+   "kind": "assigned_frequency",
+   "rulesYear": 2026,
+   "interpretation": "Virginia Tax assigns a quarterly, monthly, semi-weekly or seasonal status from the AVERAGE MONTHLY income tax withheld (estimated at registration and reviewed each year; changes take effect January 1): under $100 quarterly; at least $100 but under $1,000 monthly; $1,000 or more semi-weekly. The status is an INPUT (what Virginia Tax assigned) or is derived from a supplied average monthly liability. Monthly: Form VA-5 and payment by the 25th of the following month (December wages: January 25). Quarterly: Form VA-5 and payment by the last day of the month after the quarter. Semi-weekly: if the tax withheld as of the close of any federal deposit period (generally Tuesday and Friday cutoffs, i.e. Wednesday-Friday and Saturday-Tuesday periods) is MORE than $500, payment is due within 3 banking days; at quarter end the remaining tax is paid with the reconciliation Form VA-16 by the last day of the month after the quarter. INTERPRETATION (the booklet gives no worked example): the $500 test is applied to the tax accumulated and not yet paid since the last payment in the same calendar quarter, so a balance of $500 or less carries to the next deposit period; the accumulation restarts each calendar quarter; and a payment is always made separately and on time even when its due date falls near the VA-16 due date (the booklet says such a payment is then included on the VA-16; paying it earlier is never late). If Virginia Tax reads it differently, change this profile. Seasonal status (returns only for designated months, due the 25th of the following month) and the monthly waiver for employers with no more than 5 employees are not modelled.",
+   "lookback": {
+    "description": "Average monthly Virginia income tax withheld",
+    "classes": [
+     {
+      "name": "quarterly",
+      "maxInclusive": 9999
+     },
+     {
+      "name": "monthly",
+      "minExclusive": 9999,
+      "maxInclusive": 99999
+     },
+     {
+      "name": "semiweekly",
+      "minExclusive": 99999
+     }
+    ],
+    "newEmployer": "quarterly"
+   },
+   "frequencies": {
+    "quarterly": {
+     "period": "quarter",
+     "due": {
+      "kind": "last_day_of_month_after_quarter"
+     }
+    },
+    "monthly": {
+     "period": "month",
+     "due": {
+      "kind": "day_of_month_after",
+      "day": 25
+     }
+    },
+    "semiweekly": {
+     "period": "semiweekly_threshold",
+     "thresholdExclusive": 50000,
+     "bankingDays": 3,
+     "due": {
+      "kind": "last_day_of_month_after_quarter"
+     }
+    }
+   },
+   "deposited": [
+    "withholding"
+   ],
+   "source": "S1"
+  },
+  "returns": [
+   {
+    "id": "VA-5",
+    "name": "Form VA-5, Employer's Return of Virginia Income Tax Withheld",
+    "frequency": "monthly",
+    "due": {
+     "kind": "day_of_month_after",
+     "day": 25
+    },
+    "contents": [
+     "Monthly filers: due the 25th of the following month (December wages: January 25); quarterly filers: due April 30, July 31, October 31 and January 31.",
+     "A return is required for every period the account is open, even if no tax is due."
+    ],
+    "source": "S1"
+   },
+   {
+    "id": "VA-16",
+    "name": "Form VA-16, quarterly reconciliation for semi-weekly filers",
+    "frequency": "quarterly",
+    "due": {
+     "kind": "last_day_of_month_after_quarter"
+    },
+    "contents": [
+     "Total payments made for the quarter are subtracted from the actual tax withheld; any balance is paid with the return.",
+     "Semi-weekly filers owe a 6% underpayment penalty if at least 90% of the quarter's liability was not paid within 3 banking days after the close of the semi-weekly period that covers the quarter end."
+    ],
+    "source": "S1"
+   },
+   {
+    "id": "VA-6",
+    "name": "Form VA-6, Employer's Annual Summary of Virginia Income Tax Withheld",
+    "frequency": "annual",
+    "due": {
+     "kind": "january_day_next_year",
+     "day": 31
+    },
+    "contents": [
+     "Due January 31 with the W-2 and 1099 statements that show Virginia withholding; if the account closes early, within 30 days of the last month wages were paid.",
+     "Must be submitted electronically.",
+     "Forms W-2, W-2C, 1099-MISC, 1099-NEC and 1099-R may be sent by Web Upload (EFW2 / Publication 1220 format, state code 51) or eForms; other federal forms (W-2G, 1099-INT) go on paper."
+    ],
+    "source": "S1"
+   }
+  ],
+  "notModelled": [
+   "Seasonal filing status and the written waiver that allows a small employer (5 or fewer employees) to file monthly.",
+   "Virginia unemployment tax (Virginia Employment Commission): no document read.",
+   "The booklet does not state what happens when a due date falls on a weekend or holiday; the next business day is assumed, and Virginia's legal-holiday list was not read.",
+   "The Electronic Payment Guide (ACH credit file formats) and Web Upload validation rules.",
+   "Registration steps and the new-hire reporting deadline."
+  ]
+ },
+ "channels": [
+  {
+   "id": "state:VA:online-services",
+   "function": "withholding returns and payments, VA-6 annual summary, W-2/1099 submission",
+   "description": "Virginia Tax online services for Businesses, eForms and Web Upload; payments by ACH debit or ACH credit",
+   "enrollment": [
+    "Register the business for a Virginia withholding tax account with Virginia Tax; the booklet says registration asks for the estimated average monthly withholding, from which the filing status is assigned (the registration steps were not read).",
+    "Returns and payments must be submitted electronically: eForms, online services for Businesses, Web Upload, or ACH credit (see the Electronic Payment Guide)."
+   ],
+   "specs": "Web Upload follows the SSA's EFW2 and the IRS's Publication 1220 with state code 51; the Electronic Payment Guide was not read.",
+   "source": "S1"
+  }
+ ],
+ "notModelled": [
+  "Virginia unemployment insurance (Virginia Employment Commission): not read.",
+  "Registration trigger and deadline: not read."
+ ]
+}

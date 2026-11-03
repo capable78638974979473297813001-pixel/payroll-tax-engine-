@@ -93,7 +93,24 @@ export interface AssignedFrequencySpec {
     /** The frequency for a new employer with no look-back history. */
     newEmployer: string;
   };
-  frequencies: Record<string, { period: 'week_sat_fri' | 'month' | 'quarter' | 'year'; due: DueRule }>;
+  frequencies: Record<string, {
+    period: 'week_sat_fri' | 'month' | 'quarter' | 'year' | 'semiweekly_threshold';
+    /** For `semiweekly_threshold` the due rule is that of the REMAINDER (paid with the quarterly return). */
+    due: DueRule;
+    /**
+     * Only for `semiweekly_threshold` (Virginia): at the close of each federal deposit period (Wed-Fri, Sat-Tue),
+     * when the tax accumulated and not yet paid in the quarter is MORE than this (cents), it is due `bankingDays`
+     * banking days later; whatever is left at quarter end is paid with the quarterly return.
+     */
+    thresholdExclusive?: Cents;
+    bankingDays?: number;
+    /**
+     * Only for `week_sat_fri`: where a week that runs across a boundary is cut into two periods.
+     * 'quarter' (default; Connecticut) cuts at quarter ends; 'year' (Colorado) cuts only at December 31,
+     * which then ends the final period whatever weekday it is.
+     */
+    weekSplit?: 'quarter' | 'year';
+  }>;
   deposited: ('withholding' | 'employeeInsurance')[];
   source: string;
 }
@@ -219,6 +236,9 @@ export function validateProfile(p: StateProfile): string[] {
     if (d.kind === 'assigned_frequency') {
       if (!d.frequencies[d.lookback.newEmployer]) bad.push(`withholding.deposits: new-employer frequency ${d.lookback.newEmployer} is not defined`);
       for (const c of d.lookback.classes) if (!d.frequencies[c.name]) bad.push(`withholding.deposits: look-back class ${c.name} has no frequency`);
+      for (const [n, f] of Object.entries(d.frequencies)) {
+        if (f.period === 'semiweekly_threshold' && !((f.thresholdExclusive ?? 0) > 0 && (f.bankingDays ?? 0) >= 1)) bad.push(`withholding.deposits.frequencies.${n}: semiweekly_threshold needs a positive threshold and bankingDays`);
+      }
     } else if (d.kind === 'quarter_month_threshold') {
       if (!(d.thresholdExclusive > 0)) bad.push('withholding.deposits: threshold must be positive cents');
     } else {

@@ -2,7 +2,7 @@ import { fmt, type Cents } from '../../src/money.ts';
 import { addDays, quarterOf, semiweeklyPeriodEnd, weekday } from '../federal/calendar.ts';
 import type { DepositAnalysis, DepositObligation } from '../federal/deposits.ts';
 import type { Finding } from '../federal/form941.ts';
-import { holidayFinding, resolveDue } from './calendar.ts';
+import { holidayFinding, nthStateBusinessDayAfter, resolveDue } from './calendar.ts';
 import type { StateDay } from './ledger.ts';
 import type { AssignedFrequencySpec, BandDepositSpec, FederalDepositRule, QuarterMonthThresholdSpec, StateDepositSchedule, StateProfile } from './profile.ts';
 
@@ -229,11 +229,16 @@ function rulesYearFinding(profile: StateProfile, rulesYear: number | undefined, 
   };
 }
 
-function periodKey(period: 'week_sat_fri' | 'month' | 'quarter' | 'year', date: string): { key: string; anchor: string } {
+function periodKey(period: 'week_sat_fri' | 'month' | 'quarter' | 'year' | 'semiweekly_threshold', date: string, weekSplit: 'quarter' | 'year' = 'quarter'): { key: string; anchor: string } {
   const q = quarterOf(date);
   switch (period) {
     case 'week_sat_fri': {
-      const end = weekEndFriday(date);
+      let end = weekEndFriday(date);
+      if (weekSplit === 'year') {
+        // the final weekly period of the year ends December 31 whatever weekday it is
+        if (end.slice(0, 4) > date.slice(0, 4)) end = `${date.slice(0, 4)}-12-31`;
+        return { key: end, anchor: end };
+      }
       // a week that spans two quarters needs separate payments (the guide says so)
       return { key: `${end}|Q${q}`, anchor: end };
     }
@@ -243,7 +248,55 @@ function periodKey(period: 'week_sat_fri' | 'month' | 'quarter' | 'year', date: 
       return { key: `${date.slice(0, 4)}-Q${q}`, anchor: date };
     case 'year':
       return { key: date.slice(0, 4), anchor: date };
+    case 'semiweekly_threshold':
+      throw new Error('semiweekly_threshold periods are handled by analyzeSemiweeklyThreshold');
   }
+}
+
+/**
+ * Virginia-style semi-weekly payments. Within each calendar quarter, the withholding accumulates by pay date;
+ * at the close of each federal deposit period (Wednesday-Friday, Saturday-Tuesday) a balance MORE than the
+ * threshold is due `bankingDays` banking days after the close. Whatever is left at quarter end is the remainder
+ * paid with the quarterly return.
+ */
+function semiweeklyThresholdObligations(profile: StateProfile, f: { thresholdExclusive?: Cents; bankingDays?: number; due: AssignedFrequencySpec['frequencies'][string]['due'] }, days: readonly StateDay[], extra: readonly string[]): StateDepositObligation[] {
+  const out: StateDepositObligation[] = [];
+  const byQuarter = new Map<string, StateDay[]>();
+  for (const d of days) {
+    if (d.withholding === 0 && d.employeeInsurance === 0) continue;
+    const key = `${d.date.slice(0, 4)}-Q${quarterOf(d.date)}`;
+    byQuarter.set(key, [...(byQuarter.get(key) ?? []), d]);
+  }
+  for (const [qkey, ds] of byQuarter) {
+    const periods = new Map<string, StateDay[]>();
+    for (const d of ds) periods.set(semiweeklyPeriodEnd(d.date), [...(periods.get(semiweeklyPeriodEnd(d.date)) ?? []), d]);
+    let pending: StateDay[] = [];
+    for (const end of [...periods.keys()].sort()) {
+      pending = pending.concat(periods.get(end)!);
+      const w = sum(pending, 'withholding');
+      const ins = sum(pending, 'employeeInsurance');
+      if (w + ins > f.thresholdExclusive!) {
+        const dueDate = nthStateBusinessDayAfter(end, f.bankingDays!, profile, extra);
+        out.push({
+          id: `${profile.state}-semiweekly-${end}`, state: profile.state, schedule: 'semiweekly', payDates: pending.map((d) => d.date),
+          year: Number(qkey.slice(0, 4)), quarter: quarterOf(pending[0].date), withholding: w, employeeInsurance: ins, employerUi: 0, amount: w + ins,
+          dueDate, notes: [`Semi-weekly period closing ${end}: ${fmt(w + ins)} accumulated, more than ${fmt(f.thresholdExclusive!)}, due ${f.bankingDays} banking days later.`],
+        });
+        pending = [];
+      }
+    }
+    if (pending.length > 0) {
+      const w = sum(pending, 'withholding');
+      const ins = sum(pending, 'employeeInsurance');
+      const due = resolveDue(f.due, pending[pending.length - 1].date, profile, extra);
+      out.push({
+        id: `${profile.state}-quarterly-${qkey}`, state: profile.state, schedule: 'quarterly', payDates: pending.map((d) => d.date),
+        year: Number(qkey.slice(0, 4)), quarter: quarterOf(pending[0].date), withholding: w, employeeInsurance: ins, employerUi: 0, amount: w + ins,
+        dueDate: due.dueDate, notes: [`Remainder for ${qkey}: ${fmt(w + ins)}, paid with the quarterly reconciliation.`],
+      });
+    }
+  }
+  return out;
 }
 
 function analyzeAssignedFrequency(profile: StateProfile, spec: AssignedFrequencySpec, days: readonly StateDay[], opts: StateDepositOptions): StateDepositAnalysis {
@@ -269,10 +322,16 @@ function analyzeAssignedFrequency(profile: StateProfile, spec: AssignedFrequency
     return { obligations: [], findings };
   }
 
+  if (f.period === 'semiweekly_threshold') {
+    const obligations = semiweeklyThresholdObligations(profile, f, days, opts.extraHolidays ?? []);
+    obligations.sort((a, b) => a.dueDate.localeCompare(b.dueDate) || a.id.localeCompare(b.id));
+    return { obligations, findings };
+  }
+
   const groups = new Map<string, { anchor: string; days: StateDay[] }>();
   for (const d of days) {
     if (d.withholding === 0 && d.employeeInsurance === 0) continue;
-    const { key, anchor } = periodKey(f.period, d.date);
+    const { key, anchor } = periodKey(f.period, d.date, f.weekSplit);
     const g = groups.get(key) ?? { anchor, days: [] };
     g.days.push(d);
     groups.set(key, g);
