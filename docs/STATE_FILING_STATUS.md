@@ -1,61 +1,113 @@
-# State filing implementation status
+# State filing: supported exports and remaining work
 
-This change is a reconciliation foundation, not a completed state filing product.
-No state can be submitted through this module. Do not use its output as an agency upload.
-Coverage of state codes does not mean coverage of state forms.
+This PR generates agency-layout upload files as well as reconciliation worksheets.
+It is **not a complete nationwide filing service**. Agency acceptance testing,
+automatic transmission and tax payments have not been completed.
 
-## Available
+| State/form | Implemented | Not implemented |
+| --- | --- | --- |
+| Michigan UI wage report | 2026 MiUI v3 RE/RW CSV; originals and adjustment reasons 1–9; units; monthly employment flags | No-employment format, out-of-state credits, obligation-tax records, withholding returns, payments |
+| California DE 9C | Original employee-detail CSV for e-Services direct-entry import | Complete bulk return, monthly counts, DE 9, amendments, no-payroll returns, payments |
+| Other 48 states and DC | Reconciliation worksheets | Agency formats and transmission |
 
-Import buildStateFilingWorksheets from payroll/stateFilings.ts (also exported by payroll/index.ts).
-Pass a company, year, quarter, approved run history, and optional state codes to review.
-The function groups stored state tax lines for all 50 states and DC, by employee,
-tax identifier and payer. It filters by employer and check date, rejects duplicate
-run snapshots and invalid money, and retains contributing run IDs. Draft and voided
-runs are excluded. Registered and explicitly requested states remain visible even
-without tax activity.
+Only 2026 formats are enabled. Unknown fields and unsupported states/forms are
+rejected, with no generic CSV fallback. No reconciliation worksheet is a return.
 
-Amounts are integer cents. Each tax retains its own taxable wage base. Do not add
-those bases together to obtain reportable wages. This is a current-history
-reconciliation, not an amendment to a previously accepted filing.
-Negative adjustments are rejected; an amendment ledger is not implemented.
+## Prepare a filing packet
 
-## Required before real use
+Use Node 22.18+ or Node 24. Supply JSON matching CaDe9cInput or MiWageInput in
+payroll/stateFilingExports.ts, then run:
 
-- Capture historical state UI subject wages before annual caps, exempt wages,
-  state allocations, required hours/weeks and monthly employment counts. A saved
-  capped taxable base cannot recover these fields.
-- Preserve employer/employee identity snapshots and required agency fields.
-  Current employee profiles cannot reconstruct historical filing facts.
-- Implement each agency/form/version format using current official specifications,
-  including original, amended, annual, zero-wage and final returns where required.
-- Track each employer's actual filing obligations and assigned deposit schedules;
-  tax-line presence or absence is not an obligation determination.
-- Add authorized production transmission or portal-upload workflows, encrypted
-  artifacts and credential storage, durable idempotency, access controls,
-  acknowledgement handling and accepted-return history.
-- Reconcile state deposits/payments separately from return acceptance.
-- Validate synthetic files against agency validators and complete required
-  transmitter enrollment/testing before enabling a production adapter.
+```sh
+npm run state:filing -- prepare input.json new-packet-directory
+```
 
-No API/UI submission route, state-specific serializer, payment instruction or
-production adapter is supplied in this PR. All worksheets have canSubmit=false.
-Registration records do not remove the format/acceptance/data blockers.
+The parent directory must exist; the output directory must not exist. The command
+writes a CSV, manifest.json with totals/checksum, and instructions.txt with the
+portal workflow. It does not upload anything or require agency credentials.
 
-## Official references reviewed November 2, 2026
+Inputs use integer cents, nine-digit SSNs without punctuation, string account
+numbers preserving leading zeros, and wageBasis: "agency_reportable". Michigan
+requires a seven-digit UI account and three-digit units; California requires an
+eight-digit payroll account. Never substitute capped UI taxable wages for
+subject/gross wages. Supply reviewed quarter-level records from the payroll ledger:
+the existing PayRun tax bases cannot reconstruct the missing wage details.
 
-Michigan's current guidance requires MiUI formats and says the old MiWAM format
-is no longer accepted. The public validator must only receive synthetic data:
-https://www.michigan.gov/leo/bureaus-agencies/uia/miui-university/miui-resources-for-employers-and-tpas/quarterly-wage-report-testing
+Names are not truncated or silently normalized. Michigan accepts a conservative
+delimiter-safe subset of address/name characters; use the portal for unsupported
+punctuation rather than removing it from legal names. Michigan adjustment rows
+contain corrected reported amounts, not negative deltas. California wage plan
+eligibility must be reviewed against the employer account under Appendix G.
 
-California documents FSET transmission, required wage plan codes, acknowledgements,
-and a separate amendment process:
-https://edd.ca.gov/en/payroll_taxes/FSET/
+Input/output contains full SSNs and wages. This is a local operator tool, not a
+hosted multi-tenant backend. Files request owner-only POSIX permissions; Windows
+deployments must apply appropriate directory ACLs. Files are not encrypted. Do not
+commit real payroll payloads or generated packets.
 
-These references illustrate separate agency requirements. They do not constitute
-verification of the other states' specifications.
+## Upload and record the result
 
-## Validation
+Follow instructions.txt in the agency portal with employer or authorized TPA access.
+California CSV imports employee detail only: select the account/quarter and complete
+the remaining DE 9C fields. Do not use the CSV as a bulk-return upload.
 
-Run node --test tests/payroll-state-filings.test.ts, then npm test.
-The test is included in npm test. Local execution was unavailable during authoring;
-no successful test run or agency acceptance is claimed.
+After submitting, save agency confirmation evidence and create receipt JSON:
+
+```json
+{
+  "status": "submitted",
+  "confirmationId": "agency-confirmation-id",
+  "recordedBy": "operator-id",
+  "occurredAt": "2026-10-25T15:00:00.000Z"
+}
+```
+
+Use the actual timestamp and confirmation identifier:
+
+```sh
+npm run state:filing -- receipt new-packet-directory receipt.json agency-confirmation.pdf
+```
+
+Record accepted, rejected or partially_accepted only with the actual agency result.
+Each event stores evidence separately. Partial acceptance remains unresolved.
+The original manifest stays prepared; later history records the processing state.
+Submission must precede a result. Accepted/rejected packets are terminal; corrections
+require a new packet. Acceptance does not imply payment.
+
+Receipts identify themselves as operator-recorded evidence, not authenticated
+agency callbacks. A per-packet exclusive lock protects writes; hashes check the CSV
+and previous evidence. These are accidental-change checks, not signed proof against
+someone with write access. A crash can leave .receipt-lock: confirm no writer is
+active before removing it. This is not a cross-machine queue and does not prevent
+duplicate returns prepared in different directories. Check agency history before
+uploading again. No automatic retries transmit files.
+
+## Official specifications
+
+Reviewed November 2, 2026:
+
+- [MiUI delimited v3, April 8, 2026](https://www.michigan.gov/leo/-/media/Project/Websites/leo/Documents/UIA/Publications/MiUI-University/Delimited_File_Format_Employer_Reference_Document.pdf): RE/RW layout, implied cents, account length, adjustment reasons, and eleven spaces for absent out-of-state wages in its revision log.
+- [Michigan validator guidance](https://www.michigan.gov/leo/bureaus-agencies/uia/miui-university/miui-resources-for-employers-and-tpas/quarterly-wage-report-testing): synthetic data only in the public validator; old MiWAM format not accepted.
+- [California DE 8300 revision 12](https://edd.ca.gov/siteassets/files/pdf_pub_ctr/de8300.pdf): Appendix A CSV and Appendix G wage plan codes.
+
+No successful agency validator result or production acceptance is claimed. No agency
+accounts or taxpayer authorizations were supplied. No real return/payment was sent.
+
+## Validation and remaining integration
+
+```sh
+node --test tests/payroll-state-filings.test.ts tests/payroll-state-filing-exports.test.ts
+```
+
+20 tests passed on Node 24: exact file rows, cents, duplicates, unsupported fields
+and states, packet files, receipt transitions, corruption checks and CLI behavior.
+TEMP/TMP pointed to the writable workspace because this Windows sandbox's default
+virtual temporary directory denied file renames. Both test files are in npm test.
+The full repository suite was not run: cloning was blocked by DNS; required branch
+files were fetched through GitHub.
+
+Remaining: other state/form formats; complete return packages; historical reportable
+wage and identity snapshots; zero/amended/final workflows; assigned deposit schedules
+and remittances; authenticated transmission/acknowledgement adapters; encrypted
+tenant storage, access controls and durable submission idempotency; agency validation
+and enrollment. buildStateFilingWorksheets remains reconciliation-only and cannot
+be submitted through the export command.
