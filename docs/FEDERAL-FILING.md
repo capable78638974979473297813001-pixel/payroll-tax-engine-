@@ -135,6 +135,10 @@ W-3 row) must be read.
 | `irs_eft_deposit` | IRS / Treasury | EFTPS enrollment, IRS Direct Pay, the IRS business tax account, or a third party that deposits for you and returns the EFT Trace Number | Public (cutoffs in Pub. 15, encoded in `paymentInstruction`) |
 | `ssa_bso_w2` | SSA | Business Services Online registration (allow 2+ weeks; credentials renewed since 2023-03-25); BSO online forms for ≤ 50 W-2s, or file upload of an EFW2 wage file above that | EFW2/EFW2C — published by SSA, but its site **returned HTTP 403 to automated retrieval** |
 
+For a payroll product filing for other employers, the enrollment sequence (provider options, Form 8655,
+fingerprints, testing, A2A vs IFA, the security obligations) is in
+[`IRS-EFILE-ENROLLMENT-PLAN.md`](IRS-EFILE-ENROLLMENT-PLAN.md).
+
 So the two things a live connection needs that code alone cannot supply are the
 **IRS 94x schema package** (obtained by the operator's e-Services account) and the
 **SSA EFW2 specification** (a person can download it in a browser). Once those are in

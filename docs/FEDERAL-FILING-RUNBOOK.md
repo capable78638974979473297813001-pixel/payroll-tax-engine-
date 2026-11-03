@@ -75,7 +75,9 @@ must). To e-file you need a connection that is not in this repository:
   application as a software developer, ATS testing, and the year's 94x schema package from the e-Services
   mailbox. Then the XML mapping goes behind `FilingTransport` (`payroll/federal/agency.ts`).
 
-See `docs/FEDERAL-FILING.md` for the channels, what each needs, and where the specifications stand.
+See `docs/FEDERAL-FILING.md` for the channels, what each needs, and where the specifications stand, and
+`docs/IRS-EFILE-ENROLLMENT-PLAN.md` for the full enrollment sequence for a payroll product that files for other
+employers (Software Developer, Transmitter and Reporting Agent).
 
 ## What this does not do
 
