@@ -1,0 +1,27 @@
+{
+  "$comment": "Blank IRS forms, pinned. They are public IRS documents. A different revision must be re-mapped in forms.ts by a person (fill_pdf.py refuses a form whose revision text or field count differs from the mapping).",
+  "forms": [
+    {
+      "file": "f941.pdf",
+      "url": "https://www.irs.gov/pub/irs-pdf/f941.pdf",
+      "revision": "Rev. March 2026",
+      "description": "Form 941 for 2026 (Rev. 3-2026), including the 941-V payment voucher",
+      "sha256": "38a3d8cf7a455101d52543c8c48e66202bc25c189ead878627e35c797c88e2ad",
+      "bytes": 841648,
+      "fieldCount": 130,
+      "pages": 3,
+      "fetchedOn": "2026-11-02"
+    },
+    {
+      "file": "f941sb.pdf",
+      "url": "https://www.irs.gov/pub/irs-pdf/f941sb.pdf",
+      "revision": "Rev. March 2024",
+      "description": "Schedule B (Form 941)",
+      "sha256": "95a62159c8367fc50e6b5445f7d80f9a00ac7cdf56d224240fc2776cb545ab63",
+      "bytes": 97028,
+      "fieldCount": 228,
+      "pages": 1,
+      "fetchedOn": "2026-11-02"
+    }
+  ]
+}

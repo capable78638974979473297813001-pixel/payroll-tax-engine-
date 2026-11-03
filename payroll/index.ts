@@ -690,3 +690,6 @@ export {
   ratePaySalariedSafeHarborMonthlyCeiling,
 } from './aca.ts';
 export type { AleDetermination, CoverageOffer, EmployeeMonthlyHours, Line14Code, Line16Code, Line16Inputs, MonthlyAleCounts } from './aca.ts';
+
+// Federal employment-tax filing (941/Schedule B, 940/Schedule A, W-2/W-3, deposits, agency layer). See docs/FEDERAL-FILING.md.
+export * as federal from './federal/index.ts';

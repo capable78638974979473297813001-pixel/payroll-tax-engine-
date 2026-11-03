@@ -29,10 +29,11 @@ import { type Cents, dollars } from '../src/money.ts';
  *    does. Callers passing quarterly liability figures into this module
  *    should know that distinction rather than assume perfect parity with
  *    a real IRS determination.
- *  - Deposit-deadline dates are calendar-only (Mon-Fri business days);
- *    this module does not exclude Federal Reserve/federal holidays, the
- *    same disclosed gap payroll/directDepositVerification.ts's own
- *    business-day counter carries.
+ *  - Deposit-deadline dates here are calendar-only (Mon-Fri business days)
+ *    and do not exclude legal holidays. payroll/federal/calendar.ts is the
+ *    holiday-aware version (DC legal holidays per Pub. 15, the semiweekly
+ *    "3 business days" rule, due-date rollovers) and payroll/federal/deposits.ts
+ *    builds on it; prefer those for anything a deadline depends on.
  *  - EFTPS mechanics themselves (the actual electronic transfer) are out
  *    of scope, the same "disclosed, not built" boundary this project
  *    draws around e-filing and bank-linking elsewhere.
