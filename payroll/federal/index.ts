@@ -11,3 +11,5 @@ export * from './form941.ts';
 export * from './form940.ts';
 export * from './w3.ts';
 export * from './agency.ts';
+export * from './paper/forms.ts';
+export * from './paper/w2Sheet.ts';

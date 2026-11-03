@@ -9,6 +9,12 @@ or can be transmitted from this code until the enrollments below exist. Every
 "submit" here either rehearses (sandbox, labelled as not a filing) or refuses with
 the list of what is missing. See [Agency connections](#agency-connections).
 
+**What it does do: it lets you file today without that connection.** Form 941 is not
+required to be e-filed (the IRS "encourage[s]" it), so `paper/` fills the IRS's own
+Form 941, Schedule B and Form 941-V with the computed figures, ready to sign and mail,
+and produces a W-2 entry sheet for the SSA's online forms. See
+[`FEDERAL-FILING-RUNBOOK.md`](FEDERAL-FILING-RUNBOOK.md) for the procedure.
+
 ## What is built
 
 | Module | Covers | Built from |
@@ -19,6 +25,8 @@ the list of what is missing. See [Agency connections](#agency-connections).
 | `form941.ts` | **Form 941 (Rev. 3-2026), every line**, Part 2, Schedule B, the line 11 research credit | Form 941 and its Instructions (Rev. 3-2026); Schedule B instructions |
 | `form940.ts` | **Form 940, every line**, Schedule A credit reduction, Part 5 quarterly liability, FUTA deposits | Form 940 and Schedule A, Instructions for Form 940 (2025) |
 | `w3.ts` | W-2 checks, W-3 totals, **941 ↔ W-3 reconciliation** | General Instructions for Forms W-2 and W-3 (2026) |
+| `paper/forms.ts` | **Fills the IRS's own fillable Form 941 (Rev. 3-2026), Schedule B and 941-V** from a computed return; mailing address by state; signer's checklist. Refuses a revised form. Part 5 is never filled | the forms and the 941 instructions' address table |
+| `paper/w2Sheet.ts` | W-2 entry sheet for SSA Business Services Online (up to 50 W-2s), each W-2 checked, W-3 totals | W-2/W-3 instructions |
 | `agency.ts` | Federal channels, filing lifecycle and audit trail, transports, EFTPS payment instruction, compliance calendar | the agencies' own enrollment text (below) |
 
 ### Rules that are easy to get wrong, and where they are encoded
@@ -145,8 +153,10 @@ The W-2 e-file mandate (at least 10 information returns in total) and the SSA ro
   employee's exempt FUTA payments. Absent, they are zero or derived with a stated
   assumption in `findings`; nothing is guessed silently.
 - **Not built:** Form 944 (annual filers), Form 941-X / W-2c amendments, Form 8974
-  itself, CT-1 (railroad), aggregate-return filers (CPEO / section 3504 agent), Form
-  941-V vouchers, paper-form PDF output.
+  itself, CT-1 (railroad), aggregate-return filers (CPEO / section 3504 agent), the
+  Form 940 PDF mapping (the 2026 form is not published; the paper filler is mapped to
+  one verified revision of each form and refuses any other), the EFW2 wage file for
+  more than 50 W-2s.
 - **Form 940 (2026)** is not published yet; this follows the 2025 form. The FUTA
   credit-reduction list for a year is final only after November 10; until the engine
   data carries it the return says so (`credit_reduction_not_determined`).
