@@ -1,10 +1,10 @@
 import { fmt, type Cents } from '../../src/money.ts';
-import { quarterOf, semiweeklyPeriodEnd } from '../federal/calendar.ts';
+import { addDays, quarterOf, semiweeklyPeriodEnd, weekday } from '../federal/calendar.ts';
 import type { DepositAnalysis, DepositObligation } from '../federal/deposits.ts';
 import type { Finding } from '../federal/form941.ts';
 import { holidayFinding, resolveDue } from './calendar.ts';
 import type { StateDay } from './ledger.ts';
-import type { FederalDepositRule, StateDepositSchedule, StateProfile } from './profile.ts';
+import type { AssignedFrequencySpec, BandDepositSpec, FederalDepositRule, QuarterMonthThresholdSpec, StateDepositSchedule, StateProfile } from './profile.ts';
 
 /**
  * STATE WITHHOLDING DEPOSITS: when the state's income-tax and employee-insurance
@@ -59,7 +59,7 @@ interface Item {
   federalRule: FederalDepositRule;
 }
 
-function bandFor(spec: NonNullable<NonNullable<StateProfile['withholding']>['deposits']>, pit: Cents): string {
+function bandFor(spec: BandDepositSpec, pit: Cents): string {
   for (const b of spec.bands) {
     if (b.maxExclusive !== undefined && pit < b.maxExclusive) return b.name;
     if (b.maxInclusive !== undefined && pit <= b.maxInclusive) return b.name;
@@ -70,7 +70,7 @@ function bandFor(spec: NonNullable<NonNullable<StateProfile['withholding']>['dep
 
 const sum = (xs: readonly StateDay[], k: 'withholding' | 'employeeInsurance' | 'employerUi'): Cents => xs.reduce((s, d) => s + d[k], 0);
 
-export function analyzeStateDeposits(
+function analyzeBandDeposits(
   profile: StateProfile,
   days: readonly StateDay[],
   federal: DepositAnalysis,
@@ -80,7 +80,7 @@ export function analyzeStateDeposits(
   const hf = holidayFinding(profile);
   if (hf) findings.push(hf);
 
-  const spec = profile.withholding?.deposits;
+  const spec = profile.withholding?.deposits as BandDepositSpec | undefined;
   if (!profile.withholding?.applies || !spec) {
     findings.push({
       severity: 'error',
@@ -197,4 +197,195 @@ export function analyzeStateDeposits(
 
   obligations.sort((a, b) => a.dueDate.localeCompare(b.dueDate) || a.id.localeCompare(b.id));
   return { obligations, findings };
+}
+
+// ---------------------------------------------------------------------------
+// Other rule shapes, and the dispatcher
+// ---------------------------------------------------------------------------
+
+export interface StateDepositOptions {
+  extraHolidays?: readonly string[];
+  /** The frequency the agency assigned (assigned-frequency states), e.g. 'weekly', 'monthly', 'quarterly'. */
+  assignedFrequency?: string;
+  /** The employer's liability over the look-back period, cents; used to derive the frequency when none is given. */
+  lookbackLiability?: Cents;
+  /** An employer licensed to file annually (Nebraska). */
+  annualFiler?: boolean;
+}
+
+/** The Friday that ends the Saturday-to-Friday week containing `date`. */
+function weekEndFriday(date: string): string {
+  return addDays(date, (5 - weekday(date) + 7) % 7);
+}
+
+function rulesYearFinding(profile: StateProfile, rulesYear: number | undefined, days: readonly StateDay[]): Finding | undefined {
+  if (rulesYear === undefined) return undefined;
+  const other = [...new Set(days.map((d) => Number(d.date.slice(0, 4))).filter((y) => y !== rulesYear))];
+  if (other.length === 0) return undefined;
+  return {
+    severity: 'warning',
+    code: 'state_rules_year_mismatch',
+    message: `${profile.state}: these deposit rules were read from the ${rulesYear} edition of the state's guide but pay dates fall in ${other.join(', ')}. Thresholds and dates may have changed; read that year's guide.`,
+  };
+}
+
+function periodKey(period: 'week_sat_fri' | 'month' | 'quarter' | 'year', date: string): { key: string; anchor: string } {
+  const q = quarterOf(date);
+  switch (period) {
+    case 'week_sat_fri': {
+      const end = weekEndFriday(date);
+      // a week that spans two quarters needs separate payments (the guide says so)
+      return { key: `${end}|Q${q}`, anchor: end };
+    }
+    case 'month':
+      return { key: date.slice(0, 7), anchor: `${date.slice(0, 7)}-01` };
+    case 'quarter':
+      return { key: `${date.slice(0, 4)}-Q${q}`, anchor: date };
+    case 'year':
+      return { key: date.slice(0, 4), anchor: date };
+  }
+}
+
+function analyzeAssignedFrequency(profile: StateProfile, spec: AssignedFrequencySpec, days: readonly StateDay[], opts: StateDepositOptions): StateDepositAnalysis {
+  const findings: Finding[] = [];
+  const hf = holidayFinding(profile);
+  if (hf) findings.push(hf);
+  const ry = rulesYearFinding(profile, spec.rulesYear, days);
+  if (ry) findings.push(ry);
+  findings.push({ severity: 'info', code: 'state_deposit_interpretation', message: spec.interpretation });
+
+  let frequency = opts.assignedFrequency;
+  if (frequency === undefined && opts.lookbackLiability !== undefined) {
+    const l = opts.lookbackLiability;
+    frequency = spec.lookback.classes.find((c) => (c.minExclusive === undefined || l > c.minExclusive) && (c.maxInclusive === undefined || l <= c.maxInclusive))?.name;
+  }
+  if (frequency === undefined) {
+    frequency = spec.lookback.newEmployer;
+    findings.push({ severity: 'warning', code: 'state_frequency_assumed_new_employer', message: `${profile.state}: no assigned frequency or look-back liability was given, so the new-employer frequency (${frequency}) was used. The agency tells each employer its frequency by mail; supply it.` });
+  }
+  const f = spec.frequencies[frequency];
+  if (!f) {
+    findings.push({ severity: 'error', code: 'state_unknown_frequency', message: `${profile.state}: "${frequency}" is not a frequency in the profile (${Object.keys(spec.frequencies).join(', ')}).` });
+    return { obligations: [], findings };
+  }
+
+  const groups = new Map<string, { anchor: string; days: StateDay[] }>();
+  for (const d of days) {
+    if (d.withholding === 0 && d.employeeInsurance === 0) continue;
+    const { key, anchor } = periodKey(f.period, d.date);
+    const g = groups.get(key) ?? { anchor, days: [] };
+    g.days.push(d);
+    groups.set(key, g);
+  }
+  const obligations: StateDepositObligation[] = [];
+  const extra = opts.extraHolidays ?? [];
+  for (const [key, g] of groups) {
+    const dates = g.days.map((d) => d.date);
+    const withholding = sum(g.days, 'withholding');
+    const insurance = sum(g.days, 'employeeInsurance');
+    const due = resolveDue(f.due, g.anchor, profile, extra);
+    const sched: StateDepositSchedule = f.period === 'week_sat_fri' ? 'weekly' : f.period === 'month' ? 'monthly' : f.period === 'quarter' ? 'quarterly' : 'annual';
+    obligations.push({
+      id: `${profile.state}-${sched}-${key.replace('|', '-')}`, state: profile.state, schedule: sched, payDates: dates,
+      year: Number(dates[0].slice(0, 4)), quarter: quarterOf(dates[0]), withholding, employeeInsurance: insurance, employerUi: 0,
+      amount: withholding + insurance, dueDate: due.dueDate, settleBy: due.settleBy,
+      notes: [`${frequency} remitter: ${fmt(withholding + insurance)} for period ${key.replace('|', ' ')}.`],
+    });
+  }
+  obligations.sort((a, b) => a.dueDate.localeCompare(b.dueDate) || a.id.localeCompare(b.id));
+  return { obligations, findings };
+}
+
+function analyzeQuarterMonthThreshold(profile: StateProfile, spec: QuarterMonthThresholdSpec, days: readonly StateDay[], opts: StateDepositOptions): StateDepositAnalysis {
+  const findings: Finding[] = [];
+  const hf = holidayFinding(profile);
+  if (hf) findings.push(hf);
+  const ry = rulesYearFinding(profile, spec.rulesYear, days);
+  if (ry) findings.push(ry);
+  findings.push({ severity: 'info', code: 'state_deposit_interpretation', message: spec.interpretation });
+  const extra = opts.extraHolidays ?? [];
+  const obligations: StateDepositObligation[] = [];
+  const live = days.filter((d) => d.withholding !== 0 || d.employeeInsurance !== 0);
+  const amountOf = (xs: readonly StateDay[]) => sum(xs, 'withholding') + sum(xs, 'employeeInsurance');
+
+  if (opts.annualFiler) {
+    const byYear = new Map<string, StateDay[]>();
+    for (const d of live) byYear.set(d.date.slice(0, 4), [...(byYear.get(d.date.slice(0, 4)) ?? []), d]);
+    for (const [year, ds] of byYear) {
+      const due = resolveDue(spec.annual.due, `${year}-06-01`, profile, extra);
+      obligations.push({
+        id: `${profile.state}-annual-${year}`, state: profile.state, schedule: 'annual', payDates: ds.map((d) => d.date), year: Number(year), quarter: 4,
+        withholding: sum(ds, 'withholding'), employeeInsurance: sum(ds, 'employeeInsurance'), employerUi: 0, amount: amountOf(ds), dueDate: due.dueDate,
+        notes: ['Annual filer: one return and payment for the calendar year.'],
+      });
+    }
+    return { obligations, findings };
+  }
+
+  const byQuarter = new Map<string, StateDay[]>();
+  for (const d of live) {
+    const key = `${d.date.slice(0, 4)}-Q${quarterOf(d.date)}`;
+    byQuarter.set(key, [...(byQuarter.get(key) ?? []), d]);
+  }
+  for (const [key, ds] of byQuarter) {
+    const year = Number(key.slice(0, 4));
+    const q = Number(key.slice(6)) as Quarter;
+    const monthOf = (d: StateDay) => ((Number(d.date.slice(5, 7)) - 1) % 3) + 1;
+    const m = [1, 2, 3].map((n) => ds.filter((d) => monthOf(d) === n));
+    const amounts = m.map(amountOf);
+    const T = spec.thresholdExclusive;
+    const dep: Cents[] = [0, 0, 0];
+    if (amounts[0] > T) dep[0] = amounts[0];
+    if (amounts[1] > T || (spec.secondMonthTriggeredByFirst && amounts[0] > T)) dep[1] = amounts[1];
+    for (const n of [0, 1]) {
+      if (dep[n] === 0) continue;
+      const due = resolveDue(spec.depositDue, m[n][0].date, profile, extra);
+      obligations.push({
+        id: `${profile.state}-monthly-${m[n][0].date.slice(0, 7)}`, state: profile.state, schedule: 'monthly', payDates: m[n].map((d) => d.date), year, quarter: q,
+        withholding: sum(m[n], 'withholding'), employeeInsurance: sum(m[n], 'employeeInsurance'), employerUi: 0, amount: dep[n], dueDate: due.dueDate,
+        notes: [`Month ${n + 1} of the quarter: more than ${fmt(T)} was withheld${n === 1 && amounts[1] <= T ? ' in month 1, which also requires the month 2 deposit' : ''}.`],
+      });
+    }
+    const remaining = amounts.reduce((a, b) => a + b, 0) - dep.reduce((a, b) => a + b, 0);
+    if (remaining > 0) {
+      const rest = ds.filter((d) => (monthOf(d) === 3) || (monthOf(d) === 1 && dep[0] === 0) || (monthOf(d) === 2 && dep[1] === 0));
+      const due = resolveDue(spec.returnPaymentDue, ds[0].date, profile, extra);
+      obligations.push({
+        id: `${profile.state}-quarterly-${key}`, state: profile.state, schedule: 'quarterly', payDates: rest.map((d) => d.date), year, quarter: q,
+        withholding: sum(rest, 'withholding'), employeeInsurance: sum(rest, 'employeeInsurance'), employerUi: 0, amount: remaining, dueDate: due.dueDate,
+        notes: [`Paid with the quarterly return: month 3 and any month not deposited.`],
+      });
+    }
+  }
+  obligations.sort((a, b) => a.dueDate.localeCompare(b.dueDate) || a.id.localeCompare(b.id));
+  return { obligations, findings };
+}
+
+/**
+ * The entry point. Chooses the analyzer from the profile's rule shape: a table keyed
+ * by the federal schedule (California), an agency-assigned frequency (Connecticut),
+ * or month thresholds within the quarter (Nebraska). A state with no deposit rules
+ * returns an error finding. The second form of the last argument (an array of dates)
+ * is kept for the earlier signature.
+ */
+export function analyzeStateDeposits(
+  profile: StateProfile,
+  days: readonly StateDay[],
+  federal: DepositAnalysis | undefined,
+  options: StateDepositOptions | readonly string[] = {},
+): StateDepositAnalysis {
+  const opts: StateDepositOptions = Array.isArray(options) ? { extraHolidays: options } : (options as StateDepositOptions);
+  const spec = profile.withholding?.deposits;
+  if (!profile.withholding?.applies || !spec) {
+    return analyzeBandDeposits(profile, days, federal as DepositAnalysis, opts.extraHolidays ?? []);
+  }
+  if (spec.kind === 'assigned_frequency') return analyzeAssignedFrequency(profile, spec, days, opts);
+  if (spec.kind === 'quarter_month_threshold') return analyzeQuarterMonthThreshold(profile, spec, days, opts);
+  if (!federal) {
+    return { obligations: [], findings: [{ severity: 'error', code: 'state_needs_federal_schedule', message: `${profile.state}'s deposit schedule depends on the federal one; supply the federal deposit analysis.` }] };
+  }
+  const result = analyzeBandDeposits(profile, days, federal, opts.extraHolidays ?? []);
+  const ry = rulesYearFinding(profile, spec.rulesYear, days);
+  if (ry) result.findings.push(ry);
+  return result;
 }

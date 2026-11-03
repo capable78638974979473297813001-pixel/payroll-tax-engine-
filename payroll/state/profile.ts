@@ -33,7 +33,11 @@ export type DueRule =
   | { kind: 'last_day_of_month_after_quarter' }
   | { kind: 'day_of_month_after'; day: number }
   | { kind: 'business_days_after_period_end'; days: number }
-  | { kind: 'next_business_day'; settleBusinessDays?: number };
+  | { kind: 'next_business_day'; settleBusinessDays?: number }
+  /** The first given weekday (0 = Sunday ... 6 = Saturday) strictly after the period's last day (Connecticut: the Wednesday after a Saturday-Friday week). */
+  | { kind: 'next_weekday_after_period_end'; weekday: number }
+  /** A fixed day in January of the year after the anchor's year (annual filers, W-2 reconciliations). */
+  | { kind: 'january_day_next_year'; day: number };
 
 export interface Agency {
   name: string;
@@ -42,17 +46,21 @@ export interface Agency {
 }
 
 export type FederalDepositRule = 'next_day' | 'semiweekly' | 'monthly';
-export type StateDepositSchedule = 'next_day' | 'semiweekly' | 'monthly' | 'quarterly';
+export type StateDepositSchedule = 'next_day' | 'semiweekly' | 'weekly' | 'monthly' | 'quarterly' | 'annual';
 
 /**
  * How a state assigns a withholding deposit schedule from the employer's federal
- * schedule and the amount accumulated. Amounts are cents. `bands` are evaluated in
- * order; the first whose `maxInclusive` is not exceeded applies (the last band has
- * no maximum). A row maps each band to the schedule the state requires.
+ * deposit schedule and the amount accumulated (California). Amounts are cents.
+ * `bands` are evaluated in order; the first whose `maxInclusive`/`maxExclusive` is
+ * not exceeded applies (the last band has no maximum). A row maps each band to the
+ * schedule the state requires.
  */
-export interface DepositSpec {
+export interface BandDepositSpec {
+  kind?: 'federal_bands';
   /** Plain statement of how the state's words were turned into this rule, including every ambiguity. */
   interpretation: string;
+  /** The tax year the rules were read for. Applying them to another year draws a warning. */
+  rulesYear?: number;
   bands: { name: string; maxExclusive?: Cents; maxInclusive?: Cents }[];
   rows: Record<FederalDepositRule, Record<string, StateDepositSchedule>>;
   due: {
@@ -68,10 +76,56 @@ export interface DepositSpec {
   source: string;
 }
 
+/**
+ * A frequency the AGENCY assigns from the employer's liability over a look-back
+ * period (Connecticut: weekly, monthly or quarterly). The frequency is an input to
+ * the analysis (what the agency told the employer), or is derived from the look-back
+ * liability by `lookback.classes`. Each frequency has a period and a due rule.
+ */
+export interface AssignedFrequencySpec {
+  kind: 'assigned_frequency';
+  interpretation: string;
+  rulesYear: number;
+  lookback: {
+    description: string;
+    /** Evaluated in order; `minExclusive` means "more than", `maxInclusive` means "not more than". Cents. */
+    classes: { name: string; minExclusive?: Cents; maxInclusive?: Cents }[];
+    /** The frequency for a new employer with no look-back history. */
+    newEmployer: string;
+  };
+  frequencies: Record<string, { period: 'week_sat_fri' | 'month' | 'quarter' | 'year'; due: DueRule }>;
+  deposited: ('withholding' | 'employeeInsurance')[];
+  source: string;
+}
+
+/**
+ * Nebraska-style deposits: within each quarter the first two months are deposited
+ * (by the 15th of the next month) only when the amount withheld passes a threshold;
+ * whatever is left is paid with the quarterly return.
+ */
+export interface QuarterMonthThresholdSpec {
+  kind: 'quarter_month_threshold';
+  interpretation: string;
+  rulesYear: number;
+  /** A deposit is required for a month when MORE than this was withheld (cents). */
+  thresholdExclusive: Cents;
+  /** Month 2 is also deposited if month 1 passed the threshold. */
+  secondMonthTriggeredByFirst: boolean;
+  depositDue: DueRule;
+  /** What is left (month 3 and any undeposited amount) is paid with the return. */
+  returnPaymentDue: DueRule;
+  /** Employers licensed as annual filers pay once a year. */
+  annual: { due: DueRule };
+  deposited: ('withholding' | 'employeeInsurance')[];
+  source: string;
+}
+
+export type DepositSpec = BandDepositSpec | AssignedFrequencySpec | QuarterMonthThresholdSpec;
+
 export interface ReturnSpec {
   id: string;
   name: string;
-  frequency: 'quarterly';
+  frequency: 'quarterly' | 'annual';
   due: DueRule;
   /** What the report must contain, as the agency describes it. */
   contents: string[];
@@ -96,6 +150,8 @@ export interface StateProfile {
     applies: boolean;
     taxLineIds?: { withholding: string; employeeInsurance: string[] };
     deposits?: DepositSpec;
+    /** The withholding returns (quarterly reconciliation, annual reconciliation) and when each is due. */
+    returns?: ReturnSpec[];
     notModelled: string[];
   };
   ui?: {
@@ -158,16 +214,24 @@ export function validateProfile(p: StateProfile): string[] {
   if (p.mandates.efile) cite('mandates.efile', p.mandates.efile.source);
   if (p.mandates.epay) cite('mandates.epay', p.mandates.epay.source);
   if (p.withholding?.deposits) {
-    cite('withholding.deposits', p.withholding.deposits.source);
     const d = p.withholding.deposits;
-    const names = d.bands.map((b) => b.name);
-    for (const fed of ['next_day', 'semiweekly', 'monthly'] as const) {
-      for (const n of names) if (!d.rows[fed]?.[n]) bad.push(`withholding.deposits.rows.${fed}.${n} is missing`);
+    cite('withholding.deposits', d.source);
+    if (d.kind === 'assigned_frequency') {
+      if (!d.frequencies[d.lookback.newEmployer]) bad.push(`withholding.deposits: new-employer frequency ${d.lookback.newEmployer} is not defined`);
+      for (const c of d.lookback.classes) if (!d.frequencies[c.name]) bad.push(`withholding.deposits: look-back class ${c.name} has no frequency`);
+    } else if (d.kind === 'quarter_month_threshold') {
+      if (!(d.thresholdExclusive > 0)) bad.push('withholding.deposits: threshold must be positive cents');
+    } else {
+      const names = d.bands.map((b) => b.name);
+      for (const fed of ['next_day', 'semiweekly', 'monthly'] as const) {
+        for (const n of names) if (!d.rows[fed]?.[n]) bad.push(`withholding.deposits.rows.${fed}.${n} is missing`);
+      }
+      for (const b of d.bands.slice(0, -1)) if (b.maxExclusive === undefined && b.maxInclusive === undefined) bad.push(`band ${b.name} has no maximum`);
     }
-    for (const b of d.bands.slice(0, -1)) if (b.maxExclusive === undefined && b.maxInclusive === undefined) bad.push(`band ${b.name} has no maximum`);
   }
   if (p.withholding?.applies && !p.withholding.deposits && p.withholding.notModelled.length === 0) bad.push('withholding applies but neither deposits nor notModelled is given');
   for (const r of p.ui?.returns ?? []) cite(`ui.returns.${r.id}`, r.source);
+  for (const r of p.withholding?.returns ?? []) cite(`withholding.returns.${r.id}`, r.source);
   if (p.newHire) cite('newHire', p.newHire.source);
   for (const c of p.channels) cite(`channels.${c.id}`, c.source);
   return bad;

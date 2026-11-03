@@ -99,3 +99,26 @@ export function stateQuarterlyReport(
     readyToFile: !findings.some((f) => f.severity === 'error'),
   };
 }
+
+export interface WithholdingReturnDue {
+  id: string;
+  name: string;
+  frequency: 'quarterly' | 'annual';
+  due: ResolvedDue;
+  contents: string[];
+}
+
+/**
+ * The state withholding returns a profile lists (quarterly reconciliations and the
+ * annual reconciliation) and when each is due for the period containing `anchor`
+ * (any date in the quarter, or in the year for annual returns).
+ */
+export function withholdingReturnDates(profile: StateProfile, anchor: string, options: { extraHolidays?: readonly string[] } = {}): WithholdingReturnDue[] {
+  return (profile.withholding?.returns ?? []).map((r) => ({
+    id: r.id,
+    name: r.name,
+    frequency: r.frequency,
+    due: resolveDue(r.due, anchor, profile, options.extraHolidays ?? []),
+    contents: r.contents,
+  }));
+}

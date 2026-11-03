@@ -93,6 +93,13 @@ export function resolveDue(rule: DueRule, anchor: string, p: StateProfile, extra
     }
     case 'business_days_after_period_end':
       return { dueDate: nthStateBusinessDayAfter(anchor, rule.days, p, extraHolidays) };
+    case 'next_weekday_after_period_end': {
+      let d = addDays(anchor, 1);
+      while (weekday(d) !== rule.weekday) d = addDays(d, 1);
+      return { dueDate: roll(d) };
+    }
+    case 'january_day_next_year':
+      return { dueDate: roll(`${year + 1}-01-${String(rule.day).padStart(2, '0')}`) };
     case 'next_business_day': {
       const due = nextStateBusinessDay(anchor, p, extraHolidays);
       return { dueDate: due, settleBy: rule.settleBusinessDays ? nthStateBusinessDayAfter(anchor, rule.settleBusinessDays, p, extraHolidays) : undefined };

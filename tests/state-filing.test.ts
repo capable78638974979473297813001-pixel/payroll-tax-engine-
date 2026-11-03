@@ -57,12 +57,12 @@ describe('coverage: every jurisdiction is accounted for', () => {
       assert.ok(x.agencyLines.length > 0 && x.website, x.code);
     }
   });
-  test('three states are modelled; every other row says NOT MODELLED rather than implying nothing is owed', () => {
-    assert.deepEqual(modelledStates(), ['CA', 'NY', 'TX']);
+  test('five states are modelled; every other row says NOT MODELLED rather than implying nothing is owed', () => {
+    assert.deepEqual(modelledStates(), ['CA', 'CT', 'NE', 'NY', 'TX']);
     const c = coverage();
     assert.equal(c.length, 53);
     for (const row of c) {
-      if (['CA', 'NY', 'TX'].includes(row.code)) assert.equal(row.modelled, true);
+      if (['CA', 'CT', 'NE', 'NY', 'TX'].includes(row.code)) assert.equal(row.modelled, true);
       else {
         assert.equal(row.modelled, false, row.code);
         assert.equal(row.functions.ui, 'NOT MODELLED', row.code);
@@ -75,6 +75,9 @@ describe('coverage: every jurisdiction is accounted for', () => {
     assert.equal(by.TX.withholding, 'no wage income tax');
     assert.equal(by.FL.withholding, 'no wage income tax');
     assert.equal(by.OH.withholding, 'NOT MODELLED');
+    assert.equal(by.CT.withholding, 'modelled');
+    assert.equal(by.CT.ui, 'NOT MODELLED'); // Connecticut's guide covers withholding only
+    assert.equal(by.NE.withholding, 'modelled');
   });
   test('an unmodelled state throws NOT MODELLED instead of returning an empty profile', () => {
     assert.equal(hasProfile('WY'), false);
@@ -314,7 +317,7 @@ describe('a full year of REAL engine pay runs in each pilot state', () => {
 
 describe('state filings run through the shared lifecycle, and nothing is transmitted', () => {
   test('every modelled state registers its channels, each with enrollment and a "not read" specification', () => {
-    assert.deepEqual(registerAllStateChannels(), ['CA', 'NY', 'TX']);
+    assert.deepEqual(registerAllStateChannels(), ['CA', 'CT', 'NE', 'NY', 'TX']);
     const ca = stateChannels(CA);
     assert.deepEqual(ca.map((c) => c.id), ['state:CA:e_services', 'state:CA:ner']);
     assert.match(ca[0].enrollment.join(' '), /Register online for an employer payroll tax account number/);
