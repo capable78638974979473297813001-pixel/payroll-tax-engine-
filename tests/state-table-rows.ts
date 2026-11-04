@@ -47,3 +47,18 @@ ROWS.push(
   { name: 'quarterly: April 20, July 20, October 20, January 20', state: 'MI', opts: { assignedFrequency: 'quarterly' }, pays: [['2026-02-13', 10], ['2026-05-15', 10], ['2026-08-14', 10], ['2026-11-13', 10]], expect: [['quarterly', 10, '2026-04-20'], ['quarterly', 10, '2026-07-20'], ['quarterly', 10, '2026-10-20'], ['quarterly', 10, '2027-01-20']] },
   { name: 'annual: February 28 of the following year (a Sunday in 2027 -> Monday March 1)', state: 'MI', opts: { assignedFrequency: 'annual' }, pays: [['2026-03-13', 10]], expect: [['annual', 10, '2027-03-01']] },
 );
+
+// Alabama (withholding booklet, January 2026): the guide's own example
+ROWS.push(
+  { name: "the guide's example: $1,050 in January is due February 15 (Sunday, so Monday Feb 16); $800 in February waits for the quarterly return April 30", state: 'AL', opts: { assignedFrequency: 'standard' }, pays: [['2026-01-14', 1050], ['2026-02-13', 800]], expect: [['monthly', 1050, '2026-02-16'], ['quarterly', 800, '2026-04-30']] },
+  { name: 'exactly $1,000 in a month is not enough; the third month is always with the quarterly return', state: 'AL', opts: { assignedFrequency: 'standard' }, pays: [['2026-04-10', 1000], ['2026-06-12', 9000]], expect: [['quarterly', 10000, '2026-07-31']] },
+  { name: 'voluntary monthly: the 15th of the following month', state: 'AL', opts: { assignedFrequency: 'monthly' }, pays: [['2026-08-07', 100]], expect: [['monthly', 100, '2026-09-15']] },
+);
+
+// Maine (2026 booklet, August 2026 revision)
+ROWS.push(
+  { name: 'look-back $18,000 or more is semiweekly; less pays with the quarterly return', state: 'ME', opts: { lookbackLiability: 17999.99 }, pays: [['2026-08-07', 100]], expect: [['quarterly', 100, '2026-11-02']] },
+  { name: 'look-back of exactly $18,000 is semiweekly: a Wednesday payday is due the following Wednesday', state: 'ME', opts: { lookbackLiability: 18000 }, pays: [['2026-08-05', 100]], expect: [['semiweekly', 100, '2026-08-12']] },
+  { name: 'semiweekly: Saturday to Tuesday paydays are due the following Friday', state: 'ME', opts: { assignedFrequency: 'semiweekly' }, pays: [['2026-08-08', 100], ['2026-08-11', 25]], expect: [['semiweekly', 125, '2026-08-14']] },
+  { name: 'quarterly 941ME: April 30, July 31, October 31, January 31', state: 'ME', opts: { assignedFrequency: 'quarterly' }, pays: [['2026-02-13', 10], ['2026-05-15', 10], ['2026-08-14', 10], ['2026-11-13', 10]], expect: [['quarterly', 10, '2026-04-30'], ['quarterly', 10, '2026-07-31'], ['quarterly', 10, '2026-11-02'], ['quarterly', 10, '2027-02-01']] },
+);
