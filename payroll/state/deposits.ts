@@ -213,6 +213,12 @@ export interface StateDepositOptions {
   annualFiler?: boolean;
 }
 
+function lastDayOfMonthIso(date: string): string {
+  const y = Number(date.slice(0, 4));
+  const m = Number(date.slice(5, 7));
+  return `${date.slice(0, 7)}-${String(new Date(Date.UTC(y, m, 0)).getUTCDate()).padStart(2, '0')}`;
+}
+
 /** The Friday that ends the Saturday-to-Friday week containing `date`. */
 function weekEndFriday(date: string): string {
   return addDays(date, (5 - weekday(date) + 7) % 7);
@@ -229,7 +235,7 @@ function rulesYearFinding(profile: StateProfile, rulesYear: number | undefined, 
   };
 }
 
-function periodKey(period: 'week_sat_fri' | 'month' | 'quarter' | 'year' | 'semiweekly_threshold' | 'published_calendar', date: string, weekSplit: 'quarter' | 'year' = 'quarter'): { key: string; anchor: string } {
+function periodKey(period: 'week_sat_fri' | 'month' | 'quarter' | 'year' | 'semiweekly_threshold' | 'published_calendar' | 'eighth_monthly', date: string, weekSplit: 'quarter' | 'year' = 'quarter'): { key: string; anchor: string } {
   const q = quarterOf(date);
   switch (period) {
     case 'week_sat_fri': {
@@ -250,6 +256,7 @@ function periodKey(period: 'week_sat_fri' | 'month' | 'quarter' | 'year' | 'semi
       return { key: date.slice(0, 4), anchor: date };
     case 'semiweekly_threshold':
     case 'published_calendar':
+    case 'eighth_monthly':
       throw new Error(`${period} periods are handled before periodKey is called`);
   }
 }
@@ -321,6 +328,32 @@ function analyzeAssignedFrequency(profile: StateProfile, spec: AssignedFrequency
   if (!f) {
     findings.push({ severity: 'error', code: 'state_unknown_frequency', message: `${profile.state}: "${frequency}" is not a frequency in the profile (${Object.keys(spec.frequencies).join(', ')}).` });
     return { obligations: [], findings };
+  }
+
+  if (f.period === 'eighth_monthly') {
+    const ends = f.periodEnds!;
+    const groups8 = new Map<string, StateDay[]>();
+    for (const d of days) {
+      if (d.withholding === 0 && d.employeeInsurance === 0) continue;
+      const last = Number(lastDayOfMonthIso(d.date).slice(8, 10));
+      const day = Number(d.date.slice(8, 10));
+      const endDay = Math.min(ends.find((e) => Math.min(e, last) >= day)!, last);
+      const end = `${d.date.slice(0, 7)}-${String(endDay).padStart(2, '0')}`;
+      groups8.set(end, [...(groups8.get(end) ?? []), d]);
+    }
+    const out: StateDepositObligation[] = [];
+    for (const [end, ds] of groups8) {
+      const w = sum(ds, 'withholding');
+      const ins = sum(ds, 'employeeInsurance');
+      const due = resolveDue(f.due, end, profile, opts.extraHolidays ?? []);
+      out.push({
+        id: `${profile.state}-eighthmonthly-${end}`, state: profile.state, schedule: 'eighth_monthly', payDates: ds.map((d) => d.date),
+        year: Number(end.slice(0, 4)), quarter: quarterOf(end), withholding: w, employeeInsurance: ins, employerUi: 0, amount: w + ins,
+        dueDate: due.dueDate, notes: [`Eighth-monthly period ending ${end}: ${fmt(w + ins)}.`],
+      });
+    }
+    out.sort((a, b) => a.dueDate.localeCompare(b.dueDate) || a.id.localeCompare(b.id));
+    return { obligations: out, findings };
   }
 
   if (f.period === 'published_calendar') {

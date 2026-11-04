@@ -1,0 +1,187 @@
+{
+ "state": "DE",
+ "name": "Delaware",
+ "verifiedOn": "2026-11-04",
+ "sources": [
+  {
+   "id": "S1",
+   "title": "Delaware Division of Revenue: Employer's Guide to Withholding Regulations and Employer Duties (web page)",
+   "url": "https://revenue.delaware.gov/employers-guide-withholding-regulations-employers-duties/",
+   "revision": "web page, no edition printed; the watcher last changed the stored copy 2026-10-20",
+   "verifiedOn": "2026-11-04",
+   "verifiedBy": "read from the stored copy in watcher/state/snapshots/de-196392c3ba.txt.gz: Section 1 (filing methods and thresholds), Section 3 (registration, new hires, W-2, annual reconciliation W-3) and Section 5 (monthly, quarterly and eighth-monthly deposits). The page reproduces regulation text that still contains examples from 2000; the dollar thresholds are the page's current ones. Not read: the withholding tables and exemption sections."
+  }
+ ],
+ "agencies": {
+  "withholding": {
+   "name": "Delaware Division of Revenue",
+   "portalUrl": "https://revenue.delaware.gov/",
+   "source": "S1"
+  },
+  "newHire": {
+   "name": "Delaware Division of Child Support Services (State Directory of New Hires)",
+   "portalUrl": "http://newhire.dhss.delaware.gov",
+   "source": "S1"
+  }
+ },
+ "calendar": {
+  "weekendsRoll": true,
+  "holidays": {
+   "verified": false
+  },
+  "source": "S1"
+ },
+ "mandates": {},
+ "withholding": {
+  "applies": true,
+  "taxLineIds": {
+   "withholding": "DE_SIT",
+   "employeeInsurance": []
+  },
+  "deposits": {
+   "kind": "assigned_frequency",
+   "interpretation": "Delaware sets the filing method from the tax reported in a look-back period, July 1 to June 30 immediately before the calendar year: $6,020.00 or less is QUARTERLY; $6,020.01 to $33,460.00 is MONTHLY; $33,460.01 or more is EIGHTH-MONTHLY. An employer with no prior record of withholding files MONTHLY until the next look-back. The Division mails the vouchers for the method it assigns, so the method is an INPUT or is derived from a supplied look-back liability. Monthly: Form W-1, by the 15th of the month after the month. Quarterly: Form W-1Q, by the last day of the month after the quarter. Eighth-monthly: Form W-1A; each month has eight payment periods ending on the 3rd, 7th, 11th, 15th, 19th, 22nd, 25th and the last day, and payment is due within 3 days (exclusive of weekends and state holidays) after the period end, which this profile reads as the 3rd business day after the period end. Withholding is reported in the month the payroll is completed (by the pay date), and a due date on a weekend or state holiday moves to the next working day. Eighth-monthly filers file no quarterly reconciliation, only the annual one (Form W-3, due February 28).",
+   "lookback": {
+    "description": "Delaware income tax reported in the look-back period July 1 to June 30 before the calendar year",
+    "classes": [
+     {
+      "name": "quarterly",
+      "maxInclusive": 602000
+     },
+     {
+      "name": "monthly",
+      "minExclusive": 602000,
+      "maxInclusive": 3346000
+     },
+     {
+      "name": "eighth_monthly",
+      "minExclusive": 3346000
+     }
+    ],
+    "newEmployer": "monthly"
+   },
+   "frequencies": {
+    "quarterly": {
+     "period": "quarter",
+     "due": {
+      "kind": "last_day_of_month_after_quarter"
+     }
+    },
+    "monthly": {
+     "period": "month",
+     "due": {
+      "kind": "day_of_month_after",
+      "day": 15
+     }
+    },
+    "eighth_monthly": {
+     "period": "eighth_monthly",
+     "periodEnds": [
+      3,
+      7,
+      11,
+      15,
+      19,
+      22,
+      25,
+      31
+     ],
+     "due": {
+      "kind": "business_days_after_period_end",
+      "days": 3
+     }
+    }
+   },
+   "deposited": [
+    "withholding"
+   ],
+   "source": "S1"
+  },
+  "returns": [
+   {
+    "id": "W-1",
+    "name": "Form W-1, monthly withholding return",
+    "frequency": "monthly",
+    "due": {
+     "kind": "day_of_month_after",
+     "day": 15
+    },
+    "contents": [
+     "Filed with the payment by the 15th of the month after the month."
+    ],
+    "source": "S1"
+   },
+   {
+    "id": "W-1Q",
+    "name": "Form W-1Q, quarterly withholding return",
+    "frequency": "quarterly",
+    "due": {
+     "kind": "last_day_of_month_after_quarter"
+    },
+    "contents": [
+     "Filed with the payment by the last day of the month after the quarter."
+    ],
+    "source": "S1"
+   },
+   {
+    "id": "W-1A",
+    "name": "Form W-1A, eighth-monthly withholding return",
+    "frequency": "eighth_monthly",
+    "due": {
+     "kind": "business_days_after_period_end",
+     "days": 3
+    },
+    "contents": [
+     "Filed with the payment within 3 days (not counting weekends and state holidays) after each period end: the 3rd, 7th, 11th, 15th, 19th, 22nd, 25th and last day of the month."
+    ],
+    "source": "S1"
+   },
+   {
+    "id": "W-3",
+    "name": "Form W-3, Annual Reconciliation/Transmittal of Income Tax Withheld",
+    "frequency": "annual",
+    "due": {
+     "kind": "month_day_next_year",
+     "month": 2,
+     "day": 28
+    },
+    "contents": [
+     "Due on or before February 28 for the preceding calendar year, filed with a duplicate copy of each federal Form W-2 showing the Delaware tax withheld.",
+     "Employees receive their W-2 by January 31.",
+     "A common paymaster may not remit for multiple employers on one return; each employer reports under its own FEIN."
+    ],
+    "source": "S1"
+   }
+  ],
+  "notModelled": [
+   "Delaware unemployment insurance (Department of Labor): no document read.",
+   "Whether Delaware requires withholding returns or payments to be made electronically: the page was not found to say so, so no mandate is recorded.",
+   "The page carries no edition date, so no rulesYear check is made: confirm the thresholds against the Division's current notices.",
+   "Delaware's state-holiday list (weekends only are skipped, with a warning).",
+   "Registration is by the Combined Registration Application through OneStop; its steps were not read in detail."
+  ]
+ },
+ "channels": [
+  {
+   "id": "state:DE:division-of-revenue",
+   "function": "withholding returns and payments, W-3 reconciliation",
+   "description": "Delaware Division of Revenue: returns W-1, W-1Q, W-1A with remittance; annual W-3 with duplicate W-2s",
+   "enrollment": [
+    "Register with the Division of Revenue on the Combined Registration Application (CRA) through OneStop; the withholding agent's number is the employer's federal EIN.",
+    "New employers file monthly until the next look-back period assigns a method."
+   ],
+   "specs": "Electronic filing options and W-2 / W-3 file layouts: not read.",
+   "source": "S1"
+  }
+ ],
+ "notModelled": [
+  "Delaware unemployment insurance: not read.",
+  "Electronic filing and payment options.",
+  "Whether this page is the current regulation text."
+ ],
+ "newHire": {
+  "form": "New-hire report (federal Form W-4 or an equivalent) to the Delaware State Directory of New Hires, Division of Child Support Services; the page says the 20 days run from hiring",
+  "daysFromStart": 20,
+  "source": "S1"
+ }
+}

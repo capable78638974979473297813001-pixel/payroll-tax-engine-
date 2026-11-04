@@ -7,6 +7,7 @@ import {
   analyzeStateDeposits,
   isStateBusinessDay,
   loadProfile,
+  newHireDeadline,
   validateProfile,
   withholdingReturnDates,
   type StateDay,
@@ -18,6 +19,10 @@ const CO = loadProfile('CO');
 const VA = loadProfile('VA');
 const UT = loadProfile('UT');
 const RI = loadProfile('RI');
+const DE = loadProfile('DE');
+const ND = loadProfile('ND');
+const nd = (days: StateDay[], opts: Parameters<typeof analyzeStateDeposits>[3] = {}) => analyzeStateDeposits(ND, days, undefined, opts);
+const de = (days: StateDay[], opts: Parameters<typeof analyzeStateDeposits>[3] = {}) => analyzeStateDeposits(DE, days, undefined, opts);
 const ri = (days: StateDay[], opts: Parameters<typeof analyzeStateDeposits>[3] = {}) => analyzeStateDeposits(RI, days, undefined, opts);
 const ut = (days: StateDay[], opts: Parameters<typeof analyzeStateDeposits>[3] = {}) => analyzeStateDeposits(UT, days, undefined, opts);
 const va = (days: StateDay[], opts: Parameters<typeof analyzeStateDeposits>[3] = {}) => analyzeStateDeposits(VA, days, undefined, opts);
@@ -318,6 +323,84 @@ describe('Rhode Island (2026 Withholding Tax Booklet): the agency\'s printed pay
       const r = ri(days, { assignedFrequency: f });
       assert.equal(r.obligations.reduce((a, o) => a + o.amount, 0), days.reduce((a, d) => a + d.withholding, 0), `seed ${seed}`);
       for (const o of r.obligations) assert.ok(o.dueDate > o.payDates[o.payDates.length - 1], `seed ${seed}`);
+    }
+  });
+});
+
+describe('Delaware (Employer\'s Guide, Sections 1 and 5)', () => {
+  test('look-back thresholds: $6,020.00 or less quarterly; $6,020.01 to $33,460.00 monthly; $33,460.01 or more eighth-monthly', () => {
+    const s = (v: number) => de([stDay('2026-08-07', 100)], { lookbackLiability: dollars(v) }).obligations[0].schedule;
+    assert.deepEqual([6020, 6020.01, 33_460, 33_460.01].map(s), ['quarterly', 'monthly', 'monthly', 'eighth_monthly']);
+  });
+  test('a new employer with no record files monthly', () => {
+    const r = de([stDay('2026-08-07', 100)]);
+    assert.equal(r.obligations[0].schedule, 'monthly');
+    assert.equal(r.findings.some((f) => f.code === 'state_frequency_assumed_new_employer'), true);
+  });
+  test('monthly: the 15th of the following month; quarterly: the last day of the month after the quarter', () => {
+    assert.deepEqual(de([stDay('2026-08-07', 100), stDay('2026-08-28', 25)], { assignedFrequency: 'monthly' }).obligations.map((o) => [o.dueDate, o.amount]), [['2026-09-15', dollars(125)]]);
+    assert.deepEqual(de([stDay('2026-08-07', 100)], { assignedFrequency: 'quarterly' }).obligations.map((o) => o.dueDate), ['2026-11-02']); // Oct 31, 2026 is a Saturday
+  });
+  test('eighth-monthly periods end on the 3rd, 7th, 11th, 15th, 19th, 22nd, 25th and the last day', () => {
+    const periods = (dates: string[]) => de(dates.map((d) => stDay(d, 10)), { assignedFrequency: 'eighth_monthly' }).obligations.map((o) => o.payDates.join('+'));
+    assert.deepEqual(periods(['2026-08-03', '2026-08-04', '2026-08-07', '2026-08-08']), ['2026-08-03', '2026-08-04+2026-08-07', '2026-08-08']);
+    assert.deepEqual(periods(['2026-08-22', '2026-08-23', '2026-08-25', '2026-08-26', '2026-08-31']), ['2026-08-22', '2026-08-23+2026-08-25', '2026-08-26+2026-08-31']);
+  });
+  test('an eighth-monthly payment is due 3 business days after the period end (weekends skipped)', () => {
+    const due = (d: string) => de([stDay(d, 500)], { assignedFrequency: 'eighth_monthly' }).obligations[0].dueDate;
+    assert.equal(due('2026-08-03'), '2026-08-06'); // Mon Aug 3 -> Thu Aug 6
+    assert.equal(due('2026-08-07'), '2026-08-12'); // Fri Aug 7 -> Wed Aug 12
+    assert.equal(due('2026-08-31'), '2026-09-03'); // Mon Aug 31 -> Thu Sep 3
+  });
+  test('February: the last period ends on the 28th (29th in a leap year)', () => {
+    const r = de([stDay('2026-02-26', 10), stDay('2026-02-28', 10)], { assignedFrequency: 'eighth_monthly' });
+    assert.equal(r.obligations.length, 1);
+    const leap = de([stDay('2028-02-26', 10), stDay('2028-02-29', 10)], { assignedFrequency: 'eighth_monthly' });
+    assert.equal(leap.obligations.length, 1);
+  });
+  test('the annual W-3 is due February 28 and the new-hire report within 20 days', () => {
+    assert.equal(withholdingReturnDates(DE, '2026-06-01').find((r) => r.id === 'W-3')!.due.dueDate, '2027-03-01'); // Feb 28, 2027 is a Sunday
+    assert.equal(newHireDeadline(DE, '2026-08-03').dueDate, '2026-08-23');
+  });
+  test('validator: periodEnds must end with 31', () => {
+    const bad = JSON.parse(JSON.stringify(DE));
+    bad.withholding.deposits.frequencies.eighth_monthly.periodEnds = [3, 7, 11, 15, 19, 22, 25, 30];
+    assert.match(validateProfile(bad).join(';'), /periodEnds must ascend and end with 31/);
+  });
+  test('1,000 payroll years: eighth-monthly conserves every dollar, one payment per period, after the period end', () => {
+    for (let seed = 8000; seed < 9000; seed += 1) {
+      const days = randomDays(seed, 2026);
+      const r = de(days, { assignedFrequency: 'eighth_monthly' });
+      assert.equal(r.obligations.reduce((a, o) => a + o.amount, 0), days.reduce((a, d) => a + d.withholding, 0), `seed ${seed}`);
+      assert.equal(new Set(r.obligations.map((o) => o.id)).size, r.obligations.length, `seed ${seed}`);
+      for (const o of r.obligations) {
+        assert.ok(isStateBusinessDay(o.dueDate, DE), `seed ${seed}: ${o.dueDate}`);
+        assert.ok(o.dueDate > o.payDates[o.payDates.length - 1], `seed ${seed}`);
+      }
+    }
+  });
+});
+
+describe('North Dakota (Income Tax Withholding & Information Returns Guideline, 4-2026)', () => {
+  test('Form 306 is quarterly by default: April 30, July 31, October 31, January 31', () => {
+    const r = nd([stDay('2026-02-13', 100), stDay('2026-05-15', 100), stDay('2026-08-14', 100), stDay('2026-11-13', 100)]);
+    assert.deepEqual(r.obligations.map((o) => [o.schedule, o.dueDate]), [['quarterly', '2026-04-30'], ['quarterly', '2026-07-31'], ['quarterly', '2026-11-02'], ['quarterly', '2027-02-01']]);
+  });
+  test('the annual option is an input: one payment for the year, due January 31', () => {
+    const r = nd([stDay('2026-03-13', 300), stDay('2026-09-11', 400)], { assignedFrequency: 'annual' });
+    assert.deepEqual(r.obligations.map((o) => [o.schedule, o.amount, o.dueDate]), [['annual', dollars(700), '2027-02-01']]);
+  });
+  test('the electronic mandate quotes the guideline, including the payroll-service-provider trigger', () => {
+    assert.match(ND.mandates.efile!.text, /third-party payroll service provider/);
+    assert.match(ND.mandates.efile!.text, /\$1,000 or more/);
+  });
+  test('1,000 payroll years: conserved, one payment per quarter, after payday', () => {
+    for (let seed = 12000; seed < 13000; seed += 1) {
+      const days = randomDays(seed, 2026);
+      const r = nd(days);
+      assert.equal(r.obligations.reduce((a, o) => a + o.amount, 0), days.reduce((a, d) => a + d.withholding, 0), `seed ${seed}`);
+      assert.ok(r.obligations.length <= 4, `seed ${seed}`);
+      for (const o of r.obligations) assert.ok(isStateBusinessDay(o.dueDate, ND) && o.dueDate > o.payDates[o.payDates.length - 1], `seed ${seed}`);
     }
   });
 });

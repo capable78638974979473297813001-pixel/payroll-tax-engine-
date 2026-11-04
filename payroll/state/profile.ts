@@ -38,7 +38,9 @@ export type DueRule =
   /** The first given weekday (0 = Sunday ... 6 = Saturday) strictly after the period's last day (Connecticut: the Wednesday after a Saturday-Friday week). */
   | { kind: 'next_weekday_after_period_end'; weekday: number }
   /** A fixed day in January of the year after the anchor's year (annual filers, W-2 reconciliations). */
-  | { kind: 'january_day_next_year'; day: number };
+  | { kind: 'january_day_next_year'; day: number }
+  /** A fixed month and day of the year after the anchor's year (Delaware's W-3 is due February 28). */
+  | { kind: 'month_day_next_year'; month: number; day: number };
 
 export interface Agency {
   name: string;
@@ -47,7 +49,7 @@ export interface Agency {
 }
 
 export type FederalDepositRule = 'next_day' | 'semiweekly' | 'monthly';
-export type StateDepositSchedule = 'next_day' | 'semiweekly' | 'weekly' | 'monthly' | 'quarterly' | 'annual';
+export type StateDepositSchedule = 'next_day' | 'semiweekly' | 'weekly' | 'monthly' | 'quarterly' | 'annual' | 'eighth_monthly';
 
 /**
  * How a state assigns a withholding deposit schedule from the employer's federal
@@ -86,7 +88,8 @@ export interface BandDepositSpec {
 export interface AssignedFrequencySpec {
   kind: 'assigned_frequency';
   interpretation: string;
-  rulesYear: number;
+  /** The edition the thresholds and dates were read from; omitted when the source carries no edition. */
+  rulesYear?: number;
   lookback: {
     description: string;
     /** Evaluated in order; `minExclusive` means "more than", `maxInclusive` means "not more than". Cents. */
@@ -95,7 +98,7 @@ export interface AssignedFrequencySpec {
     newEmployer: string;
   };
   frequencies: Record<string, {
-    period: 'week_sat_fri' | 'month' | 'quarter' | 'year' | 'semiweekly_threshold' | 'published_calendar';
+    period: 'week_sat_fri' | 'month' | 'quarter' | 'year' | 'semiweekly_threshold' | 'published_calendar' | 'eighth_monthly';
     /** For `semiweekly_threshold` the due rule is that of the REMAINDER (paid with the quarterly return). */
     due: DueRule;
     /**
@@ -111,6 +114,12 @@ export interface AssignedFrequencySpec {
      * row is an ERROR finding (the calendar for that year was not read), never an extrapolation.
      */
     calendar?: { from: string; to: string; due: string }[];
+    /**
+     * Only for `eighth_monthly` (Delaware): the days of the month on which a payment period ends, ascending; 31 means
+     * "the last day of the month". A pay date belongs to the first period that ends on or after its day. The `due`
+     * rule is applied to the period END (Delaware: 3 business days later).
+     */
+    periodEnds?: number[];
     /**
      * Only for `week_sat_fri`: where a week that runs across a boundary is cut into two periods.
      * 'quarter' (default; Connecticut) cuts at quarter ends; 'year' (Colorado) cuts only at December 31,
@@ -244,6 +253,10 @@ export function validateProfile(p: StateProfile): string[] {
       if (!d.frequencies[d.lookback.newEmployer]) bad.push(`withholding.deposits: new-employer frequency ${d.lookback.newEmployer} is not defined`);
       for (const c of d.lookback.classes) if (!d.frequencies[c.name]) bad.push(`withholding.deposits: look-back class ${c.name} has no frequency`);
       for (const [n, f] of Object.entries(d.frequencies)) {
+        if (f.period === 'eighth_monthly') {
+          const e = f.periodEnds ?? [];
+          if (e.length < 2 || e.some((x, i) => x < 1 || x > 31 || (i > 0 && x <= e[i - 1])) || e[e.length - 1] !== 31) bad.push(`withholding.deposits.frequencies.${n}: periodEnds must ascend and end with 31 (the last day)`);
+        }
         if (f.period === 'published_calendar') {
           const rows = f.calendar ?? [];
           if (rows.length === 0) bad.push(`withholding.deposits.frequencies.${n}: published_calendar has no rows`);

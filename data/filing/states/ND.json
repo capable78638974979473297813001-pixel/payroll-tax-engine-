@@ -1,0 +1,132 @@
+{
+ "state": "ND",
+ "name": "North Dakota",
+ "verifiedOn": "2026-11-04",
+ "sources": [
+  {
+   "id": "S1",
+   "title": "North Dakota Income Tax Withholding & Information Returns Guideline",
+   "url": "https://www.tax.nd.gov/sites/www/files/documents/guidelines/business/it-withhold/income-tax-withholding-information-returns-guideline.pdf",
+   "revision": "28221 - Updated Format 4-2026; content revised 12/2025",
+   "verifiedOn": "2026-11-04",
+   "verifiedBy": "read from the stored copy in watcher/state/snapshots/nd-dfb87d4460.txt.gz: Section 1 (Form 306, filing and payment methods, electronic requirements, When to File Form 306, Annual Filing, penalty and interest) and Section 3 (information returns: how and when to file, TAP and the upload web service). Not read: Section 2 (voluntary non-wage withholding) and Form RWT-941 (retirement-plan payer) details beyond the quarter table."
+  }
+ ],
+ "agencies": {
+  "withholding": {
+   "name": "North Dakota Office of State Tax Commissioner",
+   "portalUrl": "https://tap.tax.nd.gov",
+   "source": "S1"
+  }
+ },
+ "calendar": {
+  "weekendsRoll": true,
+  "holidays": {
+   "verified": false
+  },
+  "source": "S1"
+ },
+ "mandates": {
+  "efile": {
+   "text": "Form 306 and the tax due on it must be submitted electronically if either of the following apply: the amount required to be withheld from wages paid during the previous calendar year is $1,000 or more; or the employer contracts with a third-party payroll service provider to file and remit North Dakota income tax withheld on the employer's behalf, and the provider electronically files and remits the employer's withholding taxes for federal tax purposes.",
+   "source": "S1"
+  }
+ },
+ "withholding": {
+  "applies": true,
+  "taxLineIds": {
+   "withholding": "ND_SIT",
+   "employeeInsurance": []
+  },
+  "deposits": {
+   "kind": "assigned_frequency",
+   "rulesYear": 2026,
+   "interpretation": "North Dakota has no deposit schedule: Form 306 is filed and paid for each calendar quarter, on or before April 30, July 31, October 31 and January 31 (it must be filed even if no wages were paid). An employer may instead file and pay ANNUALLY, one Form 306 for the whole year due January 31 after the year, if it filed and paid all four quarters of the preceding year on time AND withheld less than $1,000 in the preceding year; the employer must contact the Commissioner (withhold@nd.gov) before the first quarter's return. The annual option is therefore an INPUT (assignedFrequency 'annual') and is never derived. Because a payroll service provider that files the employer's federal taxes electronically makes ND electronic filing mandatory for that employer, a payroll platform's customers should be treated as electronic filers.",
+   "lookback": {
+    "description": "North Dakota income tax withheld in the preceding calendar year (only used to decide electronic filing, not the schedule)",
+    "classes": [
+     {
+      "name": "quarterly"
+     }
+    ],
+    "newEmployer": "quarterly"
+   },
+   "frequencies": {
+    "quarterly": {
+     "period": "quarter",
+     "due": {
+      "kind": "last_day_of_month_after_quarter"
+     }
+    },
+    "annual": {
+     "period": "year",
+     "due": {
+      "kind": "january_day_next_year",
+      "day": 31
+     }
+    }
+   },
+   "deposited": [
+    "withholding"
+   ],
+   "source": "S1"
+  },
+  "returns": [
+   {
+    "id": "306",
+    "name": "Form 306, North Dakota Income Tax Withholding Return",
+    "frequency": "quarterly",
+    "due": {
+     "kind": "last_day_of_month_after_quarter"
+    },
+    "contents": [
+     "Filed for each calendar quarter by April 30, July 31, October 31 and January 31, even if no wages were paid.",
+     "Annual filers file one Form 306 for the calendar year by January 31.",
+     "Electronic submission through TAP (ACH debit) or by ACH credit with Form 301-EF; an ACH credit satisfies the filing requirement. Paper only if not required to file electronically or with a waiver."
+    ],
+    "source": "S1"
+   },
+   {
+    "id": "ND-information-returns",
+    "name": "Forms W-2, 1099, 1042-S and W-2G showing North Dakota withholding",
+    "frequency": "annual",
+    "due": {
+     "kind": "january_day_next_year",
+     "day": 31
+    },
+    "contents": [
+     "The state requirement is met by filing a copy of the form filed with SSA or IRS with the state information section completed; filed electronically (waiver for good cause).",
+     "Methods: Taxpayer Access Point (upload or key), or an upload web service called from accounting software (technical guidance at www.tax.nd.gov/SoftwareDevelopers).",
+     "A zero annual reconciliation is a .txt/.csv file of FEIN and year uploaded in TAP."
+    ],
+    "source": "S1"
+   }
+  ],
+  "notModelled": [
+   "North Dakota unemployment insurance (Job Service North Dakota): no document read.",
+   "The January 31 due date for information returns is taken from the guideline's quarter table and its Section 3 summary; the section's own due-date sentence was not isolated.",
+   "The web-service technical specification at www.tax.nd.gov/SoftwareDevelopers.",
+   "North Dakota's legal-holiday list (weekends only are skipped, with a warning).",
+   "Form RWT-941 (retirement-plan payer withholding), monthly election for those payers, and voluntary non-wage withholding."
+  ]
+ },
+ "channels": [
+  {
+   "id": "state:ND:tap",
+   "function": "Form 306 returns and payments, W-2/1099 upload",
+   "description": "North Dakota Taxpayer Access Point (tap.tax.nd.gov); ACH debit through TAP, or ACH credit with Form 301-EF; an upload web service exists for software that submits information returns directly",
+   "enrollment": [
+    "Sign up for a TAP account at tap.tax.nd.gov (\"Sign Up For Access\"); third-party access is available for filing only information returns.",
+    "Register for a withholding account (taxregistration@nd.gov assists; the registration form steps were not read).",
+    "For ACH credit: submit Form 301-EF, ACH Credit Authorization, and use the addenda record layout specified for Income Tax Withholding.",
+    "For the software upload web service: technical information at www.tax.nd.gov/SoftwareDevelopers (not read)."
+   ],
+   "specs": "The upload web service and the ACH addenda layout: not read.",
+   "source": "S1"
+  }
+ ],
+ "notModelled": [
+  "North Dakota unemployment insurance: not read.",
+  "New-hire reporting: not read."
+ ]
+}

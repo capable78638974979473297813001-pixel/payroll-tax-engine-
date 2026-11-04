@@ -105,6 +105,8 @@ export function resolveDue(rule: DueRule, anchor: string, p: StateProfile, extra
     }
     case 'january_day_next_year':
       return { dueDate: roll(`${year + 1}-01-${String(rule.day).padStart(2, '0')}`) };
+    case 'month_day_next_year':
+      return { dueDate: roll(`${year + 1}-${String(rule.month).padStart(2, '0')}-${String(rule.day).padStart(2, '0')}`) };
     case 'next_business_day': {
       const due = nextStateBusinessDay(anchor, p, extraHolidays);
       return { dueDate: due, settleBy: rule.settleBusinessDays ? nthStateBusinessDayAfter(anchor, rule.settleBusinessDays, p, extraHolidays) : undefined };

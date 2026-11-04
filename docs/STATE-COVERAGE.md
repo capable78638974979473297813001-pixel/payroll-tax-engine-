@@ -2,9 +2,9 @@
 
 _Generated from `data/filing/` by `scripts/state-coverage.ts`; `tests/state-coverage.test.ts` fails if this file is stale. Do not edit by hand._
 
-**53 jurisdictions** (the 53 unemployment-tax agencies the US Department of Labor lists: 50 states, DC, Puerto Rico, US Virgin Islands). **9 have a state profile** (CA, CO, CT, NE, NY, RI, TX, UT, VA). The rest are **NOT MODELLED**: their own documents have not been read, and nothing is assumed about what they require. A row saying NOT MODELLED does not mean nothing is owed.
+**53 jurisdictions** (the 53 unemployment-tax agencies the US Department of Labor lists: 50 states, DC, Puerto Rico, US Virgin Islands). **11 have a state profile** (CA, CO, CT, DE, ND, NE, NY, RI, TX, UT, VA). The rest are **NOT MODELLED**: their own documents have not been read, and nothing is assumed about what they require. A row saying NOT MODELLED does not mean nothing is owed.
 
-Unemployment reporting modelled for 3 of 53. Withholding deposits modelled for 7, partly for 1. New-hire reporting modelled for 1.
+Unemployment reporting modelled for 3 of 53. Withholding deposits modelled for 9, partly for 1. New-hire reporting modelled for 2.
 
 **Nothing is transmitted to any state.** No state transport is connected; the sandbox rehearses and says so, and live transports refuse with the enrollment steps each profile records.
 
@@ -17,7 +17,7 @@ Unemployment reporting modelled for 3 of 53. Withholding deposits modelled for 7
 | CA | California | Account Services Group, MIC-90, Employment Development Department, PO Box 942880, Sacramento, CA 94280 | modelled | modelled | modelled |
 | CO | Colorado | Unemployment Insurance Operations, Department of Labor and Employment, PO Box 8789, Denver, CO 80201-8789 | modelled | NOT MODELLED | NOT MODELLED |
 | CT | Connecticut | Connecticut Department of Labor, 200 Folly Brook Blvd, Wethersfield, CT 61091-1114 | modelled | NOT MODELLED | NOT MODELLED |
-| DE | Delaware | Division of Unemployment Insurance, Department of Labor, PO Box 9950, Wilmington, DE 19809-0950 | NOT MODELLED | NOT MODELLED | NOT MODELLED |
+| DE | Delaware | Division of Unemployment Insurance, Department of Labor, PO Box 9950, Wilmington, DE 19809-0950 | modelled | NOT MODELLED | modelled |
 | DC | District of Columbia | Department of Employment Services, Office of Unemployment, Compensation Tax Division, 609 H Street NE, 3rd floor, Washington, DC 20001-4347 | NOT MODELLED | NOT MODELLED | NOT MODELLED |
 | FL | Florida | Unemployment Compensation Services, Agency for Workforce Innovation, 107 E. Madison St. MSC 229, Tallahassee, FL 32399-0180 | no wage income tax | NOT MODELLED | NOT MODELLED |
 | GA | Georgia | Department of Labor, 148 Andrew Young Inter Blvd, Suite 800, Atlanta, GA 30303-1732 | NOT MODELLED | NOT MODELLED | NOT MODELLED |
@@ -44,7 +44,7 @@ Unemployment reporting modelled for 3 of 53. Withholding deposits modelled for 7
 | NM | New Mexico | Department of Workforce Solutions, PO Box 2281, Albuquerque, NM 87103-2281 | NOT MODELLED | NOT MODELLED | NOT MODELLED |
 | NY | New York | Department of Labor, State Campus, Building 12, Room 500, Albany, NY 12240-0339 | partial | modelled | NOT MODELLED |
 | NC | North Carolina | Employment Security Commission, PO Box 26504, Raleigh, NC 27611-6504 | NOT MODELLED | NOT MODELLED | NOT MODELLED |
-| ND | North Dakota | Job Service of North Dakota, PO Box 5507, Bismarck, ND 58506-5507 | NOT MODELLED | NOT MODELLED | NOT MODELLED |
+| ND | North Dakota | Job Service of North Dakota, PO Box 5507, Bismarck, ND 58506-5507 | modelled | NOT MODELLED | NOT MODELLED |
 | OH | Ohio | Department of Job & Family Services, PO Box 182404, Columbus, OH 43218-2404 | NOT MODELLED | NOT MODELLED | NOT MODELLED |
 | OK | Oklahoma | Employment Security Commission, PO Box 52003, Oklahoma City, OK 73152-2003 | NOT MODELLED | NOT MODELLED | NOT MODELLED |
 | OR | Oregon | Employment Department, 875 Union Street NE, Room 107, Salem, OR 97311-0030 | NOT MODELLED | NOT MODELLED | NOT MODELLED |

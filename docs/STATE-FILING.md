@@ -5,10 +5,10 @@ runs, using **state profiles**: data files in `data/filing/states/` with a citat
 Import it as `import { state } from './payroll/index.ts'`. Coverage is in
 [`STATE-COVERAGE.md`](STATE-COVERAGE.md) (generated; a test fails if it is stale).
 
-**Status: pilot.** Nine states are modelled (California, Colorado, Connecticut, Nebraska, New York, Rhode Island, Texas, Utah, Virginia), chosen to
+**Status: pilot.** Eleven states are modelled (California, Colorado, Connecticut, Delaware, Nebraska, New York, North Dakota, Rhode Island, Texas, Utah, Virginia), chosen to
 cover the different shapes a state deposit rule takes: a table keyed to the federal schedule (CA), a frequency
-the state assigns (CT, CO, VA, UT, RI), a monthly threshold (NE), a combined quarterly return (NY), and an
-unemployment-only state with no wage income tax (TX). The other **44 jurisdictions
+the state assigns (CT, CO, VA, UT, RI, DE, ND), a monthly threshold (NE), a combined quarterly return (NY), and an
+unemployment-only state with no wage income tax (TX). The other **42 jurisdictions
 are NOT MODELLED**: nothing is assumed for them, and a lookup for one fails loudly. **Nothing is
 transmitted to any state**: no state transport is connected.
 
@@ -24,7 +24,7 @@ transmitted to any state**: no state transport is connected.
 | `newhire.ts` | New-hire deadline from a state's days-from-start rule; refuses if the profile has none |
 | `agency.ts` | Each profile's channels as registry entries (with the enrollment steps the profile records), and filing packages for the shared `FilingBook` lifecycle |
 
-## What is verified, for the nine states
+## What is verified, for the eleven states
 
 From each agency's own documents, read in full (the stored watcher copy or the live page, as cited):
 
@@ -58,6 +58,15 @@ From each agency's own documents, read in full (the stored watcher copy or the l
   calendar** (52 weekly rows, 12 monthly, 4 quarterly), and 2027 pay dates draw an error until that year's calendar is
   added. Two printed weekly rows around July 3-7, 2026 are flagged for a look against the PDF, because the stored
   text loses the calendar's colour coding. Bulk RI-941 filing needs a Payroll Letter of Intent to Rhode Island.
+- **Delaware (Division of Revenue employer's guide, web page, no edition printed).** Withholding and the 20-day new-hire
+  rule. Look-back (July to June): $6,020.00 or less quarterly, $6,020.01 to $33,460.00 monthly (the 15th), above that
+  EIGHTH-MONTHLY, with eight periods ending the 3rd, 7th, 11th, 15th, 19th, 22nd, 25th and last day, each due 3 business
+  days later; new employers are monthly. Annual W-3 by February 28. The page still carries regulation examples from
+  2000, so confirm the thresholds against the Division's current notices.
+- **North Dakota (Guideline, updated 4-2026).** Withholding only. Form 306 quarterly (April 30, July 31, October 31,
+  January 31) or, for small eligible employers, annually. Electronic filing is mandatory for employers over $1,000 and
+  **for any employer whose payroll service provider files its federal taxes electronically**, so a payroll platform's
+  customers are electronic filers. TAP, ACH credit, and an upload web service for software.
 - **Connecticut (Circular CT, IP 2025(1)).** Withholding only (no unemployment guide was read). Remitter
   class from the look-back: weekly above $10,000, monthly above $2,000 up to $10,000, quarterly $2,000 or less,
   new employers quarterly. Weekly: the Saturday-to-Friday week, due the Wednesday after; monthly the 15th;
@@ -84,6 +93,7 @@ to the monthly deposit; the rest to the quarterly one. If EDD's reading differs,
   seasonal status and the small-employer monthly waiver.
 - Utah and Rhode Island: unemployment (Workforce Services; DLT and temporary disability insurance); Rhode Island
   years after 2026; the registration steps; holiday lists.
+- Delaware and North Dakota: unemployment; Delaware electronic filing options; North Dakota's web-service specification.
 - Connecticut: unemployment; the CT-941 line layout. Nebraska: unemployment; the 941N line layout.
 - Every state: no state transport is connected, so no filing is sent. Subject-wages definitions are the
   agencies' own; gross pay is used as a proxy and the report says so. SSNs are never held by the engine.
@@ -101,7 +111,7 @@ Follow `STATE-LAYER-SPEC.md`. In short:
 3. Express the state's deposit rule in `withholding.deposits` using one of the three shapes the engine
    interprets: `federal_bands` (a table of federal schedule x amount band, see CA), `assigned_frequency`
    (the state assigns weekly/monthly/quarterly, see CT; CO adds `weekSplit: "year"`, VA adds a
-   `semiweekly_threshold` frequency; UT adds a `last_day_of_following_month` due rule; RI uses a
+   `semiweekly_threshold` frequency; UT adds a `last_day_of_following_month` due rule; DE adds `eighth_monthly` periods and a `month_day_next_year` due rule; RI uses a
    `published_calendar` frequency that holds the agency's printed periods and due dates), or `quarter_month_threshold` (deposit a month's tax once
    it passes a threshold, see NE). A rule that fits none of them stays out, with the reason in `notModelled`:
    adding a new shape means extending `deposits.ts` and `profile.ts` and testing it from the agency's examples.
