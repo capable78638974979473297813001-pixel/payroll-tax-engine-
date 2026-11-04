@@ -77,3 +77,15 @@ ROWS.push(
   { name: 'monthly: the 15th, December wages by January 31', state: 'NC', opts: { assignedFrequency: 'monthly' }, pays: [['2026-09-11', 100], ['2026-12-11', 80]], expect: [['monthly', 100, '2026-10-15'], ['monthly', 80, '2027-02-01']] },
   { name: '$2,000 or more a month is semiweekly: Saturday-Tuesday due the following Friday, Wednesday-Friday the following Wednesday', state: 'NC', opts: { lookbackLiability: 2000 }, pays: [['2026-08-05', 100], ['2026-08-10', 40]], expect: [['semiweekly', 100, '2026-08-12'], ['semiweekly', 40, '2026-08-14']] },
 );
+
+// Vermont (withholding page): only the semiweekly schedule is modelled
+ROWS.push(
+  { name: 'semiweekly: Wednesday to Friday paydays due the following Wednesday, all other pay dates the following Friday', state: 'VT', opts: { assignedFrequency: 'semiweekly' }, pays: [['2026-08-06', 100], ['2026-08-10', 40]], expect: [['semiweekly', 100, '2026-08-12'], ['semiweekly', 40, '2026-08-14']] },
+);
+
+// West Virginia (Tax Division withholding page)
+ROWS.push(
+  { name: 'monthly: the 15th of the succeeding month', state: 'WV', opts: { assignedFrequency: 'monthly' }, pays: [['2026-08-07', 100], ['2026-08-28', 50]], expect: [['monthly', 150, '2026-09-15']] },
+  { name: 'annual filers (under $600 a year) pay January 31', state: 'WV', opts: { assignedFrequency: 'annual' }, pays: [['2026-03-13', 20]], expect: [['annual', 20, '2027-02-01']] },
+  { name: 'look-back under $600 is annual', state: 'WV', opts: { lookbackLiability: 599.99 }, pays: [['2026-03-13', 20]], expect: [['annual', 20, '2027-02-01']] },
+);
