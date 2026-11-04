@@ -1,5 +1,5 @@
 {
- "date": "2026-11-02",
+ "date": "2026-11-04",
  "fixed": [],
  "verified": [
   {
@@ -9,74 +9,8 @@
    "edits": []
   }
  ],
- "possible": [
-  {
-   "jurisdiction": "AZ",
-   "title": "City of Tucson -- Tucson Minimum Wage Act (Proposition 206, November 2021)",
-   "url": "https://www.tucsonaz.gov/Departments/Business-Services-Department/Tucson-Minimum-Wage-Act",
-   "figures": [
-    "$16.00"
-   ],
-   "feeds": [
-    "data/minimum-wage/local/AZ-local-2026.json",
-    "data/minimum-wage/local/AZ-local-2027.json"
-   ]
-  },
-  {
-   "jurisdiction": "MN",
-   "title": "City of Saint Paul -- Minimum Wage Increases for Small and Micro Businesses (effective July 1, 2026)",
-   "url": "https://www.stpaul.gov/news/city-saint-paul-minimum-wage-increases-small-and-micro-businesses",
-   "figures": [
-    "$300,000"
-   ],
-   "feeds": [
-    "data/minimum-wage/local/MN-local-2026.json",
-    "data/minimum-wage/local/MN-local-2027.json"
-   ]
-  },
-  {
-   "jurisdiction": "MO",
-   "title": "Missouri unemployment insurance 2026 rate/wage-base reporting (Bloomberg Tax, Vensure, MO DOLIR's own labor.mo.gov/des/employers/tax-rates page referenced)",
-   "url": "https://labor.mo.gov/des/employers/tax-rates",
-   "figures": [
-    "$11,000",
-    "$8,500",
-    "0.6%",
-    "6%"
-   ],
-   "feeds": [
-    "data/states/MO-2026.json",
-    "data/states/MO-2027.json"
-   ]
-  },
-  {
-   "jurisdiction": "NC",
-   "title": "NC Division of Employment Security -- Tax Rate Information",
-   "url": "https://www.des.nc.gov/employers/tax-rate-information",
-   "figures": [
-    "20%"
-   ],
-   "feeds": [
-    "data/states/NC-2026.json",
-    "data/states/NC-2027.json"
-   ]
-  },
-  {
-   "jurisdiction": "NJ",
-   "title": "NJ Division of Employer Accounts -- Rate information, contributions, and due dates",
-   "url": "https://www.nj.gov/labor/ea/employer-services/rate-info/",
-   "figures": [
-    "0.0000",
-    "0.0024"
-   ],
-   "feeds": [
-    "data/states/NJ-2025.json",
-    "data/states/NJ-2026.json",
-    "data/states/NJ-2027.json"
-   ]
-  }
- ],
- "informational_changes": 80,
+ "possible": [],
+ "informational_changes": 20,
  "blind_spots": [
   {
    "jurisdiction": "AL",
@@ -395,17 +329,6 @@
    ]
   },
   {
-   "jurisdiction": "HI",
-   "title": "Haw. Rev. Stat. \u00a7 652-1 \u2014 MARGINAL brackets on monthly disposable earnings: 5% of the first $100/month, 10% of the next $100/month (i.e. the $100-$200 slice), 20% of everything over $200/month, prorated to 'an equivalent portion... per week' for other pay frequencies",
-   "url": "https://www.capitol.hawaii.gov/hrscurrent/Vol13_Ch0601-0676/HRS0652/HRS_0652-0001.htm",
-   "why": "read with a browser last time; a real browser was refused too",
-   "never_read": false,
-   "feeds": [
-    "data/garnishment/state-overrides-2026.json",
-    "data/garnishment/state-overrides-2027.json"
-   ]
-  },
-  {
    "jurisdiction": "KY",
    "title": "City of Augusta Code of Ordinances Sec. 110.02",
    "url": "https://codelibrary.amlegal.com/codes/augusta/latest/augusta_ky/0-0-0-8998",
@@ -490,6 +413,18 @@
    ]
   },
   {
+   "jurisdiction": "KY",
+   "title": "City of Georgetown, KY \u2014 Taxes and license fees (occupational license tax: net profits vs gross receipts)",
+   "url": "https://www.georgetownky.gov/2167/Taxes-License-Fees",
+   "why": "read with a browser last time; a real browser was refused too",
+   "never_read": false,
+   "feeds": [
+    "data/local/KY-occupational-2025.json",
+    "data/local/KY-occupational-2026.json",
+    "data/local/KY-occupational-2027.json"
+   ]
+  },
+  {
    "jurisdiction": "MN",
    "title": "Minnesota Paid Leave -- Premium rate and contributions",
    "url": "https://pl.mn.gov/resources/calculators/premium-rate-and-contributions",
@@ -520,6 +455,61 @@
    "feeds": [
     "data/states/NJ-2026.json",
     "data/states/NJ-2027.json"
+   ]
+  },
+  {
+   "jurisdiction": "NY",
+   "title": "DOL -- Calculating an Employer's UI Contribution Rate",
+   "url": "https://dol.ny.gov/calculating-employers-ui-contribution-rate",
+   "why": "HTTP 403: the site refuses automated requests; a real browser was refused too",
+   "never_read": false,
+   "feeds": [
+    "data/states/NY-2026.json",
+    "data/states/NY-2027.json"
+   ]
+  },
+  {
+   "jurisdiction": "NY",
+   "title": "DOL -- Employer Contribution Rate Table",
+   "url": "https://dol.ny.gov/employer-contribution-rate-table",
+   "why": "HTTP 404",
+   "never_read": false,
+   "feeds": [
+    "data/states/NY-2026.json",
+    "data/states/NY-2027.json"
+   ]
+  },
+  {
+   "jurisdiction": "NY",
+   "title": "NY Department of Labor -- Register for Unemployment Insurance",
+   "url": "https://dol.ny.gov/register-unemployment-insurance-0",
+   "why": "HTTP 403: the site refuses automated requests; a real browser was refused too",
+   "never_read": false,
+   "feeds": [
+    "data/employer-thresholds/NY-2026.json",
+    "data/employer-thresholds/NY-2027.json"
+   ]
+  },
+  {
+   "jurisdiction": "NY",
+   "title": "DOL -- Subsidiary Contribution Rate Table",
+   "url": "https://dol.ny.gov/subsidiary-rate-table",
+   "why": "HTTP 403: the site refuses automated requests; a real browser was refused too",
+   "never_read": false,
+   "feeds": [
+    "data/states/NY-2026.json",
+    "data/states/NY-2027.json"
+   ]
+  },
+  {
+   "jurisdiction": "NY",
+   "title": "DOL -- Unemployment Insurance Rate Information",
+   "url": "https://dol.ny.gov/unemployment-insurance-rate-information",
+   "why": "HTTP 403: the site refuses automated requests; a real browser was refused too",
+   "never_read": false,
+   "feeds": [
+    "data/states/NY-2026.json",
+    "data/states/NY-2027.json"
    ]
   },
   {
