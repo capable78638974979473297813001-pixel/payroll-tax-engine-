@@ -23,3 +23,12 @@ ROWS.push(
   { name: 'look-back: $12,000 or less is monthly, more is semi-weekly', state: 'IL', opts: { lookbackLiability: 12000 }, pays: [['2026-08-07', 100]], expect: [['monthly', 100, '2026-09-15']] },
   { name: 'look-back above $12,000 is semi-weekly', state: 'IL', opts: { lookbackLiability: 12000.01 }, pays: [['2026-08-07', 100]], expect: [['semiweekly', 100, '2026-08-12']] },
 );
+
+// Wisconsin (Publication W-166, 1/26)
+ROWS.push(
+  { name: "the guide's example: paid December 16, reported for the period ending December 31, due January 15", state: 'WI', opts: { assignedFrequency: 'semi_monthly' }, pays: [['2026-12-16', 100]], expect: [['sub_monthly', 100, '2027-01-15']] },
+  { name: "semi-monthly: paid on or between the 1st and 15th is due the last day of the month (Jan 11 -> Jan 30 2026 is a Friday; Jan 31 is Saturday -> Feb 2)", state: 'WI', opts: { assignedFrequency: 'semi_monthly' }, pays: [['2026-01-11', 100]], expect: [['sub_monthly', 100, '2026-02-02']] },
+  { name: 'monthly: the last day of the following month', state: 'WI', opts: { assignedFrequency: 'monthly' }, pays: [['2026-12-26', 100]], expect: [['monthly', 100, '2027-02-01']] }, // Jan 31, 2027 is a Sunday
+  { name: 'quarterly: the last day of the month after the quarter', state: 'WI', opts: { assignedFrequency: 'quarterly' }, pays: [['2026-02-13', 20], ['2026-05-15', 20]], expect: [['quarterly', 20, '2026-04-30'], ['quarterly', 20, '2026-07-31']] },
+  { name: 'annual: no deposit report; one payment with the WT-7 on January 31', state: 'WI', opts: { assignedFrequency: 'annual' }, pays: [['2026-03-13', 20], ['2026-09-11', 20]], expect: [['annual', 40, '2027-02-01']] },
+);

@@ -1,0 +1,88 @@
+{
+ "state": "OK",
+ "name": "Oklahoma",
+ "verifiedOn": "2026-11-04",
+ "sources": [
+  {
+   "id": "S1",
+   "title": "Oklahoma Tax Commission: Common Oklahoma Withholding Tax Audit Issues",
+   "url": "https://oklahoma.gov/tax/businesses/withholding.html",
+   "revision": "withholding page; the stored brochure (Common Oklahoma Withholding Tax Audit Issues) is a document linked from it, no edition printed",
+   "verifiedOn": "2026-11-04",
+   "verifiedBy": "read from the stored copy in watcher/state/snapshots/ok-fc9a4ccbff~d381f40e.txt.gz (the URL is shortened in the watcher's record: confirm it from the Tax Commission's withholding page). It states the quarterly return (Form WTH-10001), its due date under OAC 710:90-3-4, and the annual reconciliation requirement (68 O.S. 2385.3). It does NOT state the remittance schedule thresholds or dates."
+  }
+ ],
+ "agencies": {
+  "withholding": {
+   "name": "Oklahoma Tax Commission",
+   "portalUrl": "https://oklahoma.gov/tax.html",
+   "source": "S1"
+  }
+ },
+ "calendar": {
+  "weekendsRoll": true,
+  "holidays": {
+   "verified": false
+  },
+  "source": "S1"
+ },
+ "mandates": {},
+ "withholding": {
+  "applies": true,
+  "taxLineIds": {
+   "withholding": "OK_SIT",
+   "employeeInsurance": []
+  },
+  "returns": [
+   {
+    "id": "WTH-10001",
+    "name": "Form WTH-10001, Oklahoma Quarterly Wage Withholding Tax Return",
+    "frequency": "quarterly",
+    "due": {
+     "kind": "day_of_month_after_quarter",
+     "day": 20
+    },
+    "contents": [
+     "Filed on a quarterly basis with any payment due, on or before the 20th day of the month following the close of each quarter (OAC 710:90-3-4), even when there is no payroll for the period.",
+     "The OTC compares quarterly withholding returns with the W-2/W-3 yearly totals filed with the IRS."
+    ],
+    "source": "S1"
+   },
+   {
+    "id": "OK-annual-reconciliation",
+    "name": "Annual reconciliation (W-3 information) to the Oklahoma Tax Commission",
+    "frequency": "annual",
+    "due": {
+     "kind": "january_day_next_year",
+     "day": 31
+    },
+    "contents": [
+     "HB 2289 (68 O.S. 2385.3) imposes a penalty of up to $1,000 on an employer who fails to furnish the Tax Commission the required annual reconciliation by January 31."
+    ],
+    "source": "S1"
+   }
+  ],
+  "notModelled": [
+   "Oklahoma's remittance schedule ('varies depending on the total amount of employee wages'): the stored brochure gives no thresholds or dates, so no deposit schedule is computed.",
+   "Oklahoma unemployment insurance (Oklahoma Employment Security Commission): no document read.",
+   "Oklahoma's legal-holiday list.",
+   "Electronic filing requirements and the OkTAP layouts: not in the stored documents."
+  ]
+ },
+ "channels": [
+  {
+   "id": "state:OK:oktap",
+   "function": "withholding returns and payments",
+   "description": "Oklahoma Tax Commission's online filing (OkTAP); registration and file layouts were not read",
+   "enrollment": [
+    "Register for an Oklahoma withholding account with the Tax Commission (steps not read); accounts are linked to the federal identification number."
+   ],
+   "specs": "Not read.",
+   "source": "S1"
+  }
+ ],
+ "notModelled": [
+  "Oklahoma unemployment insurance: not read.",
+  "New-hire reporting: not read."
+ ]
+}

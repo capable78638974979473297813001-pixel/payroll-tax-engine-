@@ -1,0 +1,142 @@
+{
+ "state": "WI",
+ "name": "Wisconsin",
+ "verifiedOn": "2026-11-04",
+ "sources": [
+  {
+   "id": "S1",
+   "title": "Wisconsin Withholding Tax Guide, Publication W-166",
+   "url": "https://www.revenue.wi.gov/DOR%20Publications/pb166.pdf",
+   "revision": "Publication W-166 (1/26)",
+   "verifiedOn": "2026-11-04",
+   "verifiedBy": "read from the stored copy in watcher/state/snapshots/wi-bf48d4174b.txt.gz: section 4 'Depositing Withheld Taxes' (reporting requirements, WT-6 filing options, reporting periods table, due dates, annual reconciliation WT-7, extensions). Not read: Wisconsin unemployment insurance (Department of Workforce Development) rules."
+  }
+ ],
+ "agencies": {
+  "withholding": {
+   "name": "Wisconsin Department of Revenue",
+   "portalUrl": "https://tap.revenue.wi.gov/mta/",
+   "source": "S1"
+  }
+ },
+ "calendar": {
+  "weekendsRoll": true,
+  "holidays": {
+   "verified": false
+  },
+  "source": "S1"
+ },
+ "mandates": {
+  "efile": {
+   "text": "Withholding deposit reports and the annual withholding reconciliation must be submitted electronically unless you've been granted a department waiver from electronic filing.",
+   "source": "S1"
+  }
+ },
+ "withholding": {
+  "applies": true,
+  "taxLineIds": {
+   "withholding": "WI_SIT",
+   "employeeInsurance": []
+  },
+  "returns": [
+   {
+    "id": "WT-6",
+    "name": "Form WT-6, Withholding Deposit Report",
+    "frequency": "monthly",
+    "due": {
+     "kind": "last_day_of_following_month"
+    },
+    "contents": [
+     "Filed and paid for every reporting period of the assigned frequency, electronically (My Tax Account, telefile, e-file transmission or ACH credit), even if nothing was withheld; annual filers file none.",
+     "ACH debit payments through My Tax Account must be initiated by central standard time of the due date."
+    ],
+    "source": "S1"
+   },
+   {
+    "id": "WT-7",
+    "name": "Form WT-7, Annual Reconciliation of Wisconsin Income Tax Withheld",
+    "frequency": "annual",
+    "due": {
+     "kind": "january_day_next_year",
+     "day": 31
+    },
+    "contents": [
+     "All filers with an active withholding account file it, with W-2s and information returns, by January 31; within 30 days of the cease date when the account closes early.",
+     "Employers filing quarterly, monthly or semi-monthly cannot submit it until every WT-6 has been filed; it is rejected if its total exceeds the WT-6 total or a deposit is missing."
+    ],
+    "source": "S1"
+   }
+  ],
+  "notModelled": [
+   "Wisconsin unemployment insurance (Department of Workforce Development): no document read.",
+   "The thresholds the department uses to assign the frequency: not in the guide.",
+   "Wisconsin's legal-holiday list (weekends only are skipped, with a warning).",
+   "Wage attachment payments (garnishments), which are paid separately and electronically.",
+   "The My Tax Account bulk file layouts."
+  ],
+  "deposits": {
+   "kind": "assigned_frequency",
+   "rulesYear": 2026,
+   "interpretation": "Wisconsin assigns each employer an ANNUAL, QUARTERLY, MONTHLY or SEMI-MONTHLY filing frequency; the guide does not give the thresholds, so the frequency is an INPUT and is never derived. Liability is incurred when wages are PAID, not earned. Deposit report (Form WT-6) due dates: QUARTERLY and MONTHLY: the last day of the month following the period. SEMI-MONTHLY: wages paid from the 1st to the 15th are reported for the period ending the 15th and are due the LAST DAY of that month; wages paid from the 16th to month end are reported for the period ending the last day and are due the 15th of the following month (the guide's example: paid December 16, due January 15). ANNUAL filers file no deposit report: withholding is reported and paid with the annual reconciliation (Form WT-7) due January 31, which this profile uses as the annual payment date. A deposit report is filed for every period, even with no tax. A due date on a weekend or holiday moves to the next business day. The department may grant a one-month extension for good cause (not modelled).",
+   "lookback": {
+    "description": "None: the department assigns the frequency",
+    "classes": [],
+    "newEmployer": "quarterly"
+   },
+   "frequencies": {
+    "quarterly": {
+     "period": "quarter",
+     "due": {
+      "kind": "last_day_of_month_after_quarter"
+     }
+    },
+    "monthly": {
+     "period": "month",
+     "due": {
+      "kind": "last_day_of_following_month"
+     }
+    },
+    "semi_monthly": {
+     "period": "eighth_monthly",
+     "periodEnds": [
+      15,
+      31
+     ],
+     "due": {
+      "kind": "semimonthly_days",
+      "firstHalfDay": 31,
+      "secondHalfDay": 15
+     }
+    },
+    "annual": {
+     "period": "year",
+     "due": {
+      "kind": "january_day_next_year",
+      "day": 31
+     }
+    }
+   },
+   "deposited": [
+    "withholding"
+   ],
+   "source": "S1"
+  }
+ },
+ "channels": [
+  {
+   "id": "state:WI:my-tax-account",
+   "function": "withholding deposit reports (WT-6), annual reconciliation (WT-7), W-2/1099 filing",
+   "description": "Wisconsin My Tax Account; telefile, e-file transmission and ACH credit are also accepted for WT-6",
+   "enrollment": [
+    "Register for a Wisconsin withholding account with the Department of Revenue (steps not read); the department assigns the filing frequency.",
+    "Submit deposit reports and the reconciliation electronically; a department waiver is required to file otherwise."
+   ],
+   "specs": "E-file transmission and My Tax Account bulk layouts: not read.",
+   "source": "S1"
+  }
+ ],
+ "notModelled": [
+  "Wisconsin unemployment insurance: not read.",
+  "New-hire reporting: not read."
+ ]
+}

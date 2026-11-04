@@ -107,7 +107,7 @@ export function resolveDue(rule: DueRule, anchor: string, p: StateProfile, extra
       return { dueDate: roll(`${year + 1}-01-${String(rule.day).padStart(2, '0')}`) };
     case 'semimonthly_days': {
       const day = Number(anchor.slice(8, 10));
-      if (day <= 15) return { dueDate: roll(`${anchor.slice(0, 7)}-${String(rule.firstHalfDay).padStart(2, '0')}`) };
+      if (day <= 15) return { dueDate: roll(`${anchor.slice(0, 7)}-${String(Math.min(rule.firstHalfDay, Number(lastDayOfMonth(year, month).slice(8, 10)))).padStart(2, '0')}`) };
       const m = month === 12 ? 1 : month + 1;
       const y = month === 12 ? year + 1 : year;
       return { dueDate: roll(`${y}-${String(m).padStart(2, '0')}-${String(rule.secondHalfDay).padStart(2, '0')}`) };
