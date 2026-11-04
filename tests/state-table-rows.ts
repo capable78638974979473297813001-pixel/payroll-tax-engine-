@@ -96,3 +96,13 @@ ROWS.push(
   { name: 'quarterly depositor: Q4 2025 Feb 2, Q1 Apr 30, Q2 Jul 31, Q3 Nov 1', state: 'OR', opts: { assignedFrequency: 'quarterly' }, pays: [['2025-11-14', 10], ['2026-02-13', 10], ['2026-05-15', 10], ['2026-08-14', 10]], expect: [['quarterly', 10, '2026-02-02'], ['quarterly', 10, '2026-04-30'], ['quarterly', 10, '2026-07-31'], ['quarterly', 10, '2026-11-01']] },
   { name: 'semi-weekly: Wednesday to Friday payroll due the following Wednesday, Saturday to Tuesday the following Friday', state: 'OR', opts: { assignedFrequency: 'semiweekly' }, pays: [['2026-08-05', 100], ['2026-08-08', 40]], expect: [['semiweekly', 100, '2026-08-12'], ['semiweekly', 40, '2026-08-14']] },
 );
+
+// Ohio (Employer Withholding page and the 2025-2026 Due Dates document, Rev. 3/26)
+ROWS.push(
+  { name: 'look-back: $2,000 quarterly; over $2,000 monthly; $84,000 partial-weekly', state: 'OH', opts: { lookbackLiability: 2000 }, pays: [['2026-02-13', 10]], expect: [['quarterly', 10, '2026-04-30']] },
+  { name: 'monthly: the 2026 printed dates, with the holiday roll-forwards (Feb 17, Mar 16, Aug 17, Nov 16)', state: 'OH', opts: { assignedFrequency: 'monthly' }, pays: [['2025-12-12', 10], ['2026-01-09', 10], ['2026-02-13', 10], ['2026-07-10', 10], ['2026-10-09', 10], ['2026-12-11', 10]], expect: [['monthly', 10, '2026-01-15'], ['monthly', 10, '2026-02-17'], ['monthly', 10, '2026-03-16'], ['monthly', 10, '2026-08-17'], ['monthly', 10, '2026-11-16'], ['monthly', 10, '2027-01-15']] },
+  { name: 'quarterly: Q3 2026 is due November 2 and Q4 2026 February 1, 2027', state: 'OH', opts: { assignedFrequency: 'quarterly' }, pays: [['2026-08-14', 10], ['2026-11-13', 10]], expect: [['quarterly', 10, '2026-11-02'], ['quarterly', 10, '2027-02-01']] },
+  { name: 'partial-weekly: the printed periods (Wed Jan 7 - Fri Jan 9 due Jan 14; Sat Jan 10 - Tue Jan 13 due Jan 16)', state: 'OH', opts: { assignedFrequency: 'partial_weekly' }, pays: [['2026-01-07', 100], ['2026-01-09', 50], ['2026-01-12', 25]], expect: [['weekly', 150, '2026-01-14'], ['weekly', 25, '2026-01-16']] },
+  { name: 'partial-weekly: the printed holiday shift (Sat Jun 13 - Tue Jun 16 is due Mon Jun 22, not Fri Jun 19, because Jun 19 is a holiday)', state: 'OH', opts: { assignedFrequency: 'partial_weekly' }, pays: [['2026-06-15', 100]], expect: [['weekly', 100, '2026-06-22']] },
+  { name: 'partial-weekly: the year-end period Dec 30-31 is due January 6, 2027', state: 'OH', opts: { assignedFrequency: 'partial_weekly' }, pays: [['2026-12-31', 100]], expect: [['weekly', 100, '2027-01-06']] },
+);

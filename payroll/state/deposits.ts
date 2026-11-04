@@ -442,7 +442,7 @@ function analyzeFrequencyGroups(profile: StateProfile, spec: AssignedFrequencySp
       const r = rows[i];
       const w = sum(ds, 'withholding');
       const ins = sum(ds, 'employeeInsurance');
-      const sched: StateDepositSchedule = frequency === 'weekly' ? 'weekly' : frequency === 'monthly' ? 'monthly' : frequency === 'quarterly' ? 'quarterly' : 'annual';
+      const sched: StateDepositSchedule = frequency.includes('week') ? 'weekly' : frequency.includes('month') ? 'monthly' : frequency.includes('quarter') ? 'quarterly' : 'annual';
       out.push({
         id: `${profile.state}-${sched}-${r.from}`, state: profile.state, schedule: sched, payDates: ds.map((d) => d.date),
         year: Number(r.from.slice(0, 4)), quarter: quarterOf(r.from), withholding: w, employeeInsurance: ins, employerUi: 0, amount: w + ins,

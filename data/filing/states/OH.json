@@ -1,0 +1,767 @@
+{
+ "state": "OH",
+ "name": "Ohio",
+ "verifiedOn": "2026-11-04",
+ "sources": [
+  {
+   "id": "S1",
+   "title": "Ohio Department of Taxation: Employer Withholding (web page) and Ohio and School District Employer Withholding Tax Due Dates, 2025-2026 Payment Schedule",
+   "url": "https://tax.ohio.gov/business/employer-withholding",
+   "revision": "web page; Due Dates document Rev. 3/26",
+   "verifiedOn": "2026-11-04",
+   "verifiedBy": "read from the stored copies in watcher/state/snapshots/oh-5eceaa717d.txt.gz (Electronic Filing Requirement, Required Returns and Forms, Filing Frequency, the $100,000 rule) and oh-5eceaa717d~d6b4712b.txt.gz (the 2026 monthly and quarterly due dates and the 2026 partial-weekly calendar of 105 periods). The Due Dates document is at https://dam.assets.ohio.gov/image/upload/tax.ohio.gov/employer_withholding/2025-2026%20NYP%20Updates/Due_Dates_2025-2026.pdf. Not read: Ohio unemployment (ODJFS), municipal income tax."
+  }
+ ],
+ "agencies": {
+  "withholding": {
+   "name": "Ohio Department of Taxation (OH|TAX eServices); Ohio Treasurer of State for partial-weekly EFT",
+   "portalUrl": "https://tax.ohio.gov/business/employer-withholding",
+   "source": "S1"
+  }
+ },
+ "calendar": {
+  "weekendsRoll": true,
+  "holidays": {
+   "verified": false
+  },
+  "source": "S1"
+ },
+ "mandates": {
+  "efile": {
+   "text": "Employers are required to electronically file and pay Ohio employer and school district withholding taxes either through OH|TAX eServices or through the Ohio Treasurer of State or by any other electronic means prescribed by the tax commissioner. See Ohio Adm. Code 5703-7-19.",
+   "source": "S1"
+  }
+ },
+ "withholding": {
+  "applies": true,
+  "taxLineIds": {
+   "withholding": "OH_SIT",
+   "employeeInsurance": []
+  },
+  "returns": [
+   {
+    "id": "IT-501",
+    "name": "Ohio IT 501, Return for Income Tax Withheld",
+    "frequency": "monthly",
+    "due": {
+     "kind": "day_of_month_after",
+     "day": 15
+    },
+    "contents": [
+     "Reports and pays the Ohio income tax withheld for the period; not required if there is no Ohio liability for the period. Quarterly and monthly filers file it with their payment on the printed due dates; partial-weekly filers pay by EFT.",
+     "Filing all IT 501s does not complete the requirement: the annual reconciliation is also required."
+    ],
+    "source": "S1"
+   },
+   {
+    "id": "IT-941",
+    "name": "Ohio IT 941, Annual Reconciliation of Income Tax Withheld",
+    "frequency": "annual",
+    "due": {
+     "kind": "january_day_next_year",
+     "day": 31
+    },
+    "contents": [
+     "Due January 31 of the following year, or within 15 days after the business is discontinued; total tax withheld must equal the W-2s and 1099s submitted.",
+     "All employers upload W-2/1099 information electronically through OH|TAX eServices; school district withholding is reconciled on SD 141."
+    ],
+    "source": "S1"
+   }
+  ],
+  "notModelled": [
+   "Any year but 2026 for due dates (December 2026 wages and Q4 2026 are included, as printed; 2025 pay dates before December and all 2027 pay dates draw state_calendar_not_published).",
+   "The $100,000 next-banking-day rule (applies to the combined state and school district withholding).",
+   "School district income tax withholding (Form SD 101, SD 141): a separate Ohio tax, not deposited by this layer.",
+   "Ohio municipal (city) income tax withholding: separate agencies; not modelled.",
+   "Ohio unemployment insurance (Department of Job and Family Services): no document read.",
+   "Ohio's legal-holiday list: the printed calendar is the oracle for 2026.",
+   "The Ohio Treasurer of State EFT layout and the Bulk Filing Implementation Guide (stored but not read)."
+  ],
+  "deposits": {
+   "kind": "assigned_frequency",
+   "rulesYear": 2026,
+   "interpretation": "Ohio sets the filing frequency each calendar year from the COMBINED state and school district tax withheld in the 12 months ended June 30 of the preceding year (estimated at registration): $2,000 or less QUARTERLY; more than $2,000 but less than $84,000 MONTHLY; $84,000 or more PARTIAL-WEEKLY (state tax only; payments by EFT through the Ohio Treasurer of State within three banking days of the end of each partial-weekly period; the two periods each week are Saturday-Tuesday and Wednesday-Friday, chosen by the payroll day, and a period never runs from one year into the next). The look-back amount supplied must be the COMBINED state and school district figure. Ohio prints its 2026 due dates, so the profile holds them as the agency's calendar: every monthly period (December 2025 wages January 15, 2026 through December 2026 wages January 15, 2027), every quarter (Q4 2025 February 2, 2026 through Q4 2026 February 1, 2027), and all 105 partial-weekly periods of 2026 with their due dates (a period ending on a holiday week moves, e.g. Monday January 19 is skipped). Pay dates in any other year draw state_calendar_not_published. THE $100,000 RULE IS NOT MODELLED: Ohio applies it to the combined state and school district withholding for a payroll and requires the Ohio portion the first banking day after, but this layer sees only the state tax, so it cannot test the combined amount; a payroll that reaches $100,000 combined needs the next-banking-day payment by hand. School district withholding (return SD 101) is a separate tax and is not deposited here.",
+   "lookback": {
+    "description": "Combined Ohio and school district withholding in the 12 months ended June 30 of the preceding calendar year",
+    "classes": [
+     {
+      "name": "quarterly",
+      "maxInclusive": 200000
+     },
+     {
+      "name": "monthly",
+      "minExclusive": 200000,
+      "maxInclusive": 8399999
+     },
+     {
+      "name": "partial_weekly",
+      "minExclusive": 8399999
+     }
+    ],
+    "newEmployer": "monthly"
+   },
+   "frequencies": {
+    "quarterly": {
+     "period": "published_calendar",
+     "due": {
+      "kind": "next_business_day"
+     },
+     "calendar": [
+      {
+       "from": "2025-10-01",
+       "to": "2025-12-31",
+       "due": "2026-02-02"
+      },
+      {
+       "from": "2026-01-01",
+       "to": "2026-03-31",
+       "due": "2026-04-30"
+      },
+      {
+       "from": "2026-04-01",
+       "to": "2026-06-30",
+       "due": "2026-07-31"
+      },
+      {
+       "from": "2026-07-01",
+       "to": "2026-09-30",
+       "due": "2026-11-02"
+      },
+      {
+       "from": "2026-10-01",
+       "to": "2026-12-31",
+       "due": "2027-02-01"
+      }
+     ]
+    },
+    "monthly": {
+     "period": "published_calendar",
+     "due": {
+      "kind": "next_business_day"
+     },
+     "calendar": [
+      {
+       "from": "2025-12-01",
+       "to": "2025-12-31",
+       "due": "2026-01-15"
+      },
+      {
+       "from": "2026-01-01",
+       "to": "2026-01-31",
+       "due": "2026-02-17"
+      },
+      {
+       "from": "2026-02-01",
+       "to": "2026-02-28",
+       "due": "2026-03-16"
+      },
+      {
+       "from": "2026-03-01",
+       "to": "2026-03-31",
+       "due": "2026-04-15"
+      },
+      {
+       "from": "2026-04-01",
+       "to": "2026-04-30",
+       "due": "2026-05-15"
+      },
+      {
+       "from": "2026-05-01",
+       "to": "2026-05-31",
+       "due": "2026-06-15"
+      },
+      {
+       "from": "2026-06-01",
+       "to": "2026-06-30",
+       "due": "2026-07-15"
+      },
+      {
+       "from": "2026-07-01",
+       "to": "2026-07-31",
+       "due": "2026-08-17"
+      },
+      {
+       "from": "2026-08-01",
+       "to": "2026-08-31",
+       "due": "2026-09-15"
+      },
+      {
+       "from": "2026-09-01",
+       "to": "2026-09-30",
+       "due": "2026-10-15"
+      },
+      {
+       "from": "2026-10-01",
+       "to": "2026-10-31",
+       "due": "2026-11-16"
+      },
+      {
+       "from": "2026-11-01",
+       "to": "2026-11-30",
+       "due": "2026-12-15"
+      },
+      {
+       "from": "2026-12-01",
+       "to": "2026-12-31",
+       "due": "2027-01-15"
+      }
+     ]
+    },
+    "partial_weekly": {
+     "period": "published_calendar",
+     "due": {
+      "kind": "next_business_day"
+     },
+     "calendar": [
+      {
+       "from": "2026-01-01",
+       "to": "2026-01-02",
+       "due": "2026-01-07"
+      },
+      {
+       "from": "2026-01-03",
+       "to": "2026-01-06",
+       "due": "2026-01-09"
+      },
+      {
+       "from": "2026-01-07",
+       "to": "2026-01-09",
+       "due": "2026-01-14"
+      },
+      {
+       "from": "2026-01-10",
+       "to": "2026-01-13",
+       "due": "2026-01-16"
+      },
+      {
+       "from": "2026-01-14",
+       "to": "2026-01-16",
+       "due": "2026-01-22"
+      },
+      {
+       "from": "2026-01-17",
+       "to": "2026-01-20",
+       "due": "2026-01-23"
+      },
+      {
+       "from": "2026-01-21",
+       "to": "2026-01-23",
+       "due": "2026-01-28"
+      },
+      {
+       "from": "2026-01-24",
+       "to": "2026-01-27",
+       "due": "2026-01-30"
+      },
+      {
+       "from": "2026-01-28",
+       "to": "2026-01-30",
+       "due": "2026-02-04"
+      },
+      {
+       "from": "2026-01-31",
+       "to": "2026-02-03",
+       "due": "2026-02-06"
+      },
+      {
+       "from": "2026-02-04",
+       "to": "2026-02-06",
+       "due": "2026-02-11"
+      },
+      {
+       "from": "2026-02-07",
+       "to": "2026-02-10",
+       "due": "2026-02-13"
+      },
+      {
+       "from": "2026-02-11",
+       "to": "2026-02-13",
+       "due": "2026-02-19"
+      },
+      {
+       "from": "2026-02-14",
+       "to": "2026-02-17",
+       "due": "2026-02-20"
+      },
+      {
+       "from": "2026-02-18",
+       "to": "2026-02-20",
+       "due": "2026-02-25"
+      },
+      {
+       "from": "2026-02-21",
+       "to": "2026-02-24",
+       "due": "2026-02-27"
+      },
+      {
+       "from": "2026-02-25",
+       "to": "2026-02-27",
+       "due": "2026-03-04"
+      },
+      {
+       "from": "2026-02-28",
+       "to": "2026-03-03",
+       "due": "2026-03-06"
+      },
+      {
+       "from": "2026-03-04",
+       "to": "2026-03-06",
+       "due": "2026-03-11"
+      },
+      {
+       "from": "2026-03-07",
+       "to": "2026-03-10",
+       "due": "2026-03-13"
+      },
+      {
+       "from": "2026-03-11",
+       "to": "2026-03-13",
+       "due": "2026-03-18"
+      },
+      {
+       "from": "2026-03-14",
+       "to": "2026-03-17",
+       "due": "2026-03-20"
+      },
+      {
+       "from": "2026-03-18",
+       "to": "2026-03-20",
+       "due": "2026-03-25"
+      },
+      {
+       "from": "2026-03-21",
+       "to": "2026-03-24",
+       "due": "2026-03-27"
+      },
+      {
+       "from": "2026-03-25",
+       "to": "2026-03-27",
+       "due": "2026-04-01"
+      },
+      {
+       "from": "2026-03-28",
+       "to": "2026-03-31",
+       "due": "2026-04-03"
+      },
+      {
+       "from": "2026-04-01",
+       "to": "2026-04-03",
+       "due": "2026-04-08"
+      },
+      {
+       "from": "2026-04-04",
+       "to": "2026-04-07",
+       "due": "2026-04-10"
+      },
+      {
+       "from": "2026-04-08",
+       "to": "2026-04-10",
+       "due": "2026-04-15"
+      },
+      {
+       "from": "2026-04-11",
+       "to": "2026-04-14",
+       "due": "2026-04-17"
+      },
+      {
+       "from": "2026-04-15",
+       "to": "2026-04-17",
+       "due": "2026-04-22"
+      },
+      {
+       "from": "2026-04-18",
+       "to": "2026-04-21",
+       "due": "2026-04-24"
+      },
+      {
+       "from": "2026-04-22",
+       "to": "2026-04-24",
+       "due": "2026-04-29"
+      },
+      {
+       "from": "2026-04-25",
+       "to": "2026-04-28",
+       "due": "2026-05-01"
+      },
+      {
+       "from": "2026-04-29",
+       "to": "2026-05-01",
+       "due": "2026-05-06"
+      },
+      {
+       "from": "2026-05-02",
+       "to": "2026-05-05",
+       "due": "2026-05-08"
+      },
+      {
+       "from": "2026-05-06",
+       "to": "2026-05-08",
+       "due": "2026-05-13"
+      },
+      {
+       "from": "2026-05-09",
+       "to": "2026-05-12",
+       "due": "2026-05-15"
+      },
+      {
+       "from": "2026-05-13",
+       "to": "2026-05-15",
+       "due": "2026-05-20"
+      },
+      {
+       "from": "2026-05-16",
+       "to": "2026-05-19",
+       "due": "2026-05-22"
+      },
+      {
+       "from": "2026-05-20",
+       "to": "2026-05-22",
+       "due": "2026-05-28"
+      },
+      {
+       "from": "2026-05-23",
+       "to": "2026-05-26",
+       "due": "2026-05-29"
+      },
+      {
+       "from": "2026-05-27",
+       "to": "2026-05-29",
+       "due": "2026-06-03"
+      },
+      {
+       "from": "2026-05-30",
+       "to": "2026-06-02",
+       "due": "2026-06-05"
+      },
+      {
+       "from": "2026-06-03",
+       "to": "2026-06-05",
+       "due": "2026-06-10"
+      },
+      {
+       "from": "2026-06-06",
+       "to": "2026-06-09",
+       "due": "2026-06-12"
+      },
+      {
+       "from": "2026-06-10",
+       "to": "2026-06-12",
+       "due": "2026-06-17"
+      },
+      {
+       "from": "2026-06-13",
+       "to": "2026-06-16",
+       "due": "2026-06-22"
+      },
+      {
+       "from": "2026-06-17",
+       "to": "2026-06-19",
+       "due": "2026-06-24"
+      },
+      {
+       "from": "2026-06-20",
+       "to": "2026-06-23",
+       "due": "2026-06-26"
+      },
+      {
+       "from": "2026-06-24",
+       "to": "2026-06-26",
+       "due": "2026-07-01"
+      },
+      {
+       "from": "2026-06-27",
+       "to": "2026-06-30",
+       "due": "2026-07-06"
+      },
+      {
+       "from": "2026-07-01",
+       "to": "2026-07-03",
+       "due": "2026-07-08"
+      },
+      {
+       "from": "2026-07-04",
+       "to": "2026-07-07",
+       "due": "2026-07-10"
+      },
+      {
+       "from": "2026-07-08",
+       "to": "2026-07-10",
+       "due": "2026-07-15"
+      },
+      {
+       "from": "2026-07-11",
+       "to": "2026-07-14",
+       "due": "2026-07-17"
+      },
+      {
+       "from": "2026-07-15",
+       "to": "2026-07-17",
+       "due": "2026-07-22"
+      },
+      {
+       "from": "2026-07-18",
+       "to": "2026-07-21",
+       "due": "2026-07-24"
+      },
+      {
+       "from": "2026-07-22",
+       "to": "2026-07-24",
+       "due": "2026-07-29"
+      },
+      {
+       "from": "2026-07-25",
+       "to": "2026-07-28",
+       "due": "2026-07-31"
+      },
+      {
+       "from": "2026-07-29",
+       "to": "2026-07-31",
+       "due": "2026-08-05"
+      },
+      {
+       "from": "2026-08-01",
+       "to": "2026-08-04",
+       "due": "2026-08-07"
+      },
+      {
+       "from": "2026-08-05",
+       "to": "2026-08-07",
+       "due": "2026-08-12"
+      },
+      {
+       "from": "2026-08-08",
+       "to": "2026-08-11",
+       "due": "2026-08-14"
+      },
+      {
+       "from": "2026-08-12",
+       "to": "2026-08-14",
+       "due": "2026-08-19"
+      },
+      {
+       "from": "2026-08-15",
+       "to": "2026-08-18",
+       "due": "2026-08-21"
+      },
+      {
+       "from": "2026-08-19",
+       "to": "2026-08-21",
+       "due": "2026-08-26"
+      },
+      {
+       "from": "2026-08-22",
+       "to": "2026-08-25",
+       "due": "2026-08-28"
+      },
+      {
+       "from": "2026-08-26",
+       "to": "2026-08-28",
+       "due": "2026-09-02"
+      },
+      {
+       "from": "2026-08-29",
+       "to": "2026-09-01",
+       "due": "2026-09-04"
+      },
+      {
+       "from": "2026-09-02",
+       "to": "2026-09-04",
+       "due": "2026-09-10"
+      },
+      {
+       "from": "2026-09-05",
+       "to": "2026-09-08",
+       "due": "2026-09-11"
+      },
+      {
+       "from": "2026-09-09",
+       "to": "2026-09-11",
+       "due": "2026-09-16"
+      },
+      {
+       "from": "2026-09-12",
+       "to": "2026-09-15",
+       "due": "2026-09-18"
+      },
+      {
+       "from": "2026-09-16",
+       "to": "2026-09-18",
+       "due": "2026-09-23"
+      },
+      {
+       "from": "2026-09-19",
+       "to": "2026-09-22",
+       "due": "2026-09-25"
+      },
+      {
+       "from": "2026-09-23",
+       "to": "2026-09-25",
+       "due": "2026-09-30"
+      },
+      {
+       "from": "2026-09-26",
+       "to": "2026-09-29",
+       "due": "2026-10-02"
+      },
+      {
+       "from": "2026-09-30",
+       "to": "2026-10-02",
+       "due": "2026-10-07"
+      },
+      {
+       "from": "2026-10-03",
+       "to": "2026-10-06",
+       "due": "2026-10-09"
+      },
+      {
+       "from": "2026-10-07",
+       "to": "2026-10-09",
+       "due": "2026-10-15"
+      },
+      {
+       "from": "2026-10-10",
+       "to": "2026-10-13",
+       "due": "2026-10-16"
+      },
+      {
+       "from": "2026-10-14",
+       "to": "2026-10-16",
+       "due": "2026-10-21"
+      },
+      {
+       "from": "2026-10-17",
+       "to": "2026-10-20",
+       "due": "2026-10-23"
+      },
+      {
+       "from": "2026-10-21",
+       "to": "2026-10-23",
+       "due": "2026-10-28"
+      },
+      {
+       "from": "2026-10-24",
+       "to": "2026-10-27",
+       "due": "2026-10-30"
+      },
+      {
+       "from": "2026-10-28",
+       "to": "2026-10-30",
+       "due": "2026-11-04"
+      },
+      {
+       "from": "2026-10-31",
+       "to": "2026-11-03",
+       "due": "2026-11-06"
+      },
+      {
+       "from": "2026-11-04",
+       "to": "2026-11-06",
+       "due": "2026-11-12"
+      },
+      {
+       "from": "2026-11-07",
+       "to": "2026-11-10",
+       "due": "2026-11-16"
+      },
+      {
+       "from": "2026-11-11",
+       "to": "2026-11-13",
+       "due": "2026-11-18"
+      },
+      {
+       "from": "2026-11-14",
+       "to": "2026-11-17",
+       "due": "2026-11-20"
+      },
+      {
+       "from": "2026-11-18",
+       "to": "2026-11-20",
+       "due": "2026-11-25"
+      },
+      {
+       "from": "2026-11-21",
+       "to": "2026-11-24",
+       "due": "2026-11-30"
+      },
+      {
+       "from": "2026-11-25",
+       "to": "2026-11-27",
+       "due": "2026-12-02"
+      },
+      {
+       "from": "2026-11-28",
+       "to": "2026-12-01",
+       "due": "2026-12-04"
+      },
+      {
+       "from": "2026-12-02",
+       "to": "2026-12-04",
+       "due": "2026-12-09"
+      },
+      {
+       "from": "2026-12-05",
+       "to": "2026-12-08",
+       "due": "2026-12-11"
+      },
+      {
+       "from": "2026-12-09",
+       "to": "2026-12-11",
+       "due": "2026-12-16"
+      },
+      {
+       "from": "2026-12-12",
+       "to": "2026-12-15",
+       "due": "2026-12-18"
+      },
+      {
+       "from": "2026-12-16",
+       "to": "2026-12-18",
+       "due": "2026-12-23"
+      },
+      {
+       "from": "2026-12-19",
+       "to": "2026-12-22",
+       "due": "2026-12-28"
+      },
+      {
+       "from": "2026-12-23",
+       "to": "2026-12-25",
+       "due": "2026-12-30"
+      },
+      {
+       "from": "2026-12-26",
+       "to": "2026-12-29",
+       "due": "2027-01-04"
+      },
+      {
+       "from": "2026-12-30",
+       "to": "2026-12-31",
+       "due": "2027-01-06"
+      }
+     ]
+    }
+   },
+   "deposited": [
+    "withholding"
+   ],
+   "source": "S1"
+  }
+ },
+ "channels": [
+  {
+   "id": "state:OH:oh-tax-eservices",
+   "function": "withholding returns (IT 501, IT 941), EFT payments through the Treasurer of State, W-2/1099 upload, bulk filing",
+   "description": "OH|TAX eServices; the Ohio Treasurer of State for partial-weekly EFT; a Bulk Filing Implementation Guide (January 2026) exists for software vendors",
+   "enrollment": [
+    "Register online through OH|TAX eServices within 15 days of when withholding liability begins; the FEIN, legal name and e-mail address are needed; the account number is used for both employer and school district withholding.",
+    "Partial-weekly EFT payments go through the Ohio Treasurer of State."
+   ],
+   "specs": "The Ohio Bulk Filing Implementation Guide (BulkFilingImplementationGuideB_OHTAX_01222026) is stored in the watcher corpus but was not read.",
+   "source": "S1"
+  }
+ ],
+ "notModelled": [
+  "Ohio unemployment insurance and municipal taxes: not read.",
+  "New-hire reporting: not read."
+ ]
+}
