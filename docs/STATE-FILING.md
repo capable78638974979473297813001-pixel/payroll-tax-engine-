@@ -5,12 +5,7 @@ runs, using **state profiles**: data files in `data/filing/states/` with a citat
 Import it as `import { state } from './payroll/index.ts'`. Coverage is in
 [`STATE-COVERAGE.md`](STATE-COVERAGE.md) (generated; a test fails if it is stale).
 
-**Status: pilot.** Eleven states are modelled (California, Colorado, Connecticut, Delaware, Nebraska, New York, North Dakota, Rhode Island, Texas, Utah, Virginia), chosen to
-cover the different shapes a state deposit rule takes: a table keyed to the federal schedule (CA), a frequency
-the state assigns (CT, CO, VA, UT, RI, DE, ND), a monthly threshold (NE), a combined quarterly return (NY), and an
-unemployment-only state with no wage income tax (TX). The other **42 jurisdictions
-are NOT MODELLED**: nothing is assumed for them, and a lookup for one fails loudly. **Nothing is
-transmitted to any state**: no state transport is connected.
+**Status: 35 of 53 jurisdictions are modelled; 18 are NOT MODELLED.** Twenty-eight have a full withholding profile (deposit schedule, returns, mandates, channels), six have a **partial** one (returns, mandates and channels read, but the stored agency documents do not state the deposit schedule, so none is computed: IA, LA, MD, NM, NY, OK), and Texas has no wage income tax. The other 18 (AK, AZ, AR, DC, FL, ID, IN, KY, MA, MO, NV, NH, PR, SD, TN, VI, WA, WY) are **NOT MODELLED**: nothing is assumed for them, and a lookup for one fails loudly. Everything modelled is **withholding and its returns**; unemployment insurance is modelled only for California, New York and Texas. **Nothing is transmitted to any state**: no state transport is connected.
 
 ## What it does
 
