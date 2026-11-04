@@ -22,6 +22,9 @@ function run(r: Row) {
 
 import { ROWS, type Row } from './state-table-rows.ts';
 
+/** Due dates an agency prints in its own calendar that fall on a non-business day by our weekend rule; used as printed. */
+const PUBLISHED_AS_PRINTED = new Set(['RI 2026-07-03', 'OR 2026-11-01']);
+
 describe('table-driven state rules', () => {
   for (const r of ROWS) {
     test(`${r.state}: ${r.name}`, () => {
@@ -50,7 +53,7 @@ describe('every state in the table: profiles validate and 1,000 randomized years
           const tag = `${st} ${f} seed ${seed}`;
           assert.equal(r.obligations.reduce((a, o) => a + o.amount, 0), days.reduce((a, d) => a + d.withholding, 0), `${tag}: conserved`);
           for (const o of r.obligations) {
-            assert.ok(isStateBusinessDay(o.dueDate, profile) || o.dueDate === '2026-07-03', `${tag}: ${o.dueDate}`);
+            assert.ok(isStateBusinessDay(o.dueDate, profile) || PUBLISHED_AS_PRINTED.has(`${st} ${o.dueDate}`), `${tag}: ${o.dueDate}`);
             assert.ok(o.dueDate > o.payDates[o.payDates.length - 1], `${tag}: due before payday`);
           }
         }

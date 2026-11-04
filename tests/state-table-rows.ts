@@ -89,3 +89,10 @@ ROWS.push(
   { name: 'annual filers (under $600 a year) pay January 31', state: 'WV', opts: { assignedFrequency: 'annual' }, pays: [['2026-03-13', 20]], expect: [['annual', 20, '2027-02-01']] },
   { name: 'look-back under $600 is annual', state: 'WV', opts: { lookbackLiability: 599.99 }, pays: [['2026-03-13', 20]], expect: [['annual', 20, '2027-02-01']] },
 );
+
+// Oregon (2026 Withholding and Transit Tax Calendar, 150-206-400): the printed dates
+ROWS.push(
+  { name: 'monthly depositor: every month of the printed calendar', state: 'OR', opts: { assignedFrequency: 'monthly' }, pays: [['2025-12-12', 10], ['2026-01-09', 10], ['2026-02-13', 10], ['2026-03-13', 10], ['2026-04-10', 10], ['2026-05-08', 10], ['2026-06-12', 10], ['2026-07-10', 10], ['2026-08-14', 10], ['2026-09-11', 10], ['2026-10-09', 10], ['2026-11-13', 10]], expect: [['monthly', 10, '2026-01-15'], ['monthly', 10, '2026-02-16'], ['monthly', 10, '2026-03-16'], ['monthly', 10, '2026-04-15'], ['monthly', 10, '2026-05-15'], ['monthly', 10, '2026-06-15'], ['monthly', 10, '2026-07-15'], ['monthly', 10, '2026-08-17'], ['monthly', 10, '2026-09-15'], ['monthly', 10, '2026-10-15'], ['monthly', 10, '2026-11-16'], ['monthly', 10, '2026-12-15']] },
+  { name: 'quarterly depositor: Q4 2025 Feb 2, Q1 Apr 30, Q2 Jul 31, Q3 Nov 1', state: 'OR', opts: { assignedFrequency: 'quarterly' }, pays: [['2025-11-14', 10], ['2026-02-13', 10], ['2026-05-15', 10], ['2026-08-14', 10]], expect: [['quarterly', 10, '2026-02-02'], ['quarterly', 10, '2026-04-30'], ['quarterly', 10, '2026-07-31'], ['quarterly', 10, '2026-11-01']] },
+  { name: 'semi-weekly: Wednesday to Friday payroll due the following Wednesday, Saturday to Tuesday the following Friday', state: 'OR', opts: { assignedFrequency: 'semiweekly' }, pays: [['2026-08-05', 100], ['2026-08-08', 40]], expect: [['semiweekly', 100, '2026-08-12'], ['semiweekly', 40, '2026-08-14']] },
+);

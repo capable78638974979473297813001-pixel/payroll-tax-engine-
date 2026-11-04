@@ -1,0 +1,211 @@
+{
+ "state": "OR",
+ "name": "Oregon",
+ "verifiedOn": "2026-11-04",
+ "sources": [
+  {
+   "id": "S1",
+   "title": "Oregon Department of Revenue: 2026 Withholding and Transit Tax Calendar and Important Due Dates",
+   "url": "https://www.oregon.gov/dor/forms/FormsPubs/withholding-calendar_206-400.pdf",
+   "revision": "150-206-400 (Rev. 03-24-26)",
+   "verifiedOn": "2026-11-04",
+   "verifiedBy": "read in full from the stored copy in watcher/state/snapshots/or-76c5f8eb90~061b44c5.txt.gz: the month-by-month list of monthly-depositor payment dates, the quarterly Form OQ dates, Q4 2025 / OA / OR-STT-2 / W-2 / OR-WR (Feb 2), and the semi-weekly note. The Oregon business guide (employer-guide.pdf) and the Department's withholding page were searched but state no depositor thresholds, so those are not modelled."
+  }
+ ],
+ "agencies": {
+  "withholding": {
+   "name": "Oregon Department of Revenue (withholding, Statewide Transit Tax); Oregon Employment Department (unemployment, Paid Leave)",
+   "portalUrl": "https://revenueonline.dor.oregon.gov",
+   "source": "S1"
+  }
+ },
+ "calendar": {
+  "weekendsRoll": true,
+  "holidays": {
+   "verified": false
+  },
+  "source": "S1"
+ },
+ "mandates": {},
+ "withholding": {
+  "applies": true,
+  "taxLineIds": {
+   "withholding": "OR_SIT",
+   "employeeInsurance": []
+  },
+  "returns": [
+   {
+    "id": "OQ",
+    "name": "Form OQ, Oregon Quarterly Tax Report",
+    "frequency": "quarterly",
+    "due": {
+     "kind": "table",
+     "dates": {
+      "2025-Q4": {
+       "due": "2026-02-02"
+      },
+      "2026-Q1": {
+       "due": "2026-04-30"
+      },
+      "2026-Q2": {
+       "due": "2026-07-31"
+      },
+      "2026-Q3": {
+       "due": "2026-11-01"
+      }
+     }
+    },
+    "contents": [
+     "Due with the calendar's quarterly dates for every employer (the report is filed whether the employer deposits monthly, semi-weekly or quarterly); quarterly depositors pay with it.",
+     "Filed through Frances Online; after filing, employers can pay the reported employer taxes by ACH through the Department of Revenue payment portal.",
+     "Q4 2025 also carries Form OA (annual reconciliation), Form OR-STT-2 if necessary, the 2025 W-2 and Form OR-WR, all due February 2, 2026."
+    ],
+    "source": "S1"
+   }
+  ],
+  "notModelled": [
+   "The thresholds that make an employer monthly, quarterly or semi-weekly: not in the stored documents.",
+   "The Q4 2026 and all 2027 calendar rows: the 2026 calendar ends at the Q3 date; later pay dates draw state_calendar_not_published.",
+   "Oregon unemployment insurance and Paid Leave Oregon contributions (Oregon Employment Department): not deposited with the Department of Revenue and not read here.",
+   "The Statewide Transit Tax (OR-STT-2), the Oregon Workers' Benefit Fund assessment, and Portland, TriMet and Lane transit/local taxes.",
+   "Oregon's legal-holiday list."
+  ],
+  "deposits": {
+   "kind": "assigned_frequency",
+   "rulesYear": 2026,
+   "interpretation": "Oregon's 2026 Withholding and Transit Tax Calendar prints the due date of every MONTHLY-depositor payment (payroll of one month is due the 15th of the next, rolled forward: February 16, March 16, April 15, May 15, June 15, July 15, August 17, September 15, October 15, November 16, December 15; December 2025 payroll January 15), every QUARTERLY-depositor payment with Form OQ (Q4 2025 February 2, Q1 April 30, Q2 July 31, Q3 November 1), and the SEMI-WEEKLY rule: payroll on Wednesday, Thursday or Friday is due the following Wednesday, Saturday to Tuesday the following Friday. The stored documents do not say how an employer becomes a monthly, quarterly or semi-weekly depositor, so the frequency is an INPUT and is never derived. The monthly and quarterly dates are held as the agency's printed 2026 calendar (pay dates in any other year draw state_calendar_not_published); the printed Q3 date of November 1, 2026 (a Sunday) is used as printed and should be confirmed against the PDF. The semi-weekly dates follow the printed rule for any year.",
+   "lookback": {
+    "description": "None: the stored documents give no depositor thresholds",
+    "classes": [],
+    "newEmployer": "monthly"
+   },
+   "frequencies": {
+    "monthly": {
+     "period": "published_calendar",
+     "due": {
+      "kind": "next_business_day"
+     },
+     "calendar": [
+      {
+       "from": "2025-12-01",
+       "to": "2025-12-31",
+       "due": "2026-01-15"
+      },
+      {
+       "from": "2026-01-01",
+       "to": "2026-01-31",
+       "due": "2026-02-16"
+      },
+      {
+       "from": "2026-02-01",
+       "to": "2026-02-28",
+       "due": "2026-03-16"
+      },
+      {
+       "from": "2026-03-01",
+       "to": "2026-03-31",
+       "due": "2026-04-15"
+      },
+      {
+       "from": "2026-04-01",
+       "to": "2026-04-30",
+       "due": "2026-05-15"
+      },
+      {
+       "from": "2026-05-01",
+       "to": "2026-05-31",
+       "due": "2026-06-15"
+      },
+      {
+       "from": "2026-06-01",
+       "to": "2026-06-30",
+       "due": "2026-07-15"
+      },
+      {
+       "from": "2026-07-01",
+       "to": "2026-07-31",
+       "due": "2026-08-17"
+      },
+      {
+       "from": "2026-08-01",
+       "to": "2026-08-31",
+       "due": "2026-09-15"
+      },
+      {
+       "from": "2026-09-01",
+       "to": "2026-09-30",
+       "due": "2026-10-15"
+      },
+      {
+       "from": "2026-10-01",
+       "to": "2026-10-31",
+       "due": "2026-11-16"
+      },
+      {
+       "from": "2026-11-01",
+       "to": "2026-11-30",
+       "due": "2026-12-15"
+      }
+     ]
+    },
+    "quarterly": {
+     "period": "published_calendar",
+     "due": {
+      "kind": "next_business_day"
+     },
+     "calendar": [
+      {
+       "from": "2025-10-01",
+       "to": "2025-12-31",
+       "due": "2026-02-02"
+      },
+      {
+       "from": "2026-01-01",
+       "to": "2026-03-31",
+       "due": "2026-04-30"
+      },
+      {
+       "from": "2026-04-01",
+       "to": "2026-06-30",
+       "due": "2026-07-31"
+      },
+      {
+       "from": "2026-07-01",
+       "to": "2026-09-30",
+       "due": "2026-11-01"
+      }
+     ]
+    },
+    "semiweekly": {
+     "period": "semiweekly",
+     "due": {
+      "kind": "semiweekly_following",
+      "afterFriday": 3,
+      "afterTuesday": 5
+     }
+    }
+   },
+   "deposited": [
+    "withholding"
+   ],
+   "source": "S1"
+  }
+ },
+ "channels": [
+  {
+   "id": "state:OR:frances-online",
+   "function": "withholding and transit tax returns (Form OQ) and payments, W-2 filing",
+   "description": "Frances Online (Oregon Employment Department and Department of Revenue combined payroll reporting); payment portal by ACH, Revenue Online for credit cards; 1099s are filed through iWire",
+   "enrollment": [
+    "Register through the Oregon Business Registry (allow up to 14 business days) or with the Combined Employer's Registration; each payroll account has a BIN.",
+    "Pension and annuity withholding needs a different BIN than the payroll account."
+   ],
+   "specs": "Not read.",
+   "source": "S1"
+  }
+ ],
+ "notModelled": [
+  "Oregon unemployment and Paid Leave Oregon: not read.",
+  "New-hire reporting: not read."
+ ]
+}
