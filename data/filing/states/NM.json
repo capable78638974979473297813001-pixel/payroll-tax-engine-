@@ -1,0 +1,96 @@
+{
+ "state": "NM",
+ "name": "New Mexico",
+ "verifiedOn": "2026-11-04",
+ "sources": [
+  {
+   "id": "S1",
+   "title": "New Mexico FYI-104, New Mexico Withholding Tax",
+   "url": "https://realfile.tax.newmexico.gov/FYI-104.pdf",
+   "revision": "FYI-104 REV. 11/2025, effective January 1, 2026",
+   "verifiedOn": "2026-11-04",
+   "verifiedBy": "read from the stored copy in watcher/state/snapshots/nm-f855813bdb.txt.gz: the HB 218 notice, How to Report and Pay Withholding Taxes, Required Quarterly Withholding Report (TRD-41431), Annual Withholding Statements. The publication refers to the form instructions for the payment due dates of the TRD-41414, which are not stored."
+  }
+ ],
+ "agencies": {
+  "withholding": {
+   "name": "New Mexico Taxation and Revenue Department",
+   "portalUrl": "https://tap.state.nm.us",
+   "source": "S1"
+  }
+ },
+ "calendar": {
+  "weekendsRoll": true,
+  "holidays": {
+   "verified": false
+  },
+  "source": "S1"
+ },
+ "mandates": {
+  "efile": {
+   "text": "The withholding report, as well as the withholding tax returns and any withholding statements required to be submitted to the Department, are all now required to be submitted electronically.",
+   "source": "S1"
+  }
+ },
+ "withholding": {
+  "applies": true,
+  "taxLineIds": {
+   "withholding": "NM_SIT",
+   "employeeInsurance": []
+  },
+  "returns": [
+   {
+    "id": "TRD-41431",
+    "name": "TRD-41431, Workers Compensation Fee Return and Employees Quarterly Wage and Withholding Report",
+    "frequency": "quarterly",
+    "due": {
+     "kind": "day_of_month_after_quarter",
+     "day": 25
+    },
+    "contents": [
+     "From the quarter beginning January 1, 2026 (House Bill 218) every employer reports each employee's gross wages, pensions or annuity payments and the state income tax withheld; due the 25th of the month after the quarter, electronically.",
+     "It carries the workers' compensation fee return (formerly the WC-1) and the per-employee data Section 7-3-13 NMSA 1978 requires; it is filed in addition to the withholding tax returns.",
+     "Reporting to the Department of Workforce Solutions or the Workers' Compensation Administration does not satisfy the obligation to report and pay withholding tax."
+    ],
+    "source": "S1"
+   },
+   {
+    "id": "NM-annual-statements",
+    "name": "Annual withholding statements (W-2, W-2G, 1042-S, 1099-R)",
+    "frequency": "annual",
+    "due": {
+     "kind": "january_day_next_year",
+     "day": 31
+    },
+    "contents": [
+     "Filed electronically on or before the last day of January for each employee, pension recipient or winner, through the Combined Federal/State Filing Program or TAP; any federal statement that shows the New Mexico income and withholding is accepted.",
+     "Details are in Publication FYI-330, Income and Withholding Information Returns and Filing Methods (not read)."
+    ],
+    "source": "S1"
+   }
+  ],
+  "notModelled": [
+   "The payment due dates and frequency of the Wage Withholding Tax Return (TRD-41414): the publication says 'consult the form instructions', which are not in the stored documents, so no deposit schedule is computed. A return (even a zero return) is required for every period.",
+   "New Mexico unemployment insurance (Department of Workforce Solutions): no document read.",
+   "New Mexico's legal-holiday list.",
+   "Publication FYI-330 and the TAP file layouts."
+  ]
+ },
+ "channels": [
+  {
+   "id": "state:NM:tap",
+   "function": "withholding tax returns (TRD-41414, TRD-41409), quarterly wage and withholding report (TRD-41431), annual statements",
+   "description": "New Mexico Taxpayer Access Point (tap.state.nm.us); the Combined Federal/State Filing Program accepts annual statements",
+   "enrollment": [
+    "Register for a New Mexico Business Tax Identification Number (NMBTIN) with Form ACD-31015, Business Tax Registration Application and Update Form; the reporting obligation continues until the NMBTIN is cancelled.",
+    "File all returns, the quarterly report and annual statements electronically through TAP."
+   ],
+   "specs": "Not read.",
+   "source": "S1"
+  }
+ ],
+ "notModelled": [
+  "New Mexico unemployment insurance: not read.",
+  "New-hire reporting: not read."
+ ]
+}

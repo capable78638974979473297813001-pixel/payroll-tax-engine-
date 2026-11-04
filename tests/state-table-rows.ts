@@ -106,3 +106,10 @@ ROWS.push(
   { name: 'partial-weekly: the printed holiday shift (Sat Jun 13 - Tue Jun 16 is due Mon Jun 22, not Fri Jun 19, because Jun 19 is a holiday)', state: 'OH', opts: { assignedFrequency: 'partial_weekly' }, pays: [['2026-06-15', 100]], expect: [['weekly', 100, '2026-06-22']] },
   { name: 'partial-weekly: the year-end period Dec 30-31 is due January 6, 2027', state: 'OH', opts: { assignedFrequency: 'partial_weekly' }, pays: [['2026-12-31', 100]], expect: [['weekly', 100, '2027-01-06']] },
 );
+
+// Hawaii (Booklet A, Rev. 2025)
+ROWS.push(
+  { name: 'annual liability: $5,000 or less quarterly (15th after the quarter); above it monthly (15th)', state: 'HI', opts: { lookbackLiability: 5000 }, pays: [['2025-02-13', 10]], expect: [['quarterly', 10, '2025-04-15']] },
+  { name: 'monthly: the 15th of the following month', state: 'HI', opts: { lookbackLiability: 5000.01 }, pays: [['2025-08-08', 10]], expect: [['monthly', 10, '2025-09-15']] },
+  { name: 'semiweekly: Wednesday to Friday paydays due the following Wednesday, Saturday to Tuesday the Friday after', state: 'HI', opts: { assignedFrequency: 'semiweekly' }, pays: [['2025-08-06', 100], ['2025-08-09', 40]], expect: [['semiweekly', 100, '2025-08-13'], ['semiweekly', 40, '2025-08-15']] },
+);
