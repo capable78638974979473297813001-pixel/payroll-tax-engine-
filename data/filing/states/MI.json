@@ -1,0 +1,130 @@
+{
+ "state": "MI",
+ "name": "Michigan",
+ "verifiedOn": "2026-11-04",
+ "sources": [
+  {
+   "id": "S1",
+   "title": "Michigan Department of Treasury: Withholding Tax (web page)",
+   "url": "https://www.michigan.gov/taxes/business-taxes/withholding",
+   "revision": "web page, no edition printed; stored copy checked 2026-11-04",
+   "verifiedOn": "2026-11-04",
+   "verifiedBy": "read from the stored copy in watcher/state/snapshots/mi-f5fa14dee6.txt.gz: Due Dates, Filing Deadlines (twice: bullet list and table), Accelerated Filers, Payroll Service Providers, the Authorized Representative Declaration (Form 151). The Michigan Withholding Guide (446, 2026) is stored but its frequency sections were not found."
+  }
+ ],
+ "agencies": {
+  "withholding": {
+   "name": "Michigan Department of Treasury",
+   "portalUrl": "https://mto.treasury.michigan.gov",
+   "source": "S1"
+  }
+ },
+ "calendar": {
+  "weekendsRoll": true,
+  "holidays": {
+   "verified": false
+  },
+  "source": "S1"
+ },
+ "mandates": {},
+ "withholding": {
+  "applies": true,
+  "taxLineIds": {
+   "withholding": "MI_SIT",
+   "employeeInsurance": []
+  },
+  "returns": [
+   {
+    "id": "MI-annual",
+    "name": "Michigan annual withholding return",
+    "frequency": "annual",
+    "due": {
+     "kind": "month_day_next_year",
+     "month": 2,
+     "day": 28
+    },
+    "contents": [
+     "All businesses file an annual return by February 28, regardless of assigned filing frequency.",
+     "Income record forms (W-2, 1099) are filed under Michigan's Income Record Form Remittance Guide."
+    ],
+    "source": "S1"
+   },
+   {
+    "id": "MI-periodic",
+    "name": "Michigan monthly or quarterly withholding return",
+    "frequency": "quarterly",
+    "due": {
+     "kind": "day_of_month_after_quarter",
+     "day": 20
+    },
+    "contents": [
+     "Monthly filers: by the 20th of the following month; quarterly filers: by the 20th of the month after the quarter.",
+     "EFT payments are due the 20th of the following month."
+    ],
+    "source": "S1"
+   }
+  ],
+  "notModelled": [
+   "Michigan's ACCELERATED schedule (same day as the federal payment; pre-payment by the 20th and a reconciliation by the 20th of the next month): the rule is stated but follows the federal schedule and is not modelled.",
+   "The thresholds Treasury uses to assign monthly, quarterly or annual: not on the page.",
+   "Michigan unemployment insurance (Unemployment Insurance Agency): no document read.",
+   "Michigan's State-holiday list (weekends only are skipped, with a warning).",
+   "City income tax withholding (Michigan cities file separately).",
+   "The Income Record Form Remittance Guide's file layouts."
+  ],
+  "deposits": {
+   "kind": "assigned_frequency",
+   "interpretation": "Treasury determines each year whether an employer files MONTHLY, QUARTERLY or ANNUALLY; the page gives no thresholds, so the frequency is an INPUT and is never derived. Monthly: return and payment by the 20th of the following month. Quarterly: by the 20th of the month after the quarter (April 20, July 20, October 20, January 20). Every business also files an ANNUAL return by February 28 regardless of its frequency; an annual filer pays by then. ACCELERATED filers (EFT only) must remit on or before the same day as their federal payments regardless of the amount: a pre-payment by the 20th of the current month and a reconciliation payment by the 20th of the next month for the remaining liability. The accelerated schedule follows the federal deposit schedule and is NOT MODELLED: supplying 'accelerated' returns an error rather than a guess. A due date on a weekend or State holiday moves to the next business day.",
+   "lookback": {
+    "description": "None: Treasury assigns the frequency",
+    "classes": [],
+    "newEmployer": "monthly"
+   },
+   "frequencies": {
+    "monthly": {
+     "period": "month",
+     "due": {
+      "kind": "day_of_month_after",
+      "day": 20
+     }
+    },
+    "quarterly": {
+     "period": "quarter",
+     "due": {
+      "kind": "day_of_month_after_quarter",
+      "day": 20
+     }
+    },
+    "annual": {
+     "period": "year",
+     "due": {
+      "kind": "month_day_next_year",
+      "month": 2,
+      "day": 28
+     }
+    }
+   },
+   "deposited": [
+    "withholding"
+   ],
+   "source": "S1"
+  }
+ },
+ "channels": [
+  {
+   "id": "state:MI:mto",
+   "function": "withholding returns and payments, W-2/1099 income record forms, payroll service provider filing",
+   "description": "Michigan Treasury Online (MTO); EFT credit or debit for payments; a Payroll Service Providers page gives supplemental filing and payment information; an Authorized Representative Declaration (Form 151) authorizes a representative",
+   "enrollment": [
+    "Register for Michigan Withholding Tax with Treasury (steps not read) and use Michigan Treasury Online.",
+    "A payroll service provider files for clients with the Authorized Representative Declaration/Power of Attorney (Form 151); the provider page's content was not read."
+   ],
+   "specs": "Income Record Form Remittance Guide and the payroll service provider specifications: not read.",
+   "source": "S1"
+  }
+ ],
+ "notModelled": [
+  "Michigan unemployment insurance: not read.",
+  "New-hire reporting: not read."
+ ]
+}

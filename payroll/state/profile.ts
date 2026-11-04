@@ -31,7 +31,8 @@ export interface Source {
 export type DueRule =
   | { kind: 'table'; dates: Record<string, { due: string; delinquent?: string; settle?: string }> }
   | { kind: 'last_day_of_month_after_quarter' }
-  | { kind: 'day_of_month_after'; day: number }
+  /** A fixed day of the following month; `decemberDay` replaces it for December wages (Pennsylvania: January 31). */
+  | { kind: 'day_of_month_after'; day: number; decemberDay?: number }
   | { kind: 'last_day_of_following_month' }
   | { kind: 'business_days_after_period_end'; days: number }
   | { kind: 'next_business_day'; settleBusinessDays?: number }

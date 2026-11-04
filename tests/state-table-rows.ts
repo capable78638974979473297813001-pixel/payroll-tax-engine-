@@ -32,3 +32,18 @@ ROWS.push(
   { name: 'quarterly: the last day of the month after the quarter', state: 'WI', opts: { assignedFrequency: 'quarterly' }, pays: [['2026-02-13', 20], ['2026-05-15', 20]], expect: [['quarterly', 20, '2026-04-30'], ['quarterly', 20, '2026-07-31']] },
   { name: 'annual: no deposit report; one payment with the WT-7 on January 31', state: 'WI', opts: { assignedFrequency: 'annual' }, pays: [['2026-03-13', 20], ['2026-09-11', 20]], expect: [['annual', 40, '2027-02-01']] },
 );
+
+// Pennsylvania (REV-415, the Department's Employer Withholding page)
+ROWS.push(
+  { name: 'expected quarterly withholding: under $300 quarterly; $300 monthly; $1,000 semi-monthly; $5,000 semi-weekly', state: 'PA', opts: { lookbackLiability: 299.99 }, pays: [['2026-08-07', 100]], expect: [['quarterly', 100, '2026-11-02']] },
+  { name: 'monthly: January to November wages due the 15th, December wages due January 31', state: 'PA', opts: { assignedFrequency: 'monthly' }, pays: [['2026-09-11', 100], ['2026-12-11', 80]], expect: [['monthly', 100, '2026-10-15'], ['monthly', 80, '2027-02-01']] },
+  { name: 'semi-monthly: periods end the 15th and last day, due within three banking days', state: 'PA', opts: { assignedFrequency: 'semimonthly' }, pays: [['2026-08-12', 100], ['2026-08-28', 50]], expect: [['sub_monthly', 100, '2026-08-19'], ['sub_monthly', 50, '2026-09-03']] },
+  { name: 'semi-weekly: Wednesday to Friday paydays due the Wednesday after, Saturday to Tuesday the Friday after', state: 'PA', opts: { assignedFrequency: 'semiweekly' }, pays: [['2026-08-05', 100], ['2026-08-08', 50]], expect: [['semiweekly', 100, '2026-08-12'], ['semiweekly', 50, '2026-08-14']] },
+);
+
+// Michigan (Treasury withholding page)
+ROWS.push(
+  { name: 'monthly: the 20th of the following month', state: 'MI', opts: { assignedFrequency: 'monthly' }, pays: [['2026-08-07', 100]], expect: [['monthly', 100, '2026-09-21']] }, // Sep 20, 2026 is a Sunday
+  { name: 'quarterly: April 20, July 20, October 20, January 20', state: 'MI', opts: { assignedFrequency: 'quarterly' }, pays: [['2026-02-13', 10], ['2026-05-15', 10], ['2026-08-14', 10], ['2026-11-13', 10]], expect: [['quarterly', 10, '2026-04-20'], ['quarterly', 10, '2026-07-20'], ['quarterly', 10, '2026-10-20'], ['quarterly', 10, '2027-01-20']] },
+  { name: 'annual: February 28 of the following year (a Sunday in 2027 -> Monday March 1)', state: 'MI', opts: { assignedFrequency: 'annual' }, pays: [['2026-03-13', 10]], expect: [['annual', 10, '2027-03-01']] },
+);

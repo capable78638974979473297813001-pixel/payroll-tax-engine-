@@ -94,7 +94,8 @@ export function resolveDue(rule: DueRule, anchor: string, p: StateProfile, extra
     case 'day_of_month_after': {
       const m = month === 12 ? 1 : month + 1;
       const y = month === 12 ? year + 1 : year;
-      return { dueDate: roll(`${y}-${String(m).padStart(2, '0')}-${String(rule.day).padStart(2, '0')}`) };
+      const dd = month === 12 && rule.decemberDay !== undefined ? rule.decemberDay : rule.day;
+      return { dueDate: roll(`${y}-${String(m).padStart(2, '0')}-${String(dd).padStart(2, '0')}`) };
     }
     case 'business_days_after_period_end':
       return { dueDate: nthStateBusinessDayAfter(anchor, rule.days, p, extraHolidays) };
