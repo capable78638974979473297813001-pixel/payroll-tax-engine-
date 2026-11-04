@@ -62,3 +62,18 @@ ROWS.push(
   { name: 'semiweekly: Saturday to Tuesday paydays are due the following Friday', state: 'ME', opts: { assignedFrequency: 'semiweekly' }, pays: [['2026-08-08', 100], ['2026-08-11', 25]], expect: [['semiweekly', 125, '2026-08-14']] },
   { name: 'quarterly 941ME: April 30, July 31, October 31, January 31', state: 'ME', opts: { assignedFrequency: 'quarterly' }, pays: [['2026-02-13', 10], ['2026-05-15', 10], ['2026-08-14', 10], ['2026-11-13', 10]], expect: [['quarterly', 10, '2026-04-30'], ['quarterly', 10, '2026-07-31'], ['quarterly', 10, '2026-11-02'], ['quarterly', 10, '2027-02-01']] },
 );
+
+// Montana (Wage Withholding Returns and Payments page)
+ROWS.push(
+  { name: 'look-back: $1,199 annual; $1,200 monthly; $11,999 monthly; $12,000 accelerated', state: 'MT', opts: { lookbackLiability: 1199.99 }, pays: [['2026-08-07', 100]], expect: [['annual', 100, '2027-02-01']] },
+  { name: 'monthly: January withholding is due February 15 (a Sunday in 2026, so Monday)', state: 'MT', opts: { assignedFrequency: 'monthly' }, pays: [['2026-01-09', 100]], expect: [['monthly', 100, '2026-02-16']] },
+  { name: 'accelerated: Saturday to Tuesday paydays due the following Friday; Wednesday to Friday the following Wednesday', state: 'MT', opts: { assignedFrequency: 'accelerated' }, pays: [['2026-08-05', 100], ['2026-08-08', 40]], expect: [['semiweekly', 100, '2026-08-12'], ['semiweekly', 40, '2026-08-14']] },
+  { name: 'look-back of exactly $12,000 is accelerated', state: 'MT', opts: { lookbackLiability: 12000 }, pays: [['2026-08-05', 100]], expect: [['semiweekly', 100, '2026-08-12']] },
+);
+
+// North Carolina (withholding FAQ)
+ROWS.push(
+  { name: 'average monthly: $249.99 quarterly, $250 monthly', state: 'NC', opts: { lookbackLiability: 249.99 }, pays: [['2026-08-07', 100]], expect: [['quarterly', 100, '2026-11-02']] },
+  { name: 'monthly: the 15th, December wages by January 31', state: 'NC', opts: { assignedFrequency: 'monthly' }, pays: [['2026-09-11', 100], ['2026-12-11', 80]], expect: [['monthly', 100, '2026-10-15'], ['monthly', 80, '2027-02-01']] },
+  { name: '$2,000 or more a month is semiweekly: Saturday-Tuesday due the following Friday, Wednesday-Friday the following Wednesday', state: 'NC', opts: { lookbackLiability: 2000 }, pays: [['2026-08-05', 100], ['2026-08-10', 40]], expect: [['semiweekly', 100, '2026-08-12'], ['semiweekly', 40, '2026-08-14']] },
+);

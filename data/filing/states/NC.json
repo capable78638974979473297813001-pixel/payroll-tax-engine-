@@ -1,0 +1,147 @@
+{
+ "state": "NC",
+ "name": "North Carolina",
+ "verifiedOn": "2026-11-04",
+ "sources": [
+  {
+   "id": "S1",
+   "title": "North Carolina Department of Revenue: Withholding Tax Frequently Asked Questions",
+   "url": "https://www.ncdor.gov/withholding-tax-frequently-asked-questions",
+   "revision": "web page, no edition printed; stored copy checked 2026-11-04",
+   "verifiedOn": "2026-11-04",
+   "verifiedBy": "read from the stored copy in watcher/state/snapshots/nc-e720098358.txt.gz: Filing Frequency and Due Dates, Online Filing for Withholding, the NC-3 annual reconciliation, the electronic funds transfer threshold, seasonal filers, due dates on weekends and holidays, and how frequencies are updated. NC-30 (the withholding tables and instructions) pages 11-12 were not stored."
+  }
+ ],
+ "agencies": {
+  "withholding": {
+   "name": "North Carolina Department of Revenue",
+   "portalUrl": "https://www.ncdor.gov",
+   "source": "S1"
+  }
+ },
+ "calendar": {
+  "weekendsRoll": true,
+  "holidays": {
+   "verified": false
+  },
+  "source": "S1"
+ },
+ "mandates": {
+  "epay": {
+   "text": "If you remit an average of at least $20,000 each month in North Carolina withholding taxes, you are required to pay by electronic funds transfer (EFT). The Department will notify you if you are required to make payments by electronic funds transfer.",
+   "source": "S1"
+  }
+ },
+ "withholding": {
+  "applies": true,
+  "taxLineIds": {
+   "withholding": "NC_SIT",
+   "employeeInsurance": []
+  },
+  "returns": [
+   {
+    "id": "NC-5",
+    "name": "Form NC-5, North Carolina Withholding Return (NC-5Q quarterly return for semiweekly payers)",
+    "frequency": "monthly",
+    "due": {
+     "kind": "day_of_month_after",
+     "day": 15,
+     "decemberDay": 31
+    },
+    "contents": [
+     "Zero returns are required; monthly and quarterly filers file and pay online, semiweekly filers pay online and file the quarterly NC-5Q in the eNC5Q application.",
+     "Round to the nearest dollar on paper returns but pay the exact amount."
+    ],
+    "source": "S1"
+   },
+   {
+    "id": "NC-3",
+    "name": "Form NC-3, Annual Withholding Reconciliation",
+    "frequency": "annual",
+    "due": {
+     "kind": "january_day_next_year",
+     "day": 31
+    },
+    "contents": [
+     "Every North Carolina withholding taxpayer files it, with the W-2 and 1099 statements available, no later than January 31 of the following year; additional statements follow as they become available."
+    ],
+    "source": "S1"
+   }
+  ],
+  "notModelled": [
+   "North Carolina unemployment insurance (Division of Employment Security): no document read.",
+   "The NC-30 booklet pages 11-12 and the NC-5Q due date: the FAQ gives the quarterly deadline for quarterly filers but not NC-5Q's own date for semiweekly payers.",
+   "Seasonal filer registration.",
+   "North Carolina's legal-holiday list (weekends only are skipped, with a warning).",
+   "The eNC3 / eNC5Q file layouts."
+  ],
+  "deposits": {
+   "kind": "assigned_frequency",
+   "interpretation": "North Carolina sets the filing frequency from the AVERAGE monthly withholding over the 12 months ended June 30 (updated once a year; the Department mails the new frequency, usually in September; at registration it comes from the estimate on the application): under $250 a month QUARTERLY (return and payment by the last day of the month after the quarter); $250 to under $2,000 MONTHLY (by the 15th of the following month; December by January 31); $2,000 or more SEMIWEEKLY, 'at the same time you are required to file the reports and pay the tax withheld on the same wages for federal income tax purposes': payroll on Saturday to Tuesday is due the following Friday, Wednesday to Friday the following Wednesday. The frequency is an INPUT (what the Department assigned) or is derived from a supplied average monthly liability. A seasonal filer who pays employees six or fewer months a year may register the months and skip the off-season periods (not modelled). A due date on a weekend or holiday moves to the first business day after.",
+   "lookback": {
+    "description": "Average monthly North Carolina withholding over the 12 months ended June 30",
+    "classes": [
+     {
+      "name": "quarterly",
+      "maxInclusive": 24999
+     },
+     {
+      "name": "monthly",
+      "minExclusive": 24999,
+      "maxInclusive": 199999
+     },
+     {
+      "name": "semiweekly",
+      "minExclusive": 199999
+     }
+    ],
+    "newEmployer": "monthly"
+   },
+   "frequencies": {
+    "quarterly": {
+     "period": "quarter",
+     "due": {
+      "kind": "last_day_of_month_after_quarter"
+     }
+    },
+    "monthly": {
+     "period": "month",
+     "due": {
+      "kind": "day_of_month_after",
+      "day": 15,
+      "decemberDay": 31
+     }
+    },
+    "semiweekly": {
+     "period": "semiweekly",
+     "due": {
+      "kind": "semiweekly_following",
+      "afterFriday": 3,
+      "afterTuesday": 5
+     }
+    }
+   },
+   "deposited": [
+    "withholding"
+   ],
+   "source": "S1"
+  }
+ },
+ "channels": [
+  {
+   "id": "state:NC:online-filing",
+   "function": "withholding returns and payments, NC-5Q quarterly return, NC-3 reconciliation",
+   "description": "North Carolina Department of Revenue Online Filing and Payments System; eNC5Q and eNC3 applications; EFT required at an average of $20,000 a month",
+   "enrollment": [
+    "Register for a North Carolina withholding identification number with Form NC-BR (a new number is required for a new owner or a new entity); the letter says the assigned filing frequency.",
+    "Online filing needs the state-issued account number."
+   ],
+   "specs": "eNC3 and eNC5Q layouts: not read.",
+   "source": "S1"
+  }
+ ],
+ "notModelled": [
+  "North Carolina unemployment insurance: not read.",
+  "New-hire reporting: not read."
+ ]
+}
