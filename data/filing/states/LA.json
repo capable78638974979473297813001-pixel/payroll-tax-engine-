@@ -1,0 +1,81 @@
+{
+ "state": "LA",
+ "name": "Louisiana",
+ "verifiedOn": "2026-11-04",
+ "sources": [
+  {
+   "id": "S1",
+   "title": "Louisiana Department of Revenue: Withholding (web page)",
+   "url": "https://revenue.louisiana.gov/businesses/widely-used-tax-types/withholding/",
+   "revision": "web page, no edition printed; stored copy checked 2026-11-04",
+   "verifiedOn": "2026-11-04",
+   "verifiedBy": "read from the stored copy in watcher/state/snapshots/la-706e332554.txt.gz: Who Must File, Payment Frequency, File and Pay Electronically, Annual Reconciliation. The page states the payment-frequency thresholds but no payment due dates; the rate tables (R-1306) and the emergency rule on tables do not state them either."
+  }
+ ],
+ "agencies": {
+  "withholding": {
+   "name": "Louisiana Department of Revenue",
+   "portalUrl": "https://latap.revenue.louisiana.gov",
+   "source": "S1"
+  }
+ },
+ "calendar": {
+  "weekendsRoll": true,
+  "holidays": {
+   "verified": false
+  },
+  "source": "S1"
+ },
+ "mandates": {
+  "efile": {
+   "text": "Every employer who withholds, or is required to withhold, Louisiana income tax must file a quarterly withholding tax return electronically for every assigned filing period. Payments must be submitted electronically according to your assigned payment frequency.",
+   "source": "S1"
+  }
+ },
+ "withholding": {
+  "applies": true,
+  "taxLineIds": {
+   "withholding": "LA_SIT",
+   "employeeInsurance": []
+  },
+  "returns": [
+   {
+    "id": "L-3",
+    "name": "Form L-3, Annual Withholding Reconciliation",
+    "frequency": "annual",
+    "due": {
+     "kind": "january_day_next_year",
+     "day": 31
+    },
+    "contents": [
+     "Filed electronically (LaWage may be used) by January 31 after the year, or 30 days after final wages if the business closes.",
+     "The quarterly return is Form L-1; it is required even for zero returns, with the month-by-month amounts and payments for the quarter."
+    ],
+    "source": "S1"
+   }
+  ],
+  "notModelled": [
+   "Louisiana's payment frequency is assigned from the average monthly withholding: quarterly under $500, monthly $500 to under $5,000, semi-monthly $5,000 or more. The page does NOT state the due dates for any frequency (or the Form L-1 due date), so no deposit schedule is computed.",
+   "Louisiana unemployment insurance: no document read.",
+   "Louisiana's legal-holiday list.",
+   "The LaTAP and LaWage file layouts."
+  ]
+ },
+ "channels": [
+  {
+   "id": "state:LA:latap",
+   "function": "withholding returns (L-1), electronic payments, annual reconciliation (L-3) through LaTAP and LaWage",
+   "description": "Louisiana Taxpayer Access Point (LaTAP): file returns, make and schedule payments, view history; the annual reconciliation may be filed through LaWage",
+   "enrollment": [
+    "Register for a Louisiana withholding account (the page's checklist starts with registering; steps not read).",
+    "File every return and pay electronically; zero returns are required."
+   ],
+   "specs": "LaTAP and LaWage layouts: not read.",
+   "source": "S1"
+  }
+ ],
+ "notModelled": [
+  "Louisiana unemployment insurance: not read.",
+  "New-hire reporting: not read."
+ ]
+}

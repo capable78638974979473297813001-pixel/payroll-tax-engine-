@@ -57,12 +57,12 @@ describe('coverage: every jurisdiction is accounted for', () => {
       assert.ok(x.agencyLines.length > 0 && x.website, x.code);
     }
   });
-  test('fifteen states are modelled; every other row says NOT MODELLED rather than implying nothing is owed', () => {
-    assert.deepEqual(modelledStates(), ['CA', 'CO', 'CT', 'DE', 'GA', 'KS', 'MN', 'ND', 'NE', 'NJ', 'NY', 'RI', 'TX', 'UT', 'VA']);
+  test('twenty states are modelled (some only partly); every other row says NOT MODELLED rather than implying nothing is owed', () => {
+    assert.deepEqual(modelledStates(), ['CA', 'CO', 'CT', 'DE', 'GA', 'IL', 'KS', 'LA', 'MD', 'MN', 'MS', 'ND', 'NE', 'NJ', 'NY', 'RI', 'SC', 'TX', 'UT', 'VA']);
     const c = coverage();
     assert.equal(c.length, 53);
     for (const row of c) {
-      if (['CA', 'CO', 'CT', 'DE', 'GA', 'KS', 'MN', 'ND', 'NE', 'NJ', 'NY', 'RI', 'TX', 'UT', 'VA'].includes(row.code)) assert.equal(row.modelled, true);
+      if (['CA', 'CO', 'CT', 'DE', 'GA', 'IL', 'KS', 'LA', 'MD', 'MN', 'MS', 'ND', 'NE', 'NJ', 'NY', 'RI', 'SC', 'TX', 'UT', 'VA'].includes(row.code)) assert.equal(row.modelled, true);
       else {
         assert.equal(row.modelled, false, row.code);
         assert.equal(row.functions.ui, 'NOT MODELLED', row.code);
@@ -75,6 +75,11 @@ describe('coverage: every jurisdiction is accounted for', () => {
     assert.equal(by.TX.withholding, 'no wage income tax');
     assert.equal(by.FL.withholding, 'no wage income tax');
     assert.equal(by.OH.withholding, 'NOT MODELLED');
+    assert.equal(by.MS.withholding, 'modelled');
+    assert.equal(by.IL.withholding, 'modelled');
+    assert.equal(by.SC.withholding, 'modelled');
+    assert.equal(by.MD.withholding, 'partial'); // forms and mandates read; the deposit thresholds are not in the stored documents
+    assert.equal(by.LA.withholding, 'partial');
     assert.equal(by.NJ.withholding, 'modelled');
     assert.equal(by.MN.withholding, 'modelled');
     assert.equal(by.KS.withholding, 'modelled');
@@ -328,7 +333,7 @@ describe('a full year of REAL engine pay runs in each pilot state', () => {
 
 describe('state filings run through the shared lifecycle, and nothing is transmitted', () => {
   test('every modelled state registers its channels, each with enrollment and a "not read" specification', () => {
-    assert.deepEqual(registerAllStateChannels(), ['CA', 'CO', 'CT', 'DE', 'GA', 'KS', 'MN', 'ND', 'NE', 'NJ', 'NY', 'RI', 'TX', 'UT', 'VA']);
+    assert.deepEqual(registerAllStateChannels(), ['CA', 'CO', 'CT', 'DE', 'GA', 'IL', 'KS', 'LA', 'MD', 'MN', 'MS', 'ND', 'NE', 'NJ', 'NY', 'RI', 'SC', 'TX', 'UT', 'VA']);
     const ca = stateChannels(CA);
     assert.deepEqual(ca.map((c) => c.id), ['state:CA:e_services', 'state:CA:ner']);
     assert.match(ca[0].enrollment.join(' '), /Register online for an employer payroll tax account number/);

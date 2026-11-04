@@ -1,0 +1,133 @@
+{
+ "state": "SC",
+ "name": "South Carolina",
+ "verifiedOn": "2026-11-04",
+ "sources": [
+  {
+   "id": "S1",
+   "title": "South Carolina Withholding Tax Information Guide, WH-105",
+   "url": "https://dor.sc.gov/sites/dor/files/forms/WH105.pdf",
+   "revision": "WH-105 (Rev. 2/13/23)",
+   "verifiedOn": "2026-11-04",
+   "verifiedBy": "read from the stored copy in watcher/state/snapshots/sc-25117bc99e.txt.gz: Who Must Withhold, Submitting W-2s, Filing Returns (WH-1605, WH-1606), the payment rules for resident and nonresident employers, the due-date table, and the annual filer note. THE 2023 EDITION: the Department's current withholding page (watcher copy sc-f29ced8fb2) says the same in summary but was not compared line by line."
+  }
+ ],
+ "agencies": {
+  "withholding": {
+   "name": "South Carolina Department of Revenue",
+   "portalUrl": "https://mydorway.dor.sc.gov",
+   "source": "S1"
+  }
+ },
+ "calendar": {
+  "weekendsRoll": true,
+  "holidays": {
+   "verified": false
+  },
+  "source": "S1"
+ },
+ "mandates": {},
+ "withholding": {
+  "applies": true,
+  "taxLineIds": {
+   "withholding": "SC_SIT",
+   "employeeInsurance": []
+  },
+  "returns": [
+   {
+    "id": "WH-1605",
+    "name": "Form WH-1605, SC Withholding Quarterly Tax Return (first three quarters)",
+    "frequency": "quarterly",
+    "due": {
+     "kind": "last_day_of_month_after_quarter"
+    },
+    "contents": [
+     "Due April 30, July 31 and October 31; a return is filed for every quarter while the account is open, even with no tax or employees.",
+     "Payments alone do not satisfy the filing requirement."
+    ],
+    "source": "S1"
+   },
+   {
+    "id": "WH-1606",
+    "name": "Form WH-1606, SC Withholding Fourth Quarter and Annual Reconciliation Return",
+    "frequency": "annual",
+    "due": {
+     "kind": "january_day_next_year",
+     "day": 31
+    },
+    "contents": [
+     "Due January 31 instead of a fourth-quarter WH-1605; required if the account was open for any part of the year.",
+     "W-2s and 1099s with South Carolina withholding are due by January 31: online through the W-2 portal on MyDORWAY if the IRS requires electronic W-2 filing, otherwise on paper with WH-1612."
+    ],
+    "source": "S1"
+   }
+  ],
+  "notModelled": [
+   "The 2023 edition is the one read: confirm against the Department's current guide.",
+   "Nonresident employers' quarterly/monthly payment rule (stated in the guide; not modelled).",
+   "Annual filers (voluntary withholding from farmers, domestic help, fishermen, pastors): the guide defers to the Department's page.",
+   "South Carolina unemployment insurance (Department of Employment and Workforce): no document read.",
+   "South Carolina's legal-holiday list (weekends only are skipped, with a warning).",
+   "Whether payroll service providers have separate filing steps ('info for payroll service providers' on the Department's page)."
+  ],
+  "deposits": {
+   "kind": "federal_bands",
+   "rulesYear": 2023,
+   "interpretation": "South Carolina requires RESIDENT employers (principal place of business in South Carolina) to pay their withholding at the same time their federal payments are due, regardless of the state amount: the federal schedule (next-day, semiweekly, monthly) applies unchanged, with no dollar bands. The due dates are the federal ones: semiweekly the Wednesday after a Wednesday-Friday payday and the Friday after a Saturday-Tuesday payday; monthly by the 15th; next-day the next business day after a payday over $100,000. NONRESIDENT employers pay quarterly or monthly instead (under $500 of South Carolina tax for the quarter: by the last day of the month after the quarter; once withholding reaches $500 in the quarter: by the 15th of the following month) and are NOT modelled here: the profile is applied as the resident rule. Payments alone do not satisfy the filing requirement. THIS IS THE 2023 EDITION of the guide.",
+   "bands": [
+    {
+     "name": "any"
+    }
+   ],
+   "rows": {
+    "next_day": {
+     "any": "next_day"
+    },
+    "semiweekly": {
+     "any": "semiweekly"
+    },
+    "monthly": {
+     "any": "monthly"
+    }
+   },
+   "due": {
+    "monthly": {
+     "kind": "day_of_month_after",
+     "day": 15
+    },
+    "quarterly": {
+     "kind": "last_day_of_month_after_quarter"
+    },
+    "semiweekly": {
+     "kind": "business_days_after_period_end",
+     "days": 3
+    },
+    "next_day": {
+     "kind": "next_business_day"
+    }
+   },
+   "deposited": [
+    "withholding"
+   ],
+   "employerQuarterly": [],
+   "source": "S1"
+  }
+ },
+ "channels": [
+  {
+   "id": "state:SC:mydorway",
+   "function": "withholding returns and payments, W-2/1099 submission",
+   "description": "SCDOR MyDORWAY: file and pay withholding electronically; W-2 portal for electronic W-2/1099 submission",
+   "enrollment": [
+    "Register for an SC withholding account with SCDOR (steps not read); the Department's page has an information section for payroll service providers.",
+    "File and pay through MyDORWAY, the SCDOR's recommended method."
+   ],
+   "specs": "W-2 portal layouts: not read.",
+   "source": "S1"
+  }
+ ],
+ "notModelled": [
+  "South Carolina unemployment insurance: not read.",
+  "New-hire reporting: not read."
+ ]
+}

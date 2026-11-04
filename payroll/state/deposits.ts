@@ -257,7 +257,8 @@ function periodKey(period: 'week_sat_fri' | 'month' | 'quarter' | 'year' | 'semi
     case 'semiweekly_threshold':
     case 'semiweekly': {
       const end = semiweeklyPeriodEnd(date);
-      return { key: end, anchor: end };
+      // pay dates in different quarters are reported on different returns, so they are paid separately (Illinois says so)
+      return { key: `${end}|Q${q}`, anchor: end };
     }
     case 'published_calendar':
     case 'eighth_monthly':

@@ -2,6 +2,7 @@ import { test, describe } from 'node:test';
 import assert from 'node:assert/strict';
 
 import { dollars } from '../src/money.ts';
+import { analyzeDeposits } from '../payroll/federal/deposits.ts';
 import { addDays } from '../payroll/federal/calendar.ts';
 import {
   analyzeStateDeposits,
@@ -25,6 +26,7 @@ const GA = loadProfile('GA');
 const KS = loadProfile('KS');
 const MN = loadProfile('MN');
 const NJ = loadProfile('NJ');
+const SC = loadProfile('SC');
 const nj = (days: StateDay[], opts: Parameters<typeof analyzeStateDeposits>[3] = {}) => analyzeStateDeposits(NJ, days, undefined, opts);
 const mn = (days: StateDay[], opts: Parameters<typeof analyzeStateDeposits>[3] = {}) => analyzeStateDeposits(MN, days, undefined, opts);
 const ks = (days: StateDay[], opts: Parameters<typeof analyzeStateDeposits>[3] = {}) => analyzeStateDeposits(KS, days, undefined, opts);
@@ -564,6 +566,25 @@ describe('New Jersey (NJ-WT, September 2025)', () => {
         for (const o of r.obligations) assert.ok(isStateBusinessDay(o.dueDate, NJ) && o.dueDate > o.payDates[o.payDates.length - 1], `seed ${seed} ${f}`);
       }
     }
+  });
+});
+
+describe('South Carolina (WH-105): residents pay when their federal payments are due', () => {
+  const fedDay = (date: string, total: number) => ({ date, federalIncomeTax: total, socialSecurityEmployee: 0, socialSecurityEmployer: 0, medicareEmployee: 0, medicareEmployer: 0, additionalMedicare: 0, total, wagesSubjectToIncomeTax: 0, socialSecurityWages: 0, medicareWages: 0, additionalMedicareWages: 0, employeeIds: [] as string[] });
+  const sc = (schedule: 'monthly' | 'semiweekly', pays: [string, number, number][]) => {
+    const federal = analyzeDeposits(pays.map(([d, , f]) => fedDay(d, dollars(f))), { startingSchedule: schedule });
+    return analyzeStateDeposits(SC, pays.map(([d, s]) => stDay(d, s)), federal);
+  };
+  test('federal semiweekly: a Wednesday payday is due the following Wednesday, a Saturday payday the following Friday, whatever the amount', () => {
+    assert.deepEqual(sc('semiweekly', [['2026-08-05', 40, 30_000]]).obligations.map((o) => [o.schedule, o.amount, o.dueDate]), [['semiweekly', dollars(40), '2026-08-12']]);
+    assert.deepEqual(sc('semiweekly', [['2026-08-08', 10, 30_000]]).obligations.map((o) => [o.schedule, o.amount, o.dueDate]), [['semiweekly', dollars(10), '2026-08-14']]);
+  });
+  test('federal monthly: by the 15th of the following month', () => {
+    assert.deepEqual(sc('monthly', [['2026-08-07', 80, 5_000]]).obligations.map((o) => [o.schedule, o.dueDate]), [['monthly', '2026-09-15']]);
+  });
+  test('the 2023 edition draws a rules-year warning on 2026 pay dates; quarterly returns as the guide prints them', () => {
+    assert.equal(sc('monthly', [['2026-08-07', 80, 5_000]]).findings.some((f) => f.code === 'state_rules_year_mismatch'), true);
+    assert.deepEqual(withholdingReturnDates(SC, '2026-06-01').map((r) => r.id), ['WH-1605', 'WH-1606']);
   });
 });
 
