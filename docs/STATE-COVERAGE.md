@@ -2,9 +2,9 @@
 
 _Generated from `data/filing/` by `scripts/state-coverage.ts`; `tests/state-coverage.test.ts` fails if this file is stale. Do not edit by hand._
 
-**53 jurisdictions** (the 53 unemployment-tax agencies the US Department of Labor lists: 50 states, DC, Puerto Rico, US Virgin Islands). **13 have a state profile** (CA, CO, CT, DE, GA, KS, ND, NE, NY, RI, TX, UT, VA). The rest are **NOT MODELLED**: their own documents have not been read, and nothing is assumed about what they require. A row saying NOT MODELLED does not mean nothing is owed.
+**53 jurisdictions** (the 53 unemployment-tax agencies the US Department of Labor lists: 50 states, DC, Puerto Rico, US Virgin Islands). **15 have a state profile** (CA, CO, CT, DE, GA, KS, MN, ND, NE, NJ, NY, RI, TX, UT, VA). The rest are **NOT MODELLED**: their own documents have not been read, and nothing is assumed about what they require. A row saying NOT MODELLED does not mean nothing is owed.
 
-Unemployment reporting modelled for 3 of 53. Withholding deposits modelled for 11, partly for 1. New-hire reporting modelled for 2.
+Unemployment reporting modelled for 3 of 53. Withholding deposits modelled for 13, partly for 1. New-hire reporting modelled for 2.
 
 **Nothing is transmitted to any state.** No state transport is connected; the sandbox rehearses and says so, and live transports refuse with the enrollment steps each profile records.
 
@@ -33,14 +33,14 @@ Unemployment reporting modelled for 3 of 53. Withholding deposits modelled for 1
 | MD | Maryland | Department of Labor, Licensing, & Regulation, 1100 North Eutaw St,, Room 414, Baltimore, MD 21201-2201 | NOT MODELLED | NOT MODELLED | NOT MODELLED |
 | MA | Massachusetts | Division of Employment and Training, 19 Staniford Street, Boston, MA 02114-2589 | NOT MODELLED | NOT MODELLED | NOT MODELLED |
 | MI | Michigan | Department of Licensing and Regulatory Affairs, 3024 W Grand Blvd, Detroit, MI 48202-6024 | NOT MODELLED | NOT MODELLED | NOT MODELLED |
-| MN | Minnesota | Department of Employment & Economic Development, 332 Minnesota Street, Suite E200, St. Paul, MN 55101-1351 | NOT MODELLED | NOT MODELLED | NOT MODELLED |
+| MN | Minnesota | Department of Employment & Economic Development, 332 Minnesota Street, Suite E200, St. Paul, MN 55101-1351 | modelled | NOT MODELLED | NOT MODELLED |
 | MS | Mississippi | Department of Employment Security, PO Box 1699, Jackson, MS | NOT MODELLED | NOT MODELLED | NOT MODELLED |
 | MO | Missouri | Division of Employment Security, PO Box 59, Jefferson City, MO 65104-0059 | NOT MODELLED | NOT MODELLED | NOT MODELLED |
 | MT | Montana | Unemployment Insurance Division, PO Box 6339, Helena, MT 59604-6339 | NOT MODELLED | NOT MODELLED | NOT MODELLED |
 | NE | Nebraska | Department of Labor, Box 94600, State House Station, Lincoln, NE 68509-4600 | modelled | NOT MODELLED | NOT MODELLED |
 | NV | Nevada | Department of Employment Training and Rehabilitation, 500 East Third Street, Carson City, NV 89713-0030 | no wage income tax | NOT MODELLED | NOT MODELLED |
 | NH | New Hampshire | Department of Employment Security, 32 South Main Street, Concord, NH 03301-4857 | no wage income tax | NOT MODELLED | NOT MODELLED |
-| NJ | New Jersey | Department of Labor & Workforce Development, PO Box 947, Trenton, NJ 08625-0947 | NOT MODELLED | NOT MODELLED | NOT MODELLED |
+| NJ | New Jersey | Department of Labor & Workforce Development, PO Box 947, Trenton, NJ 08625-0947 | modelled | NOT MODELLED | NOT MODELLED |
 | NM | New Mexico | Department of Workforce Solutions, PO Box 2281, Albuquerque, NM 87103-2281 | NOT MODELLED | NOT MODELLED | NOT MODELLED |
 | NY | New York | Department of Labor, State Campus, Building 12, Room 500, Albany, NY 12240-0339 | partial | modelled | NOT MODELLED |
 | NC | North Carolina | Employment Security Commission, PO Box 26504, Raleigh, NC 27611-6504 | NOT MODELLED | NOT MODELLED | NOT MODELLED |

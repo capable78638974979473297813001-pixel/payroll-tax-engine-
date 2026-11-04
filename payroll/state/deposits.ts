@@ -235,7 +235,7 @@ function rulesYearFinding(profile: StateProfile, rulesYear: number | undefined, 
   };
 }
 
-function periodKey(period: 'week_sat_fri' | 'month' | 'quarter' | 'year' | 'semiweekly_threshold' | 'published_calendar' | 'eighth_monthly' | 'semiweekly', date: string, weekSplit: 'quarter' | 'year' = 'quarter'): { key: string; anchor: string } {
+function periodKey(period: 'week_sat_fri' | 'month' | 'quarter' | 'year' | 'semiweekly_threshold' | 'published_calendar' | 'eighth_monthly' | 'semiweekly' | 'month_threshold', date: string, weekSplit: 'quarter' | 'year' = 'quarter'): { key: string; anchor: string } {
   const q = quarterOf(date);
   switch (period) {
     case 'week_sat_fri': {
@@ -261,6 +261,7 @@ function periodKey(period: 'week_sat_fri' | 'month' | 'quarter' | 'year' | 'semi
     }
     case 'published_calendar':
     case 'eighth_monthly':
+    case 'month_threshold':
       throw new Error(`${period} periods are handled before periodKey is called`);
   }
 }
@@ -323,6 +324,10 @@ function analyzeAssignedFrequency(profile: StateProfile, spec: AssignedFrequency
   if (frequency === undefined && opts.lookbackLiability !== undefined) {
     const l = opts.lookbackLiability;
     frequency = spec.lookback.classes.find((c) => (c.minExclusive === undefined || l > c.minExclusive) && (c.maxInclusive === undefined || l <= c.maxInclusive))?.name;
+    if (frequency === undefined) {
+      findings.push({ severity: 'error', code: 'state_frequency_not_derivable', message: `${profile.state}: the look-back liability does not decide the frequency by itself (see the interpretation above). Supply the assigned frequency; no schedule was guessed.` });
+      return { obligations: [], findings };
+    }
   }
   if (frequency === undefined) {
     frequency = spec.lookback.newEmployer;
@@ -352,6 +357,46 @@ function analyzeAssignedFrequency(profile: StateProfile, spec: AssignedFrequency
 }
 
 function analyzeFrequencyGroups(profile: StateProfile, spec: AssignedFrequencySpec, f: AssignedFrequencySpec['frequencies'][string], frequency: string, days: readonly StateDay[], opts: StateDepositOptions, findings: Finding[]): StateDepositAnalysis {
+  if (f.period === 'month_threshold') {
+    const out: StateDepositObligation[] = [];
+    const byQuarter = new Map<string, StateDay[]>();
+    for (const d of days) {
+      if (d.withholding === 0 && d.employeeInsurance === 0) continue;
+      const key = `${d.date.slice(0, 4)}-Q${quarterOf(d.date)}`;
+      byQuarter.set(key, [...(byQuarter.get(key) ?? []), d]);
+    }
+    const extra = opts.extraHolidays ?? [];
+    const amountOf = (xs: readonly StateDay[]) => sum(xs, 'withholding') + sum(xs, 'employeeInsurance');
+    for (const [qkey, ds] of byQuarter) {
+      const year = Number(qkey.slice(0, 4));
+      const q = quarterOf(ds[0].date);
+      const months = [1, 2, 3].map((n) => ds.filter((d) => ((Number(d.date.slice(5, 7)) - 1) % 3) + 1 === n));
+      const rest: StateDay[] = [...months[2]];
+      for (const n of [0, 1]) {
+        const m = months[n];
+        if (m.length === 0) continue;
+        if (amountOf(m) > f.thresholdExclusive!) {
+          const due = resolveDue({ kind: 'day_of_month_after', day: f.monthlyDueDay! }, m[0].date, profile, extra);
+          out.push({
+            id: `${profile.state}-monthly-${m[0].date.slice(0, 7)}`, state: profile.state, schedule: 'monthly', payDates: m.map((d) => d.date), year, quarter: q,
+            withholding: sum(m, 'withholding'), employeeInsurance: sum(m, 'employeeInsurance'), employerUi: 0, amount: amountOf(m), dueDate: due.dueDate,
+            notes: [`More than ${fmt(f.thresholdExclusive!)} withheld in ${m[0].date.slice(0, 7)}: paid on the ${f.monthlyDueDay}th of the next month.`],
+          });
+        } else rest.push(...m);
+      }
+      if (rest.length > 0) {
+        const due = resolveDue(f.due, rest[0].date, profile, extra);
+        out.push({
+          id: `${profile.state}-quarterly-${qkey}`, state: profile.state, schedule: 'quarterly', payDates: rest.map((d) => d.date).sort(), year, quarter: q,
+          withholding: sum(rest, 'withholding'), employeeInsurance: sum(rest, 'employeeInsurance'), employerUi: 0, amount: amountOf(rest), dueDate: due.dueDate,
+          notes: [`Paid with the quarterly return: the third month and any month at or under ${fmt(f.thresholdExclusive!)}.`],
+        });
+      }
+    }
+    out.sort((a, b) => a.dueDate.localeCompare(b.dueDate) || a.id.localeCompare(b.id));
+    return { obligations: out, findings };
+  }
+
   if (f.period === 'eighth_monthly') {
     const ends = f.periodEnds!;
     const groups8 = new Map<string, StateDay[]>();

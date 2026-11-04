@@ -104,7 +104,7 @@ export interface AssignedFrequencySpec {
     newEmployer: string;
   };
   frequencies: Record<string, {
-    period: 'week_sat_fri' | 'month' | 'quarter' | 'year' | 'semiweekly_threshold' | 'published_calendar' | 'eighth_monthly' | 'semiweekly';
+    period: 'week_sat_fri' | 'month' | 'quarter' | 'year' | 'semiweekly_threshold' | 'published_calendar' | 'eighth_monthly' | 'semiweekly' | 'month_threshold';
     /** For `semiweekly_threshold` the due rule is that of the REMAINDER (paid with the quarterly return). */
     due: DueRule;
     /**
@@ -126,6 +126,12 @@ export interface AssignedFrequencySpec {
      * rule is applied to the period END (Delaware: 3 business days later).
      */
     periodEnds?: number[];
+    /**
+     * Only for `month_threshold` (New Jersey): within each quarter the first two months are paid on `monthlyDueDay`
+     * of the next month when MORE than `thresholdExclusive` (cents) was withheld in that month; the third month, and
+     * any month at or under the threshold, are paid with the quarterly return (the `due` rule).
+     */
+    monthlyDueDay?: number;
     /**
      * Only for `week_sat_fri`: where a week that runs across a boundary is cut into two periods.
      * 'quarter' (default; Connecticut) cuts at quarter ends; 'year' (Colorado) cuts only at December 31,
@@ -264,6 +270,7 @@ export function validateProfile(p: StateProfile): string[] {
       if (!d.frequencies[d.lookback.newEmployer]) bad.push(`withholding.deposits: new-employer frequency ${d.lookback.newEmployer} is not defined`);
       for (const c of d.lookback.classes) if (!d.frequencies[c.name]) bad.push(`withholding.deposits: look-back class ${c.name} has no frequency`);
       for (const [n, f] of Object.entries(d.frequencies)) {
+        if (f.period === 'month_threshold' && !((f.thresholdExclusive ?? 0) > 0 && (f.monthlyDueDay ?? 0) >= 1)) bad.push(`withholding.deposits.frequencies.${n}: month_threshold needs a positive threshold and monthlyDueDay`);
         if (f.period === 'eighth_monthly') {
           const e = f.periodEnds ?? [];
           if (e.length < 2 || e.some((x, i) => x < 1 || x > 31 || (i > 0 && x <= e[i - 1])) || e[e.length - 1] !== 31) bad.push(`withholding.deposits.frequencies.${n}: periodEnds must ascend and end with 31 (the last day)`);

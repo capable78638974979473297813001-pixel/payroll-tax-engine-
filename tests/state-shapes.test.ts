@@ -23,6 +23,10 @@ const DE = loadProfile('DE');
 const ND = loadProfile('ND');
 const GA = loadProfile('GA');
 const KS = loadProfile('KS');
+const MN = loadProfile('MN');
+const NJ = loadProfile('NJ');
+const nj = (days: StateDay[], opts: Parameters<typeof analyzeStateDeposits>[3] = {}) => analyzeStateDeposits(NJ, days, undefined, opts);
+const mn = (days: StateDay[], opts: Parameters<typeof analyzeStateDeposits>[3] = {}) => analyzeStateDeposits(MN, days, undefined, opts);
 const ks = (days: StateDay[], opts: Parameters<typeof analyzeStateDeposits>[3] = {}) => analyzeStateDeposits(KS, days, undefined, opts);
 const ga = (days: StateDay[], opts: Parameters<typeof analyzeStateDeposits>[3] = {}) => analyzeStateDeposits(GA, days, undefined, opts);
 const nd = (days: StateDay[], opts: Parameters<typeof analyzeStateDeposits>[3] = {}) => analyzeStateDeposits(ND, days, undefined, opts);
@@ -478,6 +482,86 @@ describe('Kansas (KW-100, Rev. 10-24): five frequencies from annual withholding'
         const r = ks(days, { assignedFrequency: f });
         assert.equal(r.obligations.reduce((a, o) => a + o.amount, 0), days.reduce((a, d) => a + d.withholding, 0), `seed ${seed} ${f}`);
         for (const o of r.obligations) assert.ok(isStateBusinessDay(o.dueDate, KS) && o.dueDate > o.payDates[o.payDates.length - 1], `seed ${seed} ${f}`);
+      }
+    }
+  });
+});
+
+describe('Minnesota (2026 booklet): the federal schedule when more than $1,500 was withheld last quarter', () => {
+  test('$1,500 or less last quarter derives a quarterly deposit; above it the engine refuses to guess', () => {
+    assert.equal(mn([stDay('2026-08-07', 100)], { lookbackLiability: dollars(1500) }).obligations[0].schedule, 'quarterly');
+    const r = mn([stDay('2026-08-07', 100)], { lookbackLiability: dollars(1500.01) });
+    assert.deepEqual(r.obligations, []);
+    assert.equal(r.findings.some((f) => f.code === 'state_frequency_not_derivable' && f.severity === 'error'), true);
+  });
+  test('semiweekly: Wednesday to Friday paydays due the Wednesday after; Saturday to Tuesday the Friday after', () => {
+    const due = (d: string) => mn([stDay(d, 5000)], { assignedFrequency: 'semiweekly' }).obligations[0].dueDate;
+    assert.deepEqual(['2026-08-05', '2026-08-07', '2026-08-08', '2026-08-11'].map(due), ['2026-08-12', '2026-08-12', '2026-08-14', '2026-08-14']);
+  });
+  test('Minnesota did not adopt the one-day rule: a $150,000 payday follows the ordinary schedule', () => {
+    const r = mn([stDay('2026-08-05', 150_000)], { assignedFrequency: 'semiweekly' });
+    assert.deepEqual(r.obligations.map((o) => [o.schedule, o.dueDate]), [['semiweekly', '2026-08-12']]);
+  });
+  test('monthly the 15th; quarterly April 30, July 31, October 31, January 31', () => {
+    assert.deepEqual(mn([stDay('2026-08-07', 100)], { assignedFrequency: 'monthly' }).obligations.map((o) => o.dueDate), ['2026-09-15']);
+    const q = mn([stDay('2026-02-13', 10), stDay('2026-05-15', 10), stDay('2026-08-14', 10), stDay('2026-11-13', 10)], { assignedFrequency: 'quarterly' });
+    assert.deepEqual(q.obligations.map((o) => o.dueDate), ['2026-04-30', '2026-07-31', '2026-11-02', '2027-02-01']);
+  });
+  test('the electronic mandate names payroll service companies', () => {
+    assert.match(MN.mandates.epay!.text, /payroll service company/);
+  });
+  test('1,000 payroll years: semiweekly and monthly conserve every dollar', () => {
+    for (let seed = 18000; seed < 19000; seed += 1) {
+      const days = randomDays(seed, 2026);
+      for (const f of ['semiweekly', 'monthly']) {
+        const r = mn(days, { assignedFrequency: f });
+        assert.equal(r.obligations.reduce((a, o) => a + o.amount, 0), days.reduce((a, d) => a + d.withholding, 0), `seed ${seed} ${f}`);
+        for (const o of r.obligations) assert.ok(isStateBusinessDay(o.dueDate, MN) && o.dueDate > o.payDates[o.payDates.length - 1], `seed ${seed} ${f}`);
+      }
+    }
+  });
+});
+
+describe('New Jersey (NJ-WT, September 2025)', () => {
+  test('a prior-year liability of $10,000 or more is a weekly payer', () => {
+    const s = (v: number) => nj([stDay('2025-08-08', 100)], { lookbackLiability: dollars(v) }).obligations[0].schedule;
+    assert.deepEqual([9999.99, 10_000].map(s), ['quarterly', 'weekly']);
+  });
+  test("the guide's worked example: a Friday payday (June 7, 2024) is paid Wednesday June 12", () => {
+    assert.deepEqual(nj([stDay('2024-06-07', 1500)], { assignedFrequency: 'weekly' }).obligations.map((o) => [o.amount, o.dueDate]), [[dollars(1500), '2024-06-12']]);
+  });
+  test('a bi-weekly payroll pays bi-weekly: paydays two weeks apart are separate payments', () => {
+    const r = nj([stDay('2025-08-08', 300), stDay('2025-08-22', 300)], { assignedFrequency: 'weekly' });
+    assert.deepEqual(r.obligations.map((o) => o.dueDate), ['2025-08-13', '2025-08-27']);
+  });
+  test('standard: more than $500 in month 1 or 2 is paid the 15th of the next month; month 3 and small months go with the quarterly return (the 30th)', () => {
+    const r = nj([stDay('2025-07-11', 500.01), stDay('2025-08-15', 500), stDay('2025-09-12', 9000)]);
+    assert.deepEqual(r.obligations.map((o) => [o.schedule, o.amount, o.dueDate]), [['monthly', dollars(500.01), '2025-08-15'], ['quarterly', dollars(9500), '2025-10-30']]);
+  });
+  test('months are tested one at a time: month 2 over $500 is paid even when month 1 was not', () => {
+    const r = nj([stDay('2025-04-11', 100), stDay('2025-05-16', 700)]);
+    assert.deepEqual(r.obligations.map((o) => [o.schedule, o.amount, o.dueDate]), [['monthly', dollars(700), '2025-06-16'], ['quarterly', dollars(100), '2025-07-30']]);
+  });
+  test('quarterly returns are due April 30, July 30, October 30 and January 30', () => {
+    const due = (d: string) => nj([stDay(d, 10)]).obligations[0].dueDate;
+    assert.deepEqual(['2025-03-14', '2025-06-13', '2025-09-12', '2025-12-12'].map(due), ['2025-04-30', '2025-07-30', '2025-10-30', '2026-01-30']);
+    assert.deepEqual(withholdingReturnDates(NJ, '2025-06-01').map((r) => r.id), ['NJ-927', 'NJ-500', 'NJ-927-H']);
+  });
+  test('household employers pay once a year by January 31', () => {
+    assert.deepEqual(nj([stDay('2025-03-14', 50), stDay('2025-09-12', 50)], { assignedFrequency: 'household' }).obligations.map((o) => [o.amount, o.dueDate]), [[dollars(100), '2026-02-02']]);
+  });
+  test('validator: month_threshold needs a threshold', () => {
+    const bad = JSON.parse(JSON.stringify(NJ));
+    delete bad.withholding.deposits.frequencies.standard.thresholdExclusive;
+    assert.match(validateProfile(bad).join(';'), /month_threshold needs a positive threshold/);
+  });
+  test('1,000 payroll years: weekly and standard conserve every dollar and never pay before the pay date', () => {
+    for (let seed = 20000; seed < 21000; seed += 1) {
+      const days = randomDays(seed, 2025);
+      for (const f of ['weekly', 'standard']) {
+        const r = nj(days, { assignedFrequency: f });
+        assert.equal(r.obligations.reduce((a, o) => a + o.amount, 0), days.reduce((a, d) => a + d.withholding, 0), `seed ${seed} ${f}`);
+        for (const o of r.obligations) assert.ok(isStateBusinessDay(o.dueDate, NJ) && o.dueDate > o.payDates[o.payDates.length - 1], `seed ${seed} ${f}`);
       }
     }
   });
