@@ -1,0 +1,68 @@
+{
+ "state": "ID",
+ "name": "Idaho",
+ "verifiedOn": "2026-11-04",
+ "sources": [
+  {
+   "id": "S1",
+   "title": "Idaho State Tax Commission: Withholding (web page)",
+   "url": "https://tax.idaho.gov/search-category/income-tax/withholding/",
+   "revision": "web page, no edition printed; stored copy checked 2026-11-04",
+   "verifiedOn": "2026-11-04",
+   "verifiedBy": "read from the stored copy in watcher/state/snapshots/id-882a4325e8.txt.gz: the descriptions of Form 910 (periodic return), Form 967 (annual reconciliation with W-2s), Form 96 (annual information return), electronic filing and substitute forms. The page does not state the filing frequencies or due dates of Form 910; those are on the Commission's 'Withholding filing' and 'Withholding paying' pages, which are not in the stored documents."
+  }
+ ],
+ "agencies": {
+  "withholding": {
+   "name": "Idaho State Tax Commission",
+   "portalUrl": "https://tap.idaho.gov",
+   "source": "S1"
+  }
+ },
+ "calendar": {
+  "weekendsRoll": true,
+  "holidays": {
+   "verified": false
+  },
+  "source": "S1"
+ },
+ "mandates": {
+  "efile": {
+   "text": "Idaho requires you to file W-2s and Form 967 electronically if you're an employer who meets the IRS requirements to file W-2s electronically and you have 10 or more employees in Idaho.",
+   "source": "S1"
+  }
+ },
+ "withholding": {
+  "applies": true,
+  "taxLineIds": {
+   "withholding": "ID_SIT",
+   "employeeInsurance": []
+  },
+  "returns": [],
+  "notModelled": [
+   "Form 967 (annual reconciliation with the W-2s) is filed once a year, online in TAP or by mail, but the page does not print its due date; none is recorded.",
+   "Form 910 filing frequencies and due dates: the page says a 910 is filed for every period (monthly, quarterly) but states no thresholds or dates, so no deposit schedule is computed. A 'zero' 910 is filed either online or by mail, not both.",
+   "Form 96, Annual Information Return, is due the last day of February.",
+   "Idaho unemployment insurance (Department of Labor): no document read.",
+   "The January 31 due date of Form 967 is assumed, not read.",
+   "Idaho's legal-holiday list."
+  ]
+ },
+ "channels": [
+  {
+   "id": "state:ID:tap",
+   "function": "withholding returns (Form 910, 967), W-2/1099 filing, substitute forms",
+   "description": "Idaho TaxAccess Point (TAP); the Commission publishes Substitute Forms Specifications so software can produce approved substitute withholding forms",
+   "enrollment": [
+    "Register for an Idaho withholding account (steps not read) and use TAP.",
+    "To produce substitute withholding forms from software, follow the Commission's Substitute Forms Specifications and contact its Substitute Forms Help Desk for approval."
+   ],
+   "specs": "Substitute Forms Specifications: named on the page, not read.",
+   "source": "S1"
+  }
+ ],
+ "notModelled": [
+  "Idaho unemployment insurance: not read.",
+  "New-hire reporting: not read."
+ ]
+}

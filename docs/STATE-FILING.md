@@ -5,7 +5,7 @@ runs, using **state profiles**: data files in `data/filing/states/` with a citat
 Import it as `import { state } from './payroll/index.ts'`. Coverage is in
 [`STATE-COVERAGE.md`](STATE-COVERAGE.md) (generated; a test fails if it is stale).
 
-**Status: 35 of 53 jurisdictions are modelled; 18 are NOT MODELLED.** Twenty-eight have a full withholding profile (deposit schedule, returns, mandates, channels), six have a **partial** one (returns, mandates and channels read, but the stored agency documents do not state the deposit schedule, so none is computed: IA, LA, MD, NM, NY, OK), and Texas has no wage income tax. The other 18 (AK, AZ, AR, DC, FL, ID, IN, KY, MA, MO, NV, NH, PR, SD, TN, VI, WA, WY) are **NOT MODELLED**: nothing is assumed for them, and a lookup for one fails loudly. Everything modelled is **withholding and its returns**; unemployment insurance is modelled only for California, New York and Texas. **Nothing is transmitted to any state**: no state transport is connected.
+**Status: 37 of 53 jurisdictions are modelled; 16 are NOT MODELLED.** Twenty-eight have a full withholding profile (deposit schedule, returns, mandates, channels), eight have a **partial** one (mandates, channels and what returns the stored agency documents state, but no deposit schedule is computed: IA, ID, LA, MD, MO, NM, NY, OK), and Texas has no wage income tax. The other 16 (AK, AZ, AR, DC, FL, IN, KY, MA, NV, NH, PR, SD, TN, VI, WA, WY) are **NOT MODELLED**: nothing is assumed for them, and a lookup for one fails loudly. Everything modelled is **withholding and its returns**; unemployment insurance is modelled only for California, New York and Texas. **Nothing is transmitted to any state**: no state transport is connected.
 
 ## What it does
 
@@ -147,7 +147,7 @@ Every profile cites the agency's own document (URL, edition, what was read and w
 | WI | W-166 (1/26) | Annual, quarterly, monthly, semi-monthly | Frequency assigned by the department |
 | WV | Withholding help page | Monthly 15th, annual | Payroll services must e-file |
 | ME | 2026 booklet, Aug 2026 | Semi-weekly at $18,000 look-back, otherwise quarterly | |
-| IA, LA, MD, NM, OK | various | **Partial**: thresholds, returns, mandates, channels | No payment dates in the stored documents |
+| IA, ID, LA, MD, MO, NM, OK | various | **Partial**: thresholds, returns, mandates, channels | No payment dates in the stored documents |
 
 Items worth a person's attention before relying on a state: Rhode Island's and Ohio's printed calendars (taken as published; the stored text cannot show their colour coding), Virginia's and Delaware's interpretations (recorded in each profile and repeated in every result), and every profile marked as an older edition.
 

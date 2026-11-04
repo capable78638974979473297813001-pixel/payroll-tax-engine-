@@ -1,0 +1,68 @@
+{
+ "state": "MO",
+ "name": "Missouri",
+ "verifiedOn": "2026-11-04",
+ "sources": [
+  {
+   "id": "S1",
+   "title": "Missouri Department of Revenue: Withholding Tax FAQ",
+   "url": "https://dor.mo.gov/faq/taxation/business/withholding.html",
+   "revision": "web page, no edition printed; stored copy checked 2026-11-04",
+   "verifiedOn": "2026-11-04",
+   "verifiedBy": "read from the stored copy in watcher/state/snapshots/mo-a8348dd409.txt.gz: the MO-941 requirement, MyTax Missouri, the timely compensation deduction, the electronic mandate for quarter-monthly filers, and the pointer to a list of due dates for all filing frequencies (not stored)."
+  }
+ ],
+ "agencies": {
+  "withholding": {
+   "name": "Missouri Department of Revenue",
+   "portalUrl": "https://mytax.dor.mo.gov",
+   "source": "S1"
+  }
+ },
+ "calendar": {
+  "weekendsRoll": true,
+  "holidays": {
+   "verified": false
+  },
+  "source": "S1"
+ },
+ "mandates": {
+  "epay": {
+   "text": "The Director of Revenue has mandated that effective January 1, 2004, all employers subject to the requirement of quarter-monthly filing must file and pay withholding tax electronically.",
+   "source": "S1"
+  }
+ },
+ "withholding": {
+  "applies": true,
+  "taxLineIds": {
+   "withholding": "MO_SIT",
+   "employeeInsurance": []
+  },
+  "returns": [],
+  "notModelled": [
+   "Form MO-941 (Employer's Withholding Tax Income Return) is required for every period even with no withholding, filed through MyTax Missouri; its due dates are on a list that is not stored, so none is recorded.",
+   "Missouri's filing frequencies (quarter-monthly, monthly, quarterly, annual) and every payment due date: the FAQ says 'click here for a current list of due dates for all filing frequencies', which is not in the stored documents, so no deposit schedule is computed.",
+   "The timely compensation deduction an employer may take when MO-941 is filed and paid on time: 2% of withholding up to $5,000 of year-to-date tax, 1% from $5,001 to $10,000, 1/2% over $10,000 (not applied here).",
+   "Missouri unemployment insurance (Division of Employment Security): no document read.",
+   "St. Louis and Kansas City earnings taxes: separate agencies, not modelled.",
+   "Missouri's legal-holiday list."
+  ]
+ },
+ "channels": [
+  {
+   "id": "state:MO:mytax",
+   "function": "withholding returns (MO-941) and electronic payments",
+   "description": "MyTax Missouri portal (registered or guest filing); quarter-monthly filers must file and pay electronically",
+   "enrollment": [
+    "Register for a Missouri withholding account (steps not read); MyTax Missouri registration needs the Missouri Tax Identification Number (MOID) and a Personal Identification Number (PIN), or file as a guest.",
+    "A professional employer organization co-employing workers affects account closure; see the FAQ."
+   ],
+   "specs": "Not read.",
+   "source": "S1"
+  }
+ ],
+ "notModelled": [
+  "Missouri unemployment insurance: not read.",
+  "New-hire reporting: not read."
+ ]
+}
