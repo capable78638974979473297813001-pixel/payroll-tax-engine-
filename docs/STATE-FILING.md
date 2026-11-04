@@ -125,3 +125,35 @@ requires (for California, registering for an employer payroll tax account at e-S
 registering on UTR and waiting for the Employer Liability Notice). The live transports refuse until those exist.
 Which of them your product itself needs, versus your customers, is the same filer-of-record decision as the
 federal one (`IRS-EFILE-ENROLLMENT-PLAN.md`).
+
+
+## Batch 2: the states added after the first eleven
+
+Every profile cites the agency's own document (URL, edition, what was read and what was not) and lists its gaps in `notModelled`. A document that does not state a rule leaves that rule out; it is never filled from memory. Shapes are the engine's: `assigned_frequency` (the agency assigns weekly/monthly/quarterly/...), `federal_bands`, and the period kinds `week_sat_fri`, `semiweekly`, `eighth_monthly` (any fixed set of period-end days), `month_threshold`, `published_calendar` and `semiweekly_threshold`.
+
+| State | Source and edition | What is computed | Flags |
+| --- | --- | --- | --- |
+| AL | Withholding booklet, Jan 2026 | Quarterly A-1; monthly A-6 when a month of the quarter's first two exceeds $1,000; A-3 January 31 | Occupational tax not modelled |
+| GA | Employer's Tax Guide, Sept 2026 | Semi-weekly (look-back over $50,000), monthly, quarterly, annual, and the $100,000 one-day rule | Quarterly/annual status are inputs |
+| HI | Booklet A, Rev. 2025 | Quarterly (to $5,000), monthly (to $40,000) | **Semi-weekly derivation not modelled: the stored text drops the paragraph's opening condition** |
+| IL | Pub 131, R-01/26 | Monthly or semi-weekly by $12,000 look-back, quarterly IL-941, quarter-split payments | Mid-year switch not modelled |
+| KS | KW-100, Rev. 10-24 | Quad-monthly, semi-monthly, monthly, quarterly, annual by annual withholding | **2024 edition**, warns on 2026 dates |
+| MI | Treasury page | Monthly/quarterly/annual (20th) | **Accelerated filers not modelled**; frequency is an input |
+| MN | 2026 booklet | Federal schedule above $1,500 last quarter, quarterly below; no one-day rule | Above $1,500 the schedule must be supplied |
+| MS | Pub 89-700-25-1 | Monthly/quarterly, the 15th | Frequency assigned by the Department, an input |
+| MT | Wage withholding page | Annual (to $1,199), monthly, accelerated (federal days) | |
+| NC | Withholding FAQ | Quarterly (under $250/month), monthly (December Jan 31), semi-weekly (from $2,000) | |
+| NJ | NJ-WT, Sept 2025 | Quarterly, monthly over $500 per month, weekly payers (prior year $10,000) | Saturday-to-Friday pay week is an interpretation |
+| OH | Employer withholding page and Due Dates, Rev. 3/26 | The **printed 2026 calendar**: 13 monthly, 5 quarterly, 105 partial-weekly periods | **$100,000 rule not modelled** (combined with school district tax); other years error |
+| OR | 2026 Withholding and Transit Tax Calendar | The printed monthly and quarterly dates; semi-weekly rule | Depositor thresholds not in the stored documents; Q3 printed as Nov 1 |
+| PA | REV-415 and the Department page | Quarterly, monthly (December Jan 31), semi-monthly, semi-weekly | |
+| SC | WH-105, Rev. 2/13/23 | Residents follow the federal schedule exactly | **2023 edition**; nonresident rule not modelled |
+| VT | Withholding page | Semi-weekly only | Monthly/quarterly not modelled (no WHT-436 date stated) |
+| WI | W-166 (1/26) | Annual, quarterly, monthly, semi-monthly | Frequency assigned by the department |
+| WV | Withholding help page | Monthly 15th, annual | Payroll services must e-file |
+| ME | 2026 booklet, Aug 2026 | Semi-weekly at $18,000 look-back, otherwise quarterly | |
+| IA, LA, MD, NM, OK | various | **Partial**: thresholds, returns, mandates, channels | No payment dates in the stored documents |
+
+Items worth a person's attention before relying on a state: Rhode Island's and Ohio's printed calendars (taken as published; the stored text cannot show their colour coding), Virginia's and Delaware's interpretations (recorded in each profile and repeated in every result), and every profile marked as an older edition.
+
+Engine support added for these: `semiweekly`, `eighth_monthly` (also used for semi-monthly and quad-monthly), `month_threshold`, `published_calendar`, a next-banking-day override (`nextDayRule`), and the due rules `semiweekly_following`, `semimonthly_days`, `day_of_month_after_quarter`, `last_day_of_following_month`, `month_day_next_year`, and a `decemberDay` on `day_of_month_after`. A look-back amount that does not decide a schedule returns `state_frequency_not_derivable` instead of a guess. `tests/state-table.test.ts` runs every state's table rows and 1,000 randomized payroll years each.
