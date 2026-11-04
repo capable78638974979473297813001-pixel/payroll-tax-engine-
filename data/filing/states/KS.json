@@ -1,0 +1,184 @@
+{
+ "state": "KS",
+ "name": "Kansas",
+ "verifiedOn": "2026-11-04",
+ "sources": [
+  {
+   "id": "S1",
+   "title": "Kansas Withholding Tax Guide, KW-100",
+   "url": "https://www.ksrevenue.gov/pdf/kw100.pdf",
+   "revision": "KW-100 (Rev. 10-24), rates for wages paid on or after July 1, 2024",
+   "verifiedOn": "2026-11-04",
+   "verifiedBy": "read from the stored copy in watcher/state/snapshots/ks-41963fbebb.txt.gz: Filing Frequencies and Due Dates (the five-frequency chart), Completing a KW-5 (electronic requirement), the KW-3 annual return (January 31), changing frequency, and the registration item for filing frequency. THE OCTOBER 2024 EDITION: the stored copy is the Department's current KW-100 link, but it carries 2024 rates, so check for a newer edition."
+  }
+ ],
+ "agencies": {
+  "withholding": {
+   "name": "Kansas Department of Revenue",
+   "portalUrl": "https://www.ksrevenue.gov/",
+   "source": "S1"
+  }
+ },
+ "calendar": {
+  "weekendsRoll": true,
+  "holidays": {
+   "verified": false
+  },
+  "source": "S1"
+ },
+ "mandates": {
+  "efile": {
+   "text": "Kansas withholding tax reports must be filed and payment of tax made electronically.",
+   "source": "S1"
+  }
+ },
+ "withholding": {
+  "applies": true,
+  "taxLineIds": {
+   "withholding": "KS_SIT",
+   "employeeInsurance": []
+  },
+  "deposits": {
+   "kind": "assigned_frequency",
+   "rulesYear": 2024,
+   "interpretation": "Kansas assigns one of five filing frequencies by the size of the employer's ANNUAL withholding (K.S.A. 79-3298): quad-monthly above $100,000.00; semi-monthly $8,000.01 to $100,000.00; monthly $1,200.01 to $8,000.00; quarterly $200.01 to $1,200.00; annually $200.00 or less. The initial frequency comes from the estimate on the business tax application, the Department reviews deposit history each year (notices mailed about November, effective January 1), and an employer must not file more or less often than assigned, so the frequency is an INPUT or is derived from a supplied annual liability. QUAD-MONTHLY: periods end on the 7th, 15th, 21st and last day, each due within three banking days. SEMI-MONTHLY: periods 1st-15th (due the 25th of the same month) and 16th-end (due the 10th of the next month). MONTHLY: due the 15th of the next month. QUARTERLY: due April 25, July 25, October 25 and January 25. ANNUAL: due January 25. A KW-5 is filed for every period even with no tax, and the director may require more frequent payments if money may be diverted. Due dates on a weekend or legal holiday move to the next regular business day. THIS IS THE OCTOBER 2024 EDITION.",
+   "lookback": {
+    "description": "Kansas annual withholding",
+    "classes": [
+     {
+      "name": "quad_monthly",
+      "minExclusive": 10000000
+     },
+     {
+      "name": "semi_monthly",
+      "minExclusive": 800000,
+      "maxInclusive": 10000000
+     },
+     {
+      "name": "monthly",
+      "minExclusive": 120000,
+      "maxInclusive": 800000
+     },
+     {
+      "name": "quarterly",
+      "minExclusive": 20000,
+      "maxInclusive": 120000
+     },
+     {
+      "name": "annual",
+      "maxInclusive": 20000
+     }
+    ],
+    "newEmployer": "monthly"
+   },
+   "frequencies": {
+    "quad_monthly": {
+     "period": "eighth_monthly",
+     "periodEnds": [
+      7,
+      15,
+      21,
+      31
+     ],
+     "due": {
+      "kind": "business_days_after_period_end",
+      "days": 3
+     }
+    },
+    "semi_monthly": {
+     "period": "eighth_monthly",
+     "periodEnds": [
+      15,
+      31
+     ],
+     "due": {
+      "kind": "semimonthly_days",
+      "firstHalfDay": 25,
+      "secondHalfDay": 10
+     }
+    },
+    "monthly": {
+     "period": "month",
+     "due": {
+      "kind": "day_of_month_after",
+      "day": 15
+     }
+    },
+    "quarterly": {
+     "period": "quarter",
+     "due": {
+      "kind": "day_of_month_after_quarter",
+      "day": 25
+     }
+    },
+    "annual": {
+     "period": "year",
+     "due": {
+      "kind": "january_day_next_year",
+      "day": 25
+     }
+    }
+   },
+   "deposited": [
+    "withholding"
+   ],
+   "source": "S1"
+  },
+  "returns": [
+   {
+    "id": "KW-5",
+    "name": "Form KW-5, Withholding Tax Deposit Report",
+    "frequency": "monthly",
+    "due": {
+     "kind": "day_of_month_after",
+     "day": 15
+    },
+    "contents": [
+     "Filed with the payment for EACH reporting period even when no tax was withheld; annual filers still file a KW-5 for the year.",
+     "Electronically through the KDOR Customer Service Center; an amended or corrected KW-5 must be on paper.",
+     "Due dates follow the filing frequency (see the profile's deposit rules)."
+    ],
+    "source": "S1"
+   },
+   {
+    "id": "KW-3",
+    "name": "Form KW-3, Annual Withholding Tax Return and Reconciliation",
+    "frequency": "annual",
+    "due": {
+     "kind": "january_day_next_year",
+     "day": 31
+    },
+    "contents": [
+     "Due by January 31 with the W-2s and 1099s that show Kansas withholding; must be filed electronically.",
+     "Reports the total Kansas tax withheld on W-2s and 1099s, credits, and the number of forms; all KW-5 payments for the year are entered.",
+     "Employers with more than a stated number of W-2s must file them electronically (the number was not isolated)."
+    ],
+    "source": "S1"
+   }
+  ],
+  "notModelled": [
+   "Anything newer than the October 2024 edition: thresholds and forms may have changed.",
+   "Kansas unemployment insurance (Kansas Department of Labor): the guide only points to KDOL.",
+   "Kansas's legal-holiday list (weekends only are skipped, with a warning) and the meaning of 'banking days' for quad-monthly filers.",
+   "The KCSC file layouts for bulk W-2 and 1099 upload; registration steps beyond the filing-frequency item.",
+   "The Department's power to require more frequent payment."
+  ]
+ },
+ "channels": [
+  {
+   "id": "state:KS:kcsc",
+   "function": "KW-5 reports and payments, KW-3 annual return, W-2/1099 filing",
+   "description": "Kansas Department of Revenue Customer Service Center (KCSC) on ksrevenue.gov; electronic filing and payment are mandatory",
+   "enrollment": [
+    "Apply for a Kansas withholding account (Business Tax Application) giving the estimated annual withholding; the Department assigns the filing frequency and prints it on the Withholding Registration Certificate.",
+    "Register a KCSC login and add the withholding account with its access code (first-time users obtain the code from the Taxpayer Assistance Center)."
+   ],
+   "specs": "Bulk upload layouts for W-2s and 1099s: not read.",
+   "source": "S1"
+  }
+ ],
+ "notModelled": [
+  "Kansas unemployment insurance: not read.",
+  "New-hire reporting: not read."
+ ]
+}

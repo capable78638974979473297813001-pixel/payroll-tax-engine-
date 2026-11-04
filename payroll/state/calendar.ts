@@ -105,6 +105,25 @@ export function resolveDue(rule: DueRule, anchor: string, p: StateProfile, extra
     }
     case 'january_day_next_year':
       return { dueDate: roll(`${year + 1}-01-${String(rule.day).padStart(2, '0')}`) };
+    case 'semimonthly_days': {
+      const day = Number(anchor.slice(8, 10));
+      if (day <= 15) return { dueDate: roll(`${anchor.slice(0, 7)}-${String(rule.firstHalfDay).padStart(2, '0')}`) };
+      const m = month === 12 ? 1 : month + 1;
+      const y = month === 12 ? year + 1 : year;
+      return { dueDate: roll(`${y}-${String(m).padStart(2, '0')}-${String(rule.secondHalfDay).padStart(2, '0')}`) };
+    }
+    case 'day_of_month_after_quarter': {
+      const endMonth = quarterOf(anchor) * 3 + 1;
+      const y = endMonth > 12 ? year + 1 : year;
+      const m = endMonth > 12 ? 1 : endMonth;
+      return { dueDate: roll(`${y}-${String(m).padStart(2, '0')}-${String(rule.day).padStart(2, '0')}`) };
+    }
+    case 'semiweekly_following': {
+      const want = weekday(anchor) === 5 ? rule.afterFriday : rule.afterTuesday;
+      let d = addDays(anchor, 1);
+      while (weekday(d) !== want) d = addDays(d, 1);
+      return { dueDate: roll(d) };
+    }
     case 'month_day_next_year':
       return { dueDate: roll(`${year + 1}-${String(rule.month).padStart(2, '0')}-${String(rule.day).padStart(2, '0')}`) };
     case 'next_business_day': {

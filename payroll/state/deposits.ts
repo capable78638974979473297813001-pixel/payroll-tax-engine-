@@ -235,7 +235,7 @@ function rulesYearFinding(profile: StateProfile, rulesYear: number | undefined, 
   };
 }
 
-function periodKey(period: 'week_sat_fri' | 'month' | 'quarter' | 'year' | 'semiweekly_threshold' | 'published_calendar' | 'eighth_monthly', date: string, weekSplit: 'quarter' | 'year' = 'quarter'): { key: string; anchor: string } {
+function periodKey(period: 'week_sat_fri' | 'month' | 'quarter' | 'year' | 'semiweekly_threshold' | 'published_calendar' | 'eighth_monthly' | 'semiweekly', date: string, weekSplit: 'quarter' | 'year' = 'quarter'): { key: string; anchor: string } {
   const q = quarterOf(date);
   switch (period) {
     case 'week_sat_fri': {
@@ -255,6 +255,10 @@ function periodKey(period: 'week_sat_fri' | 'month' | 'quarter' | 'year' | 'semi
     case 'year':
       return { key: date.slice(0, 4), anchor: date };
     case 'semiweekly_threshold':
+    case 'semiweekly': {
+      const end = semiweeklyPeriodEnd(date);
+      return { key: end, anchor: end };
+    }
     case 'published_calendar':
     case 'eighth_monthly':
       throw new Error(`${period} periods are handled before periodKey is called`);
@@ -330,6 +334,24 @@ function analyzeAssignedFrequency(profile: StateProfile, spec: AssignedFrequency
     return { obligations: [], findings };
   }
 
+  let nextDay: StateDepositObligation[] = [];
+  if (spec.nextDayRule) {
+    const rule = spec.nextDayRule;
+    const over = days.filter((d) => d.withholding + d.employeeInsurance > rule.thresholdExclusive);
+    days = days.filter((d) => !over.includes(d));
+    nextDay = over.map((d) => ({
+      id: `${profile.state}-nextday-${d.date}`, state: profile.state, schedule: 'next_day' as StateDepositSchedule, payDates: [d.date],
+      year: Number(d.date.slice(0, 4)), quarter: quarterOf(d.date), withholding: d.withholding, employeeInsurance: d.employeeInsurance, employerUi: 0,
+      amount: d.withholding + d.employeeInsurance, dueDate: nthStateBusinessDayAfter(d.date, rule.businessDays, profile, opts.extraHolidays ?? []),
+      notes: [`More than ${fmt(rule.thresholdExclusive)} withheld for this payday: due the next banking day, whatever the frequency.`],
+    }));
+  }
+  const result = analyzeFrequencyGroups(profile, spec, f, frequency, days, opts, findings);
+  result.obligations = [...result.obligations, ...nextDay].sort((a, b) => a.dueDate.localeCompare(b.dueDate) || a.id.localeCompare(b.id));
+  return result;
+}
+
+function analyzeFrequencyGroups(profile: StateProfile, spec: AssignedFrequencySpec, f: AssignedFrequencySpec['frequencies'][string], frequency: string, days: readonly StateDay[], opts: StateDepositOptions, findings: Finding[]): StateDepositAnalysis {
   if (f.period === 'eighth_monthly') {
     const ends = f.periodEnds!;
     const groups8 = new Map<string, StateDay[]>();
@@ -347,7 +369,7 @@ function analyzeAssignedFrequency(profile: StateProfile, spec: AssignedFrequency
       const ins = sum(ds, 'employeeInsurance');
       const due = resolveDue(f.due, end, profile, opts.extraHolidays ?? []);
       out.push({
-        id: `${profile.state}-eighthmonthly-${end}`, state: profile.state, schedule: 'eighth_monthly', payDates: ds.map((d) => d.date),
+        id: `${profile.state}-eighthmonthly-${end}`, state: profile.state, schedule: 'sub_monthly', payDates: ds.map((d) => d.date),
         year: Number(end.slice(0, 4)), quarter: quarterOf(end), withholding: w, employeeInsurance: ins, employerUi: 0, amount: w + ins,
         dueDate: due.dueDate, notes: [`Eighth-monthly period ending ${end}: ${fmt(w + ins)}.`],
       });
@@ -406,7 +428,7 @@ function analyzeAssignedFrequency(profile: StateProfile, spec: AssignedFrequency
     const withholding = sum(g.days, 'withholding');
     const insurance = sum(g.days, 'employeeInsurance');
     const due = resolveDue(f.due, g.anchor, profile, extra);
-    const sched: StateDepositSchedule = f.period === 'week_sat_fri' ? 'weekly' : f.period === 'month' ? 'monthly' : f.period === 'quarter' ? 'quarterly' : 'annual';
+    const sched: StateDepositSchedule = f.period === 'week_sat_fri' ? 'weekly' : f.period === 'semiweekly' ? 'semiweekly' : f.period === 'month' ? 'monthly' : f.period === 'quarter' ? 'quarterly' : 'annual';
     obligations.push({
       id: `${profile.state}-${sched}-${key.replace('|', '-')}`, state: profile.state, schedule: sched, payDates: dates,
       year: Number(dates[0].slice(0, 4)), quarter: quarterOf(dates[0]), withholding, employeeInsurance: insurance, employerUi: 0,

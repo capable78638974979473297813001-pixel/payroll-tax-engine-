@@ -39,6 +39,12 @@ export type DueRule =
   | { kind: 'next_weekday_after_period_end'; weekday: number }
   /** A fixed day in January of the year after the anchor's year (annual filers, W-2 reconciliations). */
   | { kind: 'january_day_next_year'; day: number }
+  /** Federal-style semi-weekly: the anchor is a period end (Friday or Tuesday); due on the next `afterFriday` / `afterTuesday` weekday (0=Sunday). */
+  /** Kansas semi-monthly: the anchor is a period end; periods ending on or before the 15th are due `firstHalfDay` of the same month, later ones `secondHalfDay` of the next month. */
+  | { kind: 'semimonthly_days'; firstHalfDay: number; secondHalfDay: number }
+  /** A fixed day of the month after the quarter (Kansas quarterly: the 25th). */
+  | { kind: 'day_of_month_after_quarter'; day: number }
+  | { kind: 'semiweekly_following'; afterFriday: number; afterTuesday: number }
   /** A fixed month and day of the year after the anchor's year (Delaware's W-3 is due February 28). */
   | { kind: 'month_day_next_year'; month: number; day: number };
 
@@ -49,7 +55,7 @@ export interface Agency {
 }
 
 export type FederalDepositRule = 'next_day' | 'semiweekly' | 'monthly';
-export type StateDepositSchedule = 'next_day' | 'semiweekly' | 'weekly' | 'monthly' | 'quarterly' | 'annual' | 'eighth_monthly';
+export type StateDepositSchedule = 'next_day' | 'semiweekly' | 'weekly' | 'monthly' | 'quarterly' | 'annual' | 'sub_monthly';
 
 /**
  * How a state assigns a withholding deposit schedule from the employer's federal
@@ -98,7 +104,7 @@ export interface AssignedFrequencySpec {
     newEmployer: string;
   };
   frequencies: Record<string, {
-    period: 'week_sat_fri' | 'month' | 'quarter' | 'year' | 'semiweekly_threshold' | 'published_calendar' | 'eighth_monthly';
+    period: 'week_sat_fri' | 'month' | 'quarter' | 'year' | 'semiweekly_threshold' | 'published_calendar' | 'eighth_monthly' | 'semiweekly';
     /** For `semiweekly_threshold` the due rule is that of the REMAINDER (paid with the quarterly return). */
     due: DueRule;
     /**
@@ -128,6 +134,11 @@ export interface AssignedFrequencySpec {
     weekSplit?: 'quarter' | 'year';
   }>;
   deposited: ('withholding' | 'employeeInsurance')[];
+  /**
+   * A next-banking-day rule that overrides every frequency (Georgia): any single pay date on which MORE than
+   * this much is withheld is paid the next banking day after the payday, on its own; the rest follows the frequency.
+   */
+  nextDayRule?: { thresholdExclusive: Cents; businessDays: number };
   source: string;
 }
 

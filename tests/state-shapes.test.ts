@@ -21,6 +21,10 @@ const UT = loadProfile('UT');
 const RI = loadProfile('RI');
 const DE = loadProfile('DE');
 const ND = loadProfile('ND');
+const GA = loadProfile('GA');
+const KS = loadProfile('KS');
+const ks = (days: StateDay[], opts: Parameters<typeof analyzeStateDeposits>[3] = {}) => analyzeStateDeposits(KS, days, undefined, opts);
+const ga = (days: StateDay[], opts: Parameters<typeof analyzeStateDeposits>[3] = {}) => analyzeStateDeposits(GA, days, undefined, opts);
 const nd = (days: StateDay[], opts: Parameters<typeof analyzeStateDeposits>[3] = {}) => analyzeStateDeposits(ND, days, undefined, opts);
 const de = (days: StateDay[], opts: Parameters<typeof analyzeStateDeposits>[3] = {}) => analyzeStateDeposits(DE, days, undefined, opts);
 const ri = (days: StateDay[], opts: Parameters<typeof analyzeStateDeposits>[3] = {}) => analyzeStateDeposits(RI, days, undefined, opts);
@@ -330,7 +334,7 @@ describe('Rhode Island (2026 Withholding Tax Booklet): the agency\'s printed pay
 describe('Delaware (Employer\'s Guide, Sections 1 and 5)', () => {
   test('look-back thresholds: $6,020.00 or less quarterly; $6,020.01 to $33,460.00 monthly; $33,460.01 or more eighth-monthly', () => {
     const s = (v: number) => de([stDay('2026-08-07', 100)], { lookbackLiability: dollars(v) }).obligations[0].schedule;
-    assert.deepEqual([6020, 6020.01, 33_460, 33_460.01].map(s), ['quarterly', 'monthly', 'monthly', 'eighth_monthly']);
+    assert.deepEqual([6020, 6020.01, 33_460, 33_460.01].map(s), ['quarterly', 'monthly', 'monthly', 'sub_monthly']);
   });
   test('a new employer with no record files monthly', () => {
     const r = de([stDay('2026-08-07', 100)]);
@@ -401,6 +405,80 @@ describe('North Dakota (Income Tax Withholding & Information Returns Guideline, 
       assert.equal(r.obligations.reduce((a, o) => a + o.amount, 0), days.reduce((a, d) => a + d.withholding, 0), `seed ${seed}`);
       assert.ok(r.obligations.length <= 4, `seed ${seed}`);
       for (const o of r.obligations) assert.ok(isStateBusinessDay(o.dueDate, ND) && o.dueDate > o.payDates[o.payDates.length - 1], `seed ${seed}`);
+    }
+  });
+});
+
+describe('Georgia (2026 Employer\'s Tax Guide): semi-weekly, monthly, quarterly, annual and the One-Day Rule', () => {
+  test('semi-weekly: Wednesday to Friday paydays due the following Wednesday, Saturday to Tuesday paydays the following Friday', () => {
+    const due = (d: string) => ga([stDay(d, 1000)], { assignedFrequency: 'semiweekly' }).obligations[0].dueDate;
+    assert.deepEqual(['2026-08-05', '2026-08-06', '2026-08-07'].map(due), ['2026-08-12', '2026-08-12', '2026-08-12']);
+    assert.deepEqual(['2026-08-08', '2026-08-09', '2026-08-10', '2026-08-11'].map(due), ['2026-08-14', '2026-08-14', '2026-08-14', '2026-08-14']);
+  });
+  test('more than $50,000 in the look-back is semi-weekly, otherwise monthly', () => {
+    const s = (v: number) => ga([stDay('2026-08-07', 100)], { lookbackLiability: dollars(v) }).obligations[0].schedule;
+    assert.deepEqual([50_000, 50_000.01].map(s), ['monthly', 'semiweekly']);
+  });
+  test('monthly the 15th; quarterly and annual as the guide\'s 2026 table prints them', () => {
+    assert.deepEqual(ga([stDay('2026-08-07', 100)], { assignedFrequency: 'monthly' }).obligations.map((o) => o.dueDate), ['2026-09-15']);
+    const q = ga([stDay('2026-02-13', 10), stDay('2026-05-15', 10), stDay('2026-08-14', 10), stDay('2026-11-13', 10)], { assignedFrequency: 'quarterly' });
+    assert.deepEqual(q.obligations.map((o) => o.dueDate), ['2026-04-30', '2026-07-31', '2026-11-02', '2027-02-01']);
+    assert.deepEqual(ga([stDay('2026-03-13', 10), stDay('2026-09-11', 10)], { assignedFrequency: 'annual' }).obligations.map((o) => [o.amount, o.dueDate]), [[dollars(20), '2027-02-01']]);
+  });
+  test('the One-Day Rule: more than $100,000 for a payday is due the next banking day, whatever the frequency; $100,000 exactly is not', () => {
+    for (const f of ['semiweekly', 'monthly', 'quarterly']) {
+      const r = ga([stDay('2026-08-05', 100_000.01), stDay('2026-08-06', 100_000)], { assignedFrequency: f });
+      const next = r.obligations.filter((o) => o.schedule === 'next_day');
+      assert.deepEqual(next.map((o) => [o.payDates[0], o.dueDate]), [['2026-08-05', '2026-08-06']], f);
+      assert.equal(r.obligations.filter((o) => o.schedule !== 'next_day').reduce((a, o) => a + o.amount, 0), dollars(100_000), f);
+    }
+    const fri = ga([stDay('2026-08-07', 150_000)], { assignedFrequency: 'monthly' });
+    assert.equal(fri.obligations[0].dueDate, '2026-08-10'); // Friday payday: Monday
+  });
+  test('the EFT mandate and the payroll year: 1,000 randomized semi-weekly years conserve every dollar', () => {
+    assert.match(GA.mandates.epay!.text, /exceeds \$500\.00/);
+    for (let seed = 14000; seed < 15000; seed += 1) {
+      const days = randomDays(seed, 2026);
+      const r = ga(days, { assignedFrequency: 'semiweekly' });
+      assert.equal(r.obligations.reduce((a, o) => a + o.amount, 0), days.reduce((a, d) => a + d.withholding, 0), `seed ${seed}`);
+      for (const o of r.obligations) assert.ok(isStateBusinessDay(o.dueDate, GA) && o.dueDate > o.payDates[o.payDates.length - 1], `seed ${seed}`);
+    }
+  });
+});
+
+describe('Kansas (KW-100, Rev. 10-24): five frequencies from annual withholding', () => {
+  test('thresholds: $200.00 annual; $200.01 quarterly; $1,200.01 monthly; $8,000.01 semi-monthly; $100,000.01 quad-monthly', () => {
+    const s = (v: number) => ks([stDay('2024-08-07', 100)], { lookbackLiability: dollars(v) }).obligations[0].schedule;
+    assert.deepEqual([200, 200.01, 1200, 1200.01, 8000, 8000.01, 100_000, 100_000.01].map(s), ['annual', 'quarterly', 'quarterly', 'monthly', 'monthly', 'sub_monthly', 'sub_monthly', 'sub_monthly']);
+  });
+  test("the chart's dates: semi-monthly Jan 1-15 due Jan 25, Jan 16-31 due Feb 10", () => {
+    const r = ks([stDay('2025-01-10', 100), stDay('2025-01-20', 50), stDay('2025-02-14', 10), stDay('2025-02-18', 10)], { assignedFrequency: 'semi_monthly' });
+    assert.deepEqual(r.obligations.map((o) => [o.payDates.join('+'), o.dueDate]), [['2025-01-10', '2025-01-27'], ['2025-01-20', '2025-02-10'], ['2025-02-14', '2025-02-25'], ['2025-02-18', '2025-03-10']]);
+    // Jan 25, 2025 is a Saturday -> Monday Jan 27
+  });
+  test('Dec 16-31 is due January 10; quarterly Apr 25, Jul 25, Oct 25, Jan 25; annual Jan 25', () => {
+    assert.equal(ks([stDay('2025-12-20', 10)], { assignedFrequency: 'semi_monthly' }).obligations[0].dueDate, '2026-01-12'); // Jan 10, 2026 is a Saturday
+    const q = ks([stDay('2025-02-14', 10), stDay('2025-05-16', 10), stDay('2025-08-15', 10), stDay('2025-11-14', 10)], { assignedFrequency: 'quarterly' });
+    assert.deepEqual(q.obligations.map((o) => o.dueDate), ['2025-04-25', '2025-07-25', '2025-10-27', '2026-01-26']);
+    assert.deepEqual(ks([stDay('2025-03-14', 10)], { assignedFrequency: 'annual' }).obligations.map((o) => o.dueDate), ['2026-01-26']);
+    assert.deepEqual(ks([stDay('2025-03-14', 10)], { assignedFrequency: 'monthly' }).obligations.map((o) => o.dueDate), ['2025-04-15']);
+  });
+  test('quad-monthly periods end on the 7th, 15th, 21st and the last day, each due 3 banking days later', () => {
+    const r = ks([stDay('2025-03-03', 10), stDay('2025-03-07', 10), stDay('2025-03-10', 10), stDay('2025-03-17', 10), stDay('2025-03-24', 10), stDay('2025-03-31', 10)], { assignedFrequency: 'quad_monthly' });
+    assert.deepEqual(r.obligations.map((o) => [o.payDates.join('+'), o.dueDate]), [['2025-03-03+2025-03-07', '2025-03-12'], ['2025-03-10', '2025-03-19'], ['2025-03-17', '2025-03-26'], ['2025-03-24+2025-03-31', '2025-04-03']]);
+  });
+  test('the 2024 edition draws a rules-year warning on 2026 pay dates; the mandate is the guide\'s own words', () => {
+    assert.equal(ks([stDay('2026-03-13', 10)], { assignedFrequency: 'monthly' }).findings.some((f) => f.code === 'state_rules_year_mismatch'), true);
+    assert.match(KS.mandates.efile!.text, /filed and payment of tax made electronically/);
+  });
+  test('1,000 payroll years conserve every dollar for semi-monthly and quad-monthly', () => {
+    for (let seed = 16000; seed < 17000; seed += 1) {
+      const days = randomDays(seed, 2025);
+      for (const f of ['semi_monthly', 'quad_monthly']) {
+        const r = ks(days, { assignedFrequency: f });
+        assert.equal(r.obligations.reduce((a, o) => a + o.amount, 0), days.reduce((a, d) => a + d.withholding, 0), `seed ${seed} ${f}`);
+        for (const o of r.obligations) assert.ok(isStateBusinessDay(o.dueDate, KS) && o.dueDate > o.payDates[o.payDates.length - 1], `seed ${seed} ${f}`);
+      }
     }
   });
 });

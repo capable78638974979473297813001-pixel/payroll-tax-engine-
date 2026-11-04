@@ -2,9 +2,9 @@
 
 _Generated from `data/filing/` by `scripts/state-coverage.ts`; `tests/state-coverage.test.ts` fails if this file is stale. Do not edit by hand._
 
-**53 jurisdictions** (the 53 unemployment-tax agencies the US Department of Labor lists: 50 states, DC, Puerto Rico, US Virgin Islands). **11 have a state profile** (CA, CO, CT, DE, ND, NE, NY, RI, TX, UT, VA). The rest are **NOT MODELLED**: their own documents have not been read, and nothing is assumed about what they require. A row saying NOT MODELLED does not mean nothing is owed.
+**53 jurisdictions** (the 53 unemployment-tax agencies the US Department of Labor lists: 50 states, DC, Puerto Rico, US Virgin Islands). **13 have a state profile** (CA, CO, CT, DE, GA, KS, ND, NE, NY, RI, TX, UT, VA). The rest are **NOT MODELLED**: their own documents have not been read, and nothing is assumed about what they require. A row saying NOT MODELLED does not mean nothing is owed.
 
-Unemployment reporting modelled for 3 of 53. Withholding deposits modelled for 9, partly for 1. New-hire reporting modelled for 2.
+Unemployment reporting modelled for 3 of 53. Withholding deposits modelled for 11, partly for 1. New-hire reporting modelled for 2.
 
 **Nothing is transmitted to any state.** No state transport is connected; the sandbox rehearses and says so, and live transports refuse with the enrollment steps each profile records.
 
@@ -20,13 +20,13 @@ Unemployment reporting modelled for 3 of 53. Withholding deposits modelled for 9
 | DE | Delaware | Division of Unemployment Insurance, Department of Labor, PO Box 9950, Wilmington, DE 19809-0950 | modelled | NOT MODELLED | modelled |
 | DC | District of Columbia | Department of Employment Services, Office of Unemployment, Compensation Tax Division, 609 H Street NE, 3rd floor, Washington, DC 20001-4347 | NOT MODELLED | NOT MODELLED | NOT MODELLED |
 | FL | Florida | Unemployment Compensation Services, Agency for Workforce Innovation, 107 E. Madison St. MSC 229, Tallahassee, FL 32399-0180 | no wage income tax | NOT MODELLED | NOT MODELLED |
-| GA | Georgia | Department of Labor, 148 Andrew Young Inter Blvd, Suite 800, Atlanta, GA 30303-1732 | NOT MODELLED | NOT MODELLED | NOT MODELLED |
+| GA | Georgia | Department of Labor, 148 Andrew Young Inter Blvd, Suite 800, Atlanta, GA 30303-1732 | modelled | NOT MODELLED | NOT MODELLED |
 | HI | Hawaii | Department of Labor and Industrial Relations, 830 Punchbowl Street, Room 437, Honolulu, HI 96813-5096 | NOT MODELLED | NOT MODELLED | NOT MODELLED |
 | ID | Idaho | Department of Labor, 317 W Main Street, Boise, ID 83735-0002 | NOT MODELLED | NOT MODELLED | NOT MODELLED |
 | IL | Illinois | Department of Employment Security, 33 South State St, Chicago, IL 60603 | NOT MODELLED | NOT MODELLED | NOT MODELLED |
 | IN | Indiana | Department of Workforce Development, 10 North Senate Ave, Room SE 106, Indianapolis, IN 46204-2277 | NOT MODELLED | NOT MODELLED | NOT MODELLED |
 | IA | Iowa | Workforce Development, 1000 East Grand Avenue, Des Moines, IA 50319-0209 | NOT MODELLED | NOT MODELLED | NOT MODELLED |
-| KS | Kansas | Department of Labor, 401 SW Topeka Blvd, Topeka, KS 66603-3182 | NOT MODELLED | NOT MODELLED | NOT MODELLED |
+| KS | Kansas | Department of Labor, 401 SW Topeka Blvd, Topeka, KS 66603-3182 | modelled | NOT MODELLED | NOT MODELLED |
 | KY | Kentucky | Department for Employment Services, P. O. Box 948, Frankfort, KY 40602-0948 | NOT MODELLED | NOT MODELLED | NOT MODELLED |
 | LA | Louisiana | Louisiana Workforce Commission, PO Box 94094, Baton Rouge, LA 70804 | NOT MODELLED | NOT MODELLED | NOT MODELLED |
 | ME | Maine | Department of Labor, PO Box 259, Augusta, ME 04332-0259 | NOT MODELLED | NOT MODELLED | NOT MODELLED |
