@@ -1,7 +1,7 @@
 {
  "state": "ID",
  "name": "Idaho",
- "verifiedOn": "2026-11-04",
+ "verifiedOn": "2026-11-05",
  "sources": [
   {
    "id": "S1",
@@ -10,6 +10,14 @@
    "revision": "web page, no edition printed; stored copy checked 2026-11-04",
    "verifiedOn": "2026-11-04",
    "verifiedBy": "read from the stored copy in watcher/state/snapshots/id-882a4325e8.txt.gz: the descriptions of Form 910 (periodic return), Form 967 (annual reconciliation with W-2s), Form 96 (annual information return), electronic filing and substitute forms. The page does not state the filing frequencies or due dates of Form 910; those are on the Commission's 'Withholding filing' and 'Withholding paying' pages, which are not in the stored documents."
+  },
+  {
+   "id": "S2",
+   "title": "Idaho State Tax Commission: Withholding Due Dates and Withholding Filing (web pages)",
+   "url": "https://tax.idaho.gov/taxes/income-tax/withholding/withholding-due-dates/",
+   "revision": "web pages, no edition printed; fetched live 2026-11-05",
+   "verifiedOn": "2026-11-05",
+   "verifiedBy": "fetched directly from tax.idaho.gov on 2026-11-05 and read: Withholding Due Dates (Form 910 by filing cycle, Form 967 and W-2s, 1099s, weekend rule) and Withholding Filing (the criteria for semimonthly, monthly, quarterly and annual cycles, cycle changes by November 15, TAP, PEOs, powers of attorney) at https://tax.idaho.gov/taxes/income-tax/withholding/withholding-filing/."
   }
  ],
  "agencies": {
@@ -38,15 +46,101 @@
    "withholding": "ID_SIT",
    "employeeInsurance": []
   },
-  "returns": [],
+  "returns": [
+   {
+    "id": "910",
+    "name": "Form 910, Idaho Withholding Payment/Return",
+    "frequency": "monthly",
+    "due": {
+     "kind": "day_of_month_after",
+     "day": 20
+    },
+    "contents": [
+     "Filed for every period of the assigned cycle, with a 'zero' form if nothing was withheld, online in TAP or by paper (not both); due dates by cycle are in the profile's deposit rules."
+    ],
+    "source": "S2"
+   },
+   {
+    "id": "967",
+    "name": "Form 967, Annual Idaho Withholding Reconciliation, with W-2s",
+    "frequency": "annual",
+    "due": {
+     "kind": "january_day_next_year",
+     "day": 31
+    },
+    "contents": [
+     "Filed once a year to reconcile the withholding account whatever the Form 910 cycle; due the last day of January with the W-2s; Form 1099s are due the last day of February (Form 96 annual information return the last day of February).",
+     "Idaho requires W-2s and Form 967 electronically if the employer must file W-2s electronically for the IRS and has 10 or more employees in Idaho."
+    ],
+    "source": "S2"
+   }
+  ],
   "notModelled": [
-   "Form 967 (annual reconciliation with the W-2s) is filed once a year, online in TAP or by mail, but the page does not print its due date; none is recorded.",
-   "Form 910 filing frequencies and due dates: the page says a 910 is filed for every period (monthly, quarterly) but states no thresholds or dates, so no deposit schedule is computed. A 'zero' 910 is filed either online or by mail, not both.",
-   "Form 96, Annual Information Return, is due the last day of February.",
-   "Idaho unemployment insurance (Department of Labor): no document read.",
-   "The January 31 due date of Form 967 is assumed, not read.",
-   "Idaho's legal-holiday list."
-  ]
+   "The 12-month $300,000 test, the one-pay-period rule and the farmer rules for assigning a cycle.",
+   "Forms 1099 and the Form 96 information return (the last day of February)."
+  ],
+  "deposits": {
+   "kind": "assigned_frequency",
+   "rulesYear": 2026,
+   "interpretation": "Idaho assigns each withholding account a filing cycle effective for a full calendar year (a change request must arrive by November 15): SEMIMONTHLY if it withholds at least $25,000 a month or at least $300,000 in a 12-month period; MONTHLY if it withholds less than $25,000 a month and more than $750 a quarter, or has only one monthly pay period; QUARTERLY if it withholds $750 or less each quarter (or is a farmer who must file with the Department of Labor); ANNUAL if it withholds less than $750 a year (or is a farmer not required to file with the Department of Labor). Form 910 is due: monthly, the 20th of the month after the period; semimonthly, the 20th of the month for the 1st-15th and the 5th of the following month for the 16th-end; quarterly, the last day of the month after the quarter; annual, the last day of January. A zero payment form is required when nothing was withheld; a due date on a weekend or state holiday moves to the next business day. Tax is due by when wages were PAID. The frequency is an INPUT (the cycle assigned) or is derived from an average MONTHLY amount supplied using only the $25,000 and $250-a-month ($750 a quarter) levels; the 12-month $300,000 test, the one-pay-period rule, the farmer rules and the annual criteria are inputs.",
+   "lookback": {
+    "description": "Average monthly Idaho withholding",
+    "classes": [
+     {
+      "name": "quarterly",
+      "maxInclusive": 25000
+     },
+     {
+      "name": "monthly",
+      "minExclusive": 25000,
+      "maxInclusive": 2499999
+     },
+     {
+      "name": "semimonthly",
+      "minExclusive": 2499999
+     }
+    ],
+    "newEmployer": "quarterly"
+   },
+   "frequencies": {
+    "quarterly": {
+     "period": "quarter",
+     "due": {
+      "kind": "last_day_of_month_after_quarter"
+     }
+    },
+    "monthly": {
+     "period": "month",
+     "due": {
+      "kind": "day_of_month_after",
+      "day": 20
+     }
+    },
+    "semimonthly": {
+     "period": "eighth_monthly",
+     "periodEnds": [
+      15,
+      31
+     ],
+     "due": {
+      "kind": "semimonthly_days",
+      "firstHalfDay": 20,
+      "secondHalfDay": 5
+     }
+    },
+    "annual": {
+     "period": "year",
+     "due": {
+      "kind": "january_day_next_year",
+      "day": 31
+     }
+    }
+   },
+   "deposited": [
+    "withholding"
+   ],
+   "source": "S2"
+  }
  },
  "channels": [
   {

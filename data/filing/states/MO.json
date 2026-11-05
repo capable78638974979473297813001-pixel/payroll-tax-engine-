@@ -1,7 +1,7 @@
 {
  "state": "MO",
  "name": "Missouri",
- "verifiedOn": "2026-11-04",
+ "verifiedOn": "2026-11-05",
  "sources": [
   {
    "id": "S1",
@@ -10,6 +10,14 @@
    "revision": "web page, no edition printed; stored copy checked 2026-11-04",
    "verifiedOn": "2026-11-04",
    "verifiedBy": "read from the stored copy in watcher/state/snapshots/mo-a8348dd409.txt.gz: the MO-941 requirement, MyTax Missouri, the timely compensation deduction, the electronic mandate for quarter-monthly filers, and the pointer to a list of due dates for all filing frequencies (not stored)."
+  },
+  {
+   "id": "S2",
+   "title": "State of Missouri Employer's Tax Guide, Form 4282 (Revised 03-2026), and Form 2414W (Revised 12-2025) 2026 Quarter-Monthly Withholding Payment Due Dates",
+   "url": "https://dor.mo.gov/forms/4282_2026.pdf",
+   "revision": "Form 4282 Revised 03-2026; Form 2414W Revised 12-2025",
+   "verifiedOn": "2026-11-05",
+   "verifiedBy": "fetched directly from dor.mo.gov on 2026-11-05 and read: the guide's section 11 (monthly, quarterly and annual filing requirements), section 12 (quarter-monthly: eligibility, the periods, the 90% payment, the guide's own example), the Employer Withholding Tax Due Dates table, and Form 2414W (https://dor.mo.gov/forms/2414W_2026.pdf): the 48 quarter-monthly payment due dates for 2026, the monthly and quarterly return due dates, and the electronic requirement. The guide's example ($12,000 payroll January 15 -> $10,800 due January 21; $15,000 payroll January 31 -> $13,500 due February 4) is a test."
   }
  ],
  "agencies": {
@@ -28,8 +36,12 @@
  },
  "mandates": {
   "epay": {
-   "text": "The Director of Revenue has mandated that effective January 1, 2004, all employers subject to the requirement of quarter-monthly filing must file and pay withholding tax electronically.",
-   "source": "S1"
+   "text": "All employers subject to the requirement of quarter-monthly filing must file and pay employer withholding tax electronically (Section 143.225, RSMo).",
+   "source": "S2"
+  },
+  "efile": {
+   "text": "Section 143.591, RSMo requires employers with 250 or more employees to submit the Transmittal of Tax Statements (Form MO W-3) and accompanying Forms W-2 electronically, in the SSA EFW2 format with Missouri modifications, by January 31.",
+   "source": "S2"
   }
  },
  "withholding": {
@@ -38,15 +50,478 @@
    "withholding": "MO_SIT",
    "employeeInsurance": []
   },
-  "returns": [],
+  "returns": [
+   {
+    "id": "MO-941",
+    "name": "Form MO-941, Employer's Return of Income Taxes Withheld",
+    "frequency": "monthly",
+    "due": {
+     "kind": "day_of_month_after",
+     "day": 15
+    },
+    "contents": [
+     "Filed for every period of the assigned frequency even if nothing was withheld; one per period; quarter-monthly filers file a MO-941 for the month after making their quarter-monthly payments, to reconcile.",
+     "The due dates are the Department's printed 2026 dates (see the deposit rules); the compensation deduction of 2%, 1% and 1/2% of withholding is allowed only when the return is filed and paid on time.",
+     "E-file through MyTax Missouri or on paper; a zero return can be filed online."
+    ],
+    "source": "S2"
+   },
+   {
+    "id": "MO-W-3",
+    "name": "Form MO W-3, Transmittal of Tax Statements, with Forms W-2",
+    "frequency": "annual",
+    "due": {
+     "kind": "january_day_next_year",
+     "day": 31
+    },
+    "contents": [
+     "Employers with 250 or more employees submit it and the W-2s electronically in the SSA EFW2 format with Missouri modifications by January 31; a secure upload method is provided by the Department."
+    ],
+    "source": "S2"
+   }
+  ],
   "notModelled": [
-   "Form MO-941 (Employer's Withholding Tax Income Return) is required for every period even with no withholding, filed through MyTax Missouri; its due dates are on a list that is not stored, so none is recorded.",
-   "Missouri's filing frequencies (quarter-monthly, monthly, quarterly, annual) and every payment due date: the FAQ says 'click here for a current list of due dates for all filing frequencies', which is not in the stored documents, so no deposit schedule is computed.",
-   "The timely compensation deduction an employer may take when MO-941 is filed and paid on time: 2% of withholding up to $5,000 of year-to-date tax, 1% from $5,001 to $10,000, 1/2% over $10,000 (not applied here).",
-   "Missouri unemployment insurance (Division of Employment Security): no document read.",
-   "St. Louis and Kansas City earnings taxes: separate agencies, not modelled.",
-   "Missouri's legal-holiday list."
-  ]
+   "Option 1 of the guide for quarter-monthly payers (100% of the Department's estimated amount).",
+   "The 10% remainder is rounded in the employer's favour here; the guide says 'at least 90 percent'.",
+   "Any year other than 2026 for due dates.",
+   "The ACH credit TXP addenda (Form 4585) layouts."
+  ],
+  "deposits": {
+   "kind": "assigned_frequency",
+   "rulesYear": 2026,
+   "interpretation": "Missouri has four frequencies, each from the withholding of the PRECEDING months, so the frequency is an INPUT (what the Department assigned; a new employer is assigned from its own estimate) and is never derived: QUARTER-MONTHLY if the employer withheld $9,000 or more in each of at least two months of the prior 12 (must pay electronically); MONTHLY if $500 a month for at least two months of the prior 12; QUARTERLY if at least $100 in at least one of the prior four quarters; ANNUAL if under $100 in each of the prior four quarters. The Department prints its 2026 due dates, which this profile holds as the agency's calendar (other years draw state_calendar_not_published): MONTHLY returns Feb 17, Mar 16, Apr 30, May 15, Jun 15, Jul 31, Aug 17, Sep 15, Nov 2, Nov 16, Dec 15 and Feb 1, 2027 for January to December wages; QUARTERLY returns Apr 30, Jul 31, Nov 2 and Feb 1, 2027; ANNUAL February 1, 2027. QUARTER-MONTHLY: the periods are the 1st-7th, 8th-15th, 16th-22nd and 23rd-end of each month; an employer pays AT LEAST 90% of the actual tax of each period within three banking days after it (the 48 printed dates), no payment for a period with no payroll, and any additional tax for the month is paid by the due date of the monthly return (here: 10% of each period, rounded down in the employer's favour, is added to the monthly return). Option 1 of the guide (paying 100% of an estimated amount set by the Department) is not modelled.",
+   "lookback": {
+    "description": "None: the frequency depends on several months of prior withholding",
+    "classes": [],
+    "newEmployer": "monthly"
+   },
+   "frequencies": {
+    "quarter_monthly": {
+     "period": "published_calendar",
+     "due": {
+      "kind": "next_business_day"
+     },
+     "calendar": [
+      {
+       "from": "2026-01-01",
+       "to": "2026-01-07",
+       "due": "2026-01-12"
+      },
+      {
+       "from": "2026-01-08",
+       "to": "2026-01-15",
+       "due": "2026-01-21"
+      },
+      {
+       "from": "2026-01-16",
+       "to": "2026-01-22",
+       "due": "2026-01-27"
+      },
+      {
+       "from": "2026-01-23",
+       "to": "2026-01-31",
+       "due": "2026-02-04"
+      },
+      {
+       "from": "2026-02-01",
+       "to": "2026-02-07",
+       "due": "2026-02-11"
+      },
+      {
+       "from": "2026-02-08",
+       "to": "2026-02-15",
+       "due": "2026-02-19"
+      },
+      {
+       "from": "2026-02-16",
+       "to": "2026-02-22",
+       "due": "2026-02-25"
+      },
+      {
+       "from": "2026-02-23",
+       "to": "2026-02-28",
+       "due": "2026-03-04"
+      },
+      {
+       "from": "2026-03-01",
+       "to": "2026-03-07",
+       "due": "2026-03-11"
+      },
+      {
+       "from": "2026-03-08",
+       "to": "2026-03-15",
+       "due": "2026-03-18"
+      },
+      {
+       "from": "2026-03-16",
+       "to": "2026-03-22",
+       "due": "2026-03-25"
+      },
+      {
+       "from": "2026-03-23",
+       "to": "2026-03-31",
+       "due": "2026-04-03"
+      },
+      {
+       "from": "2026-04-01",
+       "to": "2026-04-07",
+       "due": "2026-04-10"
+      },
+      {
+       "from": "2026-04-08",
+       "to": "2026-04-15",
+       "due": "2026-04-20"
+      },
+      {
+       "from": "2026-04-16",
+       "to": "2026-04-22",
+       "due": "2026-04-27"
+      },
+      {
+       "from": "2026-04-23",
+       "to": "2026-04-30",
+       "due": "2026-05-05"
+      },
+      {
+       "from": "2026-05-01",
+       "to": "2026-05-07",
+       "due": "2026-05-12"
+      },
+      {
+       "from": "2026-05-08",
+       "to": "2026-05-15",
+       "due": "2026-05-20"
+      },
+      {
+       "from": "2026-05-16",
+       "to": "2026-05-22",
+       "due": "2026-05-28"
+      },
+      {
+       "from": "2026-05-23",
+       "to": "2026-05-31",
+       "due": "2026-06-03"
+      },
+      {
+       "from": "2026-06-01",
+       "to": "2026-06-07",
+       "due": "2026-06-10"
+      },
+      {
+       "from": "2026-06-08",
+       "to": "2026-06-15",
+       "due": "2026-06-18"
+      },
+      {
+       "from": "2026-06-16",
+       "to": "2026-06-22",
+       "due": "2026-06-25"
+      },
+      {
+       "from": "2026-06-23",
+       "to": "2026-06-30",
+       "due": "2026-07-06"
+      },
+      {
+       "from": "2026-07-01",
+       "to": "2026-07-07",
+       "due": "2026-07-10"
+      },
+      {
+       "from": "2026-07-08",
+       "to": "2026-07-15",
+       "due": "2026-07-20"
+      },
+      {
+       "from": "2026-07-16",
+       "to": "2026-07-22",
+       "due": "2026-07-27"
+      },
+      {
+       "from": "2026-07-23",
+       "to": "2026-07-31",
+       "due": "2026-08-05"
+      },
+      {
+       "from": "2026-08-01",
+       "to": "2026-08-07",
+       "due": "2026-08-12"
+      },
+      {
+       "from": "2026-08-08",
+       "to": "2026-08-15",
+       "due": "2026-08-19"
+      },
+      {
+       "from": "2026-08-16",
+       "to": "2026-08-22",
+       "due": "2026-08-26"
+      },
+      {
+       "from": "2026-08-23",
+       "to": "2026-08-31",
+       "due": "2026-09-03"
+      },
+      {
+       "from": "2026-09-01",
+       "to": "2026-09-07",
+       "due": "2026-09-10"
+      },
+      {
+       "from": "2026-09-08",
+       "to": "2026-09-15",
+       "due": "2026-09-18"
+      },
+      {
+       "from": "2026-09-16",
+       "to": "2026-09-22",
+       "due": "2026-09-25"
+      },
+      {
+       "from": "2026-09-23",
+       "to": "2026-09-30",
+       "due": "2026-10-05"
+      },
+      {
+       "from": "2026-10-01",
+       "to": "2026-10-07",
+       "due": "2026-10-13"
+      },
+      {
+       "from": "2026-10-08",
+       "to": "2026-10-15",
+       "due": "2026-10-20"
+      },
+      {
+       "from": "2026-10-16",
+       "to": "2026-10-22",
+       "due": "2026-10-27"
+      },
+      {
+       "from": "2026-10-23",
+       "to": "2026-10-31",
+       "due": "2026-11-04"
+      },
+      {
+       "from": "2026-11-01",
+       "to": "2026-11-07",
+       "due": "2026-11-12"
+      },
+      {
+       "from": "2026-11-08",
+       "to": "2026-11-15",
+       "due": "2026-11-18"
+      },
+      {
+       "from": "2026-11-16",
+       "to": "2026-11-22",
+       "due": "2026-11-25"
+      },
+      {
+       "from": "2026-11-23",
+       "to": "2026-11-30",
+       "due": "2026-12-03"
+      },
+      {
+       "from": "2026-12-01",
+       "to": "2026-12-07",
+       "due": "2026-12-10"
+      },
+      {
+       "from": "2026-12-08",
+       "to": "2026-12-15",
+       "due": "2026-12-18"
+      },
+      {
+       "from": "2026-12-16",
+       "to": "2026-12-22",
+       "due": "2026-12-28"
+      },
+      {
+       "from": "2026-12-23",
+       "to": "2026-12-31",
+       "due": "2027-01-06"
+      }
+     ],
+     "percent": 90,
+     "remainderCalendar": [
+      {
+       "from": "2026-01-01",
+       "to": "2026-01-31",
+       "due": "2026-02-17"
+      },
+      {
+       "from": "2026-02-01",
+       "to": "2026-02-28",
+       "due": "2026-03-16"
+      },
+      {
+       "from": "2026-03-01",
+       "to": "2026-03-31",
+       "due": "2026-04-30"
+      },
+      {
+       "from": "2026-04-01",
+       "to": "2026-04-30",
+       "due": "2026-05-15"
+      },
+      {
+       "from": "2026-05-01",
+       "to": "2026-05-31",
+       "due": "2026-06-15"
+      },
+      {
+       "from": "2026-06-01",
+       "to": "2026-06-30",
+       "due": "2026-07-31"
+      },
+      {
+       "from": "2026-07-01",
+       "to": "2026-07-31",
+       "due": "2026-08-17"
+      },
+      {
+       "from": "2026-08-01",
+       "to": "2026-08-31",
+       "due": "2026-09-15"
+      },
+      {
+       "from": "2026-09-01",
+       "to": "2026-09-30",
+       "due": "2026-11-02"
+      },
+      {
+       "from": "2026-10-01",
+       "to": "2026-10-31",
+       "due": "2026-11-16"
+      },
+      {
+       "from": "2026-11-01",
+       "to": "2026-11-30",
+       "due": "2026-12-15"
+      },
+      {
+       "from": "2026-12-01",
+       "to": "2026-12-31",
+       "due": "2027-02-01"
+      }
+     ]
+    },
+    "monthly": {
+     "period": "published_calendar",
+     "due": {
+      "kind": "next_business_day"
+     },
+     "calendar": [
+      {
+       "from": "2026-01-01",
+       "to": "2026-01-31",
+       "due": "2026-02-17"
+      },
+      {
+       "from": "2026-02-01",
+       "to": "2026-02-28",
+       "due": "2026-03-16"
+      },
+      {
+       "from": "2026-03-01",
+       "to": "2026-03-31",
+       "due": "2026-04-30"
+      },
+      {
+       "from": "2026-04-01",
+       "to": "2026-04-30",
+       "due": "2026-05-15"
+      },
+      {
+       "from": "2026-05-01",
+       "to": "2026-05-31",
+       "due": "2026-06-15"
+      },
+      {
+       "from": "2026-06-01",
+       "to": "2026-06-30",
+       "due": "2026-07-31"
+      },
+      {
+       "from": "2026-07-01",
+       "to": "2026-07-31",
+       "due": "2026-08-17"
+      },
+      {
+       "from": "2026-08-01",
+       "to": "2026-08-31",
+       "due": "2026-09-15"
+      },
+      {
+       "from": "2026-09-01",
+       "to": "2026-09-30",
+       "due": "2026-11-02"
+      },
+      {
+       "from": "2026-10-01",
+       "to": "2026-10-31",
+       "due": "2026-11-16"
+      },
+      {
+       "from": "2026-11-01",
+       "to": "2026-11-30",
+       "due": "2026-12-15"
+      },
+      {
+       "from": "2026-12-01",
+       "to": "2026-12-31",
+       "due": "2027-02-01"
+      }
+     ]
+    },
+    "quarterly": {
+     "period": "published_calendar",
+     "due": {
+      "kind": "next_business_day"
+     },
+     "calendar": [
+      {
+       "from": "2026-01-01",
+       "to": "2026-03-31",
+       "due": "2026-04-30"
+      },
+      {
+       "from": "2026-04-01",
+       "to": "2026-06-30",
+       "due": "2026-07-31"
+      },
+      {
+       "from": "2026-07-01",
+       "to": "2026-09-30",
+       "due": "2026-11-02"
+      },
+      {
+       "from": "2026-10-01",
+       "to": "2026-12-31",
+       "due": "2027-02-01"
+      }
+     ]
+    },
+    "annual": {
+     "period": "published_calendar",
+     "due": {
+      "kind": "next_business_day"
+     },
+     "calendar": [
+      {
+       "from": "2026-01-01",
+       "to": "2026-12-31",
+       "due": "2027-02-01"
+      }
+     ]
+    }
+   },
+   "deposited": [
+    "withholding"
+   ],
+   "source": "S2"
+  }
  },
  "channels": [
   {
@@ -58,7 +533,7 @@
     "A professional employer organization co-employing workers affects account closure; see the FAQ."
    ],
    "specs": "Not read.",
-   "source": "S1"
+   "source": "S2"
   }
  ],
  "notModelled": [

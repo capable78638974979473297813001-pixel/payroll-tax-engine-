@@ -4,7 +4,7 @@ _Generated from `data/filing/` by `scripts/state-coverage.ts`; `tests/state-cove
 
 **53 jurisdictions** (the 53 unemployment-tax agencies the US Department of Labor lists: 50 states, DC, Puerto Rico, US Virgin Islands). **53 have a state profile** (AK, AL, AR, AZ, CA, CO, CT, DC, DE, FL, GA, HI, IA, ID, IL, IN, KS, KY, LA, MA, MD, ME, MI, MN, MO, MS, MT, NC, ND, NE, NH, NJ, NM, NV, NY, OH, OK, OR, PA, PR, RI, SC, SD, TN, TX, UT, VA, VI, VT, WA, WI, WV, WY). The rest are **NOT MODELLED**: their own documents have not been read, and nothing is assumed about what they require. A row saying NOT MODELLED does not mean nothing is owed.
 
-Unemployment reporting modelled for 13 of 53. Withholding deposits modelled for 34, partly for 10. New-hire reporting modelled for 2.
+Unemployment reporting modelled for 13 of 53. Withholding deposits modelled for 42, partly for 2. New-hire reporting modelled for 2.
 
 **Nothing is transmitted to any state.** No state transport is connected; the sandbox rehearses and says so, and live transports refuse with the enrollment steps each profile records.
 
@@ -22,31 +22,31 @@ Unemployment reporting modelled for 13 of 53. Withholding deposits modelled for 
 | FL | Florida | Unemployment Compensation Services, Agency for Workforce Innovation, 107 E. Madison St. MSC 229, Tallahassee, FL 32399-0180 | no wage income tax | modelled | NOT MODELLED |
 | GA | Georgia | Department of Labor, 148 Andrew Young Inter Blvd, Suite 800, Atlanta, GA 30303-1732 | modelled | NOT MODELLED | NOT MODELLED |
 | HI | Hawaii | Department of Labor and Industrial Relations, 830 Punchbowl Street, Room 437, Honolulu, HI 96813-5096 | modelled | NOT MODELLED | NOT MODELLED |
-| ID | Idaho | Department of Labor, 317 W Main Street, Boise, ID 83735-0002 | partial | NOT MODELLED | NOT MODELLED |
+| ID | Idaho | Department of Labor, 317 W Main Street, Boise, ID 83735-0002 | modelled | NOT MODELLED | NOT MODELLED |
 | IL | Illinois | Department of Employment Security, 33 South State St, Chicago, IL 60603 | modelled | NOT MODELLED | NOT MODELLED |
 | IN | Indiana | Department of Workforce Development, 10 North Senate Ave, Room SE 106, Indianapolis, IN 46204-2277 | modelled | NOT MODELLED | NOT MODELLED |
-| IA | Iowa | Workforce Development, 1000 East Grand Avenue, Des Moines, IA 50319-0209 | partial | NOT MODELLED | NOT MODELLED |
+| IA | Iowa | Workforce Development, 1000 East Grand Avenue, Des Moines, IA 50319-0209 | modelled | NOT MODELLED | NOT MODELLED |
 | KS | Kansas | Department of Labor, 401 SW Topeka Blvd, Topeka, KS 66603-3182 | modelled | NOT MODELLED | NOT MODELLED |
 | KY | Kentucky | Department for Employment Services, P. O. Box 948, Frankfort, KY 40602-0948 | modelled | NOT MODELLED | NOT MODELLED |
-| LA | Louisiana | Louisiana Workforce Commission, PO Box 94094, Baton Rouge, LA 70804 | partial | NOT MODELLED | NOT MODELLED |
+| LA | Louisiana | Louisiana Workforce Commission, PO Box 94094, Baton Rouge, LA 70804 | modelled | NOT MODELLED | NOT MODELLED |
 | ME | Maine | Department of Labor, PO Box 259, Augusta, ME 04332-0259 | modelled | NOT MODELLED | NOT MODELLED |
-| MD | Maryland | Department of Labor, Licensing, & Regulation, 1100 North Eutaw St,, Room 414, Baltimore, MD 21201-2201 | partial | NOT MODELLED | NOT MODELLED |
+| MD | Maryland | Department of Labor, Licensing, & Regulation, 1100 North Eutaw St,, Room 414, Baltimore, MD 21201-2201 | modelled | NOT MODELLED | NOT MODELLED |
 | MA | Massachusetts | Division of Employment and Training, 19 Staniford Street, Boston, MA 02114-2589 | modelled | NOT MODELLED | NOT MODELLED |
 | MI | Michigan | Department of Licensing and Regulatory Affairs, 3024 W Grand Blvd, Detroit, MI 48202-6024 | modelled | NOT MODELLED | NOT MODELLED |
 | MN | Minnesota | Department of Employment & Economic Development, 332 Minnesota Street, Suite E200, St. Paul, MN 55101-1351 | modelled | NOT MODELLED | NOT MODELLED |
 | MS | Mississippi | Department of Employment Security, PO Box 1699, Jackson, MS | modelled | NOT MODELLED | NOT MODELLED |
-| MO | Missouri | Division of Employment Security, PO Box 59, Jefferson City, MO 65104-0059 | partial | NOT MODELLED | NOT MODELLED |
+| MO | Missouri | Division of Employment Security, PO Box 59, Jefferson City, MO 65104-0059 | modelled | NOT MODELLED | NOT MODELLED |
 | MT | Montana | Unemployment Insurance Division, PO Box 6339, Helena, MT 59604-6339 | modelled | NOT MODELLED | NOT MODELLED |
 | NE | Nebraska | Department of Labor, Box 94600, State House Station, Lincoln, NE 68509-4600 | modelled | NOT MODELLED | NOT MODELLED |
 | NV | Nevada | Department of Employment Training and Rehabilitation, 500 East Third Street, Carson City, NV 89713-0030 | no wage income tax | modelled | NOT MODELLED |
 | NH | New Hampshire | Department of Employment Security, 32 South Main Street, Concord, NH 03301-4857 | no wage income tax | modelled | NOT MODELLED |
 | NJ | New Jersey | Department of Labor & Workforce Development, PO Box 947, Trenton, NJ 08625-0947 | modelled | NOT MODELLED | NOT MODELLED |
-| NM | New Mexico | Department of Workforce Solutions, PO Box 2281, Albuquerque, NM 87103-2281 | partial | NOT MODELLED | NOT MODELLED |
-| NY | New York | Department of Labor, State Campus, Building 12, Room 500, Albany, NY 12240-0339 | partial | modelled | NOT MODELLED |
+| NM | New Mexico | Department of Workforce Solutions, PO Box 2281, Albuquerque, NM 87103-2281 | modelled | NOT MODELLED | NOT MODELLED |
+| NY | New York | Department of Labor, State Campus, Building 12, Room 500, Albany, NY 12240-0339 | modelled | modelled | NOT MODELLED |
 | NC | North Carolina | Employment Security Commission, PO Box 26504, Raleigh, NC 27611-6504 | modelled | NOT MODELLED | NOT MODELLED |
 | ND | North Dakota | Job Service of North Dakota, PO Box 5507, Bismarck, ND 58506-5507 | modelled | NOT MODELLED | NOT MODELLED |
 | OH | Ohio | Department of Job & Family Services, PO Box 182404, Columbus, OH 43218-2404 | modelled | NOT MODELLED | NOT MODELLED |
-| OK | Oklahoma | Employment Security Commission, PO Box 52003, Oklahoma City, OK 73152-2003 | partial | NOT MODELLED | NOT MODELLED |
+| OK | Oklahoma | Employment Security Commission, PO Box 52003, Oklahoma City, OK 73152-2003 | modelled | NOT MODELLED | NOT MODELLED |
 | OR | Oregon | Employment Department, 875 Union Street NE, Room 107, Salem, OR 97311-0030 | modelled | NOT MODELLED | NOT MODELLED |
 | PA | Pennsylvania | Dept of Labor and Industry, 7th and Forster Street, Room 915, Harrisburg, PA 17121-0001 | modelled | NOT MODELLED | NOT MODELLED |
 | PR | Puerto Rico | Department of Labor and Human Resources, PO Box 1020, San Juan, PR 000919 | partial | modelled | NOT MODELLED |

@@ -235,7 +235,7 @@ function rulesYearFinding(profile: StateProfile, rulesYear: number | undefined, 
   };
 }
 
-function periodKey(period: 'week_sat_fri' | 'month' | 'quarter' | 'year' | 'semiweekly_threshold' | 'published_calendar' | 'eighth_monthly' | 'semiweekly' | 'month_threshold' | 'follow_federal' | 'period_threshold', date: string, weekSplit: 'quarter' | 'year' = 'quarter'): { key: string; anchor: string } {
+function periodKey(period: 'week_sat_fri' | 'month' | 'quarter' | 'year' | 'semiweekly_threshold' | 'published_calendar' | 'eighth_monthly' | 'semiweekly' | 'month_threshold' | 'follow_federal' | 'period_threshold' | 'paydate_threshold' | 'week_threshold', date: string, weekSplit: 'quarter' | 'year' = 'quarter'): { key: string; anchor: string } {
   const q = quarterOf(date);
   switch (period) {
     case 'week_sat_fri': {
@@ -265,6 +265,8 @@ function periodKey(period: 'week_sat_fri' | 'month' | 'quarter' | 'year' | 'semi
     case 'month_threshold':
     case 'follow_federal':
     case 'period_threshold':
+    case 'paydate_threshold':
+    case 'week_threshold':
       throw new Error(`${period} periods are handled before periodKey is called`);
   }
 }
@@ -275,8 +277,10 @@ function periodKey(period: 'week_sat_fri' | 'month' | 'quarter' | 'year' | 'semi
  * threshold is due `bankingDays` banking days after the close. Whatever is left at quarter end is the remainder
  * paid with the quarterly return.
  */
-function semiweeklyThresholdObligations(profile: StateProfile, f: { thresholdExclusive?: Cents; bankingDays?: number; periodEnds?: number[]; due: AssignedFrequencySpec['frequencies'][string]['due'] }, days: readonly StateDay[], extra: readonly string[]): StateDepositObligation[] {
+function semiweeklyThresholdObligations(profile: StateProfile, f: { period?: string; thresholdExclusive?: Cents; bankingDays?: number; periodEnds?: number[]; due: AssignedFrequencySpec['frequencies'][string]['due'] }, days: readonly StateDay[], extra: readonly string[]): StateDepositObligation[] {
   const endOf = (date: string): string => {
+    if (f.period === 'paydate_threshold') return date;
+    if (f.period === 'week_threshold') return addDays(date, 6 - weekday(date));
     if (!f.periodEnds) return semiweeklyPeriodEnd(date);
     const last = Number(lastDayOfMonthIso(date).slice(8, 10));
     const day = Number(date.slice(8, 10));
@@ -299,9 +303,10 @@ function semiweeklyThresholdObligations(profile: StateProfile, f: { thresholdExc
       const w = sum(pending, 'withholding');
       const ins = sum(pending, 'employeeInsurance');
       if (w + ins > f.thresholdExclusive!) {
-        const dueDate = nthStateBusinessDayAfter(end, f.bankingDays!, profile, extra);
+        const dueAnchor = f.period === 'week_threshold' ? pending[pending.length - 1].date : end;
+        const dueDate = nthStateBusinessDayAfter(dueAnchor, f.bankingDays!, profile, extra);
         out.push({
-          id: `${profile.state}-semiweekly-${end}`, state: profile.state, schedule: f.periodEnds ? 'sub_monthly' : 'semiweekly', payDates: pending.map((d) => d.date),
+          id: `${profile.state}-semiweekly-${end}`, state: profile.state, schedule: f.periodEnds || f.period === 'paydate_threshold' ? 'sub_monthly' : f.period === 'week_threshold' ? 'weekly' : 'semiweekly', payDates: pending.map((d) => d.date),
           year: Number(qkey.slice(0, 4)), quarter: quarterOf(pending[0].date), withholding: w, employeeInsurance: ins, employerUi: 0, amount: w + ins,
           dueDate, notes: [`Semi-weekly period closing ${end}: ${fmt(w + ins)} accumulated, more than ${fmt(f.thresholdExclusive!)}, due ${f.bankingDays} banking days later.`],
         });
@@ -474,22 +479,49 @@ function analyzeFrequencyGroups(profile: StateProfile, spec: AssignedFrequencySp
       findings.push({ severity: 'error', code: 'state_calendar_not_published', message: `${profile.state}: pay dates in ${y} fall outside the agency's published ${frequency} calendar held in the profile, so no due date is computed for them. Read that year's calendar from the agency and add it; nothing is extrapolated.` });
     }
     const out: StateDepositObligation[] = [];
+    const remainders = new Map<number, { days: StateDay[]; rest: Cents }>();
     for (const [i, ds] of byRow) {
       const r = rows[i];
       const w = sum(ds, 'withholding');
       const ins = sum(ds, 'employeeInsurance');
-      const sched: StateDepositSchedule = frequency.includes('week') ? 'weekly' : frequency.includes('twice') || frequency.includes('semi') ? 'sub_monthly' : frequency.includes('month') ? 'monthly' : frequency.includes('quarter') ? 'quarterly' : 'annual';
+      if (f.percent !== undefined) {
+        const total = w + ins;
+        const paid = Math.min(total, Math.ceil((total * f.percent) / 100));
+        const rest = total - paid;
+        const rem = f.remainderCalendar ?? [];
+        const j = rem.findIndex((x) => ds[0].date >= x.from && ds[0].date <= x.to);
+        if (rest > 0) {
+          if (j < 0) findings.push({ severity: 'error', code: 'state_calendar_not_published', message: `${profile.state}: pay date ${ds[0].date} has no published return date for the remainder of the quarter-monthly tax.` });
+          else { const e = remainders.get(j) ?? { days: [], rest: 0 }; e.days.push(...ds); e.rest += rest; remainders.set(j, e); }
+        }
+        const sched: StateDepositSchedule = 'sub_monthly';
+        out.push({
+          id: `${profile.state}-${sched}-${r.from}`, state: profile.state, schedule: sched, payDates: ds.map((d) => d.date),
+          year: Number(r.from.slice(0, 4)), quarter: quarterOf(r.from), withholding: Math.min(w, paid), employeeInsurance: Math.max(0, paid - w), employerUi: 0, amount: paid,
+          dueDate: r.due, notes: [`${f.percent}% of ${fmt(total)} withheld ${r.from} to ${r.to}, due ${r.due} per the agency's published calendar; the remaining ${fmt(rest)} goes with the periodic return.`],
+        });
+        continue;
+      }
+      const sched: StateDepositSchedule = frequency.includes('week') ? 'weekly' : frequency.includes('annual') ? 'annual' : frequency.includes('twice') || frequency.includes('semi') ? 'sub_monthly' : frequency.includes('month') ? 'monthly' : frequency.includes('quarter') ? 'quarterly' : 'annual';
       out.push({
         id: `${profile.state}-${sched}-${r.from}`, state: profile.state, schedule: sched, payDates: ds.map((d) => d.date),
         year: Number(r.from.slice(0, 4)), quarter: quarterOf(r.from), withholding: w, employeeInsurance: ins, employerUi: 0, amount: w + ins,
         dueDate: f.rollPrintedDates ? onOrNextStateBusinessDay(r.due, profile, opts.extraHolidays ?? []) : r.due, notes: [`${frequency} remitter: ${fmt(w + ins)} for pay dates ${r.from} to ${r.to}, printed due date ${r.due}${f.rollPrintedDates ? ' (moved to the next business day if it falls on a weekend or holiday)' : ''}, per the agency's published calendar.`],
       });
     }
+    for (const [j, e] of remainders) {
+      const x = (f.remainderCalendar ?? [])[j];
+      out.push({
+        id: `${profile.state}-remainder-${x.from}`, state: profile.state, schedule: 'monthly', payDates: [...new Set(e.days.map((d) => d.date))].sort(),
+        year: Number(x.from.slice(0, 4)), quarter: quarterOf(x.from), withholding: e.rest, employeeInsurance: 0, employerUi: 0, amount: e.rest, dueDate: x.due,
+        notes: [`The balance of ${x.from} to ${x.to} withholding after the ${f.percent}% quarter-monthly payments, paid with the periodic return.`],
+      });
+    }
     out.sort((a, b) => a.dueDate.localeCompare(b.dueDate) || a.id.localeCompare(b.id));
     return { obligations: out, findings };
   }
 
-  if (f.period === 'semiweekly_threshold' || f.period === 'period_threshold') {
+  if (f.period === 'semiweekly_threshold' || f.period === 'period_threshold' || f.period === 'paydate_threshold' || f.period === 'week_threshold') {
     const obligations = semiweeklyThresholdObligations(profile, f, days, opts.extraHolidays ?? []);
     obligations.sort((a, b) => a.dueDate.localeCompare(b.dueDate) || a.id.localeCompare(b.id));
     return { obligations, findings };

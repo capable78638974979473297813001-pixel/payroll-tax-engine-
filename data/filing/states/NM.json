@@ -1,7 +1,7 @@
 {
  "state": "NM",
  "name": "New Mexico",
- "verifiedOn": "2026-11-04",
+ "verifiedOn": "2026-11-05",
  "sources": [
   {
    "id": "S1",
@@ -10,6 +10,14 @@
    "revision": "FYI-104 REV. 11/2025, effective January 1, 2026",
    "verifiedOn": "2026-11-04",
    "verifiedBy": "read from the stored copy in watcher/state/snapshots/nm-f855813bdb.txt.gz: the HB 218 notice, How to Report and Pay Withholding Taxes, Required Quarterly Withholding Report (TRD-41431), Annual Withholding Statements. The publication refers to the form instructions for the payment due dates of the TRD-41414, which are not stored."
+  },
+  {
+   "id": "S2",
+   "title": "New Mexico TRD-41414 Instructions (07/01/2026) and TAP FAQs on TRD-41431",
+   "url": "https://realfile.tax.newmexico.gov/trd-41414ins.pdf",
+   "revision": "TRD-41414 Ins 07/01/2026",
+   "verifiedOn": "2026-11-05",
+   "verifiedBy": "fetched directly from realfile.tax.newmexico.gov on 2026-11-05 and read: 'When and where to file and pay' (each return due on or before the 25th of the month following the end of the tax period, next business day if a weekend or holiday; monthly, quarterly or semiannual status from the registration certificate; the semi-annual table; the electronic mandate), and the TAP FAQ (https://www.tax.newmexico.gov/individuals/wp-content/uploads/sites/5/2026/05/TAP-FAQs-on-Workers-Compensation-Fee-Return-and-Employees-Quarterly-Wage-and-Withholding-Report.pdf: the TRD-41431 is e-file mandated and due the 25th after the quarter, the first due April 25, 2026; bulk file in TAP; TRD-41414 is a separate return)."
   }
  ],
  "agencies": {
@@ -30,6 +38,10 @@
   "efile": {
    "text": "The withholding report, as well as the withholding tax returns and any withholding statements required to be submitted to the Department, are all now required to be submitted electronically.",
    "source": "S1"
+  },
+  "epay": {
+   "text": "TRD-41414 is mandated for electronic filing of tax return and electronic payment of taxes due. The following electronic methods of remitting tax payments will be accepted: credit card, ACH Debit and ACH Credit.",
+   "source": "S2"
   }
  },
  "withholding": {
@@ -39,6 +51,20 @@
    "employeeInsurance": []
   },
   "returns": [
+   {
+    "id": "TRD-41414",
+    "name": "Form TRD-41414, Wage Withholding Tax Return",
+    "frequency": "quarterly",
+    "due": {
+     "kind": "day_of_month_after_quarter",
+     "day": 25
+    },
+    "contents": [
+     "Due on or before the 25th of the month following the end of the tax period; monthly, quarterly or semiannual per the registration certificate; a return (even a zero return) is required for every period.",
+     "Filed through TAP (tap.state.nm.us); a paper return is allowed only with an e-file exception or waiver; non-wage withholding is a separate return, TRD-41409."
+    ],
+    "source": "S2"
+   },
    {
     "id": "TRD-41431",
     "name": "TRD-41431, Workers Compensation Fee Return and Employees Quarterly Wage and Withholding Report",
@@ -70,11 +96,68 @@
    }
   ],
   "notModelled": [
-   "The payment due dates and frequency of the Wage Withholding Tax Return (TRD-41414): the publication says 'consult the form instructions', which are not in the stored documents, so no deposit schedule is computed. A return (even a zero return) is required for every period.",
-   "New Mexico unemployment insurance (Department of Workforce Solutions): no document read.",
-   "New Mexico's legal-holiday list.",
-   "Publication FYI-330 and the TAP file layouts."
-  ]
+   "Seasonal, temporary and special event filers' monthly periods (the instructions' table).",
+   "The annual statements' date: the FYI-104 (11/2025) says the last day of January, the Department's withholding page says the last day of February; the earlier date is recorded."
+  ],
+  "deposits": {
+   "kind": "assigned_frequency",
+   "rulesYear": 2026,
+   "interpretation": "New Mexico assigns a MONTHLY, QUARTERLY or SEMIANNUAL filing status, shown on the employer's registration certificate (seasonal, temporary and special event filers use monthly), so the frequency is an INPUT and is never derived. Each Form TRD-41414 is due on or before the 25th of the month following the end of the tax period: monthly, the 25th of the next month; quarterly, the 25th of the month after the quarter (April 25, July 25, October 25, January 25); semiannual, January-June due July 25 and July-December due January 25. A due date on a weekend, or a legal, state or national holiday, moves to the next business day. Filing and payment are electronic (credit card, ACH debit and ACH credit); an e-file exception or waiver can be requested. TRD-41414 is a separate return from the quarterly TRD-41431 wage and withholding report.",
+   "lookback": {
+    "description": "None: the Department assigns the status",
+    "classes": [],
+    "newEmployer": "monthly"
+   },
+   "frequencies": {
+    "monthly": {
+     "period": "month",
+     "due": {
+      "kind": "day_of_month_after",
+      "day": 25
+     }
+    },
+    "quarterly": {
+     "period": "quarter",
+     "due": {
+      "kind": "day_of_month_after_quarter",
+      "day": 25
+     }
+    },
+    "semiannual": {
+     "period": "published_calendar",
+     "due": {
+      "kind": "next_business_day"
+     },
+     "rollPrintedDates": true,
+     "calendar": [
+      {
+       "from": "2026-01-01",
+       "to": "2026-06-30",
+       "due": "2026-07-25"
+      },
+      {
+       "from": "2026-07-01",
+       "to": "2026-12-31",
+       "due": "2027-01-25"
+      },
+      {
+       "from": "2027-01-01",
+       "to": "2027-06-30",
+       "due": "2027-07-25"
+      },
+      {
+       "from": "2027-07-01",
+       "to": "2027-12-31",
+       "due": "2028-01-25"
+      }
+     ]
+    }
+   },
+   "deposited": [
+    "withholding"
+   ],
+   "source": "S2"
+  }
  },
  "channels": [
   {

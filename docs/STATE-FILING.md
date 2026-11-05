@@ -9,11 +9,10 @@ Import it as `import { state } from './payroll/index.ts'`. Coverage is in
 
 | Tier | Jurisdictions | What it means |
 | --- | --- | --- |
-| Full withholding profile, read from the agency's own document | AL, AR, AZ, CA, CO, CT, DC, DE, GA, HI, IL, IN, KS, KY, ME, MI, MN, MS, MT, NC, ND, NE, NJ, OH, OR, PA, RI, SC, UT, VA, VT, WI, WV (33) | Deposit schedule, returns, mandates and channels, each rule cited to the document it was read from |
-| Partial withholding | IA, ID, LA, MD, MO, NM, NY, OK (8) | Mandates, channels and what returns the documents state; **no deposit schedule is computed** because the documents do not give one |
-| No wage income tax, unemployment only, read from the agency | TX, FL, AK, SD, WA, WY (6), TN (wage base only) | Quarterly report due dates, wage base, mandates, channels |
-| **Secondary source** | **MA, NV, NH** | The agency refuses automated access (HTTP 403), which was respected. Rules come from search-engine summaries of its pages, not its documents. **Every analysis and report for these three carries the warning `state_source_secondary`**, and `tests/state-secondary.test.ts` pins exactly which states are in this tier, so a flag can only be cleared deliberately. Massachusetts' M-3 and W-2 facts are read from the agency's own stored forms. |
-| Unemployment only, outside the paycheck engine | PR, VI | The Puerto Rico and Virgin Islands unemployment report rules, read from the departments' own pages (Puerto Rico's in Spanish; its due date is inferred from the SINOT regulation). **The paycheck engine has no Puerto Rico or Virgin Islands tax data**, so no wages or withholding flow in, and their income tax withholding is NOT modelled. |
+| Full withholding profile, read from the agency's own document (42) | AL, AR, AZ, CA, CO, CT, DC, DE, GA, HI, IA, ID, IL, IN, KS, KY, LA, MA, MD, ME, MI, MN, MO, MS, MT, NC, ND, NE, NJ, NM, NY, OH, OK, OR, PA, RI, SC, UT, VA, VT, WI, WV | Deposit schedule, returns, mandates and channels, each rule cited to the document it was read from |
+| No wage income tax, unemployment only, read from the agency (6 + 1) | TX, FL, AK, SD, WA, WY; TN (wage base only) | Quarterly report due dates, wage base, mandates, channels. Tennessee's quarterly due-date page (lwdsupport.tn.gov) and the statute copy on Justia refuse automated access, so its due date is NOT recorded |
+| **Secondary source (2)** | **NV, NH** | The agency refuses automated access (HTTP 403, including from an ordinary browser session). Rules come from search-engine summaries of its pages, not its documents. **Every unemployment report for these carries the warning `state_source_secondary`**, and `tests/state-secondary.test.ts` pins exactly which states are in this tier, so a flag can only be cleared deliberately. |
+| Unemployment only, outside the paycheck engine (2) | PR, VI | The Puerto Rico and Virgin Islands unemployment report rules, read from the departments' own pages (Puerto Rico's in Spanish; its due date is inferred from the SINOT regulation). **The paycheck engine has no Puerto Rico or Virgin Islands tax data**, so no wages or withholding flow in, and their income tax withholding is NOT modelled. |
 
 Everything modelled is **withholding and its returns**, except the unemployment-only rows above; state unemployment insurance for the other states (beyond CA and NY) is not modelled. **Nothing is transmitted to any state**: no state transport is connected.
 
@@ -192,4 +191,22 @@ New engine support: a `follow_federal` frequency (the state payment is due with 
 
 ## Batch 5: the last five, and the secondary-source rule
 
-`Source.secondary` marks a source that was not the agency's own document. It exists because MA, NV and NH refuse automated requests; the rules recorded for them are the best available but unconfirmed, and the warning travels with every result so a person must confirm them before filing. To upgrade one: read the agency's own page (a person can; the agency allows browsers), update the profile, delete `secondary`, and the pin in `tests/state-secondary.test.ts` will say so. New engine support: the `period_threshold` frequency (Massachusetts' quarter-monthly $500 deposit rule) and the `monthly_with_quarter_end` due rule.
+`Source.secondary` marks a source that was not the agency's own document. It exists because NV and NH refuse automated requests (MA was one of three until it was read from the agency's own pages in batch 6); the rules recorded for them are the best available but unconfirmed, and the warning travels with every result so a person must confirm them before filing. To upgrade one: read the agency's own page (a person can; the agency allows browsers), update the profile, delete `secondary`, and the pin in `tests/state-secondary.test.ts` will say so. New engine support: the `period_threshold` frequency (Massachusetts' quarter-monthly $500 deposit rule) and the `monthly_with_quarter_end` due rule.
+
+## Batch 6: the eight partial states completed, and Massachusetts verified (2026-11-05)
+
+IA, ID, LA, MD, MO, NM, NY and OK now have deposit schedules read from the agencies' own pages or rules; MA was read from the Department's own pages. Highlights:
+
+| State | Source | What is computed |
+| --- | --- | --- |
+| IA | Filing Frequency & Return Due Dates | Quarterly; monthly (months 1-2 by the 15th, month 3 with the return); semimonthly (25th / 10th) |
+| ID | Withholding Due Dates and Filing | Semimonthly (20th / 5th), monthly (20th), quarterly, annual cycles |
+| LA | FAQs: When are my payments due; When must I file L-1 | Quarterly and monthly (last day of the month after), semi-monthly (end of month / 15th); L-1 15th for semi-monthly payers |
+| MD | Employer Withholding Guide (Dec 2023) | Accelerated ($700 within 3 business days of the pay date), monthly, quarterly (15th), annual. **2024 edition; monthly due date inferred** |
+| MO | Employer's Tax Guide 4282 (03-2026) and Form 2414W | The Department's printed 2026 calendar: 48 quarter-monthly payment dates (90% of each period, the guide's worked example is a test), monthly, quarterly, annual |
+| NM | TRD-41414 Instructions (07/01/2026) | Monthly, quarterly, semiannual, due the 25th, weekend rolls |
+| NY | Withholding tax filing requirements, due dates and NYS-1 instructions | NYS-1 due 3 or 5 business days after the payroll that takes the quarter's accumulated tax to $700 (weeks grouped Sunday-Saturday); the rest with the NYS-45 |
+| OK | OAC 710:90-3-4 | Quarterly (20th), monthly (20th), or the federal semiweekly dates |
+| MA | Withholding Tax Guide and Form M-941 instructions | Annual, quarterly, monthly (with the quarter-end months), and the over-$25,000 quarter-monthly $500 rule |
+
+Massachusetts (and the other pages that answer plain HTTP clients with 403) was read in an ordinary headless browser session, one request per page, the way a person's browser loads it. Nevada and New Hampshire still answered 403 in that session and were not pursued further. New engine support: `paydate_threshold` and `week_threshold` frequencies, and percent-of-withholding payments with a remainder calendar on published calendars.

@@ -142,11 +142,61 @@ ROWS.push(
   { name: 'look-back: more than $1,000 a month is an early filer', state: 'IN', opts: { lookbackLiability: 1000.01 }, pays: [['2026-04-10', 100]], expect: [['monthly', 100, '2026-05-20']] },
 );
 
-// Massachusetts (SECONDARY source: a search summary of mass.gov; every result carries state_source_secondary)
+// Massachusetts (Withholding Tax Guide and Form M-941 instructions, read from mass.gov on 2026-11-05)
 ROWS.push(
   { name: 'projected annual withholding: $100 annual, $101 quarterly, $1,201 monthly, over $25,000 accelerated', state: 'MA', opts: { lookbackLiability: 100 }, pays: [['2026-03-13', 40]], expect: [['annual', 40, '2027-02-01']] },
   { name: 'quarterly: the last day of the month after the quarter', state: 'MA', opts: { assignedFrequency: 'quarterly' }, pays: [['2026-02-13', 10], ['2026-08-14', 10]], expect: [['quarterly', 10, '2026-04-30'], ['quarterly', 10, '2026-11-02']] },
   { name: 'monthly: the 15th, but March, June, September and December wages are due the last day of the following month', state: 'MA', opts: { assignedFrequency: 'monthly' }, pays: [['2026-02-13', 10], ['2026-03-13', 10], ['2026-06-12', 10], ['2026-12-11', 10]], expect: [['monthly', 10, '2026-03-16'], ['monthly', 10, '2026-04-30'], ['monthly', 10, '2026-07-31'], ['monthly', 10, '2027-02-01']] },
   { name: 'accelerated: $500 or more at the 7th, 15th, 22nd or last day is paid within 3 business days; less carries forward', state: 'MA', opts: { assignedFrequency: 'accelerated' }, pays: [['2026-08-03', 300], ['2026-08-07', 250], ['2026-08-10', 499.99], ['2026-08-14', 100]], expect: [['sub_monthly', 550, '2026-08-12'], ['sub_monthly', 599.99, '2026-08-19']] },
   { name: 'accelerated: exactly $500 is paid; $499.99 is not (it waits for the quarterly return)', state: 'MA', opts: { assignedFrequency: 'accelerated' }, pays: [['2026-09-04', 500], ['2026-09-08', 499.99]], expect: [['sub_monthly', 500, '2026-09-10'], ['quarterly', 499.99, '2026-11-02']] },
+);
+
+// Iowa (Filing Frequency & Return Due Dates page)
+ROWS.push(
+  { name: 'quarterly: the last day of the month after the quarter; annual tax under $6,000', state: 'IA', opts: { lookbackLiability: 5999.99 }, pays: [['2026-02-13', 10]], expect: [['quarterly', 10, '2026-04-30']] },
+  { name: 'monthly: months 1 and 2 by the 15th of the following month; month 3 with the quarterly return', state: 'IA', opts: { assignedFrequency: 'monthly' }, pays: [['2026-07-10', 100], ['2026-08-14', 200], ['2026-09-11', 300]], expect: [['monthly', 100, '2026-08-17'], ['monthly', 200, '2026-09-15'], ['quarterly', 300, '2026-11-02']] },
+  { name: 'semimonthly: 1st-15th due the 25th, 16th-end due the 10th of the next month, the sixth payment the 10th after the quarter', state: 'IA', opts: { assignedFrequency: 'semimonthly' }, pays: [['2026-08-12', 10], ['2026-08-28', 20], ['2026-12-30', 5]], expect: [['sub_monthly', 10, '2026-08-25'], ['sub_monthly', 20, '2026-09-10'], ['sub_monthly', 5, '2027-01-11']] },
+);
+
+// Idaho (Withholding Due Dates and Withholding Filing pages)
+ROWS.push(
+  { name: 'monthly: the 20th of the month after the period', state: 'ID', opts: { assignedFrequency: 'monthly' }, pays: [['2026-03-13', 100]], expect: [['monthly', 100, '2026-04-20']] },
+  { name: 'semimonthly: the 1st-15th due the 20th of that month, the 16th-end due the 5th of the next', state: 'ID', opts: { assignedFrequency: 'semimonthly' }, pays: [['2026-03-12', 10], ['2026-03-27', 20]], expect: [['sub_monthly', 10, '2026-03-20'], ['sub_monthly', 20, '2026-04-06']] }, // Apr 5, 2026 is a Sunday
+  { name: 'quarterly and annual: the last day of the month after the quarter; the last day of January', state: 'ID', opts: { assignedFrequency: 'quarterly' }, pays: [['2026-02-13', 10]], expect: [['quarterly', 10, '2026-04-30']] },
+  { name: 'annual filers: the last day of January', state: 'ID', opts: { assignedFrequency: 'annual' }, pays: [['2026-03-13', 10]], expect: [['annual', 10, '2027-02-01']] },
+);
+
+// Louisiana (FAQs: When are my payments due?)
+ROWS.push(
+  { name: 'quarterly: the last day of the month after the quarter', state: 'LA', opts: { assignedFrequency: 'quarterly' }, pays: [['2026-05-15', 10]], expect: [['quarterly', 10, '2026-07-31']] },
+  { name: 'monthly: the last day of the month after the month', state: 'LA', opts: { assignedFrequency: 'monthly' }, pays: [['2026-02-13', 10]], expect: [['monthly', 10, '2026-03-31']] },
+  { name: 'semi-monthly: 1st-15th due the end of the same month, 16th-end due the 15th of the next', state: 'LA', opts: { assignedFrequency: 'semimonthly' }, pays: [['2026-03-12', 10], ['2026-03-27', 20]], expect: [['sub_monthly', 10, '2026-03-31'], ['sub_monthly', 20, '2026-04-15']] },
+  { name: 'average monthly under $500 quarterly; $500 monthly; $5,000 semi-monthly', state: 'LA', opts: { lookbackLiability: 5000 }, pays: [['2026-03-12', 10]], expect: [['sub_monthly', 10, '2026-03-31']] },
+);
+
+// Maryland (Employer Withholding Guide, effective January 2024)
+ROWS.push(
+  { name: 'accelerated: $700 or more accumulated is due 3 business days after the pay date; less carries to the next pay date', state: 'MD', opts: { assignedFrequency: 'accelerated' }, pays: [['2026-08-07', 699.99], ['2026-08-14', 100], ['2026-08-21', 700]], expect: [['sub_monthly', 799.99, '2026-08-19'], ['sub_monthly', 700, '2026-08-26']] },
+  { name: 'quarterly returns: the 15th of the month after the quarter; annual: the last day of January', state: 'MD', opts: { assignedFrequency: 'quarterly' }, pays: [['2026-02-13', 10], ['2026-05-15', 10]], expect: [['quarterly', 10, '2026-04-15'], ['quarterly', 10, '2026-07-15']] },
+);
+
+// Missouri (Employer's Tax Guide 4282 Rev. 03-2026 and Form 2414W): the Department's own dates and its worked example
+ROWS.push(
+  { name: "the guide's example: $12,000 on Jan 15 -> $10,800 due Jan 21; $15,000 on Jan 31 -> $13,500 due Feb 4 (the balance goes with the monthly return Feb 17)", state: 'MO', opts: { assignedFrequency: 'quarter_monthly' }, pays: [['2026-01-15', 12000], ['2026-01-30', 15000]], expect: [['sub_monthly', 10800, '2026-01-21'], ['sub_monthly', 13500, '2026-02-04'], ['monthly', 2700, '2026-02-17']] },
+  { name: 'monthly returns as printed: January Feb 17, March Apr 30, September Nov 2, December Feb 1 2027', state: 'MO', opts: { assignedFrequency: 'monthly' }, pays: [['2026-01-09', 10], ['2026-03-13', 10], ['2026-09-11', 10], ['2026-12-11', 10]], expect: [['monthly', 10, '2026-02-17'], ['monthly', 10, '2026-04-30'], ['monthly', 10, '2026-11-02'], ['monthly', 10, '2027-02-01']] },
+  { name: 'quarterly and annual as printed', state: 'MO', opts: { assignedFrequency: 'quarterly' }, pays: [['2026-02-13', 10], ['2026-08-14', 10]], expect: [['quarterly', 10, '2026-04-30'], ['quarterly', 10, '2026-11-02']] },
+  { name: 'annual: February 1, 2027', state: 'MO', opts: { assignedFrequency: 'annual' }, pays: [['2026-03-13', 10]], expect: [['annual', 10, '2027-02-01']] },
+);
+
+// New Mexico (TRD-41414 Instructions 07/01/2026)
+ROWS.push(
+  { name: 'monthly: the 25th of the following month (Aug 25, 2026 is a Tuesday)', state: 'NM', opts: { assignedFrequency: 'monthly' }, pays: [['2026-07-10', 100]], expect: [['monthly', 100, '2026-08-25']] },
+  { name: 'quarterly: the 25th of the month after the quarter (Oct 25, 2026 is a Sunday -> Monday)', state: 'NM', opts: { assignedFrequency: 'quarterly' }, pays: [['2026-08-14', 100]], expect: [['quarterly', 100, '2026-10-26']] },
+  { name: 'semiannual: January-June due July 25 (a Saturday -> Monday July 27), July-December due January 25, 2027', state: 'NM', opts: { assignedFrequency: 'semiannual' }, pays: [['2026-03-13', 10], ['2026-10-09', 20]], expect: [['annual', 10, '2026-07-27'], ['annual', 20, '2027-01-25']] },
+);
+
+// Oklahoma (OAC 710:90-3-4)
+ROWS.push(
+  { name: 'under $500 a quarter on average: remit by the 20th of the month after the quarter', state: 'OK', opts: { lookbackLiability: 499.99 }, pays: [['2026-02-13', 100], ['2026-08-14', 50]], expect: [['quarterly', 100, '2026-04-20'], ['quarterly', 50, '2026-10-20']] },
+  { name: 'over $500: monthly, due the 20th of each succeeding month', state: 'OK', opts: { assignedFrequency: 'monthly' }, pays: [['2026-08-07', 100], ['2026-09-11', 70]], expect: [['monthly', 100, '2026-09-21'], ['monthly', 70, '2026-10-20']] },
 );

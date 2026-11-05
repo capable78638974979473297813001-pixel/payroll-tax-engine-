@@ -28,6 +28,7 @@ const MN = loadProfile('MN');
 const NJ = loadProfile('NJ');
 const SC = loadProfile('SC');
 const AZ = loadProfile('AZ');
+const OKP = loadProfile('OK');
 const nj = (days: StateDay[], opts: Parameters<typeof analyzeStateDeposits>[3] = {}) => analyzeStateDeposits(NJ, days, undefined, opts);
 const mn = (days: StateDay[], opts: Parameters<typeof analyzeStateDeposits>[3] = {}) => analyzeStateDeposits(MN, days, undefined, opts);
 const ks = (days: StateDay[], opts: Parameters<typeof analyzeStateDeposits>[3] = {}) => analyzeStateDeposits(KS, days, undefined, opts);
@@ -617,6 +618,19 @@ describe('Arizona (Employer Withholding Filing Obligations; WTP 16-1): quarterly
   test('annual is an input: January 31; the EFT mandate is the page\'s words', () => {
     assert.deepEqual(analyzeStateDeposits(AZ, [stDay('2026-03-13', 20)], undefined, { assignedFrequency: 'annual' }).obligations.map((o) => o.dueDate), ['2027-02-01']);
     assert.match(AZ.mandates.epay!.text, /\$500 or more/);
+  });
+});
+
+describe('Oklahoma (OAC 710:90-3-4): employers on the federal semiweekly schedule pay Oklahoma on the same dates', () => {
+  const fedDay = (date: string, total: number) => ({ date, federalIncomeTax: total, socialSecurityEmployee: 0, socialSecurityEmployer: 0, medicareEmployee: 0, medicareEmployer: 0, additionalMedicare: 0, total, wagesSubjectToIncomeTax: 0, socialSecurityWages: 0, medicareWages: 0, additionalMedicareWages: 0, employeeIds: [] as string[] });
+  test('a Wednesday payday is due the following Wednesday, a Saturday payday the following Friday', () => {
+    const pays: [string, number, number][] = [['2026-08-05', 90, 40_000], ['2026-08-08', 30, 40_000]];
+    const federal = analyzeDeposits(pays.map(([d, , f]) => fedDay(d, dollars(f))), { startingSchedule: 'semiweekly' });
+    const r = analyzeStateDeposits(OKP, pays.map(([d, s]) => stDay(d, s)), federal, { assignedFrequency: 'federal' });
+    assert.deepEqual(r.obligations.map((o) => [o.amount, o.dueDate]), [[dollars(90), '2026-08-12'], [dollars(30), '2026-08-14']]);
+  });
+  test('the quarterly return is due the 20th after the quarter whatever the remittance schedule', () => {
+    assert.deepEqual(withholdingReturnDates(OKP, '2026-08-01').map((r) => [r.id, r.due.dueDate]).slice(0, 1), [['WTH-10001', '2026-10-20']]);
   });
 });
 

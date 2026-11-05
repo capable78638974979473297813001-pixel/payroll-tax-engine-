@@ -115,7 +115,7 @@ export interface AssignedFrequencySpec {
     newEmployer: string;
   };
   frequencies: Record<string, {
-    period: 'week_sat_fri' | 'month' | 'quarter' | 'year' | 'semiweekly_threshold' | 'published_calendar' | 'eighth_monthly' | 'semiweekly' | 'month_threshold' | 'follow_federal' | 'period_threshold';
+    period: 'week_sat_fri' | 'month' | 'quarter' | 'year' | 'semiweekly_threshold' | 'published_calendar' | 'eighth_monthly' | 'semiweekly' | 'month_threshold' | 'follow_federal' | 'period_threshold' | 'paydate_threshold' | 'week_threshold';
     /** For `semiweekly_threshold` the due rule is that of the REMAINDER (paid with the quarterly return). */
     due: DueRule;
     /**
@@ -133,6 +133,13 @@ export interface AssignedFrequencySpec {
     calendar?: { from: string; to: string; due: string }[];
     /** `published_calendar` only: the agency's printed dates are day-of-month dates with no weekend rule printed (Kentucky); roll a date on a weekend or holiday to the next business day. Leave unset when the dates are already adjusted. */
     rollPrintedDates?: boolean;
+    /**
+     * `published_calendar` only (Missouri quarter-monthly): the payment due on each calendar row is only this percent of
+     * the tax withheld in the row (rounded up to the cent); the rest is paid with the periodic return, whose dates are the
+     * rows of `remainderCalendar` (by pay date).
+     */
+    percent?: number;
+    remainderCalendar?: { from: string; to: string; due: string }[];
     /**
      * `follow_federal` (Arizona): the state payment is due at the same time as the employer's FEDERAL deposit for the same
      * pay dates, whatever the state amount. The federal deposit analysis must be supplied; its due dates are used as they are.
@@ -287,7 +294,7 @@ export function validateProfile(p: StateProfile): string[] {
       if (!d.frequencies[d.lookback.newEmployer]) bad.push(`withholding.deposits: new-employer frequency ${d.lookback.newEmployer} is not defined`);
       for (const c of d.lookback.classes) if (!d.frequencies[c.name]) bad.push(`withholding.deposits: look-back class ${c.name} has no frequency`);
       for (const [n, f] of Object.entries(d.frequencies)) {
-        if (f.period === 'month_threshold' && !((f.thresholdExclusive ?? 0) > 0 && (f.monthlyDueDay ?? 0) >= 1)) bad.push(`withholding.deposits.frequencies.${n}: month_threshold needs a positive threshold and monthlyDueDay`);
+        if (f.period === 'month_threshold' && !(f.thresholdExclusive !== undefined && f.thresholdExclusive >= 0 && (f.monthlyDueDay ?? 0) >= 1)) bad.push(`withholding.deposits.frequencies.${n}: month_threshold needs a positive threshold and monthlyDueDay`);
         if (f.period === 'eighth_monthly') {
           const e = f.periodEnds ?? [];
           if (e.length < 2 || e.some((x, i) => x < 1 || x > 31 || (i > 0 && x <= e[i - 1])) || e[e.length - 1] !== 31) bad.push(`withholding.deposits.frequencies.${n}: periodEnds must ascend and end with 31 (the last day)`);
@@ -300,6 +307,7 @@ export function validateProfile(p: StateProfile): string[] {
             if (i > 0 && !(rows[i - 1].to < r.from)) bad.push(`withholding.deposits.frequencies.${n}.calendar[${i}]: overlaps or is out of order`);
           });
         }
+        if ((f.period === 'paydate_threshold' || f.period === 'week_threshold') && !((f.thresholdExclusive ?? 0) > 0 && (f.bankingDays ?? 0) >= 1)) bad.push(`withholding.deposits.frequencies.${n}: ${f.period} needs a positive threshold and bankingDays`);
         if (f.period === 'period_threshold' && !((f.thresholdExclusive ?? 0) > 0 && (f.bankingDays ?? 0) >= 1 && (f.periodEnds ?? []).length >= 2)) bad.push(`withholding.deposits.frequencies.${n}: period_threshold needs a positive threshold, bankingDays and periodEnds`);
         if (f.period === 'semiweekly_threshold' && !((f.thresholdExclusive ?? 0) > 0 && (f.bankingDays ?? 0) >= 1)) bad.push(`withholding.deposits.frequencies.${n}: semiweekly_threshold needs a positive threshold and bankingDays`);
       }
