@@ -57,12 +57,12 @@ describe('coverage: every jurisdiction is accounted for', () => {
       assert.ok(x.agencyLines.length > 0 && x.website, x.code);
     }
   });
-  test('forty-two states are modelled (eight only partly, Texas has no wage income tax); every other row says NOT MODELLED rather than implying nothing is owed', () => {
-    assert.deepEqual(modelledStates(), ['AL', 'AR', 'AZ', 'CA', 'CO', 'CT', 'DC', 'DE', 'GA', 'HI', 'IA', 'ID', 'IL', 'IN', 'KS', 'KY', 'LA', 'MD', 'ME', 'MI', 'MN', 'MO', 'MS', 'MT', 'NC', 'ND', 'NE', 'NJ', 'NM', 'NY', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC', 'TX', 'UT', 'VA', 'VT', 'WI', 'WV']);
+  test('forty-eight states are modelled (eight only partly; Texas, Florida, Tennessee, Alaska, South Dakota, Washington and Wyoming have no wage income tax); every other row says NOT MODELLED rather than implying nothing is owed', () => {
+    assert.deepEqual(modelledStates(), ['AK', 'AL', 'AR', 'AZ', 'CA', 'CO', 'CT', 'DC', 'DE', 'FL', 'GA', 'HI', 'IA', 'ID', 'IL', 'IN', 'KS', 'KY', 'LA', 'MD', 'ME', 'MI', 'MN', 'MO', 'MS', 'MT', 'NC', 'ND', 'NE', 'NJ', 'NM', 'NY', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC', 'SD', 'TN', 'TX', 'UT', 'VA', 'VT', 'WA', 'WI', 'WV', 'WY']);
     const c = coverage();
     assert.equal(c.length, 53);
     for (const row of c) {
-      if (['AL', 'AR', 'AZ', 'CA', 'CO', 'CT', 'DC', 'DE', 'GA', 'HI', 'IA', 'ID', 'IL', 'IN', 'KS', 'KY', 'LA', 'MD', 'ME', 'MI', 'MN', 'MO', 'MS', 'MT', 'NC', 'ND', 'NE', 'NJ', 'NM', 'NY', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC', 'TX', 'UT', 'VA', 'VT', 'WI', 'WV'].includes(row.code)) assert.equal(row.modelled, true);
+      if (['AK', 'AL', 'AR', 'AZ', 'CA', 'CO', 'CT', 'DC', 'DE', 'FL', 'GA', 'HI', 'IA', 'ID', 'IL', 'IN', 'KS', 'KY', 'LA', 'MD', 'ME', 'MI', 'MN', 'MO', 'MS', 'MT', 'NC', 'ND', 'NE', 'NJ', 'NM', 'NY', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC', 'SD', 'TN', 'TX', 'UT', 'VA', 'VT', 'WA', 'WI', 'WV', 'WY'].includes(row.code)) assert.equal(row.modelled, true);
       else {
         assert.equal(row.modelled, false, row.code);
         assert.equal(row.functions.ui, 'NOT MODELLED', row.code);
@@ -82,8 +82,8 @@ describe('coverage: every jurisdiction is accounted for', () => {
     assert.equal(by.CT.ui, 'NOT MODELLED'); // Connecticut's guide covers withholding only
   });
   test('an unmodelled state throws NOT MODELLED instead of returning an empty profile', () => {
-    assert.equal(hasProfile('WY'), false);
-    assert.throws(() => loadProfile('WY'), /NOT MODELLED/);
+    assert.equal(hasProfile('NV'), false);
+    assert.throws(() => loadProfile('NV'), /NOT MODELLED/);
   });
 });
 
@@ -319,7 +319,7 @@ describe('a full year of REAL engine pay runs in each pilot state', () => {
 
 describe('state filings run through the shared lifecycle, and nothing is transmitted', () => {
   test('every modelled state registers its channels, each with enrollment and a "not read" specification', () => {
-    assert.deepEqual(registerAllStateChannels(), ['AL', 'AR', 'AZ', 'CA', 'CO', 'CT', 'DC', 'DE', 'GA', 'HI', 'IA', 'ID', 'IL', 'IN', 'KS', 'KY', 'LA', 'MD', 'ME', 'MI', 'MN', 'MO', 'MS', 'MT', 'NC', 'ND', 'NE', 'NJ', 'NM', 'NY', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC', 'TX', 'UT', 'VA', 'VT', 'WI', 'WV']);
+    assert.deepEqual(registerAllStateChannels(), ['AK', 'AL', 'AR', 'AZ', 'CA', 'CO', 'CT', 'DC', 'DE', 'FL', 'GA', 'HI', 'IA', 'ID', 'IL', 'IN', 'KS', 'KY', 'LA', 'MD', 'ME', 'MI', 'MN', 'MO', 'MS', 'MT', 'NC', 'ND', 'NE', 'NJ', 'NM', 'NY', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC', 'SD', 'TN', 'TX', 'UT', 'VA', 'VT', 'WA', 'WI', 'WV', 'WY']);
     const ca = stateChannels(CA);
     assert.deepEqual(ca.map((c) => c.id), ['state:CA:e_services', 'state:CA:ner']);
     assert.match(ca[0].enrollment.join(' '), /Register online for an employer payroll tax account number/);

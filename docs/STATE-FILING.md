@@ -5,7 +5,7 @@ runs, using **state profiles**: data files in `data/filing/states/` with a citat
 Import it as `import { state } from './payroll/index.ts'`. Coverage is in
 [`STATE-COVERAGE.md`](STATE-COVERAGE.md) (generated; a test fails if it is stale).
 
-**Status: 42 of 53 jurisdictions are modelled; 11 are NOT MODELLED.** Thirty-three have a full withholding profile (deposit schedule, returns, mandates, channels), eight have a **partial** one (mandates, channels and what returns the stored agency documents state, but no deposit schedule is computed: IA, ID, LA, MD, MO, NM, NY, OK), and Texas has no wage income tax. The other 11 are **NOT MODELLED**: AK, FL, NV, NH, SD, TN, WA and WY have no wage income tax and their unemployment rules have not been read; MA's Department of Revenue refused an automated fetch (HTTP 403), which was respected and not worked around; PR and VI were not covered. Nothing is assumed for them, and a lookup for one fails loudly. Everything modelled is **withholding and its returns**; unemployment insurance is modelled only for California, New York and Texas. **Nothing is transmitted to any state**: no state transport is connected.
+**Status: 48 of 53 jurisdictions are modelled; 5 are NOT MODELLED (MA, NV, NH, PR, VI).** Thirty-three have a full withholding profile (deposit schedule, returns, mandates, channels), eight have a **partial** one (mandates, channels and what returns the stored agency documents state, but no deposit schedule is computed: IA, ID, LA, MD, MO, NM, NY, OK), and seven have no wage income tax and are modelled for **unemployment insurance only**: TX, FL, AK, SD, WA, WY (quarterly report due dates, wage base, channels) and TN (wage base only; the Department's due-date page refused an automated fetch). Massachusetts, Nevada and New Hampshire refused an automated fetch (HTTP 403), which was respected and not worked around; Puerto Rico and the Virgin Islands were not covered. Nothing is assumed for the unmodelled ones, and a lookup for one fails loudly. Outside those seven, unemployment insurance is modelled only for California and New York. **Nothing is transmitted to any state**: no state transport is connected.
 
 ## What it does
 
@@ -166,3 +166,16 @@ These five were fetched directly from the agency's website and read, not taken f
 | KY | 42A003, Revised October 2025 | Annual, quarterly, monthly, twice-monthly (printed table for 2026-2027) | No weekend rule printed (next business day assumed); one-day deposit not modelled |
 
 New engine support: a `follow_federal` frequency (the state payment is due with the federal deposit for the same pay dates), `rollPrintedDates` for printed calendars with no weekend rule, and the due rules `calendar_days_after_month_end` and `decemberDay`.
+
+## Batch 4: unemployment-only states, read live (2026-11-05)
+
+`tests/state-ui.test.ts` checks every unemployment section's wage base against the paycheck engine's own, separately researched 2026 figure, so two independent sources must agree.
+
+| State | Source | What is computed | Flags |
+| --- | --- | --- | --- |
+| FL | Department of Revenue Reemployment Tax pages | RT-6 quarterly, $7,000 base; electronic filing and payment mandatory at 10 or more employees | Rate is an input |
+| AK | Employment Security Tax Handbook (April 2024), 2026 TQ01C and rates page | Quarterly report and wage schedule, $54,200 base; **online filing mandatory when a payroll agent reports for the employer** | Employee contribution on the same form |
+| SD | Reemployment Assistance wage reporting pages | Quarterly wage report received by the last day of the month, $15,000 base | |
+| WA | ESD quarterly reports and tax-rate pages | Quarterly tax and wage report, $78,200 base | Paid Leave and WA Cares have their own report, not modelled |
+| WY | DWS reporting due dates, taxable wage base and WYUI pages | Quarterly report, $33,800 base | |
+| TN | UI Tax Rates page | $7,000 base only | The quarterly due-date page refused an automated fetch |

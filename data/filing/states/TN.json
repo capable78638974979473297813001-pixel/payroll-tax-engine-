@@ -1,0 +1,60 @@
+{
+ "state": "TN",
+ "name": "Tennessee",
+ "verifiedOn": "2026-11-05",
+ "sources": [
+  {
+   "id": "S1",
+   "title": "Tennessee Department of Labor and Workforce Development: UI Tax Rates (taxable wage base)",
+   "url": "https://www.tn.gov/workforce/employers/tax-and-insurance-redirect/unemployment-insurance-tax/ui-tax-rates.html",
+   "revision": "web page, no edition printed; fetched live 2026-11-05",
+   "verifiedOn": "2026-11-05",
+   "verifiedBy": "fetched directly from tn.gov on 2026-11-05 and read: the variable taxable wage base table (2026: $7,000). The Department's support page 'When are quarterly reports due?' (lwdsupport.tn.gov) refused the automated fetch (HTTP 403) and was not worked around, so the quarterly due date is NOT recorded as read: a search result summary says the end of the month after the quarter, which is not an agency document I read."
+  }
+ ],
+ "agencies": {
+  "ui": {
+   "name": "Tennessee Department of Labor and Workforce Development (Employer e-Services)",
+   "portalUrl": "https://www.tn.gov/workforce/employers/tax-and-insurance-redirect/unemployment-insurance-tax.html",
+   "source": "S1"
+  }
+ },
+ "calendar": {
+  "weekendsRoll": true,
+  "holidays": {
+   "verified": false
+  },
+  "source": "S1"
+ },
+ "mandates": {},
+ "withholding": {
+  "applies": false,
+  "notModelled": []
+ },
+ "ui": {
+  "wageBase": 700000,
+  "wageBaseYear": 2026,
+  "employerTaxLineId": "TN_SUI_ER",
+  "returns": [],
+  "notModelled": [
+   "The quarterly report's due date and file format: the Department's support page refused an automated fetch, so none is recorded.",
+   "The rate notice (an input) and the variable-wage-base rule: the base varies with the trust fund balance and is $7,000 for 2026 per the Department's table."
+  ]
+ },
+ "channels": [
+  {
+   "id": "state:TN:employer-e-services",
+   "function": "unemployment wage reports and premiums",
+   "description": "Tennessee Employer e-Services (TNPAWS and TPU no longer take wage reports, per the Department's FAQ in a search result; not read from the agency)",
+   "enrollment": [
+    "Register as a Tennessee employer for unemployment insurance (steps not read) and file through Employer e-Services."
+   ],
+   "specs": "Not read.",
+   "source": "S1"
+  }
+ ],
+ "notModelled": [
+  "Tennessee has no wage income tax on wages, so there is no state withholding.",
+  "New-hire reporting: not read."
+ ]
+}

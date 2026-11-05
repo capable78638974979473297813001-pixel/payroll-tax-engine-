@@ -1,0 +1,76 @@
+{
+ "state": "WY",
+ "name": "Wyoming",
+ "verifiedOn": "2026-11-05",
+ "sources": [
+  {
+   "id": "S1",
+   "title": "Wyoming Department of Workforce Services: Reporting Due Dates; Unemployment Taxable Wage Base; WYUI portal (web pages)",
+   "url": "https://dws.wyo.gov/dws-division/unemployment-insurance/employers/reporting-due-dates/",
+   "revision": "web pages, no edition printed; fetched live 2026-11-05",
+   "verifiedOn": "2026-11-05",
+   "verifiedBy": "fetched directly from dws.wyo.gov on 2026-11-05 and read: the Reporting Due Dates table (quarter, due date, delinquent date), the Unemployment Taxable Wage Base table (2026: $33,800; the page also lists 2027 at $34,900), and the WYUI portal page (file and amend quarterly reports, pay online or print voucher coupons). The wage base page is https://dws.wyo.gov/dws-division/unemployment-insurance/wyui/unemployment-taxable-wage-base/ and the portal page https://dws.wyo.gov/dws-division/unemployment-insurance/wyui/."
+  }
+ ],
+ "agencies": {
+  "ui": {
+   "name": "Wyoming Department of Workforce Services, Unemployment Insurance",
+   "portalUrl": "https://dws.wyo.gov/dws-division/unemployment-insurance/wyui/",
+   "source": "S1"
+  }
+ },
+ "calendar": {
+  "weekendsRoll": true,
+  "holidays": {
+   "verified": false
+  },
+  "source": "S1"
+ },
+ "mandates": {},
+ "withholding": {
+  "applies": false,
+  "notModelled": []
+ },
+ "ui": {
+  "wageBase": 3380000,
+  "wageBaseYear": 2026,
+  "employerTaxLineId": "WY_SUI_ER",
+  "returns": [
+   {
+    "id": "quarterly-report",
+    "name": "Quarterly unemployment insurance report and tax payment (WYUI)",
+    "frequency": "quarterly",
+    "due": {
+     "kind": "last_day_of_month_after_quarter"
+    },
+    "source": "S1",
+    "contents": [
+     "Due April 30, July 31, October 31 and January 31; the delinquent date is the next day (May 1, August 1, November 1, February 1). When the date is a weekend or holiday the due date is the next business day.",
+     "Reports are filed and amended in the WYUI portal, which also shows wages, rates (current and past), payments, balances and credits; taxes are paid online or by check with a printed voucher coupon.",
+     "The portal also carries workers' compensation reporting for employers that need it."
+    ]
+   }
+  ],
+  "notModelled": [
+   "Wyoming's rate notice is an input.",
+   "The WYUI report file layouts and the portal's registration steps were not read.",
+   "Whether electronic filing is mandatory: the portal page lists the tools without stating a mandate."
+  ]
+ },
+ "channels": [
+  {
+   "id": "state:WY:wyui",
+   "function": "quarterly unemployment report and tax payment",
+   "description": "Wyoming Unemployment Insurance User Portal (WYUI): file and amend quarterly reports, pay online or by check with printed voucher coupons",
+   "enrollment": [
+    "Register as a Wyoming employer with the Department of Workforce Services Unemployment Insurance division (steps not read) and use the WYUI portal."
+   ],
+   "specs": "Not read.",
+   "source": "S1"
+  }
+ ],
+ "notModelled": [
+  "Wyoming has no state income tax on wages, so there is no state withholding.",
+  "New-hire reporting: not read."
+ ]
+}

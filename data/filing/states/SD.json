@@ -1,0 +1,77 @@
+{
+ "state": "SD",
+ "name": "South Dakota",
+ "verifiedOn": "2026-11-05",
+ "sources": [
+  {
+   "id": "S1",
+   "title": "South Dakota Department of Labor & Regulation: Reemployment Assistance Tax - Wage Reporting; Reemployment Assistance for Businesses (web pages)",
+   "url": "https://dlr.sd.gov/ra/businesses/wage_reporting.aspx",
+   "revision": "web pages, no edition printed; fetched live 2026-11-05",
+   "verifiedOn": "2026-11-05",
+   "verifiedBy": "fetched directly from dlr.sd.gov on 2026-11-05 and read: How do I file, When do I file (the quarterly table), penalties and interest, the taxable wage base ($15,000), electronic reporting, zero reports. The Reemployment Assistance for Businesses page (https://dlr.sd.gov/ra/businesses/default.aspx) states the 2026 wage base and the due dates."
+  }
+ ],
+ "agencies": {
+  "ui": {
+   "name": "South Dakota Department of Labor & Regulation, Reemployment Assistance",
+   "portalUrl": "https://dlr.sd.gov/ra/businesses/default.aspx",
+   "source": "S1"
+  }
+ },
+ "calendar": {
+  "weekendsRoll": true,
+  "holidays": {
+   "verified": false
+  },
+  "source": "S1"
+ },
+ "mandates": {},
+ "withholding": {
+  "applies": false,
+  "notModelled": []
+ },
+ "ui": {
+  "wageBase": 1500000,
+  "wageBaseYear": 2026,
+  "employerTaxLineId": "SD_SUI_ER",
+  "returns": [
+   {
+    "id": "quarterly-wage-report",
+    "name": "Employer's Reemployment Assistance Quarterly Report (Form 21 / online wage reporting)",
+    "frequency": "quarterly",
+    "due": {
+     "kind": "last_day_of_month_after_quarter"
+    },
+    "contents": [
+     "Due the last day of the month after the quarter: April 30, July 31, October 31, January 31; a weekend or holiday date moves to the next business day.",
+     "Reports must be RECEIVED by April 30, July 31, October 31 and January 31; the reporting period opens the first day after each quarter.",
+     "A zero-wage report is still required, and penalties apply to late zero reports; the late filing penalty is $25 per month or part (plus $25 per month for late payment and 1.5% monthly interest).",
+     "Filed online through the Internet Quarterly Wage Reporting System (comma-delimited file upload is possible) or on paper; domestic employers who report annually use Form 21D & E."
+    ],
+    "source": "S1"
+   }
+  ],
+  "notModelled": [
+   "The comma-delimited upload file layout and the SIDES e-response exchange were not read.",
+   "The 2026 rate notice is an input (rate notices were mailed October 31, 2025).",
+   "Whether electronic filing is mandatory: the pages call it the fastest and most efficient way, not a requirement."
+  ]
+ },
+ "channels": [
+  {
+   "id": "state:SD:ra-wage-reporting",
+   "function": "quarterly wage report and tax",
+   "description": "South Dakota Reemployment Assistance Internet Quarterly Wage Reporting System (online or comma-delimited upload); paper reports are accepted",
+   "enrollment": [
+    "Register as an employer with the Reemployment Assistance Tax Unit (605-626-2312); a UserID and password, plus an Authentication Key and Security Code, are needed to report online."
+   ],
+   "specs": "The comma-delimited upload layout: named, not read.",
+   "source": "S1"
+  }
+ ],
+ "notModelled": [
+  "South Dakota has no state income tax on wages, so there is no state withholding.",
+  "New-hire reporting: not read."
+ ]
+}
