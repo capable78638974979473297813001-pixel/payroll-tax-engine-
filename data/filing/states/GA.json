@@ -1,0 +1,153 @@
+{
+ "state": "GA",
+ "name": "Georgia",
+ "verifiedOn": "2026-11-04",
+ "sources": [
+  {
+   "id": "S1",
+   "title": "Georgia Employer's Tax Guide",
+   "url": "https://dor.georgia.gov/document/document/2026-employers-tax-guide-updated-september-2026/download",
+   "revision": "2026 edition, updated September 2026",
+   "verifiedOn": "2026-11-04",
+   "verifiedBy": "read from the stored copy in watcher/state/snapshots/ga-944bb83df9~84d4aacc.txt.gz: the 2026 due-date table, 'Withholding Requirements Summary' (payer status, thresholds, semi-weekly due days), Filing Status (EFT over $500, One-Day Rule, annual, quarterly and monthly filers). The stored text is jumbled by the PDF layout in places; the summary table was read as printed. Not read: the unemployment (Georgia Department of Labor) rules and the Georgia Tax Center registration steps."
+  }
+ ],
+ "agencies": {
+  "withholding": {
+   "name": "Georgia Department of Revenue",
+   "portalUrl": "https://gtc.dor.ga.gov",
+   "source": "S1"
+  }
+ },
+ "calendar": {
+  "weekendsRoll": true,
+  "holidays": {
+   "verified": false
+  },
+  "source": "S1"
+ },
+ "mandates": {
+  "epay": {
+   "text": "If the total tax withheld, or required to be withheld, on Form G-7 exceeds $500.00, the amount must be remitted via electronic funds transfer (EFT) on any payment and return thereafter. Employers who are required to pay the tax withheld via EFT must file all applicable withholding tax returns electronically.",
+   "source": "S1"
+  }
+ },
+ "withholding": {
+  "applies": true,
+  "taxLineIds": {
+   "withholding": "GA_SIT",
+   "employeeInsurance": []
+  },
+  "deposits": {
+   "kind": "assigned_frequency",
+   "rulesYear": 2026,
+   "interpretation": "Georgia follows the federal pattern. Look-back: the 12 months ending June 30 of the previous calendar year. SEMI-WEEKLY payers (more than $50,000 withheld in the look-back): paydays Wednesday-Friday are due by EFT on the following Wednesday; paydays Saturday-Tuesday by the following Friday. MONTHLY payers (under $50,000 in the look-back, and more than $200 a month): Form GA-V payment by the 15th of the following month, and Form G-7 each quarter by the last day of the month after the quarter. QUARTERLY payers ($200 a month or less but more than $800 a year): payment with Form G-7 by the last day of the month after the quarter. ANNUAL payers ($800 or less a year, by request through the Georgia Tax Center before the first quarter's due date): payment with the fourth-quarter G-7 by January 31 of the next year. The ONE-DAY RULE overrides all of these: if MORE than $100,000 is required to be withheld for a payday, it is due by EFT the next banking day after the payday (not after accumulation), and the filing frequency does not change. Only the $50,000 semi-weekly threshold is stated against the look-back, so the look-back classes derive semi-weekly or monthly; quarterly and annual status are INPUTS (assignedFrequency), because the guide states those thresholds per month and per year rather than against the look-back. A due date on a Federal Reserve bank holiday, Georgia state holiday, Saturday or Sunday moves to the next banking day.",
+   "lookback": {
+    "description": "Georgia income tax withheld in the 12 months ending June 30 of the previous calendar year",
+    "classes": [
+     {
+      "name": "semiweekly",
+      "minExclusive": 5000000
+     },
+     {
+      "name": "monthly",
+      "maxInclusive": 5000000
+     }
+    ],
+    "newEmployer": "monthly"
+   },
+   "frequencies": {
+    "semiweekly": {
+     "period": "semiweekly",
+     "due": {
+      "kind": "semiweekly_following",
+      "afterFriday": 3,
+      "afterTuesday": 5
+     }
+    },
+    "monthly": {
+     "period": "month",
+     "due": {
+      "kind": "day_of_month_after",
+      "day": 15
+     }
+    },
+    "quarterly": {
+     "period": "quarter",
+     "due": {
+      "kind": "last_day_of_month_after_quarter"
+     }
+    },
+    "annual": {
+     "period": "year",
+     "due": {
+      "kind": "january_day_next_year",
+      "day": 31
+     }
+    }
+   },
+   "nextDayRule": {
+    "thresholdExclusive": 10000000,
+    "businessDays": 1
+   },
+   "deposited": [
+    "withholding"
+   ],
+   "source": "S1"
+  },
+  "returns": [
+   {
+    "id": "G-7",
+    "name": "Form G-7, Quarterly Return",
+    "frequency": "quarterly",
+    "due": {
+     "kind": "last_day_of_month_after_quarter"
+    },
+    "contents": [
+     "Due the last day of the month after each quarter (2026: April 30, July 31, November 2, February 1, 2027); required even if no tax was withheld.",
+     "Monthly and semi-weekly payers list the payments made during the quarter; semi-weekly payers also attach Schedule B.",
+     "Quarterly and annual payers send their payment with it."
+    ],
+    "source": "S1"
+   },
+   {
+    "id": "G-1003",
+    "name": "Form G-1003, Georgia W-2 / 1099 return",
+    "frequency": "annual",
+    "due": {
+     "kind": "january_day_next_year",
+     "day": 31
+    },
+    "contents": [
+     "W-2s and 1099-NEC: February 1, 2027 for tax year 2026 (January 31 rolled forward); all other 1099s: March 1, 2027.",
+     "Forms 1099-K and 1099-DA must be submitted even if no Georgia tax was withheld; other 1099s only if they report Georgia withholding, qualified overtime compensation or qualified cash tips."
+    ],
+    "source": "S1"
+   }
+  ],
+  "notModelled": [
+   "Georgia unemployment insurance (Georgia Department of Labor): no document read.",
+   "Georgia's state-holiday and Federal Reserve holiday list (weekends only are skipped, with a warning).",
+   "The January 31 date used for G-1003 is the W-2 / 1099-NEC date; the March 1 date for other 1099s is not modelled as a separate return.",
+   "ACH credit registration (Form EFT-002) and the Georgia Tax Center upload layouts."
+  ]
+ },
+ "channels": [
+  {
+   "id": "state:GA:gtc",
+   "function": "withholding payments (ACH debit), returns, W-2/1099 filing",
+   "description": "Georgia Tax Center (gtc.dor.ga.gov): ACH debit payments, G-7 filing, G-1003 and refund claims; ACH credit by request; Fedwire not accepted",
+   "enrollment": [
+    "Register for a Georgia withholding account and a Georgia Tax Center login (the steps were not read).",
+    "For ACH credit instead of ACH debit: file Form EFT-002 and receive approval.",
+    "Annual filing must be requested through the Georgia Tax Center before the first quarter due date."
+   ],
+   "specs": "The Georgia Tax Center bulk upload layouts: not read.",
+   "source": "S1"
+  }
+ ],
+ "notModelled": [
+  "Georgia unemployment insurance: not read.",
+  "New-hire reporting: not read."
+ ]
+}

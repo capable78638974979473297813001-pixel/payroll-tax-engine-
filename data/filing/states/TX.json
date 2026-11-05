@@ -1,0 +1,101 @@
+{
+ "state": "TX",
+ "name": "Texas",
+ "verifiedOn": "2026-11-03",
+ "sources": [
+  {
+   "id": "S1",
+   "title": "Texas Workforce Commission: Your 2026 Tax Rates",
+   "url": "https://www.twc.texas.gov/programs/unemployment-tax/your-tax-rates",
+   "revision": "page last read 2026-11-03",
+   "verifiedOn": "2026-11-03",
+   "verifiedBy": "page fetched directly from twc.texas.gov and read: wage base, minimum and maximum 2026 rates"
+  },
+  {
+   "id": "S2",
+   "title": "Texas Workforce Commission: Unemployment Tax",
+   "url": "https://www.twc.texas.gov/programs/unemployment-tax",
+   "revision": "page last read 2026-11-03",
+   "verifiedOn": "2026-11-03",
+   "verifiedBy": "page fetched directly: registration and quarterly due-date statements"
+  },
+  {
+   "id": "S3",
+   "title": "Texas Workforce Commission: Manage a Tax Account (Unemployment Tax Services)",
+   "url": "https://www.twc.texas.gov/services/manage-tax",
+   "revision": "page last read 2026-11-03",
+   "verifiedOn": "2026-11-03",
+   "verifiedBy": "page fetched directly: UTS wage-report filing and Required Wage Report Information"
+  }
+ ],
+ "agencies": {
+  "ui": {
+   "name": "Texas Workforce Commission (TWC), Unemployment Tax Services",
+   "portalUrl": "https://apps.twc.texas.gov/UITAXSERV/security/logon.do",
+   "source": "S3"
+  }
+ },
+ "calendar": {
+  "weekendsRoll": true,
+  "holidays": {
+   "verified": false
+  },
+  "source": "S2"
+ },
+ "registration": {
+  "daysAfterTrigger": 10,
+  "trigger": "becoming a liable employer",
+  "source": "S2"
+ },
+ "mandates": {},
+ "withholding": {
+  "applies": false,
+  "notModelled": []
+ },
+ "ui": {
+  "wageBase": 900000,
+  "wageBaseYear": 2026,
+  "employerTaxLineId": "TX_SUI_ER",
+  "returns": [
+   {
+    "id": "quarterly_wage_report",
+    "name": "Employer's quarterly wage report and tax payment (UTS)",
+    "frequency": "quarterly",
+    "due": {
+     "kind": "last_day_of_month_after_quarter"
+    },
+    "contents": [
+     "Number of employees, both full- and part-time, employed in the months covered by the wage report",
+     "Texas county where the greatest number of your employees worked",
+     "Number of employees who worked outside the county reported above",
+     "A Social Security number for each employee unique to that quarterly wage report",
+     "Each employee's last name and first initial (the middle initial is optional)",
+     "Texas wages paid to each employee for the quarter",
+     "Wages paid to each employee and reported to a state other than Texas, if applicable"
+    ],
+    "source": "S3"
+   }
+  ],
+  "notModelled": [
+   "The wage-report upload layout for more than 1,000 employees (TWC QuickFile) was not read.",
+   "Texas legal holidays were not read.",
+   "The tax rate notice is an input; the 2026 minimum is 0.32% and maximum 6.32% (S1)."
+  ]
+ },
+ "channels": [
+  {
+   "id": "state:TX:uts",
+   "function": "quarterly wage report and payment",
+   "description": "Unemployment Tax Services (UTS): file wage reports for 1,000 or fewer employees and pay by ACH debit or credit card. QuickFile is TWC's free software for more than 1,000 employees.",
+   "enrollment": [
+    "Register for a new tax account on Unemployment Tax Registration (UTR); wait for the Employer Liability Notice before accessing the account; the same user ID and password work for UTR and UTS."
+   ],
+   "specs": "QuickFile layout not read.",
+   "source": "S3"
+  }
+ ],
+ "notModelled": [
+  "New-hire reporting (Texas Attorney General's office) not read.",
+  "Local taxes: none are modelled for Texas; the engine's data says Texas has no wage income tax or local payroll tax."
+ ]
+}

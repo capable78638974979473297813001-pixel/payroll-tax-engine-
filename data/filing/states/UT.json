@@ -1,0 +1,144 @@
+{
+ "state": "UT",
+ "name": "Utah",
+ "verifiedOn": "2026-11-03",
+ "sources": [
+  {
+   "id": "S1",
+   "title": "Utah Withholding Tax Guide, Publication 14",
+   "url": "https://files.tax.utah.gov/tax/forms/2025/pub-14.pdf",
+   "revision": "Rev. 4/25, effective June 1, 2025",
+   "verifiedOn": "2026-11-03",
+   "verifiedBy": "read from the stored copy in watcher/state/snapshots/ut-f0f098aed0.txt.gz: Electronic Filing Requirements, How to Get a Withholding Account, How to File Returns, Due Dates (Annual, Quarterly with quarterly payments, Quarterly with monthly payments), Annual Reconciliations/W-2s/1099s, Filing Status Changes, W-2 and 1099 Requirements, and the penalty table. THE JUNE 2025 EDITION: a newer revision may exist (the stored copy of the Tax Commission's current Pub 14 page was not compared). Not read: payroll service provider liability, the Utah unemployment (Workforce Services) rules."
+  }
+ ],
+ "agencies": {
+  "withholding": {
+   "name": "Utah State Tax Commission",
+   "portalUrl": "https://tap.utah.gov",
+   "source": "S1"
+  }
+ },
+ "calendar": {
+  "weekendsRoll": true,
+  "holidays": {
+   "verified": false
+  },
+  "source": "S1"
+ },
+ "mandates": {
+  "efile": {
+   "text": "You must file Utah withholding tax returns, W-2s and 1099s (with Utah tax withheld) electronically.",
+   "source": "S1"
+  }
+ },
+ "withholding": {
+  "applies": true,
+  "taxLineIds": {
+   "withholding": "UT_SIT",
+   "employeeInsurance": []
+  },
+  "deposits": {
+   "kind": "assigned_frequency",
+   "rulesYear": 2025,
+   "interpretation": "Utah does not follow the federal deposit periods: the IRS semiweekly and $100,000 next-day rules do not apply. Payments are monthly, quarterly or annual. An employer who withholds LESS than $1,000 each month files and pays quarterly, by the last day of the month after the quarter. An employer who withholds $1,000 or MORE each month files quarterly but pays MONTHLY, each payment due the last day of the following month. A household employer who reports on federal Schedule H or files Form 944 may pay annually, due January 31. The Tax Commission reviews each account annually from the previous year's filings and may change the status; a quarterly payer may ask in writing to pay monthly. The status is therefore an INPUT (what the Commission assigned) or is derived from a supplied typical monthly withholding; the guide does not say how to treat a year in which some months are over and some under $1,000, and that is left to the Commission's assignment. The annual status is never derived and must be given.",
+   "lookback": {
+    "description": "Utah income tax withheld each month (typical month)",
+    "classes": [
+     {
+      "name": "quarterly",
+      "maxInclusive": 99999
+     },
+     {
+      "name": "monthly",
+      "minExclusive": 99999
+     }
+    ],
+    "newEmployer": "quarterly"
+   },
+   "frequencies": {
+    "quarterly": {
+     "period": "quarter",
+     "due": {
+      "kind": "last_day_of_month_after_quarter"
+     }
+    },
+    "monthly": {
+     "period": "month",
+     "due": {
+      "kind": "last_day_of_following_month"
+     }
+    },
+    "annual": {
+     "period": "year",
+     "due": {
+      "kind": "january_day_next_year",
+      "day": 31
+     }
+    }
+   },
+   "deposited": [
+    "withholding"
+   ],
+   "source": "S1"
+  },
+  "returns": [
+   {
+    "id": "UT-quarterly",
+    "name": "Utah quarterly withholding return (filed at Taxpayer Access Point)",
+    "frequency": "quarterly",
+    "due": {
+     "kind": "last_day_of_month_after_quarter"
+    },
+    "contents": [
+     "A return is required for every filing period, even if no tax was withheld; a payment without a return can draw a non-filing penalty.",
+     "Quarterly due dates: April 30, July 31, October 31, January 31. Monthly payers still file quarterly.",
+     "The fourth-quarter return is combined with the annual reconciliation."
+    ],
+    "source": "S1"
+   },
+   {
+    "id": "UT-annual-reconciliation",
+    "name": "Utah annual reconciliation with state copies of W-2s and 1099s",
+    "frequency": "annual",
+    "due": {
+     "kind": "january_day_next_year",
+     "day": 31
+    },
+    "contents": [
+     "Filed electronically by January 31; combined with the fourth-quarter return (or the annual return for annual filers).",
+     "State copies of every W-2 and 1099 issued for the account are filed with it; the reconciliation must balance to the amounts paid.",
+     "Form TC-941D (Discrepancy Report) is submitted on paper when the totals on all accounts do not match the W-2s and 1099s.",
+     "Penalties: $50 if filed more than 14 days late, plus per-form amounts. The Tax Commission does not issue employee refunds before March 1 unless the complete reconciliation is filed electronically by January 31."
+    ],
+    "source": "S1"
+   }
+  ],
+  "notModelled": [
+   "Utah unemployment insurance (Utah Department of Workforce Services): no document read.",
+   "Whether this June 2025 edition is current; thresholds and dates may have changed.",
+   "Utah's legal-holiday list (weekends only are skipped, with a warning).",
+   "The Taxpayer Access Point file layouts for bulk reconciliation and W-2 upload.",
+   "Payroll service provider liability and registration rules (the guide has a section; not read in detail).",
+   "The bond requirement ($25,000 to $500,000 for a history of late filing or payment)."
+  ]
+ },
+ "channels": [
+  {
+   "id": "state:UT:tap",
+   "function": "withholding returns, payments, annual reconciliation and W-2/1099 upload",
+   "description": "Utah Taxpayer Access Point (tap.utah.gov): paper withholding forms are rejected; payment online or by check with a TC-941PC coupon",
+   "enrollment": [
+    "Obtain a federal EIN first (the guide says Utah requires it before registering).",
+    "Apply for a withholding tax account at tap.utah.gov (\"Apply for a tax account(s) - TC-69\").",
+    "Returns, W-2s and 1099s with Utah withholding must be filed electronically."
+   ],
+   "specs": "Bulk reconciliation and W-2/1099 upload file layouts: not read.",
+   "source": "S1"
+  }
+ ],
+ "notModelled": [
+  "Utah unemployment insurance (Workforce Services): not read.",
+  "New-hire reporting: not read."
+ ]
+}

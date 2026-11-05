@@ -1,0 +1,122 @@
+{
+ "state": "NE",
+ "name": "Nebraska",
+ "verifiedOn": "2026-11-03",
+ "sources": [
+  {
+   "id": "S1",
+   "title": "2026 Nebraska Circular EN: Income Tax Withholding on Wages, Pensions and Annuities, and Gambling Winnings",
+   "url": "https://revenue.nebraska.gov/sites/default/files/doc/business/Cir_En_2025/2026cir_en_whole.pdf",
+   "revision": "8-429-1998 Rev. 11-2025",
+   "verifiedOn": "2026-11-03",
+   "verifiedBy": "read from the stored copy in watcher/state/snapshots/ne-1c1f4767ff.txt.gz: 'Filing and Payment Requirements' (Quarterly Return, Monthly Deposits, Monthly Deposit Filing, Annual Filers, Annual Reconciliation, W-2 copies) and 'Electronic Payments'"
+  }
+ ],
+ "agencies": {
+  "withholding": {
+   "name": "Nebraska Department of Revenue (DOR)",
+   "portalUrl": "https://revenue.nebraska.gov",
+   "source": "S1"
+  }
+ },
+ "calendar": {
+  "weekendsRoll": true,
+  "holidays": {
+   "verified": false
+  },
+  "source": "S1"
+ },
+ "mandates": {
+  "efile": {
+   "text": "An employer who is filing more than 50 Forms W-2, W-2G, 1099-R, 1099-MISC, and/or 1099-NEC with Nebraska income tax withholding amounts for a tax year must file the forms electronically.",
+   "source": "S1"
+  },
+  "epay": {
+   "text": "Most taxpayers required to make monthly withholding deposits have been mandated to submit their payments via EFT.",
+   "source": "S1"
+  }
+ },
+ "withholding": {
+  "applies": true,
+  "taxLineIds": {
+   "withholding": "NE_SIT",
+   "employeeInsurance": []
+  },
+  "deposits": {
+   "kind": "quarter_month_threshold",
+   "rulesYear": 2026,
+   "interpretation": "Nebraska: 'The amount of income taxes withheld determines the frequency of deposits.' For the first month of a quarter a deposit is required if more than $500 was withheld in that month; for the second month a deposit is required if more than $500 was withheld in either the second month or the first. Deposits are due by the 15th of the month following the month the tax was withheld. INTERPRETATION: the circular does not state what happens to month 3 or to months at or under $500; they are treated as paid with the quarterly Form 941N, due the last day of the month after the quarter (the quarterly return is stated to be filed whether or not any tax was withheld). 'In either this period or in the first month' is read as: month 2 is deposited when month 2 exceeds $500 OR month 1 exceeded $500. Employers licensed as annual filers file one Form 941N for the calendar year, due January 31 of the following year.",
+   "thresholdExclusive": 50000,
+   "secondMonthTriggeredByFirst": true,
+   "depositDue": {
+    "kind": "day_of_month_after",
+    "day": 15
+   },
+   "returnPaymentDue": {
+    "kind": "last_day_of_month_after_quarter"
+   },
+   "annual": {
+    "due": {
+     "kind": "january_day_next_year",
+     "day": 31
+    }
+   },
+   "deposited": [
+    "withholding"
+   ],
+   "source": "S1"
+  },
+  "returns": [
+   {
+    "id": "941N",
+    "name": "Form 941N, Nebraska Income Tax Withholding Return",
+    "frequency": "quarterly",
+    "due": {
+     "kind": "last_day_of_month_after_quarter"
+    },
+    "contents": [
+     "Filed whether or not any payments subject to Nebraska withholding were made during the quarter, unless licensed as an annual filer.",
+     "Due on or before the last day of the month following the end of the quarter.",
+     "May be e-filed using DOR's free Form 941N filing program."
+    ],
+    "source": "S1"
+   },
+   {
+    "id": "W-3N",
+    "name": "Form W-3N, Nebraska Reconciliation of Income Tax Withheld",
+    "frequency": "annual",
+    "due": {
+     "kind": "january_day_next_year",
+     "day": 31
+    },
+    "contents": [
+     "Due on or before January 31 of the following year; filed separately from Form 941N.",
+     "Nebraska copies of Forms W-2, W-2G and the specified 1099s are due January 31 after the close of the tax year."
+    ],
+    "source": "S1"
+   }
+  ],
+  "notModelled": [
+   "The 12-month look-back or any DOR-assigned frequency other than the monthly-threshold rule and the annual-filer license.",
+   "Form 501N deposit transmittal and DOR e-pay field layouts.",
+   "Nebraska's legal-holiday list.",
+   "Local or other Nebraska taxes."
+  ]
+ },
+ "channels": [
+  {
+   "id": "state:NE:dor_online",
+   "function": "Form 941N, W-3N and withholding payments",
+   "description": "DOR's free Form 941N and W-3N filing programs; payments by Electronic Funds Withdrawal, Nebraska e-pay, ACH credit, Tele-pay (800-232-0057) or credit card",
+   "enrollment": [
+    "Not read: the account and login requirements for the free filing programs and e-pay."
+   ],
+   "specs": "The Nebraska Computer Reporting Procedure 21EFW2 (W-2 electronic filing layouts) was not read.",
+   "source": "S1"
+  }
+ ],
+ "notModelled": [
+  "Nebraska unemployment tax (Nebraska Department of Labor): not read.",
+  "New-hire reporting and registration rules: not read."
+ ]
+}

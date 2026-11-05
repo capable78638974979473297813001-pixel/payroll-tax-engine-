@@ -1,0 +1,122 @@
+{
+ "state": "ME",
+ "name": "Maine",
+ "verifiedOn": "2026-11-04",
+ "sources": [
+  {
+   "id": "S1",
+   "title": "Maine Revenue Services: Withholding Tax Instruction and Tables (August 2026 revision)",
+   "url": "https://www.maine.gov/revenue/sites/maine.gov.revenue/files/inline-files/26_wh_tab_instr_August2026.pdf",
+   "revision": "2026 booklet, August 2026 revision",
+   "verifiedOn": "2026-11-04",
+   "verifiedBy": "read from the stored copy in watcher/state/snapshots/me-17ca301d46.txt.gz: DOs and DON'Ts for clients of payroll processors, Due Date (semiweekly), electronic payment requirement, Form 941ME (quarterly return), instruction 7 (Payment) and instruction 9 (payee statements). Not read: the withholding calendar's date rows, Maine unemployment (Department of Labor) rules."
+  }
+ ],
+ "agencies": {
+  "withholding": {
+   "name": "Maine Revenue Services",
+   "portalUrl": "https://revenue.maine.gov",
+   "source": "S1"
+  }
+ },
+ "calendar": {
+  "weekendsRoll": true,
+  "holidays": {
+   "verified": false
+  },
+  "source": "S1"
+ },
+ "mandates": {
+  "epay": {
+   "text": "Taxpayers with a combined annual tax liability for all taxes that is $10,000 or more for the prior calendar year must remit all Maine tax payments electronically and continue to remit tax payments electronically in future years. Thus employers and non-wage payers required to remit on a semiweekly basis must do so electronically.",
+   "source": "S1"
+  }
+ },
+ "withholding": {
+  "applies": true,
+  "taxLineIds": {
+   "withholding": "ME_SIT",
+   "employeeInsurance": []
+  },
+  "returns": [
+   {
+    "id": "941ME",
+    "name": "Form 941ME, Quarterly Return of Income Tax Withholding",
+    "frequency": "quarterly",
+    "due": {
+     "kind": "last_day_of_month_after_quarter"
+    },
+    "contents": [
+     "Filed by every employer or non-payroll filer registered to remit withholding, even when no tax was withheld; the withholding detail pages must be completed (a waiver is needed otherwise).",
+     "Reports the quarter's withholding, reconciles payments, and pays any balance due.",
+     "Semiweekly payments are made with Form 900ME (electronically for semiweekly payers)."
+    ],
+    "source": "S1"
+   }
+  ],
+  "notModelled": [
+   "Maine unemployment insurance (Maine Department of Labor): no document read.",
+   "The withholding calendar rows in the booklet: dates here are computed from the stated rules, not read from the calendar.",
+   "Maine's legal-holiday list (weekends only are skipped, with a warning).",
+   "Annual W-2 / 1099 state filing dates: the booklet says statements go to payees by the federal due date; the state filing rule was not isolated.",
+   "The State Tax Assessor's power to require more frequent remittances.",
+   "The Maine Tax Portal file layouts."
+  ],
+  "deposits": {
+   "kind": "assigned_frequency",
+   "rulesYear": 2026,
+   "interpretation": "Maine's withholding system works like the federal one. An employer or non-wage payer whose total withholding in the look-back period (July 1, 2024 to June 30, 2025 for 2026) was $18,000 or MORE pays SEMIWEEKLY: wages paid Wednesday, Thursday or Friday are due the following Wednesday, wages paid Saturday to Tuesday the following Friday. All others pay on or before the quarterly return due date: Form 941ME, due the last day of the month following the end of the quarter, even if there is no tax to report. The account is reviewed at the end of 2026 for 2027, and the State Tax Assessor may require more frequent remittances if collection is in jeopardy (not modelled). The quarterly return reports and reconciles the quarter's payments and pays any balance.",
+   "lookback": {
+    "description": "Maine withholding in the look-back period July 1 to June 30 before the calendar year",
+    "classes": [
+     {
+      "name": "quarterly",
+      "maxInclusive": 1799999
+     },
+     {
+      "name": "semiweekly",
+      "minExclusive": 1799999
+     }
+    ],
+    "newEmployer": "quarterly"
+   },
+   "frequencies": {
+    "quarterly": {
+     "period": "quarter",
+     "due": {
+      "kind": "last_day_of_month_after_quarter"
+     }
+    },
+    "semiweekly": {
+     "period": "semiweekly",
+     "due": {
+      "kind": "semiweekly_following",
+      "afterFriday": 3,
+      "afterTuesday": 5
+     }
+    }
+   },
+   "deposited": [
+    "withholding"
+   ],
+   "source": "S1"
+  }
+ },
+ "channels": [
+  {
+   "id": "state:ME:tax-portal",
+   "function": "withholding payments (900ME), quarterly returns (941ME), W-2/1099 filing",
+   "description": "Maine Tax Portal (MTP) at revenue.maine.gov; the booklet carries a section on payroll processors, including that processors must be licensed with the Bureau of Consumer Credit Protection and have posted surety or be enrolled in the Payroll Processor Recovery Fund",
+   "enrollment": [
+    "Register for Maine withholding through the Maine Tax Portal (accounts are closed there or with Form 941BN-ME).",
+    "A payroll processor handling client funds in Maine should be licensed with the Bureau of Consumer Credit Protection (207-624-8527) with proof of fidelity insurance, and have a surety bond or letter of credit or be enrolled in the state's Payroll Processor Recovery Fund; the booklet advises clients to require this, and that notices from tax agencies go to the client."
+   ],
+   "specs": "Not read.",
+   "source": "S1"
+  }
+ ],
+ "notModelled": [
+  "Maine unemployment insurance: not read.",
+  "New-hire reporting: not read."
+ ]
+}

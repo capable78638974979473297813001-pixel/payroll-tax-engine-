@@ -1,0 +1,130 @@
+{
+ "state": "MT",
+ "name": "Montana",
+ "verifiedOn": "2026-11-04",
+ "sources": [
+  {
+   "id": "S1",
+   "title": "Montana Department of Revenue: Wage Withholding Returns and Payments (web page)",
+   "url": "https://revenue.mt.gov/taxes/withholding-tax/wage-withholding-returns-and-payments",
+   "revision": "web page, no edition printed; stored copy checked 2026-11-04",
+   "verifiedOn": "2026-11-04",
+   "verifiedBy": "read in full from the stored copy in watcher/state/snapshots/mt-2599ef4f7b.txt.gz: filing requirements, due dates, withholding payment schedules and look-back, payment and filing options, truncated TINs, amending the reconciliation."
+  }
+ ],
+ "agencies": {
+  "withholding": {
+   "name": "Montana Department of Revenue",
+   "portalUrl": "https://tap.dor.mt.gov",
+   "source": "S1"
+  }
+ },
+ "calendar": {
+  "weekendsRoll": true,
+  "holidays": {
+   "verified": false
+  },
+  "source": "S1"
+ },
+ "mandates": {},
+ "withholding": {
+  "applies": true,
+  "taxLineIds": {
+   "withholding": "MT_SIT",
+   "employeeInsurance": []
+  },
+  "returns": [
+   {
+    "id": "MW-3",
+    "name": "Form MW-3, Montana Annual W-2 1099 Withholding Tax Reconciliation",
+    "frequency": "annual",
+    "due": {
+     "kind": "january_day_next_year",
+     "day": 31
+    },
+    "contents": [
+     "Filed every year the Montana withholding account is open, by January 31, online in TAP or on paper.",
+     "Must include a federal W-2 for EVERY employee paid Montana wages (even with no tax withheld) and every 1099 with Montana withholding; Montana does not receive W-2s from the SSA.",
+     "Montana does not accept W-2s or 1099s with truncated Social Security Numbers or FEINs.",
+     "1099s without withholding need no Montana withholding account."
+    ],
+    "source": "S1"
+   }
+  ],
+  "notModelled": [
+   "The page gives no separate periodic return: payments are made with Form MW-1 or electronically and reconciled on the MW-3.",
+   "Montana unemployment insurance (Department of Labor & Industry): no document read.",
+   "Montana's legal-holiday list (weekends only are skipped, with a warning).",
+   "Whether the federal $100,000 one-day rule applies to accelerated filers (not stated).",
+   "TAP and approved-software-vendor file layouts."
+  ],
+  "deposits": {
+   "kind": "assigned_frequency",
+   "interpretation": "Montana sets the payment schedule from the total withholding in the look-back period (July 1 of the preceding year to June 30 of the current year; reviewed each year, with notice by November 1 of any change): up to $1,199 ANNUAL (January 31); $1,200 to $11,999 MONTHLY (the 15th of the following month); $12,000 or more ACCELERATED, 'same as federal tax deposits': paydays Saturday to Tuesday due the following Friday, paydays Wednesday to Friday due the following Wednesday. All new withholding accounts start on the monthly schedule. An employer may pay more often than its schedule requires. A form due on a weekend is due the next business day. The guide says nothing about the federal one-day $100,000 rule, so the accelerated schedule is applied to every payday.",
+   "lookback": {
+    "description": "Total Montana withholding paid in the look-back period (July 1 to June 30)",
+    "classes": [
+     {
+      "name": "annual",
+      "maxInclusive": 119999
+     },
+     {
+      "name": "monthly",
+      "minExclusive": 119999,
+      "maxInclusive": 1199999
+     },
+     {
+      "name": "accelerated",
+      "minExclusive": 1199999
+     }
+    ],
+    "newEmployer": "monthly"
+   },
+   "frequencies": {
+    "annual": {
+     "period": "year",
+     "due": {
+      "kind": "january_day_next_year",
+      "day": 31
+     }
+    },
+    "monthly": {
+     "period": "month",
+     "due": {
+      "kind": "day_of_month_after",
+      "day": 15
+     }
+    },
+    "accelerated": {
+     "period": "semiweekly",
+     "due": {
+      "kind": "semiweekly_following",
+      "afterFriday": 3,
+      "afterTuesday": 5
+     }
+    }
+   },
+   "deposited": [
+    "withholding"
+   ],
+   "source": "S1"
+  }
+ },
+ "channels": [
+  {
+   "id": "state:MT:tap",
+   "function": "withholding payments, MW-3 reconciliation, W-2/1099 filing",
+   "description": "Montana TransAction Portal (TAP), approved withholding tax software vendors, ACH credit, or Form MW-1 vouchers",
+   "enrollment": [
+    "Register for a Montana withholding account with the Department of Revenue (steps not read) and create a TAP login.",
+    "Payments may come from approved withholding tax software vendors: the page names the category but not the approval process."
+   ],
+   "specs": "Not read.",
+   "source": "S1"
+  }
+ ],
+ "notModelled": [
+  "Montana unemployment insurance: not read.",
+  "New-hire reporting: not read."
+ ]
+}

@@ -37,8 +37,12 @@ import type { Finding } from './form941.ts';
 // Registry
 // ---------------------------------------------------------------------------
 
-export type ChannelId = 'irs_mef_94x' | 'irs_eft_deposit' | 'ssa_bso_w2';
-export type AgencyId = 'IRS' | 'SSA';
+export type FederalChannelId = 'irs_mef_94x' | 'irs_eft_deposit' | 'ssa_bso_w2';
+/** A state channel, e.g. `state:CA:e_services`; defined by that state's profile (payroll/state/agency.ts). */
+export type StateChannelId = `state:${string}`;
+export type ChannelId = FederalChannelId | StateChannelId;
+/** 'IRS' or 'SSA' for the federal channels; a two-letter state code for state channels. */
+export type AgencyId = string;
 
 export interface SourceRef {
   title: string;
@@ -47,8 +51,8 @@ export interface SourceRef {
 
 export interface SpecStatus {
   name: string;
-  /** Whether this repository can read the specification to build against it. */
-  availability: 'public' | 'registered_developers_only' | 'blocks_automated_access';
+  /** Whether this repository can read the specification to build against it. 'not_read' means nobody has tried yet (state profiles). */
+  availability: 'public' | 'registered_developers_only' | 'blocks_automated_access' | 'not_read';
   note: string;
 }
 
@@ -128,9 +132,16 @@ export const FEDERAL_CHANNELS: readonly AgencyChannel[] = [
   },
 ];
 
+const registered = new Map<string, AgencyChannel>();
+
+/** Add a channel defined elsewhere (state profiles register theirs). Replaces a channel with the same id. */
+export function registerChannel(c: AgencyChannel): void {
+  registered.set(c.id, c);
+}
+
 export function channel(id: ChannelId): AgencyChannel {
-  const c = FEDERAL_CHANNELS.find((x) => x.id === id);
-  if (!c) throw new Error(`Unknown federal channel ${id}`);
+  const c = FEDERAL_CHANNELS.find((x) => x.id === id) ?? registered.get(id);
+  if (!c) throw new Error(`Unknown channel ${id}`);
   return c;
 }
 
@@ -148,7 +159,7 @@ export function ssaBsoRoute(w2Count: number): 'bso_online_forms' | 'bso_file_upl
 // Filing packages and the lifecycle
 // ---------------------------------------------------------------------------
 
-export type FilingKind = 'form941' | 'form940' | 'w2_w3' | 'deposit';
+export type FilingKind = 'form941' | 'form940' | 'w2_w3' | 'deposit' | 'state_return' | 'state_deposit' | 'state_new_hire';
 
 export interface FilingPackage {
   id: string;
@@ -186,10 +197,15 @@ export function makePackage(args: {
   payload: unknown;
   fields: Record<string, unknown>;
   findings: Finding[];
+  /** Required for state kinds (the state profile's channel id); federal kinds derive theirs. */
+  channelId?: ChannelId;
 }): FilingPackage {
-  const channelId: ChannelId = args.kind === 'w2_w3' ? 'ssa_bso_w2' : args.kind === 'deposit' ? 'irs_eft_deposit' : 'irs_mef_94x';
+  const { channelId: given, ...rest } = args;
+  const channelId: ChannelId =
+    given ?? (args.kind === 'w2_w3' ? 'ssa_bso_w2' : args.kind === 'deposit' ? 'irs_eft_deposit' : 'irs_mef_94x');
+  if (args.kind.startsWith('state_') && !given) throw new Error(`A ${args.kind} filing needs the state channel id it goes through.`);
   const checksum = packageChecksum(args.payload, args.fields);
-  return { id: `${args.kind}:${args.ein}:${args.period}:${checksum.slice(0, 12)}`, channelId, checksum, ...args };
+  return { id: `${args.kind}:${args.ein}:${args.period}:${checksum.slice(0, 12)}`, channelId, checksum, ...rest };
 }
 
 export type FilingStatus =

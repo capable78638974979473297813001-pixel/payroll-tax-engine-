@@ -1,0 +1,84 @@
+{
+ "state": "MD",
+ "name": "Maryland",
+ "verifiedOn": "2026-11-04",
+ "sources": [
+  {
+   "id": "S1",
+   "title": "Maryland Withholding Tax Facts, January-December 2026",
+   "url": "https://www.marylandcomptroller.gov/content/dam/mdcomp/tax/legal-publications/facts/withholding-tax-facts-2026.pdf",
+   "revision": "COM/RAD-098, revised 12/25",
+   "verifiedOn": "2026-11-04",
+   "verifiedBy": "read from the stored copy in watcher/state/snapshots/md-982a16c674.txt.gz: Filing Your Return, Annual Withholding Filers, the MW508 reconciliation and electronic filing options. The Comptroller's 2026 Maryland Employer Withholding guide (stored as md-6837586c10) was also read for the forms list and the reporting-agent authorization. Neither stored document states the filing-frequency thresholds or the due dates of the regular and accelerated schedules."
+  }
+ ],
+ "agencies": {
+  "withholding": {
+   "name": "Comptroller of Maryland, Revenue Administration Division",
+   "portalUrl": "https://mdtaxconnect.gov",
+   "source": "S1"
+  }
+ },
+ "calendar": {
+  "weekendsRoll": true,
+  "holidays": {
+   "verified": false
+  },
+  "source": "S1"
+ },
+ "mandates": {
+  "efile": {
+   "text": "Filing your withholding return electronically is now the default option for employers. If you are submitting 25 or more W-2 or 1099 forms you are required to file electronically.",
+   "source": "S1"
+  }
+ },
+ "withholding": {
+  "applies": true,
+  "taxLineIds": {
+   "withholding": "MD_SIT",
+   "employeeInsurance": []
+  },
+  "returns": [
+   {
+    "id": "MW508",
+    "name": "Form MW508, Annual Employer Withholding Reconciliation Return",
+    "frequency": "annual",
+    "due": {
+     "kind": "january_day_next_year",
+     "day": 31
+    },
+    "contents": [
+     "Due January 31 with the state copy of every W-2 or 1099 showing Maryland tax withheld.",
+     "25 or more W-2s or 1099s must be filed electronically: bulk-file a modified-Maryland-format text file (SSA Publication 42-007 / IRS Publication 1220) as a Maryland Tax Connect user, upload as a registered Transmitter User, or key fewer than 25 in the portal.",
+     "Maryland cannot process the Combined Federal/State program."
+    ],
+    "source": "S1"
+   }
+  ],
+  "notModelled": [
+   "Maryland's withholding deposit schedule (regular and accelerated filers: Forms MW506 and MW506M): neither stored document states the thresholds or due dates, so none is computed. An accelerated filer enters the pay date on the MW506M.",
+   "Annual filers' dates: only that they use the fourth-quarter coupon matching their tax year end.",
+   "Maryland unemployment insurance and family leave: no document read.",
+   "Maryland's legal-holiday list.",
+   "The 'modified Maryland standard format' layout in the Employer Reporting of W-2s or 1099s Instructions and Specifications."
+  ]
+ },
+ "channels": [
+  {
+   "id": "state:MD:tax-connect",
+   "function": "withholding returns and payments, MW508, W-2/1099 bulk or transmitter filing",
+   "description": "Maryland Tax Connect (mdtaxconnect.gov): electronic filing and payment is the default; a Transmitter User may upload W-2/1099 files; reporting agents are authorized on Form 548P",
+   "enrollment": [
+    "Register with Maryland (Central Registration number) and create a Maryland Tax Connect login with the withholding account.",
+    "A third-party reporting agent obtains information and acts on a client's withholding returns and payments under Form 548P, Limited Power of Attorney and Maryland Reporting Agents Authorization, which Maryland uses instead of the federal Form 8655.",
+    "To upload W-2/1099 files for clients, register as a Transmitter User on Maryland Tax Connect."
+   ],
+   "specs": "The modified Maryland standard format for W-2/1099 text files is in the Comptroller's Employer Reporting instructions (not read); contact efileW21099help@marylandtaxes.gov for bulk-file technical support.",
+   "source": "S1"
+  }
+ ],
+ "notModelled": [
+  "Maryland unemployment insurance: not read.",
+  "New-hire reporting: not read."
+ ]
+}

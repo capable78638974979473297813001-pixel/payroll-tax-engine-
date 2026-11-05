@@ -693,3 +693,6 @@ export type { AleDetermination, CoverageOffer, EmployeeMonthlyHours, Line14Code,
 
 // Federal employment-tax filing (941/Schedule B, 940/Schedule A, W-2/W-3, deposits, agency layer). See docs/FEDERAL-FILING.md.
 export * as federal from './federal/index.ts';
+
+// State employment-tax filing (profiles, calendar, deposits, quarterly UI report, new hire). See docs/STATE-FILING.md.
+export * as state from './state/index.ts';

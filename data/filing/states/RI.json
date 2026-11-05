@@ -1,0 +1,515 @@
+{
+ "state": "RI",
+ "name": "Rhode Island",
+ "verifiedOn": "2026-11-03",
+ "sources": [
+  {
+   "id": "S1",
+   "title": "2026 Rhode Island Withholding Tax Booklet (instructions 6, 9, 10 and the 2026 Withholding Tax Payment Calendar)",
+   "url": "https://tax.ri.gov/sites/g/files/xkgbur541/files/2025-12/2026%20Withholding%20Tax%20Booklet.pdf",
+   "revision": "2026 edition (posted December 2025)",
+   "verifiedOn": "2026-11-03",
+   "verifiedBy": "read from the stored copy in watcher/state/snapshots/ri-d9f64cd9b0.txt.gz: instruction 6 (weekly, monthly, quarterly payers), 9 (RI-941), 10 (RI W-3) and the printed 2026 payment calendar (52 weekly periods, 12 monthly rows, 4 quarterly rows), taken as published. The calendar's colour coding (holiday highlights) is lost in the stored text."
+  },
+  {
+   "id": "S2",
+   "title": "Rhode Island Withholding Tax Filing & Transmittal Requirements (Form WTM, RI-941, W-2s, RI W-3, Tax Portal)",
+   "url": "https://tax.ri.gov/sites/g/files/xkgbur541/files/2026-01/Withholding%20Filing%20Requirements_12302025.pdf",
+   "revision": "v.1 - 12/2025",
+   "verifiedOn": "2026-11-03",
+   "verifiedBy": "read from the stored copy under watcher/state/snapshots/ri-bdb5673f09~d4d90b7e.txt.gz (the document linked from https://tax.ri.gov/tax-sections/withholding-tax): Form WTM, Form RI-941 including bulk filing by Payroll Letter of Intent, and the W-2 requirements."
+  }
+ ],
+ "agencies": {
+  "withholding": {
+   "name": "Rhode Island Division of Taxation",
+   "portalUrl": "https://taxportal.ri.gov/",
+   "source": "S2"
+  }
+ },
+ "calendar": {
+  "weekendsRoll": true,
+  "holidays": {
+   "verified": false
+  },
+  "source": "S1"
+ },
+ "mandates": {
+  "efile": {
+   "text": "Weekly payers must file and pay via electronic means. Monthly payers with an average Rhode Island withholding for the previous calendar year of $200 or more per month must file and pay via electronic means.",
+   "source": "S2"
+  }
+ },
+ "withholding": {
+  "applies": true,
+  "taxLineIds": {
+   "withholding": "RI_SIT",
+   "employeeInsurance": []
+  },
+  "deposits": {
+   "kind": "assigned_frequency",
+   "rulesYear": 2026,
+   "interpretation": "Rhode Island sets the payment frequency from the tax withheld in a calendar month: $600 or more in any month is a WEEKLY payer (and stays weekly until the start of a calendar year); $50 or more but less than $600 is a MONTHLY payer; less than $50 is a QUARTERLY payer. Moving to a less frequent basis is allowed only at the beginning of a calendar year; a higher amount moves the employer up at once. The frequency is therefore an INPUT or is derived from a supplied monthly liability. Due dates are NOT computed from a rule: the booklet prints a 2026 calendar of every weekly period (Sunday to Saturday, cut at each quarter end), every month and every quarter with its due date, and this profile holds those printed rows. Pay dates in any other year draw an error finding (state_calendar_not_published) and no due date is invented. Monthly payments are due the 20th of the next month (June: July 31 and other quarter-ending months: the last day of the month after, with Form RI-941); weekly payments the next banking day after the week (generally Monday, Tuesday after a holiday); a quarter-end stub week is printed with its own date. Two printed weekly rows deserve a look against the PDF: the period June 21-30 is shown due Friday 2026-07-03 (the observed Independence Day holiday) and July 1-4 due Tuesday 2026-07-07; the stored text cannot show the calendar's colour coding, so they are used as printed.",
+   "lookback": {
+    "description": "Rhode Island income tax withheld in a calendar month",
+    "classes": [
+     {
+      "name": "quarterly",
+      "maxInclusive": 4999
+     },
+     {
+      "name": "monthly",
+      "minExclusive": 4999,
+      "maxInclusive": 59999
+     },
+     {
+      "name": "weekly",
+      "minExclusive": 59999
+     }
+    ],
+    "newEmployer": "quarterly"
+   },
+   "frequencies": {
+    "weekly": {
+     "period": "published_calendar",
+     "due": {
+      "kind": "next_business_day"
+     },
+     "calendar": [
+      {
+       "from": "2026-01-01",
+       "to": "2026-01-03",
+       "due": "2026-01-05"
+      },
+      {
+       "from": "2026-01-04",
+       "to": "2026-01-10",
+       "due": "2026-01-12"
+      },
+      {
+       "from": "2026-01-11",
+       "to": "2026-01-17",
+       "due": "2026-01-20"
+      },
+      {
+       "from": "2026-01-18",
+       "to": "2026-01-24",
+       "due": "2026-01-26"
+      },
+      {
+       "from": "2026-01-25",
+       "to": "2026-01-31",
+       "due": "2026-02-02"
+      },
+      {
+       "from": "2026-02-01",
+       "to": "2026-02-07",
+       "due": "2026-02-09"
+      },
+      {
+       "from": "2026-02-08",
+       "to": "2026-02-14",
+       "due": "2026-02-17"
+      },
+      {
+       "from": "2026-02-15",
+       "to": "2026-02-21",
+       "due": "2026-02-23"
+      },
+      {
+       "from": "2026-02-22",
+       "to": "2026-02-28",
+       "due": "2026-03-02"
+      },
+      {
+       "from": "2026-03-01",
+       "to": "2026-03-07",
+       "due": "2026-03-09"
+      },
+      {
+       "from": "2026-03-08",
+       "to": "2026-03-14",
+       "due": "2026-03-16"
+      },
+      {
+       "from": "2026-03-15",
+       "to": "2026-03-21",
+       "due": "2026-03-23"
+      },
+      {
+       "from": "2026-03-22",
+       "to": "2026-03-31",
+       "due": "2026-04-03"
+      },
+      {
+       "from": "2026-04-01",
+       "to": "2026-04-04",
+       "due": "2026-04-06"
+      },
+      {
+       "from": "2026-04-05",
+       "to": "2026-04-11",
+       "due": "2026-04-13"
+      },
+      {
+       "from": "2026-04-12",
+       "to": "2026-04-18",
+       "due": "2026-04-20"
+      },
+      {
+       "from": "2026-04-19",
+       "to": "2026-04-25",
+       "due": "2026-04-27"
+      },
+      {
+       "from": "2026-04-26",
+       "to": "2026-05-02",
+       "due": "2026-05-04"
+      },
+      {
+       "from": "2026-05-03",
+       "to": "2026-05-09",
+       "due": "2026-05-11"
+      },
+      {
+       "from": "2026-05-10",
+       "to": "2026-05-16",
+       "due": "2026-05-18"
+      },
+      {
+       "from": "2026-05-17",
+       "to": "2026-05-23",
+       "due": "2026-05-26"
+      },
+      {
+       "from": "2026-05-24",
+       "to": "2026-05-30",
+       "due": "2026-06-01"
+      },
+      {
+       "from": "2026-05-31",
+       "to": "2026-06-06",
+       "due": "2026-06-08"
+      },
+      {
+       "from": "2026-06-07",
+       "to": "2026-06-13",
+       "due": "2026-06-15"
+      },
+      {
+       "from": "2026-06-14",
+       "to": "2026-06-20",
+       "due": "2026-06-22"
+      },
+      {
+       "from": "2026-06-21",
+       "to": "2026-06-30",
+       "due": "2026-07-03"
+      },
+      {
+       "from": "2026-07-01",
+       "to": "2026-07-04",
+       "due": "2026-07-07"
+      },
+      {
+       "from": "2026-07-05",
+       "to": "2026-07-11",
+       "due": "2026-07-13"
+      },
+      {
+       "from": "2026-07-12",
+       "to": "2026-07-18",
+       "due": "2026-07-20"
+      },
+      {
+       "from": "2026-07-19",
+       "to": "2026-07-25",
+       "due": "2026-07-27"
+      },
+      {
+       "from": "2026-07-26",
+       "to": "2026-08-01",
+       "due": "2026-08-03"
+      },
+      {
+       "from": "2026-08-02",
+       "to": "2026-08-08",
+       "due": "2026-08-11"
+      },
+      {
+       "from": "2026-08-09",
+       "to": "2026-08-15",
+       "due": "2026-08-17"
+      },
+      {
+       "from": "2026-08-16",
+       "to": "2026-08-22",
+       "due": "2026-08-24"
+      },
+      {
+       "from": "2026-08-23",
+       "to": "2026-08-29",
+       "due": "2026-08-31"
+      },
+      {
+       "from": "2026-08-30",
+       "to": "2026-09-05",
+       "due": "2026-09-08"
+      },
+      {
+       "from": "2026-09-06",
+       "to": "2026-09-12",
+       "due": "2026-09-14"
+      },
+      {
+       "from": "2026-09-13",
+       "to": "2026-09-19",
+       "due": "2026-09-21"
+      },
+      {
+       "from": "2026-09-20",
+       "to": "2026-09-30",
+       "due": "2026-10-05"
+      },
+      {
+       "from": "2026-10-01",
+       "to": "2026-10-03",
+       "due": "2026-10-05"
+      },
+      {
+       "from": "2026-10-04",
+       "to": "2026-10-10",
+       "due": "2026-10-13"
+      },
+      {
+       "from": "2026-10-11",
+       "to": "2026-10-17",
+       "due": "2026-10-19"
+      },
+      {
+       "from": "2026-10-18",
+       "to": "2026-10-24",
+       "due": "2026-10-26"
+      },
+      {
+       "from": "2026-10-25",
+       "to": "2026-10-31",
+       "due": "2026-11-02"
+      },
+      {
+       "from": "2026-11-01",
+       "to": "2026-11-07",
+       "due": "2026-11-09"
+      },
+      {
+       "from": "2026-11-08",
+       "to": "2026-11-14",
+       "due": "2026-11-16"
+      },
+      {
+       "from": "2026-11-15",
+       "to": "2026-11-21",
+       "due": "2026-11-23"
+      },
+      {
+       "from": "2026-11-22",
+       "to": "2026-11-28",
+       "due": "2026-11-30"
+      },
+      {
+       "from": "2026-11-29",
+       "to": "2026-12-05",
+       "due": "2026-12-07"
+      },
+      {
+       "from": "2026-12-06",
+       "to": "2026-12-12",
+       "due": "2026-12-14"
+      },
+      {
+       "from": "2026-12-13",
+       "to": "2026-12-19",
+       "due": "2026-12-21"
+      },
+      {
+       "from": "2026-12-20",
+       "to": "2026-12-31",
+       "due": "2027-01-04"
+      }
+     ]
+    },
+    "monthly": {
+     "period": "published_calendar",
+     "due": {
+      "kind": "next_business_day"
+     },
+     "calendar": [
+      {
+       "from": "2026-01-01",
+       "to": "2026-01-31",
+       "due": "2026-02-20"
+      },
+      {
+       "from": "2026-02-01",
+       "to": "2026-02-28",
+       "due": "2026-03-20"
+      },
+      {
+       "from": "2026-03-01",
+       "to": "2026-03-31",
+       "due": "2026-04-30"
+      },
+      {
+       "from": "2026-04-01",
+       "to": "2026-04-30",
+       "due": "2026-05-20"
+      },
+      {
+       "from": "2026-05-01",
+       "to": "2026-05-31",
+       "due": "2026-06-22"
+      },
+      {
+       "from": "2026-06-01",
+       "to": "2026-06-30",
+       "due": "2026-07-31"
+      },
+      {
+       "from": "2026-07-01",
+       "to": "2026-07-31",
+       "due": "2026-08-20"
+      },
+      {
+       "from": "2026-08-01",
+       "to": "2026-08-31",
+       "due": "2026-09-21"
+      },
+      {
+       "from": "2026-09-01",
+       "to": "2026-09-30",
+       "due": "2026-11-02"
+      },
+      {
+       "from": "2026-10-01",
+       "to": "2026-10-31",
+       "due": "2026-11-20"
+      },
+      {
+       "from": "2026-11-01",
+       "to": "2026-11-30",
+       "due": "2026-12-21"
+      },
+      {
+       "from": "2026-12-01",
+       "to": "2026-12-31",
+       "due": "2027-02-01"
+      }
+     ]
+    },
+    "quarterly": {
+     "period": "published_calendar",
+     "due": {
+      "kind": "next_business_day"
+     },
+     "calendar": [
+      {
+       "from": "2026-01-01",
+       "to": "2026-03-31",
+       "due": "2026-04-30"
+      },
+      {
+       "from": "2026-04-01",
+       "to": "2026-06-30",
+       "due": "2026-07-31"
+      },
+      {
+       "from": "2026-07-01",
+       "to": "2026-09-30",
+       "due": "2026-11-02"
+      },
+      {
+       "from": "2026-10-01",
+       "to": "2026-12-31",
+       "due": "2027-02-01"
+      }
+     ]
+    }
+   },
+   "deposited": [
+    "withholding"
+   ],
+   "source": "S1"
+  },
+  "returns": [
+   {
+    "id": "RI-941",
+    "name": "Form RI-941, Employer's Quarterly Tax Return and Reconciliation",
+    "frequency": "quarterly",
+    "due": {
+     "kind": "last_day_of_month_after_quarter"
+    },
+    "contents": [
+     "Filed by the last day of the month after the quarter by every employer; quarterly payers send it with the payment.",
+     "Weekly and monthly payers use it to reconcile the quarter's payments; it is filed even if no tax was withheld in a quarter-ending month.",
+     "Electronic filing is required for weekly payers and for monthly payers averaging $200 or more a month; others may file on paper unless the business has $5,000+ of combined annual tax liability or over $100,000 of gross income.",
+     "Bulk filing is by Payroll Letter of Intent to Tax.VendorForms@tax.ri.gov, after which the contact receives a PIN notice and the Administrator User Guide."
+    ],
+    "source": "S2"
+   },
+   {
+    "id": "WTM",
+    "name": "Form WTM (RI-941M), monthly return for non-quarter-ending months",
+    "frequency": "monthly",
+    "due": {
+     "kind": "day_of_month_after",
+     "day": 20
+    },
+    "contents": [
+     "Only for monthly payers who are not required to file electronically; due on or before the 20th of the following month.",
+     "Electronic monthly payers make the payment only."
+    ],
+    "source": "S2"
+   },
+   {
+    "id": "RI-W-3",
+    "name": "Rhode Island W-3 reconciliation of all returns",
+    "frequency": "annual",
+    "due": {
+     "kind": "january_day_next_year",
+     "day": 31
+    },
+    "contents": [
+     "Due January 31, or at the termination of business: reconciles the weekly, monthly or quarterly returns with the W-2s and with the payments for the year.",
+     "W-2s are due to the State by January 31 and must be filed electronically (EFW2, .txt, ASCII) by employers with 25 or more Rhode Island employees or any claiming a Rhode Island tax credit.",
+     "1099s with Rhode Island income must be filed even with no Rhode Island tax withheld."
+    ],
+    "source": "S2"
+   }
+  ],
+  "notModelled": [
+   "Any year other than 2026 for due dates: no calendar was read. 2027 pay dates draw state_calendar_not_published until the 2027 booklet is added.",
+   "Rhode Island unemployment insurance (Department of Labor and Training), temporary disability / caregiver insurance contributions: no document read.",
+   "Rhode Island's legal-holiday list (the calendar itself is the oracle for 2026).",
+   "The tax-type codes for EFT credit payments (01102 weekly, 01103 monthly, 01104 quarterly) are recorded in the booklet but no payment file layout was read.",
+   "The W-2 / RI W-3 bulk template layouts and the Tax Portal upload steps."
+  ]
+ },
+ "channels": [
+  {
+   "id": "state:RI:tax-portal",
+   "function": "withholding returns and payments, bulk RI-941, W-2 / RI W-3 / 1099 upload",
+   "description": "Rhode Island Division of Taxation Tax Portal (taxportal.ri.gov); EFT credit payments with tax type codes 01102 (weekly), 01103 (monthly), 01104 (quarterly)",
+   "enrollment": [
+    "Register for a Rhode Island withholding account with the Division of Taxation (the registration steps were not read).",
+    "For bulk RI-941 filing: submit a Payroll Letter of Intent (LOI) to Tax.VendorForms@tax.ri.gov; on approval the listed contact receives a PIN notice and the Administrator User Guide from the Tax Portal group."
+   ],
+   "specs": "EFW2 .txt ASCII files for W-2s (maximum 49MB, zip above 5MB); the bulk RI-941 and RI W-3 templates were not read.",
+   "source": "S2"
+  }
+ ],
+ "notModelled": [
+  "Rhode Island unemployment and temporary disability insurance: not read.",
+  "Registration trigger and deadline: not read.",
+  "New-hire reporting: not read."
+ ]
+}

@@ -1,0 +1,126 @@
+{
+ "state": "IL",
+ "name": "Illinois",
+ "verifiedOn": "2026-11-04",
+ "sources": [
+  {
+   "id": "S1",
+   "title": "Illinois Publication 131, Withholding Income Tax Payment and Filing Requirements",
+   "url": "https://tax.illinois.gov/content/dam/soi/en/web/tax/research/publications/pubs/documents/pub-131.pdf",
+   "revision": "PUB-131 (R-01/26), January 2026",
+   "verifiedOn": "2026-11-04",
+   "verifiedBy": "read from the stored copy in watcher/state/snapshots/il-2a6ba9c9a5.txt.gz: When am I required to file Form IL-941, When am I required to pay, weekend due dates, How is my payment frequency determined, How do I pay and file (electronic mandates, FSET, ACH credit), the separate-payments-for-two-quarters note and its example. Not read: Publication 131-D (the due-date table), Publication 110 (W-2 filing), or any unemployment (IDES) rule."
+  }
+ ],
+ "agencies": {
+  "withholding": {
+   "name": "Illinois Department of Revenue",
+   "portalUrl": "https://mytax.illinois.gov",
+   "source": "S1"
+  }
+ },
+ "calendar": {
+  "weekendsRoll": true,
+  "holidays": {
+   "verified": false
+  },
+  "source": "S1"
+ },
+ "mandates": {
+  "efile": {
+   "text": "All Forms IL-941 must be filed electronically.",
+   "source": "S1"
+  },
+  "epay": {
+   "text": "You must make withholding tax payments electronically if you are assigned to the semi-weekly payment schedule.",
+   "source": "S1"
+  }
+ },
+ "withholding": {
+  "applies": true,
+  "taxLineIds": {
+   "withholding": "IL_SIT",
+   "employeeInsurance": []
+  },
+  "returns": [
+   {
+    "id": "IL-941",
+    "name": "Form IL-941, Illinois Withholding Income Tax Return",
+    "frequency": "quarterly",
+    "due": {
+     "kind": "last_day_of_month_after_quarter"
+    },
+    "contents": [
+     "Due by the last day of the month after the quarter; filed electronically (waiver by Form IL-900-EW). Illinois has no annual reconciliation return.",
+     "Schedule P (Illinois Withholding Schedule) is completed with it; Schedules WC and WC-I report withholding credits.",
+     "Filed through MyTax Illinois or the Federal/State Employment Taxes (FSET) program using IDOR-approved software."
+    ],
+    "source": "S1"
+   }
+  ],
+  "notModelled": [
+   "Publication 131-D (the published due-date table) was not read; dates here are computed from the rules in Publication 131.",
+   "Illinois unemployment insurance (Illinois Department of Employment Security): no document read.",
+   "Illinois's state-holiday list (weekends only are skipped, with a warning).",
+   "W-2 / 1099 filing (Publication 110) and the electronic mandate for them: named in Publication 131, rules not read.",
+   "The mid-year switch to semi-weekly after exceeding $12,000 in a quarter."
+  ],
+  "deposits": {
+   "kind": "assigned_frequency",
+   "rulesYear": 2026,
+   "interpretation": "Illinois assigns a MONTHLY or SEMI-WEEKLY payment schedule from the withholding reported in the look-back period (July 1 to June 30 before the calendar year; for 2026: July 1, 2024 to June 30, 2025). First-time taxpayers and those who reported $12,000 or less are MONTHLY; more than $12,000 is SEMI-WEEKLY. An employer who exceeds $12,000 of withholding within a quarter must start paying semi-weekly in the FOLLOWING quarter, for the rest of the year and the next year (that mid-year switch is the employer's to apply and is NOT modelled: supply the assigned frequency). MONTHLY: Form IL-501 payment by the 15th of the month after the month the tax was withheld. SEMI-WEEKLY: by Wednesday for amounts withheld the preceding Wednesday, Thursday or Friday, and by Friday for amounts withheld the preceding Saturday, Sunday, Monday or Tuesday. Illinois files a QUARTERLY return (Form IL-941) for everyone. Liability from two different quarters is paid in two separate payments, each identifying its reporting period: the guide's example is a Wednesday September 30, 2026 payday and a Thursday October 1, 2026 payday, both due Wednesday October 7, 2026, paid separately. A due date on a weekend or state holiday moves to the next business day.",
+   "lookback": {
+    "description": "Illinois withholding reported in the look-back period (July 1 to June 30 before the calendar year)",
+    "classes": [
+     {
+      "name": "monthly",
+      "maxInclusive": 1200000
+     },
+     {
+      "name": "semiweekly",
+      "minExclusive": 1200000
+     }
+    ],
+    "newEmployer": "monthly"
+   },
+   "frequencies": {
+    "monthly": {
+     "period": "month",
+     "due": {
+      "kind": "day_of_month_after",
+      "day": 15
+     }
+    },
+    "semiweekly": {
+     "period": "semiweekly",
+     "due": {
+      "kind": "semiweekly_following",
+      "afterFriday": 3,
+      "afterTuesday": 5
+     }
+    }
+   },
+   "deposited": [
+    "withholding"
+   ],
+   "source": "S1"
+  }
+ },
+ "channels": [
+  {
+   "id": "state:IL:mytax",
+   "function": "withholding payments (IL-501), IL-941 returns, W-2 filing",
+   "description": "MyTax Illinois, the FSET program (IDOR-approved tax-prep software files electronically), and ACH credit payments",
+   "enrollment": [
+    "Register for Illinois Withholding Income Tax; first return options are on Form IL-941 Step 1 or MyTax Illinois sign-up.",
+    "To file through software, use a program approved by IDOR under the Federal/State Employment Taxes (FSET) program (software you develop or purchase); to pay, MyTax Illinois, approved software, or the ACH credit option."
+   ],
+   "specs": "The FSET approval process and layouts were not read.",
+   "source": "S1"
+  }
+ ],
+ "notModelled": [
+  "Illinois unemployment insurance: not read.",
+  "New-hire reporting: not read."
+ ]
+}

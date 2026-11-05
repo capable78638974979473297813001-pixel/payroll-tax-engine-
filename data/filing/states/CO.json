@@ -1,0 +1,148 @@
+{
+ "state": "CO",
+ "name": "Colorado",
+ "verifiedOn": "2026-11-03",
+ "sources": [
+  {
+   "id": "S1",
+   "title": "Colorado Wage Withholding Tax Guide",
+   "url": "https://tax.colorado.gov/sites/tax/files/documents/Wage_Withholding_Tax_Guide_Jan_2026.pdf",
+   "revision": "January 2026",
+   "verifiedOn": "2026-11-03",
+   "verifiedBy": "read from the stored copy in watcher/state/snapshots/co-0afe64d6b9.txt.gz: Part 3 'Filing frequency and due dates' (the table, weekly filing, year-end weekly filing period and its worked example), 'Filing and payment options' (EFT, Revenue Online, paper DR 1094), correcting errors, and the January 31 W-2 requirement (DR 1093). Not read: the registration form steps, penalties beyond the first sentence, or any unemployment (CDLE) or FAMLI document."
+  }
+ ],
+ "agencies": {
+  "withholding": {
+   "name": "Colorado Department of Revenue",
+   "portalUrl": "https://tax.colorado.gov/revenue-online",
+   "source": "S1"
+  }
+ },
+ "calendar": {
+  "weekendsRoll": true,
+  "holidays": {
+   "verified": false
+  },
+  "source": "S1"
+ },
+ "mandates": {
+  "epay": {
+   "text": "Any employer who is required to remit wage withholding tax on a weekly basis is required to remit payment via electronic funds transfer (EFT).",
+   "source": "S1"
+  }
+ },
+ "withholding": {
+  "applies": true,
+  "taxLineIds": {
+   "withholding": "CO_SIT",
+   "employeeInsurance": []
+  },
+  "deposits": {
+   "kind": "assigned_frequency",
+   "rulesYear": 2026,
+   "interpretation": "Colorado sets a filing and remittance frequency from the employer's ANNUAL Colorado income tax withholding: quarterly under $7,000; monthly at least $7,000 but not more than $50,000; weekly $50,000 or more. The guide states $50,000 in both the monthly and the weekly row; this profile treats exactly $50,000 as monthly (the 'not more than' row) and flags the overlap here. The frequency is first set from the estimate on the employer's withholding account application, and the Department raises it on January 1 if actual withholding for a year exceeded the estimate, so the frequency is an INPUT (what the Department assigned) or is derived from a supplied annual liability. Weekly: the Saturday-to-Friday week, due the 3rd business day after the Friday; the final weekly period of the year ends December 31 whatever weekday it is (due the 3rd business day after December 31), and a week is NOT split at quarter ends. Monthly: the 15th of the following month. Quarterly: the last day of the month after the quarter. Each return covers wages PAID in the period. Due dates falling on a Saturday, Sunday or legal holiday move to the next business day. An EFT payment satisfies both filing and payment, so no separate return is made.",
+   "lookback": {
+    "description": "Colorado income tax withholding for a calendar year (estimated on the account application, then actual)",
+    "classes": [
+     {
+      "name": "quarterly",
+      "maxInclusive": 699999
+     },
+     {
+      "name": "monthly",
+      "minExclusive": 699999,
+      "maxInclusive": 5000000
+     },
+     {
+      "name": "weekly",
+      "minExclusive": 5000000
+     }
+    ],
+    "newEmployer": "quarterly"
+   },
+   "frequencies": {
+    "weekly": {
+     "period": "week_sat_fri",
+     "weekSplit": "year",
+     "due": {
+      "kind": "business_days_after_period_end",
+      "days": 3
+     }
+    },
+    "monthly": {
+     "period": "month",
+     "due": {
+      "kind": "day_of_month_after",
+      "day": 15
+     }
+    },
+    "quarterly": {
+     "period": "quarter",
+     "due": {
+      "kind": "last_day_of_month_after_quarter"
+     }
+    }
+   },
+   "deposited": [
+    "withholding"
+   ],
+   "source": "S1"
+  },
+  "returns": [
+   {
+    "id": "DR 1094",
+    "name": "Colorado W-2 Wage Withholding Tax Return (DR 1094)",
+    "frequency": "quarterly",
+    "due": {
+     "kind": "last_day_of_month_after_quarter"
+    },
+    "contents": [
+     "Monthly and quarterly filers (not weekly filers) must file a return for each period even if no tax is due; the due date follows the filing frequency (quarterly shown; monthly the 15th of the next month).",
+     "An employer who remits by EFT does not file a separate return: the EFT satisfies both payment and filing.",
+     "A paper return is only for employers not required to remit by EFT."
+    ],
+    "source": "S1"
+   },
+   {
+    "id": "DR 1093",
+    "name": "Annual Transmittal of State W-2 Forms (DR 1093)",
+    "frequency": "annual",
+    "due": {
+     "kind": "january_day_next_year",
+     "day": 31
+    },
+    "contents": [
+     "Copies of every W-2 go to the employee and to the Department no later than January 31 of the following year.",
+     "Employers who file W-2s electronically (Revenue Online) do not submit a paper DR 1093 except to remit additional tax or claim a refund.",
+     "An overpayment not deducted from a later period in the same year is claimed on the DR 1093 filed before January 31, or later by a Claim for Refund (DR 0137)."
+    ],
+    "source": "S1"
+   }
+  ],
+  "notModelled": [
+   "Colorado unemployment insurance (Colorado Department of Labor and Employment) and FAMLI premiums: no document read.",
+   "The registration form and its steps, and the Colorado new-hire reporting deadline.",
+   "The Revenue Online file layouts for electronic W-2 submission.",
+   "Colorado's legal-holiday list (weekends only are skipped, with a warning).",
+   "Penalty and interest amounts beyond the guide's opening sentence (the greater of $5 or 5% of the unpaid tax)."
+  ]
+ },
+ "channels": [
+  {
+   "id": "state:CO:revenue-online",
+   "function": "withholding payments (EFT), returns, and electronic W-2 submission",
+   "description": "Colorado Revenue Online: EFT payment satisfies filing and payment; W-2s are submitted electronically through 'Submit Year-End Withholding'",
+   "enrollment": [
+    "Register with the Colorado Department of Revenue as an employer subject to wage withholding (the guide's registration steps were not read).",
+    "Create a Revenue Online login to file and pay online.",
+    "For electronic W-2 submission: Revenue Online > 'Submit Year-End Withholding' > 'Request Withholding Submitter Access', at least five days before the first electronic filing."
+   ],
+   "specs": "Electronic W-2 submission file layout: not read.",
+   "source": "S1"
+  }
+ ],
+ "notModelled": [
+  "Colorado unemployment insurance (CDLE) and FAMLI: not read."
+ ]
+}

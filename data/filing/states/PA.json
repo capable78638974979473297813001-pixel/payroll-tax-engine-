@@ -1,0 +1,144 @@
+{
+ "state": "PA",
+ "name": "Pennsylvania",
+ "verifiedOn": "2026-11-04",
+ "sources": [
+  {
+   "id": "S1",
+   "title": "Pennsylvania Employer Withholding Information Guide, REV-415 (SU)",
+   "url": "https://www.pa.gov/agencies/revenue/resources/tax-types-and-information/employer-withholding",
+   "revision": "REV-415 (SU) 01-23, cross-checked with the Department's Employer Withholding page",
+   "verifiedOn": "2026-11-04",
+   "verifiedBy": "read from the stored copy in watcher/state/snapshots/pa-9fa00e5442.txt.gz (frequency determination; the URL in the watcher's record is truncated: confirm it from the Department's Employer Withholding page) and the page stored as pa-8251b0b3ee (https://www.pa.gov/agencies/revenue/resources/tax-types-and-information/employer-withholding), which gives the same four schedules. Not read: Pennsylvania unemployment (L&I) and local earned income tax rules."
+  }
+ ],
+ "agencies": {
+  "withholding": {
+   "name": "Pennsylvania Department of Revenue",
+   "portalUrl": "https://mypath.pa.gov",
+   "source": "S1"
+  }
+ },
+ "calendar": {
+  "weekendsRoll": true,
+  "holidays": {
+   "verified": false
+  },
+  "source": "S1"
+ },
+ "mandates": {},
+ "withholding": {
+  "applies": true,
+  "taxLineIds": {
+   "withholding": "PA_SIT",
+   "employeeInsurance": []
+  },
+  "returns": [
+   {
+    "id": "PA-W-3",
+    "name": "Pennsylvania Quarterly Withholding Return (W-3) and quarterly reconciliation",
+    "frequency": "quarterly",
+    "due": {
+     "kind": "last_day_of_month_after_quarter"
+    },
+    "contents": [
+     "Every entity required to withhold files a quarterly return and reconciliation for each quarter, plus W-2s for all employees and W-2 transmittals.",
+     "Returns are filed whether or not taxable transactions occur; myPATH, Telefile (1-800-748-8299) and paper for the income statements are the options.",
+     "myPATH filers may request an email reminder five business days before each due date."
+    ],
+    "source": "S1"
+   }
+  ],
+  "notModelled": [
+   "The page's quarterly reconciliation and W-2 transmittal due dates: the January 31 and quarterly reconciliation dates are not stated in the text read, so only the quarterly return is recorded.",
+   "Pennsylvania unemployment (Department of Labor & Industry) and local earned income tax: no document read.",
+   "Whether Pennsylvania's flat 3.07% applies to every pay (rate belongs to the paycheck engine, not this layer).",
+   "Pennsylvania's legal-holiday list and what the Department counts as a banking day (weekends only are skipped, with a warning).",
+   "Electronic filing mandates: the page lists myPATH and Telefile without stating a mandate."
+  ],
+  "deposits": {
+   "kind": "assigned_frequency",
+   "interpretation": "Pennsylvania sets the payment frequency from the withholding EXPECTED each quarter: under $300 QUARTERLY (by the last day of April, July, October and January); $300 to $999.99 MONTHLY (by the 15th of the succeeding month for January to November wages and by January 31 for December wages); $1,000 to $4,999.99 SEMI-MONTHLY (within three banking days after the close of each semi-monthly period; the periods end on the 15th and the last day of the month); $5,000 or more a quarter ($20,000 a year) SEMI-WEEKLY (the Wednesday after a Wednesday-Friday payday, the Friday after a Saturday-Tuesday payday). The employer decides from its expected quarterly withholding and may ask for a more frequent schedule 15 days before a quarter begins, so the frequency is an INPUT or is derived from a supplied expected quarterly liability. Separate account IDs exist for employer (W-2), other income (1099-MISC/NEC) and retirement (1099-R) withholding; this profile covers the employer account. Returns are filed whether or not taxable transactions occur. Local earned income tax is separate and not modelled.",
+   "lookback": {
+    "description": "Pennsylvania withholding expected for a quarter",
+    "classes": [
+     {
+      "name": "quarterly",
+      "maxInclusive": 29999
+     },
+     {
+      "name": "monthly",
+      "minExclusive": 29999,
+      "maxInclusive": 99999
+     },
+     {
+      "name": "semimonthly",
+      "minExclusive": 99999,
+      "maxInclusive": 499999
+     },
+     {
+      "name": "semiweekly",
+      "minExclusive": 499999
+     }
+    ],
+    "newEmployer": "quarterly"
+   },
+   "frequencies": {
+    "quarterly": {
+     "period": "quarter",
+     "due": {
+      "kind": "last_day_of_month_after_quarter"
+     }
+    },
+    "monthly": {
+     "period": "month",
+     "due": {
+      "kind": "day_of_month_after",
+      "day": 15,
+      "decemberDay": 31
+     }
+    },
+    "semimonthly": {
+     "period": "eighth_monthly",
+     "periodEnds": [
+      15,
+      31
+     ],
+     "due": {
+      "kind": "business_days_after_period_end",
+      "days": 3
+     }
+    },
+    "semiweekly": {
+     "period": "semiweekly",
+     "due": {
+      "kind": "semiweekly_following",
+      "afterFriday": 3,
+      "afterTuesday": 5
+     }
+    }
+   },
+   "deposited": [
+    "withholding"
+   ],
+   "source": "S1"
+  }
+ },
+ "channels": [
+  {
+   "id": "state:PA:mypath",
+   "function": "withholding returns and payments, W-2 and 1099 income statements",
+   "description": "myPATH (mypath.pa.gov) online registration, filing and payment; Telefile 1-800-748-8299; paper accepted for PA W-2, 1099-MISC, 1099-NEC and 1099-R statements",
+   "enrollment": [
+    "Obtain a federal EIN first, then register for withholding accounts through the Pennsylvania Online Business Tax Registration at mypath.pa.gov.",
+    "Register, file and pay each withholding type under a separate account ID: Employer Withholding (W-2), Other Income Withholding (1099-MISC/NEC), Retirement Withholding (1099-R)."
+   ],
+   "specs": "Not read.",
+   "source": "S1"
+  }
+ ],
+ "notModelled": [
+  "Pennsylvania unemployment insurance and local taxes: not read.",
+  "New-hire reporting: not read."
+ ]
+}

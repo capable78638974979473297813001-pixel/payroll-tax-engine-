@@ -1,0 +1,159 @@
+{
+ "state": "NJ",
+ "name": "New Jersey",
+ "verifiedOn": "2026-11-04",
+ "sources": [
+  {
+   "id": "S1",
+   "title": "New Jersey Employer Guide to Withholding (NJ-WT)",
+   "url": "https://www.nj.gov/treasury/taxation/pdf/current/njwt.pdf",
+   "revision": "NJ-WT, September 2025",
+   "verifiedOn": "2026-11-04",
+   "verifiedBy": "read from the stored copy in watcher/state/snapshots/nj-fb66759b8e.txt.gz: 'Quarterly Return - Form NJ-927', Quarterly Due Dates, Seasonal Businesses, Monthly Payments - Form NJ-500 and Monthly Due Dates, Weekly Payers - Form NJ-927-W, Weekly Due Dates and Guidelines, domestic (household) employers, penalties, EFT codes and the required date format, and the worked example. THE SEPTEMBER 2025 EDITION. Not read: unemployment, disability and family-leave reporting rules administered by the Department of Labor and Workforce Development."
+  }
+ ],
+ "agencies": {
+  "withholding": {
+   "name": "New Jersey Division of Taxation",
+   "portalUrl": "https://www.nj.gov/treasury/taxation/",
+   "source": "S1"
+  }
+ },
+ "calendar": {
+  "weekendsRoll": true,
+  "holidays": {
+   "verified": false
+  },
+  "source": "S1"
+ },
+ "mandates": {
+  "epay": {
+   "text": "You must submit the total of all tax withheld for the quarter (after taking credit for monthly and/or weekly payments made), electronically, by 11:59 p.m. on the 30th day of the month following the end of the quarter.",
+   "source": "S1"
+  }
+ },
+ "withholding": {
+  "applies": true,
+  "taxLineIds": {
+   "withholding": "NJ_SIT",
+   "employeeInsurance": []
+  },
+  "deposits": {
+   "kind": "assigned_frequency",
+   "rulesYear": 2025,
+   "interpretation": "New Jersey files a quarterly return (Form NJ-927) due the 30th of the month after the quarter (April 30, July 30, October 30, January 30), even with no tax. STANDARD employers: if MORE than $500 of New Jersey income tax was collected in the first and/or second month of a quarter, that month is paid with Form NJ-500 by the 15th of the next month (each month is tested on its own); the third month is always paid with the quarterly return, as is any month of $500 or less. WEEKLY payers: an employer with a prior-year liability of $10,000 or more of income tax withheld pays by the Wednesday after the pay week, according to its pay-period frequency (a bi-weekly payroll pays bi-weekly, a monthly payroll monthly); it still files the quarterly return. The booklet's example is a Friday payday (June 7, 2024) paid Wednesday June 12; INTERPRETATION: pay weeks are read as Saturday to Friday, so a Saturday payday falls in the following week, and a week that runs across a quarter end is paid separately for each quarter (the EFT tax-period end date is the quarter's). Household (domestic) employers file and pay once a year with Form NJ-927-H by January 31 (an input, never derived). The prior-year $10,000 test decides weekly versus standard; the look-back amount supplied here is that prior-year liability. Unemployment, disability and family-leave contributions are reported on the same NJ-927 but belong to the Department of Labor and Workforce Development and are not deposited here.",
+   "lookback": {
+    "description": "New Jersey income tax withheld in the prior year",
+    "classes": [
+     {
+      "name": "weekly",
+      "minExclusive": 999999
+     },
+     {
+      "name": "standard",
+      "maxInclusive": 999999
+     }
+    ],
+    "newEmployer": "standard"
+   },
+   "frequencies": {
+    "weekly": {
+     "period": "week_sat_fri",
+     "due": {
+      "kind": "next_weekday_after_period_end",
+      "weekday": 3
+     }
+    },
+    "standard": {
+     "period": "month_threshold",
+     "thresholdExclusive": 50000,
+     "monthlyDueDay": 15,
+     "due": {
+      "kind": "day_of_month_after_quarter",
+      "day": 30
+     }
+    },
+    "household": {
+     "period": "year",
+     "due": {
+      "kind": "january_day_next_year",
+      "day": 31
+     }
+    }
+   },
+   "deposited": [
+    "withholding"
+   ],
+   "source": "S1"
+  },
+  "returns": [
+   {
+    "id": "NJ-927",
+    "name": "Form NJ-927 (NJ-927-W for weekly payers), Employer's Quarterly Report",
+    "frequency": "quarterly",
+    "due": {
+     "kind": "day_of_month_after_quarter",
+     "day": 30
+    },
+    "contents": [
+     "Due the 30th of the month after the quarter, even if no tax was withheld; seasonal businesses file all four quarters.",
+     "Reports New Jersey income tax withheld together with unemployment, workforce, family leave and disability wage information (the latter administered by the Department of Labor and Workforce Development).",
+     "The total for the quarter, after credit for monthly and weekly payments, is paid electronically with it."
+    ],
+    "source": "S1"
+   },
+   {
+    "id": "NJ-500",
+    "name": "Form NJ-500, monthly payment (also used for weekly payments)",
+    "frequency": "monthly",
+    "due": {
+     "kind": "day_of_month_after",
+     "day": 15
+    },
+    "contents": [
+     "Required for the first and second months of a quarter when more than $500 was collected; due the 15th of the following month.",
+     "Weekly payers use it for their weekly payments."
+    ],
+    "source": "S1"
+   },
+   {
+    "id": "NJ-927-H",
+    "name": "Form NJ-927-H, household employer annual return",
+    "frequency": "annual",
+    "due": {
+     "kind": "january_day_next_year",
+     "day": 31
+    },
+    "contents": [
+     "Domestic employers report and pay income tax withholding and unemployment and disability insurance electronically once a year, by January 31 for the prior year; they do not file NJ-927 or NJ-500 unless they also have regular employees."
+    ],
+    "source": "S1"
+   }
+  ],
+  "notModelled": [
+   "The September 2025 edition is the only one read; confirm against the Division's current guide.",
+   "Form NJ-W-3 (annual reconciliation) and W-2 / 1099 filing: the table of contents lists them (pages 16-19) but the section text was not read, so no due date is recorded.",
+   "New Jersey unemployment, disability and family-leave contributions (Department of Labor and Workforce Development): not deposited here.",
+   "Contractor (construction) withholdings, pension and gambling withholdings.",
+   "New Jersey's legal-holiday list (weekends only are skipped, with a warning).",
+   "ACH debit/credit registration; EFT codes are recorded in the guide (quarterly 01130, monthly 01120, weekly 01170) but no payment file layout was read."
+  ]
+ },
+ "channels": [
+  {
+   "id": "state:NJ:online-services",
+   "function": "withholding payments, quarterly returns, W-2/1099 filing",
+   "description": "New Jersey Division of Taxation online filing and payment (NJ Employer Quarterly Report); ACH debit and credit with the guide's EFT codes and the quarter's tax-period end date",
+   "enrollment": [
+    "Register as a New Jersey employer online (the guide says an FEIN is required first, and a 10-digit New Jersey Corporate Identification Number for corporate entities).",
+    "For ACH debit or credit: register as an ACH payer and use the payment-frequency codes and the quarter-end tax period date (year, month, last day, e.g. 240630)."
+   ],
+   "specs": "EFT payment codes and date format as printed in the guide; the W-2/NJ-W-3 filing layouts were not read.",
+   "source": "S1"
+  }
+ ],
+ "notModelled": [
+  "New Jersey unemployment, disability and family-leave deposits: not read.",
+  "New-hire reporting: not read."
+ ]
+}

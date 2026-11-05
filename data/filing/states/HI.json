@@ -1,0 +1,139 @@
+{
+ "state": "HI",
+ "name": "Hawaii",
+ "verifiedOn": "2026-11-04",
+ "sources": [
+  {
+   "id": "S1",
+   "title": "Hawaii Department of Taxation, Booklet A: Employer's Tax Guide",
+   "url": "https://files.hawaii.gov/tax/news/pubs/25BkltA.pdf",
+   "revision": "Booklet A (Rev. 2025)",
+   "verifiedOn": "2026-11-04",
+   "verifiedBy": "read from the stored copy in watcher/state/snapshots/hi-dea958dcf2.txt.gz: the calendar of employer due dates, Section 3 'Determination of Tax Remittance Frequency' (quarterly, monthly, semiweekly and the Three-Day Banking Rule), the HW-14, HW-30 and HW-2 sections, and the electronic filing and penalty notes. The extracted text drops the heading and opening sentence of the semiweekly paragraph (its dollar threshold and federal-schedule condition), so the semiweekly derivation is NOT modelled. THE 2025 EDITION."
+  }
+ ],
+ "agencies": {
+  "withholding": {
+   "name": "Hawaii Department of Taxation",
+   "portalUrl": "https://hitax.hawaii.gov",
+   "source": "S1"
+  }
+ },
+ "calendar": {
+  "weekendsRoll": true,
+  "holidays": {
+   "verified": false
+  },
+  "source": "S1"
+ },
+ "mandates": {},
+ "withholding": {
+  "applies": true,
+  "taxLineIds": {
+   "withholding": "HI_SIT",
+   "employeeInsurance": []
+  },
+  "returns": [
+   {
+    "id": "HW-14",
+    "name": "Form HW-14, Withholding Tax Return (quarterly return; periodic returns may be e-filed on Hawaii Tax Online)",
+    "frequency": "quarterly",
+    "due": {
+     "kind": "day_of_month_after_quarter",
+     "day": 15
+    },
+    "contents": [
+     "Filed by the 15th day of the month following the close of the filing period; Form VP-1 accompanies the remittance.",
+     "Periodic HW-14 returns, including amended returns, may be electronically filed, and payments made, on Hawaii Tax Online."
+    ],
+    "source": "S1"
+   },
+   {
+    "id": "HW-30",
+    "name": "Form HW-30, Employer's Annual Transmittal of Hawaii Income Tax Withheld from Wages",
+    "frequency": "annual",
+    "due": {
+     "kind": "january_day_next_year",
+     "day": 31
+    },
+    "contents": [
+     "Filed with copy A of the HW-2s or copy 1 of the federal W-2s; not needed when EFW-2 files are uploaded through Hawaii Tax Online, Simple File Import or the Bulk File System.",
+     "Employees receive HW-2 or W-2 copies by January 31; the State transmittal Form N-196 with federal 1099s is due by February 28 (29 in a leap year)."
+    ],
+    "source": "S1"
+   }
+  ],
+  "notModelled": [
+   "The semiweekly threshold and its federal-schedule condition: the paragraph's opening sentence is missing from the stored text.",
+   "Hawaii unemployment insurance (Department of Labor and Industrial Relations): no document read.",
+   "Hawaii's state-holiday list and the Three-Day Banking Rule's extra day (weekends only are skipped, with a warning).",
+   "The Hawaii Tax Online Bulk File System layouts and the electronic filing mandate under section 231-8.5 HRS (named in the penalty section, thresholds not read).",
+   "Whether the 2025 edition is current."
+  ],
+  "deposits": {
+   "kind": "assigned_frequency",
+   "rulesYear": 2025,
+   "interpretation": "Hawaii sets the remittance frequency from the ANNUAL State withholding liability: $5,000 or less QUARTERLY (Form VP-1 by the 15th day of the month following the quarter); more than $5,000 and not more than $40,000 MONTHLY (VP-1 by the 15th of the month following the month). Above $40,000 the booklet describes a SEMIWEEKLY schedule that follows the IRS semi-weekly schedule (wages paid Wednesday to Friday due the Wednesday after, Saturday to Tuesday the Friday after, with the federal Three-Day Banking Rule: if a weekday in the three after the period end is a banking holiday the employer gets one more banking day), but the stored text does not include the paragraph's opening condition, so a look-back above $40,000 does NOT derive a frequency (an error is returned) and 'semiweekly' must be supplied; its holiday extension is not applied because the state holiday list is unverified (weekends only). Hawaii does not use the federal four-quarter look-back. The frequency is otherwise an INPUT or derived from the annual liability supplied.",
+   "lookback": {
+    "description": "Annual Hawaii State withholding tax liability",
+    "classes": [
+     {
+      "name": "quarterly",
+      "maxInclusive": 500000
+     },
+     {
+      "name": "monthly",
+      "minExclusive": 500000,
+      "maxInclusive": 4000000
+     }
+    ],
+    "newEmployer": "quarterly"
+   },
+   "frequencies": {
+    "quarterly": {
+     "period": "quarter",
+     "due": {
+      "kind": "day_of_month_after_quarter",
+      "day": 15
+     }
+    },
+    "monthly": {
+     "period": "month",
+     "due": {
+      "kind": "day_of_month_after",
+      "day": 15
+     }
+    },
+    "semiweekly": {
+     "period": "semiweekly",
+     "due": {
+      "kind": "semiweekly_following",
+      "afterFriday": 3,
+      "afterTuesday": 5
+     }
+    }
+   },
+   "deposited": [
+    "withholding"
+   ],
+   "source": "S1"
+  }
+ },
+ "channels": [
+  {
+   "id": "state:HI:hawaii-tax-online",
+   "function": "withholding returns and payments, W-2/HW-2 uploads, bulk filing",
+   "description": "Hawaii Tax Online (hitax.hawaii.gov): HW-14 e-filing and payments; EFW-2 uploads via Simple File Import or the Bulk File System",
+   "enrollment": [
+    "Register for a Hawaii withholding account with the Department of Taxation (steps not read) and use Hawaii Tax Online.",
+    "Large filers must file electronically under section 231-8.5 HRS (the threshold was not read)."
+   ],
+   "specs": "The Bulk File System and Simple File Import layouts: not read.",
+   "source": "S1"
+  }
+ ],
+ "notModelled": [
+  "Hawaii unemployment insurance: not read.",
+  "New-hire reporting: not read."
+ ]
+}

@@ -1,0 +1,135 @@
+{
+ "state": "WV",
+ "name": "West Virginia",
+ "verifiedOn": "2026-11-04",
+ "sources": [
+  {
+   "id": "S1",
+   "title": "West Virginia Tax Division: Withholding Help and General Information (web page)",
+   "url": "https://tax.wv.gov/Business/Withholding/HelpAndGeneralInformation/Pages/WithholdingHelpAndGeneralInformation.aspx",
+   "revision": "web page, no edition printed; stored copy checked 2026-11-04",
+   "verifiedOn": "2026-11-04",
+   "verifiedBy": "read from the stored copy in watcher/state/snapshots/wv-800855f068.txt.gz: How to Register and General Information - Employer's Withholding (remittance, quarterly returns, EFT threshold, annual filers, W-2 and IT-103 reconciliation, electronic filing for payroll services)."
+  }
+ ],
+ "agencies": {
+  "withholding": {
+   "name": "West Virginia State Tax Department, Tax Division",
+   "portalUrl": "https://mytaxes.wvtax.gov",
+   "source": "S1"
+  }
+ },
+ "calendar": {
+  "weekendsRoll": true,
+  "holidays": {
+   "verified": false
+  },
+  "source": "S1"
+ },
+ "mandates": {
+  "efile": {
+   "text": "For periods beginning after December 31, 2024, any employer that uses a payroll service or is required to file a withholding return for more than 10 employees shall file the returns electronically. Failure to do so can result in a penalty of $25 per employee for whom the return was not filed electronically.",
+   "source": "S1"
+  },
+  "epay": {
+   "text": "Any employer whose tax liability exceeds $50,000 during the previous calendar year is required to make all payments by Electronic Funds Transfer.",
+   "source": "S1"
+  }
+ },
+ "withholding": {
+  "applies": true,
+  "taxLineIds": {
+   "withholding": "WV_SIT",
+   "employeeInsurance": []
+  },
+  "returns": [
+   {
+    "id": "WV-quarterly",
+    "name": "West Virginia quarterly withholding return",
+    "frequency": "quarterly",
+    "due": {
+     "kind": "last_day_of_month_after_quarter"
+    },
+    "contents": [
+     "Due the last day of the month following the end of the quarter; not required of annual filers."
+    ],
+    "source": "S1"
+   },
+   {
+    "id": "IT-103",
+    "name": "Form WV/IT-103, Year End Reconciliation, with W-2 copies",
+    "frequency": "annual",
+    "due": {
+     "kind": "january_day_next_year",
+     "day": 31
+    },
+    "contents": [
+     "A copy of each employee's W-2 goes to the Tax Division with the reconciliation no later than January 31; employees get their W-2 by January 31.",
+     "Employers who use a payroll service or file for more than 10 employees file electronically (penalty $25 per employee otherwise); smaller filers are encouraged to use MyTaxes."
+    ],
+    "source": "S1"
+   }
+  ],
+  "notModelled": [
+   "West Virginia unemployment insurance (WorkForce West Virginia): no document read.",
+   "West Virginia's legal-holiday list (weekends only are skipped, with a warning).",
+   "Form numbers of the monthly and quarterly returns (the page says tax reporting forms are computer-generated and mailed before their due dates).",
+   "EFT enrollment details (WV/EFT-5 application) and the MyTaxes file layouts."
+  ],
+  "deposits": {
+   "kind": "assigned_frequency",
+   "interpretation": "West Virginia employers remit the tax withheld on or before the 15th day of the succeeding month (MONTHLY) and file a quarterly return by the last day of the month after the quarter that reconciles the three months. Employers who withhold LESS than $600 annually, or who employ certain domestic and household employees, file the annual return and pay once a year, due January 31 of the succeeding year (ANNUAL; an input, never derived: the page gives the $600 figure as a continuing exception). No other schedule is described, so there is no semi-weekly rule modelled and no look-back derivation: monthly is the default.",
+   "lookback": {
+    "description": "Annual withholding (only to identify annual filers)",
+    "classes": [
+     {
+      "name": "annual",
+      "maxInclusive": 59999
+     },
+     {
+      "name": "monthly",
+      "minExclusive": 59999
+     }
+    ],
+    "newEmployer": "monthly"
+   },
+   "frequencies": {
+    "monthly": {
+     "period": "month",
+     "due": {
+      "kind": "day_of_month_after",
+      "day": 15
+     }
+    },
+    "annual": {
+     "period": "year",
+     "due": {
+      "kind": "january_day_next_year",
+      "day": 31
+     }
+    }
+   },
+   "deposited": [
+    "withholding"
+   ],
+   "source": "S1"
+  }
+ },
+ "channels": [
+  {
+   "id": "state:WV:mytaxes",
+   "function": "withholding returns and payments, W-2 and IT-103 reconciliation",
+   "description": "West Virginia MyTaxes; EFT by application (online or WV/EFT-5); employers using a payroll service must file electronically",
+   "enrollment": [
+    "Register with the Tax Division (Business Registration Application); the Business Registration Certificate carries the West Virginia Tax Identification Number.",
+    "Apply for Electronic Funds Transfer online or with form WV/EFT-5; EFT is required above $50,000 of prior-year liability."
+   ],
+   "specs": "Not read.",
+   "source": "S1"
+  }
+ ],
+ "notModelled": [
+  "West Virginia unemployment insurance: not read.",
+  "New-hire reporting: not read."
+ ]
+}

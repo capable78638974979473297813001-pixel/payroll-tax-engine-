@@ -1,0 +1,126 @@
+{
+ "state": "AL",
+ "name": "Alabama",
+ "verifiedOn": "2026-11-04",
+ "sources": [
+  {
+   "id": "S1",
+   "title": "Alabama Withholding Tax Tables and Instructions for Employers and Withholding Agents",
+   "url": "https://www.revenue.alabama.gov/wp-content/uploads/2026/01/whbooklet_0126.pdf",
+   "revision": "booklet posted January 2026 (Form A-4 Rev. 4/2025 inside)",
+   "verifiedOn": "2026-11-04",
+   "verifiedBy": "read from the stored copy in watcher/state/snapshots/al-7b1543356b.txt.gz: Mailing Addresses and Due Dates (electronic threshold, Form A-3 date), Withholding Tax Returns (Form A-1, monthly Form A-6 rule), amended returns, the A-3 reconciliation and information return dates. Not read: the occupational tax sections, Alabama unemployment compensation."
+  }
+ ],
+ "agencies": {
+  "withholding": {
+   "name": "Alabama Department of Revenue, Withholding Tax Section",
+   "portalUrl": "https://myalabamataxes.alabama.gov",
+   "source": "S1"
+  }
+ },
+ "calendar": {
+  "weekendsRoll": true,
+  "holidays": {
+   "verified": false
+  },
+  "source": "S1"
+ },
+ "mandates": {
+  "efile": {
+   "text": "If you make a single withholding tax payment of $750 or more, you are required to electronically file both your payment and your withholding tax return.",
+   "source": "S1"
+  }
+ },
+ "withholding": {
+  "applies": true,
+  "taxLineIds": {
+   "withholding": "AL_SIT",
+   "employeeInsurance": []
+  },
+  "returns": [
+   {
+    "id": "A-1",
+    "name": "Form A-1, quarterly withholding tax return (Form A-6 monthly)",
+    "frequency": "quarterly",
+    "due": {
+     "kind": "last_day_of_month_after_quarter"
+    },
+    "contents": [
+     "Filed even if no tax was withheld; an account that no longer withholds may be made inactive in My Alabama Taxes.",
+     "A single payment of $750 or more requires electronic filing of both payment and return."
+    ],
+    "source": "S1"
+   },
+   {
+    "id": "A-3",
+    "name": "Form A-3, Annual Withholding Tax Reconciliation, with W-2s",
+    "frequency": "annual",
+    "due": {
+     "kind": "january_day_next_year",
+     "day": 31
+    },
+    "contents": [
+     "Every employer that withheld tax during the preceding year files it by the last day of January with a copy of each W-2; a zero A-3 is required for active accounts with no withholding.",
+     "Employers submitting 10 or more W-2s, or who filed and paid electronically during the year, submit through the Department's website.",
+     "Information returns for payees (1099) go to the Department by March 15 unless Alabama tax was withheld, then with the A-3."
+    ],
+    "source": "S1"
+   }
+  ],
+  "notModelled": [
+   "Alabama unemployment compensation (Department of Workforce): no document read.",
+   "Occupational tax withholding (separate local-style tax): not modelled.",
+   "Alabama's legal-holiday list (weekends only are skipped, with a warning).",
+   "The My Alabama Taxes (MAT) bulk file layouts for A-3/W-2."
+  ],
+  "deposits": {
+   "kind": "assigned_frequency",
+   "rulesYear": 2026,
+   "interpretation": "Alabama employers file a quarterly return (Form A-1) and pay the tax withheld between the first and last day of the month after the quarter (April 30, July 31, October 31, January 31). An employer who withheld MORE than $1,000.00 in the first OR the second month of the quarter must also file a monthly return (Form A-6) and remit that month's tax by the 15th of the following month; each month is tested on its own, the third month is always paid with the quarterly return, and a month of $1,000 or less is paid with the quarterly return (the guide's example: $1,050 in January is due February 15, $800 in February waits for April 30). Employers withholding less than $1,000 a month may voluntarily file monthly ('monthly' frequency, due the 15th). Tax for a period longer than one calendar month is never reported on Form A-6. The frequency is therefore 'standard' (the threshold rule) or 'monthly' (voluntary), supplied as an input; a look-back amount does not decide it.",
+   "lookback": {
+    "description": "None: the monthly $1,000 test is applied to each month",
+    "classes": [],
+    "newEmployer": "standard"
+   },
+   "frequencies": {
+    "standard": {
+     "period": "month_threshold",
+     "thresholdExclusive": 100000,
+     "monthlyDueDay": 15,
+     "due": {
+      "kind": "last_day_of_month_after_quarter"
+     }
+    },
+    "monthly": {
+     "period": "month",
+     "due": {
+      "kind": "day_of_month_after",
+      "day": 15
+     }
+    }
+   },
+   "deposited": [
+    "withholding"
+   ],
+   "source": "S1"
+  }
+ },
+ "channels": [
+  {
+   "id": "state:AL:mat",
+   "function": "withholding returns and payments, A-3 reconciliation and W-2 filing",
+   "description": "My Alabama Taxes (MAT): electronic filing and payment, required for a single payment of $750 or more; web requests, ask-a-question and A-3/W-2 submission",
+   "enrollment": [
+    "Register for an Alabama withholding account with the Department (steps not read) and create a My Alabama Taxes login.",
+    "Employers with a single payment of $750 or more must file the payment and return electronically; 10 or more W-2s go through the Department's website."
+   ],
+   "specs": "MAT bulk layouts: not read.",
+   "source": "S1"
+  }
+ ],
+ "notModelled": [
+  "Alabama unemployment compensation: not read.",
+  "New-hire reporting: not read."
+ ]
+}

@@ -1,0 +1,126 @@
+{
+ "state": "MS",
+ "name": "Mississippi",
+ "verifiedOn": "2026-11-04",
+ "sources": [
+  {
+   "id": "S1",
+   "title": "Mississippi Withholding Income Tax Tables and Employer Instructions, Pub 89-700-25-1",
+   "url": "https://www.dor.ms.gov/sites/default/files/tax-forms/business/89700251revised1.13.2026.pdf",
+   "revision": "Pub 89-700-25-1 (Rev. 07/25), file revised 1.13.2026",
+   "verifiedOn": "2026-11-04",
+   "verifiedBy": "read from the stored copy in watcher/state/snapshots/ms-f79d3f52fc.txt.gz: the cover notes (electronic filing, FSET bulk program, W-2 and 1099 formats), instruction 14 (monthly or quarterly return) and the Mississippi Withholding Tax Calendar. Not read: Mississippi unemployment (MDES) rules."
+  }
+ ],
+ "agencies": {
+  "withholding": {
+   "name": "Mississippi Department of Revenue, Income Tax Bureau",
+   "portalUrl": "https://www.dor.ms.gov",
+   "source": "S1"
+  }
+ },
+ "calendar": {
+  "weekendsRoll": true,
+  "holidays": {
+   "verified": false
+  },
+  "source": "S1"
+ },
+ "mandates": {
+  "efile": {
+   "text": "Electronic reporting through Taxpayer Access Point (TAP) is mandatory for employers submitting 10 or more W-2s or 1099s.",
+   "source": "S1"
+  }
+ },
+ "withholding": {
+  "applies": true,
+  "taxLineIds": {
+   "withholding": "MS_SIT",
+   "employeeInsurance": []
+  },
+  "deposits": {
+   "kind": "assigned_frequency",
+   "rulesYear": 2025,
+   "interpretation": "Mississippi's Department of Revenue determines whether an employer files MONTHLY or QUARTERLY and tells it so; the guide gives no dollar thresholds, so the frequency is an INPUT and is never derived (a look-back amount draws an error, not a guess). Monthly: return and remittance by the 15th of the following month. Quarterly: return and remittance by the 15th of the month after the quarter (April 15, July 15, October 15, January 15). A return is filed for every period even with no tax due. A due date on a weekend or state holiday moves to the next working day.",
+   "lookback": {
+    "description": "None: the Department assigns the frequency",
+    "classes": [],
+    "newEmployer": "monthly"
+   },
+   "frequencies": {
+    "monthly": {
+     "period": "month",
+     "due": {
+      "kind": "day_of_month_after",
+      "day": 15
+     }
+    },
+    "quarterly": {
+     "period": "quarter",
+     "due": {
+      "kind": "day_of_month_after_quarter",
+      "day": 15
+     }
+    }
+   },
+   "deposited": [
+    "withholding"
+   ],
+   "source": "S1"
+  },
+  "returns": [
+   {
+    "id": "MS-return",
+    "name": "Mississippi monthly or quarterly withholding return (Form 89-105 coupon for paper filers)",
+    "frequency": "monthly",
+    "due": {
+     "kind": "day_of_month_after",
+     "day": 15
+    },
+    "contents": [
+     "Filed for every period even if no tax is due, on the frequency the Department assigns.",
+     "Paper filers (fewer than 10 W-2s or 1099s) use the preaddressed Form 89-105 coupons."
+    ],
+    "source": "S1"
+   },
+   {
+    "id": "89-140",
+    "name": "Annual Information Return, Form 89-140, with W-2s",
+    "frequency": "annual",
+    "due": {
+     "kind": "january_day_next_year",
+     "day": 31
+    },
+    "contents": [
+     "W-2s and the Annual Information Return are due to the State by January 31; 1099s with it by February 28.",
+     "W-2s are submitted in SSA EFW2 format including the RS record; 1099s in IRS Publication 1220 format.",
+     "Penalty for not filing electronically when required: $25 first instance, $500 each additional instance."
+    ],
+    "source": "S1"
+   }
+  ],
+  "notModelled": [
+   "Mississippi unemployment insurance (Mississippi Department of Employment Security): no document read.",
+   "The thresholds the Department uses to assign monthly or quarterly: not in the guide.",
+   "Mississippi's state-holiday list (weekends only are skipped, with a warning).",
+   "The January 31 W-2 date is used for the annual return; the February 28 date for 1099s is recorded in the contents only."
+  ]
+ },
+ "channels": [
+  {
+   "id": "state:MS:tap",
+   "function": "withholding returns and payments, W-2/1099 filing, bulk filing through FSET",
+   "description": "Mississippi Taxpayer Access Point (TAP); the Fed/State Employment Taxes (FSET) program lets payroll software transmit returns and payments in bulk",
+   "enrollment": [
+    "Register for a Mississippi withholding account (steps not read).",
+    "Employers with 10 or more W-2s or 1099s must file through TAP; payroll software that participates in FSET can transmit returns and payment information to the Department in bulk without TAP."
+   ],
+   "specs": "W-2: SSA EFW2 with the RS state record; other information returns: IRS Publication 1220. FSET layouts were not read.",
+   "source": "S1"
+  }
+ ],
+ "notModelled": [
+  "Mississippi unemployment insurance: not read.",
+  "New-hire reporting: not read."
+ ]
+}
