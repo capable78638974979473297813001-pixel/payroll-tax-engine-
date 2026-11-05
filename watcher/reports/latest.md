@@ -1,18 +1,18 @@
-# Source watch - 2026-11-03
+# Source watch - 2026-11-04
 
-**12 sources changed**
+**19 sources changed**
 
 **1 item need attention: see "Needs attention" below.** A run with no changes is not an all-clear while this list is not empty.
 
 | Changed | Minor | Unchanged | New | Unstable | Unreachable | Gone (404) | Blocks bots | Total |
 |---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| 12 | 5 | 1494 | 25 | 0 | 14 | 7 | 42 | 1599 |
+| 19 | 1 | 984 | 0 | 0 | 7 | 7 | 42 | 1060 |
 
-_Run took 3249 s. A change is only reported after a second fetch confirms it._
+_Run took 2603 s. A change is only reported after a second fetch confirms it._
 
-**Coverage: 1536 of 1599 sources were read this run; 63 could not be checked**, and 33 of those have never been read successfully, so nothing about them is being watched.
-917 of those are documents linked from pages. 43 other linked documents could not be read (a dead link, or a file the site won't serve) and are not counted above.
-**133 linked documents were not read this run** (the time budget ran out) and will be read first thing in the next run; until then they are not being watched.
+**Coverage: 1004 of 1060 sources were read this run; 56 could not be checked**, and 33 of those have never been read successfully, so nothing about them is being watched.
+378 of those are documents linked from pages. 6 other linked documents could not be read (a dead link, or a file the site won't serve) and are not counted above.
+**703 linked documents were not read this run** (the time budget ran out) and will be read first thing in the next run; until then they are not being watched.
 
 ## Needs attention (1)
 
@@ -47,6 +47,31 @@ No change needed, but worth knowing: a variance the data file already explains, 
 
 ## Changed
 
+### AR - Arkansas DFA: news
+
+<https://www.dfa.arkansas.gov/news/>  
+3 lines added, 8 removed; 1 links added, 1 removed
+
+- New link: [November 3, 2026 October 2026 General Revenue Report Posted October 2026 General Revenue Report…](https://www.dfa.arkansas.gov/news/october-2026-general-revenue-report-posted/)
+- Removed link: [July 13, 2026 State successfully implements major upgrade to accounting system FOR IMMEDIATE RELEASE: July 13, 2026 FOR MORE INFORMATION:Scott Hardin, DFA 501-352-9351, [email protected] State successfully implements major upgrade to accounting system LITTLE ROCK, Arkansas (July 13, 2026) – Today DFA Secretary Jim Hudson announced that the State of Arkansas successfully completed a major …](https://www.dfa.arkansas.gov/news/state-successfully-implements-major-upgrade-to-accounting-system/)
+
+<details><summary>What changed</summary>
+
+```diff
++November 3, 2026
++October 2026 General Revenue Report Posted
++October 2026 General Revenue Report…
+-July 13, 2026
+-State successfully implements major upgrade to accounting system
+-FOR IMMEDIATE RELEASE:
+-July 13, 2026
+-FOR MORE INFORMATION:Scott Hardin, DFA
+-501-352-9351, [email protected]
+-State successfully implements major upgrade to accounting system
+-LITTLE ROCK, Arkansas (July 13, 2026) - Today DFA Secretary Jim Hudson announced that the State of Arkansas successfully completed a major …
+```
+</details>
+
 ### AZ - City of Flagstaff -- City of Flagstaff announces minimum wage for 2026
 
 <https://www.flagstaff.az.gov/CivicAlerts.aspx?AID=2165>  
@@ -58,263 +83,336 @@ Used by: `data/minimum-wage/local/AZ-local-2026.json`, `data/minimum-wage/local/
 <details><summary>What changed</summary>
 
 ```diff
--City Facilities Closed Nov. 2 for Flood Response
--Homepage News
-+Winter Parking Restrictions Begin Nov. 1
++City Issues Declaration of Emergency for November 2026 Flooding Event
 +Homepage News
+-Homepage News
+-Numerous Road Closures in Flagstaff; Avoid Travel
 ```
 </details>
 
-### CA - FAQ (English) (linked from City of Santa Monica -- Minimum Wage)
+### CO - Boulder County -- Local Minimum Wage
 
-<https://santamonica.gov/media/Minimum_Wage/MinimumWageFAQ_English2023.pdf>  
+<https://bouldercounty.gov/departments/commissioners/local-minimum-wage/>  
 1 lines added, 1 removed
   
-Used by: `data/minimum-wage/sectoral/CA-sectoral-2026.json`, `data/minimum-wage/sectoral/CA-sectoral-2027.json`
+Used by: `data/minimum-wage/local/CO-local-2026.json`, `data/minimum-wage/local/CO-local-2027.json`
 
 
 <details><summary>What changed</summary>
 
 ```diff
--A third-party browser plugin, such as Ghostery or NoScript, is preventing JavaScript from running. Additional information is available in this support article.
-+A third-party browser plugin, such as Ghostery or NoScript, is preventing JavaScript from running.
+-Boulder County government offices, except the Elections Division, closed Nov. 3 for Election Day.
++Boulder County government offices closed Wednesday, Nov. 11, for Veterans Day.
+```
+</details>
+
+### DE - Delaware House Bill 13 (153rd General Assembly) + House Substitute No. 2 for HB13 -- bracket-restructuring proposal
+
+<https://legis.delaware.gov/BillDetail?LegislationId=141813>  
+2 lines added, 2 removed
+  
+Used by: `data/states/DE-2026.json`, `data/states/DE-2027.json`
+
+
+<details><summary>What changed</summary>
+
+```diff
+-153rd General Assembly (Present)
++153rd General Assembly (2025 - 2026)
+-If original bill has not been considered in committee, the substitute takes place of original bill. If original bill has been considered in committee, the substitute will be assigned to committee for consideration.
++The General Assembly has ended, the current status is the final status.
+```
+</details>
+
+### GA - Georgia DOR: press releases
+
+<https://dor.georgia.gov/press-releases>  
+2 lines added, 2 removed; 1 links added, 1 removed
+
+- New link: [Gov. Kemp, DOR Announce Distribution of Homeowner Tax Relief Grants November 03, 2026](https://dor.georgia.gov/press-releases/2026-11-03/gov-kemp-dor-announce-distribution-homeowner-tax-relief-grants)
+- Removed link: [Special Tax Refunds Begin Issuing May 04, 2026](https://dor.georgia.gov/press-releases/2026-05-04/special-tax-refunds-begin-issuing)
+
+<details><summary>What changed</summary>
+
+```diff
++Gov. Kemp, DOR Announce Distribution of Homeowner Tax Relief Grants
++November 03, 2026
+-Special Tax Refunds Begin Issuing
+-May 04, 2026
+```
+</details>
+
+### IN - Indiana DOR withholding
+
+<https://www.in.gov/dor/i-am-a/business-corp/withholding/>  
+1 links added, 1 removed
+
+- New link: [DOR Withholding Schema: IDORWTH2016V1.0](https://www.in.gov/dor/files/IDORWTH2016V1.0.zip)
+- Removed link: [DOR Withholding Schema: IDORWTH2016V1.0](https://www.in.gov/dor/files/IDORWTH2016V1.0)
+
+### KS - K.S.A. § 60-2310 — wage garnishment: maximum part of earnings subject to garnishment is the lesser of 25% of aggregate disposable earnings, or the amount by which disposable earnings exceed 30 times the federal minimum hourly wage
+
+<https://www.ksrevisor.gov/statutes/chapters/ch60/060_023_0010.html>  
+0 lines added, 5 removed; 0 links added, 5 removed
+  
+Used by: `data/garnishment/state-overrides-2026.json`, `data/garnishment/state-overrides-2027.json`
+
+- Removed link: [Item 1 Proposed Minutes 8/17 & 9/3, 2026](https://www.ksrevisor.gov/docs/LCC_Packet20260929/Item 1 PROPOSED MINUTES August 17 and September 3, 2026.pdf)
+- Removed link: [Item 3 USD 489 RAC Closing of Building Resolution](https://www.ksrevisor.gov/docs/LCC_Packet20260929/Item 3 USD 489 RAC Closing of Building Resolution 09-2026.pdf)
+- Removed link: [Item 4 Proposed Legislative Holidays 2027](https://www.ksrevisor.gov/docs/LCC_Packet20260929/Item 4 Proposed Recommended Legislative Holidays for 2027.pdf)
+- Removed link: [Agenda](https://www.ksrevisor.gov/docs/LCC_Packet20260929/LCC Agenda September 29, 2026.pdf)
+- Removed link: [Meeting Notice](https://www.ksrevisor.gov/statutes/chapters/ch60/docs/LCC_Packet20260929/LCC Meeting Notice September 29, 2026.pdf)
+
+<details><summary>What changed</summary>
+
+```diff
+-Meeting Notice
+-Agenda
+-Item 1 Proposed Minutes 8/17 & 9/3, 2026
+-Item 3 USD 489 RAC Closing of Building Resolution
+-Item 4 Proposed Legislative Holidays 2027
+```
+</details>
+
+### KY - Need to update or cancel a business account? (linked from Kentucky withholding)
+
+<http://revenue.ky.gov/Forms/10A104.pdf>  
+106 lines added, 109 removed
+
+
+<details><summary>What changed</summary>
+
+```diff
+-10A104 (04-25)
++10A104 (09-26)
+-Kentucky Coal Severance and Processing Tax _____________________
+-Kentucky Pass-Through Non-Resident WH _______________________
++Kentucky Pass-Through Non-Resident WH _____________________
++Other ________________________ ______________________
++Other ________________________ _____________________
++Other ________________________ _____________________
+-10A104 (04-25) Page 2
++10A104 (09-26) Page 2
+-Revenue. Please visit mytaxes.ky.gov.)
++Revenue. Please visit
++mytaxes.ky.gov.)
+-10A104 (04-25) Page 3
++Page 310A104 (09-26)
+-Provide an end date and/or any other updated information for existin
+-g responsible parties and/or adding additional responsible
++Provide an end date and/or any other updated information for existing
++responsible parties and/or adding additional responsible
+- Coal Severance and
+-Processing Tax
++ Other
++_________________
+- Coal Severance and
+-Processing Tax
+- Pass-Through Non-
+-Resident Withholding
+-10A104 (04-25) Page 4
++ Pass-Through Non-
++Resident Withholding
++Other
++___________________
++10A104 (09-26) Page 4
+-"final" return. A corporation or limited liability pass-through entity
+-organized in Kentucky shall
+-not file a final return before it is officially
++"final" return. A corporation or limited liability
++pass-through entity
++organized in Kentucky shall not file a final return before it is officially
+- Utility Gross Receipts
+... 175 more changed lines
+```
+</details>
+
+### MN - City of Saint Paul -- Minimum Wage Increases for Small and Micro Businesses (effective July 1, 2026)
+
+<https://www.stpaul.gov/news/city-saint-paul-minimum-wage-increases-small-and-micro-businesses>  
+4 lines added, 4 removed
+  
+Used by: `data/minimum-wage/local/MN-local-2026.json`, `data/minimum-wage/local/MN-local-2027.json`
+
+
+<details><summary>What changed</summary>
+
+```diff
++Saint Paul Commits $300,000 to Keep Evie Carshare Alive
++Mayor's Office
++Mayor Kaohly Her is leading a regional push to preserve a transportation option that served thousands of residents before the service shut down.
++Read More
+-Read More
+-Saint Paul Commits $300,000 to Keep Evie Carshare Alive
+-Mayor's Office
+-Mayor Kaohly Her is leading a regional push to preserve a transportation option that served thousands of residents before the service shut down.
 ```
 </details>
 
 ### MO - St. Louis: earnings tax department
 
 <https://www.stlouis-mo.gov/government/departments/collector/earnings-tax/index.cfm>  
-1 lines added, 1 removed; 1 links added, 0 removed
+2 lines added, 2 removed; 0 links added, 1 removed
 
-- New link: [W-10/P-10 Forms (Fillable)](https://www.stlouis-mo.gov/government/departments/collector/earnings-tax/documents/p-10-w-10-form-fillable.cfm)
+- Removed link: [W-10/P-10 Forms (Fillable)](https://www.stlouis-mo.gov/government/departments/collector/earnings-tax/documents/p-10-w-10-form-fillable.cfm)
 
 <details><summary>What changed</summary>
 
 ```diff
--Individual Earnings Tax Information
-+W-10/P-10 Forms (Fillable)
++Zip Code Directory
+-Zip Code Directory
+-W-10/P-10 Forms (Fillable)
++Individual Earnings Tax Information
 ```
 </details>
 
-### NY - 2021 IC Rule (linked from data/minimum-wage/federal-2026.json (this engine's)
+### NJ - New Jersey Division of Taxation: what's new
 
-<https://www.federalregister.gov/documents/2021/01/07/2020-29274/independent-contractor-status-under-the-fair-labor-standards-act>  
-2 lines added, 2 removed
-  
-Used by: `data/employer-thresholds/NY-2026.json`, `data/employer-thresholds/NY-2027.json`, `data/minimum-wage/federal-2026.json`, `data/minimum-wage/federal-2027.json`
+<https://www.nj.gov/treasury/taxation/whatsnew.shtml>  
+0 lines added, 5 removed
 
-- Figures now present: 91,721
-- Figures no longer present: 91,611
 
 <details><summary>What changed</summary>
 
 ```diff
--91,611
-+91,721
--10/27/2026 at
-+11/03/2026 at
+-Property Tax Relief Application Filing Event
+-Monday, November 2, 2026
+-to p.m.
+-The event will take place at the NJ Division of Taxation, 3 John Fitch Way, 1st Floor, Trenton, NJ 08611. Division representatives will be available to assist individuals with filing their Property Tax Relief Applications (PAS-1 and ANC...
+-Additionally, the Galloway, Freehold, Fair Lawn, and Cranford locations will remain open until on Monday, November 2, 2026, to provide filing assistance.
 ```
 </details>
 
-### NY - Need Time? The Employee's Guide to the Family and Medical Leave Act (linked from 29 U.S.C. 2611(4)(A)(i)-(ii))
+### NJ - New Jersey employer payroll tax
 
-<https://www.dol.gov/sites/dolgov/files/WHD/legacy/files/employeeguide.pdf>  
-read with a headless browser; 115 lines added, 114 removed
-  
-Used by: `data/employer-thresholds/NY-2026.json`, `data/employer-thresholds/NY-2027.json`
+<https://www.nj.gov/treasury/taxation/businesses/payroll/index.shtml>  
+0 lines added, 5 removed
 
 
 <details><summary>What changed</summary>
 
 ```diff
--the Family and
--Medical Leave Act
--the Family and
-+The Family and
-+WAGE AND HOUR DIVISION
--■ Who Can Use FMLA Leave?
--■ When Can I Use FMLA Leave?
--■ What Can the FMLA Do for Me?
--■ How Do I Request FMLA Leave?
--■ Communication with Your Employer
--■ Medical Certification
--■ Returning to Work
--■ How to File a Complaint
--■ Website Resources
--This Guide Explains:
--An Introduction to the Family
--and Medical Leave Act
-+The Employee's Guide to the Family and Medical Leave Act 1
-+■ Who can use FMLA leave
-+■ When FMLA leave can be used
-+■ What the FMLA does
-+■ How to request FMLA leave
-+■ Communicating with your employer
-+■ Medical certification
-+■ Returning to work
-+■ How to file a complaint
-+■ Online resources
-+This guide explains:
-+An Introduction to the
-+Family and Medical Leave Act
--Whether you are unable to work because of your own serious
--health condition, or because you need to care for your parent,
--spouse, or child with a serious health condition, the FMLA
--provides unpaid, job-protected leave. Leave may be taken all at
--once, or may be taken intermittently as the medical condition
--requires.
-+Whether you are unable to work because of your own serious health
-+condition, or because you need to care for your parent, spouse or
-+child with a serious health condition, the FMLA provides unpaid, job-
-+protected leave. Leave may be taken all at once, or may be taken
-... 189 more changed lines
+-Property Tax Relief Application Filing Event
+-Monday, November 2, 2026
+-to p.m.
+-The event will take place at the NJ Division of Taxation, 3 John Fitch Way, 1st Floor, Trenton, NJ 08611. Division representatives will be available to assist individuals with filing their Property Tax Relief Applications (PAS-1 and ANC...
+-Additionally, the Galloway, Freehold, Fair Lawn, and Cranford locations will remain open until on Monday, November 2, 2026, to provide filing assistance.
 ```
 </details>
 
-### NY - fact sheet PDF (linked from IRS -- Determining if an employer is an applicable)
+### NY - Tax.NY.gov: information for retired persons
 
-<http://www.treasury.gov/press-center/press-releases/Documents/Fact%20Sheet%20021014.pdf>  
-20 lines added, 19 removed
+<https://www.tax.ny.gov/pit/file/information_for_seniors.htm>  
+11 lines added, 1 removed
   
-Used by: `data/employer-thresholds/NY-2026.json`, `data/employer-thresholds/NY-2027.json`
+Used by: `data/pension/state-withholding-2026.json`
 
-- Figures now present: none
-- Figures no longer present: $270
 
 <details><summary>What changed</summary>
 
 ```diff
-+November 2, 2026
-+Readouts
-+READOUT: Secretary of the Treasury Scott Bessent's Meeting with Venezuelan Foreign Minister Oliver Blanco
-+November 2, 2026
-+Treasury Announces Marketable Borrowing Estimates
-+November 2, 2026
-+Economy Statement for the Treasury Borrowing Advisory Committee
-+October 30, 2026
-+Report on U.S. Portfolio Holdings of Foreign Securities at Year-End 2025
-+October 30, 2026
-+ICYMI: Secretary Bessent, Trump Administration Officials Announce New Fraud Prevention Measures in Minnesota
-+October 30, 2026
-+Secretary Statements & Remarks
-+Remarks by Secretary of the Treasury Scott Bessent on New Fraud Prevention Measures in Minnesota
-+October 30, 2026
-+Secretary Bessent, Senior U.S. Officials Announce New Fraud Prevention Measures in Minnesota
-+October 28, 2026
-+Treasury Sanctions Facilitators of DPRK IT Worker Fraud Targeting U.S. Businesses
-+October 28, 2026
-+Treasury Sanctions Rwandan Ministry of Defence and Financial Institution Supporting M23
--October 22, 2026
--Readouts
--READOUT: Secretary of the Treasury Scott Bessent's Meeting with President Santiago Peña of Paraguay
--October 22, 2026
--The Trump Administration is Making Homeownership More Affordable
--October 21, 2026
--Operation Economic Outcast Targets Iran's Shadow Fleet Networks
--October 19, 2026
--U.S. Treasury Identifies $270 Million in Suspicious Activity Linked to Federal Student Aid Fraud
--October 16, 2026
--Treasury International Capital Data for August 2026
--October 15, 2026
--Operation Economic Outcast Targets Iranian Regime's Abuse of Religious Charity Networks
--October 15, 2026
--Operation Economic Outcast Targets Iran's International Financial Networks and Shadow Banking Architecture
--October 14, 2026
--Statement from U.S. Secretary of the Treasury Scott Bessent for the World Bank Development Committee and IMF International Monetary and Financial Committee
--October 14, 2026
--Treasury and IRS Move to Protect Health Care Benefits for Eligible Americans
++Subtractions
++General
+-New York State, including the State and City Universities of New York and the New York State Education Department, who belongs to the Optional Retirement Program. Optional Retirement Program members may only subtract that portion attrib...
++New York State, including the State and City Universities of New York and the New York State Education Department, who belongs to the Optional Retirement Program. Optional Retirement Program members may only subtract that portion attrib...
++New York State Thruway Authority (provided the distributions are derived from the New York State Thruway Authority and not from supplemental funds).
++Distributions from a Thrift Savings Plan (TSP) qualify for this subtraction if the federal employee participates in Federal Employees Retirement System (FERS). Distributions from a TSP for federal employees who participate in Civil Serv...
++Rollovers
++Generally, amounts rolled over into an IRA from a New York State, local government or federal government pension will continue to be fully excludable to the extent of the rollover amount.
++Any interest or gains on the initial rollover included in the distribution may be eligible for the Pension and annuity income exclusion.
++The recipient must keep track of the yearly distributions from the original rollover amount versus distributions attributable to any gain or interest on the rollover amount.
++To determine the amount of distribution that represents the amount eligible for this subtraction, divide the amount of contributions rolled over from the New York State, local government or federal government pension plan by the total v...
++Qualified Domestic Relations Order and Domestic Relations Order
 ```
 </details>
 
 ### OR - Oregon Department of Revenue: news
 
 <https://www.oregon.gov/dor/news/Pages/default.aspx>  
-17 lines added, 17 removed; 4 links added, 2 removed
+21 lines added, 20 removed; 3 links added, 2 removed
 
-- New link: [Department of Veterans' Affairs](https://apps.oregon.gov/oregon-newsroom/OR/ODVA/Posts)
-- New link: [https://apps.oregon.gov/oregon-newsroom/OR/ODVA/Posts/Post/reminder-oregonians-invited-to-statewide-veterans-day-ceremony-nov-11-at-capitol](https://apps.oregon.gov/oregon-newsroom/OR/ODVA/Posts/Post/reminder-oregonians-invited-to-statewide-veterans-day-ceremony-nov-11-at-capitol)
-- New link: [Veteran](https://apps.oregon.gov/oregon-newsroom/OR/Posts/Search?cat=Veteran)
-- New link: [November 3, 2026](https://apps.oregon.gov/oregon-newsroom/OR/Posts/Search?from=11%2F3%2F2026&to=11%2F3%2F2026)
-- Removed link: [Oregon Department of Human Services shares information on support for survivors in recognition of Domestic Violence Awareness Month](https://apps.oregon.gov/oregon-newsroom/OR/ODHS/Posts/Post/odhs-shares-info-on-support-for-survivors-in-recognition-of-domestic-violence-awareness-month)
-- Removed link: [10/27/26](https://apps.oregon.gov/oregon-newsroom/OR/Posts/Search?from=10%2F27%2F2026&to=10%2F27%2F2026)
+- New link: [https://apps.oregon.gov/oregon-newsroom/OR/DCBS/Posts/Post/aca-open-enrollment-period](https://apps.oregon.gov/oregon-newsroom/OR/DCBS/Posts/Post/aca-open-enrollment-period)
+- New link: [https://apps.oregon.gov/oregon-newsroom/OR/ODA/Posts/Post/celebration-of-one-health-day-in-oregon](https://apps.oregon.gov/oregon-newsroom/OR/ODA/Posts/Post/celebration-of-one-health-day-in-oregon)
+- New link: [https://apps.oregon.gov/oregon-newsroom/OR/SOS/Posts/Post/election-day-oregon-elected-leaders-provide-update-election-integrity-turnout](https://apps.oregon.gov/oregon-newsroom/OR/SOS/Posts/Post/election-day-oregon-elected-leaders-provide-update-election-integrity-turnout)
+- Removed link: [https://apps.oregon.gov/oregon-newsroom/OR/SOS/Posts/Post/election-integrity-TV-PSA-launched-oregon-secretary-of-state](https://apps.oregon.gov/oregon-newsroom/OR/SOS/Posts/Post/election-integrity-TV-PSA-launched-oregon-secretary-of-state)
+- Removed link: [https://apps.oregon.gov/oregon-newsroom/OR/SOS/Posts/Post/secretary-read-to-hold-election-day-press-conference-with-sen-wyden-attorney-general-rayfield-PSU-president-cudd](https://apps.oregon.gov/oregon-newsroom/OR/SOS/Posts/Post/secretary-read-to-hold-election-day-press-conference-with-sen-wyden-attorney-general-rayfield-PSU-president-cudd)
 
 <details><summary>What changed</summary>
 
 ```diff
+-(514)
++(515)
+-(267)
++(268)
++Consumer Information
++November 3, 2026
++Oregon DFR reminds Oregonians to utilize ACA open enrollment period, be careful of 'limited partner' and 'sharing' plans
++DCBS
++·
++Press Release
++Elections & Voting
++November 3, 2026
++ELECTION DAY: Oregon Elected Leaders Provide Update on Election Integrity, Turnout
++Voters have until 8 p.m. tonight to return their ballot at an official drop box
++SOS
++·
++Press Release
++Agriculture
++November 3, 2026
++Celebration of One Health Day in Oregon
++ODA
++·
++Article
+-·
+-Press Release
+-Elections & Voting
+-November 2, 2026
+-Election Integrity TV PSA Launched by Oregon Secretary of State
+-SOS
+-·
+-Press Release
+-Elections & Voting
+-November 2, 2026
+-Secretary Read to Hold Election Day Press Conference with Sen. Wyden, Attorney General Rayfield, PSU President Cudd
+-SOS
+-·
+-Press Release
 -Courts
 -November 2, 2026
 -The Oregon Judicial Department's Office of the Ombudsman launches to hear court users' feedback on judicial performance
--Oregon Judicial Department
-+Veteran
-+November 3, 2026
-+Reminder: Oregonians Invited to Statewide Veterans Day Ceremony Nov. 11 at Capitol
-+Department of Veterans' Affairs
-+Courts
-+Nov 2
-+The Oregon Judicial Department's Office of the Ombudsman launches to hear court users' feedback on judicial performance
-+Oregon Judicial Dept.
-+·
-+Pr. Release
--Oct 30
-+·
--Oregon Dept. of Human Services
--·
--Pr. Release
--Social Services
--·
--Oregon Department of Human Services shares information on support for survivors in recognition of Domestic Violence Awareness Month
-+Veteran
-+November 3, 2026
-+Reminder: Oregonians Invited to Statewide Veterans Day Ceremony Nov. 11 at Capitol
-+ODVA
-+·
-+Press Release
--Social Services
--October 30, 2026
--The Oregon Department of Human Services and the Oregon Health Authority remind new parents about safe sleep practices
--ODHS
--·
--Article
+... 1 more changed lines
 ```
 </details>
 
-### US - 10/08/2026 (linked from Federal Register -- Minimum Wage for Federal Contr)
+### PA - NJ Division of Taxation -- Reciprocal Personal Income Tax Agreement (PA/NJ)
 
-<https://www.federalregister.gov/documents/2026/10/08>  
-1 lines added, 0 removed; 3 links added, 0 removed
+<https://www.nj.gov/treasury/taxation/njit25.shtml>  
+0 lines added, 5 removed
   
-Used by: `data/minimum-wage/federal-2027.json`
+Used by: `data/states/PA-2025.json`, `data/states/PA-2026.json`, `data/states/PA-2027.json`
 
-- New link: [28](https://www.federalregister.gov/documents/2026/10/28)
-- New link: [29](https://www.federalregister.gov/documents/2026/10/29)
-- New link: [30](https://www.federalregister.gov/documents/2026/10/30)
 
 <details><summary>What changed</summary>
 
 ```diff
-+Next »
+-Property Tax Relief Application Filing Event
+-Monday, November 2, 2026
+-to p.m.
+-The event will take place at the NJ Division of Taxation, 3 John Fitch Way, 1st Floor, Trenton, NJ 08611. Division representatives will be available to assist individuals with filing their Property Tax Relief Applications (PAS-1 and ANC...
+-Additionally, the Galloway, Freehold, Fair Lawn, and Cranford locations will remain open until on Monday, November 2, 2026, to provide filing assistance.
 ```
 </details>
 
-### US - 86 FR 22835 (linked from Executive Order 14236, Additional Rescissions of H)
+### SC - South Carolina Department of Revenue: news
 
-<https://www.federalregister.gov/documents/2021/04/30/2021-09263/increasing-the-minimum-wage-for-federal-contractors>  
-2 lines added, 2 removed
-  
-Used by: `data/minimum-wage/federal-2026.json`, `data/minimum-wage/federal-2027.json`
+<https://dor.sc.gov/news>  
+3 links added, 2 removed
 
-- Figures now present: 51,760
-- Figures no longer present: 51,656
-
-<details><summary>What changed</summary>
-
-```diff
--51,656
-+51,760
--10/27/2026 at
-+11/03/2026 at
-```
-</details>
+- New link: [Arrests](https://dor.sc.gov/index%2Ephp/arrests)
+- New link: [All News](https://dor.sc.gov/index%2Ephp/news)
+- New link: [Tax Tips](https://dor.sc.gov/index%2Ephp/tax-tips)
+- Removed link: [Arrests](https://dor.sc.gov/arrests)
+- Removed link: [Tax Tips](https://dor.sc.gov/tax-tips)
 
 ### US - Federal Register -- Minimum Wage for Federal Contracts Covered by Executive Order 13658: Notice of Rate Change in Effect
 
@@ -327,130 +425,55 @@ Used by: `data/minimum-wage/federal-2027.json`
 <details><summary>What changed</summary>
 
 ```diff
--886
-+894
--11/02/2026 at
-+11/03/2026 at
+-894
++907
+-11/03/2026 at
++11/04/2026 at
 ```
 </details>
 
-### US - Instruction 944 (linked from IRS draft tax forms: payroll forms only (W-4, W-4P)
+### WI - Wis. Stat. § 71.03(13) — 'Wisconsin adjusted gross income' defined
 
-<https://www.irs.gov/pub/irs-dft/i944--dft.pdf>  
-57 lines added, 49 removed
-
-
-<details><summary>What changed</summary>
-
-```diff
-+TREASURY/IRS AND OMB USE ONLY DRAFT
--Tipped Occupation Code of the tip recipient.
-+Tipped Occupation Code(s) of the tip recipient.
--employees at least one-and-a-half times their regular rate
--of pay for hours worked over 40 hours per week. For
--more information about overtime compensation, go to
--dol.gov/agencies/whd/overtime. Employers must use an
--employee's updated Form W-4, if one is submitted by
-+employees at least one-and-a-half times their regular
-+rate of pay for hours worked over 40 hours per week.
-+For more information about overtime compensation, go
-+to dol.gov/agencies/whd/overtime. Go to IRS.gov/OTfaqs
--Oct 16, 2026 Department of the T reasury Internal Revenue Service www.irs.gov
-+Oct 30, 2026 Department of the T reasury Internal Revenue Service www.irs.gov
--the employee, and the federal income tax withholding
--procedures in Pub. 15-T to allow the employee to account
--for their expected deduction and receive more money in
--each paycheck instead of waiting until filing their income
--tax return to receive the full benefit of this deduction.
--Overtime compensation is still generally subject to both
--the employer share and employee share of social security
--tax and Medicare tax.
-+for frequently asked questions about the deduction for
-+qualified overtime compensation.
-+Employers must use an employee's updated Form W-4,
-+if one is submitted by the employee, and the federal
-+income tax withholding procedures in Pub. 15-T to allow
-+the employee to account for their expected deduction and
-+receive more money in each paycheck instead of waiting
-+until filing their income tax return to receive the full benefit
-+of this deduction. Overtime compensation is still generally
-+subject to both the employer share and employee share of
-+social security tax and Medicare tax.
--ResearchPayrollTC. Also, see Adjusting tax liability for the
-+ResearchPayrollTC. Also see Adjusting tax liability for the
-+2 Instructions for Form 944 (2026)
-+TREASURY/IRS AND OMB USE ONLY DRAFT
-+DRAFT
-+DRAFT
--2 Instructions for Form 944 (2026)
-... 66 more changed lines
-```
-</details>
-
-### US - Normalized attributes and metadata (linked from Federal Register -- Minimum Wage for Federal Contr)
-
-<https://www.federalregister.gov/api/v1/documents/2026-20646?publication_date=2026-10-08>  
-2 lines added, 2 removed
+<https://docs.legis.wisconsin.gov/document/statutes/71.03>  
+1 lines added, 1 removed
   
-Used by: `data/minimum-wage/federal-2027.json`
+Used by: `data/states/WI-2026.json`, `data/states/WI-2027.json`
 
 
 <details><summary>What changed</summary>
 
 ```diff
--"count": 745,
--"last_updated": "2026-10-27  -0400"
-+"count": 894,
-+"last_updated": "2026-11-03  -0500"
+-2023-24 Wisconsin Statutes updated through 2025 Wis. Act 247 and through all Supreme Court Orders and Controlled Substances Board Orders filed before and in effect on October 1, 2026. Published and certified under s. 35.18. Changes effe...
++2023-24 Wisconsin Statutes updated through 2025 Wis. Act 247 and through all Supreme Court Orders and Controlled Substances Board Orders filed before and in effect on November 4, 2026. Published and certified under s. 35.18. Changes eff...
 ```
 </details>
 
-## Minor changes: link lists and headlines only (5)
+### WI - Wis. Stat. § 812.34 — 80% of disposable earnings exempt from garnishment (i.e. 20% reachable), further limited by the amount by which disposable earnings exceed 30x the FEDERAL minimum hourly wage
+
+<https://docs.legis.wisconsin.gov/document/statutes/812.34>  
+1 lines added, 1 removed
+  
+Used by: `data/garnishment/state-overrides-2026.json`, `data/garnishment/state-overrides-2027.json`
+
+
+<details><summary>What changed</summary>
+
+```diff
+-2023-24 Wisconsin Statutes updated through 2025 Wis. Act 247 and through all Supreme Court Orders and Controlled Substances Board Orders filed before and in effect on October 1, 2026. Published and certified under s. 35.18. Changes effe...
++2023-24 Wisconsin Statutes updated through 2025 Wis. Act 247 and through all Supreme Court Orders and Controlled Substances Board Orders filed before and in effect on November 4, 2026. Published and certified under s. 35.18. Changes eff...
+```
+</details>
+
+## Minor changes: link lists and headlines only (1)
 
 Recorded, but only the text of links to other pages changed (news boxes, menus).
 
 <details><summary>Show</summary>
 
-### KY - City of Union -- New 2023 Payroll and Business License
-
-<https://cityofunionky.org/new-2023-payroll-and-business-license/>  
-3 lines added, 3 removed (link lists / headlines only)
-  
-Used by: `data/local/KY-occupational-2025.json`, `data/local/KY-occupational-2026.json`, `data/local/KY-occupational-2027.json`
-
-
-<details><summary>What changed</summary>
-
-```diff
-+City of Union Building Closed Wednesday, November 11
-+Commission Meeting Monday, November 2 6 PM
-+11-2-2026 MEETING AGENDA
--9-9-2026 REGULAR MEETING MINUTES
--9-21-2026 CAUCUS MEETING MINUTES
--9-9-2026 REGULAR MEETING MINUTES
-```
-</details>
-
-### MI - Michigan LEO -- Michigan's Minimum Wage Set to Increase on Jan. 1, 2026
-
-<https://www.michigan.gov/leo/news/2025/12/08/michigans-minimum-wage-set-to-increase-on-jan-1-2026>  
-1 lines added, 1 removed (link lists / headlines only)
-  
-Used by: `data/minimum-wage/states/MI-2026.json`, `data/minimum-wage/states/MI-2027.json`
-
-
-<details><summary>What changed</summary>
-
-```diff
-+Get Ready for MiUI: Five things to know about the new unemployment system
--Get Ready for MiUI: Five things to know about the new unemployment system
-```
-</details>
-
 ### MI - Other Michigan cities with income tax (City of Grand Rapids rate table)
 
 <https://www.grandrapidsmi.gov/departments/fiscal-services/income-tax/other-michigan-cities-with-income-tax/>  
-1 lines added, 1 removed (link lists / headlines only)
+9 lines added, 8 removed (link lists / headlines only)
   
 Used by: `data/local/MI-cities-2025.json`, `data/local/MI-cities-2026.json`, `data/local/MI-cities-2027.json`
 
@@ -458,38 +481,23 @@ Used by: `data/local/MI-cities-2025.json`, `data/local/MI-cities-2026.json`, `da
 <details><summary>What changed</summary>
 
 ```diff
--GRVotes
-+Stickers
-```
-</details>
-
-### NY - DOL -- Unemployment Insurance Rate Information
-
-<https://dol.ny.gov/unemployment-insurance-rate-information>  
-0 lines added, 1 removed (link lists / headlines only)
-  
-Used by: `data/states/NY-2026.json`, `data/states/NY-2027.json`
-
-
-<details><summary>What changed</summary>
-
-```diff
--Unemployment Insurance Information for Employers
-```
-</details>
-
-### NY - NY Department of Labor -- Register for Unemployment Insurance
-
-<https://dol.ny.gov/register-unemployment-insurance-0>  
-0 lines added, 1 removed (link lists / headlines only)
-  
-Used by: `data/employer-thresholds/NY-2026.json`, `data/employer-thresholds/NY-2027.json`
-
-
-<details><summary>What changed</summary>
-
-```diff
--Unemployment Insurance Information for Employers
+-Election Information
++Elections
++Current Election Information
++Voter Registration
++Register to Vote
++Check Voter Registration Status
++Update Voter Registration
+-Voter Registration
+-Register to Vote
+-Check Voter Registration Status
+-Update Voter Registration
+-Current Election Information
+-August 4, 2026 - Primary Election Results
+-November 4, 2025 - Election Day Results
++November 3, 2026 - Voter Turnout Report
++August 4, 2026 - Voter Turnout Report
++November 4, 2025 - Voter Turnout Report
 ```
 </details>
 
@@ -535,7 +543,7 @@ Each of these has failed on every run so far. Replace the URL, or check the docu
 | OK | [Oklahoma OW-2 percentage method tables (top bracket 4.5%)](https://oklahoma.gov/tax/businesses/withholding-tax.html) | HTTP 404 |
 | OR | [City of Wilsonville Transit Payroll Tax Information](https://www.wilsonvilleoregon.gov/finance/page/transit-payroll-tax-information) | HTTP 404 |
 
-## Broken - failing for 3+ runs (9)
+## Broken - failing for 3+ runs (11)
 
 These URLs need replacing in `watcher/sources.json` (or the site blocks automated fetches).
 
@@ -547,65 +555,28 @@ These URLs need replacing in `watcher/sources.json` (or the site blocks automate
 | CO | [City of Greenwood Village occupational privilege tax](https://www.greenwoodvillage.com/206/Occupational-Privilege-Tax) | HTTP 404 |
 | IL | [735 ILCS 5/12-803 — maximum wage deduction: lesser of 15% of GROSS weekly wages, or the am](https://www.ilga.gov/legislation/ilcs/ilcs4.asp?DocName=073500050K12-803) | site's TLS certificate failed verification (unable to get local issuer certificate) |
 | IL | [Illinois State Income Tax Exemptions - 2026 (Illinois Office of Comptroller, Payroll Bulle](https://illinoiscomptroller.gov/state-agencies/bulletins-forms/payroll-bulletins/illinois-state-income-tax-exemptions-2026) | HTTP 500 |
+| KY | [Grant County Fiscal Court -- Occupational Licensing](https://grantcounty.ky.gov/occupational-licensing/) | URLError: <urlopen error timed out> |
 | MN | [Minnesota Paid Leave -- Premium rate and contributions](https://pl.mn.gov/resources/calculators/premium-rate-and-contributions) | HTTP 405 |
 | OH | [Ohio Auditor of State, Liberty Township (Henry County) regular audit 2021-2022: 'The JEDD ](https://ohioauditor.gov/Auditsearch/Reports/2023/Liberty_Township_22_21_Henry_FINAL.pdf) | URLError: <urlopen error [Errno -5] No address associated with hostname> |
+| OK | [Oklahoma OW-2 percentage method tables (top bracket 4.5%)](https://oklahoma.gov/tax/businesses/withholding-tax.html) | HTTP 404 |
 | OR | [City of Wilsonville Transit Payroll Tax Information](https://www.wilsonvilleoregon.gov/finance/page/transit-payroll-tax-information) | HTTP 404 |
 
-## Gone (404) (2)
+## Gone (404) (1)
 
 A 404 on an official document often means a new version was published at a new address.
 
 | Jurisdiction | Source | Detail |
 |---|---|---|
-| KY | [Kentucky Association of Counties -- Data Brief: 2026 County Occupational Tax Rates (payrol](https://kaco.org/media/7051/2026-databrief-occupationaltaxes.pdf) | HTTP 404 |
-| OK | [Oklahoma OW-2 percentage method tables (top bracket 4.5%)](https://oklahoma.gov/tax/businesses/withholding-tax.html) | HTTP 404 |
+| NY | [DOL -- Employer Contribution Rate Table](https://dol.ny.gov/employer-contribution-rate-table) | HTTP 404 |
 
-## Unreachable this run (10)
-
-| Jurisdiction | Source | Detail |
-|---|---|---|
-| WI | [DOR General Withholding Tax Questions (reciprocity, thresholds, WT-4)](https://www.revenue.wi.gov/Pages/FAQS/pcs-with.aspx) | URLError: <urlopen error timed out> |
-| WI | [DOR Tax Rates FAQ (annual Form 1 individual income tax brackets)](https://www.revenue.wi.gov/Pages/FAQS/pcs-taxrates.aspx) | URLError: <urlopen error timed out> |
-| WI | [Wis. Stat. § 71.03(13) — 'Wisconsin adjusted gross income' defined](https://docs.legis.wisconsin.gov/document/statutes/71.03) | URLError: <urlopen error timed out> |
-| WI | [Wis. Stat. § 812.34 — 80% of disposable earnings exempt from garnishment (i.e. 20% reachab](https://docs.legis.wisconsin.gov/document/statutes/812.34) | URLError: <urlopen error timed out> |
-| WI | [Wisconsin Department of Revenue, Withholding Tax Guide (Publication W-166, January 2026)](https://www.revenue.wi.gov/dor%20publications/pb166.pdf) | URLError: <urlopen error timed out> |
-| WI | [Wisconsin Department of Revenue: news](https://www.revenue.wi.gov/Pages/News/home.aspx) | URLError: <urlopen error timed out> |
-| WI | [Wisconsin Legislature -- Wis. Stat. 104.035 (minimum wage; opportunity employees)](https://docs.legis.wisconsin.gov/2017/statutes/statutes/104/035/9) | URLError: <urlopen error timed out> |
-| WI | [Wisconsin W-166 withholding guide](https://www.revenue.wi.gov/DOR%20Publications/pb166.pdf) | URLError: <urlopen error timed out> |
-| WI | [Wisconsin Withholding Tax Update, October 2025](https://www.revenue.wi.gov/withholdingtaxupdate/25-1.pdf) | URLError: <urlopen error timed out> |
-| WI | [Wisconsin withholding](https://www.revenue.wi.gov/Pages/Withholding/home.aspx) | URLError: <urlopen error timed out> |
-
-## New (first snapshot taken) (25)
+## Unreachable this run (2)
 
 | Jurisdiction | Source | Detail |
 |---|---|---|
-| AZ | [Minimum Wage English 2027(PDF, 3MB) (linked from City of Tucson -- Tucson Minimum Wage Act](https://www.tucsonaz.gov/files/sharedassets/public/v/1/bsd/documents/minimum-wage-materials/2027_cot_minimum_wage_ltr-poster-eng.pdf) | read with a headless browser; first snapshot (40 words, pdf) |
-| AZ | [Minimum Wage Spanish 2027(PDF, 3MB) (linked from City of Tucson -- Tucson Minimum Wage Act](https://www.tucsonaz.gov/files/sharedassets/public/v/1/bsd/documents/minimum-wage-materials/2027_cot_minimum_wage_ltr-poster-span.pdf) | read with a headless browser; first snapshot (26 words, pdf) |
-| CA | [2027 Withholding Schedules - Method A – Wage Bracket Table Method (PDF (linked from Califo](https://edd.ca.gov/siteassets/files/pdf_pub_ctr/27metha.pdf) | first snapshot (8546 words, pdf) |
-| CA | [2027 Withholding Schedules - Method B – Exact Calculation Method (PDF) (linked from Califo](https://edd.ca.gov/siteassets/files/pdf_pub_ctr/27methb.pdf) | first snapshot (4661 words, pdf) |
-| CT | [AN 2017(11), Revised Form CT-W4P for Connecticut Resident Recipients o (linked from CT DRS](https://portal.ct.gov/-/media/drs/publications/pubsan/2017/an201711pdf.pdf?hash=60E4CB7D55B0ACA35394F4063FB7EE89) | first snapshot (2713 words, pdf) |
-| CT | [Form CT-W4P, Withholding Certificate for Pension or Annuity Payments (linked from CT DRS, ](https://portal.ct.gov/-/media/drs/forms/2019/withholding/2019-ct-w4p.pdf?hash=9AE413DD3DBFDE1B51767CD66B857455) | first snapshot (1501 words, pdf) |
-| CT | [Informational Publication 2018(8), Connecticut Tax Guide for Payers of (linked from CT DRS](https://portal.ct.gov/-/media/drs/publications/pubsip/2018/ip-2018(8).pdf?hash=E245222A98364EDF61B06E2C4561FFA2) | first snapshot (7210 words, pdf) |
-| IA | [All Tables (linked from Iowa Department of Revenue, Withholding Tax Inform)](https://revenue.iowa.gov/media/54/download?inline=) | first snapshot (23481 words, html) |
-| IA | [Annually (linked from Iowa Department of Revenue, Withholding Tax Inform)](https://revenue.iowa.gov/media/59/download?inline=) | first snapshot (1943 words, html) |
-| IA | [Biweekly (linked from Iowa Department of Revenue, Withholding Tax Inform)](https://revenue.iowa.gov/media/56/download?inline=) | first snapshot (3570 words, html) |
-| IA | [Employee's Statement of Nonresidence in Iowa (44-016) (113.35 KB) Arch (linked from Iowa D](https://revenue.iowa.gov/media/2318/download?inline=) | first snapshot (203 words, pdf) |
-| IA | [Form 4506, Request for Copy of Tax Return (linked from Iowa Department of Revenue, Withhol](http://www.irs.gov/pub/irs-pdf/f4506.pdf) | first snapshot (2355 words, pdf) |
-| IA | [Instruction for Iowa Withholding Tables (98.9 KB) .pdf (linked from Iowa Department of Rev](https://revenue.iowa.gov/media/52/download?inline=) | first snapshot (664 words, pdf) |
-| IA | [Monthly (linked from Iowa Department of Revenue, Withholding Tax Inform)](https://revenue.iowa.gov/media/57/download?inline=) | first snapshot (6231 words, html) |
-| IA | [Nonresident Request for Release from Withholding (44-017) (118.16 KB)  (linked from Iowa D](https://revenue.iowa.gov/media/2317/download?inline=) | first snapshot (337 words, pdf) |
-| IA | [Semimonthly (linked from Iowa Department of Revenue, Withholding Tax Inform)](https://revenue.iowa.gov/media/58/download?inline=) | first snapshot (4430 words, html) |
-| IA | [Weekly (linked from Iowa Department of Revenue, Withholding Tax Inform)](https://revenue.iowa.gov/media/55/download?inline=) | first snapshot (4139 words, html) |
-| ID | [Publication 1779 (linked from Idaho State Tax Commission, withholding: retiremen)](https://www.irs.gov/pub/irs-pdf/p1779.pdf) | first snapshot (830 words, pdf) |
-| IN | [1220 Flat File Business Rules for Indiana (linked from Indiana DOR withholding)](https://www.in.gov/dor/files/business-rules-1220-flat-file.pdf) | first snapshot (342 words, pdf) |
-| IN | [1220 Specifications/Deviations for Indiana (linked from Indiana DOR withholding)](https://www.in.gov/dor/files/guide-1220-w-2g-1099.pdf) | first snapshot (4991 words, pdf) |
-| IN | [DOR WH-3 XML Business Rules (linked from Indiana DOR withholding)](https://www.in.gov/dor/files/business-rules-wh3-xml.pdf) | first snapshot (708 words, pdf) |
-| IN | [EFW2 Flat File Business Rules for Indiana (linked from Indiana DOR withholding)](https://www.in.gov/dor/files/business-rules-efw2-flat-file.pdf) | first snapshot (578 words, pdf) |
-| IN | [EFW2 Specifications/Deviations for Indiana (linked from Indiana DOR withholding)](https://www.in.gov/dor/files/guide-efw2-w2-wh3.pdf) | first snapshot (3054 words, pdf) |
-| IN | [SFTP: If a file size exceeds 10 MB, register for and use SFTP bulk fil (linked from Indian](https://www.in.gov/dor/files/guide-withholding-sftp.pdf) | first snapshot (1467 words, pdf) |
-| IN | [Withholding Information for Part-Time Employees (linked from Indiana DOR withholding)](https://www.in.gov/dor/files/ib52.pdf) | first snapshot (933 words, pdf) |
+| IN | [Indiana DOR: departmental notices](https://www.in.gov/dor/legal-resources/tax-library/departmental-notices/) | URLError: <urlopen error timed out> |
+| IN | [Indiana Information Bulletin #13 and Form WH-4P](https://www.in.gov/dor/files/reference/ib13.pdf) | URLError: <urlopen error timed out> |
 
-## Redirected (102)
+## Redirected (57)
 
 These still work but redirect elsewhere; consider updating the URL in data/ or curated.json.
 
@@ -613,10 +584,10 @@ These still work but redirect elsewhere; consider updating the URL in data/ or c
 |---|---|---|
 | AL | [Alabama DOR: local tax (rates and codes for cities and counties)](https://www.revenue.alabama.gov/local-tax/) | -> https://www.revenue.alabama.gov/sales-use/local-tax-liaisons/ |
 | AL | [City of Opelika -- announcement of the occupational tax cut](https://www.opelika-al.gov/CivicAlerts.aspx?AID=1092) | -> https://www.opelika-al.gov/m/newsflash/home/detail/1092 |
-| AR | [Arkansas DFA: news](https://www.dfa.arkansas.gov/news/) | -> https://www.dfa.arkansas.gov/about/news/ |
+| AR | [Arkansas DFA: news](https://www.dfa.arkansas.gov/news/) | 3 lines added, 8 removed; 1 links added, 1 removed |
 | AZ | [City of Flagstaff -- City of Flagstaff announces minimum wage for 2026](https://www.flagstaff.az.gov/CivicAlerts.aspx?AID=2165) | 2 lines added, 2 removed |
 | CA | [California Employer's Guide (DE 44), Rev. 52 (4-26) -- "How to Withhold PIT on Supplementa](https://www.edd.ca.gov/siteassets/files/pdf_pub_ctr/de44.pdf) | -> https://edd.ca.gov:443/siteassets/files/pdf_pub_ctr/de44.pdf |
-| CA | [FAQ (English) (linked from City of Santa Monica -- Minimum Wage)](https://santamonica.gov/media/Minimum_Wage/MinimumWageFAQ_English2023.pdf) | 1 lines added, 1 removed |
+| CA | [FAQ (English) (linked from City of Santa Monica -- Minimum Wage)](https://santamonica.gov/media/Minimum_Wage/MinimumWageFAQ_English2023.pdf) | -> https://www.santamonica.gov/media/Minimum_Wage/MinimumWageFAQ_English2023.pdf |
 | CA | [FAQ (Spanish) (linked from City of Santa Monica -- Minimum Wage)](https://santamonica.gov/media/Minimum_Wage/MinimumWageFAQ_Spanish2023.pdf) | -> https://www.santamonica.gov/media/Minimum_Wage/MinimumWageFAQ_Spanish2023.pdf |
 | CA | [form FL-435 (linked from Cal. Civ. Proc. Code § 706.050 — ordinary garnishm)](https://www.courts.ca.gov/documents/fl435.pdf) | -> https://courts.ca.gov/sites/default/files/courts/default/2024-11/fl435.pdf |
 | CA | [form WG-002 (linked from Cal. Civ. Proc. Code § 706.050 — ordinary garnishm)](https://www.courts.ca.gov/documents/wg002.pdf) | -> https://courts.ca.gov/system/files?file=2025-07/wg002.pdf |
@@ -637,8 +608,6 @@ These still work but redirect elsewhere; consider updating the URL in data/ or c
 | ID | [Form ID W-4, Employee's Withholding Allowance Certificate (EFO00307, 04-28-2025 revision)](https://tax.idaho.gov/w4form) | -> https://tax.idaho.gov/wp-content/uploads/forms/EFO00307/EFO00307_04-28-2025.pdf |
 | ID | [Idaho Child Tax Credit Allowance Table (ICTCAT) page](https://tax.idaho.gov/ictcat) | -> https://tax.idaho.gov/taxes/income-tax/withholding/computing/#ictcat |
 | IN | [1 (linked from Indiana DOR: departmental notices)](https://www.in.gov/dor/files/reference/dn01.pdf) | -> https://www.in.gov/dor/files/dn01.pdf |
-| IN | [Indiana DOR: departmental notices](https://www.in.gov/dor/legal-resources/tax-library/departmental-notices/) | -> https://www.in.gov/dor/resources/tax-library/departmental-notices/ |
-| KY | [City of Georgetown, KY — Taxes and license fees (occupational license tax: net profits vs ](https://www.georgetownky.gov/2167/Taxes-License-Fees) | read with a headless browser |
 | KY | [City of Hopkinsville -- Occupational License application form](https://cms2files.revize.com/hopkinsvilleky/document_center/Finance/Tax_Forms/OCCUPATIONAL_LIC___APPLICATION_FORM.pdf) | -> https://cms2.revize.com/revize/hopkinsvilleky/document_center/Finance/Tax_Forms/OCCUPATIONAL_LIC___APPLICATION_FORM.pdf |
 | KY | [City of Vanceburg -- Annual Reconciliation of License Fee](https://www.cityofvanceburg.com/_files/ugd/2ae91a_8e635f8b0a724e379859934219b43aac.pdf) | -> https://44f532c8-0c02-45ec-afd7-8fe00fe64156.filesusr.com/ugd/2ae91a_8e635f8b0a724e379859934219b43aac.pdf |
 | KY | [City of Vanceburg -- Employee Quarterly Return](https://www.cityofvanceburg.com/_files/ugd/2ae91a_5d54392ffbe34c1ba805a5216c0afd9e.pdf) | -> https://44f532c8-0c02-45ec-afd7-8fe00fe64156.filesusr.com/ugd/2ae91a_5d54392ffbe34c1ba805a5216c0afd9e.pdf |
@@ -651,66 +620,23 @@ These still work but redirect elsewhere; consider updating the URL in data/ or c
 | MI | [Revenue Administrative Bulletin 1988-27 — Section 125 cafeteria plan benefits excluded fro](https://michigan.gov/treasury/0,4679,7-121-44402_44415_44416-7351--,00.html) | -> https://www.michigan.gov/en/treasury/reference/rab/content/1988/revenue-administrative-bulletin-1988-27 |
 | MN | [Minnesota Department of Labor and Industry -- Minimum wage in Minnesota](https://www.dli.mn.gov/business/employment-practices/minimum-wage-minnesota) | -> https://www.dli.mn.gov/minwage |
 | MO | [Missouri Department of Revenue: news](https://dor.mo.gov/news/) | -> https://dor.mo.gov/news/archive |
-| NC | [Form NC-4 (linked from NCDOR -- Withholding Tax Frequently Asked Question)](https://www.ncdor.gov/documents/employees-withholding-allowance-certificate-nc-4) | -> https://www.ncdor.gov/taxes-forms/withholding-tax/withholding-tax-forms-and-instructions/nc-4-employees-withholding-allowance-certificate |
-| NC | [Form NC-4 EZ (linked from NCDOR -- Withholding Tax Frequently Asked Question)](https://www.ncdor.gov/documents/employees-withholding-allowance-certificate-nc-4ez) | -> https://www.ncdor.gov/taxes-forms/withholding-tax/withholding-tax-forms-and-instructions/nc-4-ez-employees-withholding-allowance-certificate |
-| NC | [Form NC-4 NRA (linked from NCDOR -- Withholding Tax Frequently Asked Question)](https://www.ncdor.gov/documents/nonresident-alien-employees-withholding-allowance-certificate) | -> https://www.ncdor.gov/taxes-forms/withholding-tax/withholding-tax-forms-and-instructions/nc-4-nra-nonresident-alien-employees-withholding-allowance-certifica |
-| NC | [Form NC-BN, Request to Close Tax Account (linked from NCDOR -- Withholding Tax Frequently ](https://www.ncdor.gov/documents/nc-bn-out-business-notification) | -> https://www.ncdor.gov/taxes-forms/sales-and-use-tax/sales-and-use-tax-forms-and-certificates/miscellaneous-forms/nc-bn-request-close-tax-account |
-| NC | [Form NC-BR (linked from NCDOR -- Withholding Tax Frequently Asked Question)](https://www.ncdor.gov/documents/form-nc-br-webfill-business-registration-application-income-tax-withholding-sales-and-use-tax-and) | -> https://www.ncdor.gov/taxes-forms/sales-and-use-tax/sales-and-use-tax-forms-and-certificates/sales-and-use-tax-registration-applications/nc-br-business-regis |
-| NC | [NC-30, North Carolina Income Tax Withholding Tables and Instructions f (linked from NCDOR ](https://www.ncdor.gov/documents/2017-income-tax-withholding-tables-and-instructions-employers) | -> https://www.ncdor.gov/taxes-forms/withholding-tax/withholding-tax-forms-and-instructions/nc-30-income-tax-withholding-tables-and-instructions-employers |
 | NC | [NCDOR -- Withholding Tax Frequently Asked Questions](https://www.ncdor.gov/withholding-tax-frequently-asked-questions) | -> https://www.ncdor.gov/taxes-forms/withholding-tax/withholding-tax-frequently-asked-questions |
-| NC | [Publication NC-30 (linked from NCDOR -- Withholding Tax Frequently Asked Question)](https://www.ncdor.gov/documents/income-tax-withholding-tables-and-instructions-employers) | -> https://www.ncdor.gov/taxes-forms/withholding-tax/withholding-tax-forms-and-instructions/nc-30-income-tax-withholding-tables-and-instructions-employers |
-| NE | [Biweekly Payroll Period (linked from Nebraska withholding)](https://revenue.nebraska.gov/sites/revenue.nebraska.gov/files/doc/business/Cir_En_2026/2027_biweekly.pdf) | -> https://revenue.nebraska.gov/sites/default/files/doc/business/Cir_En_2026/2027_biweekly.pdf |
-| NE | [Daily Payroll Period (linked from Nebraska withholding)](https://revenue.nebraska.gov/sites/revenue.nebraska.gov/files/doc/business/Cir_En_2026/2027_daily.pdf) | -> https://revenue.nebraska.gov/sites/default/files/doc/business/Cir_En_2026/2027_daily.pdf |
-| NE | [Entire Book (linked from Nebraska withholding)](https://revenue.nebraska.gov/sites/revenue.nebraska.gov/files/doc/business/Cir_En_2026/2027cir_en_whole.pdf) | -> https://revenue.nebraska.gov/sites/default/files/doc/business/Cir_En_2026/2027cir_en_whole.pdf |
-| NE | [Important Information for Employers (linked from Nebraska withholding)](https://revenue.nebraska.gov/sites/revenue.nebraska.gov/files/doc/business/important_W-2_format_info.pdf) | -> https://revenue.nebraska.gov/sites/default/files/doc/business/important_W-2_format_info.pdf |
-| NE | [Income Tax Withholding for Nonresident Individuals Performing Personal (linked from Nebras](https://revenue.nebraska.gov/sites/revenue.nebraska.gov/files/doc/info/8-515.pdf) | -> https://revenue.nebraska.gov/sites/default/files/doc/info/8-515.pdf |
-| NE | [Instructions (linked from Nebraska withholding)](https://revenue.nebraska.gov/sites/revenue.nebraska.gov/files/doc/business/Cir_En_2026/2027_instruct.pdf) | -> https://revenue.nebraska.gov/sites/default/files/doc/business/Cir_En_2026/2027_instruct.pdf |
-| NE | [Monthly Payroll Period (linked from Nebraska withholding)](https://revenue.nebraska.gov/sites/revenue.nebraska.gov/files/doc/business/Cir_En_2026/2027_monthly.pdf) | -> https://revenue.nebraska.gov/sites/default/files/doc/business/Cir_En_2026/2027_monthly.pdf |
-| NE | [Nebraska Income Tax for U.S. Servicemembers, Their Spouses, and Civili (linked from Nebras](https://revenue.nebraska.gov/sites/revenue.nebraska.gov/files/doc/info/8-364.pdf) | -> https://revenue.nebraska.gov/sites/default/files/doc/info/8-364.pdf |
-| NE | [Nebraska Nonresident Employee Certificate for Allocation of Income Tax (linked from Nebras](https://revenue.nebraska.gov/sites/revenue.nebraska.gov/files/doc/tax-forms/f_9n.pdf) | -> https://revenue.nebraska.gov/sites/default/files/doc/tax-forms/f_9n.pdf |
-| NE | [Nebraska Voluntary Disclosure Program (linked from Nebraska withholding)](https://revenue.nebraska.gov/sites/revenue.nebraska.gov/files/doc/info/7-250.pdf) | -> https://revenue.nebraska.gov/sites/default/files/doc/info/7-250.pdf |
-| NE | [Percentage Method (linked from Nebraska withholding)](https://revenue.nebraska.gov/sites/revenue.nebraska.gov/files/doc/business/Cir_En_2026/2027_percent.pdf) | -> https://revenue.nebraska.gov/sites/default/files/doc/business/Cir_En_2026/2027_percent.pdf |
-| NE | [Procedures for Reviewing and Appealing a Notice of Deficiency Determin (linked from Nebras](https://revenue.nebraska.gov/sites/revenue.nebraska.gov/files/doc/info/7-149.pdf) | -> https://revenue.nebraska.gov/sites/default/files/doc/info/7-149.pdf |
-| NE | [Required Special Income Tax Withholding Procedures (linked from Nebraska withholding)](https://revenue.nebraska.gov/sites/revenue.nebraska.gov/files/doc/business/Cir_En_2026/2027_letter_only.pdf) | -> https://revenue.nebraska.gov/sites/default/files/doc/business/Cir_En_2026/2027_letter_only.pdf |
-| NE | [Semimonthly Payroll Period (linked from Nebraska withholding)](https://revenue.nebraska.gov/sites/revenue.nebraska.gov/files/doc/business/Cir_En_2026/2027_semimonthly.pdf) | -> https://revenue.nebraska.gov/sites/default/files/doc/business/Cir_En_2026/2027_semimonthly.pdf |
-| NE | [Weekly Payroll Period (linked from Nebraska withholding)](https://revenue.nebraska.gov/sites/revenue.nebraska.gov/files/doc/business/Cir_En_2026/2027_weekly.pdf) | -> https://revenue.nebraska.gov/sites/default/files/doc/business/Cir_En_2026/2027_weekly.pdf |
 | NM | [New Mexico Taxation and Revenue: news](https://www.tax.newmexico.gov/news/) | -> https://www.tax.newmexico.gov/news-alerts/ |
 | NM | [Texas Workforce Commission cross-reference for New Mexico UI figures -- New Mexico DWS 'Ho](https://www.dws.state.nm.us/Unemployment/Unemployment-for-a-Business/Unemployment-Insurance-Tax-Information/How-UI-Tax-Rates-Are-Calculated) | -> https://www.dws.nm.gov/Unemployment/Unemployment-for-a-Business/Unemployment-Insurance-Tax-Information/How-UI-Tax-Rates-Are-Calculated |
-| NY | [DOL -- Employer Contribution Rate Table](https://dol.ny.gov/employer-contribution-rate-table) | -> https://dol.ny.gov/bizserve/ui/prg/rate/ratetables |
-| NY | [Frequently Asked Questions: COBRA Continuation Health Coverage (linked from U.S. DOL -- CO](https://www.dol.gov/sites/dolgov/files/EBSA/about-ebsa/our-activities/resource-center/faqs/cobra-continuation-health-coverage-consumer.pdf) | read with a headless browser |
 | NY | [New York State Department of Labor -- Home Care Aide Minimum Wage Fact Sheet (P105)](https://dol.ny.gov/home-care-aide-minimum-wage-fact-sheet-p105) | -> https://dol.ny.gov/system/files/documents/2024/12/p105-home-health-aide-10-23-24.pdf |
 | NY | [New York State Department of Labor -- Minimum Wage (rates effective 01/01/2026)](https://dol.ny.gov/minimum-wage-0) | -> https://dol.ny.gov/minimum-wage |
-| NY | [fact sheet PDF (linked from IRS -- Determining if an employer is an applicable)](http://www.treasury.gov/press-center/press-releases/Documents/Fact%20Sheet%20021014.pdf) | 20 lines added, 19 removed |
 | OH | [Combined Form IT 4 — Employee's Withholding Exemption Certificate (post-2020-12-07 combine](https://tax.ohio.gov/static/forms/employer_withholding/generic/wth-it4-combined-fi.pdf) | -> https://dam.assets.ohio.gov/image/upload/tax.ohio.gov/forms/employer_withholding/generic/wth-it4-combined-fi.pdf |
-| OH | [Declaration of Estimated Payments (linked from Ohio Department of Taxation: municipal inco](https://tax.ohio.gov/static/muni-net-profit/ascii%20and%20xml/ascii%20-%20declaration%20of%20estimated%20payments%208-21-18.xlsx) | -> https://dam.assets.ohio.gov/raw/upload/tax.ohio.gov/muni-net-profit/ascii%20and%20xml/ascii%20-%20declaration%20of%20estimated%20payments%208-21-18.xlsx |
-| OH | [Excel File Generator Tool (linked from Ohio Department of Taxation: municipal income tax )](https://tax.ohio.gov/static/muni-net-profit/ascii%20and%20xml/oh%20muni%20ascii%20dev%20v017%202_19_2020.xls) | -> https://dam.assets.ohio.gov/raw/upload/tax.ohio.gov/muni-net-profit/ascii%20and%20xml/oh%20muni%20ascii%20dev%20v017%202_19_2020.xls |
-| OH | [MNP10 Tax Return (linked from Ohio Department of Taxation: municipal income tax )](https://tax.ohio.gov/static/muni-net-profit/ascii%20and%20xml/ascii%20-%20mnp10%20return%208-21-18.xlsx) | -> https://dam.assets.ohio.gov/raw/upload/tax.ohio.gov/muni-net-profit/ascii%20and%20xml/ascii%20-%20mnp10%20return%208-21-18.xlsx |
 | OH | [Ohio Department of Taxation: all news](https://tax.ohio.gov/wps/portal/gov/tax/home/news-and-events/all-news/) | -> https://tax.ohio.gov/home/news-and-events/all-news/ |
 | OH | [Ohio Department of Taxation: information releases](https://tax.ohio.gov/wps/portal/gov/tax/help-center/communications/information-releases) | -> https://tax.ohio.gov/help-center/communications/information-releases |
 | OH | [Ohio Department of Taxation: municipal income tax (state page for municipalities and emplo](https://tax.ohio.gov/business/municipalities) | -> https://tax.ohio.gov/business/municipal-net-profit-tax |
 | OH | [Ohio Dept of Taxation: school district income tax list](https://tax.ohio.gov/static/tax_analysis/tax_data_series/school_district_data/SDIT_LIST.pdf) | -> https://dam.assets.ohio.gov/image/upload/tax.ohio.gov/tax_analysis/tax_data_series/school_district_data/SDIT_LIST.pdf |
 | OH | [Ohio Form IT 4NR — Employee's Statement of Residency in a Reciprocity State (Rev. 5/07), O](https://tax.ohio.gov/static/forms/employer_withholding/generic/wth_it4nr.pdf) | -> https://dam.assets.ohio.gov/image/upload/tax.ohio.gov/forms/employer_withholding/generic/wth_it4nr.pdf |
-| OR | [Oregon Department of Revenue: news](https://www.oregon.gov/dor/news/Pages/default.aspx) | 17 lines added, 17 removed; 4 links added, 2 removed |
-| PA | [Form REV-419EX (linked from NJ Division of Taxation -- Reciprocal Personal Inc)](https://www.revenue.pa.gov/FormsandPublications/FormsforIndividuals/PIT/Documents/rev-419.pdf) | -> https://www.pa.gov/content/dam/copapwp-pagov/en/revenue/documents/formsandpublications/formsforbusinesses/employerwithholding/documents/rev-419.pdf |
+| OR | [Oregon Department of Revenue: news](https://www.oregon.gov/dor/news/Pages/default.aspx) | 21 lines added, 20 removed; 3 links added, 2 removed |
 | PA | [PA Department of Revenue -- Employer Withholding (reciprocal agreements)](https://www.pa.gov/en/agencies/revenue/resources/tax-types-and-information/employer-withholding.html) | -> https://www.pa.gov/agencies/revenue/resources/tax-types-and-information/employer-withholding |
-| RI | [2020 Form (linked from Rhode Island Division of Taxation: news)](https://tax.ri.gov/forms/2020/Excise/AnnualRecs/2020_T-204R_m.pdf) | -> https://tax.ri.gov/sites/g/files/xkgbur541/files/forms/2020/Excise/AnnualRecs/2020_T-204R_m.pdf |
-| RI | [2020 RI-1040 return (linked from Rhode Island Division of Taxation: news)](https://tax.ri.gov/forms/2020/Income/2020_1040WE_w.pdf) | -> https://tax.ri.gov/sites/g/files/xkgbur541/files/forms/2020/Income/2020_1040WE_w.pdf |
-| RI | [2020 RI-1040NR return (linked from Rhode Island Division of Taxation: news)](https://tax.ri.gov/forms/2020/Income/2020_1040NRWE_w.pdf) | -> https://tax.ri.gov/sites/g/files/xkgbur541/files/forms/2020/Income/2020_1040NRWE_w.pdf |
-| RI | [Click here for Form T-205 to pay the sales and use tax due (linked from Rhode Island Divis](https://tax.ri.gov/forms/2017/Excise/T-205_m.pdf) | -> https://tax.ri.gov/sites/g/files/xkgbur541/files/forms/2017/Excise/T-205_m.pdf |
-| RI | [Click here for the Business Application and Registration form (linked from Rhode Island Di](https://tax.ri.gov/forms/2017/Misc/TX_BAR_092017.pdf) | -> https://tax.ri.gov/sites/g/files/xkgbur541/files/forms/2017/Misc/TX_BAR_092017.pdf |
-| RI | [here (linked from Rhode Island Division of Taxation: news)](https://tax.ri.gov/Advisory/ADV_2020_09.pdf) | -> https://tax.ri.gov/sites/g/files/xkgbur541/files/Advisory/ADV_2020_09.pdf |
-| RI | [here (linked from Rhode Island Division of Taxation: news)](https://tax.ri.gov/Advisory/ADV_2021_28.pdf) | -> https://tax.ri.gov/sites/g/files/xkgbur541/files/Advisory/ADV_2021_28.pdf |
-| RI | [here (linked from Rhode Island Division of Taxation: news)](https://tax.ri.gov/Advisory/ADV_2021_26.pdf) | -> https://tax.ri.gov/sites/g/files/xkgbur541/files/Advisory/ADV_2021_26.pdf |
-| RI | [here (linked from Rhode Island Division of Taxation: news)](https://tax.ri.gov/newsletter/Rhode_Island_Division_of_Taxation_Newsletter_Third_Quarter_2021.pdf) | -> https://tax.ri.gov/sites/g/files/xkgbur541/files/newsletter/Rhode_Island_Division_of_Taxation_Newsletter_Third_Quarter_2021.pdf |
-| RI | [here (linked from Rhode Island Division of Taxation: news)](https://tax.ri.gov/notice/Pub_2021_02_pension_income_guide_04_06_21.pdf) | -> https://tax.ri.gov/sites/g/files/xkgbur541/files/notice/Pub_2021_02_pension_income_guide_04_06_21.pdf |
-| RI | [here (linked from Rhode Island Division of Taxation: news)](https://tax.ri.gov/reports/Summary_of_Legislative_Changes_07_26_21_final.pdf) | -> https://tax.ri.gov/sites/g/files/xkgbur541/files/reports/Summary_of_Legislative_Changes_07_26_21_final.pdf |
-| RI | [here (linked from Rhode Island Division of Taxation: news)](https://tax.ri.gov/Advisory/ADV_2021_16.pdf) | -> https://tax.ri.gov/sites/g/files/xkgbur541/files/Advisory/ADV_2021_16.pdf |
-| US | [15 USC §1671 et seq. (PDF) (linked from DOL elaws: FLSA/CCPA Wage Garnishment — Basic Prov](https://www.dol.gov/whd/regs/statutes/garn01.pdf) | read with a headless browser |
-| US | [Federal Wage Garnishment Law Fact Sheet (linked from DOL elaws: FLSA/CCPA Wage Garnishment](https://www.dol.gov/whd/regs/compliance/whdfs30.pdf) | read with a headless browser |
-| VA | [Electronic Payment Guide (linked from Virginia withholding)](https://tax.virginia.gov/sites/default/files/inline-files/virginia-tax-electronic-payment-guide.pdf) | -> https://www.tax.virginia.gov/sites/default/files/inline-files/virginia-tax-electronic-payment-guide.pdf |
 | WA | [City of Burien -- Minimum Wage (BMC Chapter 5.16, Administrative Rule 2026-01)](https://www.burienwa.gov/MinimumWage) | -> https://www.burienwa.gov/city_hall/laws_regulations/minimum_wage |
-| WA | [Draft Burien Administrative Rule 2026-01 (linked from City of Burien -- Minimum Wage (BMC ](https://www.burienwa.gov/UserFiles/Servers/Server_11045935/File/City%20Hall/Laws%20&%20Regulations/Minimum%20Wage/Draft%20Burien%20Administrative%20Rule%202026-01%20Fair%20Labor%20Standards%20(revised%20060426).pdf) | -> https://cdnsm5-hosted.civiclive.com/UserFiles/Servers/Server_11045935/File/City%20Hall/Laws%20&%20Regulations/Minimum%20Wage/Draft%20Burien%20Administrative% |
 | WI | [2026 Tax Rate Schedule for Employers (DWD, full Schedule D reserve-percentage rate table)](https://dwd.wisconsin.gov/ui/employers/taxrates.htm) | read with a headless browser |
+| WI | [Wis. Stat. § 71.03(13) — 'Wisconsin adjusted gross income' defined](https://docs.legis.wisconsin.gov/document/statutes/71.03) | 1 lines added, 1 removed |
+| WI | [Wis. Stat. § 812.34 — 80% of disposable earnings exempt from garnishment (i.e. 20% reachab](https://docs.legis.wisconsin.gov/document/statutes/812.34) | 1 lines added, 1 removed |
 | WV | [Fairmont administrative regulations section 1.2](https://fairmontwv.gov/DocumentCenter/View/2198) | -> https://fairmontwv.gov/DocumentCenter/View/2198/SMC-Administrative-Regulations-070119?bidId= |
 | WV | [West Virginia State Tax Department: home page (news and notices)](https://tax.wv.gov/) | -> https://tax.wv.gov/Pages/default.aspx |
 
@@ -723,11 +649,8 @@ These can't be watched by a script (bot protection or JavaScript-only pages). Ch
 | Jurisdiction | Source | Detail |
 |---|---|---|
 | AL | [City of Birmingham -- Employers Return of Occupational Tax Withheld](https://birminghamal.hdlgov.com/base64files/TAXES_FORM_4.pdf) | HTTP 403: the site refuses automated requests; a real browser was refused too |
+| AL | [City of Fairfield -- Ordinance 1019, Occupational Tax](https://cityoffairfieldal.org/wp-content/uploads/2025/02/Ordinance-1019-Occupational-Tax_rotated.pdf) | HTTP 429: the site refuses automated requests; a real browser was refused too |
 | AL | [City of Gadsden, Code of Ordinances, Sec. 74-112 (Levy of fee), Municode](https://library.municode.com/al/gadsden/codes/code_of_ordinances) | HTTP 403: the site refuses automated requests; a real browser was refused too |
-| AL | [City of Glencoe -- Form G-1, Employer's Monthly/Quarterly Return of Occupational Tax Withh](https://cityofglencoe.org/wp-content/uploads/2021/09/Glencoe-Occupational-Tax-Form.pdf) | page returned almost no text (a bot check, or built by JavaScript); a real browser was refused too |
-| AL | [City of Irondale -- Occupational License Fee](https://cityofirondaleal.gov/occupational-license-fee/) | page returned almost no text (a bot check, or built by JavaScript); a real browser was refused too |
-| AL | [City of Southside -- Occupational Tax Return (06/30/2022)](https://cityofsouthside.com/wp-content/uploads/2023/02/Occupational-Tax-Return.pdf) | page returned almost no text (a bot check, or built by JavaScript); a real browser was refused too |
-| AL | [Gadsden-Etowah Industrial Development Authority -- Taxes and Fees](https://gadsdenida.org/taxes-and-fees/) | page returned almost no text (a bot check, or built by JavaScript); a real browser was refused too |
 | AL | [Rainbow City -- Form G-1 (Rev 12/20), occupational license fee return](https://www.rbcalabama.com/download/revenue-g-1/?wpdmdl=730&masterkey=60c8bce41072f) | HTTP 403: the site refuses automated requests; a real browser was refused too |
 | AR | [Arkansas Department of Labor and Licensing -- Minimum Wage and Overtime](https://labor.arkansas.gov/labor/labor-standards/minimum-wage-and-overtime/) | HTTP 403: the site refuses automated requests; a real browser was refused too |
 | AZ | [UIT-0603A (FY26), Unemployment Insurance Tax Rate Chart](https://des.az.gov/sites/default/files/dl/UIT-0603A_FY26.pdf) | HTTP 403: the site refuses automated requests; a real browser was refused too |
@@ -738,9 +661,9 @@ These can't be watched by a script (bot protection or JavaScript-only pages). Ch
 | DC | [DC Department of Employment Services -- Office of Wage-Hour Compliance](https://does.dc.gov/service/office-wage-hour-compliance-0) | HTTP 403: the site refuses automated requests; a real browser was refused too |
 | DC | [DC OTR withholding](https://otr.cfo.dc.gov/page/withholding-tax-forms-and-publications) | HTTP 403: the site refuses automated requests; a real browser was refused too |
 | DE | [City of Wilmington: City wage and net profits taxes](https://www.wilmingtonde.gov/residents/earned-income-tax-and-net-profits-tax) | HTTP 403: the site refuses automated requests; a real browser was refused too |
-| KS | [K.S.A. § 60-2310 — wage garnishment: maximum part of earnings subject to garnishment is th](https://www.ksrevisor.gov/statutes/chapters/ch60/060_023_0010.html) | page returned almost no text (a bot check, or built by JavaScript); a real browser was refused too |
 | KY | [City of Augusta Code of Ordinances Sec. 110.02](https://codelibrary.amlegal.com/codes/augusta/latest/augusta_ky/0-0-0-8998) | read with a browser last time; a real browser was refused too |
 | KY | [City of Elizabethtown, KY — Code of Ordinances Chapter 110, § 110.03 Occupational License ](https://codelibrary.amlegal.com/codes/elizabethtownky/latest/elizabethtown_ky/0-0-0-3203) | HTTP 403: the site refuses automated requests; a real browser was refused too |
+| KY | [City of Georgetown, KY — Taxes and license fees (occupational license tax: net profits vs ](https://www.georgetownky.gov/2167/Taxes-License-Fees) | read with a browser last time; a real browser was refused too |
 | KY | [City of Hartford -- Notice of Occupational License Fees](https://hartfordky.org/notice-of-occupational-license-fees/) | read with a browser last time; a real browser was refused too |
 | KY | [City of Hickman Code of Ordinances Secs. 14-13 and 14-15 (Ord. No. 08-07)](https://library.municode.com/ky/hickman/codes/code_of_ordinances?nodeId=COOR_CH14LIBURE_ARTIIOCLITA) | HTTP 403: the site refuses automated requests; a real browser was refused too |
 | KY | [City of Marion Code of Ordinances Sec. 110.22](https://codelibrary.amlegal.com/codes/marionky/latest/marion_ky/0-0-0-22684) | HTTP 403: the site refuses automated requests; a real browser was refused too |
@@ -751,23 +674,26 @@ These can't be watched by a script (bot protection or JavaScript-only pages). Ch
 | KY | [City of Nortonville Code of Ordinances § 110.03 OCCUPATIONAL LICENSE FEE PAYMENT REQUIRED](https://codelibrary.amlegal.com/codes/nortonvilleky/latest/nortonville_ky/0-0-0-3279) | read with a browser last time; a real browser was refused too |
 | KY | [City of Pikeville -- Business Licenses](https://pikevilleky.gov/business/) | HTTP 403: the site refuses automated requests; a real browser was refused too |
 | KY | [City of Simpsonville Code of Ordinances Sec. 110.27](https://codelibrary.amlegal.com/codes/simpsonville/latest/simpsonville_ky/0-0-0-6803) | read with a browser last time; a real browser was refused too |
-| KY | [Grant County Fiscal Court -- Occupational Licensing](https://grantcounty.ky.gov/occupational-licensing/) | page returned almost no text (a bot check, or built by JavaScript); a real browser was refused too |
 | MO | [Kansas City, MO: earnings tax](https://www.kcmo.gov/city-hall/departments/finance/earnings-tax) | HTTP 403: the site refuses automated requests; a real browser was refused too |
 | MO | [Kansas City, MO: tax guide for non-resident businesses (employer withholding of the earnin](https://www.kcmo.gov/city-hall/departments/finance/tax-home/tax-guides/tax-guide-for-non-resident-businesses) | HTTP 403: the site refuses automated requests; a real browser was refused too |
 | NJ | [City of Newark Q1 2026 Payroll Tax Booklet](https://www.newarknj.gov/DocumentCenter/View/2741/Payroll-Tax-Booklet-2026-PDF) | read with a browser last time; a real browser was refused too |
 | NJ | [HHS/ASPE 2026 Poverty Guidelines for the 48 Contiguous States and DC — household of 1: $15](https://aspe.hhs.gov/topics/poverty-economic-mobility/poverty-guidelines) | HTTP 403: the site refuses automated requests; a real browser was refused too |
 | NM | [City of Las Cruces -- Official Notice, Minimum Wage Ordinance (2026)](https://lascruces.gov/wp-content/uploads/2025/09/MinimumWageEng26.pdf) | HTTP 403: the site refuses automated requests; a real browser was refused too |
+| NY | [DOL -- Calculating an Employer's UI Contribution Rate](https://dol.ny.gov/calculating-employers-ui-contribution-rate) | HTTP 403: the site refuses automated requests; a real browser was refused too |
+| NY | [DOL -- Subsidiary Contribution Rate Table](https://dol.ny.gov/subsidiary-rate-table) | HTTP 403: the site refuses automated requests; a real browser was refused too |
+| NY | [DOL -- Unemployment Insurance Rate Information](https://dol.ny.gov/unemployment-insurance-rate-information) | HTTP 403: the site refuses automated requests; a real browser was refused too |
 | NY | [NY Department of Financial Services -- COBRA and Premium Assistance](https://www.dfs.ny.gov/consumers/health_insurance/cobra_and_premium_assistance) | HTTP 403: the site refuses automated requests; a real browser was refused too |
+| NY | [NY Department of Labor -- Register for Unemployment Insurance](https://dol.ny.gov/register-unemployment-insurance-0) | HTTP 403: the site refuses automated requests; a real browser was refused too |
 | NY | [NY Election Law 3-400 via NY Senate Open Legislation API (free key: NYSENATE_API_KEY)](https://legislation.nysenate.gov/api/3/laws/ELN/3-400?key={env:NYSENATE_API_KEY}) | needs a free API key: add repository secret NYSENATE_API_KEY; a real browser was refused too |
 | NY | [NY Labor Law 651 via NY Senate Open Legislation API (free key: NYSENATE_API_KEY)](https://legislation.nysenate.gov/api/3/laws/LAB/651?key={env:NYSENATE_API_KEY}) | needs a free API key: add repository secret NYSENATE_API_KEY; a real browser was refused too |
 | NY | [NY.gov -- New York State Paid Sick Leave FAQ](https://www.ny.gov/sites/default/files/atoms/files/PSL_FAQ_PaidSickLeaveFAQ.pdf) | HTTP 403: the site refuses automated requests; a real browser was refused too |
 | NY | [NYS Paid Family Leave -- 2025 contribution rate 0.388%, maximum annual contribution $354.5](https://paidfamilyleave.ny.gov/2025) | HTTP 403: the site refuses automated requests; a real browser was refused too |
-| OH | [City of Cheviot Tax Department -- JEDD INFORMATION (Contracts with Green Township)](https://cheviot.org/departments/tax/) | page returned almost no text (a bot check, or built by JavaScript); a real browser was refused too |
 | OH | [Village of College Corner income tax ordinance (1%) and repeal resolution](https://villageofcollegecorner.org/wp-content/uploads/2025/04/Rita-Repeal.pdf) | HTTP 403: the site refuses automated requests; a real browser was refused too |
+| US | [IRS draft tax forms: payroll forms only (W-4, W-4P/R, Pub 15/15-T, 940/941/944, W-2/W-3)](https://www.irs.gov/draft-tax-forms) | read with a browser last time; a real browser was refused too |
 
 </details>
 
-## Unchanged (1494)
+## Unchanged (984)
 
 <details><summary>Show all</summary>
 
@@ -780,9 +706,11 @@ These can't be watched by a script (bot protection or JavaScript-only pages). Ch
 - AL - [Alabama League of Municipalities: municipal tax rates (occupational tax survey list)](https://almonline.org/TaxRates.aspx) (last changed: 2026-10-20)
 - AL - [Alabama State Comptroller -- Memorandum, 'Jefferson County Occupational Tax'](https://comptroller.alabama.gov/wp-content/uploads/2018/01/Jefferson-County-Occupational-Tax.pdf) (last changed: 2026-09-24)
 - AL - [City of Auburn -- Occupational License Fee](https://www.auburnal.gov/revenue/tax-information/occupational-license-fee/) (last changed: 2026-09-30)
-- AL - [City of Fairfield -- Ordinance 1019, Occupational Tax](https://cityoffairfieldal.org/wp-content/uploads/2025/02/Ordinance-1019-Occupational-Tax_rotated.pdf) (last changed: 2026-10-23)
+- AL - [City of Glencoe -- Form G-1, Employer's Monthly/Quarterly Return of Occupational Tax Withheld (Ordin](https://cityofglencoe.org/wp-content/uploads/2021/09/Glencoe-Occupational-Tax-Form.pdf) (last changed: 2026-10-20)
+- AL - [City of Irondale -- Occupational License Fee](https://cityofirondaleal.gov/occupational-license-fee/) (last changed: 2026-09-30)
 - AL - [City of Leeds -- Occupational Tax](https://www.leedsalabama.gov/471/Occupational-Tax) (last changed: 2026-09-30)
 - AL - [City of Opelika -- announcement of the occupational tax cut](https://www.opelika-al.gov/CivicAlerts.aspx?AID=1092) (last changed: 2026-11-02)
+- AL - [City of Southside -- Occupational Tax Return (06/30/2022)](https://cityofsouthside.com/wp-content/uploads/2023/02/Occupational-Tax-Return.pdf) (last changed: 2026-10-20)
 - AL - [City of Tarrant -- occupational license fee ordinance (Municode)](https://mcclibraryfunctions.azurewebsites.us/api/ordinanceDownload/10178/1047327/pdf) (last changed: 2026-09-30)
 - AL - [Form 10 (linked from Alabama DOR withholding tax)](https://www.revenue.alabama.gov/wp-content/uploads/2024/10/Form_10_0824.pdf) (last changed: 2026-10-18)
 - AL - [Form 2848A (linked from Alabama DOR withholding tax)](https://www.revenue.alabama.gov/wp-content/uploads/2018/09/Form_2848A_rev918.pdf) (last changed: 2026-10-18)
@@ -793,10 +721,14 @@ These can't be watched by a script (bot protection or JavaScript-only pages). Ch
 - AL - [Form A–3 (linked from Alabama DOR withholding tax)](https://www.revenue.alabama.gov/wp-content/uploads/2026/03/A-3.pdf) (last changed: 2026-10-18)
 - AL - [Form A–6 (linked from Alabama DOR withholding tax)](https://www.revenue.alabama.gov/wp-content/uploads/2026/03/A-6.pdf) (last changed: 2026-10-18)
 - AL - [Forma A4 (linked from Alabama DOR withholding tax)](https://www.revenue.alabama.gov/wp-content/uploads/2025/04/A4_0425_sp.pdf) (last changed: 2026-10-18)
+- AL - [Gadsden-Etowah Industrial Development Authority -- Taxes and Fees](https://gadsdenida.org/taxes-and-fees/) (last changed: 2026-10-20)
 - AL - [Neumo (formerly Avenu Insights / Revenue Discovery Systems) -- Occupational License Tax Return, rev.](https://revds.com/taxpayerpdfs/Alabama/taxpayerforms/Occupational%20Withholding%20Tax/Neumo%20Occupational%20Form.pdf) (last changed: 2026-10-20)
 - AL - [Neumo -- Universal Annual Reconciliation, Occupational, 2026 (same jurisdiction list)](https://revds.com/taxpayerpdfs/Alabama/taxpayerforms/Occupational%20Withholding%20Tax/Universal%20Annual%20Reconciliation-Occupational%202026.pdf) (last changed: 2026-10-20)
+- AL - [Occupational License Fee FAQ (linked from City of Irondale -- Occupational License Fee)](https://cityofirondaleal.gov/wp-content/uploads/Occupational-License-Fee-FAQ.pdf) (last changed: 2026-10-20)
 - AL - [Open RESEA Report (linked from Alabama Department of Labor -- 2026 UI wage base a)](https://www2.labor.alabama.gov/WorkforceDev/RESEA_2026.pdf) (last changed: 2026-10-20)
 - AL - [Operating a Business in Alabama: Resources for Starting a New Business (linked from Alabama League o](https://www.revenue.alabama.gov/wp-content/uploads/2022/06/220616_BEST_ResourcesStartingNewBusiness.pdf) (last changed: 2026-10-20)
+- AL - [Ordinance 2018-10c (linked from City of Irondale -- Occupational License Fee)](https://cityofirondaleal.gov/wp-content/uploads/Ordinance-2018-10c.pdf) (last changed: 2026-10-20)
+- AL - [Ordinance 2022-14 – Amendment to the Occupational License Fee Ordinanc (linked from City of Irondale](https://cityofirondaleal.gov/wp-content/uploads/Ordinance-2022-14-Amendment-to-the-Occupational-License-Fee-Ordinance.pdf) (last changed: 2026-10-20)
 - AL - [Town of Notasulga -- Occupational License (Ordinance No. 97-11-01)](https://notasulgaal.com/occupational-license) (last changed: 2026-10-22)
 - AL - [USDA National Finance Center -- Alabama State Income Tax Withholding (NFC-22-1666037747, still the c](https://help.nfc.usda.gov/bulletins/2022/1666037747.htm?taxmap=true) (last changed: 2026-09-24)
 - AL - [Withholding Tax Tables and Instructions for Employers and Withholding Agents (Rev. 01/26)](https://www.revenue.alabama.gov/wp-content/uploads/2026/01/whbooklet_0126.pdf) (last changed: 2026-09-24)
@@ -804,7 +736,6 @@ These can't be watched by a script (bot protection or JavaScript-only pages). Ch
 - AL - [tax collection and administrative services for local governments (linked from Alabama DOR: local tax](https://www.revenue.alabama.gov/wp-content/uploads/2026/05/ALDOR_Local_Tax_Services-PowerPoint-05.19.2026.pdf) (last changed: 2026-10-18)
 - AR - [AR4EC -- Employee's Withholding Exemption Certificate (R 02/07/2025)](https://www.dfa.arkansas.gov/wp-content/uploads/AR4EC2025_FI.pdf) (last changed: 2026-09-24)
 - AR - [Arkansas DFA withholding tax](https://www.dfa.arkansas.gov/office/taxes/income-tax-administration/withholding-tax-branch/) (last changed: 2026-10-02)
-- AR - [Arkansas DFA: news](https://www.dfa.arkansas.gov/news/) (last changed: 2026-10-24)
 - AR - [Arkansas Form AR4P (R 12/04/2025) and instructions](https://www.dfa.arkansas.gov/wp-content/uploads/AR4P2026.pdf) (last changed: 2026-11-02)
 - AR - [Arkansas UI Information Handbook 2026 (wage base, rates)](https://dws.arkansas.gov/wp-content/uploads/UI-Handbook-2026-Final.pdf) (last changed: 2026-09-24)
 - AR - [Arkansas withholding formula (current)](https://www.dfa.arkansas.gov/wp-content/uploads/Withholding-Tax-Formula.pdf) (last changed: 2026-09-24)
@@ -827,7 +758,11 @@ These can't be watched by a script (bot protection or JavaScript-only pages). Ch
 - AZ - [Arizona Form A-4P (2026), Request for Voluntary Withholding on Retirement Income](https://azdor.gov/sites/default/files/document/FORMS_WITHHOLDING_2026_A-4P_f.pdf) (last changed: 2026-11-02)
 - AZ - [Arizona Withholding Tax Ruling (WTR) 16-4 (linked from Arizona DOR withholding)](https://azdor.gov/sites/default/files/2023-03/RULINGS_WTHOLD_2016_wtr-16-4.pdf) (last changed: 2026-10-20)
 - AZ - [City of Tucson -- Tucson Minimum Wage Act (Proposition 206, November 2021)](https://www.tucsonaz.gov/Departments/Business-Services-Department/Tucson-Minimum-Wage-Act) (last changed: 2026-11-02)
+- AZ - [Minimum Wage English 2027(PDF, 3MB) (linked from City of Tucson -- Tucson Minimum Wage Act (Proposi)](https://www.tucsonaz.gov/files/sharedassets/public/v/1/bsd/documents/minimum-wage-materials/2027_cot_minimum_wage_ltr-poster-eng.pdf) (last changed: 2026-11-03)
+- AZ - [Minimum Wage Spanish 2027(PDF, 3MB) (linked from City of Tucson -- Tucson Minimum Wage Act (Proposi)](https://www.tucsonaz.gov/files/sharedassets/public/v/1/bsd/documents/minimum-wage-materials/2027_cot_minimum_wage_ltr-poster-span.pdf) (last changed: 2026-11-03)
 - AZ - [NAICS Code and Descriptions (linked from Arizona DOR withholding)](https://www.aztaxes.gov/PDF/NAICS_11_24_2015.pdf) (last changed: 2026-10-20)
+- CA - [2027 Withholding Schedules - Method A – Wage Bracket Table Method (PDF (linked from California EDD r](https://edd.ca.gov/siteassets/files/pdf_pub_ctr/27metha.pdf) (last changed: 2026-11-03)
+- CA - [2027 Withholding Schedules - Method B – Exact Calculation Method (PDF) (linked from California EDD r](https://edd.ca.gov/siteassets/files/pdf_pub_ctr/27methb.pdf) (last changed: 2026-11-03)
 - CA - [Aviso Legal (Spanish) FY25-26 (linked from City of Santa Monica -- Minimum Wage)](https://www.santamonica.gov/media/Minimum_Wage/Notifications/25-26%20Notices/2025-26__Notification_Spanish%202025-09-08.pdf) (last changed: 2026-11-02)
 - CA - [Aviso Legal (Spanish) FY26-27 (linked from City of Santa Monica -- Minimum Wage)](https://www.santamonica.gov/media/Minimum_Wage/Notifications/26-27%20Notices/2026-27_Notification_Spanish%202026-06-09.pdf) (last changed: 2026-11-02)
 - CA - [Cal. Civ. Proc. Code § 706.050 — ordinary garnishment limited to the lesser of 20% of disposable ear](https://selfhelp.courts.ca.gov/guide-earnings-withholding-orders-employers) (last changed: 2026-10-20)
@@ -849,6 +784,7 @@ These can't be watched by a script (bot protection or JavaScript-only pages). Ch
 - CA - [EDD DE 4P (Rev. 46, 1-26)](https://edd.ca.gov/siteassets/files/pdf_pub_ctr/de4p.pdf) (last changed: 2026-11-02)
 - CA - [Enforcement Guide (linked from City of Santa Monica -- Minimum Wage)](https://www.santamonica.gov/Media/Minimum_Wage/MinimumWage_Enforcement-Employees.pdf) (last changed: 2026-10-20)
 - CA - [Enforcement Guide (linked from City of Santa Monica -- Minimum Wage)](https://www.santamonica.gov/Media/Minimum_Wage/MinimumWage_Enforcement-Businesses.pdf) (last changed: 2026-11-02)
+- CA - [FAQ (English) (linked from City of Santa Monica -- Minimum Wage)](https://santamonica.gov/media/Minimum_Wage/MinimumWageFAQ_English2023.pdf) (last changed: 2026-11-03)
 - CA - [FAQ (Spanish) (linked from City of Santa Monica -- Minimum Wage)](https://santamonica.gov/media/Minimum_Wage/MinimumWageFAQ_Spanish2023.pdf) (last changed: 2026-10-20)
 - CA - [Form DE 4, Employee's Withholding Allowance Certificate, Rev. 56 (1-26)](https://edd.ca.gov/siteassets/files/pdf_pub_ctr/de4.pdf) (last changed: 2026-10-20)
 - CA - [Health Care Minimum Wage Supplement to the minimum wage order (linked from California Department of ](https://www.dir.ca.gov/iwc/MW-2025-SUPPLEMENT-health-care.pdf) (last changed: 2026-10-20)
@@ -896,7 +832,6 @@ These can't be watched by a script (bot protection or JavaScript-only pages). Ch
 - CA - [法律声明 [Simplified Chinese] (linked from City of Santa Monica -- Minimum Wage)](https://www.santamonica.gov/media/Minimum_Wage/Notifications/26-27%20Notices/2026-27_Notification_Simplified_Chinese.pdf) (last changed: 2026-11-02)
 - CA - [法律聲明 [Traditional Chinese] (linked from City of Santa Monica -- Minimum Wage)](https://www.santamonica.gov/media/Minimum_Wage/Notifications/26-27%20Notices/2026-27_Notification_Traditional_Chinese.pdf) (last changed: 2026-11-02)
 - CA - [법적 고지 [Korean] (linked from City of Santa Monica -- Minimum Wage)](https://www.santamonica.gov/media/Minimum_Wage/Notifications/26-27%20Notices/2026-27_Notification_Korean.pdf) (last changed: 2026-11-02)
-- CO - [Boulder County -- Local Minimum Wage](https://bouldercounty.gov/departments/commissioners/local-minimum-wage/) (last changed: 2026-11-02)
 - CO - [Boulder District Attorney’s website (linked from Boulder County -- Local Minimum Wage)](https://assets.bouldercounty.gov/wp-content/uploads/2023/11/Wage-Theft-English-2022.pdf) (last changed: 2026-10-20)
 - CO - [CDLE press release -- Colorado minimum wage will increase to $15.71/hour in 2027](https://cdle.colorado.gov/press-releases/press-release-colorado-minimum-wage-will-increase-to-1571/hour-in-2027) (last changed: 2026-10-27)
 - CO - [City and County of Denver -- Denver Local Minimum Wage Adjusts to $19.29 per Hour for 2026](https://www.denvergov.org/Government/Agencies-Departments-Offices/Agencies-Departments-Offices-Directory/Department-of-Finance/News/2025/Denver-Local-Minimum-Wage-Adjusts-to-19.29-per-Hour-for-2026) (last changed: 2026-10-20)
@@ -919,6 +854,7 @@ These can't be watched by a script (bot protection or JavaScript-only pages). Ch
 - CO - [Poster in Spanish about minimum wage in the City of Boulder (linked from City of Boulder -- Local Mi](https://bouldercolorado.gov/media/16919/download?inline=) (last changed: 2026-10-20)
 - CO - [USDA National Finance Center -- Colorado State Income Tax Withholding (NFC-26-1772551649, 2026-03-04](https://help.nfc.usda.gov/bulletins/2026/1772551649.htm) (last changed: 2026-10-20)
 - CO - [here, Ordinance 2022-77 (linked from City of Aurora: occupational privilege tax (repeal)](https://www.auroragov.org/UserFiles/Servers/Server_1881137/File/Business%20Services/Tax/Occupational/Ordinance%202022-77%20OPT%20Repeal.pdf) (last changed: 2026-10-20)
+- CT - [AN 2017(11), Revised Form CT-W4P for Connecticut Resident Recipients o (linked from CT DRS, Pension ](https://portal.ct.gov/-/media/drs/publications/pubsan/2017/an201711pdf.pdf?hash=60E4CB7D55B0ACA35394F4063FB7EE89) (last changed: 2026-11-03)
 - CT - [CT DRS, Pension Payers](https://portal.ct.gov/drs/withholding-taxes/pension-payers) (last changed: 2026-11-02)
 - CT - [Connecticut 2026 Informational Publications (Circular CT is IP 2026(1))](https://portal.ct.gov/drs/publications/informational-publications/2026/2026-informational-publications) (last changed: 2026-10-20)
 - CT - [Connecticut DRS -- IP 2025(1) Circular CT Employer's Tax Guide (issued 2024-12-17), including TPG-21](https://portal.ct.gov/-/media/drs/publications/pubsip/2025/ip-2025-1.pdf) (last changed: 2026-10-20)
@@ -926,6 +862,7 @@ These can't be watched by a script (bot protection or JavaScript-only pages). Ch
 - CT - [Connecticut DRS: newsroom](https://portal.ct.gov/drs/newsroom) (last changed: 2026-10-20)
 - CT - [Form CT-W4, Employee's Withholding Certificate (Rev. 12/25, effective 2026-01-01)](https://portal.ct.gov/-/media/drs/forms/2026/wth/ct-w4_1225fillable.pdf?rev=9e9e0216cd394f579961e1d4cd5c7ab3&hash=4D496BCBD10659462D3799732B5A91F2) (last changed: 2026-10-20)
 - CT - [Form CT-W4P (Rev. 12/21)](https://portal.ct.gov/-/media/DRS/Forms/2022/WTH/CT-W4P_1221.pdf) (last changed: 2026-11-02)
+- CT - [Form CT-W4P, Withholding Certificate for Pension or Annuity Payments (linked from CT DRS, Pension Pa](https://portal.ct.gov/-/media/drs/forms/2019/withholding/2019-ct-w4p.pdf?hash=9AE413DD3DBFDE1B51767CD66B857455) (last changed: 2026-11-03)
 - CT - [Governor Lamont announces Connecticut's minimum wage will increase to $17.48 on January 1, 2027](https://portal.ct.gov/governor/news/press-releases/2026/08-2026/governor-lamont-announces-minimum-wage-will-increase) (last changed: 2026-10-26)
 - CT - [IP 2026(1) - Circular CT - Employer's Tax Guide to Withholding (linked from Connecticut DRS publicat](https://portal.ct.gov/-/media/drs/publications/pubsip/2026/ip-2026-1.pdf?hash=57C34787EE2C1D4A7F989EE1F6B8F0F8) (last changed: 2026-10-20)
 - CT - [IP 2026(1), Connecticut Employer's Tax Guide, Circular CT](https://portal.ct.gov/-/media/drs/publications/pubsip/2026/ip-2026-1.pdf?rev=4482a3dca0a44b28ae39381a91fb0916&hash=57C34787EE2C1D4A7F989EE1F6B8F0F8) (last changed: 2026-10-20)
@@ -934,6 +871,7 @@ These can't be watched by a script (bot protection or JavaScript-only pages). Ch
 - CT - [IP 2026(7), Is My Connecticut Withholding Correct? (linked from Connecticut 2026 Informational Publi](https://portal.ct.gov/-/media/drs/publications/pubsip/2026/ip-2026-7.pdf?hash=3DBADA0CC8447FD1EF469E88518F8FC2) (last changed: 2026-10-20)
 - CT - [IP 2026(8) - Connecticut Tax Guide For Payers of Nonpayroll Amounts (linked from Connecticut DRS pub](https://portal.ct.gov/-/media/drs/publications/pubsip/2026/ip-2026-8.pdf?hash=51C2632670071F5907A80795B0CF62F7) (last changed: 2026-10-20)
 - CT - [IP 2026(8), Connecticut Tax Guide For Payers of Nonpayroll Amounts (linked from Connecticut 2026 Inf](https://portal.ct.gov/-/media/drs/publications/pubsip/2026/ip-2026-8.pdf?hash=51C2632670071F5907A80795B0CF62F7) (last changed: 2026-10-20)
+- CT - [Informational Publication 2018(8), Connecticut Tax Guide for Payers of (linked from CT DRS, Pension ](https://portal.ct.gov/-/media/drs/publications/pubsip/2018/ip-2018(8).pdf?hash=E245222A98364EDF61B06E2C4561FFA2) (last changed: 2026-11-03)
 - CT - [TPG-211, 2026 Withholding Calculation Rules (Rev. 12/25)](https://portal.ct.gov/-/media/drs/forms/2025/wth/tpg-211_1225.pdf?rev=e16ef13773ec42d4bf0afd2e192e0176&hash=CCF9990D8EE0AA580A11BC6E97235650) (last changed: 2026-10-20)
 - DC - [Amharic \| lአማርኛ (linked from DC Department of Employment Services, Office of Pa)](https://dcpaidfamilyleave.dc.gov/wp-content/uploads/2024/10/Amharic-PFL-Employer-Information.pdf) (last changed: 2026-10-20)
 - DC - [D.C. Code § 1-206.02(a)(5) (Home Rule Act § 602(a)(5)) nonresident-taxation prohibition](https://code.dccouncil.gov/us/dc/council/code/sections/1-206.02) (last changed: 2026-10-20)
@@ -963,7 +901,6 @@ These can't be watched by a script (bot protection or JavaScript-only pages). Ch
 - DE - [Delaware Department of Labor -- Employer Services / Unemployment Insurance Tax (Merit Rate Table)](https://labor.delaware.gov/divisions/unemployment-insurance/employer-services/) (last changed: 2026-10-20)
 - DE - [Delaware Division of Revenue -- Employer's Guide (Withholding Tables)](https://revenue.delaware.gov/employers-guide-withholding-tables/) (last changed: 2026-10-20)
 - DE - [Delaware Division of Revenue: home (announcements)](https://revenue.delaware.gov/) (last changed: 2026-10-23)
-- DE - [Delaware House Bill 13 (153rd General Assembly) + House Substitute No. 2 for HB13 -- bracket-restruc](https://legis.delaware.gov/BillDetail?LegislationId=141813) (last changed: 2026-10-20)
 - DE - [Delaware withholding forms and guide](https://revenue.delaware.gov/employers-guide-withholding-regulations-employers-duties/) (last changed: 2026-10-20)
 - DE - [Employer Handbook (linked from Delaware Department of Labor -- Employer Services )](https://laborfiles.delaware.gov/main/dui/handbook/UI%20Employer%20Handbook.pdf) (last changed: 2026-10-20)
 - DE - [Employer's & TPAs' Guide to Delaware Paid Leave](https://laborfiles.delaware.gov/main/pfl/Employer_and_TPAs_Guide_to_DPL.pdf) (last changed: 2026-10-20)
@@ -1000,7 +937,6 @@ These can't be watched by a script (bot protection or JavaScript-only pages). Ch
 - GA - [Georgia DOR -- 2025 Employer's Tax Guide (updated June 2025)](https://dor.georgia.gov/document/document-document/2025-employers-tax-guide-updated-june-2025/download) (last changed: 2026-09-30)
 - GA - [Georgia DOR 2023 Employer's Tax Guide: pension and annuity payments](https://dor.georgia.gov/document/document/2023-employers-tax-guidepdf/download) (last changed: 2026-11-02)
 - GA - [Georgia DOR withholding](https://dor.georgia.gov/taxes/withholding-tax-employers) (last changed: 2026-10-13)
-- GA - [Georgia DOR: press releases](https://dor.georgia.gov/press-releases) (last changed: 2026-10-18)
 - GA - [Georgia Employer's Tax Guide (current)](https://dor.georgia.gov/employers-tax-guide) (last changed: 2026-10-13)
 - GA - [Georgia Form G-4P (Rev. 06/03/26)](https://dor.georgia.gov/document/form/withholdingcertificateforpensionorannuitypaymentsg-4ppdf/download) (last changed: 2026-11-02)
 - GA - [Governor Brian Kemp -- press release, HB 463 signed 2026-05-11](https://gov.georgia.gov/press-releases/2026-05-11/gov-kemp-signs-legislation-lowering-taxes-and-supporting-economic-growth) (last changed: 2026-09-24)
@@ -1022,8 +958,14 @@ These can't be watched by a script (bot protection or JavaScript-only pages). Ch
 - HI - [Tax Information Release No. 95- 4 (linked from Hawaii DOTAX withholding)](https://files.hawaii.gov/tax/legal/tir/1990_09/tir95-4.pdf) (last changed: 2026-10-20)
 - IA - [2026 IA W-4, Employee Withholding Allowance Certificate](https://revenue.iowa.gov/media/4324/download?inline=) (last changed: 2026-10-20)
 - IA - [Age to Purchase App handout (258.82 KB) .pdf (linked from Iowa Department of Revenue: press releases](https://revenue.iowa.gov/media/2154/download?inline=) (last changed: 2026-10-20)
+- IA - [All Tables (linked from Iowa Department of Revenue, Withholding Tax Inform)](https://revenue.iowa.gov/media/54/download?inline=) (last changed: 2026-11-03)
+- IA - [Annually (linked from Iowa Department of Revenue, Withholding Tax Inform)](https://revenue.iowa.gov/media/59/download?inline=) (last changed: 2026-11-03)
 - IA - [Approved Substitute Forms Vendor List (linked from Iowa Department of Revenue: press releases)](https://revenue.iowa.gov/media/4193/download?inline=) (last changed: 2026-10-20)
+- IA - [Biweekly (linked from Iowa Department of Revenue, Withholding Tax Inform)](https://revenue.iowa.gov/media/56/download?inline=) (last changed: 2026-11-03)
+- IA - [Employee's Statement of Nonresidence in Iowa (44-016) (113.35 KB) Arch (linked from Iowa Department ](https://revenue.iowa.gov/media/2318/download?inline=) (last changed: 2026-11-03)
+- IA - [Form 4506, Request for Copy of Tax Return (linked from Iowa Department of Revenue, Withholding Tax I](http://www.irs.gov/pub/irs-pdf/f4506.pdf) (last changed: 2026-11-03)
 - IA - [House File 2631 (91st General Assembly) — proposed Iowa Family and Medical Leave Act](https://www.legis.iowa.gov/docs/publications/LGI/91/HF2631.pdf) (last changed: 2026-10-20)
+- IA - [Instruction for Iowa Withholding Tables (98.9 KB) .pdf (linked from Iowa Department of Revenue, With](https://revenue.iowa.gov/media/52/download?inline=) (last changed: 2026-11-03)
 - IA - [Iowa - Illinois Reciprocal Agreement — Iowa Department of Revenue](https://revenue.iowa.gov/taxes/tax-guidance/individual-income-tax/iowa-illinois-reciprocal-agreement) (last changed: 2026-10-20)
 - IA - [Iowa Code § 642.21 — disposable earnings exempt to the extent provided by the federal CCPA, PLUS an ](https://www.legis.iowa.gov/docs/code/642.21.pdf) (last changed: 2026-10-20)
 - IA - [Iowa DOR -- Iowa Withholding Formula For Wages Paid Beginning January 1, 2025](https://revenue.iowa.gov/media/61/download?inline) (last changed: 2026-10-20)
@@ -1032,6 +974,10 @@ These can't be watched by a script (bot protection or JavaScript-only pages). Ch
 - IA - [Iowa Individual Income Tax Withholding Formula, Effective January 1, 2026](https://revenue.iowa.gov/media/53/download?inline=) (last changed: 2026-10-20)
 - IA - [Iowa Workforce Development / Iowa Division of Labor -- Your Rights Under the Iowa Minimum Wage Law a](https://workforce.iowa.gov/media/234/download) (last changed: 2026-10-20)
 - IA - [Iowa withholding](https://revenue.iowa.gov/taxes/tax-guidance/withholding-tax) (last changed: 2026-10-24)
+- IA - [Monthly (linked from Iowa Department of Revenue, Withholding Tax Inform)](https://revenue.iowa.gov/media/57/download?inline=) (last changed: 2026-11-03)
+- IA - [Nonresident Request for Release from Withholding (44-017) (118.16 KB)  (linked from Iowa Department ](https://revenue.iowa.gov/media/2317/download?inline=) (last changed: 2026-11-03)
+- IA - [Semimonthly (linked from Iowa Department of Revenue, Withholding Tax Inform)](https://revenue.iowa.gov/media/58/download?inline=) (last changed: 2026-11-03)
+- IA - [Weekly (linked from Iowa Department of Revenue, Withholding Tax Inform)](https://revenue.iowa.gov/media/55/download?inline=) (last changed: 2026-11-03)
 - ID - [EPB00744 — Table for Percentage Computation Method of Withholding](https://tax.idaho.gov/document-mngr/pubs_EPB00744) (last changed: 2026-09-24)
 - ID - [Form ID W-4, Employee's Withholding Allowance Certificate (EFO00307, 04-28-2025 revision)](https://tax.idaho.gov/w4form) (last changed: 2026-09-24)
 - ID - [Idaho Child Tax Credit Allowance Table (ICTCAT) page](https://tax.idaho.gov/ictcat) (last changed: 2026-09-24)
@@ -1041,6 +987,7 @@ These can't be watched by a script (bot protection or JavaScript-only pages). Ch
 - ID - [Idaho State Tax Commission, withholding: retirement-income payers](https://tax.idaho.gov/search-category/income-tax/withholding/) (last changed: 2026-11-02)
 - ID - [Idaho State Tax Commission: press releases](https://tax.idaho.gov/pressrelease) (last changed: 2026-11-02)
 - ID - [Idaho computing withholding](https://tax.idaho.gov/taxes/income-tax/withholding/computing/) (last changed: 2026-09-24)
+- ID - [Publication 1779 (linked from Idaho State Tax Commission, withholding: retiremen)](https://www.irs.gov/pub/irs-pdf/p1779.pdf) (last changed: 2026-11-03)
 - ID - [Senate Page Program (linked from Idaho Code § 11-207 — restriction on garnishment, )](https://legislature.idaho.gov/wp-content/uploads/senate/page_program.pdf) (last changed: 2026-10-20)
 - ID - [Withholding tables updated for 2026 — Idaho State Tax Commission press release](https://tax.idaho.gov/pressrelease/withholding-tables-updated-for-2026/) (last changed: 2026-09-24)
 - IL - [2026 IL-700-T Illinois Withholding Tax Tables](https://tax.illinois.gov/forms/withholding/currentyear/il-700-t-withholding-guide-tables.html) (last changed: 2026-10-20)
@@ -1069,6 +1016,8 @@ These can't be watched by a script (bot protection or JavaScript-only pages). Ch
 - IL - [Spanish (linked from Illinois Department of Labor — Minimum Wage Law (c)](https://labor.illinois.gov/content/dam/soi/en/web/idol/2025-updated-chicago-address-forms/Wage%20Complaint%20Form%20Espanol_11-7-25.pdf) (last changed: 2026-10-20)
 - IN - [1 (linked from Indiana DOR: departmental notices)](https://www.in.gov/dor/files/reference/dn01.pdf) (last changed: 2026-10-20)
 - IN - [1220 Federal Specifications (linked from Indiana DOR withholding)](https://www.irs.gov/pub/irs-pdf/p1220.pdf) (last changed: 2026-10-18)
+- IN - [1220 Flat File Business Rules for Indiana (linked from Indiana DOR withholding)](https://www.in.gov/dor/files/business-rules-1220-flat-file.pdf) (last changed: 2026-11-03)
+- IN - [1220 Specifications/Deviations for Indiana (linked from Indiana DOR withholding)](https://www.in.gov/dor/files/guide-1220-w-2g-1099.pdf) (last changed: 2026-11-03)
 - IN - [16 (linked from Indiana DOR: departmental notices)](https://www.in.gov/dor/files/reference/dn16.pdf) (last changed: 2026-10-20)
 - IN - [2 (linked from Indiana DOR: departmental notices)](https://www.in.gov/dor/files/reference/dn02.pdf) (last changed: 2026-10-20)
 - IN - [3 (linked from Indiana DOR: departmental notices)](https://www.in.gov/dor/files/reference/dn03.pdf) (last changed: 2026-10-20)
@@ -1087,10 +1036,13 @@ These can't be watched by a script (bot protection or JavaScript-only pages). Ch
 - IN - [Changes for Tax Year 2024 (linked from Indiana DOR: news and publications)](https://www.in.gov/dA/84c9a6182f/tax-changes-2024.pdf?language_id=1) (last changed: 2026-10-18)
 - IN - [DOR 2024 Fiscal Annual Report (linked from Indiana DOR: news and publications)](https://www.in.gov/dA/f18050d282/nn-ar-2024.pdf?language_id=1) (last changed: 2026-10-20)
 - IN - [DOR 2025 Fiscal Annual Report (linked from Indiana DOR: news and publications)](https://www.in.gov/dA/2e20fab1df/NP-DOR_2025_Fiscal_Annual_Report.pdf?language_id=1) (last changed: 2026-10-18)
+- IN - [DOR WH-3 XML Business Rules (linked from Indiana DOR withholding)](https://www.in.gov/dor/files/business-rules-wh3-xml.pdf) (last changed: 2026-11-03)
 - IN - [DOR recognized as Top Workplace (linked from Indiana DOR: news and publications)](https://www.in.gov/dA/552b6a0877/nn-twp-2024.pdf?language_id=1) (last changed: 2026-10-18)
 - IN - [DOR's Annual Public Hearing set for May 19 (linked from Indiana DOR: news and publications)](https://www.in.gov/dA/47da49aef6/2026-news-release-annual-public-hearing.pdf?language_id=1) (last changed: 2026-10-18)
 - IN - [Departmental Notice #1 (linked from WH-4, State Form 48845)](https://www.in.gov/dA/92797e5a5f/dn01.pdf?language_id=1) (last changed: 2026-10-20)
 - IN - [Departmental Notice #26 (linked from Indiana DOR: departmental notices)](https://www.in.gov/dA/4e9d38318e/dn26.pdf?language_id=1) (last changed: 2026-10-18)
+- IN - [EFW2 Flat File Business Rules for Indiana (linked from Indiana DOR withholding)](https://www.in.gov/dor/files/business-rules-efw2-flat-file.pdf) (last changed: 2026-11-03)
+- IN - [EFW2 Specifications/Deviations for Indiana (linked from Indiana DOR withholding)](https://www.in.gov/dor/files/guide-efw2-w2-wh3.pdf) (last changed: 2026-11-03)
 - IN - [Electronic payments and payment plans (linked from Indiana DOR: news and publications)](https://www.in.gov/dA/7a5ed24c42/nn-pay-online-plans.pdf?language_id=1) (last changed: 2026-10-18)
 - IN - [Eligible Hoosiers can file for a tax credit online (linked from Indiana DOR: news and publications)](https://www.in.gov/dA/14378de7b3/NP-Eligible_Hoosiers_can_file_for_the_SC-40_online.pdf?language_id=1) (last changed: 2026-10-18)
 - IN - [Estimated payments (linked from Indiana DOR: news and publications)](https://www.in.gov/dA/76c648ed2e/nn-estimated-payments.pdf?language_id=1) (last changed: 2026-10-18)
@@ -1101,13 +1053,10 @@ These can't be watched by a script (bot protection or JavaScript-only pages). Ch
 - IN - [INTIME customer portal keybot now available (linked from Indiana DOR: news and publications)](https://www.in.gov/dA/3c2619280a/nn-keybot.pdf?language_id=1) (last changed: 2026-10-18)
 - IN - [Indiana DOR Launches Amnesty Eligibility Tool (linked from Indiana DOR: news and publications)](https://www.in.gov/dA/a2e30e47fc/News-Release-Amnesty-Eligibility-Tool-May-18-2026.pdf?language_id=1) (last changed: 2026-10-18)
 - IN - [Indiana DOR shares changes for 2025 tax returns (linked from Indiana DOR: news and publications)](https://www.in.gov/dA/a26f05261b/NP-Indiana_DOR_shares_changes_for_2025_tax_returns.pdf?language_id=1) (last changed: 2026-10-18)
-- IN - [Indiana DOR withholding](https://www.in.gov/dor/i-am-a/business-corp/withholding/) (last changed: 2026-11-02)
-- IN - [Indiana DOR: departmental notices](https://www.in.gov/dor/legal-resources/tax-library/departmental-notices/) (last changed: 2026-10-20)
 - IN - [Indiana DOR: news and publications](https://www.in.gov/dor/about/news-publications/) (last changed: 2026-11-02)
 - IN - [Indiana Department of Revenue Warns of Text Message Scam (linked from Indiana DOR: news and publicat](https://www.in.gov/dA/2a75116158/NP-Indiana_Department_of_Revenue_Warns_of_Text_Message_Scam.pdf?language_id=1) (last changed: 2026-10-18)
 - IN - [Indiana Departmental Notice #1 (county rates)](https://www.in.gov/dor/files/dn01.pdf) (last changed: 2026-10-20)
 - IN - [Indiana IRIS XML Business Rules (linked from Indiana DOR withholding)](https://www.in.gov/dor/files/IRIS-Business-Rules.pdf) (last changed: 2026-10-18)
-- IN - [Indiana Information Bulletin #13 and Form WH-4P](https://www.in.gov/dor/files/reference/ib13.pdf) (last changed: 2026-11-02)
 - IN - [Indiana Unemployment for Employers: New Employer Premium Rate (DWD)](https://www.in.gov/dwd/indiana-unemployment/employers/employer-guide/rate-computation/new-employer-premium-rate/) (last changed: 2026-09-24)
 - IN - [Indiana Unemployment for Employers: Rate Computation (DWD)](https://www.in.gov/dwd/indiana-unemployment/employers/employer-guide/rate-computation/) (last changed: 2026-09-24)
 - IN - [Indiana Unemployment for Employers: State Premium Rate Computation (DWD)](https://www.in.gov/dwd/indiana-unemployment/employers/employer-guide/rate-computation/state-premium-rate-computation/) (last changed: 2026-09-25)
@@ -1120,12 +1069,14 @@ These can't be watched by a script (bot protection or JavaScript-only pages). Ch
 - IN - [New tax information for Indiana's Military Service members (linked from Indiana DOR: news and public](https://www.in.gov/dA/a34e5f83c0/nn-military-tax-info.pdf?language_id=1) (last changed: 2026-10-18)
 - IN - [Penalties for late payment (linked from Indiana DOR: news and publications)](https://www.in.gov/dA/f06ca3da85/nn-penalities-late-payment.pdf?language_id=1) (last changed: 2026-10-20)
 - IN - [Penny-rounding for retailers (linked from Indiana DOR: news and publications)](https://www.in.gov/dA/41e8fed88f/penny-rounding-for-retailers.pdf?language_id=1) (last changed: 2026-10-18)
+- IN - [SFTP: If a file size exceeds 10 MB, register for and use SFTP bulk fil (linked from Indiana DOR with](https://www.in.gov/dor/files/guide-withholding-sftp.pdf) (last changed: 2026-11-03)
 - IN - [Tax Amnesty 2026 Window Opens (linked from Indiana DOR: news and publications)](https://www.in.gov/dA/d1e7c10cad/2026-news-release-tax-amnesty-opens.pdf?language_id=1) (last changed: 2026-10-18)
 - IN - [Tax Day is here! (linked from Indiana DOR: news and publications)](https://www.in.gov/dA/7b4c8addc7/nn-tax-day-2024.pdf?language_id=1) (last changed: 2026-10-18)
 - IN - [Tax information for seniors and snowbirds (linked from Indiana DOR: news and publications)](https://www.in.gov/dA/0fc4c3fa53/nn-tax-info-seniors.pdf?language_id=1) (last changed: 2026-10-18)
 - IN - [Time's Running Out: Indiana’s Tax Amnesty 2026 Ends Sept. 9 (linked from Indiana DOR: news and publi](https://www.in.gov/dA/82b7e62e1f/2026-news-release-tax-amnesty-times-running-out.pdf?language_id=1) (last changed: 2026-10-18)
 - IN - [WH-4, State Form 48845](https://www.in.gov/dor/tax-forms/withholding-tax-forms/) (last changed: 2026-10-19)
 - IN - [Where's my refund? (linked from Indiana DOR: news and publications)](https://www.in.gov/dA/01d4f0b348/nn-wheres-my-refund.pdf?language_id=1) (last changed: 2026-10-18)
+- IN - [Withholding Information for Part-Time Employees (linked from Indiana DOR withholding)](https://www.in.gov/dor/files/ib52.pdf) (last changed: 2026-11-03)
 - KS - [Form 200, Local Intangibles Tax Return (Rev. 9-23-25)](https://www.ksrevenue.gov/pdf/20026.pdf) (last changed: 2026-10-20)
 - KS - [KW-100, Kansas Withholding Tax Guide (Rev. 10-24) -- SUPPLEMENTAL WAGES section, page 8](https://ksrevenue.gov/pdf/kw100.pdf) (last changed: 2026-10-20)
 - KS - [Kansas Department of Revenue: press releases](https://www.ksrevenue.gov/pressreleases.html) (last changed: 2026-10-20)
@@ -1177,7 +1128,6 @@ These can't be watched by a script (bot protection or JavaScript-only pages). Ch
 - KY - [City of Eddyville -- Local Taxes](https://www.eddyvilleky.org/Blog/10/local-taxes) (last changed: 2026-10-20)
 - KY - [City of Edmonton -- Forms](https://cityofedmontonky.com/forms/) (last changed: 2026-10-20)
 - KY - [City of Franklin -- Business Licensing & Taxes](https://www.franklinky.gov/departments/finance_accounting/business_licensing_taxes.php) (last changed: 2026-09-30)
-- KY - [City of Georgetown, KY — Taxes and license fees (occupational license tax: net profits vs gross rece](https://www.georgetownky.gov/2167/Taxes-License-Fees) (last changed: 2026-09-24)
 - KY - [City of Grayson -- Occupational-Payroll](https://www.graysonky.org/occupational-payroll) (last changed: 2026-10-20)
 - KY - [City of Henderson, KY — Occupational License Tax](https://www.hendersonky.gov/174/Occupational-License-Tax) (last changed: 2026-09-29)
 - KY - [City of Hopkinsville -- Occupational License application form](https://cms2files.revize.com/hopkinsvilleky/document_center/Finance/Tax_Forms/OCCUPATIONAL_LIC___APPLICATION_FORM.pdf) (last changed: 2026-10-20)
@@ -1193,6 +1143,7 @@ These can't be watched by a script (bot protection or JavaScript-only pages). Ch
 - KY - [City of Russell -- Occupational License Fee](https://www.russellky.gov/departments/finance___revenue_department/occupational_license_fee/index.php) (last changed: 2026-09-30)
 - KY - [City of Russellville -- Return of Payroll Taxes Withheld](https://russellvilleky.gov/index.php/forms-applications/occupational-tax?download=19:return-of-payroll-taxes-withheld) (last changed: 2026-10-18)
 - KY - [City of St. Matthews -- Occupational Tax](https://www.stmatthewsky.gov/occupational-tax/) (last changed: 2026-09-30)
+- KY - [City of Union -- New 2023 Payroll and Business License](https://cityofunionky.org/new-2023-payroll-and-business-license/) (last changed: 2026-11-03)
 - KY - [City of Vanceburg -- Annual Reconciliation of License Fee](https://www.cityofvanceburg.com/_files/ugd/2ae91a_8e635f8b0a724e379859934219b43aac.pdf) (last changed: 2026-10-20)
 - KY - [City of Vanceburg -- Employee Quarterly Return](https://www.cityofvanceburg.com/_files/ugd/2ae91a_5d54392ffbe34c1ba805a5216c0afd9e.pdf) (last changed: 2026-10-20)
 - KY - [City of West Liberty -- Occupational Tax Ordinance Amendment](https://westliberty.ky.gov/Ordinances/Occupational-Tax-Ordinance-Amendment.pdf) (last changed: 2026-10-01)
@@ -1248,6 +1199,7 @@ These can't be watched by a script (bot protection or JavaScript-only pages). Ch
 - KY - [KRS 92.281 -- Levy of all taxes authorized by Constitution Section 181 -- Exceptions -- License fees](https://apps.legislature.ky.gov/law/statutes/statute.aspx?id=48683) (last changed: 2026-09-24)
 - KY - [KY-TAM-18-03 -- Credit for Income Tax Paid to Another State](https://revenue.ky.gov/DOR%20Training%20Materials/KY-TAM-18-03%20Credit%20for%20Income%20Tax%20Paid%20to%20Another%20State%20FINAL%20(UPDATED%20HYPERLINKS).pdf) (last changed: 2026-09-24)
 - KY - [Kentucky 2026 withholding formula](https://revenue.ky.gov/Forms/2026%20Withholding%20Formula.pdf) (last changed: 2026-09-24)
+- KY - [Kentucky Association of Counties -- Data Brief: 2026 County Occupational Tax Rates (payroll column, ](https://kaco.org/media/7051/2026-databrief-occupationaltaxes.pdf) (last changed: 2026-10-20)
 - KY - [Kentucky DOR -- 2025 Form K-4](https://revenue.ky.gov/Documents/42A804%20(K-4)%20(2025).pdf) (last changed: 2026-09-30)
 - KY - [Kentucky DOR -- 2025 Kentucky Withholding Tax Formula](https://revenue.ky.gov/Forms/Withholding%20Computer%20Formula.pdf) (last changed: 2026-09-30)
 - KY - [Kentucky DOR -- Kentucky DOR Announces 2025 Standard Deduction](https://revenue.ky.gov/News/pages/kentucky-dor-announces-2025-standard-deduction.aspx) (last changed: 2026-09-30)
@@ -1258,7 +1210,6 @@ These can't be watched by a script (bot protection or JavaScript-only pages). Ch
 - KY - [Kentucky withholding](https://revenue.ky.gov/Business/Pages/Employer-Payroll-Withholding.aspx) (last changed: 2026-10-22)
 - KY - [License Fee Regulations – 5th edition – Issued Dec. 1, 2000 (linked from City of Lexington -- Occupa](https://content.lexingtonky.gov/sites/default/files/migrated-files/sites/default/files/2016-08/License%2520Fee%2520Regulations.pdf) (last changed: 2026-10-20)
 - KY - [Louisville Metro Revenue Commission -- W-1KJC Instructions and Louisville Metro Code Sec. 110.02](https://louisvilleky.gov/sites/default/files/2024-12/w-1kjc_instructions_2025.pdf) (last changed: 2026-09-24)
-- KY - [Need to update or cancel a business account? (linked from Kentucky withholding)](http://revenue.ky.gov/Forms/10A104.pdf) (last changed: 2026-10-18)
 - KY - [Net Profit License Fee Return (linked from City of Nicholasville, KY — Tax Office)](https://nicholasville.org/wp-content/uploads/2020/07/NPform-1.pdf) (last changed: 2026-10-20)
 - KY - [Occupational License Fees (linked from City of Nicholasville, KY — Tax Office)](https://nicholasville.org/wp-content/uploads/2020/07/NetProfitsOrdinance.pdf) (last changed: 2026-10-20)
 - KY - [Occupational Tax Application (linked from City of St. Matthews -- Occupational Tax)](https://www.stmatthewsky.gov/wp-content/uploads/2022/09/Occupational-Tax-Application.pdf) (last changed: 2026-10-20)
@@ -1381,6 +1332,7 @@ These can't be watched by a script (bot protection or JavaScript-only pages). Ch
 - MI - [MCL 600.4012 and Michigan's own garnishment procedure — tracks the federal CCPA floor (25%/30x-feder](https://www.legislature.mi.gov/Laws/MCL?objectName=mcl-600-4012) (last changed: 2026-10-18)
 - MI - [MI-W4 (Rev. 12-20) — Employee's Michigan Withholding Exemption Certificate](https://www.michigan.gov/-/media/Project/Websites/taxes/Forms/All-Years/MIW4.pdf) (last changed: 2026-09-24)
 - MI - [Michigan 2026 Income Tax Withholding Guide (446)](https://www.michigan.gov/taxes/-/media/Project/Websites/taxes/Forms/SUW/TY2026/446_Withholding-Guide_2026.pdf) (last changed: 2026-09-24)
+- MI - [Michigan LEO -- Michigan's Minimum Wage Set to Increase on Jan. 1, 2026](https://www.michigan.gov/leo/news/2025/12/08/michigans-minimum-wage-set-to-increase-on-jan-1-2026) (last changed: 2026-11-03)
 - MI - [Michigan LEO/UIA — Taxable Wage Base FAQ](https://www.michigan.gov/leo/bureaus-agencies/uia/employers/forms/accordion/taxable-wage-base) (last changed: 2026-09-24)
 - MI - [Michigan LEO/UIA — Unemployment Tax Rate (statutory formula, Section 19 of the Michigan Employment S](https://www.michigan.gov/leo/bureaus-agencies/uia/assets/unemployment-tax-rate) (last changed: 2026-09-24)
 - MI - [Michigan Treasury -- 446 Michigan Income Tax Withholding Guide (2025)](https://www.michigan.gov/taxes/-/media/Project/Websites/taxes/Forms/SUW/TY2025/446_Withholding-Guide_2025.pdf) (last changed: 2026-09-30)
@@ -1396,7 +1348,6 @@ These can't be watched by a script (bot protection or JavaScript-only pages). Ch
 - MN - [2025 Property Tax Services Report (linked from Minnesota Department of Revenue: what's new)](https://www.revenue.state.mn.us/sites/default/files/2026-02/2025-state-property-tax-services-report-accessible.pdf) (last changed: 2026-10-20)
 - MN - [2026 Form W-4MN, Section 2 -- Exemption From Minnesota Withholding](https://www.revenue.state.mn.us/sites/default/files/2026-04/w-4mn.pdf) (last changed: 2026-10-20)
 - MN - [City of Minneapolis -- Minimum wage increases to $16.37 for all employers](https://www.minneapolismn.gov/news/2025/december/minimum-wage/) (last changed: 2026-10-20)
-- MN - [City of Saint Paul -- Minimum Wage Increases for Small and Micro Businesses (effective July 1, 2026)](https://www.stpaul.gov/news/city-saint-paul-minimum-wage-increases-small-and-micro-businesses) (last changed: 2026-11-02)
 - MN - [Form MWR, Minnesota Reciprocity Exemption /Affidavit of Residency (linked from Minnesota Department ](https://www.revenue.state.mn.us/sites/default/files/2025-12/mwr.pdf) (last changed: 2026-10-20)
 - MN - [Minn. R. 8002.0200 (administrative rule implementing 290.081's reciprocity exclusion)](https://www.revisor.mn.gov/rules/8002.0200/) (last changed: 2026-10-20)
 - MN - [Minn. Stat. § 268B.14 (Premium rates)](https://www.revisor.mn.gov/statutes/cite/268B.14) (last changed: 2026-11-02)
@@ -1430,228 +1381,79 @@ These can't be watched by a script (bot protection or JavaScript-only pages). Ch
 - MO - [Missouri withholding](https://dor.mo.gov/taxation/business/tax-types/withholding/) (last changed: 2026-10-20)
 - MO - [St. Louis: employer withholding and payroll expense tax information](https://www.stlouis-mo.gov/government/departments/collector/earnings-tax/payroll-tax-info.cfm) (last changed: 2026-10-20)
 - MO - [W-3 Reconciliation (linked from St. Louis: employer withholding and payroll expens)](https://www.stlouis-mo.gov/government/departments/collector/earnings-tax/documents/w-3-form.cfm) (last changed: 2026-10-20)
-- MS - [1099 Guidance for Recipients (linked from Mississippi withholding)](https://www.dor.ms.gov/sites/default/files/business/1099%20guidance%20for%20recipients.pdf) (last changed: 2026-10-20)
-- MS - [2022 (linked from Mississippi withholding)](https://www.dor.ms.gov/sites/default/files/business/with_TY2022ApprovedProviders.pdf) (last changed: 2026-10-20)
-- MS - [2023 (linked from Mississippi withholding)](https://www.dor.ms.gov/sites/default/files/business/2023ApprovedProvidersWTH_20240408.pdf) (last changed: 2026-10-20)
-- MS - [2024 (linked from Mississippi withholding)](https://www.dor.ms.gov/sites/default/files/business/2024ApprovedWTHProviders.pdf) (last changed: 2026-10-20)
-- MS - [2025 (linked from Mississippi withholding)](https://www.dor.ms.gov/sites/default/files/business/2025WithholdingApprovedProvidersRev2.4.26.pdf) (last changed: 2026-10-20)
-- MS - [Ackerman Tourism and Parks and Recreation Tax (linked from Mississippi Department of Revenue: news)](https://www.dor.ms.gov/sites/default/files/news/72-26-14%20Ackerman%20Tourism%20and%20Parks%20and%20Recreation%20Tax.pdf) (last changed: 2026-10-20)
-- MS - [Bi-Weekly (linked from Mississippi withholding)](https://www.dor.ms.gov/sites/default/files/business/Bi-weekly2026.pdf) (last changed: 2026-10-20)
-- MS - [Daily​​​ (linked from Mississippi withholding)](https://www.dor.ms.gov/sites/default/files/business/Daily2026.pdf) (last changed: 2026-10-20)
-- MS - [Flowchart​​​​​ (linked from Mississippi withholding)](https://www.dor.ms.gov/sites/default/files/business/Computer%20Payroll%20Flowchart%20-%20updated%208-13-25.pdf) (last changed: 2026-10-20)
 - MS - [HERE (linked from Mississippi Department of Revenue: news)](https://www.dor.ms.gov/sites/default/files/notices-technical-bulletins/MS%20WTH%20Gaming%20Winnings%20Notice%209-21-26.pdf) (last changed: 2026-10-20)
-- MS - [HERE (linked from Mississippi Department of Revenue: news)](https://www.dor.ms.gov/sites/default/files/news/2026%20Second%20Amendment%20Sales%20Tax%20Holiday%20Updated%205-26-2026.pdf) (last changed: 2026-10-20)
-- MS - [HERE (linked from Mississippi Department of Revenue: news)](https://www.dor.ms.gov/sites/default/files/notices-technical-bulletins/72-26-15%20City%20Modernization%20Expenditure.pdf) (last changed: 2026-10-20)
-- MS - [Here (linked from Mississippi Department of Revenue: news)](https://www.dor.ms.gov/sites/default/files/news/2026%20Sales%20Tax%20Holiday.pdf) (last changed: 2026-10-20)
-- MS - [MS Administrative Code, Title 35, Part III, Subpart 11 (linked from Mississippi withholding)](https://www.sos.ms.gov/adminsearch/ACCode/00000158c.pdf) (last changed: 2026-10-20)
-- MS - [MVS Abandonment Changes July 1 2026 (linked from Mississippi Department of Revenue: news)](https://www.dor.ms.gov/sites/default/files/notices-technical-bulletins/Notice%20-%20MVS%20Abandonment%20Changes%20July%201%202026_0.pdf) (last changed: 2026-10-20)
 - MS - [Mississippi DOR business tax FAQ](https://www.dor.ms.gov/business/business-tax-frequently-asked-questions) (last changed: 2026-11-02)
 - MS - [Mississippi Department of Employment Security -- Employer FAQs](https://mdes.ms.gov/employer-faqs/) (last changed: 2026-10-20)
 - MS - [Mississippi Department of Revenue: news](https://www.dor.ms.gov/news) (last changed: 2026-10-20)
 - MS - [Mississippi withholding](https://www.dor.ms.gov/business/withholding-tax) (last changed: 2026-10-20)
-- MS - [Monthly​​​ (linked from Mississippi withholding)](https://www.dor.ms.gov/sites/default/files/business/Monthly2026.pdf) (last changed: 2026-10-20)
-- MS - [NSM Fee Rate Increase (linked from Mississippi Department of Revenue: news)](https://www.dor.ms.gov/sites/default/files/notices-technical-bulletins/72-26-10%202026%20NSM%20Fee%20Rate%20Increase.pdf) (last changed: 2026-10-20)
 - MS - [Pub 89-700-25-1 (Rev. 07/25) -- Withholding Income Tax Tables and Employer Instructions, effective J](https://www.dor.ms.gov/sites/default/files/tax-forms/business/89700251revised1.13.2026.pdf) (last changed: 2026-10-20)
-- MS - [Pub. 89-145 (linked from Mississippi withholding)](https://www.dor.ms.gov/sites/default/files/business/89-145-25%201.pdf) (last changed: 2026-10-20)
-- MS - [Semi-Monthly​​ (linked from Mississippi withholding)](https://www.dor.ms.gov/sites/default/files/business/Semi-monthly2026.pdf) (last changed: 2026-10-20)
-- MS - [To download Form UI-3B, click here. (linked from Mississippi Department of Employment Security -- E)](https://mdes.ms.gov/media/10385/UI_3B.pdf) (last changed: 2026-10-20)
 - MS - [USDA National Finance Center -- Mississippi State Income Tax Withholding (NFC-25-1745343478, effecti](https://help.nfc.usda.gov/bulletins/2025/1745343478.htm) (last changed: 2026-10-20)
 - MS - [USDA National Finance Center -- Mississippi State Income Tax Withholding bulletin (NFC-26-1768327516](https://help.nfc.usda.gov/bulletins/2026/1768327516.htm) (last changed: 2026-10-20)
-- MS - [W2-1099 Mandate (linked from Mississippi withholding)](https://www.dor.ms.gov/sites/default/files/business/W2-1099%20Mandate.pdf) (last changed: 2026-10-20)
-- MS - [Weekly​​​ (linked from Mississippi withholding)](https://www.dor.ms.gov/sites/default/files/business/Weekly2026.pdf) (last changed: 2026-10-20)
 - MT - [2026 Form MW-4, Montana Employee's Withholding and Exemption Certificate](https://revenuefiles.mt.gov/files/Forms/Montana_Employee_Withholding_Allowance_and_Exemption_Certificate_Form_MW-4.pdf) (last changed: 2026-10-20)
-- MT - [2026 Montana Minimum Wage Determination Letter (linked from Montana DLI -- Montana's Minimum Wage)](https://erd.dli.mt.gov/_docs/labor-standards/MW-Determination-Letter.2026.pdf) (last changed: 2026-10-27)
 - MT - [2026 Montana Publication 1, A Guide to Montana Tax Withholding and Estimated Payments](https://revenuefiles.mt.gov/files/Forms/Publication-1/Publication-1-2026.pdf) (last changed: 2026-10-20)
-- MT - [2027 Montana Minimum Wage Determination Letter (linked from Montana DLI -- Montana's Minimum Wage)](https://erd.dli.mt.gov/labor-standards/wage-and-hour-payment-act/MW-Determination-Letter1.pdf) (last changed: 2026-10-27)
-- MT - [Download the 2026 Montana Wage & Hour Poster (linked from Montana DLI -- Montana's Minimum Wage)](https://erd.dli.mt.gov/_docs/labor-standards/2026-MINIMUM-WAGE-POSTER.pdf) (last changed: 2026-10-27)
-- MT - [Download the 2026 Montana Wage & Hour Poster in Spanish (linked from Montana DLI -- Montana's Minimu](https://erd.dli.mt.gov/_docs/labor-standards/2026-MINIMUM-WAGE-POSTER-in-SPANISH.pdf) (last changed: 2026-10-27)
-- MT - [Download the 2027 Montana Wage & Hour Poster (linked from Montana DLI -- Montana's Minimum Wage)](https://erd.dli.mt.gov/labor-standards/wage-and-hour-payment-act/2027-MINIMUM-WAGE-POSTER.pdf) (last changed: 2026-10-27)
-- MT - [Download the 2027 Montana Wage & Hour Poster in Spanish (linked from Montana DLI -- Montana's Minimu](https://erd.dli.mt.gov/labor-standards/wage-and-hour-payment-act/2027-MINIMUM-WAGE-POSTER-in-SPANISH.pdf) (last changed: 2026-10-27)
-- MT - [Montana Annual W-2 1099 Withholding Tax Reconciliation - Form MW-3 (PD (linked from Montana withhold](https://revenuefiles.mt.gov/files/Forms/Montana_Annual_W-2_1099_Withholding_Tax_Reconciliation_Form_MW-3.pdf) (last changed: 2026-10-20)
 - MT - [Montana DLI -- Montana's Minimum Wage](https://erd.dli.mt.gov/labor-standards/wage-and-hour-payment-act/state-minimum-wage) (last changed: 2026-10-26)
 - MT - [Montana DLI -- UI Contribution Rate Schedules (all 12 schedules, I-XII)](https://uid.dli.mt.gov/employers/schedule-of-contribution-rates) (last changed: 2026-10-20)
 - MT - [Montana Employer and Information Agent Guide (publication page)](https://revenue.mt.gov/publications/montana-employer-and-information-agent-guide) (last changed: 2026-10-20)
 - MT - [Montana Employer and Information Agent Guide with Montana Withholding Tax Tables (V4, November 2025)](https://revenuefiles.mt.gov/files/Forms/Montana_Employer_and_Information_Agent_Guide_with_Tax_Tables.pdf) (last changed: 2026-10-20)
-- MT - [Montana Withholding Tax Payment Voucher - Form MW-1 (PDF) (linked from Montana withholding)](https://revenuefiles.mt.gov/files/Forms/Montana_Withholding_Tax_Payment_Voucher_Form_MW-1.pdf) (last changed: 2026-10-20)
 - MT - [Montana withholding](https://revenue.mt.gov/taxes/withholding-tax/wage-withholding-returns-and-payments) (last changed: 2026-10-20)
 - MT - [Montana withholding news](https://revenue.mt.gov/news/recent-news/2026-withholding-updates) (last changed: 2026-10-20)
-- NC - [Form NC-4 (linked from NCDOR -- Withholding Tax Frequently Asked Question)](https://www.ncdor.gov/documents/employees-withholding-allowance-certificate-nc-4) (last changed: 2026-10-20)
-- NC - [Form NC-4 EZ (linked from NCDOR -- Withholding Tax Frequently Asked Question)](https://www.ncdor.gov/documents/employees-withholding-allowance-certificate-nc-4ez) (last changed: 2026-10-20)
-- NC - [Form NC-4 NRA (linked from NCDOR -- Withholding Tax Frequently Asked Question)](https://www.ncdor.gov/documents/nonresident-alien-employees-withholding-allowance-certificate) (last changed: 2026-10-20)
-- NC - [Form NC-BN, Request to Close Tax Account (linked from NCDOR -- Withholding Tax Frequently Asked Ques](https://www.ncdor.gov/documents/nc-bn-out-business-notification) (last changed: 2026-10-20)
-- NC - [Form NC-BR (linked from NCDOR -- Withholding Tax Frequently Asked Question)](https://www.ncdor.gov/documents/form-nc-br-webfill-business-registration-application-income-tax-withholding-sales-and-use-tax-and) (last changed: 2026-10-20)
 - NC - [N.C. Gen. Stat. § 1-362 — wages/personal earnings exempt from attachment/garnishment for ordinary ju](https://www.ncleg.gov/EnactedLegislation/Statutes/HTML/BySection/Chapter_1/GS_1-362.html) (last changed: 2026-10-20)
 - NC - [NC Division of Employment Security -- Tax Rate Information](https://www.des.nc.gov/employers/tax-rate-information) (last changed: 2026-11-02)
-- NC - [NC-30, North Carolina Income Tax Withholding Tables and Instructions f (linked from NCDOR -- Withhol](https://www.ncdor.gov/documents/2017-income-tax-withholding-tables-and-instructions-employers) (last changed: 2026-10-20)
 - NC - [NCDOR -- Withholding Tax Frequently Asked Questions](https://www.ncdor.gov/withholding-tax-frequently-asked-questions) (last changed: 2026-11-02)
 - NC - [North Carolina 2026 Income Tax Withholding Tables and Instructions for Employers, Section 6](https://www.ncdor.gov/income-tax-withholding-tables-and-instructions-employers/open) (last changed: 2026-10-20)
 - NC - [North Carolina Department of Revenue: news](https://www.ncdor.gov/news) (last changed: 2026-10-20)
 - NC - [North Carolina withholding](https://www.ncdor.gov/taxes-forms/withholding-tax) (last changed: 2026-10-20)
-- NC - [Publication NC-30 (linked from NCDOR -- Withholding Tax Frequently Asked Question)](https://www.ncdor.gov/documents/income-tax-withholding-tables-and-instructions-employers) (last changed: 2026-10-20)
 - NC - [USDA National Finance Center -- North Carolina Income Tax Withholding (2025)](https://help.nfc.usda.gov/bulletins/2025/1740006150.htm) (last changed: 2026-10-20)
 - ND - [2026 Income Tax Withholding Rates and Instructions (North Dakota Office of State Tax Commissioner)](https://www.tax.nd.gov/sites/www/files/documents/forms/individual/2026-iit/2026-income-tax-withholding-rates-booklet.pdf) (last changed: 2026-10-20)
-- ND - [ACH Credit PDF (linked from North Dakota withholding)](https://www.tax.nd.gov/sites/www/files/documents/forms/misc-forms/ach-credit.pdf) (last changed: 2026-10-20)
-- ND - [Form 306 (linked from North Dakota withholding)](https://www.tax.nd.gov/sites/www/files/documents/forms/business/it-withholding/form-306-web.pdf) (last changed: 2026-10-20)
 - ND - [Form NDW-R -- Reciprocity Exemption from Withholding for Qualifying Minnesota and Montana Residents](https://www.tax.nd.gov/sites/www/files/documents/forms/business/ndwrfillable.pdf) (last changed: 2026-10-20)
-- ND - [Instructions to E-File 1099s (linked from North Dakota withholding)](https://www.tax.nd.gov/sites/www/files/documents/Income%20Tax/ND-TAP-instructions-1099.pdf) (last changed: 2026-10-20)
-- ND - [Instructions to E-File W-2s (linked from North Dakota withholding)](https://www.tax.nd.gov/sites/www/files/documents/Income%20Tax/ND-Tap-Instructions-W2s.pdf) (last changed: 2026-10-20)
-- ND - [N.D.C.C. 57-38-60 (linked from North Dakota withholding)](https://ndlegis.gov/cencode/t57c38.pdf) (last changed: 2026-10-20)
 - ND - [North Dakota Income Tax Withholding & Information Returns Guideline](https://www.tax.nd.gov/sites/www/files/documents/guidelines/business/it-withhold/income-tax-withholding-information-returns-guideline.pdf) (last changed: 2026-11-02)
 - ND - [North Dakota Office of State Tax Commissioner -- Income Tax Withholding Rates and Instructions, 2025](https://www.tax.nd.gov/sites/www/files/documents/misc-discuss-folder/Final_2025%20Income%20Tax%20Withholding%20Rates%20%20Instructions.pdf) (last changed: 2026-10-20)
 - ND - [North Dakota Office of State Tax Commissioner: news](https://www.tax.nd.gov/news) (last changed: 2026-10-20)
 - ND - [North Dakota withholding](https://www.tax.nd.gov/income-tax-withholding) (last changed: 2026-10-20)
 - NE - [A Guide to Understanding Nebraska's Unemployment Insurance Combined Tax Rates (2026)](https://dol.nebraska.gov/webdocs/Resources/Items/2026%20UI%20guide%20to%20understanding.pdf) (last changed: 2026-10-20)
-- NE - [Biweekly Payroll Period (linked from Nebraska withholding)](https://revenue.nebraska.gov/sites/revenue.nebraska.gov/files/doc/business/Cir_En_2026/2027_biweekly.pdf) (last changed: 2026-10-20)
-- NE - [Circular EN (linked from Nebraska withholding)](https://revenue.nebraska.gov/sites/default/files/doc/business/Cir_En_2026/2027cir_en_whole.pdf) (last changed: 2026-10-20)
-- NE - [Daily Payroll Period (linked from Nebraska withholding)](https://revenue.nebraska.gov/sites/revenue.nebraska.gov/files/doc/business/Cir_En_2026/2027_daily.pdf) (last changed: 2026-10-20)
-- NE - [Download Court Filing (linked from Nebraska Attorney General -- suit against the City)](https://ago.nebraska.gov/sites/default/files/doc/2026.08.18%20-%20Complaint.pdf) (last changed: 2026-10-20)
-- NE - [Download Court Filing (linked from Nebraska Attorney General -- suit against the City)](https://ago.nebraska.gov/sites/default/files/doc/Court%20Filing_26.pdf) (last changed: 2026-10-20)
-- NE - [Entire Book (linked from Nebraska withholding)](https://revenue.nebraska.gov/sites/revenue.nebraska.gov/files/doc/business/Cir_En_2026/2027cir_en_whole.pdf) (last changed: 2026-10-20)
-- NE - [Federal Form SS-4, Application for Employer Identification Number (linked from Nebraska withholding)](https://www.irs.gov/pub/irs-pdf/fss4.pdf) (last changed: 2026-10-20)
-- NE - [Important Information for Employers (linked from Nebraska withholding)](https://revenue.nebraska.gov/sites/revenue.nebraska.gov/files/doc/business/important_W-2_format_info.pdf) (last changed: 2026-10-20)
-- NE - [Income Tax Withholding for Nonresident Individuals Performing Personal (linked from Nebraska withhol](https://revenue.nebraska.gov/sites/revenue.nebraska.gov/files/doc/info/8-515.pdf) (last changed: 2026-10-20)
-- NE - [Instructions (linked from Nebraska withholding)](https://revenue.nebraska.gov/sites/revenue.nebraska.gov/files/doc/business/Cir_En_2026/2027_instruct.pdf) (last changed: 2026-10-20)
-- NE - [Instructions (linked from Nebraska withholding)](https://www.irs.gov/pub/irs-pdf/iss4.pdf) (last changed: 2026-10-20)
-- NE - [Monthly Payroll Period (linked from Nebraska withholding)](https://revenue.nebraska.gov/sites/revenue.nebraska.gov/files/doc/business/Cir_En_2026/2027_monthly.pdf) (last changed: 2026-10-20)
 - NE - [Nebraska 2026 Circular EN, Pensions and Annuities](https://revenue.nebraska.gov/sites/default/files/doc/business/Cir_En_2025/2026cir_en_whole.pdf) (last changed: 2026-10-20)
 - NE - [Nebraska Attorney General -- suit against the City of Omaha over its minimum wage ordinance](https://ago.nebraska.gov/news/attorney-general-hilgers-sues-city-omaha-over-unconstitutional-minimum-wage-ordinance) (last changed: 2026-10-20)
-- NE - [Nebraska Computer Reporting Procedure (21CM) (linked from Nebraska withholding)](https://revenue.nebraska.gov/sites/default/files/doc/info/8-482.pdf) (last changed: 2026-10-20)
-- NE - [Nebraska Computer Reporting Procedure (21EFW2) (linked from Nebraska withholding)](https://revenue.nebraska.gov/sites/default/files/doc/info/8-633.pdf) (last changed: 2026-10-20)
 - NE - [Nebraska DOR -- Nebraska Income Tax Withholding Percentage Method Tables (For Wages Paid on or After](https://revenue.nebraska.gov/sites/default/files/doc/business/Cir_En_2024/2025_percent.pdf) (last changed: 2026-10-20)
 - NE - [Nebraska Department of Labor -- Nebraska's Minimum Wage Increases to $15 Effective January 1, 2026](https://dol.nebraska.gov/PressRelease/Details/338) (last changed: 2026-10-20)
 - NE - [Nebraska Department of Labor -- State of Nebraska Minimum Wage (updated 7/31/2026)](https://dol.nebraska.gov/webdocs/getfile/18bc2309-85ed-4957-b072-e899caeaca99) (last changed: 2026-10-26)
 - NE - [Nebraska Department of Revenue: news](https://revenue.nebraska.gov/news) (last changed: 2026-10-20)
 - NE - [Nebraska Income Tax Withholding Percentage Method — Withholding Allowance Table](https://revenue.nebraska.gov/sites/default/files/doc/business/Cir_En_2025/2026_percent.pdf) (last changed: 2026-10-20)
-- NE - [Nebraska Income Tax for U.S. Servicemembers, Their Spouses, and Civili (linked from Nebraska withhol](https://revenue.nebraska.gov/sites/revenue.nebraska.gov/files/doc/info/8-364.pdf) (last changed: 2026-10-20)
 - NE - [Nebraska Legislative Bill 258 (2026), approved by the Governor February 9, 2026](https://nebraskalegislature.gov/FloorDocs/109/PDF/Slip/LB258.pdf) (last changed: 2026-10-20)
-- NE - [Nebraska Nonresident Employee Certificate for Allocation of Income Tax (linked from Nebraska withhol](https://revenue.nebraska.gov/sites/revenue.nebraska.gov/files/doc/tax-forms/f_9n.pdf) (last changed: 2026-10-20)
 - NE - [Nebraska Reg-21-004.06](https://revenue.nebraska.gov/about/chapter-21-income-tax-withholding) (last changed: 2026-11-02)
-- NE - [Nebraska Voluntary Disclosure Program (linked from Nebraska withholding)](https://revenue.nebraska.gov/sites/revenue.nebraska.gov/files/doc/info/7-250.pdf) (last changed: 2026-10-20)
 - NE - [Nebraska withholding](https://revenue.nebraska.gov/businesses/nebraska-income-tax-withholding) (last changed: 2026-10-20)
-- NE - [Percentage Method (linked from Nebraska withholding)](https://revenue.nebraska.gov/sites/revenue.nebraska.gov/files/doc/business/Cir_En_2026/2027_percent.pdf) (last changed: 2026-10-20)
-- NE - [Procedures for Reviewing and Appealing a Notice of Deficiency Determin (linked from Nebraska withhol](https://revenue.nebraska.gov/sites/revenue.nebraska.gov/files/doc/info/7-149.pdf) (last changed: 2026-10-20)
-- NE - [Required Special Income Tax Withholding Procedures (linked from Nebraska withholding)](https://revenue.nebraska.gov/sites/revenue.nebraska.gov/files/doc/business/Cir_En_2026/2027_letter_only.pdf) (last changed: 2026-10-20)
-- NE - [Semimonthly Payroll Period (linked from Nebraska withholding)](https://revenue.nebraska.gov/sites/revenue.nebraska.gov/files/doc/business/Cir_En_2026/2027_semimonthly.pdf) (last changed: 2026-10-20)
 - NE - [USDA National Finance Center -- Nebraska State Income Tax Withholding (2025)](https://help.nfc.usda.gov/bulletins/2025/1740158785.htm) (last changed: 2026-10-20)
-- NE - [Weekly Payroll Period (linked from Nebraska withholding)](https://revenue.nebraska.gov/sites/revenue.nebraska.gov/files/doc/business/Cir_En_2026/2027_weekly.pdf) (last changed: 2026-10-20)
-- NE - [wage table brackets (linked from Nebraska withholding)](https://revenue.nebraska.gov/sites/default/files/doc/business/Cir_En_2026/2027_weekly.pdf) (last changed: 2026-10-20)
-- NJ - [2026 State Equalization Table (linked from New Jersey Division of Taxation: what's new)](https://www.nj.gov/treasury/taxation/pdf/lpt/2026NoticeofHearing.pdf) (last changed: 2026-10-20)
-- NJ - [Click here (linked from NJ Division of Employer Accounts -- Rate informati)](https://www.nj.gov/labor/forms_pdfs/ea/Explanation%20of%20Unemployment%20Rate.pdf) (last changed: 2026-10-20)
-- NJ - [DOWNLOAD HERE > (linked from NJ Division of Temporary Disability and Family Lea)](https://www.nj.gov/labor/myleavebenefits/assets/pdfs/FL1_7-20.pdf) (last changed: 2026-10-20)
-- NJ - [DOWNLOAD NOW (ENGLISH) > (linked from NJ Division of Temporary Disability and Family Lea)](https://www.nj.gov/labor/myleavebenefits/assets/pdfs/PR-148%20(7-26)%20Cash%20Benefits%20Family%20Leave.pdf) (last changed: 2026-10-20)
-- NJ - [DOWNLOAD NOW (ENGLISH) > (linked from NJ Division of Temporary Disability and Family Lea)](https://www.nj.gov/labor/myleavebenefits/assets/pdfs/PR-117%20(3-26)%20Cash%20Benefits%20Health%20Conditions%20and%20Pregnancy.pdf) (last changed: 2026-10-20)
-- NJ - [DOWNLOAD NOW (SPANISH) > (linked from NJ Division of Temporary Disability and Family Lea)](https://www.nj.gov/labor/myleavebenefits/assets/pdfs/PR-148S%20(7-26)%20Cash%20Benefits%20Family%20Leave.pdf) (last changed: 2026-10-20)
-- NJ - [DOWNLOAD NOW (SPANISH) > (linked from NJ Division of Temporary Disability and Family Lea)](https://www.nj.gov/labor/myleavebenefits/assets/pdfs/PR-117S%20(3-26)%20Cash%20Benefits%20Health%20Conditions%20and%20Pregnancy%20(1).pdf) (last changed: 2026-10-20)
-- NJ - [DOWNLOAD NOW > (linked from NJ Division of Temporary Disability and Family Lea)](https://www.nj.gov/labor/myleavebenefits/assets/pdfs/DS1_6-19.pdf) (last changed: 2026-10-20)
 - NJ - [Form NJ-165 -- Employee's Certificate of Nonresidence in New Jersey](https://www.nj.gov/treasury/taxation/pdf/current/nj165.pdf) (last changed: 2026-10-20)
 - NJ - [Form NJ-W4, Employee's Withholding Allowance Certificate (1-21, last modified 2022-12-06)](https://nj.gov/treasury/taxation/pdf/current/njw4.pdf) (last changed: 2026-10-20)
-- NJ - [Gozam Bar LLC (linked from New Jersey Division of Taxation: what's new)](https://www.nj.gov/treasury/taxation/pdf/auction/26-auction-GozamBarLLC.pdf) (last changed: 2026-10-20)
 - NJ - [NJ Division of Employer Accounts -- Rate information, contributions, and due dates](https://www.nj.gov/labor/ea/employer-services/rate-info/) (last changed: 2026-11-02)
 - NJ - [NJ Division of Temporary Disability and Family Leave Insurance — Worker FLI contribution rate](https://www.nj.gov/labor/myleavebenefits/worker/fli/) (last changed: 2026-10-20)
 - NJ - [NJ Division of Temporary Disability and Family Leave Insurance — Worker TDI contribution rate](https://www.nj.gov/labor/myleavebenefits/worker/tdi/) (last changed: 2026-10-20)
 - NJ - [NJDOL press release 2026-09-29 -- minimum wage to increase to $16.48 on Jan. 1](https://www.nj.gov/labor/lwdhome/press/2026/20260929_min_wage.shtml) (last changed: 2026-10-26)
 - NJ - [NJDOL — New Benefit Rates for 2026 (taxable wage bases)](https://www.nj.gov/labor/lwdhome/press/2025/20251229_newbenefitrates2026.shtml) (last changed: 2026-10-20)
 - NJ - [New Jersey Department of Labor and Workforce Development -- minimum wage increase announcement for J](https://www.nj.gov/labor/lwdhome/press/2025/20251001_Minimum_Wage.shtml) (last changed: 2026-10-20)
-- NJ - [New Jersey Division of Taxation: what's new](https://www.nj.gov/treasury/taxation/whatsnew.shtml) (last changed: 2026-11-02)
 - NJ - [New Jersey Form NJ-W-4P, Certificate of Voluntary Withholding](https://www.nj.gov/treasury/taxation/pdf/current/njw4p.pdf) (last changed: 2026-11-02)
 - NJ - [New Jersey NJ-WT withholding instructions](https://www.nj.gov/treasury/taxation/pdf/current/njwt.pdf) (last changed: 2026-10-20)
 - NJ - [New Jersey Office of Administrative Law -- Notice of Administrative Changes, Minimum Wage (N.J.A.C. ](https://www.nj.gov/labor/assets/PDFs/Legal%20Notices/Other/Public%20Notice%20Minimum%20Wage%202026_FINAL.pdf) (last changed: 2026-10-20)
 - NJ - [New Jersey Withholding Rate Tables (Percentage Method, effective Oct 1, 2020)](https://www.nj.gov/treasury/taxation/pdf/withholdingtables.pdf) (last changed: 2026-10-20)
-- NJ - [New Jersey employer payroll tax](https://www.nj.gov/treasury/taxation/businesses/payroll/index.shtml) (last changed: 2026-11-02)
-- NJ - [OVP ENTERPRISES LLC (linked from New Jersey Division of Taxation: what's new)](https://www.nj.gov/treasury/taxation/pdf/auction/26-auction-ovp-enterprises.pdf) (last changed: 2026-10-20)
-- NJ - [Platinum Hair Design (linked from New Jersey Division of Taxation: what's new)](https://www.nj.gov/treasury/taxation/pdf/auction/PlatinumHairDesignAuctionNotice.pdf) (last changed: 2026-10-20)
-- NJ - [Platinum Hair Design (linked from New Jersey Division of Taxation: what's new)](https://www.nj.gov/treasury/taxation/pdf/auction/26-auction-platinum-hair-design.pdf) (last changed: 2026-10-20)
-- NJ - [Platinum Hair Design (linked from New Jersey Division of Taxation: what's new)](https://www.nj.gov/treasury/taxation/pdf/auction/26PlatinumHair.pdf) (last changed: 2026-10-20)
-- NJ - [Spring 2026 CEEB Meeting Legal Notice (linked from New Jersey Division of Taxation: what's new)](https://www.nj.gov/treasury/taxation/pdf/lpt/ceeb-spring-26.pdf) (last changed: 2026-10-20)
-- NJ - [TB-110 (R) Corporation Business Tax Net Controlled Foreign Corporation (linked from New Jersey Divis](https://www.nj.gov/treasury/taxation/pdf/pubs/tb/tb110.pdf) (last changed: 2026-10-20)
-- NJ - [Tax Assessor Continuing Education Eligibility Board public meeting on  (linked from New Jersey Divis](https://www.nj.gov/treasury/taxation/pdf/lpt/CEEB-2026-FallMeeting.pdf) (last changed: 2026-10-20)
-- NJ - [UC-45, Voluntary Contribution Report (linked from NJ Division of Employer Accounts -- Rate informati](https://www.nj.gov/labor/ea/assets/PDFs/UC-45.pdf) (last changed: 2026-10-20)
-- NJ - [paper application (FL-1) (linked from NJ Division of Temporary Disability and Family Lea)](https://www.nj.gov/labor/myleavebenefits/assets/pdfs/FL1_6-19v2.pdf) (last changed: 2026-10-20)
-- NM - [$9.9M in child tax credits available for New Mexico parents (linked from New Mexico Taxation and Rev](https://www.tax.newmexico.gov/wp-content/uploads/2026/07/20260723_9.9M-in-tax-credits-available-for-New-Mexico-parents-to-claim.pdf) (last changed: 2026-10-20)
-- NM - [800 delinquent properties to be auctioned in Luna County this week (linked from New Mexico Taxation ](https://www.tax.newmexico.gov/wp-content/uploads/2026/10/20261020_800-delinquent-properties-to-be-auctioned-in-Luna-County-this-week.pdf) (last changed: 2026-10-27)
-- NM - [Agent Client Rate File Format (linked from Texas Workforce Commission cross-reference for New)](https://www.dws.nm.gov/Portals/0/DM/Business/Client_Rate_File_Format.pdf) (last changed: 2026-10-20)
-- NM - [Albuquerque resident indicted on felony tax fraud charges (linked from New Mexico Taxation and Reven](https://www.tax.newmexico.gov/wp-content/uploads/2026/07/20260722_Albuquerque-resident-indicted-on-felony-tax-fraud-charges.pdf) (last changed: 2026-10-20)
-- NM - [Amended Living Wage Ordinance (Spanish)* (linked from Santa Fe County -- Living Wage Ordinance and 2](https://www.santafecountynm.gov/userfiles/AmendedLivingWageOrdinanceSpanish6-2014.pdf) (last changed: 2026-10-20)
-- NM - [Assign a Third Party Administrator Guide (linked from Texas Workforce Commission cross-reference for](https://www.dws.nm.gov/Portals/0/DM/UI/Assign_a_Third_Party_Administrator_Guide042018.pdf) (last changed: 2026-10-20)
 - NM - [City of Albuquerque -- Albuquerque Minimum Wage Information](https://www.cabq.gov/legal/albuquerque-minimum-wage-information) (last changed: 2026-10-23)
 - NM - [City of Santa Fe -- Living Wage Ordinance notice (Municipal Code Sec. 28-1 SFCC 1987)](https://santafenm.gov/media/news_pdf/2025_Living_Wage_Ordinance.pdf) (last changed: 2026-10-20)
-- NM - [Delinquent property tax auctions scheduled in January (linked from New Mexico Taxation and Revenue: ](https://www.tax.newmexico.gov/wp-content/uploads/2026/01/20260112_Delinquent-property-tax-auctions-scheduled-in-January-1.pdf) (last changed: 2026-10-20)
-- NM - [Delinquent property tax auctions scheduled in March (linked from New Mexico Taxation and Revenue: ne](https://www.tax.newmexico.gov/wp-content/uploads/2026/02/20260223_Delinquent-property-tax-auctions-scheduled-in-March-2.pdf) (last changed: 2026-10-20)
-- NM - [Disable Pop-Ups Blocker on Android (linked from New Mexico Taxation and Revenue Department — FYI-1)](https://www.tax.newmexico.gov/wp-content/uploads/2021/04/disable-pop-up-blocker-on-android-1.pdf) (last changed: 2026-10-20)
-- NM - [Disable Pop-Ups Blocker on iPhone (linked from New Mexico Taxation and Revenue Department — FYI-1)](https://www.tax.newmexico.gov/wp-content/uploads/2021/04/turn-off-pop-up-blocker-on-iphone-1.pdf) (last changed: 2026-10-20)
-- NM - [Download Posting Notice (EN/ES) (linked from Santa Fe County -- Living Wage Ordinance and 2026 )](https://www.santafecountynm.gov/userfiles/LivingWageNoticeSection10.pdf) (last changed: 2026-10-20)
-- NM - [Employer Activation Guide (linked from Texas Workforce Commission cross-reference for New)](https://www.dws.nm.gov/Portals/0/DM/Business/Employer_Activation_Guide.pdf) (last changed: 2026-10-20)
-- NM - [Half of New Mexico’s population are organ donors. Are you? (linked from New Mexico Taxation and Reve](https://www.tax.newmexico.gov/wp-content/uploads/2026/04/20260426_Half-of-New-Mexicos-population-are-organ-donors.-Are-you.pdf) (last changed: 2026-10-20)
-- NM - [House passes tax code cleanup bill (linked from New Mexico Taxation and Revenue: news)](https://www.tax.newmexico.gov/wp-content/uploads/2026/02/20260212_House-passes-tax-code-cleanup-bill.pdf) (last changed: 2026-10-20)
-- NM - [New Mexico Motor Vehicle Division warns against text scams (linked from New Mexico Taxation and Reve](https://www.tax.newmexico.gov/wp-content/uploads/2026/02/20260202_New-Mexico-Motor-Vehicle-Division-warns-against-text-scams-1.pdf) (last changed: 2026-10-20)
 - NM - [New Mexico TRD -- Important return changes for 2026 (WKC fee notice)](https://www.tax.newmexico.gov/individuals/wp-content/uploads/sites/5/2026/01/WKC-Fee-Payment-Other-Update-.pdf) (last changed: 2026-10-20)
 - NM - [New Mexico Taxation and Revenue Department — FYI-104, New Mexico Withholding Tax](https://www.tax.newmexico.gov/forms-publications/) (last changed: 2026-10-20)
 - NM - [New Mexico Taxation and Revenue: news](https://www.tax.newmexico.gov/news/) (last changed: 2026-11-02)
-- NM - [New Mexico Veterans Benefit from Expanded Property Tax Exemptions (linked from New Mexico Taxation a](https://www.tax.newmexico.gov/wp-content/uploads/2026/08/20260813_New-Mexico-Veterans-Benefit-from-Expanded-Property-Tax-Exemptions.pdf) (last changed: 2026-10-20)
-- NM - [New Mexico back-to-school tax holiday is next weekend (linked from New Mexico Taxation and Revenue: ](https://www.tax.newmexico.gov/wp-content/uploads/2026/07/20260724_Back-to-school-tax-free-weekend-happening-July-31-Aug.-2.pdf) (last changed: 2026-10-20)
-- NM - [New Mexico restaurant owner charged with tax evasion, fraud (linked from New Mexico Taxation and Rev](https://www.tax.newmexico.gov/wp-content/uploads/2026/05/20260507_New-Mexico-restaurant-owner-charged-with-tax-evasion-and-fraud.pdf) (last changed: 2026-10-20)
-- NM - [New Mexico to begin accepting electronic income tax returns Jan. 16 (linked from New Mexico Taxation](https://www.tax.newmexico.gov/wp-content/uploads/2026/01/20260112_New-Mexico-to-begin-accepting-electronic-income-tax-returns-Jan.-16_Final.pdf) (last changed: 2026-10-20)
 - NM - [New Mexico withholding (FYI-104)](https://realfile.tax.newmexico.gov/FYI-104.pdf) (last changed: 2026-10-20)
 - NM - [New Mexico workers' compensation FAQ (fee amounts)](https://www.workerscomp.nm.gov/faqs/) (last changed: 2026-10-20)
-- NM - [Ordinance 2014-1 (Living Wage Ordinance) (linked from Santa Fe County -- Living Wage Ordinance and 2](https://www.santafecountynm.gov/documents/ordinances/Ordinance2014-1.pdf) (last changed: 2026-10-20)
-- NM - [Ordinance 2014-5 (Amended Ordinance) (linked from Santa Fe County -- Living Wage Ordinance and 2026 ](https://www.santafecountynm.gov/documents/ordinances/Ordinance2014-5.pdf) (last changed: 2026-10-20)
-- NM - [Payment Allocation File Format (linked from Texas Workforce Commission cross-reference for New)](https://www.dws.nm.gov/Portals/0/DM/Business/Payment_Allocation_File_Formatv10.pdf) (last changed: 2026-10-20)
-- NM - [Payment Due File Format (linked from Texas Workforce Commission cross-reference for New)](https://www.dws.nm.gov/Portals/0/DM/Business/Passive_Role_Assignment_File_Formatv10.pdf) (last changed: 2026-10-20)
-- NM - [Reminder: Income tax returns due April 15 (linked from New Mexico Taxation and Revenue: news)](https://www.tax.newmexico.gov/wp-content/uploads/2026/03/20260315_Reminder-Income-tax-returns-due-April-15.pdf) (last changed: 2026-10-20)
 - NM - [Santa Fe County -- Living Wage Ordinance and 2026 living wage adjustment announcement](https://www.santafecountynm.gov/livingwage) (last changed: 2026-10-23)
 - NM - [Santa Fe city and county living wage figures in effect through February 2026](https://www.santafecountynm.gov/news/detail/santa-fe-county-announces-living-wage-increase-effective-march-1-2025) (last changed: 2026-10-20)
-- NM - [State encourages mailing important documents early to avoid missing de (linked from New Mexico Taxat](https://www.tax.newmexico.gov/wp-content/uploads/2026/01/20260116_USPS-Postmark-Prodecure-Changes.pdf) (last changed: 2026-10-20)
-- NM - [State schedules five property tax auctions in August (linked from New Mexico Taxation and Revenue: n](https://www.tax.newmexico.gov/wp-content/uploads/2026/08/20260806_State-schedules-five-property-tax-auctions-in-August.pdf) (last changed: 2026-10-20)
-- NM - [State schedules four property tax auctions in July (linked from New Mexico Taxation and Revenue: new](https://www.tax.newmexico.gov/wp-content/uploads/2026/07/20270703_State-schedules-four-property-tax-auctions-in-July.pdf) (last changed: 2026-10-20)
-- NM - [State schedules seven property tax auctions in September (linked from New Mexico Taxation and Revenu](https://www.tax.newmexico.gov/wp-content/uploads/2026/09/20260901_State-schedules-seven-property-tax-auctions-in-September.pdf) (last changed: 2026-10-20)
-- NM - [State to auction properties in Colfax County (linked from New Mexico Taxation and Revenue: news)](https://www.tax.newmexico.gov/wp-content/uploads/2026/06/20260605_State-to-auction-properties-in-Colfax-County.pdf) (last changed: 2026-10-20)
-- NM - [State to auction properties in Doña Ana, Luna Counties (linked from New Mexico Taxation and Revenue:](https://www.tax.newmexico.gov/wp-content/uploads/2026/03/20260325_Delinquent-property-tax-auctions-scheduled-in-late-March-April.pdf) (last changed: 2026-10-20)
-- NM - [State to auction properties in Sandoval, Mora Counties (linked from New Mexico Taxation and Revenue:](https://www.tax.newmexico.gov/wp-content/uploads/2026/09/20260928_State-to-auction-properties-in-Sandoval-Mora-Counties.pdf) (last changed: 2026-10-20)
-- NM - [State to auction properties in Taos, Torrance Counties (linked from New Mexico Taxation and Revenue:](https://www.tax.newmexico.gov/wp-content/uploads/2026/04/20260422_State-to-auction-properties-in-Taos-Torrance-Counties-1.pdf) (last changed: 2026-10-20)
-- NM - [Tax Department grants extensions for flood-harmed taxpayers (linked from New Mexico Taxation and Rev](https://www.tax.newmexico.gov/wp-content/uploads/2026/10/20261008_Tax-Department-grants-extensions-for-flood-affected-taxpayers.pdf) (last changed: 2026-10-20)
 - NM - [Texas Workforce Commission cross-reference for New Mexico UI figures -- New Mexico DWS 'How UI Tax R](https://www.dws.state.nm.us/Unemployment/Unemployment-for-a-Business/Unemployment-Insurance-Tax-Information/How-UI-Tax-Rates-Are-Calculated) (last changed: 2026-10-20)
-- NM - [Theory of Change [PDF] (linked from City of Albuquerque -- Albuquerque Minimum Wage In)](https://www.cabq.gov/mayor/documents/2026-8-15-theory-of-change-final-pdf.pdf) (last changed: 2026-10-20)
 - NM - [USDA National Finance Center -- New Mexico State Income Tax Withholding bulletin (2025)](https://help.nfc.usda.gov/bulletins/2025/1741189057.htm) (last changed: 2026-10-20)
-- NM - [Vehicle registration fees, weight-distance tax to increase July 1 (linked from New Mexico Taxation a](https://www.tax.newmexico.gov/wp-content/uploads/2026/06/20260629_Increased-vehicle-registration-fees-to-take-effect-July-1.pdf) (last changed: 2026-10-20)
-- NM - [Wage Reports Confirmation File Format (linked from Texas Workforce Commission cross-reference for Ne](https://www.dws.nm.gov/Portals/0/DM/Business/Wage_Reports_Confirmation_File_Formatv20.pdf) (last changed: 2026-10-20)
-- NM - [Wage Reports Delimited File Specification (linked from Texas Workforce Commission cross-reference fo](https://www.dws.nm.gov/Portals/0/DM/Business/Wage_Reports_Delimited_File_Formatv21.pdf) (last changed: 2026-10-20)
-- NM - [Wage Reports EFW2 File Specification (linked from Texas Workforce Commission cross-reference for New](https://www.dws.nm.gov/Portals/0/DM/Business/Wage_Reports_EFW2_File_Formatv21.pdf) (last changed: 2026-10-20)
-- NM - [Wage Reports ICESA Specification (linked from Texas Workforce Commission cross-reference for New)](https://www.dws.nm.gov/Portals/0/DM/Business/Wage_Reports_ICESA_File_Formatv21.pdf) (last changed: 2026-10-20)
-- NM - [Wage Reports XML File Specification (linked from Texas Workforce Commission cross-reference for New)](https://www.dws.nm.gov/Portals/0/DM/Business/Wage_Reports%20_XML_File_Formatv21.pdf) (last changed: 2026-10-20)
-- NM - [here (linked from Santa Fe city and county living wage figures in ef)](https://www.santafecountynm.gov/documents/ordinances/Ordinance2014-1.pdf) (last changed: 2026-10-20)
-- NM - [investigation request form (linked from Santa Fe County -- Living Wage Ordinance and 2026 )](https://www.santafecountynm.gov/uploads/documents/LivingWageComplaintForm_2026.pdf) (last changed: 2026-10-20)
-- NY - ['How to File a Complaint' Card (PDF) (linked from data/minimum-wage/federal-2026.json (this engine's](https://www.dol.gov/sites/dolgov/files/WHD/legacy/files/WHD1498HowToFileAComplaint.pdf) (last changed: 2026-10-27)
-- NY - [(Español) (linked from U.S. DOL -- COBRA Continuation Coverage)](https://www.dol.gov/sites/dolgov/files/EBSA/about-ebsa/our-activities/resource-center/publications/life-changes-require-health-choices-spanish.pdf) (last changed: 2026-10-27)
-- NY - [(Español) (linked from U.S. DOL -- COBRA Continuation Coverage)](https://www.dol.gov/sites/dolgov/files/EBSA/about-ebsa/our-activities/resource-center/publications/top-10-ways-to-make-your-health-benefits-work-for-you-spanish.pdf) (last changed: 2026-10-27)
 - NY - [29 U.S.C. 2611(4)(A)(i)-(ii)](https://www.dol.gov/agencies/whd/fmla) (last changed: 2026-10-22)
-- NY - [Chapter 39 (linked from 29 U.S.C. 2611(4)(A)(i)-(ii))](https://www.dol.gov/sites/dolgov/files/WHD/legacy/files/FOH_Ch39.pdf) (last changed: 2026-10-27)
-- NY - [Chinese Version (PDF) (linked from data/minimum-wage/federal-2026.json (this engine's)](https://www.dol.gov/sites/dolgov/files/WHD/legacy/files/minwagecn.pdf) (last changed: 2026-10-27)
-- NY - [Chinese Version (PDF) (linked from data/minimum-wage/federal-2026.json (this engine's)](https://www.dol.gov/sites/dolgov/files/WHD/legacy/files/WHD1498HowToFileAComplaint_CHINESE.pdf) (last changed: 2026-10-27)
-- NY - [DOL -- Calculating an Employer's UI Contribution Rate](https://dol.ny.gov/calculating-employers-ui-contribution-rate) (last changed: 2026-10-20)
-- NY - [DOL -- Employer Contribution Rate Table](https://dol.ny.gov/employer-contribution-rate-table) (last changed: 2026-10-20)
-- NY - [DOL -- Subsidiary Contribution Rate Table](https://dol.ny.gov/subsidiary-rate-table) (last changed: 2026-10-20)
 - NY - [EEOC -- Section 2, Threshold Issues](https://www.eeoc.gov/laws/guidance/section-2-threshold-issues) (last changed: 2026-10-20)
-- NY - [Electronic posting for purposes of the FLSA, FMLA, Section 14(c) of th (linked from 29 U.S.C. 2611(4](https://www.dol.gov/sites/dolgov/files/WHD/legacy/files/fab_2020_7.pdf) (last changed: 2026-10-27)
-- NY - [Family and Medical Leave Act Presentation (linked from 29 U.S.C. 2611(4)(A)(i)-(ii))](https://www.dol.gov/sites/dolgov/files/WHD/flsa/FMLA-072025.pdf) (last changed: 2026-10-27)
-- NY - [Frequently Asked Questions: COBRA Continuation Health Coverage (linked from U.S. DOL -- COBRA Contin](https://www.dol.gov/sites/dolgov/files/EBSA/about-ebsa/our-activities/resource-center/faqs/cobra-continuation-health-coverage-consumer.pdf) (last changed: 2026-10-27)
-- NY - [Guía Práctica Referente a la Ley de Normas Justas de Trabajo (linked from data/minimum-wage/federal-](https://www.dol.gov/sites/dolgov/files/WHD/legacy/files/wh1282_SPANISH.pdf) (last changed: 2026-10-27)
-- NY - [Guía del Empleado sobre el Permiso Familiar Militar (linked from 29 U.S.C. 2611(4)(A)(i)-(ii))](https://www.dol.gov/sites/dolgov/files/WHD/legacy/files/FMLA_Military_Guide_SPANISH.pdf) (last changed: 2026-10-27)
-- NY - [Haitian Creole Version (PDF) (linked from data/minimum-wage/federal-2026.json (this engine's)](https://www.dol.gov/sites/dolgov/files/WHD/legacy/files/WHD1498HowToFileAComplaint_Hait.pdf) (last changed: 2026-10-27)
-- NY - [Haitian Creole Version (PDF) (linked from data/minimum-wage/federal-2026.json (this engine's)](https://www.dol.gov/sites/dolgov/files/WHD/legacy/files/minwageHait.pdf) (last changed: 2026-10-27)
-- NY - [Hmong Version (PDF) (linked from data/minimum-wage/federal-2026.json (this engine's)](https://www.dol.gov/sites/dolgov/files/WHD/legacy/files/MinWageHmong.pdf) (last changed: 2026-10-27)
-- NY - [Holiday Season Employment Information (linked from data/minimum-wage/federal-2026.json (this engine'](https://www.dol.gov/sites/dolgov/files/WHD/legacy/files/HolidaySeasonEmplymntInfo.pdf) (last changed: 2026-10-27)
 - NY - [IRS -- Determining if an employer is an applicable large employer](https://www.irs.gov/affordable-care-act/employers/determining-if-an-employer-is-an-applicable-large-employer) (last changed: 2026-10-20)
 - NY - [IT-2104, Employee's Withholding Allowance Certificate (2026)](https://www.tax.ny.gov/pdf/current_forms/it/it2104_fill_in.pdf) (last changed: 2026-10-20)
 - NY - [Instructions for Form NYS-45 (tax.ny.gov)](https://www.tax.ny.gov/pdf/current_forms/wt/nys45i.pdf) (last changed: 2026-10-20)
-- NY - [Korean Version (PDF) (linked from data/minimum-wage/federal-2026.json (this engine's)](https://www.dol.gov/sites/dolgov/files/WHD/legacy/files/minwageKorean.pdf) (last changed: 2026-10-27)
-- NY - [Korean Version (PDF) (linked from data/minimum-wage/federal-2026.json (this engine's)](https://www.dol.gov/sites/dolgov/files/WHD/legacy/files/WHD1498HowToFileAComplaint_Korean.pdf) (last changed: 2026-10-27)
-- NY - [Life Changes Require Health Choices (linked from U.S. DOL -- COBRA Continuation Coverage)](https://www.dol.gov/sites/dolgov/files/EBSA/about-ebsa/our-activities/resource-center/publications/life-changes-require-health-choices.pdf) (last changed: 2026-10-27)
-- NY - [Military Family Leave – Small Card (linked from 29 U.S.C. 2611(4)(A)(i)-(ii))](https://www.dol.gov/sites/dolgov/files/WHD/legacy/files/FMLA_Military_mini_English_readers.pdf) (last changed: 2026-10-27)
 - NY - [NY Department of Labor -- Worker Adjustment and Retraining Notification (WARN)](https://dol.ny.gov/worker-adjustment-and-retraining-notification-warn) (last changed: 2026-10-20)
 - NY - [NY Paid Family Leave payroll deduction notice 2026 (rate and cap)](https://www.wcb.ny.gov/content/main/forms/PFLDocs/pfl-pay-deduction-notice-2026.pdf) (last changed: 2026-10-20)
 - NY - [NY State Comptroller payroll bulletins (PFL, withholding changes)](https://www.osc.ny.gov/state-agencies/payroll-bulletins) (last changed: 2026-10-20)
 - NY - [NY Workers' Compensation Board: Paid Family Leave 2026 announcement](https://www.wcb.ny.gov/content/main/PressRe/paid-family-leave-2026.jsp) (last changed: 2026-10-20)
-- NY - [Need Time? The Employee’s Guide to Military Family Leave (linked from 29 U.S.C. 2611(4)(A)(i)-(ii))](https://www.dol.gov/sites/dolgov/files/WHD/legacy/files/FMLA_Military_Guide_ENGLISH.pdf) (last changed: 2026-10-27)
 - NY - [New York City withholding tax tables and methods (NYS-50-T-NYC)](https://www.tax.ny.gov/pdf/publications/withholding/nys50_t_nyc.pdf) (last changed: 2026-10-20)
 - NY - [New York Department of Taxation: press](https://www.tax.ny.gov/press/) (last changed: 2026-10-20)
 - NY - [New York Form IT-2104-P, Annuitant's Request for Income Tax Withholding](https://www.tax.ny.gov/pdf/current_forms/it/it2104p_fill_in.pdf) (last changed: 2026-11-02)
@@ -1660,129 +1462,22 @@ These can't be watched by a script (bot protection or JavaScript-only pages). Ch
 - NY - [New York State Department of Labor -- Minimum Wage (rates effective 01/01/2026)](https://dol.ny.gov/minimum-wage-0) (last changed: 2026-10-20)
 - NY - [New York State Department of Labor -- Your New York State Minimum Wage](https://dol.ny.gov/minimum-wage) (last changed: 2026-10-26)
 - NY - [New York withholding tax](https://www.tax.ny.gov/bus/wt/wtidx.htm) (last changed: 2026-10-20)
-- NY - [New: Interactive Handy Reference Guide to the Fair Labor Standards Act (linked from U.S. DOL Wage an](https://www.dol.gov/sites/dolgov/files/WHD/legacy/files/Digital_Reference_Guide_FLSA.pdf) (last changed: 2026-10-27)
-- NY - [Notice 2013-45 PDF (linked from IRS -- Determining if an employer is an applicable)](https://www.irs.gov/pub/irs-drop/n-13-45.PDF) (last changed: 2026-10-20)
-- NY - [Polish Version (PDF) (linked from data/minimum-wage/federal-2026.json (this engine's)](https://www.dol.gov/sites/dolgov/files/WHD/legacy/files/FLSAPosterPolish.pdf) (last changed: 2026-10-27)
-- NY - [Polish Version (PDF) (linked from data/minimum-wage/federal-2026.json (this engine's)](https://www.dol.gov/sites/dolgov/files/WHD/legacy/files/WHD1498HowToFileAComplaint_Polish.pdf) (last changed: 2026-10-27)
-- NY - [Protecciones para los trabajadores de conformidad con La Ley de Ausenc (linked from 29 U.S.C. 2611(4](https://www.dol.gov/sites/dolgov/files/WHD/legacy/files/FMLA_EE_mini_Spanish_readers.pdf) (last changed: 2026-10-27)
-- NY - [Protecting Workers from Retaliation (linked from 29 U.S.C. 2611(4)(A)(i)-(ii))](https://www.dol.gov/sites/dolgov/files/WHD/fab/fab-2022-2.pdf) (last changed: 2026-10-27)
-- NY - [Protections for Workers under the FMLA – Small Card (linked from 29 U.S.C. 2611(4)(A)(i)-(ii))](https://www.dol.gov/sites/dolgov/files/WHD/legacy/files/FMLA_EE_mini_English_readers.pdf) (last changed: 2026-10-27)
-- NY - [Publication 5208 PDF (linked from IRS -- Determining if an employer is an applicable)](https://www.irs.gov/pub/irs-pdf/p5208.pdf) (last changed: 2026-10-20)
-- NY - [Russian Version (PDF) (linked from data/minimum-wage/federal-2026.json (this engine's)](https://www.dol.gov/sites/dolgov/files/WHD/legacy/files/WHD1498HowToFileAComplaint_Russian.pdf) (last changed: 2026-10-27)
-- NY - [Russian Version (PDF) (linked from data/minimum-wage/federal-2026.json (this engine's)](https://www.dol.gov/sites/dolgov/files/WHD/legacy/files/FLSAPosterRuss.pdf) (last changed: 2026-10-27)
-- NY - [Spanish (linked from U.S. DOL Wage and Hour Opinion Letter (1986-05-07))](https://www.dol.gov/sites/dolgov/files/WHD/legacy/files/wh1282_SPANISH.pdf) (last changed: 2026-10-27)
-- NY - [Spanish Version (PDF) (linked from data/minimum-wage/federal-2026.json (this engine's)](https://www.dol.gov/sites/dolgov/files/WHD/legacy/files/WHD1498HowToFileAComplaint_Spanish.pdf) (last changed: 2026-10-27)
-- NY - [Sus derechos como empleado según La Ley de Ausencia Familiar y Médica  (linked from 29 U.S.C. 2611(4](https://www.dol.gov/sites/dolgov/files/WHD/legacy/files/fmlasp.pdf) (last changed: 2026-10-27)
-- NY - [Tagalog Version (PDF) (linked from data/minimum-wage/federal-2026.json (this engine's)](https://www.dol.gov/sites/dolgov/files/WHD/legacy/files/WHD1498HowToFileAComplaint_TAGALOG.pdf) (last changed: 2026-10-27)
-- NY - [Tax.NY.gov: information for retired persons](https://www.tax.ny.gov/pit/file/information_for_seniors.htm) (last changed: 2026-11-02)
-- NY - [Telemedicine and Serious Health Conditions under the FMLA (linked from 29 U.S.C. 2611(4)(A)(i)-(ii))](https://www.dol.gov/sites/dolgov/files/WHD/legacy/files/fab_2020_8.pdf) (last changed: 2026-10-27)
-- NY - [Telework under the FLSA and the FMLA (linked from 29 U.S.C. 2611(4)(A)(i)-(ii))](https://www.dol.gov/sites/dolgov/files/WHD/fab/2023-1.pdf) (last changed: 2026-10-27)
-- NY - [Thai Version (PDF) (linked from data/minimum-wage/federal-2026.json (this engine's)](https://www.dol.gov/sites/dolgov/files/WHD/legacy/files/WHD1498HowToFileAComplaint_Thai.pdf) (last changed: 2026-10-27)
-- NY - [Thai Version (PDF) (linked from data/minimum-wage/federal-2026.json (this engine's)](https://www.dol.gov/sites/dolgov/files/WHD/legacy/files/MinWageThai.pdf) (last changed: 2026-10-27)
-- NY - [The Employer’s Guide to the Family and Medical Leave Act (linked from 29 U.S.C. 2611(4)(A)(i)-(ii))](https://www.dol.gov/sites/dolgov/files/WHD/legacy/files/employerguide.pdf) (last changed: 2026-10-27)
-- NY - [Top 10 Ways to Make Your Health Benefits Work for You (linked from U.S. DOL -- COBRA Continuation Co](https://www.dol.gov/sites/dolgov/files/EBSA/about-ebsa/our-activities/resource-center/publications/top-10-ways-to-make-your-health-benefits-work-for-you.pdf) (last changed: 2026-10-27)
 - NY - [U.S. DOL -- COBRA Continuation Coverage](https://www.dol.gov/general/topic/health-plans/cobra) (last changed: 2026-10-22)
 - NY - [U.S. DOL Wage and Hour Opinion Letter (1986-05-07) on county-appointed poll workers](https://www.dol.gov/agencies/whd/compliance-assistance/handy-reference-guide-flsa) (last changed: 2026-10-22)
-- NY - [Vietnamese Version (PDF) (linked from data/minimum-wage/federal-2026.json (this engine's)](https://www.dol.gov/sites/dolgov/files/WHD/legacy/files/WHD1498HowToFileAComplaint_Viet.pdf) (last changed: 2026-10-27)
-- NY - [Vietnamese Version (PDF) (linked from data/minimum-wage/federal-2026.json (this engine's)](https://www.dol.gov/sites/dolgov/files/WHD/legacy/files/minwageViet.pdf) (last changed: 2026-10-27)
 - NY - [Yonkers withholding tax tables and methods (NYS-50-T-Y)](https://www.tax.ny.gov/pdf/publications/withholding/nys50_t_y.pdf) (last changed: 2026-10-20)
-- NY - [Your Employee Rights Under the FMLA – large poster (linked from 29 U.S.C. 2611(4)(A)(i)-(ii))](https://www.dol.gov/sites/dolgov/files/WHD/legacy/files/fmlaen.pdf) (last changed: 2026-10-27)
 - NY - [data/minimum-wage/federal-2026.json (this engine's own federal minimum wage file)](https://www.dol.gov/agencies/whd/flsa) (last changed: 2026-10-22)
 - NY - [eCFR 29 CFR 553.106 amendment history - official API](https://www.ecfr.gov/api/versioner/v1/versions/title-29.json?section=553.106) (last changed: 2026-10-20)
-- NY - [see the PDF version (linked from U.S. DOL Wage and Hour Opinion Letter (1986-05-07))](https://www.dol.gov/sites/dolgov/files/WHD/legacy/files/wh1282.pdf) (last changed: 2026-10-27)
 - OH - [https://www.ccaohio.gov/member-municipalities](https://www.ccaohio.gov/member-municipalities) (last changed: 2026-10-13)
 - OH - [https://www.ritaohio.com/municipalities](https://www.ritaohio.com/municipalities) (last changed: 2026-11-02)
-- OH - [1099 Common Errors (linked from Ohio employer withholding)](https://dam.assets.ohio.gov/image/upload/tax.ohio.gov/employer_withholding/1099_common_errors_2021.pdf) (last changed: 2026-10-18)
-- OH - [1099 Submission Error Descriptions (linked from Ohio employer withholding)](https://dam.assets.ohio.gov/image/upload/tax.ohio.gov/employer_withholding/1099uploadsubmissionerrordescriptions2021.pdf) (last changed: 2026-10-18)
-- OH - [1375-income-tax (linked from Village of Georgetown -- Income Tax)](https://georgetownohio.gov/documents/1375-income-tax/) (last changed: 2026-10-20)
-- OH - [2023 Rate Details (linked from Ohio Unemployment Contribution Rates for Calendar )](https://dam.assets.ohio.gov/image/upload/jfs.ohio.gov/ouio/uctax/2023-RateDetails.pdf) (last changed: 2026-10-20)
-- OH - [2023-business-return-form (linked from Village of Georgetown -- Income Tax)](https://georgetownohio.gov/documents/2023-business-return-form/) (last changed: 2026-10-20)
-- OH - [2023-quarterly-estimate-form (linked from Village of Georgetown -- Income Tax)](https://georgetownohio.gov/documents/2023-quarterly-estimate-form/) (last changed: 2026-10-20)
-- OH - [2023-w1-employer-s-withholding-monthly (linked from Village of Georgetown -- Income Tax)](https://georgetownohio.gov/documents/2023-w1-employer-s-withholding-monthly/) (last changed: 2026-10-20)
-- OH - [2023-w1-employer-s-withholding-quarterly (linked from Village of Georgetown -- Income Tax)](https://georgetownohio.gov/documents/2023-w1-employer-s-withholding-quarterly/) (last changed: 2026-10-20)
-- OH - [2023-w3-employer-s-withholding-reconciliation-form (linked from Village of Georgetown -- Income Tax)](https://georgetownohio.gov/documents/2023-w3-employer-s-withholding-reconciliation-form/) (last changed: 2026-10-20)
-- OH - [2024 Rate Details (linked from Ohio Unemployment Contribution Rates for Calendar )](https://dam.assets.ohio.gov/image/upload/jfs.ohio.gov/ouio/uctax/2024RateDetails.pdf) (last changed: 2026-10-20)
-- OH - [2024-business-return-form (linked from Village of Georgetown -- Income Tax)](https://georgetownohio.gov/documents/2024-business-return-form/) (last changed: 2026-10-20)
-- OH - [2024-ir-form (linked from Village of Georgetown -- Income Tax)](https://georgetownohio.gov/documents/2024-ir-form/) (last changed: 2026-10-20)
-- OH - [2024-quarterly-estimate-form (linked from Village of Georgetown -- Income Tax)](https://georgetownohio.gov/documents/2024-quarterly-estimate-form/) (last changed: 2026-10-20)
-- OH - [2024-w1-employers-wh-monthly (linked from Village of Georgetown -- Income Tax)](https://georgetownohio.gov/documents/2024-w1-employers-wh-monthly/) (last changed: 2026-10-20)
-- OH - [2024-w1-employers-wh-quarterly (linked from Village of Georgetown -- Income Tax)](https://georgetownohio.gov/documents/2024-w1-employers-wh-quarterly/) (last changed: 2026-10-20)
-- OH - [2024-w3-employers-wh-rec-form (linked from Village of Georgetown -- Income Tax)](https://georgetownohio.gov/documents/2024-w3-employers-wh-rec-form/) (last changed: 2026-10-20)
-- OH - [2025 1099-MISC Upload Specifications (linked from Ohio employer withholding)](https://dam.assets.ohio.gov/image/upload/tax.ohio.gov/employer_withholding/2025-2026%20NYP%20Updates/2025_1099MISC_Specs_V1.pdf) (last changed: 2026-10-18)
-- OH - [2025 1099-NEC Upload Specifications (linked from Ohio employer withholding)](https://dam.assets.ohio.gov/image/upload/tax.ohio.gov/employer_withholding/2025-2026%20NYP%20Updates/2025_1099NEC_Specs_V1.pdf) (last changed: 2026-10-18)
-- OH - [2025 1099-R Upload Specifications (linked from Ohio employer withholding)](https://dam.assets.ohio.gov/image/upload/tax.ohio.gov/employer_withholding/2025-2026%20NYP%20Updates/2025_1099R_Specs_V1.pdf) (last changed: 2026-10-18)
-- OH - [2025 EFW2 Upload Specifications (linked from Ohio employer withholding)](https://dam.assets.ohio.gov/image/upload/tax.ohio.gov/employer_withholding/2025-2026%20NYP%20Updates/2025_W2_Specs_V1.pdf) (last changed: 2026-10-18)
-- OH - [2025 EFW2C Upload Specifications (linked from Ohio employer withholding)](https://dam.assets.ohio.gov/image/upload/tax.ohio.gov/employer_withholding/2025-2026%20NYP%20Updates/2025_W2C_Specs_v1.pdf) (last changed: 2026-10-18)
-- OH - [2025 Rate Details (linked from Ohio Unemployment Contribution Rates for Calendar )](https://dam.assets.ohio.gov/image/upload/jfs.ohio.gov/ouio/uctax/2025RateDetails.pdf) (last changed: 2026-10-20)
-- OH - [2025 Simplified W-2 Method Specifications Create CSV Guide (linked from Ohio employer withholding)](https://dam.assets.ohio.gov/image/upload/tax.ohio.gov/employer_withholding/2025-2026%20NYP%20Updates/2025_W2_CSV_Specs_V1.pdf) (last changed: 2026-10-18)
-- OH - [2025 Simplified W-2 Method Specifications Easy Entry Guide (linked from Ohio employer withholding)](https://dam.assets.ohio.gov/image/upload/tax.ohio.gov/employer_withholding/2025-2026%20NYP%20Updates/2025_Simplified_Upload_Specs_Easy_Entry_V1.pdf) (last changed: 2026-10-18)
-- OH - [2025 Simplified W-2 Method Spreadsheet Without Macros (linked from Ohio employer withholding)](https://dam.assets.ohio.gov/raw/upload/tax.ohio.gov/employer_withholding/2025-2026%20NYP%20Updates/2025_simpified-w2_no_macro_V2_1.xlsx) (last changed: 2026-10-20)
-- OH - [2025-br-form (linked from Village of Georgetown -- Income Tax)](https://georgetownohio.gov/documents/2025-br-form/) (last changed: 2026-10-20)
-- OH - [2025-ir-form (linked from Village of Georgetown -- Income Tax)](https://georgetownohio.gov/documents/2025-ir-form/) (last changed: 2026-10-20)
-- OH - [2025-q1-est-form (linked from Village of Georgetown -- Income Tax)](https://georgetownohio.gov/documents/2025-q1-est-form/) (last changed: 2026-10-20)
-- OH - [2025-w1-emp-wh-monthly (linked from Village of Georgetown -- Income Tax)](https://georgetownohio.gov/documents/2025-w1-emp-wh-monthly/) (last changed: 2026-10-20)
-- OH - [2025-w1-emp-wh-quarterly (linked from Village of Georgetown -- Income Tax)](https://georgetownohio.gov/documents/2025-w1-emp-wh-quarterly/) (last changed: 2026-10-20)
-- OH - [2025-w3-annual-rec-form (linked from Village of Georgetown -- Income Tax)](https://georgetownohio.gov/documents/2025-w3-annual-rec-form/) (last changed: 2026-10-20)
-- OH - [2026 EFW2 Upload Specifications (linked from Ohio employer withholding)](https://dam.assets.ohio.gov/image/upload/tax.ohio.gov/employer_withholding/2026-2027%20NYP%20Updates/2026_W2_Specs_V1.pdf) (last changed: 2026-10-24)
-- OH - [2026 Rate Details (linked from Ohio Unemployment Contribution Rates for Calendar )](https://dam.assets.ohio.gov/image/upload/jfs.ohio.gov/ouio/uctax/2026RateDetails.pdf) (last changed: 2026-10-20)
-- OH - [ASCII Guidelines (linked from Ohio Department of Taxation: municipal income tax )](https://dam.assets.ohio.gov/image/upload/tax.ohio.gov/muni-net-profit/ascii%20and%20xml/ASCII%20Instructions%207.19.23.pdf) (last changed: 2026-10-18)
-- OH - [Biweekly Withholding (linked from Ohio employer withholding)](https://dam.assets.ohio.gov/image/upload/tax.ohio.gov/employer_withholding/2026%20Withholding%20Tables/WHT_BiweeklyRate_2026.pdf) (last changed: 2026-10-18)
-- OH - [Biweekly Withholding (linked from Ohio employer withholding)](https://dam.assets.ohio.gov/image/upload/tax.ohio.gov/employer_withholding/2025%20Withholding%20Tables/WHT_BiweeklyRate_2025.pdf) (last changed: 2026-10-18)
-- OH - [Bulk Filing Certification Testing (linked from Ohio employer withholding)](https://dam.assets.ohio.gov/image/upload/tax.ohio.gov/employer_withholding/Bulk%20Filing%20Guide/BulkFilingCertificationTestingDocument_01152025.pdf) (last changed: 2026-10-20)
-- OH - [Bulk Filing IT-501 Field Mapping (linked from Ohio employer withholding)](https://dam.assets.ohio.gov/image/upload/tax.ohio.gov/employer_withholding/Bulk%20Filing%20Guide/BulkFilingIT-501FieldMapping01152025.pdf) (last changed: 2026-10-20)
-- OH - [Bulk Filing IT-941 Field Mappings (linked from Ohio employer withholding)](https://dam.assets.ohio.gov/image/upload/tax.ohio.gov/employer_withholding/Bulk%20Filing%20Guide/BulkFilingIT-941FieldMappings01152025.pdf) (last changed: 2026-10-20)
-- OH - [Bulk Filing Implementation Guide - Part A (linked from Ohio employer withholding)](https://dam.assets.ohio.gov/image/upload/tax.ohio.gov/employer_withholding/Bulk%20Filing%20Guide/BulkFilingImplementationGuideA_OHTAX_02242026.pdf) (last changed: 2026-10-20)
-- OH - [Bulk Filing Implementation Guide – Part B (linked from Ohio employer withholding)](https://dam.assets.ohio.gov/image/upload/tax.ohio.gov/employer_withholding/Bulk%20Filing%20Guide/BulkFilingImplementationGuideB_OHTAX_01222026.pdf) (last changed: 2026-10-20)
-- OH - [Bulk Filing SD-101 Field Mappings (linked from Ohio employer withholding)](https://dam.assets.ohio.gov/image/upload/tax.ohio.gov/employer_withholding/Bulk%20Filing%20Guide/BulkFilingSD-101FieldMappings01152025.pdf) (last changed: 2026-10-20)
-- OH - [Bulk Filing SD-141 Field Mappings (linked from Ohio employer withholding)](https://dam.assets.ohio.gov/image/upload/tax.ohio.gov/employer_withholding/Bulk%20Filing%20Guide/BulkFilingSD-141FieldMappings01152025.pdf) (last changed: 2026-10-20)
-- OH - [Bulk Filing Walkthrough Document (linked from Ohio employer withholding)](https://dam.assets.ohio.gov/image/upload/tax.ohio.gov/employer_withholding/Bulk%20Filing%20Guide/OHTAX_Walkthrough_01152025.pdf) (last changed: 2026-10-20)
 - OH - [CCA (Central Collection Agency): municipal income tax calendar and notices](https://www.ccaohio.gov/due-dates/municipal-income-tax-calendar) (last changed: 2026-10-18)
 - OH - [CCA Division of Taxation -- Tax Rates (2026 and 2025 tables)](https://www.ccaohio.gov/tax-rates) (last changed: 2026-09-30)
+- OH - [City of Cheviot Tax Department -- JEDD INFORMATION (Contracts with Green Township)](https://cheviot.org/departments/tax/) (last changed: 2026-10-20)
 - OH - [City of Dayton -- Joint Economic Development District](https://www.daytonohio.gov/261/Joint-Economic-Development-District) (last changed: 2026-09-30)
 - OH - [City of Gallipolis Tax Department](https://cityofgallipolis.com/tax-department-2/) (last changed: 2026-10-20)
 - OH - [City of Warren Income Tax Department -- Joint Economic Development Districts: 'The Warren-Champion J](https://www.warren.org/income_tax_department/joint_economic_development_districts_(jedd).php) (last changed: 2026-10-20)
 - OH - [Combined Form IT 4 — Employee's Withholding Exemption Certificate (post-2020-12-07 combined version)](https://tax.ohio.gov/static/forms/employer_withholding/generic/wth-it4-combined-fi.pdf) (last changed: 2026-09-24)
-- OH - [Daily Withholding Tables (linked from Ohio employer withholding)](https://dam.assets.ohio.gov/image/upload/tax.ohio.gov/employer_withholding/2026%20Withholding%20Tables/WHT_DailyRate_2026.pdf) (last changed: 2026-10-18)
-- OH - [Daily Withholding Tables (linked from Ohio employer withholding)](https://dam.assets.ohio.gov/image/upload/tax.ohio.gov/employer_withholding/2025%20Withholding%20Tables/WHT_DailyRate_2025.pdf) (last changed: 2026-10-18)
-- OH - [Declaration of Estimated Payments (linked from Ohio Department of Taxation: municipal income tax )](https://tax.ohio.gov/static/muni-net-profit/ascii%20and%20xml/ascii%20-%20declaration%20of%20estimated%20payments%208-21-18.xlsx) (last changed: 2026-10-18)
-- OH - [Download Authenticated PDF (linked from Ohio Revised Code 5748.01(E), definition of "taxab)](https://codes.ohio.gov/assets/laws/revised-code/authenticated/57/5748/5748.01/1-1-2026/5748.01-1-1-2026.pdf) (last changed: 2026-10-20)
-- OH - [Download Authenticated PDF (linked from Ohio Revised Code 715.691 (joint economic developm)](https://codes.ohio.gov/assets/laws/revised-code/authenticated/7/715/715.691/10-3-2023/715.691-10-3-2023.pdf) (last changed: 2026-10-20)
-- OH - [Download Authenticated PDF (linked from Ohio Revised Code 715.72 (joint economic developme)](https://codes.ohio.gov/assets/laws/revised-code/authenticated/7/715/715.72/9-30-2021/715.72-9-30-2021.pdf) (last changed: 2026-10-20)
-- OH - [Download Authenticated PDF (linked from Ohio Revised Code 718.01(R), definition of "qualif)](https://codes.ohio.gov/assets/laws/revised-code/authenticated/7/718/718.01/9-30-2025/718.01-9-30-2025.pdf) (last changed: 2026-10-20)
-- OH - [Download Authenticated PDF (linked from Ohio Revised Code Section 5747.06(A) -- Withholdin)](https://codes.ohio.gov/assets/laws/revised-code/authenticated/57/5747/5747.06/10-17-2019/5747.06-10-17-2019.pdf) (last changed: 2026-10-20)
-- OH - [Download Authenticated PDF (linked from Ohio Revised Code Section 718.011 — Withholding re)](https://codes.ohio.gov/assets/laws/revised-code/authenticated/7/718/718.011/3-23-2015/718.011-3-23-2015.pdf) (last changed: 2026-10-20)
-- OH - [Download Authenticated PDF (linked from Ohio Revised Code Section 718.121 — Second municip)](https://codes.ohio.gov/assets/laws/revised-code/authenticated/7/718/718.121/3-23-2015/718.121-3-23-2015.pdf) (last changed: 2026-10-20)
-- OH - [Download Authenticated PDF (linked from R.C. 2716.02 — maximum garnishment is the lesser o)](https://codes.ohio.gov/assets/laws/revised-code/authenticated/27/2716/2716.02/9-30-2008/2716.02-9-30-2008.pdf) (last changed: 2026-10-20)
-- OH - [Due Dates and Payment Schedule (2025) (linked from Ohio employer withholding)](https://dam.assets.ohio.gov/image/upload/tax.ohio.gov/employer_withholding/2024-2025%20NYP%20Updates/Due_Dates_2024-2025.pdf) (last changed: 2026-10-18)
-- OH - [Due Dates and Payment Schedule (2026) (linked from Ohio employer withholding)](https://dam.assets.ohio.gov/image/upload/tax.ohio.gov/employer_withholding/2025-2026%20NYP%20Updates/Due_Dates_2025-2026.pdf) (last changed: 2026-10-18)
-- OH - [EFW2 Common Submission Errors (linked from Ohio employer withholding)](https://dam.assets.ohio.gov/image/upload/tax.ohio.gov/employer_withholding/2021-efw2-upload-common-submission-errors.pdf) (last changed: 2026-10-18)
-- OH - [EFW2 Error Codes and Descriptions (linked from Ohio employer withholding)](https://dam.assets.ohio.gov/image/upload/tax.ohio.gov/employer_withholding/efw2-upload-error-codes-and-descriptions-2021.pdf) (last changed: 2026-10-20)
-- OH - [EMPLOYER ANNUAL W-3 RECONCILIATION (linked from Village of Woodville: income tax page (withholding)](https://www.villageofwoodville.com/_files/ugd/ef2ef5_547e5bf4650c4ac4917f6505c1a6cd9c.pdf) (last changed: 2026-10-18)
-- OH - [EW 2001-01 - Proper Completion of Form IT-4 (linked from Ohio employer withholding)](https://dam.assets.ohio.gov/image/upload/tax.ohio.gov/ohio_individual/individual/information_releases/2001-01ewit4ir.pdf) (last changed: 2026-10-20)
 - OH - [Employer Withholding Taxes - Percentage Method (Effective August 1, 2026)](https://dam.assets.ohio.gov/image/upload/tax.ohio.gov/employer_withholding/2026%20Withholding%20Tables/WHT_PercentageMethod_2026.pdf) (last changed: 2026-09-24)
-- OH - [Excel File Generator Tool (linked from Ohio Department of Taxation: municipal income tax )](https://tax.ohio.gov/static/muni-net-profit/ascii%20and%20xml/oh%20muni%20ascii%20dev%20v017%202_19_2020.xls) (last changed: 2026-10-18)
-- OH - [Excel template (linked from Ohio employer withholding)](https://dam.assets.ohio.gov/raw/upload/tax.ohio.gov/employer_withholding/Employer%20Withholding%20Templates/ODT_PEO_Report_1.xlsx) (last changed: 2026-10-20)
-- OH - [FREQUENTLY ASKED BUSINESS QUESTIONS (linked from Village of Woodville: income tax page (withholding)](https://www.villageofwoodville.com/_files/ugd/ef2ef5_671d3095bbb94e7b855bd7177f85501c.pdf) (last changed: 2026-10-18)
-- OH - [FREQUENTLY ASKED QUESTIONS (linked from Village of Woodville: income tax page (withholding)](https://www.villageofwoodville.com/_files/ugd/ef2ef5_c4df5a9b47eb40408b719b1a032a0952.pdf) (last changed: 2026-10-18)
-- OH - [Form MNP-TTI (linked from Ohio Department of Taxation: municipal income tax )](https://dam.assets.ohio.gov/image/upload/tax.ohio.gov/forms/municipal-net-profit/2021/mnp_transfer_of_info.pdf) (last changed: 2026-10-18)
-- OH - [General Fund Balance at 0.45% (linked from Village of Indian Hill -- Tax)](https://indianhill.gov/documents/income-tax-increase-0-45/) (last changed: 2026-10-20)
-- OH - [General Fund Balance at 0.5% (linked from Village of Indian Hill -- Tax)](https://indianhill.gov/documents/income-tax-increase-0-5/) (last changed: 2026-10-20)
-- OH - [IMPORTANT TAX NOTIFICATION (linked from Village of Woodville: income tax page (withholding)](https://www.villageofwoodville.com/_files/ugd/ef2ef5_7f2c69d239cb4b4280d39b32dcae18ad.pdf) (last changed: 2026-10-18)
-- OH - [INCOME TAX RETURN FORM (linked from Village of Woodville: income tax page (withholding)](https://www.villageofwoodville.com/_files/ugd/ef2ef5_79b4f5e4750649cb8c98764b7d509c71.pdf) (last changed: 2026-10-18)
-- OH - [Information Booklet for Taxpayers (linked from Ohio Department of Taxation: municipal income tax )](https://dam.assets.ohio.gov/image/upload/tax.ohio.gov/muni-net-profit/forms/taxpayer_booklet_042023.pdf) (last changed: 2026-10-18)
-- OH - [Instructions for Declaration of Estimated Payments (linked from Ohio Department of Taxation: municip](https://dam.assets.ohio.gov/image/upload/tax.ohio.gov/muni-net-profit/instructions_for_declaration_of_estimated_payments_ohio_taxation-municipal_net_profit_tax_rev3.1.21.pdf) (last changed: 2026-10-18)
-- OH - [JANUARY 12TH 2026 MEETING MINUTES (linked from Village of Woodville: income tax page (withholding)](https://www.villageofwoodville.com/_files/ugd/ef2ef5_b51c292022524d29b3b925318000fbed.pdf) (last changed: 2026-10-18)
-- OH - [JANUARY 26TH 2026 MEETING MINUTES (linked from Village of Woodville: income tax page (withholding)](https://www.villageofwoodville.com/_files/ugd/ef2ef5_5ff4eff4f9a846d3852598a970090c39.pdf) (last changed: 2026-10-18)
 - OH - [Jefferson Township -- Jefferson Township-Whitehall JEDD: 'On November 19th, 2024 ... mutually agreed](https://www.jeffersontownship.org/departments___services/economic_development___planning/jefferson_township-whitehall_jedd.php) (last changed: 2026-10-20)
-- OH - [MNP 2017-01: Information for JEDDs and JEDZs information release (linked from Ohio Department of Tax](https://dam.assets.ohio.gov/image/upload/tax.ohio.gov/muni-net-profit/information-releases/mnp2017-01_information_for_jedds_and_jedzs-1.5.24.pdf) (last changed: 2026-10-18)
-- OH - [MNP10 Tax Return (linked from Ohio Department of Taxation: municipal income tax )](https://tax.ohio.gov/static/muni-net-profit/ascii%20and%20xml/ascii%20-%20mnp10%20return%208-21-18.xlsx) (last changed: 2026-10-18)
-- OH - [MONTHLY TAX WITHHOLDING FORM (linked from Village of Woodville: income tax page (withholding)](https://www.villageofwoodville.com/_files/ugd/ef2ef5_3609a1bbc1ec47fcbb0ae4054a1365b5.pdf) (last changed: 2026-10-18)
-- OH - [Monthly Withholding Tables (linked from Ohio employer withholding)](https://dam.assets.ohio.gov/image/upload/tax.ohio.gov/employer_withholding/2026%20Withholding%20Tables/WHT_MonthlyRate_2026.pdf) (last changed: 2026-10-20)
-- OH - [Monthly Withholding Tables (linked from Ohio employer withholding)](https://dam.assets.ohio.gov/image/upload/tax.ohio.gov/employer_withholding/2025%20Withholding%20Tables/WHT_MonthlyRate_2025.pdf) (last changed: 2026-10-18)
-- OH - [Municipalities and Municipality Codes List (linked from Ohio Department of Taxation: municipal incom](https://dam.assets.ohio.gov/image/upload/v1741618460/tax.ohio.gov/muni-net-profit/municipal.tax.rate-3.7.25.pdf) (last changed: 2026-10-18)
-- OH - [Municipality Address List (linked from Ohio Department of Taxation: municipal income tax )](https://dam.assets.ohio.gov/image/upload/tax.ohio.gov/muni-net-profit/muni%20address%20list%203-5-18.pdf) (last changed: 2026-10-18)
-- OH - [Municipality/Local Government Portal User Guide (linked from Ohio Department of Taxation: municipal ](https://dam.assets.ohio.gov/image/upload/tax.ohio.gov/muni-net-profit/local%20gov%20portal%20user%20guide%2012-13-19.pdf) (last changed: 2026-10-18)
-- OH - [Ohio Business Gateway Registration Instructions (linked from Ohio Department of Taxation: municipal ](https://dam.assets.ohio.gov/image/upload/tax.ohio.gov/muni-net-profit/modernized_gateway_registration_for_municipal_net_profit_tax_rev3.1.21.pdf) (last changed: 2026-10-18)
 - OH - [Ohio Department of Commerce -- Ohio Minimum Wage Set to Increase in 2026](https://com.ohio.gov/about-us/media-center/news/ohio%20minimum%20wage%20set%20to%20increase%20in%202026) (last changed: 2026-09-24)
 - OH - [Ohio Department of Commerce -- Ohio minimum wage to increase by 3.5% in 2027](https://com.ohio.gov/about-us/media-center/news/Ohio-Minimum-Wage-to-Increase-in-2027) (last changed: 2026-10-26)
 - OH - [Ohio Department of Taxation -- Employer Withholding Taxes, Percentage Method (Effective October 1, 2](https://dam.assets.ohio.gov/image/upload/tax.ohio.gov/employer_withholding/2025%20Withholding%20Tables/WHT_PercentageMethod_2025.pdf) (last changed: 2026-09-24)
@@ -1792,7 +1487,6 @@ These can't be watched by a script (bot protection or JavaScript-only pages). Ch
 - OH - [Ohio Department of Taxation: municipal income tax (state page for municipalities and employers)](https://tax.ohio.gov/business/municipalities) (last changed: 2026-10-18)
 - OH - [Ohio Dept of Taxation: school district income tax list](https://tax.ohio.gov/static/tax_analysis/tax_data_series/school_district_data/SDIT_LIST.pdf) (last changed: 2026-09-24)
 - OH - [Ohio Form IT 4NR — Employee's Statement of Residency in a Reciprocity State (Rev. 5/07), Ohio Depart](https://tax.ohio.gov/static/forms/employer_withholding/generic/wth_it4nr.pdf) (last changed: 2026-09-24)
-- OH - [Ohio IT 4 Employee’s Withholding Exemption Certificate (linked from Ohio employer withholding)](https://dam.assets.ohio.gov/image/upload/tax.ohio.gov/forms/employer_withholding/generic/wth-it4-combined.pdf) (last changed: 2026-10-20)
 - OH - [Ohio JEDD/JEDZ Income Tax Rate Database Table (The Finder, bulk CSV)](https://thefinder.tax.ohio.gov/api/file-downloads/content?target=https%3A%2F%2Fapi.thefinder.tax.ohio.gov%2Ffinder%2Fapi%2Fv1%2Ftax-rates%2Fdownloads%2FJEDTaxRates.csv) (last changed: 2026-09-24)
 - OH - [Ohio Municipal Income Tax Rates (The Finder, bulk CSV: read through the Finder's own download link)](https://thefinder.tax.ohio.gov/api/file-downloads/content?target=https%3A%2F%2Fapi.thefinder.tax.ohio.gov%2Ffinder%2Fapi%2Fv1%2Ftax-rates%2Fdownloads%2FMuni%2FOHMuniRateTable.csv) (last changed: 2026-10-18)
 - OH - [Ohio Revised Code 5748.01(E), definition of "taxable income" for school district income tax](https://codes.ohio.gov/ohio-revised-code/section-5748.01) (last changed: 2026-09-26)
@@ -1804,8 +1498,6 @@ These can't be watched by a script (bot protection or JavaScript-only pages). Ch
 - OH - [Ohio Revised Code Section 718.121 — Second municipality imposing tax after time period allowed for r](https://codes.ohio.gov/ohio-revised-code/section-718.121) (last changed: 2026-09-24)
 - OH - [Ohio Unemployment Contribution Rates for Calendar Year 2023-2026](https://jfs.ohio.gov/unemployment-services/for-employers/file-unemployment-taxes/tax-resources/contribution-rates) (last changed: 2026-10-15)
 - OH - [Ohio employer withholding](https://tax.ohio.gov/business/employer-withholding) (last changed: 2026-10-07)
-- OH - [QUARTERLY TAX WITHHOLDING FORM (linked from Village of Woodville: income tax page (withholding)](https://www.villageofwoodville.com/_files/ugd/ef2ef5_bf1167c7bfba4bb9a22a04b6b0dbbd1e.pdf) (last changed: 2026-10-18)
-- OH - [QUARTERLY VOUCHER (linked from Village of Woodville: income tax page (withholding)](https://www.villageofwoodville.com/_files/ugd/ef2ef5_04f52afe0409481fad8c2157a8933a33.pdf) (last changed: 2026-10-18)
 - OH - [R.C. 2716.02 — maximum garnishment is the lesser of 25% of disposable earnings, or the amount by whi](https://codes.ohio.gov/ohio-revised-code/section-2716.02) (last changed: 2026-10-18)
 - OH - [RITA (Regional Income Tax Agency): news and updates (municipal rate and law changes)](https://www.ritaohio.com/Resources/News) (last changed: 2026-11-02)
 - OH - [RITA -- Tax Rates Table, 2025 new municipalities and tax rate changes](https://www.ritaohio.com/TaxRatesTable) (last changed: 2026-11-02)
@@ -1825,13 +1517,6 @@ These can't be watched by a script (bot protection or JavaScript-only pages). Ch
 - OH - [RITA member page -- Rio Grande (rate history)](https://www.ritaohio.com/municipalities/Home/MemberPage?id=588) (last changed: 2026-11-02)
 - OH - [RITA member page -- Stockport (rate history)](https://www.ritaohio.com/municipalities/Home/MemberPage?id=719) (last changed: 2026-11-02)
 - OH - [RITA: tax professionals news](https://www.ritaohio.com/TaxProfessionals/News) (last changed: 2026-11-02)
-- OH - [School district rates (2026) (linked from Ohio employer withholding)](https://dam.assets.ohio.gov/image/upload/tax.ohio.gov/employer_withholding/2025-2026%20NYP%20Updates/School_Districts_2026.pdf) (last changed: 2026-10-18)
-- OH - [Semi-monthly Withholding (linked from Ohio employer withholding)](https://dam.assets.ohio.gov/image/upload/tax.ohio.gov/employer_withholding/2025%20Withholding%20Tables/WHT_Semi-MonthlyRate_2025.pdf) (last changed: 2026-10-18)
-- OH - [Semi-monthly Withholding (linked from Ohio employer withholding)](https://dam.assets.ohio.gov/image/upload/tax.ohio.gov/employer_withholding/2026%20Withholding%20Tables/WHT_Semi-MonthlyRate_2026.pdf) (last changed: 2026-10-20)
-- OH - [Simplified W-2 Field Descriptions and Error Messages (linked from Ohio employer withholding)](https://dam.assets.ohio.gov/image/upload/tax.ohio.gov/employer_withholding/2021-simplifed-w2-field-descriptions-error-messages.pdf) (last changed: 2026-10-18)
-- OH - [TAXABLE VS NONTAXABLE INCOME (linked from Village of Woodville: income tax page (withholding)](https://www.villageofwoodville.com/_files/ugd/ef2ef5_51de34806c534a27a18322c185722de7.pdf) (last changed: 2026-10-18)
-- OH - [Tax Withholding Tables - Optional Computer Method (linked from Ohio employer withholding)](https://dam.assets.ohio.gov/image/upload/tax.ohio.gov/employer_withholding/2025%20Withholding%20Tables/WHT_OptionalComputerFormula_2025.pdf) (last changed: 2026-10-18)
-- OH - [Tax Withholding Tables - Optional Computer Method (linked from Ohio employer withholding)](https://dam.assets.ohio.gov/image/upload/tax.ohio.gov/employer_withholding/2026%20Withholding%20Tables/WHT_OptionalComputerFormula_2026.pdf) (last changed: 2026-10-20)
 - OH - [The Finder: directory of every Ohio municipality (a new entry here is a new jurisdiction)](https://thefinder.tax.ohio.gov/api/file-downloads?type=municipality) (last changed: 2026-10-17)
 - OH - [The Finder: directory of every Ohio school district](https://thefinder.tax.ohio.gov/api/file-downloads?type=schoolDistrict) (last changed: 2026-10-18)
 - OH - [Village of Georgetown -- Income Tax](https://georgetownohio.gov/income-tax/) (last changed: 2026-10-04)
@@ -1839,168 +1524,30 @@ These can't be watched by a script (bot protection or JavaScript-only pages). Ch
 - OH - [Village of Woodville -- Important Tax Notification (1% local municipal income tax from July 1, 2026,](https://www.villageofwoodville.com/_files/ugd/ef2ef5_5f60f5fa78e64495b52690728f655b41.pdf) (last changed: 2026-10-20)
 - OH - [Village of Woodville -- Ordinance No. 1-2026, passed 02-09-2026: levies the village income tax, 'beg](https://www.villageofwoodville.com/_files/ugd/ef2ef5_fc1ed5429f25479b939fd57201b684f7.pdf) (last changed: 2026-10-20)
 - OH - [Village of Woodville: income tax page (withholding notice, forms, ordinance)](https://www.villageofwoodville.com/tax-information) (last changed: 2026-10-18)
-- OH - [W-2G Winners Report specifications (linked from Ohio employer withholding)](https://dam.assets.ohio.gov/image/upload/tax.ohio.gov/employer_withholding/2025-2026%20NYP%20Updates/W2G_Winners_Report_Specs.pdf) (last changed: 2026-10-18)
-- OH - [Weekly Withholding (linked from Ohio employer withholding)](https://dam.assets.ohio.gov/image/upload/tax.ohio.gov/employer_withholding/2026%20Withholding%20Tables/WHT_WeeklyRate_2026.pdf) (last changed: 2026-10-20)
-- OH - [Weekly Withholding (linked from Ohio employer withholding)](https://dam.assets.ohio.gov/image/upload/tax.ohio.gov/employer_withholding/2025%20Withholding%20Tables/WHT_WeeklyRate_2025.pdf) (last changed: 2026-10-18)
-- OH - [Withholding Tax Filing Guidelines (linked from Ohio employer withholding)](https://dam.assets.ohio.gov/image/upload/tax.ohio.gov/employer_withholding/2025-2026%20NYP%20Updates/2026_OH_Employer_School_District_Withholding_Tax_Filing_Guidelines.pdf) (last changed: 2026-10-18)
-- OH - [XML Guidelines (linked from Ohio Department of Taxation: municipal income tax )](https://dam.assets.ohio.gov/image/upload/tax.ohio.gov/muni-net-profit/ascii%20and%20xml/XML%20Instructions%207.19.23.pdf) (last changed: 2026-10-18)
-- OH - [all-year-business-return-form (linked from Village of Georgetown -- Income Tax)](https://georgetownohio.gov/documents/all-year-business-return-form/) (last changed: 2026-10-20)
-- OH - [all-year-individual-return (linked from Village of Georgetown -- Income Tax)](https://georgetownohio.gov/documents/all-year-individual-return/) (last changed: 2026-10-20)
-- OH - [all-year-instruction-sheet (linked from Village of Georgetown -- Income Tax)](https://georgetownohio.gov/documents/all-year-instruction-sheet/) (last changed: 2026-10-20)
-- OH - [all-year-monthly-withholding (linked from Village of Georgetown -- Income Tax)](https://georgetownohio.gov/documents/all-year-monthly-withholding/) (last changed: 2026-10-20)
-- OH - [all-year-quarterly-withholding (linked from Village of Georgetown -- Income Tax)](https://georgetownohio.gov/documents/all-year-quarterly-withholding/) (last changed: 2026-10-20)
-- OH - [application-for-extension-request (linked from Village of Georgetown -- Income Tax)](https://georgetownohio.gov/documents/application-for-extension-request/) (last changed: 2026-10-20)
-- OH - [business-professional-application (linked from Village of Georgetown -- Income Tax)](https://georgetownohio.gov/documents/business-professional-application/) (last changed: 2026-10-20)
-- OH - [doc022624-02262024142737 (linked from Village of Georgetown -- Income Tax)](https://georgetownohio.gov/documents/doc022624-02262024142737/) (last changed: 2026-10-20)
-- OH - [file upload option (linked from Ohio employer withholding)](https://dam.assets.ohio.gov/raw/upload/tax.ohio.gov/employer_withholding/Employer%20Withholding%20Templates/SD101_Upload_File_2026.xls) (last changed: 2026-10-20)
-- OH - [inc-tax-ord-1236-12052023082812 (linked from Village of Georgetown -- Income Tax)](https://georgetownohio.gov/documents/inc-tax-ord-1236-12052023082812/) (last changed: 2026-10-20)
-- OH - [individual-application (linked from Village of Georgetown -- Income Tax)](https://georgetownohio.gov/documents/individual-application/) (last changed: 2026-10-20)
-- OK - [CreatingManagingOkTAPAccountAccess.pdf (linked from Oklahoma Tax Commission: home (announcements))](https://oklahoma.gov/content/dam/ok/en/tax/documents/resources/publications/businesses/brochures/CreatingManagingOkTAPAccountAccess.pdf) (last changed: 2026-10-20)
-- OK - [EndOfPennyProduction.pdf (linked from Oklahoma Tax Commission: home (announcements))](https://oklahoma.gov/content/dam/ok/en/tax/documents/resources/publications/individuals/EndOfPennyProduction.pdf) (last changed: 2026-10-20)
 - OK - [Form OK-W-4 (Rev. 3-2021) -- Employee's State Withholding Allowance Certificate](https://oklahoma.gov/content/dam/ok/en/tax/documents/forms/businesses/general/OK-W-4.pdf) (last changed: 2026-10-20)
-- OK - [HERE (linked from Oklahoma withholding OW-2)](https://oklahoma.gov/content/dam/ok/en/tax/documents/resources/publications/businesses/brochures/CommonOklahomaWithholdingTaxAuditIssues.pdf) (last changed: 2026-10-20)
-- OK - [OW-21 (linked from Oklahoma withholding OW-2)](https://oklahoma.gov/content/dam/ok/en/tax/documents/forms/businesses/general/OW-21.pdf) (last changed: 2026-10-20)
 - OK - [Oklahoma Employment Security Commission -- Important Numbers for Employers 2026](https://oklahoma.gov/content/dam/ok/en/oesc/images/misc/Employer-Improtant-Numbers-2026.pdf) (last changed: 2026-10-20)
 - OK - [Oklahoma Tax Commission -- 2025 Oklahoma Income Tax Withholding Tables (Packet OW-2, revised 11-2024](https://www.oklahoma.gov/content/dam/ok/en/tax/documents/resources/publications/businesses/withholding-tables/WHTables-2025.pdf) (last changed: 2026-10-20)
 - OK - [Oklahoma Tax Commission: home (announcements)](https://oklahoma.gov/tax.html) (last changed: 2026-10-20)
 - OK - [Oklahoma withholding OW-2](https://oklahoma.gov/tax/businesses/withholding.html) (last changed: 2026-10-20)
-- OK - [OklahomaWithholdingAccountRegistration.pdf (linked from Oklahoma withholding OW-2)](https://oklahoma.gov/content/dam/ok/en/tax/documents/resources/publications/businesses/brochures/OklahomaWithholdingAccountRegistration.pdf) (last changed: 2026-10-20)
 - OK - [Packet OW-2 (Revised 11-2025) -- 2026 Oklahoma Income Tax Withholding Tables](https://www.oklahoma.gov/content/dam/ok/en/tax/documents/resources/publications/businesses/withholding-tables/WHTables-2026.pdf) (last changed: 2026-10-20)
-- OK - [information (linked from Oklahoma withholding OW-2)](https://oklahoma.gov/content/dam/ok/en/tax/documents/resources/publications/businesses/brochures/Withholding-ProductionCo.pdf) (last changed: 2026-10-20)
-- OR - [009 (linked from Oregon Workers' Benefit Fund rule changes)](https://wcd.oregon.gov/laws/Documents/New_rules/009-temp-1-1-2026/9-25058-temp-2025-12-26.pdf) (last changed: 2026-10-20)
-- OR - [009 (linked from Oregon Workers' Benefit Fund rule changes)](https://wcd.oregon.gov/laws/Documents/New_rules/9-23054-23057-marked.pdf) (last changed: 2026-10-20)
-- OR - [009 (linked from Oregon Workers' Benefit Fund rule changes)](https://wcd.oregon.gov/laws/Documents/New_rules/009%2c%20010%2c%20015%20-%20April%201%2c%202025/9-25050-marked.pdf) (last changed: 2026-10-20)
-- OR - [009 (linked from Oregon Workers' Benefit Fund rule changes)](https://wcd.oregon.gov/laws/Documents/New_rules/9-24050-final-marked-2024-03-05.pdf) (last changed: 2026-10-20)
-- OR - [010 (linked from Oregon Workers' Benefit Fund rule changes)](https://wcd.oregon.gov/laws/Documents/New_rules/10-24051-final-marked-2024-03-05.pdf) (last changed: 2026-10-20)
-- OR - [010 (linked from Oregon Workers' Benefit Fund rule changes)](https://wcd.oregon.gov/laws/Documents/New_rules/10-23-055-perm-2023-11-29-Entire-changes-tracked.pdf) (last changed: 2026-10-20)
-- OR - [010 (linked from Oregon Workers' Benefit Fund rule changes)](https://wcd.oregon.gov/laws/Documents/New_rules/009%2c%20010%2c%20015%20-%20April%201%2c%202025/10-25051-marked.pdf) (last changed: 2026-10-20)
-- OR - [015 (linked from Oregon Workers' Benefit Fund rule changes)](https://wcd.oregon.gov/laws/Documents/New_rules/15-23-056-perm-2023-11-28-Entire-changes-tracked.pdf) (last changed: 2026-10-20)
-- OR - [015 (linked from Oregon Workers' Benefit Fund rule changes)](https://wcd.oregon.gov/laws/Documents/New_rules/009%2c%20010%2c%20015%20-%20April%201%2c%202025/15-25052-marked.pdf) (last changed: 2026-10-20)
-- OR - [015 (linked from Oregon Workers' Benefit Fund rule changes)](https://wcd.oregon.gov/laws/Documents/New_rules/15-24052-final-marked-2024-03-04.pdf) (last changed: 2026-10-20)
-- OR - [030 (linked from Oregon Workers' Benefit Fund rule changes)](https://wcd.oregon.gov/laws/Documents/New_rules/030%2c%20060%2c%20075%20-%202025/25-057-30-perm-marked.pdf) (last changed: 2026-10-20)
-- OR - [030 (linked from Oregon Workers' Benefit Fund rule changes)](https://wcd.oregon.gov/laws/Documents/New_rules/30-22068-marked.pdf) (last changed: 2026-10-20)
-- OR - [060 (linked from Oregon Workers' Benefit Fund rule changes)](https://wcd.oregon.gov/laws/Documents/New_rules/030%2c%20060%2c%20075%20-%202025/25-055-60-perm-marked.pdf) (last changed: 2026-10-20)
-- OR - [060 (linked from Oregon Workers' Benefit Fund rule changes)](https://wcd.oregon.gov/laws/Documents/New_rules/60-22069-marked.pdf) (last changed: 2026-10-20)
-- OR - [060 (linked from Oregon Workers' Benefit Fund rule changes)](https://wcd.oregon.gov/laws/Documents/New_rules/60-24053-marked.pdf) (last changed: 2026-10-20)
-- OR - [070 (linked from Oregon Workers' Benefit Fund rule changes)](https://wcd.oregon.gov/laws/Documents/Proposed_rules_and_testimony/Div-070-2023-09-25/70-23053-entire-changes-marked.pdf) (last changed: 2026-10-20)
-- OR - [070 (linked from Oregon Workers' Benefit Fund rule changes)](https://wcd.oregon.gov/laws/Documents/New_rules/070%20WBF%20-%20January%201%2c%202026/70-25054-perm-marked-2025-10-2.pdf) (last changed: 2026-10-20)
-- OR - [075 (linked from Oregon Workers' Benefit Fund rule changes)](https://wcd.oregon.gov/laws/Documents/New_rules/030%2c%20060%2c%20075%20-%202025/25-056-75-perm-marked.pdf) (last changed: 2026-10-20)
-- OR - [120 (linked from Oregon Workers' Benefit Fund rule changes)](https://wcd.oregon.gov/laws/Documents/New_rules/120-22070-marked.pdf) (last changed: 2026-10-20)
-- OR - [120 (linked from Oregon Workers' Benefit Fund rule changes)](https://wcd.oregon.gov/laws/Documents/New_rules/120-24054-marked.pdf) (last changed: 2026-10-20)
 - OR - [150-206-436 (Rev. 12-31-25) Oregon Withholding Tax Formulas, effective 2026-01-01](https://www.oregon.gov/dor/forms/FormsPubs/withholding-tax-formulas_206-436_2026.pdf) (last changed: 2026-10-20)
 - OR - [150-211-503 (Rev. 11-18-25) A Guide to TriMet and Lane Transit Payroll Taxes](https://www.oregon.gov/dor/forms/formspubs/transit-payroll-taxes_211-503.pdf) (last changed: 2026-10-20)
 - OR - [2026 Oregon Combined Payroll Tax Report Instructions](https://www.oregon.gov/dor/forms/FormsPubs/combined-payroll_211-155-2_2026.pdf) (last changed: 2026-10-20)
-- OR - [ACH Credit Specifications (linked from Personal Income Tax Withholding Information for Em)](https://www.portland.gov/revenue/documents/ach-credit-specifications/download) (last changed: 2026-10-20)
-- OR - [Agricultural employee withholding (linked from Oregon withholding and payroll tax)](https://www.oregon.gov/dor/forms/FormsPubs/agricultural-employees_206-628.pdf) (last changed: 2026-10-20)
-- OR - [Annual Withholding Reconciliation Return XML File Guide (linked from Personal Income Tax Withholding](https://www.portland.gov/revenue/documents/annual-withholding-reconciliation-return-xml-file-guide/download) (last changed: 2026-10-20)
 - OR - [Canby Area Transit Taxes: A guide for businesses](https://www.canbyoregon.gov/sites/default/files/fileattachments/transit_tax/page/2041/transit_tax_guide_for_businesses.pdf) (last changed: 2026-10-20)
-- OR - [Combined Employer's Registration (linked from Oregon withholding and payroll tax)](https://www.oregon.gov/dor/forms/FormsPubs/form-or-cer_211-055.pdf) (last changed: 2026-10-20)
 - OR - [Current Tax and Contribution Rates (Oregon Employment Department)](https://www.oregon.gov/employ/businesses/pages/current-tax-rate.aspx) (last changed: 2026-10-20)
-- OR - [Domestic and household employee withholding (linked from Oregon withholding and payroll tax)](https://www.oregon.gov/dor/forms/FormsPubs//withholding-household_206-627.pdf) (last changed: 2026-10-20)
-- OR - [Employer’s Filing Due Dates & Miscellaneous Contact Information UI Pub (linked from Current Tax and ](https://www.oregon.gov/employ/Businesses/Documents/Filing%20Due%20Date%20%26%20Misc%20Contact%20Info_UI%20PUB%20139_01.2026.pdf) (last changed: 2026-10-20)
-- OR - [Enrolling for Withholding ACH Credit (linked from Personal Income Tax Withholding Information for Em](https://www.portland.gov/revenue/documents/enrolling-withholding-ach-credit/download) (last changed: 2026-10-20)
-- OR - [Filing certificate (linked from Oregon Workers' Benefit Fund rule changes)](https://wcd.oregon.gov/laws/Documents/New_rules/HB%204040%20perm%20-%20009%2c%20010%2c%20015%2c%20030%2c%20035%2c%20060/HB4040-WCD_4-2026TrackedChanges.pdf) (last changed: 2026-10-20)
-- OR - [Filing certificate (linked from Oregon Workers' Benefit Fund rule changes)](https://wcd.oregon.gov/laws/Documents/New_rules/070%20WBF%20January%201%2c%202027/70-WCD_5-2026TrackedChanges.pdf) (last changed: 2026-10-20)
-- OR - [Filing certificate (linked from Oregon Workers' Benefit Fund rule changes)](https://wcd.oregon.gov/laws/Documents/New_rules/HB%204040%20temp%20-%20009%2c%20010%2c%20015%2c%20030%2c%20035%2c%20060/WCD_3-2026TrackedChanges.pdf) (last changed: 2026-10-20)
-- OR - [Filing certificate (linked from Oregon Workers' Benefit Fund rule changes)](https://wcd.oregon.gov/laws/Documents/New_rules/WCD_14-2022TrackedChanges.pdf) (last changed: 2026-10-20)
-- OR - [Filing certificate (linked from Oregon Workers' Benefit Fund rule changes)](https://wcd.oregon.gov/laws/Documents/Proposed_rules_and_testimony/Div-070-2023-09-25/SOS-filing-perm-rule-436-070-WCD-TrackedChanges-2023-10-13.pdf) (last changed: 2026-10-20)
-- OR - [Filing certificate (linked from Oregon Workers' Benefit Fund rule changes)](https://wcd.oregon.gov/laws/Documents/New_rules/OAR%20436-050%20-%202025/50-perm-sos-2025TrackedChanges.pdf) (last changed: 2026-10-20)
-- OR - [Filing certificate (linked from Oregon Workers' Benefit Fund rule changes)](https://wcd.oregon.gov/laws/Documents/New_rules/HB%202800%20%282025%29/180-WCD_6-2026TrackedChanges.pdf) (last changed: 2026-10-20)
-- OR - [Filing certificate (linked from Oregon Workers' Benefit Fund rule changes)](https://wcd.oregon.gov/laws/Documents/New_rules/WCD_14-2024TrackedChanges.pdf) (last changed: 2026-10-20)
-- OR - [Filing certificate (linked from Oregon Workers' Benefit Fund rule changes)](https://wcd.oregon.gov/laws/Documents/New_rules/9-24055-temp-notice-with-filing.pdf) (last changed: 2026-10-20)
-- OR - [Filing certificate (linked from Oregon Workers' Benefit Fund rule changes)](https://wcd.oregon.gov/laws/Documents/New_rules/WCD_15-2024TrackedChanges.pdf) (last changed: 2026-10-20)
-- OR - [Filing certificate (linked from Oregon Workers' Benefit Fund rule changes)](https://wcd.oregon.gov/laws/Documents/New_rules/030%2c%20060%2c%20075%20-%202025/WCD_5-2025TrackedChanges.pdf) (last changed: 2026-10-20)
-- OR - [Filing certificate (linked from Oregon Workers' Benefit Fund rule changes)](https://wcd.oregon.gov/laws/Documents/New_rules/009-temp-1-1-2026/WCD_6-2025TrackedChanges.pdf) (last changed: 2026-10-20)
-- OR - [Filing certificate (linked from Oregon Workers' Benefit Fund rule changes)](https://wcd.oregon.gov/laws/Documents/New_rules/070%20WBF%20-%20January%201%2c%202026/WCD_2-2025TrackedChanges.pdf) (last changed: 2026-10-20)
-- OR - [Filing certificate (linked from Oregon Workers' Benefit Fund rule changes)](https://wcd.oregon.gov/laws/Documents/New_rules/009%2c%20010%2c%20015%2c%20035%20-%20April%201%2c%202026/WCD_2-2026-tracked-changes-SOS-2026-03-25.pdf) (last changed: 2026-10-20)
-- OR - [Filing certificates (linked from Oregon Workers' Benefit Fund rule changes)](https://wcd.oregon.gov/laws/Documents/New_rules/23054-23057-SOS-TrackedChanges-receipts.pdf) (last changed: 2026-10-20)
-- OR - [Filing certificates (linked from Oregon Workers' Benefit Fund rule changes)](https://wcd.oregon.gov/laws/Documents/New_rules/WCD_1-2024TrackedChanges.pdf) (last changed: 2026-10-20)
-- OR - [Filing certificates (linked from Oregon Workers' Benefit Fund rule changes)](https://wcd.oregon.gov/laws/Documents/New_rules/009%2c%20010%2c%20015%20-%20April%201%2c%202025/9-10-15-25050-perm-notice.pdf) (last changed: 2026-10-20)
-- OR - [How to start a business in Oregon (linked from Oregon withholding and payroll tax)](https://sos.oregon.gov/business/documents/business-guides/start-business-guide.pdf) (last changed: 2026-10-20)
-- OR - [OAR 436-009, Oregon Medical Fee and Payment (linked from Oregon Workers' Benefit Fund rule changes)](https://wcd.oregon.gov/laws/Documents/New_rules/9-25055-temp-marked.pdf) (last changed: 2026-10-20)
-- OR - [OAR 436-009, Oregon Medical Fee and Payment (linked from Oregon Workers' Benefit Fund rule changes)](https://wcd.oregon.gov/laws/Documents/New_rules/009%2c%20010%2c%20015%2c%20035%20-%20April%201%2c%202026/9-26050-perm.pdf) (last changed: 2026-10-20)
-- OR - [OAR 436-009, Oregon Medical Fee and Payment (linked from Oregon Workers' Benefit Fund rule changes)](https://wcd.oregon.gov/laws/Documents/New_rules/009-temp-1-1-2026/9-25058-notice-with-rules.pdf) (last changed: 2026-10-20)
-- OR - [OAR 436-009, Oregon Medical Fee and Payment Rules (linked from Oregon Workers' Benefit Fund rule cha](https://wcd.oregon.gov/laws/Documents/New_rules/HB%204040%20perm%20-%20009%2c%20010%2c%20015%2c%20030%2c%20035%2c%20060/9-26060-marked.pdf) (last changed: 2026-10-20)
-- OR - [OAR 436-009, Oregon Medical Fee and Payment Rules (linked from Oregon Workers' Benefit Fund rule cha](https://wcd.oregon.gov/laws/Documents/New_rules/HB%204040%20temp%20-%20009%2c%20010%2c%20015%2c%20030%2c%20035%2c%20060/9-26054-marked.pdf) (last changed: 2026-10-20)
-- OR - [OAR 436-009, Oregon Medical Fee and PaymentOAR 436-010, Medical Servic (linked from Oregon Workers' ](https://wcd.oregon.gov/laws/Documents/New_rules/009%2c%20010%2c%20015%20-%20April%201%2c%202025/9-10-15-25050-marked.pdf) (last changed: 2026-10-20)
-- OR - [OAR 436-009, Oregon Medical Fee and PaymentOAR 436-010, Medical Servic (linked from Oregon Workers' ](https://wcd.oregon.gov/laws/Documents/New_rules/9-23054-23057-marked-with-notices-009-010-015.pdf) (last changed: 2026-10-20)
-- OR - [OAR 436-009, Oregon Medical Fee and PaymentOAR 436-010, Medical Servic (linked from Oregon Workers' ](https://wcd.oregon.gov/laws/Documents/New_rules/9-10-15-24050-perm-notice-with-rules.pdf) (last changed: 2026-10-20)
-- OR - [OAR 436-010, Medical Services (linked from Oregon Workers' Benefit Fund rule changes)](https://wcd.oregon.gov/laws/Documents/New_rules/HB%204040%20perm%20-%20009%2c%20010%2c%20015%2c%20030%2c%20035%2c%20060/10-061-marked.pdf) (last changed: 2026-10-20)
-- OR - [OAR 436-010, Medical Services (linked from Oregon Workers' Benefit Fund rule changes)](https://wcd.oregon.gov/laws/Documents/New_rules/HB%204040%20temp%20-%20009%2c%20010%2c%20015%2c%20030%2c%20035%2c%20060/10-26055-marked.pdf) (last changed: 2026-10-20)
-- OR - [OAR 436-010, Medical Services, (linked from Oregon Workers' Benefit Fund rule changes)](https://wcd.oregon.gov/laws/Documents/New_rules/009%2c%20010%2c%20015%2c%20035%20-%20April%201%2c%202026/10-26051-perm.pdf) (last changed: 2026-10-20)
-- OR - [OAR 436-015, Managed Care Organizations (linked from Oregon Workers' Benefit Fund rule changes)](https://wcd.oregon.gov/laws/Documents/New_rules/009%2c%20010%2c%20015%2c%20035%20-%20April%201%2c%202026/15-26052-perm.pdf) (last changed: 2026-10-20)
-- OR - [OAR 436-015, Managed Care Organizations (linked from Oregon Workers' Benefit Fund rule changes)](https://wcd.oregon.gov/laws/Documents/New_rules/HB%204040%20temp%20-%20009%2c%20010%2c%20015%2c%20030%2c%20035%2c%20060/15-26056-marked.pdf) (last changed: 2026-10-20)
-- OR - [OAR 436-015, Managed Care Organizations (linked from Oregon Workers' Benefit Fund rule changes)](https://wcd.oregon.gov/laws/Documents/New_rules/HB%204040%20perm%20-%20009%2c%20010%2c%20015%2c%20030%2c%20035%2c%20060/15-062-marked.pdf) (last changed: 2026-10-20)
-- OR - [OAR 436-030, Claim Closure and Reconsideration (linked from Oregon Workers' Benefit Fund rule change](https://wcd.oregon.gov/laws/Documents/New_rules/HB%204040%20temp%20-%20009%2c%20010%2c%20015%2c%20030%2c%20035%2c%20060/30-26057-marked.pdf) (last changed: 2026-10-20)
-- OR - [OAR 436-030, Claim Closure and Reconsideration (linked from Oregon Workers' Benefit Fund rule change](https://wcd.oregon.gov/laws/Documents/New_rules/HB%204040%20perm%20-%20009%2c%20010%2c%20015%2c%20030%2c%20035%2c%20060/30-063-marked.pdf) (last changed: 2026-10-20)
-- OR - [OAR 436-030, Claim Closure and ReconsiderationOAR 436-060, Claims Admi (linked from Oregon Workers' ](https://wcd.oregon.gov/laws/Documents/New_rules/30-60-120-new.pdf) (last changed: 2026-10-20)
-- OR - [OAR 436-035, Disability Rating Standards (linked from Oregon Workers' Benefit Fund rule changes)](https://wcd.oregon.gov/laws/Documents/New_rules/009%2c%20010%2c%20015%2c%20035%20-%20April%201%2c%202026/35-26053-perm.pdf) (last changed: 2026-10-20)
-- OR - [OAR 436-035, Disability Rating Standards (linked from Oregon Workers' Benefit Fund rule changes)](https://wcd.oregon.gov/laws/Documents/New_rules/HB%204040%20temp%20-%20009%2c%20010%2c%20015%2c%20030%2c%20035%2c%20060/35-26058-marked.pdf) (last changed: 2026-10-20)
-- OR - [OAR 436-035, Disability Rating Standards (linked from Oregon Workers' Benefit Fund rule changes)](https://wcd.oregon.gov/laws/Documents/New_rules/HB%204040%20perm%20-%20009%2c%20010%2c%20015%2c%20030%2c%20035%2c%20060/35-064-marked.pdf) (last changed: 2026-10-20)
-- OR - [OAR 436-050 Employer/Insurer Coverage Responsibility (linked from Oregon Workers' Benefit Fund rule ](https://wcd.oregon.gov/laws/Documents/New_rules/HB%202800%20%282025%29/50-26068-marked.pdf) (last changed: 2026-10-20)
-- OR - [OAR 436-050, Employer/Insurer Coverage Responsibility (linked from Oregon Workers' Benefit Fund rule](https://wcd.oregon.gov/laws/Documents/New_rules/OAR%20436-050%20-%202025/50-notice-and-rules-perm-2025-11-20.pdf) (last changed: 2026-10-20)
-- OR - [OAR 436-060 Claims Administration (linked from Oregon Workers' Benefit Fund rule changes)](https://wcd.oregon.gov/laws/Documents/New_rules/HB%202800%20%282025%29/60-26069-marked.pdf) (last changed: 2026-10-20)
-- OR - [OAR 436-060 Claims Administration OAR 436-030 Claim Closure and Admini (linked from Oregon Workers' ](https://wcd.oregon.gov/laws/Documents/New_rules/030%2c%20060%2c%20075%20-%202025/060-notice-perm-and-rules-2025-12-23.pdf) (last changed: 2026-10-20)
-- OR - [OAR 436-060, Claims Administration (linked from Oregon Workers' Benefit Fund rule changes)](https://wcd.oregon.gov/laws/Documents/New_rules/HB%204040%20perm%20-%20009%2c%20010%2c%20015%2c%20030%2c%20035%2c%20060/60-065-marked.pdf) (last changed: 2026-10-20)
-- OR - [OAR 436-060, Claims Administration (linked from Oregon Workers' Benefit Fund rule changes)](https://wcd.oregon.gov/laws/Documents/New_rules/HB%204040%20temp%20-%20009%2c%20010%2c%20015%2c%20030%2c%20035%2c%20060/60-26059-marked.pdf) (last changed: 2026-10-20)
-- OR - [OAR 436-060, Claims Administration (linked from Oregon Workers' Benefit Fund rule changes)](https://wcd.oregon.gov/laws/Documents/New_rules/60-24053-clean-and-notice.pdf) (last changed: 2026-10-20)
-- OR - [OAR 436-070, Combined Workers' Benefit Fund and BOLI Expenses Fund Ass (linked from Oregon Workers' ](https://wcd.oregon.gov/laws/Documents/New_rules/070%20WBF%20January%201%2c%202027/070-26072-marked-2026-10-06.pdf) (last changed: 2026-10-20)
-- OR - [OAR 436-070, Workers' Benefit Fund (linked from Oregon Workers' Benefit Fund rule changes)](https://wcd.oregon.gov/laws/Documents/New_rules/070%20WBF%20-%20January%201%2c%202026/70-25054-rule-notice-and-rules.pdf) (last changed: 2026-10-20)
-- OR - [OAR 436-070, Workers' Benefit Fund (linked from Oregon Workers' Benefit Fund rule changes)](https://wcd.oregon.gov/laws/Documents/Proposed_rules_and_testimony/Div-070-2023-09-25/70-23053-notice-and-marked-rules-for-website.pdf) (last changed: 2026-10-20)
-- OR - [OAR 436-105 Employer-at-Injury Program (linked from Oregon Workers' Benefit Fund rule changes)](https://wcd.oregon.gov/laws/Documents/New_rules/HB%202800%20%282025%29/105-26070-marked.pdf) (last changed: 2026-10-20)
-- OR - [OAR 436-110 Preferred Worker Program (linked from Oregon Workers' Benefit Fund rule changes)](https://wcd.oregon.gov/laws/Documents/New_rules/HB%202800%20%282025%29/110-26071-marked.pdf) (last changed: 2026-10-20)
-- OR - [OAR 436-120, Vocational Assistance to Injured Workers (linked from Oregon Workers' Benefit Fund rule](https://wcd.oregon.gov/laws/Documents/New_rules/120-24054-clean-and-notice.pdf) (last changed: 2026-10-20)
-- OR - [OAR 436-162 Electronic Data Interchange; Proof of Coverage (linked from Oregon Workers' Benefit Fund](https://wcd.oregon.gov/laws/Documents/New_rules/HB%202800%20%282025%29/162-26067-marked.pdf) (last changed: 2026-10-20)
-- OR - [OAR 436-180 Worker Leasing (linked from Oregon Workers' Benefit Fund rule changes)](https://wcd.oregon.gov/laws/Documents/New_rules/HB%202800%20%282025%29/180-26066-marked.pdf) (last changed: 2026-10-20)
 - OR - [ORS 18.385(2) — 75% of disposable earnings exempt from execution, or a flat per-period dollar minimu](https://www.oregonlegislature.gov/bills_laws/ors/ors018.html) (last changed: 2026-10-20)
 - OR - [Oregon DOR -- Withholding Tax Formulas, 150-206-436 (Rev. 12-10-24) for 2025](https://www.oregon.gov/dor/forms/FormsPubs/withholding-tax-formulas_206-436_2025.pdf) (last changed: 2026-10-20)
 - OR - [Oregon Department of Revenue: Statewide Transit Tax (webpage)](https://www.oregon.gov/dor/programs/businesses/pages/statewide-transit-tax.aspx) (last changed: 2026-10-20)
-- OR - [Oregon Employers Guide (linked from Oregon withholding and payroll tax)](https://sos.oregon.gov/business/Documents/business-guides/employer-guide.pdf) (last changed: 2026-10-20)
 - OR - [Oregon Workers' Benefit Fund rule changes](https://wcd.oregon.gov/laws/Pages/new-rules.aspx) (last changed: 2026-10-20)
 - OR - [Oregon local minimum-wage/regional rate history (July 2025 - June 2026 figures)](https://www.oregon.gov/boli/workers/pages/minimum-wage.aspx) (last changed: 2026-10-20)
 - OR - [Oregon payroll tax](https://www.oregon.gov/dor/programs/businesses/pages/payroll-updates.aspx) (last changed: 2026-10-20)
 - OR - [Oregon withholding and payroll tax](https://www.oregon.gov/dor/programs/businesses/pages/withholding-and-payroll-tax.aspx) (last changed: 2026-10-20)
 - OR - [Paid Leave Oregon — Contributions Calculator / rate page](https://paidleave.oregon.gov/employers/contributions-calculator.html) (last changed: 2026-10-20)
 - OR - [Personal Income Tax Withholding Information for Employers/Payroll Providers](https://www.portland.gov/revenue/withholding) (last changed: 2026-10-20)
-- OR - [Quarterly Withholding Return XML File Guide (linked from Personal Income Tax Withholding Information](https://www.portland.gov/revenue/documents/quarterly-withholding-return-xml-file-guide/download) (last changed: 2026-10-20)
 - OR - [Sandy Area Metro (SAM) Payroll and Self-Employment Tax Instructions](https://www.ci.sandy.or.us/sites/default/files/fileattachments/economic_development/page/4671/transit_tax_instructions.pdf) (last changed: 2026-10-20)
-- OR - [Specifications for Filing Forms W-2 Electronically (linked from Personal Income Tax Withholding Info](https://www.portland.gov/revenue/documents/specifications-filing-forms-w-2-electronically/download) (last changed: 2026-10-20)
-- OR - [W-4 information (linked from Oregon withholding and payroll tax)](https://www.oregon.gov/dor/forms/FormsPubs/w-4-information_150-211-602.pdf) (last changed: 2026-10-20)
-- OR - [Withholding and transit tax calendar (linked from Oregon withholding and payroll tax)](https://www.oregon.gov/dor/forms/FormsPubs/withholding-calendar_206-400.pdf) (last changed: 2026-10-20)
-- OR - [spreadsheet (linked from Oregon Department of Revenue: Statewide Transit Ta)](https://www.oregon.gov/dor/programs/businesses/Documents/stt-rol-import-template.xlsx) (last changed: 2026-10-20)
 - PA - [42 Pa. Cons. Stat. § 8127 — wages/salaries/commissions exempt from attachment, execution or other pr](https://www.legis.state.pa.us/WU01/LI/LI/CT/HTM/42/00.081.027.000..HTM) (last changed: 2026-10-18)
 - PA - [City of Pittsburgh -- ET-1 2025 Payroll Expense Tax return and instructions (Rev 12/24)](https://www.pittsburghpa.gov/files/assets/city/v/1/finance/documents/tax-faqs/et-2025-fillable.pdf) (last changed: 2026-10-20)
-- PA - [Form REV-419EX (linked from NJ Division of Taxation -- Reciprocal Personal Inc)](https://www.revenue.pa.gov/FormsandPublications/FormsforIndividuals/PIT/Documents/rev-419.pdf) (last changed: 2026-10-20)
-- PA - [Form UC-748, Contribution Rates Effective January 1, 2020 (linked from PA Department of Labor & Indu](https://www.pa.gov/content/dam/copapwp-pagov/en/dli/documents/uc/employer/uc-tax-rates/uc-748%20rev%2011-19.pdf) (last changed: 2026-10-20)
-- PA - [Form UC-748, Contribution Rates Effective January 1, 2021 (linked from PA Department of Labor & Indu](https://www.pa.gov/content/dam/copapwp-pagov/en/dli/documents/uc/employer/uc-tax-rates/uc-748%20rev%2008-20.pdf) (last changed: 2026-10-20)
-- PA - [Form UC-748, Contribution Rates Effective January 1, 2022 (linked from PA Department of Labor & Indu](https://www.pa.gov/content/dam/copapwp-pagov/en/dli/documents/uc/employer/uc-tax-rates/uc-748-rev-08-21.pdf) (last changed: 2026-10-20)
-- PA - [Form UC-748, Contribution Rates Effective January 1, 2023 (linked from PA Department of Labor & Indu](https://www.pa.gov/content/dam/copapwp-pagov/en/dli/documents/uc/employer/uc-tax-rates/uc-748-rev-11-22.pdf) (last changed: 2026-10-20)
-- PA - [Form UC-748, Contribution Rates Effective January 1, 2024 (linked from PA Department of Labor & Indu](https://www.pa.gov/content/dam/copapwp-pagov/en/dli/documents/uc/employer/uc-tax-rates/uc-748-rev-11-23.pdf) (last changed: 2026-10-20)
-- PA - [Form UC-748, Contribution Rates Effective January 1, 2025 (linked from PA Department of Labor & Indu](https://www.pa.gov/content/dam/copapwp-pagov/en/dli/documents/uc/employer/uc-tax-rates/uc-748%20rev%2010-24.pdf) (last changed: 2026-10-20)
-- PA - [Form UC-748, Contribution Rates Effective January 1, 2027 (linked from PA Department of Labor & Indu](https://www.pa.gov/content/dam/copapwp-pagov/en/dli/documents/uc/employer/uc-tax-rates/uc-748%20rev%2010-26.pdf) (last changed: 2026-10-20)
-- PA - [Form UC-749, Contribution Rate Chart for 2020 (linked from PA Department of Labor & Industry -- Year](https://www.pa.gov/content/dam/copapwp-pagov/en/dli/documents/uc/employer/uc-tax-rates/uc-749%20rev%2012-19.pdf) (last changed: 2026-10-20)
-- PA - [Form UC-749, Contribution Rate Chart for 2021 (linked from PA Department of Labor & Industry -- Year](https://www.pa.gov/content/dam/copapwp-pagov/en/dli/documents/uc/employer/uc-tax-rates/uc-749%20rev%2009-20.pdf) (last changed: 2026-10-20)
-- PA - [Form UC-749, Contribution Rate Chart for 2022 (linked from PA Department of Labor & Industry -- Year](https://www.pa.gov/content/dam/copapwp-pagov/en/dli/documents/uc/employer/uc-tax-rates/uc-749-rev-08-21.pdf) (last changed: 2026-10-20)
-- PA - [Form UC-749, Contribution Rate Chart for 2023 (linked from PA Department of Labor & Industry -- Year](https://www.pa.gov/content/dam/copapwp-pagov/en/dli/documents/uc/employer/uc-tax-rates/uc-749-rev-11-22.pdf) (last changed: 2026-10-20)
-- PA - [Form UC-749, Contribution Rate Chart for 2024 (linked from PA Department of Labor & Industry -- Year](https://www.pa.gov/content/dam/copapwp-pagov/en/dli/documents/uc/employer/uc-tax-rates/uc-749-rev-10-23.pdf) (last changed: 2026-10-20)
-- PA - [Form UC-749, Contribution Rate Chart for 2025 (linked from PA Department of Labor & Industry -- Year](https://www.pa.gov/content/dam/copapwp-pagov/en/dli/documents/uc/employer/uc-tax-rates/uc-749%20rev%2010-24.pdf) (last changed: 2026-10-20)
-- PA - [Form UC-749, Contribution Rate Chart for 2026 (linked from PA Department of Labor & Industry -- Year](https://www.pa.gov/content/dam/copapwp-pagov/en/dli/documents/uc/employer/uc-tax-rates/uc-749%20rev%2009-25.pdf) (last changed: 2026-10-20)
-- PA - [Form UC-749, Contribution Rate Chart for 2027 (linked from PA Department of Labor & Industry -- Year](https://www.pa.gov/content/dam/copapwp-pagov/en/dli/documents/uc/employer/uc-tax-rates/uc-749%20rev%2010-26.pdf) (last changed: 2026-10-20)
-- PA - [Form UC-820, Eligibility Criteria for 2020 Experience-Based Contributi (linked from PA Department of](https://www.pa.gov/content/dam/copapwp-pagov/en/dli/documents/uc/employer/uc-tax-rates/uc-820%20rev%2011-19.pdf) (last changed: 2026-10-20)
-- PA - [Form UC-820, Eligibility Criteria for 2021 Experience-Based Contributi (linked from PA Department of](https://www.pa.gov/content/dam/copapwp-pagov/en/dli/documents/uc/employer/uc-tax-rates/uc-820%20rev%2009-20.pdf) (last changed: 2026-10-20)
-- PA - [Form UC-820, Eligibility Criteria for 2022 Experience-Based Contributi (linked from PA Department of](https://www.pa.gov/content/dam/copapwp-pagov/en/dli/documents/uc/employer/uc-tax-rates/uc-820-rev-08-21.pdf) (last changed: 2026-10-20)
-- PA - [Form UC-820, Eligibility Criteria for 2023 Experience-Based Contributi (linked from PA Department of](https://www.pa.gov/content/dam/copapwp-pagov/en/dli/documents/uc/employer/uc-tax-rates/uc-820-rev-11-22.pdf) (last changed: 2026-10-20)
-- PA - [Form UC-820, Eligibility Criteria for 2024 Experience-Based Contributi (linked from PA Department of](https://www.pa.gov/content/dam/copapwp-pagov/en/dli/documents/uc/employer/uc-tax-rates/uc-820-rev-10-23.pdf) (last changed: 2026-10-20)
-- PA - [Form UC-820, Eligibility Criteria for 2025 Experience-Based Contributi (linked from PA Department of](https://www.pa.gov/content/dam/copapwp-pagov/en/dli/documents/uc/employer/uc-tax-rates/uc-820%20rev%2010-24.pdf) (last changed: 2026-10-20)
-- PA - [Form UC-820, Eligibility Criteria for 2026 Experience-Based Contributi (linked from PA Department of](https://www.pa.gov/content/dam/copapwp-pagov/en/dli/documents/uc/employer/uc-tax-rates/uc-820%20rev%2009-25.pdf) (last changed: 2026-10-20)
-- PA - [Form UC-820, Eligibility Criteria for 2027 for Experience-Based Contri (linked from PA Department of](https://www.pa.gov/content/dam/copapwp-pagov/en/dli/documents/uc/employer/uc-tax-rates/uc-820%20rev%2010-26.pdf) (last changed: 2026-10-20)
-- PA - [Mailing Addresses [PDF] (linked from PA Department of Revenue -- Employer Withholding ()](https://www.pa.gov/content/dam/copapwp-pagov/en/revenue/documents/contactus/documents/address_directory.pdf) (last changed: 2026-10-20)
-- PA - [Mailing Addresses [PDF] (linked from PA Department of Revenue -- Personal Income Tax (3)](https://www.pa.gov/content/dam/copapwp-pagov/en/revenue/documents/contactus/documents/address_directory.pdf) (last changed: 2026-10-20)
-- PA - [Mailing Addresses [PDF] (linked from Pennsylvania Department of Revenue: newsroom)](https://www.pa.gov/content/dam/copapwp-pagov/en/revenue/documents/contactus/documents/address_directory.pdf) (last changed: 2026-10-18)
-- PA - [Mailing Addresses [PDF] (linked from Pennsylvania employer withholding)](https://www.pa.gov/content/dam/copapwp-pagov/en/revenue/documents/contactus/documents/address_directory.pdf) (last changed: 2026-10-18)
 - PA - [Maryland Form MW507 (COM/RAD-036, 07/25 revision) -- 2026 Employee's Maryland Withholding Exemption ](https://www.marylandcomptroller.gov/content/dam/mdcomp/tax/forms/2026/mw507.pdf) (last changed: 2026-09-24)
-- PA - [NJ Division of Taxation -- Reciprocal Personal Income Tax Agreement (PA/NJ)](https://www.nj.gov/treasury/taxation/njit25.shtml) (last changed: 2026-11-02)
-- PA - [PA Able Fact Sheet [PDF] (linked from PA Department of Revenue -- Personal Income Tax (3)](https://www.pa.gov/content/dam/copapwp-pagov/en/revenue/documents/taxtypes/pit/documents/pa_able_qa.pdf) (last changed: 2026-10-20)
 - PA - [PA DCED -- Local Services Tax (LST)](https://dced.pa.gov/local-government/local-income-tax-information/local-services-tax/) (last changed: 2026-09-24)
 - PA - [PA DCED Municipal Statistics -- EIT/PIT/LST Tax Register with Collector (statewide, official) -- 202](https://apps.dced.pa.gov/munstats-public/ReportToPdf.aspx?report=EitWithCollector_Dyn_Excel&paramList=O;2025) (last changed: 2026-09-30)
 - PA - [PA DCED Municipal Statistics: statewide EIT/PIT/LST register, 2026 (every municipality and school di](https://apps.dced.pa.gov/munstats-public/ReportToPdf.aspx?report=EitWithCollector_Dyn_Excel&paramList=O;2026) (last changed: 2026-09-24)
@@ -2010,22 +1557,12 @@ These can't be watched by a script (bot protection or JavaScript-only pages). Ch
 - PA - [PA Department of Labor & Industry -- Yearly Tax Highlights (UC)](https://www.pa.gov/agencies/dli/resources/for-employers-and-educators/how-to-file/uc-tax/yearly-tax-highlights) (last changed: 2026-10-07)
 - PA - [PA Department of Revenue -- Employer Withholding (reciprocal agreements)](https://www.pa.gov/en/agencies/revenue/resources/tax-types-and-information/employer-withholding.html) (last changed: 2026-11-02)
 - PA - [PA Department of Revenue -- Personal Income Tax (3.07%)](https://www.pa.gov/agencies/revenue/resources/tax-types-and-information/personal-income-tax) (last changed: 2026-11-02)
-- PA - [PA-40 Form Download PA-40 Form for 2025 PA Tax Return (linked from PA Department of Revenue -- Perso](https://www.pa.gov/content/dam/copapwp-pagov/en/revenue/documents/formsandpublications/formsforindividuals/pit/documents/2025/2025_pa-40.pdf) (last changed: 2026-10-20)
 - PA - [Pennsylvania Department of Revenue: newsroom](https://www.pa.gov/agencies/revenue/newsroom) (last changed: 2026-11-02)
 - PA - [Pennsylvania employer withholding](https://www.pa.gov/agencies/revenue/resources/tax-types-and-information/employer-withholding) (last changed: 2026-11-02)
 - PA - [REV-415 (SU) 01-23 -- Employer Withholding Information Guide](https://www.pa.gov/content/dam/copapwp-pagov/en/revenue/documents/formsandpublications/formsforbusinesses/employerwithholding/documents/rev-415.pdf) (last changed: 2026-09-24)
 - PA - [REV-419 (EX) 09-20, instructions REV-419 IN (EX) 03-24 -- Employee's Nonwithholding Application Cert](https://www.pa.gov/content/dam/copapwp-pagov/en/revenue/documents/formsandpublications/formsforbusinesses/employerwithholding/documents/rev-419.pdf) (last changed: 2026-09-24)
-- PA - [Tips for reporting common expenses (Schedule C) [PDF] (linked from PA Department of Revenue -- Perso](https://www.pa.gov/content/dam/copapwp-pagov/en/revenue/documents/formsandpublications/formsforindividuals/pit/documents/rev-1831.pdf) (last changed: 2026-10-20)
 - PA - [UC-748 (REV 09-25) -- Contribution Rates Effective January 1, 2026](https://www.pa.gov/content/dam/copapwp-pagov/en/dli/documents/uc/employer/uc-tax-rates/uc-748%20rev%2009-25.pdf) (last changed: 2026-09-24)
-- PA - [signed statement (linked from NJ Division of Taxation -- Reciprocal Personal Inc)](https://www.nj.gov/treasury/taxation/pdf/signedstatement.pdf) (last changed: 2026-10-20)
-- RI - [2020 Form (linked from Rhode Island Division of Taxation: news)](https://tax.ri.gov/forms/2020/Excise/AnnualRecs/2020_T-204R_m.pdf) (last changed: 2026-10-20)
-- RI - [2020 RI-1040 return (linked from Rhode Island Division of Taxation: news)](https://tax.ri.gov/forms/2020/Income/2020_1040WE_w.pdf) (last changed: 2026-10-20)
-- RI - [2020 RI-1040NR return (linked from Rhode Island Division of Taxation: news)](https://tax.ri.gov/forms/2020/Income/2020_1040NRWE_w.pdf) (last changed: 2026-10-20)
 - RI - [2026 Rhode Island Employer's Income Tax Withholding Tables (RI Division of Taxation)](https://tax.ri.gov/sites/g/files/xkgbur541/files/2025-12/2026%20Withholding%20Tax%20Booklet.pdf) (last changed: 2026-10-20)
-- RI - [Click here for Form T-205 to pay the sales and use tax due (linked from Rhode Island Division of Tax](https://tax.ri.gov/forms/2017/Excise/T-205_m.pdf) (last changed: 2026-10-20)
-- RI - [Click here for the Business Application and Registration form (linked from Rhode Island Division of ](https://tax.ri.gov/forms/2017/Misc/TX_BAR_092017.pdf) (last changed: 2026-10-20)
-- RI - [EFW2 format (linked from Rhode Island withholding)](https://tax.ri.gov/sites/g/files/xkgbur541/files/2024-11/Withholding%20Filing%20Requirements_11262024.pdf) (last changed: 2026-10-20)
-- RI - [FIRE format (linked from Rhode Island withholding)](https://www.irs.gov/pub/irs-pdf/p1220.pdf) (last changed: 2026-10-20)
 - RI - [R.I. Gen. Laws 28-12-3 as amended in 2025 ($17.00 from 2027)](https://webserver.rilegislature.gov/Statutes/TITLE28/28-12/28-12-3.htm) (last changed: 2026-10-26)
 - RI - [RI DLT -- 2025 Tax Rates for Unemployment Insurance and Temporary Disability Insurance (2024-12-20)](https://dlt.ri.gov/press-releases/2025-tax-rates-unemployment-insurance-and-temporary-disability-insurance) (last changed: 2026-10-20)
 - RI - [RI Department of Labor & Training: 2026 TDI/TCI and UI Tax Rates](https://dlt.ri.gov/press-releases/2026-tax-rates-unemployment-insurance-and-temporary-disability-insurance) (last changed: 2026-10-20)
@@ -2033,47 +1570,26 @@ These can't be watched by a script (bot protection or JavaScript-only pages). Ch
 - RI - [Rhode Island Division of Taxation -- 2025 Rhode Island Withholding Tax Booklet](https://tax.ri.gov/sites/g/files/xkgbur541/files/2024-12/2025%20Withholding%20Tax%20Booklet_0.pdf) (last changed: 2026-10-20)
 - RI - [Rhode Island Division of Taxation: news](https://tax.ri.gov/news) (last changed: 2026-10-20)
 - RI - [Rhode Island withholding](https://tax.ri.gov/tax-sections/withholding-tax) (last changed: 2026-10-20)
-- RI - [Withholding Filing Requirements document (linked from Rhode Island withholding)](https://tax.ri.gov/sites/g/files/xkgbur541/files/2026-01/Withholding%20Filing%20Requirements_12302025.pdf) (last changed: 2026-10-20)
-- RI - [here (linked from Rhode Island Division of Taxation: news)](https://tax.ri.gov/Advisory/ADV_2020_09.pdf) (last changed: 2026-10-20)
-- RI - [here (linked from Rhode Island Division of Taxation: news)](https://tax.ri.gov/Advisory/ADV_2021_28.pdf) (last changed: 2026-10-20)
-- RI - [here (linked from Rhode Island Division of Taxation: news)](https://tax.ri.gov/Advisory/ADV_2021_26.pdf) (last changed: 2026-10-20)
-- RI - [here (linked from Rhode Island Division of Taxation: news)](https://tax.ri.gov/newsletter/Rhode_Island_Division_of_Taxation_Newsletter_Third_Quarter_2021.pdf) (last changed: 2026-10-20)
-- RI - [here (linked from Rhode Island Division of Taxation: news)](https://tax.ri.gov/notice/Pub_2021_02_pension_income_guide_04_06_21.pdf) (last changed: 2026-10-20)
-- RI - [here (linked from Rhode Island Division of Taxation: news)](https://tax.ri.gov/reports/Summary_of_Legislative_Changes_07_26_21_final.pdf) (last changed: 2026-10-20)
-- RI - [here (linked from Rhode Island Division of Taxation: news)](https://tax.ri.gov/Advisory/ADV_2021_16.pdf) (last changed: 2026-10-20)
-- SC - [2025 SC Withholding Tables​ (linked from South Carolina withholding)](https://dor.sc.gov/sites/dor/files/forms/WH1603_2025.pdf) (last changed: 2026-10-19)
-- SC - [2026 SC Withholding Tables​ (linked from South Carolina withholding)](https://dor.sc.gov/sites/dor/files/forms/WH1603_2026.pdf) (last changed: 2026-10-19)
-- SC - [20​25 SC W-4​ (linked from South Carolina withholding)](https://dor.sc.gov/sites/dor/files/forms/SCW4_2025.pdf) (last changed: 2026-10-19)
 - SC - [S.C. Code Ann. § 15-39-410 — earnings of the debtor for personal services excluded from property rea](https://www.scstatehouse.gov/code/t15c039.php) (last changed: 2026-10-19)
 - SC - [SC Department of Employment and Workforce -- 2026 Tax Rate Cuts Press Release](https://dew.sc.gov/news/2025-11/2026-tax-rate-cuts-press-release) (last changed: 2026-10-19)
 - SC - [SC Information Letter #26-20 (Aug. 31, 2026) -- Individual Income Tax Reform (Act 110 of 2026)](https://dor.sc.gov/sites/dor/files/policies/IL26-20.pdf) (last changed: 2026-10-19)
 - SC - [SC W-4 (Rev. 12/5/25) -- South Carolina Employee's Withholding Allowance Certificate, 2026](https://dor.sc.gov/sites/dor/files/forms/SCW4_2026.pdf) (last changed: 2026-10-19)
 - SC - [South Carolina DOR -- WH-1603F Formula for Computing South Carolina 2025 Withholding Tax (Rev. 11/12](https://dor.sc.gov/sites/dor/files/forms/WH1603F_2025.pdf) (last changed: 2026-10-19)
-- SC - [South Carolina Department of Revenue: news](https://dor.sc.gov/news) (last changed: 2026-10-20)
 - SC - [South Carolina withholding](https://dor.sc.gov/withholding) (last changed: 2026-10-19)
 - SC - [WH-105 (Rev. 2/13/23) -- South Carolina Withholding Tax Information Guide](https://dor.sc.gov/sites/dor/files/forms/WH105.pdf) (last changed: 2026-10-19)
 - SC - [WH-1603F (Rev. 11/4/25) -- Formula for Computing South Carolina 2026 Withholding Tax](https://dor.sc.gov/sites/dor/files/forms/WH1603F_2026.pdf) (last changed: 2026-10-19)
-- SC - [WH-1605 (linked from South Carolina withholding)](https://dor.sc.gov/sites/dor/files/forms/WH1605.pdf) (last changed: 2026-10-19)
-- SC - [WH-1606 (linked from South Carolina withholding)](https://dor.sc.gov/sites/dor/files/forms/WH1606.pdf) (last changed: 2026-10-19)
 - US - [https://apps.dced.pa.gov/munstats-public/FindLocalTax.aspx](https://apps.dced.pa.gov/munstats-public/FindLocalTax.aspx) (last changed: 2026-09-24)
 - US - [https://thefinder.tax.ohio.gov/?tab=fileDownloads](https://thefinder.tax.ohio.gov/?tab=fileDownloads) (last changed: 2026-09-24)
-- US - [15 USC §1671 et seq. (PDF) (linked from DOL elaws: FLSA/CCPA Wage Garnishment — Basic Prov)](https://www.dol.gov/whd/regs/statutes/garn01.pdf) (last changed: 2026-10-20)
-- US - [2021 PDF (linked from IRS Publication 51 (Circular A), Agricultural Empl)](https://www.irs.gov/pub/irs-prior/p51--2021.pdf) (last changed: 2026-10-18)
-- US - [2022 PDF (linked from IRS Publication 51 (Circular A), Agricultural Empl)](https://www.irs.gov/pub/irs-prior/p51--2022.pdf) (last changed: 2026-10-18)
-- US - [2023 PDF (linked from IRS Publication 51 (Circular A), Agricultural Empl)](https://www.irs.gov/pub/irs-prior/p51--2023.pdf) (last changed: 2026-10-18)
 - US - [DOL FUTA credit reduction states](https://oui.doleta.gov/unemploy/futa_credit.asp) (last changed: 2026-09-24)
 - US - [DOL Fact Sheet #30: Wage Garnishment Protections of the Consumer Credit Protection Act (CCPA)](https://www.dol.gov/agencies/whd/fact-sheets/30-cppa) (last changed: 2026-09-24)
 - US - [DOL consolidated state minimum wage table](https://www.dol.gov/agencies/whd/mw-consolidated) (last changed: 2026-09-24)
 - US - [DOL elaws: FLSA/CCPA Wage Garnishment — Basic Provisions/Requirements](https://webapps.dol.gov/elaws/elg/garnish.htm) (last changed: 2026-09-24)
 - US - [DOL state minimum wage laws](https://www.dol.gov/agencies/whd/minimum-wage/state) (last changed: 2026-09-24)
-- US - [Document Drafting Handbook (linked from Federal Register -- Minimum Wage for Federal Contr)](https://www.archives.gov/files/federal-register/write/handbook/ddh.pdf) (last changed: 2026-10-27)
 - US - [Executive Order 14236, Additional Rescissions of Harmful Executive Orders and Actions (2025-03-14), ](https://www.dol.gov/agencies/whd/government-contracts/eo14026) (last changed: 2026-09-24)
 - US - [Federal Register: Railroad Retirement Board notices (RUIA/RRTA rates) - official API](https://www.federalregister.gov/api/v1/documents.json?per_page=20&order=newest&fields%5B%5D=document_number&fields%5B%5D=title&fields%5B%5D=type&fields%5B%5D=publication_date&fields%5B%5D=effective_on&fields%5B%5D=html_url&conditions%5Bagencies%5D%5B%5D=railroad-retirement-board) (last changed: 2026-11-02)
 - US - [Federal Register: SSA yearly wage base notice (Cost-of-Living Increase and Other Determinations) - o](https://www.federalregister.gov/api/v1/documents.json?per_page=20&order=newest&fields%5B%5D=document_number&fields%5B%5D=title&fields%5B%5D=type&fields%5B%5D=publication_date&fields%5B%5D=effective_on&fields%5B%5D=html_url&conditions%5Bagencies%5D%5B%5D=social-security-administration&conditions%5Bterm%5D=%22cost-of-living+increase+and+other+determinations%22) (last changed: 2026-10-24)
 - US - [Federal Register: new IRS withholding rules and proposed rules - official API](https://www.federalregister.gov/api/v1/documents.json?per_page=20&order=newest&fields%5B%5D=document_number&fields%5B%5D=title&fields%5B%5D=type&fields%5B%5D=publication_date&fields%5B%5D=effective_on&fields%5B%5D=html_url&conditions%5Bagencies%5D%5B%5D=internal-revenue-service&conditions%5Btype%5D%5B%5D=RULE&conditions%5Btype%5D%5B%5D=PRORULE&conditions%5Bterm%5D=withholding) (last changed: 2026-09-24)
 - US - [Federal Register: new Wage and Hour Division documents (minimum wage, overtime, garnishment) - offic](https://www.federalregister.gov/api/v1/documents.json?per_page=20&order=newest&fields%5B%5D=document_number&fields%5B%5D=title&fields%5B%5D=type&fields%5B%5D=publication_date&fields%5B%5D=effective_on&fields%5B%5D=html_url&conditions%5Bagencies%5D%5B%5D=wage-and-hour-division) (last changed: 2026-10-16)
-- US - [Federal Wage Garnishment Law Fact Sheet (linked from DOL elaws: FLSA/CCPA Wage Garnishment — Basic P](https://www.dol.gov/whd/regs/compliance/whdfs30.pdf) (last changed: 2026-10-20)
-- US - [Historical FUTA Credit Reductions (linked from DOL FUTA credit reduction states)](https://oui.doleta.gov/unemploy/docs/reduced_credit_states_2010-2025.xlsx) (last changed: 2026-10-20)
 - US - [IRS Form W-4](https://www.irs.gov/pub/irs-pdf/fw4.pdf) (last changed: 2026-09-24)
 - US - [IRS Instructions for Schedule H (2025)](https://www.irs.gov/instructions/i1040sh) (last changed: 2026-09-30)
 - US - [IRS Notice 2024-80, 2025 Amounts Relating to Retirement Plans and IRAs](https://www.irs.gov/pub/irs-drop/n-24-80.pdf) (last changed: 2026-09-30)
@@ -2087,28 +1603,13 @@ These can't be watched by a script (bot protection or JavaScript-only pages). Ch
 - US - [IRS Publication 15-T (web page)](https://www.irs.gov/publications/p15t) (last changed: 2026-09-24)
 - US - [IRS Publication 51 (Circular A), Agricultural Employer's Tax Guide: current edition page](https://www.irs.gov/forms-pubs/about-publication-51) (last changed: 2026-10-18)
 - US - [IRS Publication 926 (2026), Household Employer's Tax Guide](https://www.irs.gov/pub/irs-pdf/p926.pdf) (last changed: 2026-09-24)
-- US - [IRS Revenue Ruling 2000-6 (linked from IRS Publication 15 (2026) and SSA, Election Worker)](http://www.irs.gov/pub/irs-irbs/irb00-06.pdf) (last changed: 2026-10-20)
-- US - [IRS draft tax forms: payroll forms only (W-4, W-4P/R, Pub 15/15-T, 940/941/944, W-2/W-3)](https://www.irs.gov/draft-tax-forms) (last changed: 2026-11-02)
 - US - [IRS retirement plan contribution limits (401(k)/403(b)/457)](https://www.irs.gov/retirement-plans/plan-participant-employee/retirement-topics-401k-and-profit-sharing-plan-contribution-limits) (last changed: 2026-09-24)
 - US - [IRS — Members of the clergy / Publication 15-A, Special Rules for Ministers](https://www.irs.gov/businesses/small-businesses-self-employed/members-of-the-clergy) (last changed: 2026-09-24)
-- US - [IRS.gov/pub/irs-irbs/irb99-04.pdf (linked from IRS Publication 15-T (web page))](https://www.irs.gov/pub/irs-irbs/irb99-04.pdf) (last changed: 2026-10-20)
-- US - [Notice 2021-31 provides guidance on temporary premium assistance for C (linked from IRS Publication ](https://www.irs.gov/pub/irs-drop/n-21-31.pdf) (last changed: 2026-10-18)
-- US - [Notice 2021-46 supplements Notice 2021-31 on temporary premium assista (linked from IRS Publication ](https://www.irs.gov/pub/irs-drop/n-21-46.pdf) (last changed: 2026-10-18)
-- US - [Original full text XML (linked from Federal Register -- Minimum Wage for Federal Contr)](https://www.federalregister.gov/documents/full_text/xml/2026/10/08/2026-20646.xml) (last changed: 2026-10-27)
 - US - [P.L. 119-21 on govinfo.gov (official text)](https://www.govinfo.gov/app/details/PLAW-119publ21) (last changed: 2026-09-24)
-- US - [PDF (945.9 KB) (linked from P.L. 119-21 on govinfo.gov (official text))](https://www.govinfo.gov/content/pkg/PLAW-119publ21/pdf/PLAW-119publ21.pdf) (last changed: 2026-10-20)
-- US - [PDF (linked from Federal Register -- Minimum Wage for Federal Contr)](https://public-inspection.federalregister.gov/2026-20646.pdf?1791377118=) (last changed: 2026-10-27)
-- US - [PL 25-01 (linked from US Railroad Retirement Board, Program Letter 2025-)](https://www.rrb.gov/sites/default/files/2024-11/PL%2025-01.pdf) (last changed: 2026-10-20)
-- US - [Potential 2026 Credit Reductions (linked from DOL FUTA credit reduction states)](https://oui.doleta.gov/unemploy/docs/potential_credit_states_2026.xlsx) (last changed: 2026-10-20)
-- US - [Publication 15-A (linked from IRS draft tax forms: payroll forms only (W-4, W-4P)](https://www.irs.gov/pub/irs-dft/p15a--dft.pdf) (last changed: 2026-10-27)
-- US - [Publication 1635, Employer Identification Number Understanding Your EI (linked from IRS Publication ](https://www.irs.gov/pub/irs-pdf/p1635.pdf) (last changed: 2026-10-18)
-- US - [Publication 1828, Tax Guide for Churches and Religious Organizations P (linked from IRS — Members of](https://www.irs.gov/pub/irs-pdf/p1828.pdf) (last changed: 2026-10-20)
-- US - [Publication 525, Taxable and Nontaxable Income PDF (linked from IRS retirement plan contribution lim](https://www.irs.gov/pub/irs-pdf/p525.pdf) (last changed: 2026-10-20)
 - US - [RRB Program Letter 2025-01 (monthly base) and RRB FY2026 Justification of Budget Estimates (rates)](https://www.rrb.gov/sites/default/files/2025-07/JBE2026.pdf) (last changed: 2026-09-30)
 - US - [U.S. DOL Wage and Hour Division -- Fact Sheet 17A: Exemption for Executive, Administrative, Professi](https://www.dol.gov/agencies/whd/fact-sheets/17a-overtime) (last changed: 2026-09-24)
 - US - [U.S. DOL Wage and Hour Division -- Minimum Wages for Tipped Employees (table current as of July 1, 2](https://www.dol.gov/agencies/whd/state/minimum-wage/tipped) (last changed: 2026-09-24)
 - US - [US Railroad Retirement Board, Program Letter 2025-01](https://www.rrb.gov/Employers/Publications/ProgramAndCircularLetters/PL25-01) (last changed: 2026-09-30)
-- US - [View printed version (PDF) (linked from Federal Register -- Minimum Wage for Federal Contr)](https://www.govinfo.gov/content/pkg/FR-2026-10-08/pdf/2026-20646.pdf) (last changed: 2026-10-27)
 - US - [eCFR 29 CFR 870 amendment history (garnishment limits) - official API](https://www.ecfr.gov/api/versioner/v1/versions/title-29.json?part=870) (last changed: 2026-09-24)
 - US - [eCFR 34 CFR 34 amendment history (administrative wage garnishment) - official API](https://www.ecfr.gov/api/versioner/v1/versions/title-34.json?part=34) (last changed: 2026-09-24)
 - UT - [Utah Pub 14 page](https://tax.utah.gov/forms-pubs/pub-14/) (last changed: 2026-10-23)
@@ -2118,53 +1619,9 @@ These can't be watched by a script (bot protection or JavaScript-only pages). Ch
 - UT - [Utah State Tax Commission UI wage base / tax rate page](https://jobs.utah.gov/ui/employer/Public/Questions/TaxRates.aspx) (last changed: 2026-09-24)
 - UT - [Utah State Tax Commission: news releases](https://tax.utah.gov/news/) (last changed: 2026-10-23)
 - UT - [Utah State Tax Commission: tax bulletins](https://tax.utah.gov/tax-bulletins/) (last changed: 2026-10-23)
-- UT - [pdf (linked from Utah State Tax Commission: news releases)](https://files.tax.utah.gov/tax/commission/releases/2022-03-21-release.pdf) (last changed: 2026-10-20)
-- UT - [pdf (linked from Utah State Tax Commission: news releases)](https://files.tax.utah.gov/tax/commission/releases/2021-07-01-release.pdf) (last changed: 2026-10-20)
-- UT - [pdf (linked from Utah State Tax Commission: news releases)](https://files.tax.utah.gov/tax/commission/releases/2022-01-10-01-release.pdf) (last changed: 2026-10-20)
-- UT - [pdf (linked from Utah State Tax Commission: news releases)](https://files.tax.utah.gov/tax/commission/releases/2020-12-01-release.pdf) (last changed: 2026-10-18)
-- UT - [pdf (linked from Utah State Tax Commission: news releases)](https://files.tax.utah.gov/tax/commission/releases/2020-03-30-release.pdf) (last changed: 2026-10-18)
-- UT - [pdf (linked from Utah State Tax Commission: news releases)](https://files.tax.utah.gov/tax/commission/releases/2025-08-06-release.pdf) (last changed: 2026-10-20)
-- UT - [pdf (linked from Utah State Tax Commission: news releases)](https://files.tax.utah.gov/tax/commission/releases/2023-02-15-release.pdf) (last changed: 2026-10-20)
-- UT - [pdf (linked from Utah State Tax Commission: news releases)](https://files.tax.utah.gov/tax/commission/releases/2020-04-03-release.pdf) (last changed: 2026-10-18)
-- UT - [pdf (linked from Utah State Tax Commission: news releases)](https://files.tax.utah.gov/tax/commission/releases/2020-09-17-release.pdf) (last changed: 2026-10-18)
-- UT - [pdf (linked from Utah State Tax Commission: news releases)](https://files.tax.utah.gov/tax/commission/releases/2025-09-13-release.pdf) (last changed: 2026-10-20)
-- UT - [pdf (linked from Utah State Tax Commission: news releases)](https://files.tax.utah.gov/tax/commission/releases/2020-12-02-release.pdf) (last changed: 2026-10-18)
-- UT - [pdf (linked from Utah State Tax Commission: news releases)](https://files.tax.utah.gov/tax/commission/releases/2020-03-20-dmv-psa.pdf) (last changed: 2026-10-18)
-- UT - [pdf (linked from Utah State Tax Commission: news releases)](https://files.tax.utah.gov/tax/commission/releases/2020-01-10.pdf) (last changed: 2026-10-18)
-- UT - [pdf (linked from Utah State Tax Commission: news releases)](https://files.tax.utah.gov/tax/commission/releases/2020-07-13-release.pdf) (last changed: 2026-10-18)
-- UT - [pdf (linked from Utah State Tax Commission: news releases)](https://files.tax.utah.gov/tax/commission/releases/2020-06-15-release.pdf) (last changed: 2026-10-18)
-- UT - [pdf (linked from Utah State Tax Commission: news releases)](https://files.tax.utah.gov/tax/commission/releases/2020-03-17-release.pdf) (last changed: 2026-10-18)
-- UT - [pdf (linked from Utah State Tax Commission: news releases)](https://files.tax.utah.gov/tax/commission/releases/2020-06-23-release.pdf) (last changed: 2026-10-18)
-- UT - [pdf (linked from Utah State Tax Commission: news releases)](https://files.tax.utah.gov/tax/commission/releases/2020-07-17-release.pdf) (last changed: 2026-10-18)
-- UT - [pdf (linked from Utah State Tax Commission: news releases)](https://files.tax.utah.gov/tax/commission/releases/2026-04-28-release.pdf) (last changed: 2026-10-20)
-- UT - [pdf (linked from Utah State Tax Commission: news releases)](https://files.tax.utah.gov/tax/commission/releases/2020-04-10-release.pdf) (last changed: 2026-10-18)
-- UT - [pdf (linked from Utah State Tax Commission: news releases)](https://files.tax.utah.gov/tax/commission/releases/2022-01-10-02-release.pdf) (last changed: 2026-10-20)
-- UT - [pdf (linked from Utah State Tax Commission: news releases)](https://files.tax.utah.gov/tax/commission/releases/2020-03-26-release.pdf) (last changed: 2026-10-18)
-- UT - [pdf (linked from Utah State Tax Commission: news releases)](https://files.tax.utah.gov/tax/commission/releases/2020-04-29-release.pdf) (last changed: 2026-10-18)
-- UT - [pdf (linked from Utah State Tax Commission: news releases)](https://files.tax.utah.gov/tax/commission/releases/2025-12-04-release.pdf) (last changed: 2026-10-20)
-- UT - [pdf (linked from Utah State Tax Commission: news releases)](https://files.tax.utah.gov/tax/commission/releases/2020-03-16-release.pdf) (last changed: 2026-10-18)
-- UT - [pdf (linked from Utah State Tax Commission: news releases)](https://files.tax.utah.gov/tax/commission/releases/2025-10-31-release.pdf) (last changed: 2026-10-20)
-- UT - [pdf (linked from Utah State Tax Commission: news releases)](https://files.tax.utah.gov/tax/commission/releases/2022-08-18-release.pdf) (last changed: 2026-10-20)
-- UT - [pdf (linked from Utah State Tax Commission: news releases)](https://files.tax.utah.gov/tax/commission/releases/2026-05-26-release.pdf) (last changed: 2026-10-20)
-- UT - [pdf (linked from Utah State Tax Commission: news releases)](https://files.tax.utah.gov/tax/commission/releases/2020-03-20-release.pdf) (last changed: 2026-10-18)
-- UT - [pdf (linked from Utah State Tax Commission: news releases)](https://files.tax.utah.gov/tax/commission/releases/2020-09-14-release.pdf) (last changed: 2026-10-18)
-- UT - [pdf (linked from Utah State Tax Commission: news releases)](https://files.tax.utah.gov/tax/commission/releases/2021-12-29-release.pdf) (last changed: 2026-10-20)
-- UT - [pdf (linked from Utah State Tax Commission: news releases)](https://files.tax.utah.gov/tax/commission/releases/2026-05-06-release.pdf) (last changed: 2026-10-20)
-- UT - [pdf (linked from Utah State Tax Commission: news releases)](https://files.tax.utah.gov/tax/commission/releases/2020-03-28-release.pdf) (last changed: 2026-10-18)
-- UT - [pdf (linked from Utah State Tax Commission: news releases)](https://files.tax.utah.gov/tax/commission/releases/2020-12-16-release.pdf) (last changed: 2026-10-18)
-- UT - [pdf (linked from Utah State Tax Commission: news releases)](https://files.tax.utah.gov/tax/commission/releases/2020-09-15-release.pdf) (last changed: 2026-10-18)
-- UT - [pdf (linked from Utah State Tax Commission: news releases)](https://files.tax.utah.gov/tax/commission/releases/2021-06-14-release.pdf) (last changed: 2026-10-18)
-- UT - [pdf (linked from Utah State Tax Commission: news releases)](https://files.tax.utah.gov/tax/commission/releases/2020-03-19-release.pdf) (last changed: 2026-10-18)
-- UT - [pdf (linked from Utah State Tax Commission: news releases)](https://files.tax.utah.gov/tax/commission/releases/2026-03-12-release.pdf) (last changed: 2026-10-20)
-- UT - [pdf (linked from Utah State Tax Commission: news releases)](https://files.tax.utah.gov/tax/commission/releases/2020-05-11-release.pdf) (last changed: 2026-10-18)
-- UT - [pdf (linked from Utah State Tax Commission: news releases)](https://files.tax.utah.gov/tax/commission/releases/2022-05-12-release.pdf) (last changed: 2026-10-20)
-- UT - [pdf (linked from Utah State Tax Commission: news releases)](https://files.tax.utah.gov/tax/commission/releases/2020-08-25-release.pdf) (last changed: 2026-10-18)
 - VA - [Code of Virginia 40.1-28.10 -- Minimum wages](https://law.lis.virginia.gov/vacode/title40.1/chapter3/section40.1-28.10/) (last changed: 2026-10-26)
-- VA - [Electronic Payment Guide (linked from Virginia withholding)](https://tax.virginia.gov/sites/default/files/inline-files/virginia-tax-electronic-payment-guide.pdf) (last changed: 2026-10-20)
 - VA - [Form VA-4, Employee's Virginia Income Tax Withholding Exemption Certificate (Rev. 04/26) + Personal ](https://www.tax.virginia.gov/sites/default/files/taxforms/withholding/any/va-4-any.pdf) (last changed: 2026-10-20)
 - VA - [Form VA-4P instructions](https://www.tax.virginia.gov/sites/default/files/taxforms/withholding/any/va-4p-any.pdf) (last changed: 2026-11-02)
-- VA - [Tax Bulletin 20-10 (linked from Virginia withholding)](https://www.tax.virginia.gov/sites/default/files/inline-files/tb-20-10-virginia-1099-k-filing-requirements.pdf) (last changed: 2026-10-20)
-- VA - [VA-6H/ W-2 eForm Instructions (linked from Virginia withholding)](https://www.tax.virginia.gov/sites/default/files/inline-files/va-6h-w2-eform-instructions.pdf) (last changed: 2026-10-20)
 - VA - [Va. Code Ann. § 34-29 — ordinary garnishment limited to the lesser of 25% of disposable earnings, or](https://law.lis.virginia.gov/vacode/title34/chapter4/section34-29/) (last changed: 2026-10-20)
 - VA - [Virginia Department of Labor and Industry — 2026 minimum wage $12.77/hr effective 2026-01-01](https://doli.virginia.gov/2025/07/29/virginia-minimum-wage-rate-increasing-effective-january-1-2026/) (last changed: 2026-10-20)
 - VA - [Virginia Paid Family and Medical Leave Insurance Program -- Governor's own press release](https://www.governor.virginia.gov/newsroom/news-releases/2026/may-releases/name-1117602-en.html) (last changed: 2026-10-20)
@@ -2172,42 +1629,18 @@ These can't be watched by a script (bot protection or JavaScript-only pages). Ch
 - VA - [Virginia Tax: news](https://www.tax.virginia.gov/news) (last changed: 2026-10-20)
 - VA - [Virginia unemployment insurance -- VEC's own wage-base FAQ](https://www.vec.virginia.gov/FAQs/employers/what-wage-base-each-employee-i-will-pay-taxes) (last changed: 2026-10-20)
 - VA - [Virginia withholding](https://www.tax.virginia.gov/withholding-tax) (last changed: 2026-11-02)
-- VA - [Web Upload W-2 and 1099 Guide (linked from Virginia withholding)](https://www.tax.virginia.gov/sites/default/files/inline-files/web-upload-w2-1099-guide.pdf) (last changed: 2026-10-20)
-- VA - [eForms W-2 and1099 Guide (linked from Virginia withholding)](https://www.tax.virginia.gov/sites/default/files/inline-files/eforms-w2-1099-guide.pdf) (last changed: 2026-10-20)
-- VA - [here (linked from Virginia Department of Labor and Industry — 2026 m)](https://doli.virginia.gov/wp-content/uploads/2025/07/Minimum-Wage-2026-Increase-Public-Letter.pdf) (last changed: 2026-10-20)
-- VT - [2014 Income Tax Withholding Instructions, Tables, and Charts (linked from Vermont withholding)](https://tax.vermont.gov/sites/tax/files/documents/GB-1210-2014.pdf) (last changed: 2026-10-20)
-- VT - [2015 Income Tax Withholding Instructions, Tables, and Charts (linked from Vermont withholding)](https://tax.vermont.gov/sites/tax/files/documents/2015-Withholding-Instructions-Charts-Tables.pdf) (last changed: 2026-10-20)
-- VT - [2018 Income Tax Withholding Instructions, Tables, and Charts (linked from Vermont withholding)](https://tax.vermont.gov/sites/tax/files/documents/GB-1210-2018.pdf) (last changed: 2026-10-20)
-- VT - [2019 Income Tax Withholding Instructions, Tables, and Charts (linked from Vermont withholding)](https://tax.vermont.gov/sites/tax/files/documents/GB-1210-2019.pdf) (last changed: 2026-10-20)
-- VT - [2020 Income Tax Withholding Instructions, Tables, and Charts (linked from Vermont withholding)](https://tax.vermont.gov/sites/tax/files/documents/GB-1210-2020.pdf) (last changed: 2026-10-20)
-- VT - [2021 Income Tax Withholding Instructions, Tables, and Charts (linked from Vermont withholding)](https://tax.vermont.gov/sites/tax/files/documents/GB-1210-2021.pdf) (last changed: 2026-10-20)
-- VT - [2022 Income Tax Withholding Instructions, Tables, and Charts (linked from Vermont withholding)](https://tax.vermont.gov/sites/tax/files/documents/GB-1210-2022.pdf) (last changed: 2026-10-20)
-- VT - [2023 Income Tax Withholding Instructions, Tables, and Charts (linked from Vermont withholding)](https://tax.vermont.gov/sites/tax/files/documents/GB-1210-2023.pdf) (last changed: 2026-10-20)
-- VT - [2024 Income Tax Withholding Instructions, Tables, and Charts (linked from Vermont withholding)](https://tax.vermont.gov/sites/tax/files/documents/GB-1210-2024.pdf) (last changed: 2026-10-20)
-- VT - [2026 Withholding Record of Payment (linked from Vermont withholding)](https://tax.vermont.gov/sites/tax/files/documents/NTC-1257-2026.pdf) (last changed: 2026-10-20)
-- VT - [Flyer - Are You Ready to Submit Your W-2 and 1099 Forms? (linked from Vermont withholding)](https://tax.vermont.gov/sites/tax/files/documents/FL-1199.pdf) (last changed: 2026-10-20)
 - VT - [Form W-4VT, Employee's Withholding Allowance Certificate (Rev. 12/18)](https://tax.vermont.gov/sites/tax/files/documents/W-4VT.pdf) (last changed: 2026-10-20)
 - VT - [GB-1210-2026, 2026 Income Tax Withholding Instructions, Tables, and Charts](https://tax.vermont.gov/sites/tax/files/documents/GB-1210-2026.pdf) (last changed: 2026-10-20)
 - VT - [Governor Phil Scott Launches Voluntary Paid Family and Medical Leave Program — Office of Governor Ph](https://governor.vermont.gov/vtfmli) (last changed: 2026-10-20)
 - VT - [Vermont Department of Taxes -- GB-1210, 2025 Income Tax Withholding Instructions, Tables, and Charts](https://tax.vermont.gov/sites/tax/files/documents/GB-1210-2025.pdf) (last changed: 2026-10-20)
-- VT - [Vermont Department of Taxes ACH Credit Payment Guide (linked from Vermont withholding)](https://tax.vermont.gov/sites/tax/files/documents/GB-1104.pdf) (last changed: 2026-10-20)
 - VT - [Vermont Department of Taxes, Withholding Tax Instructions](https://tax.vermont.gov/business-and-corp/withholding-tax/instructions) (last changed: 2026-11-02)
 - VT - [Vermont Department of Taxes: news](https://tax.vermont.gov/news) (last changed: 2026-11-02)
 - VT - [Vermont withholding](https://tax.vermont.gov/business/withholding) (last changed: 2026-10-20)
-- VT - [WHT-430 (linked from Vermont withholding)](http://tax.vermont.gov/sites/tax/files/documents/WHT-430.pdf) (last changed: 2026-10-20)
-- VT - [WHT-434 (linked from Vermont withholding)](https://tax.vermont.gov/sites/tax/files/documents/WHT-434.pdf) (last changed: 2026-10-20)
-- VT - [WHT-436, HC-1 (linked from Vermont withholding)](https://tax.vermont.gov/sites/tax/files/documents/WHT-436-2025.pdf) (last changed: 2026-10-20)
-- VT - [myVTax Guide: How to File, View, Pay, and Access a Saved Return Withou (linked from Vermont withhold](https://tax.vermont.gov/sites/tax/files/documents/GB-1289.pdf) (last changed: 2026-10-20)
-- VT - [myVTax Guide: How to Log In and File, View, or Amend a Return (linked from Vermont withholding)](https://tax.vermont.gov/sites/tax/files/documents/GB-1288.pdf) (last changed: 2026-10-20)
-- WA - [1984 c 91 s 3 (linked from RCW 36.65.030 — Tax on net income prohibited)](https://leg.wa.gov/CodeReviser/documents/sessionlaw/1984c91.pdf?cite=1984+c+91+s+3) (last changed: 2026-10-20)
-- WA - [2024 c 5 s 1 (linked from RCW 1.90.100 — Personal Income Tax Prohibition)](https://leg.wa.gov/CodeReviser/documents/sessionlaw/2024pam1.pdf?cite=2024+c+5+s+1) (last changed: 2026-10-20)
 - WA - [City of Burien -- Minimum Wage (BMC Chapter 5.16, Administrative Rule 2026-01)](https://www.burienwa.gov/MinimumWage) (last changed: 2026-11-02)
 - WA - [City of Seattle Office of Labor Standards -- Minimum Wage Ordinance](https://www.seattle.gov/laborstandards/ordinances/minimum-wage) (last changed: 2026-10-20)
 - WA - [City of Seattle, City Finance -- Payroll expense tax (2025 thresholds and rates)](https://www.seattle.gov/city-finance/business-taxes-and-licenses/seattle-taxes/payroll-expense-tax) (last changed: 2026-10-24)
 - WA - [City of Seattle, City Finance -- Social Housing Tax](https://seattle.gov/city-finance/business-taxes-and-licenses/seattle-taxes/social-housing-tax) (last changed: 2026-10-24)
-- WA - [Draft Burien Administrative Rule 2026-01 (linked from City of Burien -- Minimum Wage (BMC Chapter 5.](https://www.burienwa.gov/UserFiles/Servers/Server_11045935/File/City%20Hall/Laws%20&%20Regulations/Minimum%20Wage/Draft%20Burien%20Administrative%20Rule%202026-01%20Fair%20Labor%20Standards%20(revised%20060426).pdf) (last changed: 2026-10-27)
 - WA - [ESD — Paid Family and Medical Leave premium rate increases to 1.13% in 2026](https://esd.wa.gov/about-us/news-release/2025/paid-family-medical-leave-premium-rate-increases-113-2026) (last changed: 2026-10-20)
-- WA - [Employer Benefits Toolkit (linked from Washington Paid Leave premium rates)](https://paidleave.wa.gov/app/uploads/2024/02/Employers-Paid-Leave-Benefits-Toolkit-v4.1-2025.12.12.pdf) (last changed: 2026-10-20)
 - WA - [Employer Wage Reporting and Premiums Toolkit (v25.1, June 2026)](https://paidleave.wa.gov/app/uploads/2021/12/Employer-Wage-Reporting-and-Premiums-Toolkit-v25.1-2026.06.26.pdf) (last changed: 2026-10-20)
 - WA - [L&I — Paid Family & Medical Leave (exempt employer/employee categories)](https://www.lni.wa.gov/workers-rights/leave/paid-family-and-medical-leave) (last changed: 2026-10-20)
 - WA - [RCW 1.90.100 — Personal Income Tax Prohibition](https://app.leg.wa.gov/RCW/default.aspx?cite=1.90.100) (last changed: 2026-10-20)
@@ -2223,39 +1656,23 @@ These can't be watched by a script (bot protection or JavaScript-only pages). Ch
 - WA - [Washington State Department of Labor & Industries -- Washington's minimum wage going up to $17.13 an](https://www.lni.wa.gov/news-events/article/25-27) (last changed: 2026-10-20)
 - WA - [Washington State Department of Labor & Industries — 2026 minimum wage ($17.13/hr effective 2026-01-0](https://ofm.wa.gov/wp-content/uploads/sites/default/files/public/legacy/policy/25.60.pdf) (last changed: 2026-10-20)
 - WA - [Washington State's Paid Family and Medical Leave — Estimate your Paid Leave payments](https://paidleave.wa.gov/estimate-your-paid-leave-payments/) (last changed: 2026-10-20)
-- WA - [implementation schedule (linked from Washington State Department of Labor & Industries )](https://www.lni.wa.gov/forms-publications/F700-207-000.pdf) (last changed: 2026-10-20)
-- WA - [program expected (linked from Washington ESD -- Paid Family & Medical Leave prem)](https://paidleave.wa.gov/app/uploads/2023/09/2023.09.27-September-Paid-Leave-Advisory-Presentation.pdf) (last changed: 2026-10-20)
-- WI - [1099-DIV (linked from DOR General Withholding Tax Questions (reciprocity)](https://www.irs.gov/pub/irs-pdf/f1099div.pdf) (last changed: 2026-10-20)
-- WI - [1099-INT (linked from DOR General Withholding Tax Questions (reciprocity)](https://www.irs.gov/pub/irs-pdf/f1099int.pdf) (last changed: 2026-10-20)
-- WI - [1099-MISC (linked from DOR General Withholding Tax Questions (reciprocity)](https://www.irs.gov/pub/irs-pdf/f1099msc.pdf) (last changed: 2026-10-20)
-- WI - [1099-NEC (linked from DOR General Withholding Tax Questions (reciprocity)](https://www.irs.gov/pub/irs-pdf/f1099nec.pdf) (last changed: 2026-10-20)
-- WI - [1099-R (linked from DOR General Withholding Tax Questions (reciprocity)](https://www.irs.gov/pub/irs-pdf/f1099r.pdf) (last changed: 2026-10-20)
 - WI - [2026 Tax Rate Schedule for Employers (DWD, full Schedule D reserve-percentage rate table)](https://dwd.wisconsin.gov/ui/employers/taxrates.htm) (last changed: 2026-10-22)
-- WI - [Publication 15 (linked from DOR General Withholding Tax Questions (reciprocity)](http://www.irs.gov/pub/irs-pdf/p15.pdf) (last changed: 2026-10-20)
+- WI - [DOR General Withholding Tax Questions (reciprocity, thresholds, WT-4)](https://www.revenue.wi.gov/Pages/FAQS/pcs-with.aspx) (last changed: 2026-10-20)
+- WI - [DOR Tax Rates FAQ (annual Form 1 individual income tax brackets)](https://www.revenue.wi.gov/Pages/FAQS/pcs-taxrates.aspx) (last changed: 2026-10-20)
 - WI - [UCT-1-E, 2026 Wisconsin Employer's Quarterly Contribution Report (SUTA initial rates)](https://dwd.wisconsin.gov/dwd/forms/ui/pdf/uct-1-e-2026.pdf) (last changed: 2026-10-20)
-- WI - [W-2 (linked from DOR General Withholding Tax Questions (reciprocity)](https://www.irs.gov/pub/irs-pdf/fw2.pdf) (last changed: 2026-10-20)
-- WI - [W-2C (linked from DOR General Withholding Tax Questions (reciprocity)](https://www.irs.gov/pub/irs-pdf/fw2c.pdf) (last changed: 2026-10-20)
-- WI - [W-2G (linked from DOR General Withholding Tax Questions (reciprocity)](https://www.irs.gov/pub/irs-pdf/fw2g.pdf) (last changed: 2026-10-20)
-- WV - [1939 Regular Session Enrolled Senate Bill 5 (linked from W. Va. Code § 38-5A-3 — ordinary (consumer ](https://code.wvlegislature.gov/signed_bills/1939\1939-RS-SB5-ENR_signed.pdf) (last changed: 2026-10-20)
-- WV - [1961 Regular Session Enrolled House Bill 252 (linked from W. Va. Code § 38-5A-3 — ordinary (consumer](https://code.wvlegislature.gov/signed_bills/1961\1961-RS-HB252-ENR_signed.pdf) (last changed: 2026-10-20)
-- WV - [1979 Regular Session Enrolled House Bill 1248 (linked from W. Va. Code § 38-5A-3 — ordinary (consume](https://code.wvlegislature.gov/signed_bills/1979\1979-RS-HB1248-ENR_signed.pdf) (last changed: 2026-10-20)
-- WV - [2016 Regular Session Enrolled Senate Bill 469 (linked from W. Va. Code § 38-5A-3 — ordinary (consume](https://code.wvlegislature.gov/signed_bills/2016\2016-RS-SB469-ENR_signed.pdf) (last changed: 2026-10-20)
-- WV - [Business Registration Information and Instructions (linked from WV State Tax Division -- Withholding](https://tax.wv.gov/Documents/Business/BusinessRegistrationInformationAndInstructions.pdf) (last changed: 2026-10-20)
+- WI - [Wisconsin Department of Revenue, Withholding Tax Guide (Publication W-166, January 2026)](https://www.revenue.wi.gov/dor%20publications/pb166.pdf) (last changed: 2026-11-02)
+- WI - [Wisconsin Department of Revenue: news](https://www.revenue.wi.gov/Pages/News/home.aspx) (last changed: 2026-10-20)
+- WI - [Wisconsin Legislature -- Wis. Stat. 104.035 (minimum wage; opportunity employees)](https://docs.legis.wisconsin.gov/2017/statutes/statutes/104/035/9) (last changed: 2026-10-22)
+- WI - [Wisconsin W-166 withholding guide](https://www.revenue.wi.gov/DOR%20Publications/pb166.pdf) (last changed: 2026-10-20)
+- WI - [Wisconsin Withholding Tax Update, October 2025](https://www.revenue.wi.gov/withholdingtaxupdate/25-1.pdf) (last changed: 2026-11-02)
+- WI - [Wisconsin withholding](https://www.revenue.wi.gov/Pages/Withholding/home.aspx) (last changed: 2026-10-20)
 - WV - [City of Charleston, WV: city service fee overview](https://www.charlestonwv.gov/sites/default/files/documents/2022-12/CITY%20SERVICE%20FEE%20OVERVIEW%2012.22%20%282%29.pdf) (last changed: 2026-10-20)
 - WV - [City of Montgomery City Service Fee Remittance Form](https://montgomery.wv.gov/media/19506/download?inline=) (last changed: 2026-10-27)
 - WV - [City of Wheeling Article 797 City Service Fee](https://www.wheelingwv.gov/media/Finance/City%20Service%20Fee/City%20Service%20Fee-%20Ordinance%20Final.pdf) (last changed: 2026-10-27)
 - WV - [Fairmont administrative regulations section 1.2](https://fairmontwv.gov/DocumentCenter/View/2198) (last changed: 2026-10-27)
-- WV - [IT-100.2.B (linked from WV State Tax Division -- Withholding Help and Gene)](https://tax.wv.gov/Documents/Withholding/it100.2b.pdf) (last changed: 2026-10-20)
-- WV - [IT-100.2.B (linked from West Virginia Tax Division -- 2026 Income Tax Rate)](https://tax.wv.gov/Documents/Withholding/it100.2b.pdf) (last changed: 2026-10-20)
-- WV - [Registration Forms (linked from WV State Tax Division -- Withholding Help and Gene)](https://tax.wv.gov/Documents/Business/busapp.pdf) (last changed: 2026-10-20)
-- WV - [Statute (linked from West Virginia Division of Labor -- Minimum Wage)](https://labor.wv.gov/media/240/download?inline=) (last changed: 2026-10-20)
-- WV - [TSD 381 (linked from West Virginia withholding)](https://tax.wv.gov/Documents/TSD/tsd381.pdf) (last changed: 2026-10-18)
-- WV - [TSD 389 (linked from West Virginia withholding)](https://tax.wv.gov/Documents/TSD/tsd389.pdf) (last changed: 2026-10-18)
 - WV - [W. Va. Code § 38-5A-3 — ordinary (consumer credit sale/consumer loan judgment) garnishment limited t](https://code.wvlegislature.gov/38-5A-3/) (last changed: 2026-10-18)
 - WV - [WV IT-100.2A -- Tables for Percentage Method of Withholding (March 2026 revision)](https://tax.wv.gov/Documents/Withholding/it100.2a.pdf) (last changed: 2026-09-24)
 - WV - [WV State Tax Division -- Withholding Help and General Information page, "Supplemental Wages" guidanc](https://tax.wv.gov/Business/Withholding/HelpAndGeneralInformation/Pages/WithholdingHelpAndGeneralInformation.aspx) (last changed: 2026-09-24)
-- WV - [WV/EFT-5 (linked from WV State Tax Division -- Withholding Help and Gene)](https://tax.wv.gov/Documents/EFT/eft5.pdf) (last changed: 2026-10-20)
-- WV - [WV/IT-103 Year End Reconciliation (linked from WV State Tax Division -- Withholding Help and Gene)](https://tax.wv.gov/Documents/Withholding/2025/it103.2025.pdf) (last changed: 2026-10-20)
 - WV - [WV/IT-104 -- Employee's Withholding Exemption Certificate (Rev. 03/2023) + WV/IT-104NR Certificate o](https://tax.wv.gov/Documents/Withholding/it104.pdf) (last changed: 2026-09-24)
 - WV - [WVU Shared Services: West Virginia city user fee ordinances (every city's fee)](https://sharedservices.wvu.edu/west-virginia-city-user-fee-ordinances) (last changed: 2026-10-20)
 - WV - [West Virginia Division of Labor -- Minimum Wage](https://labor.wv.gov/wage-hour/jobs-act/minimum-wage) (last changed: 2026-09-24)
@@ -2264,7 +1681,6 @@ These can't be watched by a script (bot protection or JavaScript-only pages). Ch
 - WV - [West Virginia withholding](https://tax.wv.gov/Business/Withholding/Publications/Pages/WithholdingPublications.aspx) (last changed: 2026-09-24)
 - WV - [West Virginia withholding forms](https://tax.wv.gov/business/withholding/pages/withholdingtaxforms.aspx) (last changed: 2026-11-02)
 - WV - [Wheeling employer worksheet CSF-3](https://www.wheelingwv.gov/media/Finance/City%20Service%20Fee/City%20Service%20Fee%20-%20Employer%20Worksheet%20Form%20CSF-3.pdf) (last changed: 2026-10-27)
-- WV - [minimum wage and maximum hour (overtime) requirements (linked from West Virginia Division of Labor -](https://labor.wv.gov/media/57/download?inline=) (last changed: 2026-10-20)
 
 </details>
 

@@ -1,15 +1,30 @@
 {
- "date": "2026-11-03",
+ "date": "2026-11-04",
  "counts": {
-  "unchanged": 1494,
-  "changed": 17,
+  "unchanged": 984,
+  "changed": 20,
   "blocked": 42,
   "gone": 7,
-  "unreachable": 14,
-  "new": 25
+  "unreachable": 7
  },
- "total": 1599,
+ "total": 1060,
  "changed": [
+  {
+   "id": "ar-ae6960acd2",
+   "jurisdiction": "AR",
+   "title": "Arkansas DFA: news",
+   "url": "https://www.dfa.arkansas.gov/news/",
+   "detail": "3 lines added, 8 removed; 1 links added, 1 removed",
+   "figures_added": [],
+   "figures_removed": [],
+   "links_added": [
+    "https://www.dfa.arkansas.gov/news/october-2026-general-revenue-report-posted/"
+   ],
+   "links_removed": [
+    "https://www.dfa.arkansas.gov/news/state-successfully-implements-major-upgrade-to-accounting-system/"
+   ],
+   "significant": true
+  },
   {
    "id": "az-b66098e04c",
    "jurisdiction": "AZ",
@@ -23,10 +38,10 @@
    "significant": true
   },
   {
-   "id": "ca-3e493dc2a7~83e19890",
-   "jurisdiction": "CA",
-   "title": "FAQ (English) (linked from City of Santa Monica -- Minimum Wage)",
-   "url": "https://santamonica.gov/media/Minimum_Wage/MinimumWageFAQ_English2023.pdf",
+   "id": "co-002adac414",
+   "jurisdiction": "CO",
+   "title": "Boulder County -- Local Minimum Wage",
+   "url": "https://bouldercounty.gov/departments/commissioners/local-minimum-wage/",
    "detail": "1 lines added, 1 removed",
    "figures_added": [],
    "figures_removed": [],
@@ -35,101 +50,123 @@
    "significant": true
   },
   {
-   "id": "ky-93c78c7f02",
-   "jurisdiction": "KY",
-   "title": "City of Union -- New 2023 Payroll and Business License",
-   "url": "https://cityofunionky.org/new-2023-payroll-and-business-license/",
-   "detail": "3 lines added, 3 removed (link lists / headlines only)",
+   "id": "de-b524d54773",
+   "jurisdiction": "DE",
+   "title": "Delaware House Bill 13 (153rd General Assembly) + House Substitute No. 2 for HB13 -- bracket-restructuring proposal",
+   "url": "https://legis.delaware.gov/BillDetail?LegislationId=141813",
+   "detail": "2 lines added, 2 removed",
    "figures_added": [],
    "figures_removed": [],
    "links_added": [],
    "links_removed": [],
-   "significant": false
+   "significant": true
   },
   {
-   "id": "mi-c62e8170b0",
-   "jurisdiction": "MI",
-   "title": "Michigan LEO -- Michigan's Minimum Wage Set to Increase on Jan. 1, 2026",
-   "url": "https://www.michigan.gov/leo/news/2025/12/08/michigans-minimum-wage-set-to-increase-on-jan-1-2026",
-   "detail": "1 lines added, 1 removed (link lists / headlines only)",
+   "id": "ga-0af971f8e2",
+   "jurisdiction": "GA",
+   "title": "Georgia DOR: press releases",
+   "url": "https://dor.georgia.gov/press-releases",
+   "detail": "2 lines added, 2 removed; 1 links added, 1 removed",
+   "figures_added": [],
+   "figures_removed": [],
+   "links_added": [
+    "https://dor.georgia.gov/press-releases/2026-11-03/gov-kemp-dor-announce-distribution-homeowner-tax-relief-grants"
+   ],
+   "links_removed": [
+    "https://dor.georgia.gov/press-releases/2026-05-04/special-tax-refunds-begin-issuing"
+   ],
+   "significant": true
+  },
+  {
+   "id": "in-f3e8cf456b",
+   "jurisdiction": "IN",
+   "title": "Indiana DOR withholding",
+   "url": "https://www.in.gov/dor/i-am-a/business-corp/withholding/",
+   "detail": "1 links added, 1 removed",
+   "figures_added": [],
+   "figures_removed": [],
+   "links_added": [
+    "https://www.in.gov/dor/files/IDORWTH2016V1.0.zip"
+   ],
+   "links_removed": [
+    "https://www.in.gov/dor/files/IDORWTH2016V1.0"
+   ],
+   "significant": true
+  },
+  {
+   "id": "ks-6a3e772e2e",
+   "jurisdiction": "KS",
+   "title": "K.S.A. \u00a7 60-2310 \u2014 wage garnishment: maximum part of earnings subject to garnishment is the lesser of 25% of aggregate disposable earnings, or the amount by which disposable earnings exceed 30 times the federal minimum hourly wage",
+   "url": "https://www.ksrevisor.gov/statutes/chapters/ch60/060_023_0010.html",
+   "detail": "0 lines added, 5 removed; 0 links added, 5 removed",
+   "figures_added": [],
+   "figures_removed": [],
+   "links_added": [],
+   "links_removed": [
+    "https://www.ksrevisor.gov/docs/LCC_Packet20260929/Item 1 PROPOSED MINUTES August 17 and September 3, 2026.pdf",
+    "https://www.ksrevisor.gov/docs/LCC_Packet20260929/Item 3 USD 489 RAC Closing of Building Resolution 09-2026.pdf",
+    "https://www.ksrevisor.gov/docs/LCC_Packet20260929/Item 4 Proposed Recommended Legislative Holidays for 2027.pdf",
+    "https://www.ksrevisor.gov/docs/LCC_Packet20260929/LCC Agenda September 29, 2026.pdf",
+    "https://www.ksrevisor.gov/statutes/chapters/ch60/docs/LCC_Packet20260929/LCC Meeting Notice September 29, 2026.pdf"
+   ],
+   "significant": true
+  },
+  {
+   "id": "ky-829edc7fb7~394f1a03",
+   "jurisdiction": "KY",
+   "title": "Need to update or cancel a business account? (linked from Kentucky withholding)",
+   "url": "http://revenue.ky.gov/Forms/10A104.pdf",
+   "detail": "106 lines added, 109 removed",
    "figures_added": [],
    "figures_removed": [],
    "links_added": [],
    "links_removed": [],
-   "significant": false
+   "significant": true
   },
   {
    "id": "mi-b2211f9083",
    "jurisdiction": "MI",
    "title": "Other Michigan cities with income tax (City of Grand Rapids rate table)",
    "url": "https://www.grandrapidsmi.gov/departments/fiscal-services/income-tax/other-michigan-cities-with-income-tax/",
-   "detail": "1 lines added, 1 removed (link lists / headlines only)",
+   "detail": "9 lines added, 8 removed (link lists / headlines only)",
    "figures_added": [],
    "figures_removed": [],
    "links_added": [],
    "links_removed": [],
    "significant": false
+  },
+  {
+   "id": "mn-bb67f51ead",
+   "jurisdiction": "MN",
+   "title": "City of Saint Paul -- Minimum Wage Increases for Small and Micro Businesses (effective July 1, 2026)",
+   "url": "https://www.stpaul.gov/news/city-saint-paul-minimum-wage-increases-small-and-micro-businesses",
+   "detail": "4 lines added, 4 removed",
+   "figures_added": [],
+   "figures_removed": [],
+   "links_added": [],
+   "links_removed": [],
+   "significant": true
   },
   {
    "id": "mo-2d09c4e722",
    "jurisdiction": "MO",
    "title": "St. Louis: earnings tax department",
    "url": "https://www.stlouis-mo.gov/government/departments/collector/earnings-tax/index.cfm",
-   "detail": "1 lines added, 1 removed; 1 links added, 0 removed",
+   "detail": "2 lines added, 2 removed; 0 links added, 1 removed",
    "figures_added": [],
    "figures_removed": [],
-   "links_added": [
+   "links_added": [],
+   "links_removed": [
     "https://www.stlouis-mo.gov/government/departments/collector/earnings-tax/documents/p-10-w-10-form-fillable.cfm"
    ],
-   "links_removed": [],
    "significant": true
   },
   {
-   "id": "ny-c0f5031cb1~db5f1e4d",
-   "jurisdiction": "NY",
-   "title": "2021 IC Rule (linked from data/minimum-wage/federal-2026.json (this engine's)",
-   "url": "https://www.federalregister.gov/documents/2021/01/07/2020-29274/independent-contractor-status-under-the-fair-labor-standards-act",
-   "detail": "2 lines added, 2 removed",
-   "figures_added": [
-    "91,721"
-   ],
-   "figures_removed": [
-    "91,611"
-   ],
-   "links_added": [],
-   "links_removed": [],
-   "significant": true
-  },
-  {
-   "id": "ny-3a561f3380",
-   "jurisdiction": "NY",
-   "title": "DOL -- Unemployment Insurance Rate Information",
-   "url": "https://dol.ny.gov/unemployment-insurance-rate-information",
-   "detail": "0 lines added, 1 removed (link lists / headlines only)",
-   "figures_added": [],
-   "figures_removed": [],
-   "links_added": [],
-   "links_removed": [],
-   "significant": false
-  },
-  {
-   "id": "ny-284a641e61",
-   "jurisdiction": "NY",
-   "title": "NY Department of Labor -- Register for Unemployment Insurance",
-   "url": "https://dol.ny.gov/register-unemployment-insurance-0",
-   "detail": "0 lines added, 1 removed (link lists / headlines only)",
-   "figures_added": [],
-   "figures_removed": [],
-   "links_added": [],
-   "links_removed": [],
-   "significant": false
-  },
-  {
-   "id": "ny-14de83a77f~6671f3ed",
-   "jurisdiction": "NY",
-   "title": "Need Time? The Employee's Guide to the Family and Medical Leave Act (linked from 29 U.S.C. 2611(4)(A)(i)-(ii))",
-   "url": "https://www.dol.gov/sites/dolgov/files/WHD/legacy/files/employeeguide.pdf",
-   "detail": "read with a headless browser; 115 lines added, 114 removed",
+   "id": "nj-0db1e90800",
+   "jurisdiction": "NJ",
+   "title": "New Jersey Division of Taxation: what's new",
+   "url": "https://www.nj.gov/treasury/taxation/whatsnew.shtml",
+   "detail": "0 lines added, 5 removed",
    "figures_added": [],
    "figures_removed": [],
    "links_added": [],
@@ -137,15 +174,25 @@
    "significant": true
   },
   {
-   "id": "ny-d4f2c6eeff~d2fc2171",
-   "jurisdiction": "NY",
-   "title": "fact sheet PDF (linked from IRS -- Determining if an employer is an applicable)",
-   "url": "http://www.treasury.gov/press-center/press-releases/Documents/Fact%20Sheet%20021014.pdf",
-   "detail": "20 lines added, 19 removed",
+   "id": "nj-5b6e2ab262",
+   "jurisdiction": "NJ",
+   "title": "New Jersey employer payroll tax",
+   "url": "https://www.nj.gov/treasury/taxation/businesses/payroll/index.shtml",
+   "detail": "0 lines added, 5 removed",
    "figures_added": [],
-   "figures_removed": [
-    "$270"
-   ],
+   "figures_removed": [],
+   "links_added": [],
+   "links_removed": [],
+   "significant": true
+  },
+  {
+   "id": "ny-448945c630",
+   "jurisdiction": "NY",
+   "title": "Tax.NY.gov: information for retired persons",
+   "url": "https://www.tax.ny.gov/pit/file/information_for_seniors.htm",
+   "detail": "11 lines added, 1 removed",
+   "figures_added": [],
+   "figures_removed": [],
    "links_added": [],
    "links_removed": [],
    "significant": true
@@ -155,51 +202,49 @@
    "jurisdiction": "OR",
    "title": "Oregon Department of Revenue: news",
    "url": "https://www.oregon.gov/dor/news/Pages/default.aspx",
-   "detail": "17 lines added, 17 removed; 4 links added, 2 removed",
+   "detail": "21 lines added, 20 removed; 3 links added, 2 removed",
    "figures_added": [],
    "figures_removed": [],
    "links_added": [
-    "https://apps.oregon.gov/oregon-newsroom/OR/ODVA/Posts",
-    "https://apps.oregon.gov/oregon-newsroom/OR/ODVA/Posts/Post/reminder-oregonians-invited-to-statewide-veterans-day-ceremony-nov-11-at-capitol",
-    "https://apps.oregon.gov/oregon-newsroom/OR/Posts/Search?cat=Veteran",
-    "https://apps.oregon.gov/oregon-newsroom/OR/Posts/Search?from=11%2F3%2F2026&to=11%2F3%2F2026"
+    "https://apps.oregon.gov/oregon-newsroom/OR/DCBS/Posts/Post/aca-open-enrollment-period",
+    "https://apps.oregon.gov/oregon-newsroom/OR/ODA/Posts/Post/celebration-of-one-health-day-in-oregon",
+    "https://apps.oregon.gov/oregon-newsroom/OR/SOS/Posts/Post/election-day-oregon-elected-leaders-provide-update-election-integrity-turnout"
    ],
    "links_removed": [
-    "https://apps.oregon.gov/oregon-newsroom/OR/ODHS/Posts/Post/odhs-shares-info-on-support-for-survivors-in-recognition-of-domestic-violence-awareness-month",
-    "https://apps.oregon.gov/oregon-newsroom/OR/Posts/Search?from=10%2F27%2F2026&to=10%2F27%2F2026"
+    "https://apps.oregon.gov/oregon-newsroom/OR/SOS/Posts/Post/election-integrity-TV-PSA-launched-oregon-secretary-of-state",
+    "https://apps.oregon.gov/oregon-newsroom/OR/SOS/Posts/Post/secretary-read-to-hold-election-day-press-conference-with-sen-wyden-attorney-general-rayfield-PSU-president-cudd"
    ],
    "significant": true
   },
   {
-   "id": "us-fd7074f77b~cab9dc7f",
-   "jurisdiction": "US",
-   "title": "10/08/2026 (linked from Federal Register -- Minimum Wage for Federal Contr)",
-   "url": "https://www.federalregister.gov/documents/2026/10/08",
-   "detail": "1 lines added, 0 removed; 3 links added, 0 removed",
+   "id": "pa-a87a8e850b",
+   "jurisdiction": "PA",
+   "title": "NJ Division of Taxation -- Reciprocal Personal Income Tax Agreement (PA/NJ)",
+   "url": "https://www.nj.gov/treasury/taxation/njit25.shtml",
+   "detail": "0 lines added, 5 removed",
+   "figures_added": [],
+   "figures_removed": [],
+   "links_added": [],
+   "links_removed": [],
+   "significant": true
+  },
+  {
+   "id": "sc-e75c9301b9",
+   "jurisdiction": "SC",
+   "title": "South Carolina Department of Revenue: news",
+   "url": "https://dor.sc.gov/news",
+   "detail": "3 links added, 2 removed",
    "figures_added": [],
    "figures_removed": [],
    "links_added": [
-    "https://www.federalregister.gov/documents/2026/10/28",
-    "https://www.federalregister.gov/documents/2026/10/29",
-    "https://www.federalregister.gov/documents/2026/10/30"
+    "https://dor.sc.gov/index%2Ephp/arrests",
+    "https://dor.sc.gov/index%2Ephp/news",
+    "https://dor.sc.gov/index%2Ephp/tax-tips"
    ],
-   "links_removed": [],
-   "significant": true
-  },
-  {
-   "id": "us-61cf4e8aaf~b289ef45",
-   "jurisdiction": "US",
-   "title": "86 FR 22835 (linked from Executive Order 14236, Additional Rescissions of H)",
-   "url": "https://www.federalregister.gov/documents/2021/04/30/2021-09263/increasing-the-minimum-wage-for-federal-contractors",
-   "detail": "2 lines added, 2 removed",
-   "figures_added": [
-    "51,760"
+   "links_removed": [
+    "https://dor.sc.gov/arrests",
+    "https://dor.sc.gov/tax-tips"
    ],
-   "figures_removed": [
-    "51,656"
-   ],
-   "links_added": [],
-   "links_removed": [],
    "significant": true
   },
   {
@@ -215,11 +260,11 @@
    "significant": true
   },
   {
-   "id": "us-f10e455e50~27d246f4",
-   "jurisdiction": "US",
-   "title": "Instruction 944 (linked from IRS draft tax forms: payroll forms only (W-4, W-4P)",
-   "url": "https://www.irs.gov/pub/irs-dft/i944--dft.pdf",
-   "detail": "57 lines added, 49 removed",
+   "id": "wi-53244e93fe",
+   "jurisdiction": "WI",
+   "title": "Wis. Stat. \u00a7 71.03(13) \u2014 'Wisconsin adjusted gross income' defined",
+   "url": "https://docs.legis.wisconsin.gov/document/statutes/71.03",
+   "detail": "1 lines added, 1 removed",
    "figures_added": [],
    "figures_removed": [],
    "links_added": [],
@@ -227,11 +272,11 @@
    "significant": true
   },
   {
-   "id": "us-fd7074f77b~e793eae6",
-   "jurisdiction": "US",
-   "title": "Normalized attributes and metadata (linked from Federal Register -- Minimum Wage for Federal Contr)",
-   "url": "https://www.federalregister.gov/api/v1/documents/2026-20646?publication_date=2026-10-08",
-   "detail": "2 lines added, 2 removed",
+   "id": "wi-eb437d4ba6",
+   "jurisdiction": "WI",
+   "title": "Wis. Stat. \u00a7 812.34 \u2014 80% of disposable earnings exempt from garnishment (i.e. 20% reachable), further limited by the amount by which disposable earnings exceed 30x the FEDERAL minimum hourly wage",
+   "url": "https://docs.legis.wisconsin.gov/document/statutes/812.34",
+   "detail": "1 lines added, 1 removed",
    "figures_added": [],
    "figures_removed": [],
    "links_added": [],
@@ -239,7 +284,7 @@
    "significant": true
   }
  ],
- "significant_changes": 12,
+ "significant_changes": 19,
  "broken": [
   "https://www.tuskegeealabama.gov/finance-department/files/occupational-tax-form",
   "https://www.tuskegeealabama.gov/sites/g/files/vyhlif3946/f/uploads/infobrochure_word.pdf",
@@ -247,8 +292,10 @@
   "https://www.greenwoodvillage.com/206/Occupational-Privilege-Tax",
   "https://www.ilga.gov/legislation/ilcs/ilcs4.asp?DocName=073500050K12-803",
   "https://illinoiscomptroller.gov/state-agencies/bulletins-forms/payroll-bulletins/illinois-state-income-tax-exemptions-2026",
+  "https://grantcounty.ky.gov/occupational-licensing/",
   "https://pl.mn.gov/resources/calculators/premium-rate-and-contributions",
   "https://ohioauditor.gov/Auditsearch/Reports/2023/Liberty_Township_22_21_Henry_FINAL.pdf",
+  "https://oklahoma.gov/tax/businesses/withholding-tax.html",
   "https://www.wilsonvilleoregon.gov/finance/page/transit-payroll-tax-information"
  ],
  "attention": [
@@ -416,11 +463,11 @@
    "detail": "only 0 of 2627 rows carry a rate, so the 2027 register is not published yet; nothing to compare"
   }
  ],
- "followed_documents": 917,
- "followed_documents_unread": 43,
- "followed_documents_deferred": 133,
- "verified": 1536,
- "unverified": 63,
+ "followed_documents": 378,
+ "followed_documents_unread": 6,
+ "followed_documents_deferred": 703,
+ "verified": 1004,
+ "unverified": 56,
  "never_baselined": [
   "https://birminghamal.hdlgov.com/base64files/TAXES_FORM_4.pdf",
   "https://library.municode.com/al/gadsden/codes/code_of_ordinances",
@@ -456,5 +503,5 @@
   "https://oklahoma.gov/tax/businesses/withholding-tax.html",
   "https://www.wilsonvilleoregon.gov/finance/page/transit-payroll-tax-information"
  ],
- "max_consecutive_failures": 37
+ "max_consecutive_failures": 38
 }
