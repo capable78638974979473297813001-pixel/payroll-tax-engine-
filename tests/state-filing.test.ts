@@ -57,12 +57,12 @@ describe('coverage: every jurisdiction is accounted for', () => {
       assert.ok(x.agencyLines.length > 0 && x.website, x.code);
     }
   });
-  test('thirty-seven states are modelled (eight only partly, Texas has no wage income tax); every other row says NOT MODELLED rather than implying nothing is owed', () => {
-    assert.deepEqual(modelledStates(), ['AL', 'CA', 'CO', 'CT', 'DE', 'GA', 'HI', 'IA', 'ID', 'IL', 'KS', 'LA', 'MD', 'ME', 'MI', 'MN', 'MO', 'MS', 'MT', 'NC', 'ND', 'NE', 'NJ', 'NM', 'NY', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC', 'TX', 'UT', 'VA', 'VT', 'WI', 'WV']);
+  test('all fifty-three jurisdictions are modelled (only Puerto Rico and the Virgin Islands withholding partly; Massachusetts, Nevada and New Hampshire from secondary sources; Puerto Rico and the Virgin Islands unemployment only); every other row says NOT MODELLED rather than implying nothing is owed', () => {
+    assert.deepEqual(modelledStates(), ['AK', 'AL', 'AR', 'AZ', 'CA', 'CO', 'CT', 'DC', 'DE', 'FL', 'GA', 'HI', 'IA', 'ID', 'IL', 'IN', 'KS', 'KY', 'LA', 'MA', 'MD', 'ME', 'MI', 'MN', 'MO', 'MS', 'MT', 'NC', 'ND', 'NE', 'NH', 'NJ', 'NM', 'NV', 'NY', 'OH', 'OK', 'OR', 'PA', 'PR', 'RI', 'SC', 'SD', 'TN', 'TX', 'UT', 'VA', 'VI', 'VT', 'WA', 'WI', 'WV', 'WY']);
     const c = coverage();
     assert.equal(c.length, 53);
     for (const row of c) {
-      if (['AL', 'CA', 'CO', 'CT', 'DE', 'GA', 'HI', 'IA', 'ID', 'IL', 'KS', 'LA', 'MD', 'ME', 'MI', 'MN', 'MO', 'MS', 'MT', 'NC', 'ND', 'NE', 'NJ', 'NM', 'NY', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC', 'TX', 'UT', 'VA', 'VT', 'WI', 'WV'].includes(row.code)) assert.equal(row.modelled, true);
+      if (['AK', 'AL', 'AR', 'AZ', 'CA', 'CO', 'CT', 'DC', 'DE', 'FL', 'GA', 'HI', 'IA', 'ID', 'IL', 'IN', 'KS', 'KY', 'LA', 'MA', 'MD', 'ME', 'MI', 'MN', 'MO', 'MS', 'MT', 'NC', 'ND', 'NE', 'NH', 'NJ', 'NM', 'NV', 'NY', 'OH', 'OK', 'OR', 'PA', 'PR', 'RI', 'SC', 'SD', 'TN', 'TX', 'UT', 'VA', 'VI', 'VT', 'WA', 'WI', 'WV', 'WY'].includes(row.code)) assert.equal(row.modelled, true);
       else {
         assert.equal(row.modelled, false, row.code);
         assert.equal(row.functions.ui, 'NOT MODELLED', row.code);
@@ -70,20 +70,21 @@ describe('coverage: every jurisdiction is accounted for', () => {
       }
     }
     const by = Object.fromEntries(c.map((r) => [r.code, r.functions]));
-    for (const code of ['AL', 'CA', 'CO', 'CT', 'DE', 'GA', 'HI', 'IL', 'KS', 'ME', 'MI', 'MN', 'MS', 'MT', 'NC', 'ND', 'NE', 'NJ', 'OH', 'OR', 'PA', 'RI', 'SC', 'UT', 'VA', 'VT', 'WI', 'WV']) assert.equal(by[code].withholding, 'modelled', code);
-    for (const code of ['IA', 'ID', 'LA', 'MD', 'MO', 'NM', 'NY', 'OK']) assert.equal(by[code].withholding, 'partial', code); // returns, mandates and channels read; deposit schedule not
+    for (const code of ['AL', 'AR', 'AZ', 'CA', 'CO', 'CT', 'DC', 'DE', 'GA', 'HI', 'IA', 'ID', 'IL', 'IN', 'KS', 'KY', 'LA', 'MD', 'ME', 'MI', 'MN', 'MO', 'MS', 'MT', 'NC', 'ND', 'NE', 'NJ', 'NM', 'NY', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC', 'UT', 'VA', 'VT', 'WI', 'WV']) assert.equal(by[code].withholding, 'modelled', code);
+    for (const code of ['PR', 'VI']) assert.equal(by[code].withholding, 'partial', code); // the paycheck engine has no data for the territories: unemployment rules only
     assert.equal(by.CA.withholding, 'modelled');
-    assert.equal(by.NY.withholding, 'partial'); // return modelled, deposit schedule not
+    assert.equal(by.NY.withholding, 'modelled'); // NYS-1 and NYS-45 from the Tax Department's own pages
     assert.equal(by.TX.withholding, 'no wage income tax');
     assert.equal(by.FL.withholding, 'no wage income tax');
-    assert.equal(by.AR.withholding, 'NOT MODELLED');
+    assert.equal(by.PR.withholding, 'partial'); // the paycheck engine has no Puerto Rico data: unemployment rules only
+    assert.equal(by.PR.ui, 'modelled');
     assert.equal(by.CO.ui, 'NOT MODELLED');
     assert.equal(by.CT.withholding, 'modelled');
     assert.equal(by.CT.ui, 'NOT MODELLED'); // Connecticut's guide covers withholding only
   });
   test('an unmodelled state throws NOT MODELLED instead of returning an empty profile', () => {
-    assert.equal(hasProfile('WY'), false);
-    assert.throws(() => loadProfile('WY'), /NOT MODELLED/);
+    assert.equal(hasProfile('ZZ'), false);
+    assert.throws(() => loadProfile('ZZ'), /NOT MODELLED/);
   });
 });
 
@@ -224,13 +225,22 @@ describe('honest about what is not read', () => {
     assert.equal(isStateBusinessDay('2026-08-08', CA), false);
     assert.equal(resolveDue({ kind: 'day_of_month_after', day: 15 }, '2026-10-01', CA).dueDate, '2026-11-16'); // Nov 15, 2026 is a Sunday
   });
-  test("New York's deposit schedule is not modelled: an error, never a guessed schedule", () => {
-    const federal = analyzeDeposits([fedDay('2026-08-07', dollars(5_000))], { startingSchedule: 'monthly' });
-    const r = analyzeStateDeposits(NY, [stDay('2026-08-07', 500)], federal);
-    assert.deepEqual(r.obligations, []);
-    const e = r.findings.find((f) => f.code === 'state_deposits_not_modelled')!;
-    assert.equal(e.severity, 'error');
-    assert.match(e.message, /NYS-1/);
+  test('New York: NYS-1 is due 5 business days after the payroll that takes the accumulated tax to $700 or more (3 days for filers over $15,000 two years back)', () => {
+    const ny = (frequency: string, days: StateDay[]) => analyzeStateDeposits(NY, days, undefined, { assignedFrequency: frequency }).obligations.map((o) => [o.amount, o.dueDate]);
+    // Friday payroll Aug 7, 2026 takes the quarter's tax to $700: 5 business days -> Friday Aug 14; 3 days -> Wednesday Aug 12
+    assert.deepEqual(ny('five_day', [stDay('2026-08-07', 700)]), [[dollars(700), '2026-08-14']]);
+    assert.deepEqual(ny('three_day', [stDay('2026-08-07', 700)]), [[dollars(700), '2026-08-12']]);
+    // $699.99 is under the threshold: it waits for the NYS-45 (last day of the month after the quarter, Oct 31 -> Nov 2)
+    assert.deepEqual(ny('five_day', [stDay('2026-08-07', 699.99)]), [[dollars(699.99), '2026-11-02']]);
+  });
+  test('New York: payrolls in one Sunday-Saturday week are filed after the last payroll of the week; a balance under $700 goes with the NYS-45', () => {
+    const r = analyzeStateDeposits(NY, [stDay('2026-08-03', 400), stDay('2026-08-05', 400), stDay('2026-08-12', 300)], undefined, { assignedFrequency: 'five_day' });
+    // Mon+Wed payrolls accumulate to $800 in the week of Aug 2-8: due 5 business days after the last (Wed Aug 5) -> Wed Aug 12; the later $300 stays under $700
+    assert.deepEqual(r.obligations.map((o) => [o.schedule, o.amount, o.dueDate]), [['weekly', dollars(800), '2026-08-12'], ['quarterly', dollars(300), '2026-11-02']]);
+  });
+  test('New York: the year before last decides the filer type, and a new employer is a 5-day filer', () => {
+    const t = (v?: number) => analyzeStateDeposits(NY, [stDay('2026-08-07', 700)], undefined, v === undefined ? {} : { lookbackLiability: dollars(v) }).obligations[0].dueDate;
+    assert.deepEqual([t(14_999.99), t(15_000), t()], ['2026-08-14', '2026-08-12', '2026-08-14']);
   });
   test('New York has no new-hire rule in its profile: it refuses rather than assuming the federal 20 days', () => {
     assert.throws(() => newHireDeadline(NY, '2026-03-02'), /NOT MODELLED/);
@@ -319,7 +329,7 @@ describe('a full year of REAL engine pay runs in each pilot state', () => {
 
 describe('state filings run through the shared lifecycle, and nothing is transmitted', () => {
   test('every modelled state registers its channels, each with enrollment and a "not read" specification', () => {
-    assert.deepEqual(registerAllStateChannels(), ['AL', 'CA', 'CO', 'CT', 'DE', 'GA', 'HI', 'IA', 'ID', 'IL', 'KS', 'LA', 'MD', 'ME', 'MI', 'MN', 'MO', 'MS', 'MT', 'NC', 'ND', 'NE', 'NJ', 'NM', 'NY', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC', 'TX', 'UT', 'VA', 'VT', 'WI', 'WV']);
+    assert.deepEqual(registerAllStateChannels(), ['AK', 'AL', 'AR', 'AZ', 'CA', 'CO', 'CT', 'DC', 'DE', 'FL', 'GA', 'HI', 'IA', 'ID', 'IL', 'IN', 'KS', 'KY', 'LA', 'MA', 'MD', 'ME', 'MI', 'MN', 'MO', 'MS', 'MT', 'NC', 'ND', 'NE', 'NH', 'NJ', 'NM', 'NV', 'NY', 'OH', 'OK', 'OR', 'PA', 'PR', 'RI', 'SC', 'SD', 'TN', 'TX', 'UT', 'VA', 'VI', 'VT', 'WA', 'WI', 'WV', 'WY']);
     const ca = stateChannels(CA);
     assert.deepEqual(ca.map((c) => c.id), ['state:CA:e_services', 'state:CA:ner']);
     assert.match(ca[0].enrollment.join(' '), /Register online for an employer payroll tax account number/);

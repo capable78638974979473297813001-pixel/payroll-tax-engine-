@@ -1,0 +1,84 @@
+{
+ "state": "FL",
+ "name": "Florida",
+ "verifiedOn": "2026-11-05",
+ "sources": [
+  {
+   "id": "S1",
+   "title": "Florida Department of Revenue: Reemployment Tax Return and Payment Information (web page)",
+   "url": "https://floridarevenue.com/taxes/taxesfees/Pages/rt_return_pay.aspx",
+   "revision": "web page, no edition printed; fetched live 2026-11-05",
+   "verifiedOn": "2026-11-05",
+   "verifiedBy": "fetched directly from floridarevenue.com on 2026-11-05 and read: Options to File and Pay Electronically, the electronic filing and payment requirement and its penalties, Employer's Quarterly Report (Form RT-6) and its due-date table, weekend rule. The $7,000 wage base is from the Department's Florida Reemployment Tax page (https://floridarevenue.com/taxes/taxesfees/Pages/reemployment.aspx, fetched the same day)."
+  }
+ ],
+ "agencies": {
+  "ui": {
+   "name": "Florida Department of Revenue (Reemployment Tax)",
+   "portalUrl": "https://floridarevenue.com/taxes/taxesfees/Pages/reemployment.aspx",
+   "source": "S1"
+  }
+ },
+ "calendar": {
+  "weekendsRoll": true,
+  "holidays": {
+   "verified": false
+  },
+  "source": "S1"
+ },
+ "mandates": {
+  "efile": {
+   "text": "You must file the wage data and pay the tax electronically if you are an employer who employed 10 or more employees in any quarter during the preceding state fiscal year (July 1 - June 30). There is no waiver from electronic payment.",
+   "source": "S1"
+  }
+ },
+ "withholding": {
+  "applies": false,
+  "notModelled": []
+ },
+ "ui": {
+  "wageBase": 700000,
+  "wageBaseYear": 2026,
+  "employerTaxLineId": "FL_SUI_ER",
+  "returns": [
+   {
+    "id": "RT-6",
+    "name": "Employer's Quarterly Report (Form RT-6)",
+    "frequency": "quarterly",
+    "due": {
+     "kind": "last_day_of_month_after_quarter"
+    },
+    "contents": [
+     "Due by April 30, July 31, October 31 and January 31 (late if not postmarked by the last day of the month); when that day is a Saturday, Sunday or legal holiday the timely period extends to the end of the next working day.",
+     "Required even if there were no employees or wages in the quarter.",
+     "Shows each employee's name, Social Security number, and wages (the first $7,000 of each employee's calendar-year wages are taxable); employers of 10 or more employees in any quarter of the previous state fiscal year file the wage data and pay electronically; the penalty for not filing electronically is $25 per report plus $1 per employee up to $300, and $25 per remittance for not paying electronically."
+    ],
+    "source": "S1"
+   }
+  ],
+  "notModelled": [
+   "Florida's reemployment tax rate notice is an input: the Department's rate page gives 2.7% for new employers and a 2026 range of 0.1% to 5.4% (not re-read here).",
+   "The electronic-payment calendar of deadlines (Form DR-659): an electronic payment must be initiated at least one business day before the due date; not read.",
+   "Installment payments of the first three quarters ($5 annual fee).",
+   "The new eFile and Pay system and its file layouts."
+  ]
+ },
+ "channels": [
+  {
+   "id": "state:FL:efile-and-pay",
+   "function": "reemployment tax quarterly report (RT-6) and payment",
+   "description": "Florida Department of Revenue eFile and Pay (reemployment tax) and the e-Services system; electronic filing and payment are mandatory for employers of 10 or more employees in any quarter of the previous fiscal year",
+   "enrollment": [
+    "Register for a reemployment tax account with the Florida Department of Revenue (the Department, not a labor agency, administers it; steps not read).",
+    "Initiate electronic payments at least one business day before the due date."
+   ],
+   "specs": "The wage data file layout: not read.",
+   "source": "S1"
+  }
+ ],
+ "notModelled": [
+  "Florida has no wage income tax, so there is no state withholding.",
+  "Florida's legal-holiday list (weekends only are skipped, with a warning).",
+  "New-hire reporting: not read."
+ ]
+}

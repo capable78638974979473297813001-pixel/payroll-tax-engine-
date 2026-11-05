@@ -1,7 +1,7 @@
 {
  "state": "OK",
  "name": "Oklahoma",
- "verifiedOn": "2026-11-04",
+ "verifiedOn": "2026-11-05",
  "sources": [
   {
    "id": "S1",
@@ -10,6 +10,14 @@
    "revision": "withholding page; the stored brochure (Common Oklahoma Withholding Tax Audit Issues) is a document linked from it, no edition printed",
    "verifiedOn": "2026-11-04",
    "verifiedBy": "read from the stored copy in watcher/state/snapshots/ok-fc9a4ccbff~d381f40e.txt.gz (the URL is shortened in the watcher's record: confirm it from the Tax Commission's withholding page). It states the quarterly return (Form WTH-10001), its due date under OAC 710:90-3-4, and the annual reconciliation requirement (68 O.S. 2385.3). It does NOT state the remittance schedule thresholds or dates."
+  },
+  {
+   "id": "S2",
+   "title": "Oklahoma Administrative Code 710:90, Chapter 90 Withholding, section 710:90-3-4 (2026)",
+   "url": "https://oklahoma.gov/content/dam/ok/en/tax/documents/resources/rules-and-policies/agency-rules/2026/Chapter90-Withholding-2026.pdf",
+   "revision": "OAC 710:90, 2026 edition; section 710:90-3-4 last amended 7-11-13",
+   "verifiedOn": "2026-11-05",
+   "verifiedBy": "fetched directly from oklahoma.gov on 2026-11-05 and read: 710:90-3-4 'Payment of tax and filing of tax returns' in full (the quarterly return, the less-than-$500 quarterly remittance, monthly remittance after a quarter over $500, the Federal Semiweekly Deposit Schedule rule and its banking-day wording, zero returns)."
   }
  ],
  "agencies": {
@@ -43,10 +51,10 @@
      "day": 20
     },
     "contents": [
-     "Filed on a quarterly basis with any payment due, on or before the 20th day of the month following the close of each quarter (OAC 710:90-3-4), even when there is no payroll for the period.",
-     "The OTC compares quarterly withholding returns with the W-2/W-3 yearly totals filed with the IRS."
+     "Filed on or before the 20th of the month following the close of each quarter by every employer regardless of its remittance schedule, on a calendar-year basis; a zero return is required for every period (OAC 710:90-3-4).",
+     "Employers on the federal semiweekly schedule file under the Tax Commission's electronic data interchange program."
     ],
-    "source": "S1"
+    "source": "S2"
    },
    {
     "id": "OK-annual-reconciliation",
@@ -57,17 +65,60 @@
      "day": 31
     },
     "contents": [
-     "HB 2289 (68 O.S. 2385.3) imposes a penalty of up to $1,000 on an employer who fails to furnish the Tax Commission the required annual reconciliation by January 31."
+     "68 O.S. 2385.3 (HB 2289) imposes a penalty of up to $1,000 on an employer who fails to furnish the annual reconciliation by January 31."
     ],
     "source": "S1"
    }
   ],
   "notModelled": [
-   "Oklahoma's remittance schedule ('varies depending on the total amount of employee wages'): the stored brochure gives no thresholds or dates, so no deposit schedule is computed.",
-   "Oklahoma unemployment insurance (Oklahoma Employment Security Commission): no document read.",
-   "Oklahoma's legal-holiday list.",
-   "Electronic filing requirements and the OkTAP layouts: not in the stored documents."
-  ]
+   "The electronic-remittance threshold ($5,000 a month in the previous fiscal year, per the withholding tables): not in the rule read.",
+   "The 'exceeds $500 for any quarter' test is applied to the quarter's amount supplied; the rule is silent on rounding."
+  ],
+  "deposits": {
+   "kind": "assigned_frequency",
+   "rulesYear": 2026,
+   "interpretation": "Every Oklahoma employer files a quarterly return on or before the 20th of the month following each quarter, whatever its remittance schedule. REMITTANCE: an employer that owed an average of less than $500 a quarter in the previous fiscal year remits the amount withheld on or before the 20th of the month after each quarter (QUARTERLY); if the tax withheld exceeds $500 in any quarter it remits MONTHLY for each monthly period after that quarter, each due on or before the 20th of the succeeding month; an employer required to deposit federal withholding on the Federal Semiweekly Deposit Schedule pays Oklahoma on the same dates as the federal schedule (FEDERAL; the employer has at least three banking days, and one more if a banking holiday falls in them), and files electronically through the Commission's EDI program. A date that is not a banking day moves to the next banking day. The frequency is an INPUT, or is derived from the average quarterly amount of the previous fiscal year ('federal' is never derived: it follows the employer's federal schedule and needs the federal deposit analysis). Zero returns are required for every period.",
+   "lookback": {
+    "description": "Average Oklahoma withholding per quarter in the previous fiscal year",
+    "classes": [
+     {
+      "name": "quarterly",
+      "maxInclusive": 49999
+     },
+     {
+      "name": "monthly",
+      "minExclusive": 49999
+     }
+    ],
+    "newEmployer": "quarterly"
+   },
+   "frequencies": {
+    "quarterly": {
+     "period": "quarter",
+     "due": {
+      "kind": "day_of_month_after_quarter",
+      "day": 20
+     }
+    },
+    "monthly": {
+     "period": "month",
+     "due": {
+      "kind": "day_of_month_after",
+      "day": 20
+     }
+    },
+    "federal": {
+     "period": "follow_federal",
+     "due": {
+      "kind": "next_business_day"
+     }
+    }
+   },
+   "deposited": [
+    "withholding"
+   ],
+   "source": "S2"
+  }
  },
  "channels": [
   {

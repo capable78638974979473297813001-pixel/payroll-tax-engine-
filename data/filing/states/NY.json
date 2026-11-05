@@ -1,7 +1,7 @@
 {
  "state": "NY",
  "name": "New York",
- "verifiedOn": "2026-11-03",
+ "verifiedOn": "2026-11-05",
  "sources": [
   {
    "id": "S1",
@@ -10,6 +10,14 @@
    "revision": "NYS-45-I (1/26)",
    "verifiedOn": "2026-11-03",
    "verifiedBy": "read from the stored copy in watcher/state/snapshots/ny-4527e473d4.txt.gz: due-date table, 'Important information', 'Filing requirements', UI wage base section, lines 13-22"
+  },
+  {
+   "id": "S2",
+   "title": "New York Tax Department: Withholding tax filing requirements; Withholding tax due dates; Instructions for Form NYS-1",
+   "url": "https://www.tax.ny.gov/bus/wt/duedates.htm",
+   "revision": "web pages updated May 1, 2025 (filing requirements) and the current NYS-1 instructions; fetched live 2026-11-05",
+   "verifiedOn": "2026-11-05",
+   "verifiedBy": "fetched directly from tax.ny.gov on 2026-11-05 and read: Withholding tax filing requirements (https://www.tax.ny.gov/bus/wt/filing_requirements.htm: NYS-45 and NYS-1, the $700 rule, weekly grouping, the quarter-end rule, electronic filing and payment), Withholding tax due dates (the NYS-45 dates and the 3-day and 5-day NYS-1 filer types) and the Instructions for Form NYS-1 (https://www.tax.ny.gov/pdf/current_forms/wt/nys1i.pdf: the $15,000 test, 3 or 5 business days, new employers 5-day)."
   }
  ],
  "agencies": {
@@ -34,6 +42,10 @@
   "efile": {
    "text": "You must electronically file your quarterly returns and pay any balance due.",
    "source": "S1"
+  },
+  "epay": {
+   "text": "You must electronically file and pay your withholding tax returns. Filers of paper returns may be subject to penalties and delays in processing.",
+   "source": "S2"
   }
  },
  "withholding": {
@@ -46,8 +58,51 @@
    ]
   },
   "notModelled": [
-   "Withholding deposit frequency and thresholds (Form NYS-1 and its instructions) are not in the NYS-45 instructions and were not read, so no deposit schedule is computed. Payments are reconciled on NYS-45 line 15 ('payments remitted with Web File, Web Upload, PrompTax, or paper Forms NYS-1')."
-  ]
+   "PrompTax filers (TR-370-N), which has its own due dates.",
+   "The Tax Department's notice moving an employer between 3-day and 5-day.",
+   "Educational organizations and health care providers (Tax Law 9(a)(2) and 9(a)(4)) are 5-day filers regardless of amount: supply 'five_day'."
+  ],
+  "deposits": {
+   "kind": "assigned_frequency",
+   "rulesYear": 2026,
+   "interpretation": "New York withholding is paid on Form NYS-1 as it accumulates, and the balance with the quarterly NYS-45. If $700 or more of tax has been withheld in the calendar quarter and not yet remitted, it must be filed and paid within 3 or 5 BUSINESS DAYS after the payroll that caused the accumulated tax to equal or exceed $700. 3-DAY filers withheld $15,000 or more in the calendar year that PRECEDES THE PREVIOUS calendar year (the year before last); everyone else, new employers (until notified), educational organizations and health care providers are 5-DAY filers. If there is more than one payroll in a week (Sunday through Saturday), the NYS-1 is not due until after the last payroll of that week (the business days count from that last payroll). When a quarter ends between payrolls of one week, accumulated tax of at least $700 is remitted after the last payroll of the quarter. A balance under $700 left after the last payroll of a quarter in which an NYS-1 was already filed, and the whole tax of a quarter that never reached $700, are paid with the NYS-45, due April 30, July 31, October 31 and January 31 (next business day if needed); no extensions of time to file or pay are allowed. PrompTax filers follow TR-370-N (not modelled). The Tax Department notifies the employer of a change between 3-day and 5-day. The frequency is an INPUT ('three_day' or 'five_day') or derived from the withholding of the year before last. Payroll Paid Family Leave and disability premiums are not paid with the NYS-1.",
+   "lookback": {
+    "description": "New York tax withheld in the calendar year that precedes the previous calendar year",
+    "classes": [
+     {
+      "name": "five_day",
+      "maxInclusive": 1499999
+     },
+     {
+      "name": "three_day",
+      "minExclusive": 1499999
+     }
+    ],
+    "newEmployer": "five_day"
+   },
+   "frequencies": {
+    "five_day": {
+     "period": "week_threshold",
+     "thresholdExclusive": 69999,
+     "bankingDays": 5,
+     "due": {
+      "kind": "last_day_of_month_after_quarter"
+     }
+    },
+    "three_day": {
+     "period": "week_threshold",
+     "thresholdExclusive": 69999,
+     "bankingDays": 3,
+     "due": {
+      "kind": "last_day_of_month_after_quarter"
+     }
+    }
+   },
+   "deposited": [
+    "withholding"
+   ],
+   "source": "S2"
+  }
  },
  "ui": {
   "wageBase": 1760000,

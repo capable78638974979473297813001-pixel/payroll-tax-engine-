@@ -1,0 +1,136 @@
+{
+ "state": "IN",
+ "name": "Indiana",
+ "verifiedOn": "2026-11-04",
+ "sources": [
+  {
+   "id": "S1",
+   "title": "Indiana Department of Revenue: Business FAQ",
+   "url": "https://www.in.gov/dor/i-am-a/business-corp/business-faq/",
+   "revision": "web page, no edition printed; fetched live 2026-11-05",
+   "verifiedOn": "2026-11-05",
+   "verifiedBy": "fetched directly from in.gov on 2026-11-05 and read: electronic filing, 'What determines my filing frequency', the monthly-average table (annual, monthly, early filer), changes of frequency, the payroll service provider versus PEO answer, W-2 and WH-3 electronic filing, and the employee statement dates."
+  }
+ ],
+ "agencies": {
+  "withholding": {
+   "name": "Indiana Department of Revenue",
+   "portalUrl": "https://intime.dor.in.gov",
+   "source": "S1"
+  }
+ },
+ "calendar": {
+  "weekendsRoll": true,
+  "holidays": {
+   "verified": false
+  },
+  "source": "S1"
+ },
+ "mandates": {
+  "efile": {
+   "text": "All businesses in Indiana must file and pay their sales and withholding taxes electronically. If your average monthly tax exceeds $5,000, you are required to make payments by Electronic Funds Transfer.",
+   "source": "S1"
+  }
+ },
+ "withholding": {
+  "applies": true,
+  "taxLineIds": {
+   "withholding": "IN_SIT",
+   "employeeInsurance": []
+  },
+  "returns": [
+   {
+    "id": "WH-1",
+    "name": "Form WH-1, Indiana Withholding Tax Return (monthly/early filer)",
+    "frequency": "monthly",
+    "due": {
+     "kind": "calendar_days_after_month_end",
+     "days": 30
+    },
+    "contents": [
+     "Filed and paid for each period even if no tax is due or no employees are reportable; a late WH-1 can draw a penalty of up to 20%.",
+     "A payroll service provider may file for the business, but the business must open its own withholding account and use its own FEIN for WH-1, WH-3 and W-2; a PEO files under its own account and FEIN instead."
+    ],
+    "source": "S1"
+   },
+   {
+    "id": "WH-3",
+    "name": "Form WH-3, Annual Withholding Tax Reconciliation",
+    "frequency": "annual",
+    "due": {
+     "kind": "month_day_next_year",
+     "month": 2,
+     "day": 28
+    },
+    "contents": [
+     "Employers that filed more than 25 withholding statements in a calendar year must file the annual WH-3 and W-2s electronically (IC 6-3-4-16.5).",
+     "The FAQ says a copy of the W-2 goes to DOR by February 28; employees get theirs by January 31."
+    ],
+    "source": "S1"
+   }
+  ],
+  "notModelled": [
+   "The annual status ($83.33 or less a month) due date and the exact meaning of '30 days after the end of the month'.",
+   "Indiana's county income tax (withheld and remitted through the same return, with a county of residence and county of work for each employee): not modelled; this layer does not split the state and county amounts.",
+   "Indiana unemployment insurance (Department of Workforce Development): no document read.",
+   "The SFTP / INTIME file layouts for WH-1, WH-3, EFW2 and Publication 1220 (guides are stored in the watcher corpus, not read).",
+   "Indiana's state-holiday list (weekends only are skipped, with a warning)."
+  ],
+  "deposits": {
+   "kind": "assigned_frequency",
+   "interpretation": "Indiana sets the filing frequency from the AVERAGE MONTHLY liability throughout the tax year, re-evaluated each November, with a letter for the next year; an employer may increase how often it files but never decrease it. The FAQ table: $83.33 or less a month ANNUAL; $1,000 or less MONTHLY, due 30 days after the end of the month; more than $1,000 EARLY FILER, due 20 days after the end of the month. INTERPRETATION: 'N days after the end of the month' is read literally as N calendar days after the last day of the month (so January wages, early filer, are due February 20; monthly, March 2), moved to the next business day when it falls on a weekend or holiday; the FAQ does not say whether this is the 20th or 30th day of the following month, so check against the Department's filing calendar. The ANNUAL status's due date is not stated unambiguously (the table repeats 'after the end of the month') and is NOT MODELLED, so a derived look-back amount at or below $83.33 uses the monthly schedule, which is never late. Weekly/semi-weekly schedules do not appear in the FAQ.",
+   "lookback": {
+    "description": "Average monthly Indiana withholding liability",
+    "classes": [
+     {
+      "name": "monthly",
+      "maxInclusive": 100000
+     },
+     {
+      "name": "early_filer",
+      "minExclusive": 100000
+     }
+    ],
+    "newEmployer": "monthly"
+   },
+   "frequencies": {
+    "monthly": {
+     "period": "month",
+     "due": {
+      "kind": "calendar_days_after_month_end",
+      "days": 30
+     }
+    },
+    "early_filer": {
+     "period": "month",
+     "due": {
+      "kind": "calendar_days_after_month_end",
+      "days": 20
+     }
+    }
+   },
+   "deposited": [
+    "withholding"
+   ],
+   "source": "S1"
+  }
+ },
+ "channels": [
+  {
+   "id": "state:IN:intime",
+   "function": "withholding returns and payments (WH-1, WH-3), W-2 filing, SFTP bulk filing",
+   "description": "INTIME (Indiana's free online tax portal): file and pay; an SFTP service takes WH-1, WH-3, EFW2 and Publication 1220 files; electronic filing and payment is required of all businesses",
+   "enrollment": [
+    "Register the business on INTIME and add the withholding tax type (registrations can be submitted up to two months in advance).",
+    "A payroll service provider files on a client's behalf, but each business needs its own withholding account and FEIN; a PEO uses its own.",
+    "Employers filing more than 25 withholding statements file the WH-3 and W-2s electronically."
+   ],
+   "specs": "The SFTP webpage 'explains the file layout requirements and WH-1 and WH-3 information' and a guide for WH-1, WH-3, EFW2 and 1220 files is published; neither was read.",
+   "source": "S1"
+  }
+ ],
+ "notModelled": [
+  "Indiana unemployment insurance: not read.",
+  "New-hire reporting: not read."
+ ]
+}

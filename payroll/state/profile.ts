@@ -25,6 +25,12 @@ export interface Source {
   revision?: string;
   verifiedOn: string;
   verifiedBy: string;
+  /**
+   * True when the rules were NOT read from the agency's own document (the agency refused automated access) but taken
+   * from a search-engine summary of its pages. Every analysis and report built on such a profile carries the warning
+   * `state_source_secondary` until someone reads the agency's document and clears the flag.
+   */
+  secondary?: boolean;
 }
 
 /** When a return or payment is due. Every rule moves to the next business day when the date is not one, unless `rollsForward` is false. */
@@ -42,6 +48,10 @@ export type DueRule =
   | { kind: 'january_day_next_year'; day: number }
   /** Federal-style semi-weekly: the anchor is a period end (Friday or Tuesday); due on the next `afterFriday` / `afterTuesday` weekday (0=Sunday). */
   /** Kansas semi-monthly: the anchor is a period end; periods ending on or before the 15th are due `firstHalfDay` of the same month, later ones `secondHalfDay` of the next month. */
+  /** Calendar days after the END of the anchor's month (Indiana: monthly 30, early filers 20). */
+  | { kind: 'calendar_days_after_month_end'; days: number }
+  /** Massachusetts monthly: the `day` of the next month, except wages of March, June, September and December, due the LAST day of the next month. */
+  | { kind: 'monthly_with_quarter_end'; day: number }
   | { kind: 'semimonthly_days'; firstHalfDay: number; secondHalfDay: number }
   /** A fixed day of the month after the quarter (Kansas quarterly: the 25th). */
   | { kind: 'day_of_month_after_quarter'; day: number }
@@ -105,7 +115,7 @@ export interface AssignedFrequencySpec {
     newEmployer: string;
   };
   frequencies: Record<string, {
-    period: 'week_sat_fri' | 'month' | 'quarter' | 'year' | 'semiweekly_threshold' | 'published_calendar' | 'eighth_monthly' | 'semiweekly' | 'month_threshold';
+    period: 'week_sat_fri' | 'month' | 'quarter' | 'year' | 'semiweekly_threshold' | 'published_calendar' | 'eighth_monthly' | 'semiweekly' | 'month_threshold' | 'follow_federal' | 'period_threshold' | 'paydate_threshold' | 'week_threshold';
     /** For `semiweekly_threshold` the due rule is that of the REMAINDER (paid with the quarterly return). */
     due: DueRule;
     /**
@@ -121,6 +131,19 @@ export interface AssignedFrequencySpec {
      * row is an ERROR finding (the calendar for that year was not read), never an extrapolation.
      */
     calendar?: { from: string; to: string; due: string }[];
+    /** `published_calendar` only: the agency's printed dates are day-of-month dates with no weekend rule printed (Kentucky); roll a date on a weekend or holiday to the next business day. Leave unset when the dates are already adjusted. */
+    rollPrintedDates?: boolean;
+    /**
+     * `published_calendar` only (Missouri quarter-monthly): the payment due on each calendar row is only this percent of
+     * the tax withheld in the row (rounded up to the cent); the rest is paid with the periodic return, whose dates are the
+     * rows of `remainderCalendar` (by pay date).
+     */
+    percent?: number;
+    remainderCalendar?: { from: string; to: string; due: string }[];
+    /**
+     * `follow_federal` (Arizona): the state payment is due at the same time as the employer's FEDERAL deposit for the same
+     * pay dates, whatever the state amount. The federal deposit analysis must be supplied; its due dates are used as they are.
+     */
     /**
      * Only for `eighth_monthly` (Delaware): the days of the month on which a payment period ends, ascending; 31 means
      * "the last day of the month". A pay date belongs to the first period that ends on or after its day. The `due`
@@ -271,7 +294,7 @@ export function validateProfile(p: StateProfile): string[] {
       if (!d.frequencies[d.lookback.newEmployer]) bad.push(`withholding.deposits: new-employer frequency ${d.lookback.newEmployer} is not defined`);
       for (const c of d.lookback.classes) if (!d.frequencies[c.name]) bad.push(`withholding.deposits: look-back class ${c.name} has no frequency`);
       for (const [n, f] of Object.entries(d.frequencies)) {
-        if (f.period === 'month_threshold' && !((f.thresholdExclusive ?? 0) > 0 && (f.monthlyDueDay ?? 0) >= 1)) bad.push(`withholding.deposits.frequencies.${n}: month_threshold needs a positive threshold and monthlyDueDay`);
+        if (f.period === 'month_threshold' && !(f.thresholdExclusive !== undefined && f.thresholdExclusive >= 0 && (f.monthlyDueDay ?? 0) >= 1)) bad.push(`withholding.deposits.frequencies.${n}: month_threshold needs a positive threshold and monthlyDueDay`);
         if (f.period === 'eighth_monthly') {
           const e = f.periodEnds ?? [];
           if (e.length < 2 || e.some((x, i) => x < 1 || x > 31 || (i > 0 && x <= e[i - 1])) || e[e.length - 1] !== 31) bad.push(`withholding.deposits.frequencies.${n}: periodEnds must ascend and end with 31 (the last day)`);
@@ -284,6 +307,8 @@ export function validateProfile(p: StateProfile): string[] {
             if (i > 0 && !(rows[i - 1].to < r.from)) bad.push(`withholding.deposits.frequencies.${n}.calendar[${i}]: overlaps or is out of order`);
           });
         }
+        if ((f.period === 'paydate_threshold' || f.period === 'week_threshold') && !((f.thresholdExclusive ?? 0) > 0 && (f.bankingDays ?? 0) >= 1)) bad.push(`withholding.deposits.frequencies.${n}: ${f.period} needs a positive threshold and bankingDays`);
+        if (f.period === 'period_threshold' && !((f.thresholdExclusive ?? 0) > 0 && (f.bankingDays ?? 0) >= 1 && (f.periodEnds ?? []).length >= 2)) bad.push(`withholding.deposits.frequencies.${n}: period_threshold needs a positive threshold, bankingDays and periodEnds`);
         if (f.period === 'semiweekly_threshold' && !((f.thresholdExclusive ?? 0) > 0 && (f.bankingDays ?? 0) >= 1)) bad.push(`withholding.deposits.frequencies.${n}: semiweekly_threshold needs a positive threshold and bankingDays`);
       }
     } else if (d.kind === 'quarter_month_threshold') {

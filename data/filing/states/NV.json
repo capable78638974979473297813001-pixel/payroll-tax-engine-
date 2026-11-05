@@ -1,0 +1,99 @@
+{
+ "state": "NV",
+ "name": "Nevada",
+ "verifiedOn": "2026-11-05",
+ "sources": [
+  {
+   "id": "S1",
+   "title": "Nevada Administrative Code chapter 612 (Unemployment Compensation): NAC 612.035 and NAC 612.260",
+   "url": "https://www.leg.state.nv.us/nac/NAC-612.html",
+   "revision": "NAC 612 as published by the Nevada Legislature; fetched live 2026-11-05",
+   "verifiedOn": "2026-11-05",
+   "verifiedBy": "fetched directly from leg.state.nv.us on 2026-11-05 and read: NAC 612.035 (quarterly contribution and wage reports must be filed by electronic means; the Division may grant a waiver of not more than one year for lack of facilities, severe economic hardship or other good cause) and NAC 612.260 (contributions accrue on wages paid in each calendar quarter and are due and must be paid on or before the last day of the calendar month next following the close of the quarter; the first contribution of a new employer is due the last day of the month after the quarter in which it became liable). The Division of Employment Security's own pages (detr.nv.gov) refuse automated access, including from an ordinary browser session, so nothing from them is used."
+  },
+  {
+   "id": "S2",
+   "title": "Nevada Revised Statutes chapter 612, NRS 612.545 (Base)",
+   "url": "https://www.leg.state.nv.us/nrs/nrs-612.html",
+   "revision": "NRS 612 as published by the Nevada Legislature; fetched live 2026-11-05",
+   "verifiedOn": "2026-11-05",
+   "verifiedBy": "fetched directly from leg.state.nv.us on 2026-11-05 and read NRS 612.545: wages do not include the part paid to a person by an employer in a calendar year that exceeds 66 2/3 percent of the average annual wage, rounded to the nearest hundred dollars, for the preceding calendar year; the Administrator computes the average annual wage by July 1."
+  },
+  {
+   "id": "S3",
+   "title": "U.S. Department of Labor, Significant Provisions of State Unemployment Insurance Laws, effective January 2026",
+   "url": "https://oui.doleta.gov/unemploy/content/sigpros/2020-2029/January2026.pdf",
+   "revision": "effective January 2026",
+   "verifiedOn": "2026-11-05",
+   "verifiedBy": "fetched directly from oui.doleta.gov on 2026-11-05 and read (layout text): the Taxes column's taxable wage base for the state's row (a federal compilation of the state laws)."
+  }
+ ],
+ "agencies": {
+  "ui": {
+   "name": "Nevada Department of Employment, Training and Rehabilitation (DETR), Employment Security Division",
+   "portalUrl": "https://detr.nv.gov",
+   "source": "S1"
+  }
+ },
+ "calendar": {
+  "weekendsRoll": true,
+  "holidays": {
+   "verified": false
+  },
+  "source": "S1"
+ },
+ "mandates": {
+  "efile": {
+   "text": "Each employing unit and employer that is subject to chapter 612 of NRS shall file by electronic means all quarterly contribution and wage reports. The Division may grant a waiver of not more than 1 year if the employer lacks the facilities to file by electronic means, filing electronically would impose a severe economic hardship, or other good cause is shown (NAC 612.035).",
+   "source": "S1"
+  }
+ },
+ "withholding": {
+  "applies": false,
+  "notModelled": []
+ },
+ "ui": {
+  "wageBase": 4370000,
+  "wageBaseYear": 2026,
+  "employerTaxLineId": "NV_SUI_ER",
+  "returns": [
+   {
+    "id": "quarterly-contribution-report",
+    "name": "Employer's quarterly contribution and wage report",
+    "frequency": "quarterly",
+    "due": {
+     "kind": "last_day_of_month_after_quarter"
+    },
+    "source": "S1",
+    "contents": [
+     "Contributions are due and must be paid on or before the last day of the calendar month next following the close of the quarter (NAC 612.260), so April 30, July 31, October 31 and January 31; filed electronically (NAC 612.035).",
+     "The taxable wage limit is 66 2/3% of the preceding year's average annual wage, rounded to the nearest hundred dollars (NRS 612.545): $43,700 for 2026 per the U.S. Department of Labor's compilation; wages above it are still reported.",
+     "The code text read does not state a weekend or holiday rule, so the next business day is assumed."
+    ]
+   }
+  ],
+  "notModelled": [
+   "Nevada's weekend and holiday rule for the due date: not in NAC 612.260, so assumed (next business day).",
+   "The Division's penalties, its Employer Self-Service portal and its waiver form: the Division's pages refuse automated access and were not read.",
+   "Whether electronic payment is separately mandated above a dollar amount: not in the code text read.",
+   "The 2027 wage base (the Division's summary reports $45,400; the U.S. Department of Labor's July 2026 edition lists the same, not re-read for the profile)."
+  ]
+ },
+ "channels": [
+  {
+   "id": "state:NV:electronic-filing",
+   "function": "quarterly contribution and wage report, payment",
+   "description": "Nevada Employment Security Division electronic filing of quarterly contribution and wage reports (required by NAC 612.035 unless a waiver of up to one year is granted)",
+   "enrollment": [
+    "Register as a Nevada employer for unemployment insurance with the Employment Security Division (steps not read).",
+    "Request a waiver of the electronic filing requirement from the Division only if the employer lacks the facilities, faces severe hardship, or shows other good cause (NAC 612.035)."
+   ],
+   "specs": "The portal and file layouts: the Division's pages refuse automated access and were not read.",
+   "source": "S1"
+  }
+ ],
+ "notModelled": [
+  "Nevada has no state income tax on wages, so there is no state withholding.",
+  "New-hire reporting: not read."
+ ]
+}

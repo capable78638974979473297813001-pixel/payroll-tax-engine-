@@ -1,0 +1,85 @@
+{
+ "state": "NH",
+ "name": "New Hampshire",
+ "verifiedOn": "2026-11-05",
+ "sources": [
+  {
+   "id": "S1",
+   "title": "N.H. Code of Administrative Rules Emp 304.01, Contributions Due and Payable (as published by Cornell's Legal Information Institute)",
+   "url": "https://www.law.cornell.edu/regulations/new-hampshire/N-H-Admin-Code-SS-Emp-304.01",
+   "revision": "regulation text; fetched live 2026-11-05",
+   "verifiedOn": "2026-11-05",
+   "verifiedBy": "fetched directly from law.cornell.edu on 2026-11-05 and read Emp 304.01: contributions of every employer on wages paid during a calendar quarter are due and paid to the department of employment security on or before the last day of the month following the calendar quarter; the department must require monthly filing and payment (the last day of the month following the month in which wages are paid) of an employer whose record shows failure to report or pay when due, or who is likely to be late through economic inability, recalcitrance or similar reasons. New Hampshire Employment Security's own pages (nhes.nh.gov, www2.nhes.nh.gov, mm.nh.gov) and the legislature's rule and statute pages refuse automated access or return empty replies, so nothing from them is used."
+  },
+  {
+   "id": "S2",
+   "title": "U.S. Department of Labor, Significant Provisions of State Unemployment Insurance Laws, effective January 2026",
+   "url": "https://oui.doleta.gov/unemploy/content/sigpros/2020-2029/January2026.pdf",
+   "revision": "effective January 2026",
+   "verifiedOn": "2026-11-05",
+   "verifiedBy": "fetched directly from oui.doleta.gov on 2026-11-05 and read (layout text): the Taxes column's taxable wage base for the state's row (a federal compilation of the state laws)."
+  }
+ ],
+ "agencies": {
+  "ui": {
+   "name": "New Hampshire Employment Security (NHES)",
+   "portalUrl": "https://www.nhes.nh.gov",
+   "source": "S1"
+  }
+ },
+ "calendar": {
+  "weekendsRoll": true,
+  "holidays": {
+   "verified": false
+  },
+  "source": "S1"
+ },
+ "mandates": {},
+ "withholding": {
+  "applies": false,
+  "notModelled": []
+ },
+ "ui": {
+  "wageBase": 1400000,
+  "wageBaseYear": 2026,
+  "employerTaxLineId": "NH_SUI_ER",
+  "returns": [
+   {
+    "id": "quarterly-tax-and-wage-report",
+    "name": "Employer Tax and Wage Report (quarterly)",
+    "frequency": "quarterly",
+    "due": {
+     "kind": "last_day_of_month_after_quarter"
+    },
+    "source": "S1",
+    "contents": [
+     "Contributions on wages paid in a quarter are due and paid on or before the last day of the month following the calendar quarter: April 30, July 31, October 31, January 31 (Emp 304.01(a)).",
+     "The department requires an employer with a poor reporting record to file the Employer Tax and Wage Report and pay by the last day of the month following the MONTH in which wages are paid (Emp 304.01(b)): supply the 'monthly' frequency's treatment yourself, it is not an assigned status in this profile.",
+     "The taxable wage base is $14,000 per the U.S. Department of Labor's compilation of state laws."
+    ]
+   }
+  ],
+  "notModelled": [
+   "Monthly filing required by the department for a poor reporting record (Emp 304.01(b)): a department decision, not computed here.",
+   "How reports are filed (the department's WebTax system, its limits by employee count, any grace period and the penalty fees): the department's pages refuse automated access and were not read.",
+   "The quarterly trust-fund reduction that changes the rate: an input from the department's rate notice.",
+   "Weekend and holiday handling of the due date: not in Emp 304.01, so assumed (next business day)."
+  ]
+ },
+ "channels": [
+  {
+   "id": "state:NH:employment-security",
+   "function": "quarterly tax and wage report and contributions",
+   "description": "New Hampshire Employment Security: the Employer Tax and Wage Report and contributions (electronic system details not read)",
+   "enrollment": [
+    "Register as a New Hampshire employer for unemployment compensation with NHES (steps not read) and file the Employer Tax and Wage Report each quarter."
+   ],
+   "specs": "Not read: the department's pages refuse automated access.",
+   "source": "S1"
+  }
+ ],
+ "notModelled": [
+  "New Hampshire has no tax on wages, so there is no state withholding.",
+  "New-hire reporting: not read."
+ ]
+}

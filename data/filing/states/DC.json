@@ -1,0 +1,112 @@
+{
+ "state": "DC",
+ "name": "District of Columbia",
+ "verifiedOn": "2026-11-04",
+ "sources": [
+  {
+   "id": "S1",
+   "title": "DC Office of Tax and Revenue: 2025 FR-900Q Employer/Payor Withholding Tax - Reporting Instructions",
+   "url": "https://otr.cfo.dc.gov/sites/default/files/dc/sites/otr/publication/attachments/2025_FR900Q_Instructions_121824.pdf",
+   "revision": "2025 instructions (file dated 12/18/24)",
+   "verifiedOn": "2026-11-05",
+   "verifiedBy": "fetched directly from otr.cfo.dc.gov on 2026-11-05 and read: When Must You File, General Instructions (payment frequencies and the 20th-day rule), how to complete the FR-900Q (electronic filing, the account number, third-party payers), specific instructions, the list of related forms. THE 2025 EDITION; the 2026 instructions were not read."
+  }
+ ],
+ "agencies": {
+  "withholding": {
+   "name": "DC Office of Tax and Revenue",
+   "portalUrl": "https://mytax.dc.gov",
+   "source": "S1"
+  }
+ },
+ "calendar": {
+  "weekendsRoll": true,
+  "holidays": {
+   "verified": false
+  },
+  "source": "S1"
+ },
+ "mandates": {
+  "efile": {
+   "text": "Effective TY2023, all Withholding tax returns must be filed electronically on MyTax.DC.gov.",
+   "source": "S1"
+  }
+ },
+ "withholding": {
+  "applies": true,
+  "taxLineIds": {
+   "withholding": "DC_SIT",
+   "employeeInsurance": []
+  },
+  "returns": [
+   {
+    "id": "FR-900Q",
+    "name": "Form FR-900Q, Employer/Payor Withholding Tax - Quarterly Return",
+    "frequency": "quarterly",
+    "due": {
+     "kind": "last_day_of_month_after_quarter"
+    },
+    "contents": [
+     "Due by the last day of the month after the quarter: April 30, July 31, October 31, January 31; a quarterly filer files it even with no tax withheld, unless a final return was filed.",
+     "Monthly depositors enter the amount per month on the return; quarterly depositors the quarter's amount.",
+     "The employer remains responsible when a tax professional, bank or payroll service files and pays; the withholding account number OTR provided, not just the FEIN, must be used so payments are applied.",
+     "Filed electronically on MyTax.DC.gov; a bulk filing specification exists."
+    ],
+    "source": "S1"
+   }
+  ],
+  "notModelled": [
+   "Weekly and semi-weekly payment schedules: named, no dates or thresholds in the instructions.",
+   "Annual filers (Form FR-900A) and the payment voucher FR-900P.",
+   "The 2026 edition of the instructions; DC unemployment insurance (Department of Employment Services); the DC Paid Family Leave tax; DC's legal-holiday list (weekends only are skipped, with a warning).",
+   "The MyTax.DC.gov bulk filing specification (FR-900Q) and electronic W-2 filing: listed in the instructions, not read."
+  ],
+  "deposits": {
+   "kind": "assigned_frequency",
+   "rulesYear": 2025,
+   "interpretation": "OTR requires payments on a weekly, semi-weekly, monthly or quarterly basis, set up with OTR (the filing frequency 'is set up with OTR'), and a QUARTERLY return (Form FR-900Q) from everyone except annual filers (Form FR-900A). The instructions say 'Deposits are due by the 20th day of the following month, or on or before the 20th day of the month following the quarter being reported': MONTHLY depositors pay by the 20th of the following month and QUARTERLY depositors by the 20th of the month after the quarter (April 20, July 20, October 20, January 20). Payments made by a payroll service or other third party must also arrive by that date. A payment due on a non-business day (Saturday, Sunday, District legal holiday) is timely if made by the close of the next business day. WEEKLY and SEMI-WEEKLY schedules are named but no dates or thresholds are given, so they are NOT MODELLED: supplying them returns an error. The frequency is an INPUT (OTR assigns it); the look-back is not derived. Annual filers (FR-900A) are not modelled. THIS IS THE 2025 EDITION.",
+   "lookback": {
+    "description": "None: OTR assigns the frequency",
+    "classes": [],
+    "newEmployer": "monthly"
+   },
+   "frequencies": {
+    "monthly": {
+     "period": "month",
+     "due": {
+      "kind": "day_of_month_after",
+      "day": 20
+     }
+    },
+    "quarterly": {
+     "period": "quarter",
+     "due": {
+      "kind": "day_of_month_after_quarter",
+      "day": 20
+     }
+    }
+   },
+   "deposited": [
+    "withholding"
+   ],
+   "source": "S1"
+  }
+ },
+ "channels": [
+  {
+   "id": "state:DC:mytax-dc",
+   "function": "withholding returns (FR-900Q) and payments, electronic W-2, bulk filing",
+   "description": "MyTax.DC.gov: electronic filing and EFT payments (ACH credit, debit); a bulk-filing specification exists for FR-900Q and account lookup",
+   "enrollment": [
+    "Register with OTR for a withholding account; the OTR-assigned account number must be used by any third party that files or pays (the instructions warn that payments are misapplied otherwise).",
+    "File electronically on MyTax.DC.gov; payments by EFT; a payroll service must pay by the 20th."
+   ],
+   "specs": "The FR-900Q bulk filing specification and electronic W-2 filing instructions: named in the instructions, not read.",
+   "source": "S1"
+  }
+ ],
+ "notModelled": [
+  "DC unemployment insurance and Paid Family Leave: not read.",
+  "New-hire reporting: not read."
+ ]
+}

@@ -1,0 +1,79 @@
+{
+ "state": "WA",
+ "name": "Washington",
+ "verifiedOn": "2026-11-05",
+ "sources": [
+  {
+   "id": "S1",
+   "title": "Washington Employment Security Department: How to file your quarterly tax and wage reports; How we determine tax rates (web pages)",
+   "url": "https://esd.wa.gov/employer-requirements/quarterly-reports/how-file-your-quarterly-tax-and-wage-reports",
+   "revision": "web pages, no edition printed; fetched live 2026-11-05",
+   "verifiedOn": "2026-11-05",
+   "verifiedBy": "fetched directly from esd.wa.gov on 2026-11-05 and read: how to file (SecureAccess Washington and EAMS), due dates for quarterly reports, no-payroll reports, and the taxable wage base table (2026: $78,200) on https://esd.wa.gov/employer-requirements/unemployment-taxes/how-we-determine-tax-rates. Washington Paid Family and Medical Leave and WA Cares are separate programs run by the same department with their own quarterly report and are not modelled here."
+  }
+ ],
+ "agencies": {
+  "ui": {
+   "name": "Washington Employment Security Department (ESD)",
+   "portalUrl": "https://esd.wa.gov/employer-requirements/quarterly-reports",
+   "source": "S1"
+  }
+ },
+ "calendar": {
+  "weekendsRoll": true,
+  "holidays": {
+   "verified": false
+  },
+  "source": "S1"
+ },
+ "mandates": {},
+ "withholding": {
+  "applies": false,
+  "notModelled": []
+ },
+ "ui": {
+  "wageBase": 7820000,
+  "wageBaseYear": 2026,
+  "employerTaxLineId": "WA_SUI_ER",
+  "returns": [
+   {
+    "id": "quarterly-tax-and-wage-report",
+    "name": "Quarterly unemployment tax and wage report",
+    "frequency": "quarterly",
+    "due": {
+     "kind": "last_day_of_month_after_quarter"
+    },
+    "contents": [
+     "Due the last day of the month after the quarter: April 30, July 31, October 31, January 31; a weekend or holiday date moves to the next business day.",
+     "Every employer files each calendar quarter while the account is active, even with no employees and no payroll ('no payroll' is not the same as zero hours).",
+     "Washington needs 2 tax and wage reports each quarter: this unemployment report and the Paid Leave / WA Cares report (not modelled here).",
+     "Filed online through SecureAccess Washington (SAW) in EAMS or by mail; reimbursable employers' benefit charging payments are due one month after these dates.",
+     "A late report carries a $25 penalty and late tax payment accrues interest at 1% of taxes due per month."
+    ],
+    "source": "S1"
+   }
+  ],
+  "notModelled": [
+   "Paid Family and Medical Leave and WA Cares premiums and their own quarterly report (the engine emits WA_PFML_EE and WA_LTC_EE).",
+   "The Washington UI rate is industry-based and issued by notice (an input).",
+   "EAMS file layouts for uploaded wage files: not read.",
+   "Whether online filing is mandatory: the page says filing online reduces errors; mail is accepted."
+  ]
+ },
+ "channels": [
+  {
+   "id": "state:WA:saw-eams",
+   "function": "unemployment quarterly tax and wage report",
+   "description": "SecureAccess Washington (SAW) and ESD's EAMS online account; reports may also be mailed",
+   "enrollment": [
+    "Create a SecureAccess Washington (SAW) account and add the ESD employer services (steps on the Paid Leave toolkit were read, not the UI registration page)."
+   ],
+   "specs": "Not read.",
+   "source": "S1"
+  }
+ ],
+ "notModelled": [
+  "Washington has no state income tax on wages, so there is no state withholding.",
+  "New-hire reporting: not read."
+ ]
+}

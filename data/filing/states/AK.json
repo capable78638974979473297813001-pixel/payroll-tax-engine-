@@ -1,0 +1,83 @@
+{
+ "state": "AK",
+ "name": "Alaska",
+ "verifiedOn": "2026-11-05",
+ "sources": [
+  {
+   "id": "S1",
+   "title": "Alaska Employment Security Tax Handbook (taxbook) with the 2026 Quarterly Contribution Report (TQ01C) and 2026 UI Tax Rates page",
+   "url": "https://labor.alaska.gov/estax/documents/taxbook.pdf",
+   "revision": "handbook last updated April 2024; TQ01C (2/26); 2026 rates page",
+   "verifiedOn": "2026-11-05",
+   "verifiedBy": "fetched directly from labor.alaska.gov on 2026-11-05 and read: the Contribution Report section (due dates, online filing requirement), the 2026 Taxable Wage Base ($54,200) on the Department's 2026 experience-rates page and on Form TQ01C-26. THE 2024 HANDBOOK: the due-date and online-filing rules were read from it; the 2026 form and rates page confirm the 2026 wage base and that a report is required even with no wages."
+  }
+ ],
+ "agencies": {
+  "ui": {
+   "name": "Alaska Department of Labor and Workforce Development, Employment Security Tax",
+   "portalUrl": "https://labor.alaska.gov/estax/",
+   "source": "S1"
+  }
+ },
+ "calendar": {
+  "weekendsRoll": true,
+  "holidays": {
+   "verified": false
+  },
+  "source": "S1"
+ },
+ "mandates": {
+  "efile": {
+   "text": "Quarterly contribution reports must be filed over the Internet once a wage schedule lists 50 or more employees in a quarter; $1 million or more in taxable wages in the current or preceding calendar year; or a payroll agent reports on behalf of an employer.",
+   "source": "S1"
+  }
+ },
+ "withholding": {
+  "applies": false,
+  "notModelled": []
+ },
+ "ui": {
+  "wageBase": 5420000,
+  "wageBaseYear": 2026,
+  "employerTaxLineId": "AK_SUI_ER",
+  "returns": [
+   {
+    "id": "TQ01C",
+    "name": "Form TQ01C, Alaska Quarterly Contribution Report and wage schedule",
+    "frequency": "quarterly",
+    "due": {
+     "kind": "last_day_of_month_after_quarter"
+    },
+    "contents": [
+     "Due the last day of the month after the quarter: April 30, July 31, October 31, January 31; a weekend or holiday date moves to the next business day.",
+     "A report must be filed even if no wages are paid for the quarter; the report and wage schedule are due the last day of the month after the quarter, or within 10 days after the business ceases.",
+     "Contributions by employers AND employees become due as liabilities accrue: the form shows an employer rate and an employee rate (the 2026 employee rate is 0.50%).",
+     "Reports are filed online (labor.alaska.gov/estax) and online filing is mandatory for 50 or more employees, $1 million or more in taxable wages, or when a payroll agent reports for the employer."
+    ],
+    "source": "S1"
+   }
+  ],
+  "notModelled": [
+   "The employee contribution (AK_UC_EE) is reported on the same form; the engine emits it as a separate employee line and this section does not total it.",
+   "The 2026 employer rate is an input from the Department's rate notice (range 1.0% to 5.4% per its 2026 rates page).",
+   "The wage schedule file layout and the Department's online-filing specification were not read.",
+   "The report is also required of employers ceasing business within 10 days."
+  ]
+ },
+ "channels": [
+  {
+   "id": "state:AK:estax-online",
+   "function": "quarterly contribution report and wage schedule",
+   "description": "Alaska Employment Security Tax online services (labor.alaska.gov/estax); a payroll agent must file over the Internet",
+   "enrollment": [
+    "Register as an Alaska employer with Employment Security Tax (steps not read); online filing is mandatory for payroll agents."
+   ],
+   "specs": "Not read.",
+   "source": "S1"
+  }
+ ],
+ "notModelled": [
+  "Alaska has no state income tax on wages, so there is no state withholding.",
+  "New-hire reporting: not read."
+ ]
+}

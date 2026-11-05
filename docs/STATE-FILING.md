@@ -5,7 +5,15 @@ runs, using **state profiles**: data files in `data/filing/states/` with a citat
 Import it as `import { state } from './payroll/index.ts'`. Coverage is in
 [`STATE-COVERAGE.md`](STATE-COVERAGE.md) (generated; a test fails if it is stale).
 
-**Status: 37 of 53 jurisdictions are modelled; 16 are NOT MODELLED.** Twenty-eight have a full withholding profile (deposit schedule, returns, mandates, channels), eight have a **partial** one (mandates, channels and what returns the stored agency documents state, but no deposit schedule is computed: IA, ID, LA, MD, MO, NM, NY, OK), and Texas has no wage income tax. The other 16 (AK, AZ, AR, DC, FL, IN, KY, MA, NV, NH, PR, SD, TN, VI, WA, WY) are **NOT MODELLED**: nothing is assumed for them, and a lookup for one fails loudly. Everything modelled is **withholding and its returns**; unemployment insurance is modelled only for California, New York and Texas. **Nothing is transmitted to any state**: no state transport is connected.
+**Status: all 53 jurisdictions have a profile, and every one of the 51 states and DC is read from an official source.** No profile is secondary-sourced.
+
+| Tier | Jurisdictions | What it means |
+| --- | --- | --- |
+| Full withholding profile, read from the agency's own document (42) | AL, AR, AZ, CA, CO, CT, DC, DE, GA, HI, IA, ID, IL, IN, KS, KY, LA, MA, MD, ME, MI, MN, MO, MS, MT, NC, ND, NE, NJ, NM, NY, OH, OK, OR, PA, RI, SC, UT, VA, VT, WI, WV | Deposit schedule, returns, mandates and channels, each rule cited to the document it was read from |
+| No wage income tax, unemployment only (9) | TX, FL, AK, SD, WA, WY (read from the agency); NV, NH, TN (read from the state's published regulations and the U.S. Department of Labor, because the agencies' own pages refuse automated access) | Quarterly report due dates, wage base, mandates where the regulation states one, channels. For NV, NH and TN the agencies' portal details, penalties and grace periods are NOT recorded because their pages were not readable |
+| Unemployment only, outside the paycheck engine (2) | PR, VI | The Puerto Rico and Virgin Islands unemployment report rules, read from the departments' own pages (Puerto Rico's in Spanish; its due date is inferred from the SINOT regulation). **The paycheck engine has no Puerto Rico or Virgin Islands tax data**, so no wages or withholding flow in, and their income tax withholding is NOT modelled. |
+
+Everything modelled is **withholding and its returns**, except the unemployment-only rows above; state unemployment insurance for the other states (beyond CA and NY) is not modelled. **Nothing is transmitted to any state**: no state transport is connected.
 
 ## What it does
 
@@ -152,3 +160,65 @@ Every profile cites the agency's own document (URL, edition, what was read and w
 Items worth a person's attention before relying on a state: Rhode Island's and Ohio's printed calendars (taken as published; the stored text cannot show their colour coding), Virginia's and Delaware's interpretations (recorded in each profile and repeated in every result), and every profile marked as an older edition.
 
 Engine support added for these: `semiweekly`, `eighth_monthly` (also used for semi-monthly and quad-monthly), `month_threshold`, `published_calendar`, a next-banking-day override (`nextDayRule`), and the due rules `semiweekly_following`, `semimonthly_days`, `day_of_month_after_quarter`, `last_day_of_following_month`, `month_day_next_year`, and a `decemberDay` on `day_of_month_after`. A look-back amount that does not decide a schedule returns `state_frequency_not_derivable` instead of a guess. `tests/state-table.test.ts` runs every state's table rows and 1,000 randomized payroll years each.
+
+## Batch 3: read live from the agencies' own sites (2026-11-05)
+
+These five were fetched directly from the agency's website and read, not taken from the watcher's stored copy.
+
+| State | Source and edition | What is computed | Flags |
+| --- | --- | --- | --- |
+| AZ | Employer Withholding Filing Obligations page; WTP 16-1 (2016) | Quarterly to a $1,500 four-quarter average, then **the employer's federal deposit dates**; annual is an input | Needs the federal analysis; extra annual-payment criteria not listed |
+| AR | Employer's Instructions, updated 07/01/2024 | Monthly (the 15th), annual (January 31); AR3MAR February 28; ARW3 January 31 | **2024 edition** |
+| DC | 2025 FR-900Q instructions | Monthly (the 20th) and quarterly (the 20th after the quarter) deposits; FR-900Q | **2025 edition**; weekly and semi-weekly not modelled |
+| IN | Business FAQ | Monthly (30 days after month end) and early filer (20 days) | "N days after the end of the month" read literally; county tax not split |
+| KY | 42A003, Revised October 2025 | Annual, quarterly, monthly, twice-monthly (printed table for 2026-2027) | No weekend rule printed (next business day assumed); one-day deposit not modelled |
+
+New engine support: a `follow_federal` frequency (the state payment is due with the federal deposit for the same pay dates), `rollPrintedDates` for printed calendars with no weekend rule, and the due rules `calendar_days_after_month_end` and `decemberDay`.
+
+## Batch 4: unemployment-only states, read live (2026-11-05)
+
+`tests/state-ui.test.ts` checks every unemployment section's wage base against the paycheck engine's own, separately researched 2026 figure, so two independent sources must agree.
+
+| State | Source | What is computed | Flags |
+| --- | --- | --- | --- |
+| FL | Department of Revenue Reemployment Tax pages | RT-6 quarterly, $7,000 base; electronic filing and payment mandatory at 10 or more employees | Rate is an input |
+| AK | Employment Security Tax Handbook (April 2024), 2026 TQ01C and rates page | Quarterly report and wage schedule, $54,200 base; **online filing mandatory when a payroll agent reports for the employer** | Employee contribution on the same form |
+| SD | Reemployment Assistance wage reporting pages | Quarterly wage report received by the last day of the month, $15,000 base | |
+| WA | ESD quarterly reports and tax-rate pages | Quarterly tax and wage report, $78,200 base | Paid Leave and WA Cares have their own report, not modelled |
+| WY | DWS reporting due dates, taxable wage base and WYUI pages | Quarterly report, $33,800 base | |
+| TN | UI Tax Rates page | $7,000 base only | The quarterly due-date page refused an automated fetch |
+
+## Batch 5: the last five, and the secondary-source rule
+
+`Source.secondary` marks a source that was not the agency's own document. It exists because NV and NH refuse automated requests (MA was one of three until it was read from the agency's own pages in batch 6); the rules recorded for them are the best available but unconfirmed, and the warning travels with every result so a person must confirm them before filing. To upgrade one: read the agency's own page (a person can; the agency allows browsers), update the profile, delete `secondary`, and the pin in `tests/state-secondary.test.ts` will say so. New engine support: the `period_threshold` frequency (Massachusetts' quarter-monthly $500 deposit rule) and the `monthly_with_quarter_end` due rule.
+
+## Batch 6: the eight partial states completed, and Massachusetts verified (2026-11-05)
+
+IA, ID, LA, MD, MO, NM, NY and OK now have deposit schedules read from the agencies' own pages or rules; MA was read from the Department's own pages. Highlights:
+
+| State | Source | What is computed |
+| --- | --- | --- |
+| IA | Filing Frequency & Return Due Dates | Quarterly; monthly (months 1-2 by the 15th, month 3 with the return); semimonthly (25th / 10th) |
+| ID | Withholding Due Dates and Filing | Semimonthly (20th / 5th), monthly (20th), quarterly, annual cycles |
+| LA | FAQs: When are my payments due; When must I file L-1 | Quarterly and monthly (last day of the month after), semi-monthly (end of month / 15th); L-1 15th for semi-monthly payers |
+| MD | Employer Withholding Guide (Dec 2023) | Accelerated ($700 within 3 business days of the pay date), monthly, quarterly (15th), annual. **2024 edition; monthly due date inferred** |
+| MO | Employer's Tax Guide 4282 (03-2026) and Form 2414W | The Department's printed 2026 calendar: 48 quarter-monthly payment dates (90% of each period, the guide's worked example is a test), monthly, quarterly, annual |
+| NM | TRD-41414 Instructions (07/01/2026) | Monthly, quarterly, semiannual, due the 25th, weekend rolls |
+| NY | Withholding tax filing requirements, due dates and NYS-1 instructions | NYS-1 due 3 or 5 business days after the payroll that takes the quarter's accumulated tax to $700 (weeks grouped Sunday-Saturday); the rest with the NYS-45 |
+| OK | OAC 710:90-3-4 | Quarterly (20th), monthly (20th), or the federal semiweekly dates |
+| MA | Withholding Tax Guide and Form M-941 instructions | Annual, quarterly, monthly (with the quarter-end months), and the over-$25,000 quarter-monthly $500 rule |
+
+Massachusetts (and the other pages that answer plain HTTP clients with 403) was read in an ordinary headless browser session, one request per page, the way a person's browser loads it. Nevada and New Hampshire still answered 403 in that session and were not pursued further. New engine support: `paydate_threshold` and `week_threshold` frequencies, and percent-of-withholding payments with a remainder calendar on published calendars.
+
+## Batch 7: Nevada, New Hampshire, Tennessee and Maryland from published law (2026-11-05)
+
+The three agencies that refuse automated access (and Tennessee's support pages) publish the same rules in places that do not: the states' administrative codes, the legislature's statute sites, Cornell's Legal Information Institute, and the U.S. Department of Labor. Those were read instead, and the unconfirmed search-summary details were removed.
+
+| State | Source | What is recorded |
+| --- | --- | --- |
+| NV | NAC 612.035 and 612.260, NRS 612.545 (leg.state.nv.us); DOL Significant Provisions (January 2026) | Due the last day of the month after the quarter; electronic filing with a waiver of at most one year; wage base $43,700 (66 2/3% of the average annual wage) |
+| NH | N.H. Admin. Code Emp 304.01 (LII); DOL | Due the last day of the month after the quarter; monthly filing the department may require; wage base $14,000 |
+| TN | Rule 0800-10-01-.02 (LII); the Department's rates page and FAQ; DOL | Due the last day of the month after the quarter; wage reports in Employer e-Services; wage base $7,000 |
+| MD | Tax-General 10-822 and COMAR 03.04.01.01 | Quarterly and monthly returns the 15th, annual January 31, accelerated within 3 business days of a payroll taking the accumulated tax to $700; monthly at $700 or more expected |
+
+`Source.secondary` and the `state_source_secondary` warning remain in the engine for any future profile that cannot be read from an official source; none uses them now.

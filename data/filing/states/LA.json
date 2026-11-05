@@ -1,7 +1,7 @@
 {
  "state": "LA",
  "name": "Louisiana",
- "verifiedOn": "2026-11-04",
+ "verifiedOn": "2026-11-05",
  "sources": [
   {
    "id": "S1",
@@ -10,6 +10,14 @@
    "revision": "web page, no edition printed; stored copy checked 2026-11-04",
    "verifiedOn": "2026-11-04",
    "verifiedBy": "read from the stored copy in watcher/state/snapshots/la-706e332554.txt.gz: Who Must File, Payment Frequency, File and Pay Electronically, Annual Reconciliation. The page states the payment-frequency thresholds but no payment due dates; the rate tables (R-1306) and the emergency rule on tables do not state them either."
+  },
+  {
+   "id": "S2",
+   "title": "Louisiana Department of Revenue FAQs: When are my payments due? and When must I file Form L-1?",
+   "url": "https://revenue.louisiana.gov/tax-education-and-faqs/faqs/withholding-tax/when-are-my-payments-due/",
+   "revision": "FAQ pages, no edition printed; fetched live 2026-11-05",
+   "verifiedOn": "2026-11-05",
+   "verifiedBy": "fetched directly from revenue.louisiana.gov on 2026-11-05 and read: When are my payments due? (quarterly, monthly and semi-monthly payment dates) and When must I file Form L-1? (https://revenue.louisiana.gov/tax-education-and-faqs/faqs/withholding-tax/when-must-i-file-form-l1/: the quarterly and semi-monthly return due dates and the zero-return rule)."
   }
  ],
  "agencies": {
@@ -40,6 +48,19 @@
   },
   "returns": [
    {
+    "id": "L-1",
+    "name": "Form L-1, Louisiana Withholding Tax Return (quarterly)",
+    "frequency": "quarterly",
+    "due": {
+     "kind": "last_day_of_month_after_quarter"
+    },
+    "contents": [
+     "One return per quarter, filed electronically even if nothing was withheld (zero return); due the last day of the month after the quarter for quarterly and monthly payers, the 15th of the month after the quarter for semi-monthly payers.",
+     "Reports the month-by-month withholding and the payments made for the quarter."
+    ],
+    "source": "S2"
+   },
+   {
     "id": "L-3",
     "name": "Form L-3, Annual Withholding Reconciliation",
     "frequency": "annual",
@@ -55,11 +76,62 @@
    }
   ],
   "notModelled": [
-   "Louisiana's payment frequency is assigned from the average monthly withholding: quarterly under $500, monthly $500 to under $5,000, semi-monthly $5,000 or more. The page does NOT state the due dates for any frequency (or the Form L-1 due date), so no deposit schedule is computed.",
-   "Louisiana unemployment insurance: no document read.",
-   "Louisiana's legal-holiday list.",
-   "The LaTAP and LaWage file layouts."
-  ]
+   "Semi-monthly payers' L-1 is due the 15th after the quarter; the profile records the quarterly/monthly date for the return entry (the payment rules above carry both)."
+  ],
+  "deposits": {
+   "kind": "assigned_frequency",
+   "rulesYear": 2026,
+   "interpretation": "Louisiana assigns the payment frequency from the average monthly withholding: under $500 QUARTERLY, $500 to under $5,000 MONTHLY, $5,000 or more SEMI-MONTHLY. Payments are made electronically. QUARTERLY payments are due the last day of the month after the quarter; MONTHLY payments the last day of the month following the month; SEMI-MONTHLY payments for the 1st-15th are due by the end of the same month and for the 16th-end by the 15th of the following month. The quarterly return Form L-1 is due the last day of the month after the quarter (April 30, July 31, October 31, January 31) for quarterly and monthly payers and the 15th of the month after the quarter (April 15, July 15, October 15, January 15) for semi-monthly payers, with a zero return when nothing was withheld. The Department's calendar showed February 2, 2026 for the fourth-quarter return because January 31 was a Saturday, so weekends roll to the next business day. The frequency is an INPUT or is derived from the average monthly amount supplied.",
+   "lookback": {
+    "description": "Average monthly Louisiana withholding",
+    "classes": [
+     {
+      "name": "quarterly",
+      "maxInclusive": 49999
+     },
+     {
+      "name": "monthly",
+      "minExclusive": 49999,
+      "maxInclusive": 499999
+     },
+     {
+      "name": "semimonthly",
+      "minExclusive": 499999
+     }
+    ],
+    "newEmployer": "quarterly"
+   },
+   "frequencies": {
+    "quarterly": {
+     "period": "quarter",
+     "due": {
+      "kind": "last_day_of_month_after_quarter"
+     }
+    },
+    "monthly": {
+     "period": "month",
+     "due": {
+      "kind": "last_day_of_following_month"
+     }
+    },
+    "semimonthly": {
+     "period": "eighth_monthly",
+     "periodEnds": [
+      15,
+      31
+     ],
+     "due": {
+      "kind": "semimonthly_days",
+      "firstHalfDay": 31,
+      "secondHalfDay": 15
+     }
+    }
+   },
+   "deposited": [
+    "withholding"
+   ],
+   "source": "S2"
+  }
  },
  "channels": [
   {

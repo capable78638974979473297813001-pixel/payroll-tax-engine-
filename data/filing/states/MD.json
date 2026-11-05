@@ -1,7 +1,7 @@
 {
  "state": "MD",
  "name": "Maryland",
- "verifiedOn": "2026-11-04",
+ "verifiedOn": "2026-11-05",
  "sources": [
   {
    "id": "S1",
@@ -10,6 +10,22 @@
    "revision": "COM/RAD-098, revised 12/25",
    "verifiedOn": "2026-11-04",
    "verifiedBy": "read from the stored copy in watcher/state/snapshots/md-982a16c674.txt.gz: Filing Your Return, Annual Withholding Filers, the MW508 reconciliation and electronic filing options. The Comptroller's 2026 Maryland Employer Withholding guide (stored as md-6837586c10) was also read for the forms list and the reporting-agent authorization. Neither stored document states the filing-frequency thresholds or the due dates of the regular and accelerated schedules."
+  },
+  {
+   "id": "S2",
+   "title": "Maryland Employer Withholding Guide, effective January 2024 (revised December 2023), section 5 'How to file'",
+   "url": "https://www.marylandcomptroller.gov/content/dam/mdcomp/tax/instructions/2024/Withholding-Guide.pdf",
+   "revision": "Revised December 2023, effective January 2024",
+   "verifiedOn": "2026-11-05",
+   "verifiedBy": "fetched directly from marylandcomptroller.gov on 2026-11-05 and read: section 5 (the five filing categories: accelerated, quarterly, monthly, seasonal, annual), the reminders (quarterly returns due the 15th of the month after the quarter; MW508 January 31; 25 or more W-2s electronically), and the forms list including Form 548P for reporting agents. THE 2024 EDITION: the 2026 Withholding Tax Facts (stored) did not restate the thresholds. The monthly return's due date (the 15th of the month after the month) is stated only in the Comptroller's FAQ summary and was not isolated in the guide text, so it is recorded as an inference."
+  },
+  {
+   "id": "S3",
+   "title": "Maryland Tax-General Article section 10-822, and COMAR 03.04.01.01 (Withholding of Tax at Source)",
+   "url": "https://mgaleg.maryland.gov/mgawebsite/laws/StatuteText?article=gtg&section=10-822",
+   "revision": "statute and regulation text; fetched live 2026-11-05",
+   "verifiedOn": "2026-11-05",
+   "verifiedBy": "fetched directly from mgaleg.maryland.gov and regs.maryland.gov on 2026-11-05 and read: Tax-General 10-822 (quarterly return due on or before the 15th day of the month that follows the quarter; a person who reasonably expects $700 or more of withholding in a quarter files monthly; a person who expects less than $250 in a year files annually on or before January 31; a person that withheld $15,000 or more in the preceding calendar year files within 3 business days following each payroll that causes the total accumulated tax withheld to equal or exceed $700; waiver to file monthly) and COMAR 03.04.01.01 (monthly basis: at least $700 expected for a quarter, return and payment on or before the 15th day of the following month; quarterly basis: less than $700, on or before the 15th day of the following month; the $15,000 / $700 accelerated rule; waiver). Used at https://regs.maryland.gov/us/md/exec/comar/03.04.01.01."
   }
  ],
  "agencies": {
@@ -40,6 +56,20 @@
   },
   "returns": [
    {
+    "id": "MW506",
+    "name": "Form MW506, Employer's Return of Income Tax Withheld (MW506M for accelerated filers)",
+    "frequency": "quarterly",
+    "due": {
+     "kind": "day_of_month_after_quarter",
+     "day": 15
+    },
+    "contents": [
+     "Quarterly withholding returns are due the 15th day of the month that follows the calendar quarter; annual filers file the MW506 by the last day of January; accelerated filers file the MW506M within three business days of the pay date and enter the pay date on it.",
+     "The employer remains responsible when a third party files or pays, and must provide each employee a W-2 by January 31."
+    ],
+    "source": "S3"
+   },
+   {
     "id": "MW508",
     "name": "Form MW508, Annual Employer Withholding Reconciliation Return",
     "frequency": "annual",
@@ -56,12 +86,55 @@
    }
   ],
   "notModelled": [
-   "Maryland's withholding deposit schedule (regular and accelerated filers: Forms MW506 and MW506M): neither stored document states the thresholds or due dates, so none is computed. An accelerated filer enters the pay date on the MW506M.",
-   "Annual filers' dates: only that they use the fourth-quarter coupon matching their tax year end.",
-   "Maryland unemployment insurance and family leave: no document read.",
-   "Maryland's legal-holiday list.",
-   "The 'modified Maryland standard format' layout in the Employer Reporting of W-2s or 1099s Instructions and Specifications."
-  ]
+   "Seasonal filing status (needs prior approval).",
+   "Where an accelerated filer's quarter-end remainder under $700 is paid: the statute and regulation do not say; the quarterly return date is used."
+  ],
+  "deposits": {
+   "kind": "assigned_frequency",
+   "rulesYear": 2024,
+   "interpretation": "Maryland has five filing categories. ACCELERATED: an employer that withheld $15,000 or more in the preceding calendar year and has $700 or more of accumulated withholding must remit within three business days following the payroll (pay date; the date paychecks are made available to employees), on Form MW506M; a waiver allowing monthly returns can be requested and renewed. MONTHLY: $700 or more of withholding expected in a quarter (the Comptroller's 2024 guide words it 'more than $700'). QUARTERLY: less than $700 of withholding per quarter; quarterly returns are due the 15th day of the month that follows the quarter. ANNUAL: less than $250 withholding per calendar year; the annual Form MW506 is due the last day of January following the year. SEASONAL: only with prior approval (not modelled). INTERPRETATIONS: (1) the $700 accelerated test is applied to the tax accumulated and not yet paid since the last payment, evaluated at each pay date and restarting each quarter; the remainder under $700 at quarter end is paid with the quarterly return date (the guide does not say where it goes). (2) The MONTHLY return is due the 15th of the following month (COMAR 03.04.01.01(D)(3), read from the State's regulation); the statute and regulation say a person who expects $700 or MORE in a quarter files monthly, while the Comptroller's 2024 guide says 'more than $700': the statute is followed. The category is assigned by the Comptroller, so the frequency is an INPUT; the look-back derivation uses the $15,000 prior-year test only for accelerated, and only when the quarterly amount is also supplied, so the engine does not derive it. The rules above are confirmed against Tax-General 10-822 and COMAR 03.04.01.01 (source S3), which state the accelerated trigger as accumulated tax that 'equals or exceeds $700' after any payroll.",
+   "lookback": {
+    "description": "None: the category depends on both the prior-year total and the quarterly amount",
+    "classes": [],
+    "newEmployer": "quarterly"
+   },
+   "frequencies": {
+    "accelerated": {
+     "period": "paydate_threshold",
+     "thresholdExclusive": 69999,
+     "bankingDays": 3,
+     "due": {
+      "kind": "day_of_month_after_quarter",
+      "day": 15
+     }
+    },
+    "monthly": {
+     "period": "month",
+     "due": {
+      "kind": "day_of_month_after",
+      "day": 15
+     }
+    },
+    "quarterly": {
+     "period": "quarter",
+     "due": {
+      "kind": "day_of_month_after_quarter",
+      "day": 15
+     }
+    },
+    "annual": {
+     "period": "year",
+     "due": {
+      "kind": "january_day_next_year",
+      "day": 31
+     }
+    }
+   },
+   "deposited": [
+    "withholding"
+   ],
+   "source": "S3"
+  }
  },
  "channels": [
   {
