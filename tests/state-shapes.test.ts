@@ -27,6 +27,7 @@ const KS = loadProfile('KS');
 const MN = loadProfile('MN');
 const NJ = loadProfile('NJ');
 const SC = loadProfile('SC');
+const AZ = loadProfile('AZ');
 const nj = (days: StateDay[], opts: Parameters<typeof analyzeStateDeposits>[3] = {}) => analyzeStateDeposits(NJ, days, undefined, opts);
 const mn = (days: StateDay[], opts: Parameters<typeof analyzeStateDeposits>[3] = {}) => analyzeStateDeposits(MN, days, undefined, opts);
 const ks = (days: StateDay[], opts: Parameters<typeof analyzeStateDeposits>[3] = {}) => analyzeStateDeposits(KS, days, undefined, opts);
@@ -585,6 +586,37 @@ describe('South Carolina (WH-105): residents pay when their federal payments are
   test('the 2023 edition draws a rules-year warning on 2026 pay dates; quarterly returns as the guide prints them', () => {
     assert.equal(sc('monthly', [['2026-08-07', 80, 5_000]]).findings.some((f) => f.code === 'state_rules_year_mismatch'), true);
     assert.deepEqual(withholdingReturnDates(SC, '2026-06-01').map((r) => r.id), ['WH-1605', 'WH-1606']);
+  });
+});
+
+describe('Arizona (Employer Withholding Filing Obligations; WTP 16-1): quarterly to a $1,500 average, then the federal schedule', () => {
+  const fedDay = (date: string, total: number) => ({ date, federalIncomeTax: total, socialSecurityEmployee: 0, socialSecurityEmployer: 0, medicareEmployee: 0, medicareEmployer: 0, additionalMedicare: 0, total, wagesSubjectToIncomeTax: 0, socialSecurityWages: 0, medicareWages: 0, additionalMedicareWages: 0, employeeIds: [] as string[] });
+  const az = (schedule: 'monthly' | 'semiweekly', pays: [string, number, number][], opts: Parameters<typeof analyzeStateDeposits>[3] = {}) => {
+    const federal = analyzeDeposits(pays.map(([d, , f]) => fedDay(d, dollars(f))), { startingSchedule: schedule });
+    return analyzeStateDeposits(AZ, pays.map(([d, s]) => stDay(d, s)), federal, opts);
+  };
+  test('an average of $1,500 or less is quarterly: April 30, July 31, October 31, January 31', () => {
+    const r = az('monthly', [['2026-02-13', 90, 5000], ['2026-05-15', 90, 5000], ['2026-08-14', 90, 5000], ['2026-11-13', 90, 5000]], { lookbackLiability: dollars(1500) });
+    assert.deepEqual(r.obligations.map((o) => [o.schedule, o.dueDate]), [['quarterly', '2026-04-30'], ['quarterly', '2026-07-31'], ['quarterly', '2026-11-02'], ['quarterly', '2027-02-01']]);
+  });
+  test('an average above $1,500 pays with the federal deposit: monthly -> the 15th, semiweekly -> Wednesday or Friday', () => {
+    const m = az('monthly', [['2026-08-07', 90, 5000]], { lookbackLiability: dollars(1500.01) });
+    assert.deepEqual(m.obligations.map((o) => [o.schedule, o.dueDate]), [['monthly', '2026-09-15']]);
+    const s = az('semiweekly', [['2026-08-05', 90, 40_000], ['2026-08-08', 30, 40_000]], { assignedFrequency: 'federal' });
+    assert.deepEqual(s.obligations.map((o) => [o.schedule, o.amount, o.dueDate]), [['semiweekly', dollars(90), '2026-08-12'], ['semiweekly', dollars(30), '2026-08-14']]);
+  });
+  test('the federal next-day rule carries over: a payday over $100,000 federal is due the next business day', () => {
+    const r = az('semiweekly', [['2026-08-05', 4000, 150_000]], { assignedFrequency: 'federal' });
+    assert.deepEqual(r.obligations.map((o) => [o.schedule, o.dueDate]), [['next_day', '2026-08-06']]);
+  });
+  test('without the federal analysis, the federal frequency refuses', () => {
+    const r = analyzeStateDeposits(AZ, [stDay('2026-08-05', 90)], undefined, { assignedFrequency: 'federal' });
+    assert.deepEqual(r.obligations, []);
+    assert.equal(r.findings.some((f) => f.code === 'state_needs_federal_schedule'), true);
+  });
+  test('annual is an input: January 31; the EFT mandate is the page\'s words', () => {
+    assert.deepEqual(analyzeStateDeposits(AZ, [stDay('2026-03-13', 20)], undefined, { assignedFrequency: 'annual' }).obligations.map((o) => o.dueDate), ['2027-02-01']);
+    assert.match(AZ.mandates.epay!.text, /\$500 or more/);
   });
 });
 

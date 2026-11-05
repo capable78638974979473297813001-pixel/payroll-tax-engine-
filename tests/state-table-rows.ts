@@ -113,3 +113,31 @@ ROWS.push(
   { name: 'monthly: the 15th of the following month', state: 'HI', opts: { lookbackLiability: 5000.01 }, pays: [['2025-08-08', 10]], expect: [['monthly', 10, '2025-09-15']] },
   { name: 'semiweekly: Wednesday to Friday paydays due the following Wednesday, Saturday to Tuesday the Friday after', state: 'HI', opts: { assignedFrequency: 'semiweekly' }, pays: [['2025-08-06', 100], ['2025-08-09', 40]], expect: [['semiweekly', 100, '2025-08-13'], ['semiweekly', 40, '2025-08-15']] },
 );
+
+// Arkansas (DFA Withholding Tax Employer's Instructions, 07/01/2024)
+ROWS.push(
+  { name: 'monthly: received on or before the 15th of the following month', state: 'AR', opts: { assignedFrequency: 'monthly' }, pays: [['2024-08-09', 100], ['2024-08-30', 60]], expect: [['monthly', 160, '2024-09-16']] }, // Sep 15, 2024 is a Sunday
+  { name: 'annual: received by January 31 of the following year', state: 'AR', opts: { assignedFrequency: 'annual' }, pays: [['2024-03-15', 40]], expect: [['annual', 40, '2025-01-31']] },
+);
+
+// Kentucky (42A003, Revised October 2025): the printed tables
+ROWS.push(
+  { name: 'annual under $400; quarterly $400-$1,999; monthly $2,000-$49,999; twice-monthly $50,000 or more', state: 'KY', opts: { lookbackLiability: 399.99 }, pays: [['2026-03-13', 40]], expect: [['annual', 40, '2027-02-01']] },
+  { name: 'quarterly: April 30, July 31, October 31 (K-1) and January 31 (K-3)', state: 'KY', opts: { assignedFrequency: 'quarterly' }, pays: [['2026-02-13', 10], ['2026-05-15', 10], ['2026-08-14', 10], ['2026-11-13', 10]], expect: [['quarterly', 10, '2026-04-30'], ['quarterly', 10, '2026-07-31'], ['quarterly', 10, '2026-11-02'], ['quarterly', 10, '2027-02-01']] },
+  { name: 'monthly: the 15th for the first eleven months, December by January 31', state: 'KY', opts: { assignedFrequency: 'monthly' }, pays: [['2026-09-11', 10], ['2026-12-11', 10]], expect: [['monthly', 10, '2026-10-15'], ['monthly', 10, '2027-02-01']] },
+  { name: 'twice-monthly: all of January is one period due February 10; 1st-15th due the 25th; 16th-end due the 10th', state: 'KY', opts: { assignedFrequency: 'twice_monthly' }, pays: [['2026-01-09', 10], ['2026-01-23', 20], ['2026-03-06', 5], ['2026-03-20', 7]], expect: [['sub_monthly', 30, '2026-02-10'], ['sub_monthly', 5, '2026-03-25'], ['sub_monthly', 7, '2026-04-10']] },
+  { name: 'twice-monthly: December 1-15 is due December 26, December 16-31 is due January 31; a printed Saturday date rolls to Monday', state: 'KY', opts: { assignedFrequency: 'twice_monthly' }, pays: [['2026-04-08', 10], ['2026-12-10', 10], ['2026-12-22', 10]], expect: [['sub_monthly', 10, '2026-04-27'], ['sub_monthly', 10, '2026-12-28'], ['sub_monthly', 10, '2027-02-01']] },
+);
+
+// District of Columbia (2025 FR-900Q instructions)
+ROWS.push(
+  { name: 'monthly deposits: the 20th of the following month', state: 'DC', opts: { assignedFrequency: 'monthly' }, pays: [['2025-08-08', 100], ['2025-08-29', 50]], expect: [['monthly', 150, '2025-09-22']] }, // Sep 20, 2025 is a Saturday
+  { name: 'quarterly deposits: the 20th of the month after the quarter', state: 'DC', opts: { assignedFrequency: 'quarterly' }, pays: [['2025-02-14', 10], ['2025-05-16', 10], ['2025-08-15', 10], ['2025-11-14', 10]], expect: [['quarterly', 10, '2025-04-21'], ['quarterly', 10, '2025-07-21'], ['quarterly', 10, '2025-10-20'], ['quarterly', 10, '2026-01-20']] },
+);
+
+// Indiana (DOR Business FAQ): 30 / 20 calendar days after the end of the month, as read literally
+ROWS.push(
+  { name: 'monthly: 30 days after month end (Jan wages -> Mar 2, 2026)', state: 'IN', opts: { assignedFrequency: 'monthly' }, pays: [['2026-01-14', 100], ['2026-01-28', 50]], expect: [['monthly', 150, '2026-03-02']] },
+  { name: 'early filer: 20 days after month end (Jan wages -> Feb 20, 2026)', state: 'IN', opts: { assignedFrequency: 'early_filer' }, pays: [['2026-01-14', 100]], expect: [['monthly', 100, '2026-02-20']] },
+  { name: 'look-back: more than $1,000 a month is an early filer', state: 'IN', opts: { lookbackLiability: 1000.01 }, pays: [['2026-04-10', 100]], expect: [['monthly', 100, '2026-05-20']] },
+);

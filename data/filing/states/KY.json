@@ -1,0 +1,407 @@
+{
+ "state": "KY",
+ "name": "Kentucky",
+ "verifiedOn": "2026-11-04",
+ "sources": [
+  {
+   "id": "S1",
+   "title": "Withholding Kentucky Income Tax: Instructions for Employers (42A003)",
+   "url": "https://revenue.ky.gov/Forms/42A003.pdf",
+   "revision": "42A003 (10-25), Revised October 2025",
+   "verifiedOn": "2026-11-05",
+   "verifiedBy": "fetched directly from revenue.ky.gov on 2026-11-05 and read: Employer Filing Requirements (annual, quarterly, monthly, twice-monthly filing with the due-date tables), One-Day Deposit, Withholding Statements, Electronic Fund Transfer, and the termination-of-business steps. The two-column PDF was read in text order."
+  }
+ ],
+ "agencies": {
+  "withholding": {
+   "name": "Kentucky Department of Revenue",
+   "portalUrl": "https://mytaxes.ky.gov",
+   "source": "S1"
+  }
+ },
+ "calendar": {
+  "weekendsRoll": true,
+  "holidays": {
+   "verified": false
+  },
+  "source": "S1"
+ },
+ "mandates": {
+  "efile": {
+   "text": "Kentucky's tax law requires employers filing on an annual, quarterly, monthly or twice-monthly frequency to electronically file and pay the income tax withheld (annual and quarterly for periods beginning on or after January 2022; monthly and twice-monthly on or after January 2021). Employers and payers issuing 26 or more withholding statements must file them electronically.",
+   "source": "S1"
+  }
+ },
+ "withholding": {
+  "applies": true,
+  "taxLineIds": {
+   "withholding": "KY_SIT",
+   "employeeInsurance": []
+  },
+  "returns": [
+   {
+    "id": "K-1",
+    "name": "Form K-1, Kentucky Withholding Tax Return (K-3 for the last period)",
+    "frequency": "monthly",
+    "due": {
+     "kind": "day_of_month_after",
+     "day": 15,
+     "decemberDay": 31
+    },
+    "contents": [
+     "Filed for every period of the assigned frequency (quarterly: the first three quarters; monthly: the first eleven months) even if no tax was withheld, with the payment.",
+     "The last period of the year is reported on Form K-3, due January 31."
+    ],
+    "source": "S1"
+   },
+   {
+    "id": "K-3",
+    "name": "Form K-3, Annual Reconciliation (and fourth-quarter or December return)",
+    "frequency": "annual",
+    "due": {
+     "kind": "january_day_next_year",
+     "day": 31
+    },
+    "contents": [
+     "Filed by January 31 for the year; for annual filers it carries the whole year's tax; for others it carries the last period and reconciles the year to the W-2s.",
+     "Required even if no tax was withheld."
+    ],
+    "source": "S1"
+   },
+   {
+    "id": "K-5",
+    "name": "Form K-5 / MyTaxes transmitter: withholding statements (W-2, W-2G, 1099) to the Department",
+    "frequency": "annual",
+    "due": {
+     "kind": "january_day_next_year",
+     "day": 31
+    },
+    "contents": [
+     "Withholding statement information goes to the Department by January 31 electronically through MyTaxes as a transmitter (EFW2 for W-2s; Publication 1220 with Kentucky B records for W-2G and 1099) or on Form K-5; paper copies of the forms are not processed.",
+     "26 or more statements require electronic filing; a CD submission needs Transmitter Report Form 42A806-CD."
+    ],
+    "source": "S1"
+   }
+  ],
+  "notModelled": [
+   "The one-day deposit for $100,000 or more accumulated in a reporting period (103 KAR 1:060).",
+   "Weekend/holiday rule: the instructions print none; moving to the next business day is an assumption.",
+   "The twice-monthly table is held for 2026 and 2027 only; later pay dates draw state_calendar_not_published.",
+   "Kentucky unemployment insurance (Office of Unemployment Insurance): no document read.",
+   "Kentucky's legal-holiday list (weekends only are skipped, with a warning).",
+   "Local (occupational license) taxes, which are separate agencies."
+  ],
+  "deposits": {
+   "kind": "assigned_frequency",
+   "rulesYear": 2026,
+   "interpretation": "Kentucky sets the filing and payment frequency from the employer's ANNUAL Kentucky withholding, and the Department places the account on it (the employer must notify the Department when it meets the monthly or twice-monthly level): under $400 ANNUAL (Form K-3 by January 31, the tax paid in full with it); $400 to $1,999 QUARTERLY (Form K-1 for the first three quarters by the last day of the month after the quarter, the fourth quarter on Form K-3 by January 31); $2,000 to $49,999 MONTHLY (K-1 by the 15th of the following month for the first eleven months, December on K-3 by January 31); $50,000 or more TWICE-MONTHLY (K-1 for the 1st-15th due the 25th, the 16th-end due the 10th of the following month; the FIRST period of the year is all of January, due February 10; December 1-15 is due December 26; December 16-31 is reported on K-3 due January 31). The twice-monthly dates are held as the printed table for 2026 and 2027. The instructions print NO weekend or holiday rule, so a printed date that falls on a weekend or holiday is moved to the next business day here (an assumption: confirm with the Department). Payment goes with the return; a return is required for every period even with no tax. The ONE-DAY DEPOSIT (103 KAR 1:060: $100,000 or more accumulated during any reporting period must be remitted within one banking day, by EFT) is NOT modelled, because the accumulation basis is a reporting period rather than a payday.",
+   "lookback": {
+    "description": "Kentucky income tax withheld in a year",
+    "classes": [
+     {
+      "name": "annual",
+      "maxInclusive": 39999
+     },
+     {
+      "name": "quarterly",
+      "minExclusive": 39999,
+      "maxInclusive": 199999
+     },
+     {
+      "name": "monthly",
+      "minExclusive": 199999,
+      "maxInclusive": 4999999
+     },
+     {
+      "name": "twice_monthly",
+      "minExclusive": 4999999
+     }
+    ],
+    "newEmployer": "quarterly"
+   },
+   "frequencies": {
+    "annual": {
+     "period": "year",
+     "due": {
+      "kind": "january_day_next_year",
+      "day": 31
+     }
+    },
+    "quarterly": {
+     "period": "quarter",
+     "due": {
+      "kind": "last_day_of_month_after_quarter"
+     }
+    },
+    "monthly": {
+     "period": "month",
+     "due": {
+      "kind": "day_of_month_after",
+      "day": 15,
+      "decemberDay": 31
+     }
+    },
+    "twice_monthly": {
+     "period": "published_calendar",
+     "due": {
+      "kind": "next_business_day"
+     },
+     "calendar": [
+      {
+       "from": "2026-01-01",
+       "to": "2026-01-31",
+       "due": "2026-02-10"
+      },
+      {
+       "from": "2026-02-01",
+       "to": "2026-02-15",
+       "due": "2026-02-25"
+      },
+      {
+       "from": "2026-02-16",
+       "to": "2026-02-28",
+       "due": "2026-03-10"
+      },
+      {
+       "from": "2026-03-01",
+       "to": "2026-03-15",
+       "due": "2026-03-25"
+      },
+      {
+       "from": "2026-03-16",
+       "to": "2026-03-31",
+       "due": "2026-04-10"
+      },
+      {
+       "from": "2026-04-01",
+       "to": "2026-04-15",
+       "due": "2026-04-25"
+      },
+      {
+       "from": "2026-04-16",
+       "to": "2026-04-30",
+       "due": "2026-05-10"
+      },
+      {
+       "from": "2026-05-01",
+       "to": "2026-05-15",
+       "due": "2026-05-25"
+      },
+      {
+       "from": "2026-05-16",
+       "to": "2026-05-31",
+       "due": "2026-06-10"
+      },
+      {
+       "from": "2026-06-01",
+       "to": "2026-06-15",
+       "due": "2026-06-25"
+      },
+      {
+       "from": "2026-06-16",
+       "to": "2026-06-30",
+       "due": "2026-07-10"
+      },
+      {
+       "from": "2026-07-01",
+       "to": "2026-07-15",
+       "due": "2026-07-25"
+      },
+      {
+       "from": "2026-07-16",
+       "to": "2026-07-31",
+       "due": "2026-08-10"
+      },
+      {
+       "from": "2026-08-01",
+       "to": "2026-08-15",
+       "due": "2026-08-25"
+      },
+      {
+       "from": "2026-08-16",
+       "to": "2026-08-31",
+       "due": "2026-09-10"
+      },
+      {
+       "from": "2026-09-01",
+       "to": "2026-09-15",
+       "due": "2026-09-25"
+      },
+      {
+       "from": "2026-09-16",
+       "to": "2026-09-30",
+       "due": "2026-10-10"
+      },
+      {
+       "from": "2026-10-01",
+       "to": "2026-10-15",
+       "due": "2026-10-25"
+      },
+      {
+       "from": "2026-10-16",
+       "to": "2026-10-31",
+       "due": "2026-11-10"
+      },
+      {
+       "from": "2026-11-01",
+       "to": "2026-11-15",
+       "due": "2026-11-25"
+      },
+      {
+       "from": "2026-11-16",
+       "to": "2026-11-30",
+       "due": "2026-12-10"
+      },
+      {
+       "from": "2026-12-01",
+       "to": "2026-12-15",
+       "due": "2026-12-26"
+      },
+      {
+       "from": "2026-12-16",
+       "to": "2026-12-31",
+       "due": "2027-01-31"
+      },
+      {
+       "from": "2027-01-01",
+       "to": "2027-01-31",
+       "due": "2027-02-10"
+      },
+      {
+       "from": "2027-02-01",
+       "to": "2027-02-15",
+       "due": "2027-02-25"
+      },
+      {
+       "from": "2027-02-16",
+       "to": "2027-02-28",
+       "due": "2027-03-10"
+      },
+      {
+       "from": "2027-03-01",
+       "to": "2027-03-15",
+       "due": "2027-03-25"
+      },
+      {
+       "from": "2027-03-16",
+       "to": "2027-03-31",
+       "due": "2027-04-10"
+      },
+      {
+       "from": "2027-04-01",
+       "to": "2027-04-15",
+       "due": "2027-04-25"
+      },
+      {
+       "from": "2027-04-16",
+       "to": "2027-04-30",
+       "due": "2027-05-10"
+      },
+      {
+       "from": "2027-05-01",
+       "to": "2027-05-15",
+       "due": "2027-05-25"
+      },
+      {
+       "from": "2027-05-16",
+       "to": "2027-05-31",
+       "due": "2027-06-10"
+      },
+      {
+       "from": "2027-06-01",
+       "to": "2027-06-15",
+       "due": "2027-06-25"
+      },
+      {
+       "from": "2027-06-16",
+       "to": "2027-06-30",
+       "due": "2027-07-10"
+      },
+      {
+       "from": "2027-07-01",
+       "to": "2027-07-15",
+       "due": "2027-07-25"
+      },
+      {
+       "from": "2027-07-16",
+       "to": "2027-07-31",
+       "due": "2027-08-10"
+      },
+      {
+       "from": "2027-08-01",
+       "to": "2027-08-15",
+       "due": "2027-08-25"
+      },
+      {
+       "from": "2027-08-16",
+       "to": "2027-08-31",
+       "due": "2027-09-10"
+      },
+      {
+       "from": "2027-09-01",
+       "to": "2027-09-15",
+       "due": "2027-09-25"
+      },
+      {
+       "from": "2027-09-16",
+       "to": "2027-09-30",
+       "due": "2027-10-10"
+      },
+      {
+       "from": "2027-10-01",
+       "to": "2027-10-15",
+       "due": "2027-10-25"
+      },
+      {
+       "from": "2027-10-16",
+       "to": "2027-10-31",
+       "due": "2027-11-10"
+      },
+      {
+       "from": "2027-11-01",
+       "to": "2027-11-15",
+       "due": "2027-11-25"
+      },
+      {
+       "from": "2027-11-16",
+       "to": "2027-11-30",
+       "due": "2027-12-10"
+      },
+      {
+       "from": "2027-12-01",
+       "to": "2027-12-15",
+       "due": "2027-12-26"
+      },
+      {
+       "from": "2027-12-16",
+       "to": "2027-12-31",
+       "due": "2028-01-31"
+      }
+     ],
+     "rollPrintedDates": true
+    }
+   },
+   "deposited": [
+    "withholding"
+   ],
+   "source": "S1"
+  }
+ },
+ "channels": [
+  {
+   "id": "state:KY:mytaxes",
+   "function": "withholding returns and payments (K-1, K-3), withholding statements, bulk filing",
+   "description": "MyTaxes.ky.gov (ACH debit, e-check and ACH credit payments; W-2 filing as a transmitter); the Department publishes bulk filing and vendor upload guides for software developers",
+   "enrollment": [
+    "Register for a Kentucky withholding account with the Department (steps not read) and use MyTaxes; an account closes with Form 10A104 or in MyTaxes.",
+    "To file employees' W-2 data for clients, submit as a transmitter in MyTaxes (EFW2 format); EFT and the one-day deposit must be paid electronically."
+   ],
+   "specs": "The vendor bulk filing and manual upload guides on revenue.ky.gov/Software-Developer: named by the Department's search results, not read.",
+   "source": "S1"
+  }
+ ],
+ "notModelled": [
+  "Kentucky unemployment insurance: not read.",
+  "New-hire reporting: not read."
+ ]
+}

@@ -1,0 +1,128 @@
+{
+ "state": "AR",
+ "name": "Arkansas",
+ "verifiedOn": "2026-11-04",
+ "sources": [
+  {
+   "id": "S1",
+   "title": "Arkansas DFA Withholding Tax Employer's Instructions",
+   "url": "https://www.dfa.arkansas.gov/wp-content/uploads/withholdInstructions.pdf",
+   "revision": "Effective 01/01/2024, updated 07/01/2024 (Revised: 07/01/2024)",
+   "verifiedOn": "2026-11-05",
+   "verifiedBy": "fetched directly from dfa.arkansas.gov on 2026-11-05 and read: the due-dates summary (January 31 and February 28 filings), Monthly Filers, Annual Filers, Electronic Funds Transfer, Annual Requirements, penalty and interest. THE JULY 2024 EDITION; the Department's live Due Dates page (also fetched 2026-11-05) lists the same year-end dates. Not read: pension and annuity, pass-through-entity and Texarkana sections in detail."
+  }
+ ],
+ "agencies": {
+  "withholding": {
+   "name": "Arkansas Department of Finance and Administration, Withholding Tax Section",
+   "portalUrl": "https://atap.arkansas.gov",
+   "source": "S1"
+  }
+ },
+ "calendar": {
+  "weekendsRoll": true,
+  "holidays": {
+   "verified": false
+  },
+  "source": "S1"
+ },
+ "mandates": {
+  "epay": {
+   "text": "The State of Arkansas requires employers who average $20,000.00 or more in Arkansas Withholding Tax each month to file electronically.",
+   "source": "S1"
+  }
+ },
+ "withholding": {
+  "applies": true,
+  "taxLineIds": {
+   "withholding": "AR_SIT",
+   "employeeInsurance": []
+  },
+  "returns": [
+   {
+    "id": "AR3MAR",
+    "name": "Form AR3MAR, Employer's Annual Reconciliation of Income Tax Withheld",
+    "frequency": "annual",
+    "due": {
+     "kind": "month_day_next_year",
+     "month": 2,
+     "day": 28
+    },
+    "contents": [
+     "Filed on or before February 28 (or within 30 days after the business ends) with payment of any tax due for the previous calendar year; the monthly AR941M payments are reconciled with the W-2s.",
+     "The AR3MAR is mailed separately from the monthly payment vouchers near the end of the tax year."
+    ],
+    "source": "S1"
+   },
+   {
+    "id": "ARW3",
+    "name": "Form ARW3, Transmittal of Tax and Wage Statements, with the state copy of the W-2s",
+    "frequency": "annual",
+    "due": {
+     "kind": "january_day_next_year",
+     "day": 31
+    },
+    "contents": [
+     "Due on or before January 31 (or within 30 days after the business ends); employees receive their W-2s by January 31.",
+     "Forms W-2 and 1099 are filed electronically by magnetic media, the W-2 submission website or ATAP; paper copies of 1099s go with a photocopy of Form 1096."
+    ],
+    "source": "S1"
+   }
+  ],
+  "notModelled": [
+   "Arkansas's July 2024 edition is the one read: confirm against the Department's current instructions.",
+   "Arkansas unemployment insurance (Department of Workforce Services): the instructions only point to it, and new-hire reporting goes to its registry.",
+   "Pension and annuity withholding (AR3PAR, monthly), pass-through entity withholding (AR941PT, due April 15) and the Texarkana exemption forms.",
+   "Arkansas's legal-holiday list (weekends only are skipped, with a warning).",
+   "ATAP and W-2 submission website file layouts; the ACH Credit CCD+TXP addenda details."
+  ],
+  "deposits": {
+   "kind": "assigned_frequency",
+   "rulesYear": 2024,
+   "interpretation": "Arkansas has two filing statuses. MONTHLY (every new registration starts here, and it stays until the Commissioner notifies a change): Arkansas income tax withheld on payments made in a calendar month must be RECEIVED on or before the 15th of the following month, with Form AR941M or electronically; a zero voucher is required for a month with no tax. ANNUAL: an employer whose total Arkansas income tax withheld is under $1,000 for the calendar year AND who has been notified by the Commissioner of the change in classification pays by January 31 of the following year; annual is an INPUT (the notification), never derived, and a return and voucher are required even for a year with no tax. The look-back amount supplied is therefore ignored (an amount draws an error rather than a guess). Due dates on a Saturday, Sunday or legal holiday move to the next business day. THIS IS THE JULY 2024 EDITION.",
+   "lookback": {
+    "description": "None: the Commissioner assigns the status",
+    "classes": [],
+    "newEmployer": "monthly"
+   },
+   "frequencies": {
+    "monthly": {
+     "period": "month",
+     "due": {
+      "kind": "day_of_month_after",
+      "day": 15
+     }
+    },
+    "annual": {
+     "period": "year",
+     "due": {
+      "kind": "january_day_next_year",
+      "day": 31
+     }
+    }
+   },
+   "deposited": [
+    "withholding"
+   ],
+   "source": "S1"
+  }
+ },
+ "channels": [
+  {
+   "id": "state:AR:atap",
+   "function": "withholding payments (AR941M, annual vouchers), AR3MAR, W-2/1099 filing",
+   "description": "Arkansas Taxpayer Access Point (ATAP): online returns and payments; EFT by ACH Credit (CCD+TXP format) or ACH Debit (call the DFA EFT Unit); electronic W-2/1099 by magnetic media, the W-2 submission website or ATAP",
+   "enrollment": [
+    "Register the withholding account with the Department (EIN-based); the instructions say preprinted AR941M vouchers are mailed once a year or after registration.",
+    "Register for ATAP at atap.arkansas.gov for online filing and payment; ACH Credit needs the employer's bank to be able to initiate CCD+TXP credits carrying the amount, federal EIN, tax type code and monthly period ending date; ACH Debit needs contact with the DFA EFT Unit.",
+    "Employers averaging $20,000 a month in Arkansas withholding must pay electronically."
+   ],
+   "specs": "The ACH CCD+TXP addenda layout and the W-2 submission website format: named in the instructions, not read.",
+   "source": "S1"
+  }
+ ],
+ "notModelled": [
+  "Arkansas unemployment insurance: not read.",
+  "New-hire reporting: only the pointer to the Department of Workforce Services was read."
+ ]
+}

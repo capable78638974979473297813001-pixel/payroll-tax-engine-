@@ -5,7 +5,7 @@ runs, using **state profiles**: data files in `data/filing/states/` with a citat
 Import it as `import { state } from './payroll/index.ts'`. Coverage is in
 [`STATE-COVERAGE.md`](STATE-COVERAGE.md) (generated; a test fails if it is stale).
 
-**Status: 37 of 53 jurisdictions are modelled; 16 are NOT MODELLED.** Twenty-eight have a full withholding profile (deposit schedule, returns, mandates, channels), eight have a **partial** one (mandates, channels and what returns the stored agency documents state, but no deposit schedule is computed: IA, ID, LA, MD, MO, NM, NY, OK), and Texas has no wage income tax. The other 16 (AK, AZ, AR, DC, FL, IN, KY, MA, NV, NH, PR, SD, TN, VI, WA, WY) are **NOT MODELLED**: nothing is assumed for them, and a lookup for one fails loudly. Everything modelled is **withholding and its returns**; unemployment insurance is modelled only for California, New York and Texas. **Nothing is transmitted to any state**: no state transport is connected.
+**Status: 42 of 53 jurisdictions are modelled; 11 are NOT MODELLED.** Thirty-three have a full withholding profile (deposit schedule, returns, mandates, channels), eight have a **partial** one (mandates, channels and what returns the stored agency documents state, but no deposit schedule is computed: IA, ID, LA, MD, MO, NM, NY, OK), and Texas has no wage income tax. The other 11 are **NOT MODELLED**: AK, FL, NV, NH, SD, TN, WA and WY have no wage income tax and their unemployment rules have not been read; MA's Department of Revenue refused an automated fetch (HTTP 403), which was respected and not worked around; PR and VI were not covered. Nothing is assumed for them, and a lookup for one fails loudly. Everything modelled is **withholding and its returns**; unemployment insurance is modelled only for California, New York and Texas. **Nothing is transmitted to any state**: no state transport is connected.
 
 ## What it does
 
@@ -152,3 +152,17 @@ Every profile cites the agency's own document (URL, edition, what was read and w
 Items worth a person's attention before relying on a state: Rhode Island's and Ohio's printed calendars (taken as published; the stored text cannot show their colour coding), Virginia's and Delaware's interpretations (recorded in each profile and repeated in every result), and every profile marked as an older edition.
 
 Engine support added for these: `semiweekly`, `eighth_monthly` (also used for semi-monthly and quad-monthly), `month_threshold`, `published_calendar`, a next-banking-day override (`nextDayRule`), and the due rules `semiweekly_following`, `semimonthly_days`, `day_of_month_after_quarter`, `last_day_of_following_month`, `month_day_next_year`, and a `decemberDay` on `day_of_month_after`. A look-back amount that does not decide a schedule returns `state_frequency_not_derivable` instead of a guess. `tests/state-table.test.ts` runs every state's table rows and 1,000 randomized payroll years each.
+
+## Batch 3: read live from the agencies' own sites (2026-11-05)
+
+These five were fetched directly from the agency's website and read, not taken from the watcher's stored copy.
+
+| State | Source and edition | What is computed | Flags |
+| --- | --- | --- | --- |
+| AZ | Employer Withholding Filing Obligations page; WTP 16-1 (2016) | Quarterly to a $1,500 four-quarter average, then **the employer's federal deposit dates**; annual is an input | Needs the federal analysis; extra annual-payment criteria not listed |
+| AR | Employer's Instructions, updated 07/01/2024 | Monthly (the 15th), annual (January 31); AR3MAR February 28; ARW3 January 31 | **2024 edition** |
+| DC | 2025 FR-900Q instructions | Monthly (the 20th) and quarterly (the 20th after the quarter) deposits; FR-900Q | **2025 edition**; weekly and semi-weekly not modelled |
+| IN | Business FAQ | Monthly (30 days after month end) and early filer (20 days) | "N days after the end of the month" read literally; county tax not split |
+| KY | 42A003, Revised October 2025 | Annual, quarterly, monthly, twice-monthly (printed table for 2026-2027) | No weekend rule printed (next business day assumed); one-day deposit not modelled |
+
+New engine support: a `follow_federal` frequency (the state payment is due with the federal deposit for the same pay dates), `rollPrintedDates` for printed calendars with no weekend rule, and the due rules `calendar_days_after_month_end` and `decemberDay`.

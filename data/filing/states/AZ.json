@@ -1,0 +1,165 @@
+{
+ "state": "AZ",
+ "name": "Arizona",
+ "verifiedOn": "2026-11-04",
+ "sources": [
+  {
+   "id": "S1",
+   "title": "Arizona Department of Revenue: Employer Withholding Filing Obligations (web page)",
+   "url": "https://azdor.gov/business/withholding-tax/employer-withholding-filing-obligations",
+   "revision": "web page, no edition printed; fetched live 2026-11-05",
+   "verifiedOn": "2026-11-05",
+   "verifiedBy": "fetched directly from azdor.gov on 2026-11-05 and read in full: registration (Form JT-1), Remitting Amounts Withheld to the Department, Payment by Electronic Funds Transfer, Electronic Filing of Withholding Tax Returns, Forms A1-APR, A1-QRT (with extended due dates) and A1-R, amended returns, federal forms W-2/1099."
+  },
+  {
+   "id": "S2",
+   "title": "Arizona Withholding Tax Procedure WTP 16-1, Procedure for Determining When an Employer Must Remit Arizona Withholding Tax",
+   "url": "https://azdor.gov/sites/default/files/2023-03/PROCEDURES_WTHOLD_2016_WTP16-1.pdf",
+   "revision": "WTP 16-1 (supersedes WTP 92-3), 2016 procedure",
+   "verifiedOn": "2026-11-05",
+   "verifiedBy": "fetched directly from azdor.gov on 2026-11-05 and read: how the prior-four-quarter average is figured (existing, new, purchased, merged businesses), the quarterly deposit schedule and its payment due dates. THE 2016 PROCEDURE: the Department's 2026 page agrees on the thresholds, but the rest of the procedure (the page of the schedule that follows the federal deposits) was read only to the end of the quarterly section."
+  }
+ ],
+ "agencies": {
+  "withholding": {
+   "name": "Arizona Department of Revenue",
+   "portalUrl": "https://aztaxes.gov",
+   "source": "S1"
+  }
+ },
+ "calendar": {
+  "weekendsRoll": true,
+  "holidays": {
+   "verified": false
+  },
+  "source": "S1"
+ },
+ "mandates": {
+  "epay": {
+   "text": "Employers are required to pay their tax liability by electronic funds transfer (EFT) if the employer owes $500 or more for any taxable year beginning from and after December 31, 2020. Arizona does not offer a general withholding electronic filing or electronic payment waiver for the 2022 tax year and beyond.",
+   "source": "S1"
+  },
+  "efile": {
+   "text": "For the 2022 tax year and beyond, all W-2s are required to be submitted by electronic methods.",
+   "source": "S1"
+  }
+ },
+ "withholding": {
+  "applies": true,
+  "taxLineIds": {
+   "withholding": "AZ_SIT",
+   "employeeInsurance": []
+  },
+  "returns": [
+   {
+    "id": "A1-QRT",
+    "name": "Arizona Form A1-QRT, Quarterly Withholding Tax Return",
+    "frequency": "quarterly",
+    "due": {
+     "kind": "last_day_of_month_after_quarter"
+    },
+    "contents": [
+     "Filed by every employer except annual filers, even with zero withholding: April 30, July 31, October 31, January 31.",
+     "An employer that made every payment on time for the previous quarter gets 10 more days: May 10, August 10, November 10, February 10.",
+     "Reconciles the Arizona withholding payments of the quarter; a return for a quarter in a prior year that is amended also needs an amended A1-R."
+    ],
+    "source": "S1"
+   },
+   {
+    "id": "A1-R",
+    "name": "Arizona Form A1-R, Withholding Reconciliation Tax Return",
+    "frequency": "annual",
+    "due": {
+     "kind": "january_day_next_year",
+     "day": 31
+    },
+    "contents": [
+     "Filed by employers who file A1-QRT, by January 31, with the state copies of federal W-2, W-2c, W-2G and 1099 forms that show Arizona wages or withholding; a 30-day extension is available for good cause (WTP 11-1).",
+     "Federal forms are submitted electronically; ADOR does not accept 1099-NEC electronically (optical media or paper) and wants only 1099s showing Arizona withholding."
+    ],
+    "source": "S1"
+   },
+   {
+    "id": "A1-APR",
+    "name": "Arizona Form A1-APR, Annual Payment Withholding Tax Return",
+    "frequency": "annual",
+    "due": {
+     "kind": "january_day_next_year",
+     "day": 31
+    },
+    "contents": [
+     "For annual payers: pays the tax and reconciles the year, due January 31 of the following year, with the same federal attachments."
+    ],
+    "source": "S1"
+   }
+  ],
+  "notModelled": [
+   "The additional criteria that allow annual payment (the page says 'and who meets additional criteria' without listing them).",
+   "Arizona unemployment insurance (Department of Economic Security): registered together with withholding on Form JT-1, but its rules were not read.",
+   "Arizona's legal-holiday list (weekends only are skipped, with a warning) and the rest of WTP 16-1 beyond the quarterly schedule.",
+   "The 5% EFT-failure penalty (A.R.S. 42-1125(O)) and the AZFSET / registered-transmitter file layouts (Publication 701).",
+   "Withholding Due Date Calendar (PDF) linked from the page: not read; dates here are computed from the stated rules."
+  ],
+  "deposits": {
+   "kind": "assigned_frequency",
+   "interpretation": "Arizona sets the deposit schedule from the AVERAGE Arizona withholding of the previous four quarters, recomputed at the start of each quarter (a new business: no average in its first quarter, so QUARTERLY; the second quarter uses the first quarter's amount; then the average of the quarters so far). An average of $1,500 or less is QUARTERLY: payment due April 30, July 31, October 31 and January 31 for wages paid in the 1st to 4th quarter. An average of MORE than $1,500 means the employer pays Arizona withholding at the same time it makes its FEDERAL deposit (monthly, semiweekly or next business day), whatever the Arizona amount; the supplied federal deposit analysis supplies those dates. An average under $200 (plus additional criteria the page does not list) may pay ANNUALLY with Form A1-APR by January 31 of the next year: annual is an INPUT, never derived. The look-back amount supplied is that four-quarter average. Dates on a weekend or legal holiday move to the next business day (banking day for payments).",
+   "lookback": {
+    "description": "Average Arizona withholding of the previous four quarters (cents)",
+    "classes": [
+     {
+      "name": "quarterly",
+      "maxInclusive": 150000
+     },
+     {
+      "name": "federal",
+      "minExclusive": 150000
+     }
+    ],
+    "newEmployer": "quarterly"
+   },
+   "frequencies": {
+    "quarterly": {
+     "period": "quarter",
+     "due": {
+      "kind": "last_day_of_month_after_quarter"
+     }
+    },
+    "annual": {
+     "period": "year",
+     "due": {
+      "kind": "january_day_next_year",
+      "day": 31
+     }
+    },
+    "federal": {
+     "period": "follow_federal",
+     "due": {
+      "kind": "next_business_day"
+     }
+    }
+   },
+   "deposited": [
+    "withholding"
+   ],
+   "source": "S2"
+  }
+ },
+ "channels": [
+  {
+   "id": "state:AZ:aztaxes",
+   "function": "withholding payments and returns (A1-QRT, A1-R, A1-APR), W-2/1099 electronic submission",
+   "description": "AZTaxes.gov (data entry for original returns), AZFSET and registered transmitters for electronic return and W-2/1099 files (amended returns cannot be filed through AZTaxes)",
+   "enrollment": [
+    "Create a user account on AZTaxes.gov and submit the Arizona Joint Tax Application (Form JT-1); the employer's Arizona withholding ID is its EIN. The same application starts registration for Arizona unemployment insurance with the Department of Economic Security.",
+    "Employers owing $500 or more a year pay by EFT; all W-2s are submitted electronically.",
+    "Software that files electronically uses AZFSET or a registered transmitter (see Publication 701)."
+   ],
+   "specs": "Publication 701 and the AZFSET transmission specifications: named on the page, not read.",
+   "source": "S1"
+  }
+ ],
+ "notModelled": [
+  "Arizona unemployment insurance: not read.",
+  "New-hire reporting: not read."
+ ]
+}

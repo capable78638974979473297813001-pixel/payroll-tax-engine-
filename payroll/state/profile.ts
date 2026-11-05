@@ -42,6 +42,8 @@ export type DueRule =
   | { kind: 'january_day_next_year'; day: number }
   /** Federal-style semi-weekly: the anchor is a period end (Friday or Tuesday); due on the next `afterFriday` / `afterTuesday` weekday (0=Sunday). */
   /** Kansas semi-monthly: the anchor is a period end; periods ending on or before the 15th are due `firstHalfDay` of the same month, later ones `secondHalfDay` of the next month. */
+  /** Calendar days after the END of the anchor's month (Indiana: monthly 30, early filers 20). */
+  | { kind: 'calendar_days_after_month_end'; days: number }
   | { kind: 'semimonthly_days'; firstHalfDay: number; secondHalfDay: number }
   /** A fixed day of the month after the quarter (Kansas quarterly: the 25th). */
   | { kind: 'day_of_month_after_quarter'; day: number }
@@ -105,7 +107,7 @@ export interface AssignedFrequencySpec {
     newEmployer: string;
   };
   frequencies: Record<string, {
-    period: 'week_sat_fri' | 'month' | 'quarter' | 'year' | 'semiweekly_threshold' | 'published_calendar' | 'eighth_monthly' | 'semiweekly' | 'month_threshold';
+    period: 'week_sat_fri' | 'month' | 'quarter' | 'year' | 'semiweekly_threshold' | 'published_calendar' | 'eighth_monthly' | 'semiweekly' | 'month_threshold' | 'follow_federal';
     /** For `semiweekly_threshold` the due rule is that of the REMAINDER (paid with the quarterly return). */
     due: DueRule;
     /**
@@ -121,6 +123,12 @@ export interface AssignedFrequencySpec {
      * row is an ERROR finding (the calendar for that year was not read), never an extrapolation.
      */
     calendar?: { from: string; to: string; due: string }[];
+    /** `published_calendar` only: the agency's printed dates are day-of-month dates with no weekend rule printed (Kentucky); roll a date on a weekend or holiday to the next business day. Leave unset when the dates are already adjusted. */
+    rollPrintedDates?: boolean;
+    /**
+     * `follow_federal` (Arizona): the state payment is due at the same time as the employer's FEDERAL deposit for the same
+     * pay dates, whatever the state amount. The federal deposit analysis must be supplied; its due dates are used as they are.
+     */
     /**
      * Only for `eighth_monthly` (Delaware): the days of the month on which a payment period ends, ascending; 31 means
      * "the last day of the month". A pay date belongs to the first period that ends on or after its day. The `due`
