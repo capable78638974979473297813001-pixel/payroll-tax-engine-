@@ -1,5 +1,5 @@
 {
- "date": "2026-11-04",
+ "date": "2026-11-05",
  "fixed": [],
  "verified": [
   {
@@ -10,7 +10,7 @@
   }
  ],
  "possible": [],
- "informational_changes": 20,
+ "informational_changes": 38,
  "blind_spots": [
   {
    "jurisdiction": "AL",
@@ -82,16 +82,6 @@
   },
   {
    "jurisdiction": "CO",
-   "title": "Colorado DOR -- DR 1098 Colorado Withholding Worksheet for Employers",
-   "url": "https://tax.colorado.gov/DR1098",
-   "why": "HTTP 403: the site refuses automated requests; a real browser was refused too",
-   "never_read": true,
-   "feeds": [
-    "data/states/CO-2025.json"
-   ]
-  },
-  {
-   "jurisdiction": "CO",
    "title": "City of Aurora \u2014 Occupational Privilege Tax repeal",
    "url": "https://www.auroragov.org/business_services/taxes__licensing/occupational_privilege_tax",
    "why": "HTTP 404",
@@ -143,18 +133,6 @@
    "feeds": [
     "data/garnishment/state-overrides-2026.json",
     "data/garnishment/state-overrides-2027.json"
-   ]
-  },
-  {
-   "jurisdiction": "KY",
-   "title": "City of Elizabethtown, KY \u2014 Code of Ordinances Chapter 110, \u00a7 110.03 Occupational License Tax Payment Required",
-   "url": "https://codelibrary.amlegal.com/codes/elizabethtownky/latest/elizabethtown_ky/0-0-0-3203",
-   "why": "HTTP 403: the site refuses automated requests; a real browser was refused too",
-   "never_read": true,
-   "feeds": [
-    "data/local/KY-occupational-2025.json",
-    "data/local/KY-occupational-2026.json",
-    "data/local/KY-occupational-2027.json"
    ]
   },
   {
@@ -390,18 +368,6 @@
   },
   {
    "jurisdiction": "KY",
-   "title": "Grant County Fiscal Court -- Occupational Licensing",
-   "url": "https://grantcounty.ky.gov/occupational-licensing/",
-   "why": "URLError: <urlopen error timed out>",
-   "never_read": false,
-   "feeds": [
-    "data/local/KY-occupational-2025.json",
-    "data/local/KY-occupational-2026.json",
-    "data/local/KY-occupational-2027.json"
-   ]
-  },
-  {
-   "jurisdiction": "KY",
    "title": "City of Hartford -- Notice of Occupational License Fees",
    "url": "https://hartfordky.org/notice-of-occupational-license-fees/",
    "why": "read with a browser last time; a real browser was refused too",
@@ -422,6 +388,18 @@
     "data/local/KY-occupational-2025.json",
     "data/local/KY-occupational-2026.json",
     "data/local/KY-occupational-2027.json"
+   ]
+  },
+  {
+   "jurisdiction": "MA",
+   "title": "Mass. DOR -- Massachusetts 4% Surtax on Taxable Income",
+   "url": "https://www.mass.gov/info-details/massachusetts-4-surtax-on-taxable-income",
+   "why": "read with a browser last time; a real browser was refused too",
+   "never_read": false,
+   "feeds": [
+    "data/states/MA-2025.json",
+    "data/states/MA-2026.json",
+    "data/states/MA-2027.json"
    ]
   },
   {
@@ -522,6 +500,84 @@
     "data/local/OH-jedd-jedz-2025.json",
     "data/local/OH-jedd-jedz-2026.json",
     "data/local/OH-jedd-jedz-2027.json"
+   ]
+  },
+  {
+   "jurisdiction": "RI",
+   "title": "Reciprocity check (Rhode Island has NONE with Massachusetts or Connecticut, its only bordering states)",
+   "url": "https://www.mass.gov/info-details/learn-about-the-income-tax-paid-to-another-jurisdiction-credit",
+   "why": "read with a browser last time; a real browser was refused too",
+   "never_read": false,
+   "feeds": [
+    "data/states/RI-2026.json",
+    "data/states/RI-2027.json"
+   ]
+  },
+  {
+   "jurisdiction": "WI",
+   "title": "Wisconsin Legislature -- Wis. Stat. 104.035 (minimum wage; opportunity employees)",
+   "url": "https://docs.legis.wisconsin.gov/2017/statutes/statutes/104/035/9",
+   "why": "URLError: <urlopen error timed out>",
+   "never_read": false,
+   "feeds": [
+    "data/minimum-wage/states/WI-2026.json",
+    "data/minimum-wage/states/WI-2027.json"
+   ]
+  },
+  {
+   "jurisdiction": "WI",
+   "title": "Wis. Stat. \u00a7 71.03(13) \u2014 'Wisconsin adjusted gross income' defined",
+   "url": "https://docs.legis.wisconsin.gov/document/statutes/71.03",
+   "why": "URLError: <urlopen error timed out>",
+   "never_read": false,
+   "feeds": [
+    "data/states/WI-2026.json",
+    "data/states/WI-2027.json"
+   ]
+  },
+  {
+   "jurisdiction": "WI",
+   "title": "Wis. Stat. \u00a7 812.34 \u2014 80% of disposable earnings exempt from garnishment (i.e. 20% reachable), further limited by the amount by which disposable earnings exceed 30x the FEDERAL minimum hourly wage",
+   "url": "https://docs.legis.wisconsin.gov/document/statutes/812.34",
+   "why": "URLError: <urlopen error timed out>",
+   "never_read": false,
+   "feeds": [
+    "data/garnishment/state-overrides-2026.json",
+    "data/garnishment/state-overrides-2027.json"
+   ]
+  },
+  {
+   "jurisdiction": "WI",
+   "title": "Wisconsin W-166 withholding guide",
+   "url": "https://www.revenue.wi.gov/DOR%20Publications/pb166.pdf",
+   "why": "URLError: <urlopen error timed out>",
+   "never_read": false,
+   "feeds": [
+    "data/states/WI-2025.json",
+    "data/states/WI-2026.json",
+    "data/states/WI-2027.json"
+   ]
+  },
+  {
+   "jurisdiction": "WI",
+   "title": "DOR Tax Rates FAQ (annual Form 1 individual income tax brackets)",
+   "url": "https://www.revenue.wi.gov/Pages/FAQS/pcs-taxrates.aspx",
+   "why": "URLError: <urlopen error timed out>",
+   "never_read": false,
+   "feeds": [
+    "data/states/WI-2026.json",
+    "data/states/WI-2027.json"
+   ]
+  },
+  {
+   "jurisdiction": "WI",
+   "title": "DOR General Withholding Tax Questions (reciprocity, thresholds, WT-4)",
+   "url": "https://www.revenue.wi.gov/Pages/FAQS/pcs-with.aspx",
+   "why": "URLError: <urlopen error timed out>",
+   "never_read": false,
+   "feeds": [
+    "data/states/WI-2026.json",
+    "data/states/WI-2027.json"
    ]
   }
  ]

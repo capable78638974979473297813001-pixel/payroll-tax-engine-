@@ -1,4 +1,4 @@
-# Zero-day problems: 2026-11-04
+# Zero-day problems: 2026-11-05
 
 ## Verified, needs a person (1)
 
@@ -6,8 +6,8 @@ The official source disagrees with a number in `data/`, but a rule stopped the a
 
 - Whitesville: the Secretary of State's record changed 2026-10-06, after the data was scraped on 2026-08-13 (rate ''); re-read the ordinance
 
-20 other source change(s) were informational only and changed nothing.
-## Not being read (45; 26 never read)
+38 other source change(s) were informational only and changed nothing.
+## Not being read (50; 24 never read)
 
 A change on these pages cannot be caught until they can be read. Replace the address, or check them by hand:
 
@@ -17,13 +17,11 @@ A change on these pages cannot be caught until they can be read. Replace the add
 - AL [City of Tuskegee -- Occupational Tax Reporting form](https://www.tuskegeealabama.gov/finance-department/files/occupational-tax-form): HTTP 404; feeds `data/local/AL-municipalities-2025.json`, `data/local/AL-municipalities-2026.json`, `data/local/AL-municipalities-2027.json`
 - AR [Arkansas Department of Labor and Licensing -- Minimum Wage and Overtime](https://labor.arkansas.gov/labor/labor-standards/minimum-wage-and-overtime/): HTTP 403: the site refuses automated requests; a real browser was refused too; feeds `data/minimum-wage/states/AR-2026.json`, `data/minimum-wage/states/AR-2027.json`
 - AZ [UIT-0603A (FY26), Unemployment Insurance Tax Rate Chart](https://des.az.gov/sites/default/files/dl/UIT-0603A_FY26.pdf): HTTP 403: the site refuses automated requests; a real browser was refused too; feeds `data/states/AZ-2026.json`, `data/states/AZ-2027.json`
-- CO [Colorado DOR -- DR 1098 Colorado Withholding Worksheet for Employers](https://tax.colorado.gov/DR1098): HTTP 403: the site refuses automated requests; a real browser was refused too; feeds `data/states/CO-2025.json`
 - CO [City of Aurora — Occupational Privilege Tax repeal](https://www.auroragov.org/business_services/taxes__licensing/occupational_privilege_tax): HTTP 404; feeds `data/states/CO-2025.json`, `data/states/CO-2026.json`, `data/states/CO-2027.json`
 - CO [City of Greenwood Village occupational privilege tax](https://www.greenwoodvillage.com/206/Occupational-Privilege-Tax): HTTP 404; feeds `data/states/CO-2025.json`
 - DC [DC Department of Employment Services -- Office of Wage-Hour Compliance](https://does.dc.gov/service/office-wage-hour-compliance-0): HTTP 403: the site refuses automated requests; a real browser was refused too; feeds `data/minimum-wage/states/DC-2026.json`, `data/minimum-wage/states/DC-2027.json`
 - IL [Illinois State Income Tax Exemptions - 2026 (Illinois Office of Comptroller, Payroll Bulle](https://illinoiscomptroller.gov/state-agencies/bulletins-forms/payroll-bulletins/illinois-state-income-tax-exemptions-2026): HTTP 500; feeds `data/states/IL-2026.json`, `data/states/IL-2027.json`
 - IL [735 ILCS 5/12-803 — maximum wage deduction: lesser of 15% of GROSS weekly wages, or the am](https://www.ilga.gov/legislation/ilcs/ilcs4.asp?DocName=073500050K12-803): site's TLS certificate failed verification (unable to get local issuer certificate); feeds `data/garnishment/state-overrides-2026.json`, `data/garnishment/state-overrides-2027.json`
-- KY [City of Elizabethtown, KY — Code of Ordinances Chapter 110, § 110.03 Occupational License ](https://codelibrary.amlegal.com/codes/elizabethtownky/latest/elizabethtown_ky/0-0-0-3203): HTTP 403: the site refuses automated requests; a real browser was refused too; feeds `data/local/KY-occupational-2025.json`, `data/local/KY-occupational-2026.json`, `data/local/KY-occupational-2027.json`
 - KY [City of Marion Code of Ordinances Sec. 110.22](https://codelibrary.amlegal.com/codes/marionky/latest/marion_ky/0-0-0-22684): HTTP 403: the site refuses automated requests; a real browser was refused too; feeds `data/local/KY-occupational-2025.json`, `data/local/KY-occupational-2026.json`, `data/local/KY-occupational-2027.json`
 - KY [City of McKee Code of Ordinances § 110.02 LICENSE REQUIRED; FEES](https://codelibrary.amlegal.com/codes/mckeeky/latest/mckee_ky/0-0-0-2883): HTTP 403: the site refuses automated requests; a real browser was refused too; feeds `data/local/KY-occupational-2025.json`, `data/local/KY-occupational-2026.json`, `data/local/KY-occupational-2027.json`
 - KY [City of Hickman Code of Ordinances Secs. 14-13 and 14-15 (Ord. No. 08-07)](https://library.municode.com/ky/hickman/codes/code_of_ordinances?nodeId=COOR_CH14LIBURE_ARTIIOCLITA): HTTP 403: the site refuses automated requests; a real browser was refused too; feeds `data/local/KY-occupational-2025.json`, `data/local/KY-occupational-2026.json`, `data/local/KY-occupational-2027.json`
@@ -44,12 +42,14 @@ A change on these pages cannot be caught until they can be read. Replace the add
 - KY [City of Middletown Code of Ordinances Sec. 114.23 (Ord. 07-13-2023-B, 10-12-2023-B)](https://codelibrary.amlegal.com/codes/middletownky/latest/middletown_ky/0-0-0-10846): read with a browser last time; a real browser was refused too; feeds `data/local/KY-occupational-2025.json`, `data/local/KY-occupational-2026.json`, `data/local/KY-occupational-2027.json`
 - KY [City of Nortonville Code of Ordinances § 110.03 OCCUPATIONAL LICENSE FEE PAYMENT REQUIRED](https://codelibrary.amlegal.com/codes/nortonvilleky/latest/nortonville_ky/0-0-0-3279): read with a browser last time; a real browser was refused too; feeds `data/local/KY-occupational-2025.json`, `data/local/KY-occupational-2026.json`, `data/local/KY-occupational-2027.json`
 - KY [City of Simpsonville Code of Ordinances Sec. 110.27](https://codelibrary.amlegal.com/codes/simpsonville/latest/simpsonville_ky/0-0-0-6803): read with a browser last time; a real browser was refused too; feeds `data/local/KY-occupational-2025.json`, `data/local/KY-occupational-2026.json`, `data/local/KY-occupational-2027.json`
-- KY [Grant County Fiscal Court -- Occupational Licensing](https://grantcounty.ky.gov/occupational-licensing/): URLError: <urlopen error timed out>; feeds `data/local/KY-occupational-2025.json`, `data/local/KY-occupational-2026.json`, `data/local/KY-occupational-2027.json`
 - KY [City of Hartford -- Notice of Occupational License Fees](https://hartfordky.org/notice-of-occupational-license-fees/): read with a browser last time; a real browser was refused too; feeds `data/local/KY-occupational-2025.json`, `data/local/KY-occupational-2026.json`, `data/local/KY-occupational-2027.json`
 - KY [City of Georgetown, KY — Taxes and license fees (occupational license tax: net profits vs ](https://www.georgetownky.gov/2167/Taxes-License-Fees): read with a browser last time; a real browser was refused too; feeds `data/local/KY-occupational-2025.json`, `data/local/KY-occupational-2026.json`, `data/local/KY-occupational-2027.json`
+- MA [Mass. DOR -- Massachusetts 4% Surtax on Taxable Income](https://www.mass.gov/info-details/massachusetts-4-surtax-on-taxable-income): read with a browser last time; a real browser was refused too; feeds `data/states/MA-2025.json`, `data/states/MA-2026.json`, `data/states/MA-2027.json`
 - MN [Minnesota Paid Leave -- Premium rate and contributions](https://pl.mn.gov/resources/calculators/premium-rate-and-contributions): HTTP 405; feeds `data/states/MN-2026.json`, `data/states/MN-2027.json`
 - NJ [HHS/ASPE 2026 Poverty Guidelines for the 48 Contiguous States and DC — household of 1: $15](https://aspe.hhs.gov/topics/poverty-economic-mobility/poverty-guidelines): HTTP 403: the site refuses automated requests; a real browser was refused too; feeds `data/garnishment/state-overrides-2026.json`, `data/garnishment/state-overrides-2027.json`
 - NJ [City of Newark Q1 2026 Payroll Tax Booklet](https://www.newarknj.gov/DocumentCenter/View/2741/Payroll-Tax-Booklet-2026-PDF): read with a browser last time; a real browser was refused too; feeds `data/states/NJ-2026.json`, `data/states/NJ-2027.json`
 - NY [DOL -- Calculating an Employer's UI Contribution Rate](https://dol.ny.gov/calculating-employers-ui-contribution-rate): HTTP 403: the site refuses automated requests; a real browser was refused too; feeds `data/states/NY-2026.json`, `data/states/NY-2027.json`
-- ... and 5 more (see zero-day-latest.json)
+- NY [DOL -- Employer Contribution Rate Table](https://dol.ny.gov/employer-contribution-rate-table): HTTP 404; feeds `data/states/NY-2026.json`, `data/states/NY-2027.json`
+- NY [NY Department of Labor -- Register for Unemployment Insurance](https://dol.ny.gov/register-unemployment-insurance-0): HTTP 403: the site refuses automated requests; a real browser was refused too; feeds `data/employer-thresholds/NY-2026.json`, `data/employer-thresholds/NY-2027.json`
+- ... and 10 more (see zero-day-latest.json)
 
