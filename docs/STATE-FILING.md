@@ -5,13 +5,12 @@ runs, using **state profiles**: data files in `data/filing/states/` with a citat
 Import it as `import { state } from './payroll/index.ts'`. Coverage is in
 [`STATE-COVERAGE.md`](STATE-COVERAGE.md) (generated; a test fails if it is stale).
 
-**Status: all 53 jurisdictions have a profile. They are not equally verified; read the tiers.**
+**Status: all 53 jurisdictions have a profile, and every one of the 51 states and DC is read from an official source.** No profile is secondary-sourced.
 
 | Tier | Jurisdictions | What it means |
 | --- | --- | --- |
 | Full withholding profile, read from the agency's own document (42) | AL, AR, AZ, CA, CO, CT, DC, DE, GA, HI, IA, ID, IL, IN, KS, KY, LA, MA, MD, ME, MI, MN, MO, MS, MT, NC, ND, NE, NJ, NM, NY, OH, OK, OR, PA, RI, SC, UT, VA, VT, WI, WV | Deposit schedule, returns, mandates and channels, each rule cited to the document it was read from |
-| No wage income tax, unemployment only, read from the agency (6 + 1) | TX, FL, AK, SD, WA, WY; TN (wage base only) | Quarterly report due dates, wage base, mandates, channels. Tennessee's quarterly due-date page (lwdsupport.tn.gov) and the statute copy on Justia refuse automated access, so its due date is NOT recorded |
-| **Secondary source (2)** | **NV, NH** | The agency refuses automated access (HTTP 403, including from an ordinary browser session). Rules come from search-engine summaries of its pages, not its documents. **Every unemployment report for these carries the warning `state_source_secondary`**, and `tests/state-secondary.test.ts` pins exactly which states are in this tier, so a flag can only be cleared deliberately. |
+| No wage income tax, unemployment only (9) | TX, FL, AK, SD, WA, WY (read from the agency); NV, NH, TN (read from the state's published regulations and the U.S. Department of Labor, because the agencies' own pages refuse automated access) | Quarterly report due dates, wage base, mandates where the regulation states one, channels. For NV, NH and TN the agencies' portal details, penalties and grace periods are NOT recorded because their pages were not readable |
 | Unemployment only, outside the paycheck engine (2) | PR, VI | The Puerto Rico and Virgin Islands unemployment report rules, read from the departments' own pages (Puerto Rico's in Spanish; its due date is inferred from the SINOT regulation). **The paycheck engine has no Puerto Rico or Virgin Islands tax data**, so no wages or withholding flow in, and their income tax withholding is NOT modelled. |
 
 Everything modelled is **withholding and its returns**, except the unemployment-only rows above; state unemployment insurance for the other states (beyond CA and NY) is not modelled. **Nothing is transmitted to any state**: no state transport is connected.
@@ -210,3 +209,16 @@ IA, ID, LA, MD, MO, NM, NY and OK now have deposit schedules read from the agenc
 | MA | Withholding Tax Guide and Form M-941 instructions | Annual, quarterly, monthly (with the quarter-end months), and the over-$25,000 quarter-monthly $500 rule |
 
 Massachusetts (and the other pages that answer plain HTTP clients with 403) was read in an ordinary headless browser session, one request per page, the way a person's browser loads it. Nevada and New Hampshire still answered 403 in that session and were not pursued further. New engine support: `paydate_threshold` and `week_threshold` frequencies, and percent-of-withholding payments with a remainder calendar on published calendars.
+
+## Batch 7: Nevada, New Hampshire, Tennessee and Maryland from published law (2026-11-05)
+
+The three agencies that refuse automated access (and Tennessee's support pages) publish the same rules in places that do not: the states' administrative codes, the legislature's statute sites, Cornell's Legal Information Institute, and the U.S. Department of Labor. Those were read instead, and the unconfirmed search-summary details were removed.
+
+| State | Source | What is recorded |
+| --- | --- | --- |
+| NV | NAC 612.035 and 612.260, NRS 612.545 (leg.state.nv.us); DOL Significant Provisions (January 2026) | Due the last day of the month after the quarter; electronic filing with a waiver of at most one year; wage base $43,700 (66 2/3% of the average annual wage) |
+| NH | N.H. Admin. Code Emp 304.01 (LII); DOL | Due the last day of the month after the quarter; monthly filing the department may require; wage base $14,000 |
+| TN | Rule 0800-10-01-.02 (LII); the Department's rates page and FAQ; DOL | Due the last day of the month after the quarter; wage reports in Employer e-Services; wage base $7,000 |
+| MD | Tax-General 10-822 and COMAR 03.04.01.01 | Quarterly and monthly returns the 15th, annual January 31, accelerated within 3 business days of a payroll taking the accumulated tax to $700; monthly at $700 or more expected |
+
+`Source.secondary` and the `state_source_secondary` warning remain in the engine for any future profile that cannot be read from an official source; none uses them now.

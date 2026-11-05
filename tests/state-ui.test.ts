@@ -56,3 +56,18 @@ describe('Florida (Reemployment Tax return and payment page)', () => {
     assert.equal(FL.withholding!.applies, false);
   });
 });
+
+describe('Nevada, New Hampshire and Tennessee (read from the states\' regulations)', () => {
+  const due = (st: string, d: string) => { const p = loadProfile(st); return resolveDue(p.ui!.returns[0].due, d, p).dueDate; };
+  test('quarterly reports: the last day of the month following the quarter, rolled past weekends', () => {
+    for (const st of ['NV', 'NH', 'TN']) {
+      assert.deepEqual(['2026-02-10', '2026-05-10', '2026-08-10', '2026-11-10'].map((d) => due(st, d)), ['2026-04-30', '2026-07-31', '2026-11-02', '2027-02-01'], st);
+    }
+  });
+  test('wage bases: Nevada $43,700, New Hampshire $14,000, Tennessee $7,000 (U.S. Department of Labor, January 2026)', () => {
+    assert.deepEqual(['NV', 'NH', 'TN'].map((s) => loadProfile(s).ui!.wageBase), [4370000, 1400000, 700000]);
+  });
+  test('Nevada requires electronic filing with a waiver of at most one year (NAC 612.035)', () => {
+    assert.match(loadProfile('NV').mandates.efile!.text, /waiver of not more than 1 year/);
+  });
+});

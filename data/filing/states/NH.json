@@ -5,18 +5,25 @@
  "sources": [
   {
    "id": "S1",
-   "title": "SECONDARY: search-engine summaries of NHES's Web Tax & New Hire Reporting System pages and tax rate chart",
-   "url": "https://www2.nhes.nh.gov/webtax/File_Employer_Quarterly_Tax_Wage_Report.pdf",
-   "revision": "summaries returned 2026-11-05; the pages themselves were not readable",
+   "title": "N.H. Code of Administrative Rules Emp 304.01, Contributions Due and Payable (as published by Cornell's Legal Information Institute)",
+   "url": "https://www.law.cornell.edu/regulations/new-hampshire/N-H-Admin-Code-SS-Emp-304.01",
+   "revision": "regulation text; fetched live 2026-11-05",
    "verifiedOn": "2026-11-05",
-   "verifiedBy": "NOT READ FROM THE AGENCY'S DOCUMENTS. nhes.nh.gov and www2.nhes.nh.gov answer automated requests with HTTP 403, which was respected and not worked around. The due dates, the two-business-day grace period and the WebTax limit come from one search-engine summary (2026-11-05) of the 'File Employer Quarterly Tax and Wage Report' pages; a second summary found no due date, so these rest on a single summary. The $14,000 base is from the same summaries and agrees with the paycheck engine's own research. Every result built on this profile carries the warning state_source_secondary.",
-   "secondary": true
+   "verifiedBy": "fetched directly from law.cornell.edu on 2026-11-05 and read Emp 304.01: contributions of every employer on wages paid during a calendar quarter are due and paid to the department of employment security on or before the last day of the month following the calendar quarter; the department must require monthly filing and payment (the last day of the month following the month in which wages are paid) of an employer whose record shows failure to report or pay when due, or who is likely to be late through economic inability, recalcitrance or similar reasons. New Hampshire Employment Security's own pages (nhes.nh.gov, www2.nhes.nh.gov, mm.nh.gov) and the legislature's rule and statute pages refuse automated access or return empty replies, so nothing from them is used."
+  },
+  {
+   "id": "S2",
+   "title": "U.S. Department of Labor, Significant Provisions of State Unemployment Insurance Laws, effective January 2026",
+   "url": "https://oui.doleta.gov/unemploy/content/sigpros/2020-2029/January2026.pdf",
+   "revision": "effective January 2026",
+   "verifiedOn": "2026-11-05",
+   "verifiedBy": "fetched directly from oui.doleta.gov on 2026-11-05 and read (layout text): the Taxes column's taxable wage base for the state's row (a federal compilation of the state laws)."
   }
  ],
  "agencies": {
   "ui": {
-   "name": "New Hampshire Employment Security (NHES), Web Tax & New Hire Reporting System",
-   "portalUrl": "https://www2.nhes.nh.gov/webtax/index.jsp",
+   "name": "New Hampshire Employment Security (NHES)",
+   "portalUrl": "https://www.nhes.nh.gov",
    "source": "S1"
   }
  },
@@ -39,41 +46,40 @@
   "returns": [
    {
     "id": "quarterly-tax-and-wage-report",
-    "name": "Employer Quarterly Tax and Wage Report (WebTax)",
+    "name": "Employer Tax and Wage Report (quarterly)",
     "frequency": "quarterly",
     "due": {
      "kind": "last_day_of_month_after_quarter"
     },
     "source": "S1",
     "contents": [
-     "Every employer files a tax and wage report for every calendar quarter while providing employment, and pays the unemployment compensation tax when filing.",
-     "Due April 30, July 31, October 31 and January 31; the summaries say a report filed no later than midnight (Eastern) within 2 business days after the due date is treated as timely (a grace period, not an extension); later reports may incur late fees and interest.",
-     "WebTax may only be used by employers with no more than 1,000 employees; larger employers file differently.",
-     "(Dates come from a single secondary summary; see the profile's first source.)"
+     "Contributions on wages paid in a quarter are due and paid on or before the last day of the month following the calendar quarter: April 30, July 31, October 31, January 31 (Emp 304.01(a)).",
+     "The department requires an employer with a poor reporting record to file the Employer Tax and Wage Report and pay by the last day of the month following the MONTH in which wages are paid (Emp 304.01(b)): supply the 'monthly' frequency's treatment yourself, it is not an assigned status in this profile.",
+     "The taxable wage base is $14,000 per the U.S. Department of Labor's compilation of state laws."
     ]
    }
   ],
   "notModelled": [
-   "THE WHOLE SECTION is from a secondary source because NHES refuses automated access; read the NHES WebTax pages and clear the source's secondary flag.",
-   "The two-business-day grace period is recorded but not applied to the due date (the due date stays the conservative one).",
-   "How a report is filed by employers over 1,000 employees, and any electronic filing mandate: not found.",
-   "The trust-fund reduction that changes each quarter's rate (an input: 1.0% for Q4 2026 per the rate chart summary)."
+   "Monthly filing required by the department for a poor reporting record (Emp 304.01(b)): a department decision, not computed here.",
+   "How reports are filed (the department's WebTax system, its limits by employee count, any grace period and the penalty fees): the department's pages refuse automated access and were not read.",
+   "The quarterly trust-fund reduction that changes the rate: an input from the department's rate notice.",
+   "Weekend and holiday handling of the due date: not in Emp 304.01, so assumed (next business day)."
   ]
  },
  "channels": [
   {
-   "id": "state:NH:webtax",
-   "function": "quarterly tax and wage report",
-   "description": "NHES Web Tax & New Hire Reporting System (WebTax) for employers of up to 1,000 employees",
+   "id": "state:NH:employment-security",
+   "function": "quarterly tax and wage report and contributions",
+   "description": "New Hampshire Employment Security: the Employer Tax and Wage Report and contributions (electronic system details not read)",
    "enrollment": [
-    "Register your company with New Hampshire Employment Security (steps not read) and file through WebTax."
+    "Register as a New Hampshire employer for unemployment compensation with NHES (steps not read) and file the Employer Tax and Wage Report each quarter."
    ],
-   "specs": "Not read.",
+   "specs": "Not read: the department's pages refuse automated access.",
    "source": "S1"
   }
  ],
  "notModelled": [
   "New Hampshire has no tax on wages, so there is no state withholding.",
-  "New-hire reporting: the same WebTax system takes new-hire reports; not read."
+  "New-hire reporting: not read."
  ]
 }

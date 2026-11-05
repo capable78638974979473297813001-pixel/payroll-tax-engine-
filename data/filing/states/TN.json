@@ -9,7 +9,23 @@
    "url": "https://www.tn.gov/workforce/employers/tax-and-insurance-redirect/unemployment-insurance-tax/ui-tax-rates.html",
    "revision": "web page, no edition printed; fetched live 2026-11-05",
    "verifiedOn": "2026-11-05",
-   "verifiedBy": "fetched directly from tn.gov on 2026-11-05 and read: the variable taxable wage base table (2026: $7,000). The Department's support page 'When are quarterly reports due?' (lwdsupport.tn.gov) refused the automated fetch (HTTP 403) and was not worked around, so the quarterly due date is NOT recorded as read: a search result summary says the end of the month after the quarter, which is not an agency document I read."
+   "verifiedBy": "fetched directly from tn.gov on 2026-11-05 and read: the variable taxable wage base table (2026: $7,000). The quarterly due date is from rule 0800-10-01-.02 (S2)."
+  },
+  {
+   "id": "S2",
+   "title": "Tenn. Comp. R. & Regs. 0800-10-01-.02, Due Date for Premiums and Reimbursement Payments (as published by Cornell's Legal Information Institute)",
+   "url": "https://www.law.cornell.edu/regulations/tennessee/Tenn-Comp-R-Regs-0800-10-01-.02",
+   "revision": "regulation text; fetched live 2026-11-05",
+   "verifiedOn": "2026-11-05",
+   "verifiedBy": "fetched directly from law.cornell.edu on 2026-11-05 and read rule 0800-10-01-.02(1): premium paying employer premiums become due and payable quarterly on or before the last day of the month following the calendar quarter for which premiums are being paid, unless otherwise specified by the Rules."
+  },
+  {
+   "id": "S3",
+   "title": "Tennessee Department of Labor and Workforce Development: Frequently Asked Questions - Employers (Employer e-Services)",
+   "url": "https://www.tn.gov/content/dam/tn/workforce/documents/employers/FAQ-UI-Tax-Employers.pdf",
+   "revision": "FAQ (2025); fetched live 2026-11-05",
+   "verifiedOn": "2026-11-05",
+   "verifiedBy": "fetched directly from tn.gov on 2026-11-05 and read: wage reports are filed by logging in to Employer e-Services (https://jobs4tnui.tn.gov/employer/_/); TNPAWS and TPU are no longer available to file wage reports; delinquent quarters are filed through the same system; payment after filing the quarterly wage report; PEO reports. The Department's support pages (lwdsupport.tn.gov) refuse automated access and were not read."
   }
  ],
  "agencies": {
@@ -35,22 +51,38 @@
   "wageBase": 700000,
   "wageBaseYear": 2026,
   "employerTaxLineId": "TN_SUI_ER",
-  "returns": [],
+  "returns": [
+   {
+    "id": "quarterly-wage-and-premium-report",
+    "name": "Quarterly wage report and premium payment (Employer e-Services)",
+    "frequency": "quarterly",
+    "due": {
+     "kind": "last_day_of_month_after_quarter"
+    },
+    "source": "S2",
+    "contents": [
+     "Premiums become due and payable quarterly on or before the last day of the month following the calendar quarter (rule 0800-10-01-.02(1)): April 30, July 31, October 31, January 31.",
+     "Wage reports are filed in Employer e-Services and the premium paid there afterwards; TNPAWS and TPU no longer take wage reports.",
+     "The taxable wage base is $7,000 for 2026 (the Department's table)."
+    ]
+   }
+  ],
   "notModelled": [
-   "The quarterly report's due date and file format: the Department's support page refused an automated fetch, so none is recorded.",
-   "The rate notice (an input) and the variable-wage-base rule: the base varies with the trust fund balance and is $7,000 for 2026 per the Department's table."
+   "The rule does not state a weekend or holiday roll, so the next business day is assumed.",
+   "The Department's support pages (lwdsupport.tn.gov) refuse automated access and were not read; the electronic filing mandate in T.C.A. 50-7-404 (Justia copy refused access) is not recorded.",
+   "The rate notice and the variable-wage-base rule: the base varies with the trust fund balance and is $7,000 for 2026."
   ]
  },
  "channels": [
   {
    "id": "state:TN:employer-e-services",
    "function": "unemployment wage reports and premiums",
-   "description": "Tennessee Employer e-Services (TNPAWS and TPU no longer take wage reports, per the Department's FAQ in a search result; not read from the agency)",
+   "description": "Tennessee Employer e-Services: wage reports, premium payments and delinquent quarters",
    "enrollment": [
-    "Register as a Tennessee employer for unemployment insurance (steps not read) and file through Employer e-Services."
+    "Register as a Tennessee employer for unemployment insurance and sign up for an account on Employer e-Services (https://jobs4tnui.tn.gov/employer/_/); the FAQ says TNPAWS credentials do not work there and new accounts are created by signing up for an online account."
    ],
    "specs": "Not read.",
-   "source": "S1"
+   "source": "S3"
   }
  ],
  "notModelled": [
