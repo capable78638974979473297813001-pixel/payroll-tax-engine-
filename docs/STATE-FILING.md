@@ -13,7 +13,7 @@ Import it as `import { state } from './payroll/index.ts'`. Coverage is in
 | No wage income tax, unemployment only (9) | TX, FL, AK, SD, WA, WY (read from the agency); NV, NH, TN (read from the state's published regulations and the U.S. Department of Labor, because the agencies' own pages refuse automated access) | Quarterly report due dates, wage base, mandates where the regulation states one, channels. For NV, NH and TN the agencies' portal details, penalties and grace periods are NOT recorded because their pages were not readable |
 | Unemployment only, outside the paycheck engine (2) | PR, VI | The Puerto Rico and Virgin Islands unemployment report rules, read from the departments' own pages (Puerto Rico's in Spanish; its due date is inferred from the SINOT regulation). **The paycheck engine has no Puerto Rico or Virgin Islands tax data**, so no wages or withholding flow in, and their income tax withholding is NOT modelled. |
 
-Everything modelled is **withholding and its returns**, except the unemployment-only rows above; state unemployment insurance for the other states (beyond CA and NY) is not modelled. **Nothing is transmitted to any state**: no state transport is connected.
+Everything modelled is **withholding and its returns**, plus the **quarterly unemployment report** (due date, wage base, what it carries) for every jurisdiction except Arizona, Kansas and Massachusetts, whose labor agencies' pages refuse automated access and whose rules could not be read elsewhere. Those three say NOT MODELLED for unemployment. Rate notices, charges, claims and benefit-side filings are not modelled anywhere. **Nothing is transmitted to any state**: no state transport is connected.
 
 ## What it does
 
@@ -92,12 +92,13 @@ to the monthly deposit; the rest to the quarterly one. If EDD's reading differs,
   **not emitted by the paycheck engine** so it is not in the totals; California's legal-holiday list.
 - New York: deposit schedule; the NYS-45 part and box layout and Publication 72.5's flat-file format.
 - Texas: the QuickFile layout; Texas legal holidays; new-hire reporting.
-- Colorado and Virginia: unemployment (CDLE, VEC) and Colorado FAMLI; registration steps; holiday lists. Virginia:
-  seasonal status and the small-employer monthly waiver.
-- Utah and Rhode Island: unemployment (Workforce Services; DLT and temporary disability insurance); Rhode Island
-  years after 2026; the registration steps; holiday lists.
-- Delaware and North Dakota: unemployment; Delaware electronic filing options; North Dakota's web-service specification.
-- Connecticut: unemployment; the CT-941 line layout. Nebraska: unemployment; the 941N line layout.
+- Colorado: FAMLI; registration steps; holiday lists. Virginia: seasonal status and the small-employer monthly waiver.
+- Utah and Rhode Island: Rhode Island temporary disability insurance and years after 2026; registration steps; holiday lists.
+- Delaware and North Dakota: Delaware electronic filing options; North Dakota's web-service specification.
+- Connecticut: the CT-941 line layout. Nebraska: the 941N line layout.
+- Unemployment reporting (batch 8): Arizona, Kansas and Massachusetts are not modelled; every other state's section records
+  what was read and what was not (penalties, file formats, portal enrollment, mandatory electronic-filing thresholds in
+  several states). Several states' pages print no weekend rule, so the next business day is assumed and the section says so.
 - Every state: no state transport is connected, so no filing is sent. Subject-wages definitions are the
   agencies' own; gross pay is used as a proxy and the report says so. SSNs are never held by the engine.
 
@@ -222,3 +223,13 @@ The three agencies that refuse automated access (and Tennessee's support pages) 
 | MD | Tax-General 10-822 and COMAR 03.04.01.01 | Quarterly and monthly returns the 15th, annual January 31, accelerated within 3 business days of a payroll taking the accumulated tax to $700; monthly at $700 or more expected |
 
 `Source.secondary` and the `state_source_secondary` warning remain in the engine for any future profile that cannot be read from an official source; none uses them now.
+
+## Batch 8: quarterly unemployment reports for the withholding states (2026-11-05)
+
+Thirty-seven states and DC that had a withholding profile but no unemployment section now have one (`ui` in each profile): AL, AR, CO, CT, DC, DE, GA, HI, IA, ID, IL, IN, KY, LA, MD, ME, MI, MN, MO, MS, MT, NC, ND, NE, NJ, NM, OH, OK, OR, PA, RI, SC, UT, VA, VT, WI, WV. Each cites the agency's own page, handbook, guide or instructions (or, where noted, the state's published statute or regulation) for the due date, and the U.S. Department of Labor's *Significant Provisions of State Unemployment Insurance Laws* (January 2026) for the wage base; the wage base is also cross-checked against the paycheck engine's own figure by a test.
+
+- Most states: the last day of the month after the quarter (April 30, July 31, October 31, January 31), moved to the next business day.
+- **Michigan**: the 25th of the month after the quarter (January, April, July, October 25).
+- **New Jersey**: the 30th, and the Department states that a weekend or holiday gives **no extension**, so the profile does not roll it (new `noRoll` option on `day_of_month_after_quarter`).
+- **Ohio** is read from Ohio Revised Code 4141.20 (the ODJFS page prints no dates in the text read); **Rhode Island** from 260-RICR-40-05-1 (the regulation moves Sunday and holiday due dates but is silent on Saturday: recorded); **New Mexico** from the 2020 emergency amendment to 11.3.400.404 as printed in the New Mexico Register; **Oklahoma** from an older edition of the Commission's guide; **Oregon** from the Secretary of State's employer guide.
+- **Not modelled for unemployment: Arizona, Kansas, Massachusetts.** The agencies' pages answered 403 to a plain request and the rules could not be read from another official source; nothing was filled in from memory or from search summaries.

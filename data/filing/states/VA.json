@@ -10,6 +10,22 @@
    "revision": "Form 2614086, Rev. 10/26",
    "verifiedOn": "2026-11-03",
    "verifiedBy": "read from the stored copy in watcher/state/snapshots/va-b3a051ecad.txt.gz: the introduction (VA-6 due date), 'How to File and Pay the Tax' (electronic requirement, How Often to File, Semi-Weekly Filing and its special rule, Waiver, Monthly Filing with the due-date table, Quarterly Filing with its table, Seasonal Filing, Annual Summary VA-6). Not read: the registration steps, the Electronic Payment Guide, penalty tables, or any unemployment (VEC) document."
+  },
+  {
+   "id": "U1",
+   "title": "Virginia Employment Commission: Employer Unemployment Insurance Tax FAQ",
+   "url": "https://www.vec.virginia.gov/employers/faqs/Employer-UI-Tax-Questions",
+   "revision": "page fetched live 2026-11-05",
+   "verifiedOn": "2026-11-05",
+   "verifiedBy": "fetched directly from vec.virginia.gov on 2026-11-05 and read: deadline dates April 30th, July 31st, October 31st and January 31st; 'Quarterly reports are due on the last day of the following month'; quarterly tax and payroll reports must be filed electronically (eForm, ESS iFile or Web Upload)."
+  },
+  {
+   "id": "U2",
+   "title": "U.S. Department of Labor, Significant Provisions of State Unemployment Insurance Laws, effective January 2026",
+   "url": "https://oui.doleta.gov/unemploy/content/sigpros/2020-2029/January2026.pdf",
+   "revision": "effective January 2026",
+   "verifiedOn": "2026-11-05",
+   "verifiedBy": "fetched directly from oui.doleta.gov on 2026-11-05 and read (layout text): the Taxes column's taxable wage base for the state's row (a federal compilation of the state laws)."
   }
  ],
  "agencies": {
@@ -17,6 +33,11 @@
    "name": "Virginia Tax (Virginia Department of Taxation)",
    "portalUrl": "https://www.tax.virginia.gov/",
    "source": "S1"
+  },
+  "ui": {
+   "name": "Virginia Employment Commission (VEC), Unemployment Insurance Tax",
+   "portalUrl": "https://www.vec.virginia.gov/tax-filing-registration",
+   "source": "U1"
   }
  },
  "calendar": {
@@ -157,5 +178,30 @@
  "notModelled": [
   "Virginia unemployment insurance (Virginia Employment Commission): not read.",
   "Registration trigger and deadline: not read."
- ]
+ ],
+ "ui": {
+  "wageBase": 800000,
+  "wageBaseYear": 2026,
+  "employerTaxLineId": "VA_SUI_ER",
+  "returns": [
+   {
+    "id": "FC-20_FC-21",
+    "name": "Employer's Quarterly Tax Report (FC-20) and Payroll Report (FC-21)",
+    "frequency": "quarterly",
+    "due": {
+     "kind": "last_day_of_month_after_quarter"
+    },
+    "contents": [
+     "Due on the last day of the month after the quarter: April 30, July 31, October 31 and January 31.",
+     "Quarterly tax and payroll reports must be filed electronically (eForm FC20/21, ESS iFile or Web Upload)."
+    ],
+    "source": "U1"
+   }
+  ],
+  "notModelled": [
+   "The FAQ's own answer to the weekend and holiday question does not state a rule in the text read, so the next business day is assumed.",
+   "The $100 late-filing penalty and 1.5% monthly interest come from a search summary of the FC-20 instructions and were not read.",
+   "The agency's file format specifications, penalties not quoted above and portal enrollment steps were not read."
+  ]
+ }
 }

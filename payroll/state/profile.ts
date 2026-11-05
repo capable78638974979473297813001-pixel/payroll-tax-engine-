@@ -33,7 +33,7 @@ export interface Source {
   secondary?: boolean;
 }
 
-/** When a return or payment is due. Every rule moves to the next business day when the date is not one, unless `rollsForward` is false. */
+/** When a return or payment is due. Every rule moves to the next business day when the date is not one, unless the rule says `noRoll`. */
 export type DueRule =
   | { kind: 'table'; dates: Record<string, { due: string; delinquent?: string; settle?: string }> }
   | { kind: 'last_day_of_month_after_quarter' }
@@ -54,7 +54,8 @@ export type DueRule =
   | { kind: 'monthly_with_quarter_end'; day: number }
   | { kind: 'semimonthly_days'; firstHalfDay: number; secondHalfDay: number }
   /** A fixed day of the month after the quarter (Kansas quarterly: the 25th). */
-  | { kind: 'day_of_month_after_quarter'; day: number }
+  /** `noRoll`: the agency states the date does not move for a weekend or holiday (New Jersey UI reports). */
+  | { kind: 'day_of_month_after_quarter'; day: number; noRoll?: boolean }
   | { kind: 'semiweekly_following'; afterFriday: number; afterTuesday: number }
   /** A fixed month and day of the year after the anchor's year (Delaware's W-3 is due February 28). */
   | { kind: 'month_day_next_year'; month: number; day: number };

@@ -125,7 +125,8 @@ export function resolveDue(rule: DueRule, anchor: string, p: StateProfile, extra
       const endMonth = quarterOf(anchor) * 3 + 1;
       const y = endMonth > 12 ? year + 1 : year;
       const m = endMonth > 12 ? 1 : endMonth;
-      return { dueDate: roll(`${y}-${String(m).padStart(2, '0')}-${String(rule.day).padStart(2, '0')}`) };
+      const printed = `${y}-${String(m).padStart(2, '0')}-${String(rule.day).padStart(2, '0')}`;
+      return { dueDate: rule.noRoll ? printed : roll(printed) };
     }
     case 'semiweekly_following': {
       const want = weekday(anchor) === 5 ? rule.afterFriday : rule.afterTuesday;

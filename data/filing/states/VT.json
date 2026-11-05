@@ -10,6 +10,22 @@
    "revision": "web page, no edition printed; stored copy checked 2026-11-04",
    "verifiedOn": "2026-11-04",
    "verifiedBy": "read from the stored copy in watcher/state/snapshots/vt-a359b6d000.txt.gz: Payment Frequency for Employers (quarterly, monthly, semiweekly), Quarterly Reconciliation (WHT-436), Annual Reconciliation (WHT-434), How to File (electronic requirements), amending, and the list of specifications."
+  },
+  {
+   "id": "U1",
+   "title": "Vermont Department of Labor: Quarterly Reporting & Taxable Wage Information",
+   "url": "https://labor.vermont.gov/unemployment-insurance/ui-employers/quarterly-reporting-taxable-wage-information",
+   "revision": "page fetched live 2026-11-05",
+   "verifiedOn": "2026-11-05",
+   "verifiedBy": "fetched directly from labor.vermont.gov on 2026-11-05 and read: all employers file quarterly UI wage and contribution reports electronically; due dates (January-March: April 30; April-June: July 31; July-September: October 31; October-December: January 31); 'If the report due date falls on a weekend, the due date will be the next business day.'"
+  },
+  {
+   "id": "U2",
+   "title": "U.S. Department of Labor, Significant Provisions of State Unemployment Insurance Laws, effective January 2026",
+   "url": "https://oui.doleta.gov/unemploy/content/sigpros/2020-2029/January2026.pdf",
+   "revision": "effective January 2026",
+   "verifiedOn": "2026-11-05",
+   "verifiedBy": "fetched directly from oui.doleta.gov on 2026-11-05 and read (layout text): the Taxes column's taxable wage base for the state's row (a federal compilation of the state laws)."
   }
  ],
  "agencies": {
@@ -17,6 +33,11 @@
    "name": "Vermont Department of Taxes",
    "portalUrl": "https://myvtax.vermont.gov",
    "source": "S1"
+  },
+  "ui": {
+   "name": "Vermont Department of Labor, Unemployment Insurance and Wages Division",
+   "portalUrl": "https://labor.vermont.gov/unemployment-insurance/ui-employers/quarterly-reporting-taxable-wage-information",
+   "source": "U1"
   }
  },
  "calendar": {
@@ -101,5 +122,30 @@
  "notModelled": [
   "Vermont unemployment insurance: not read.",
   "New-hire reporting: not read."
- ]
+ ],
+ "ui": {
+  "wageBase": 1540000,
+  "wageBaseYear": 2026,
+  "employerTaxLineId": "VT_SUI_ER",
+  "returns": [
+   {
+    "id": "wage-and-contribution",
+    "name": "Employer's Quarterly Wage and Contribution Report",
+    "frequency": "quarterly",
+    "due": {
+     "kind": "last_day_of_month_after_quarter"
+    },
+    "contents": [
+     "Due April 30, July 31, October 31 and January 31; if the date falls on a weekend the due date is the next business day.",
+     "All employers file the report electronically in the online UI system."
+    ],
+    "source": "U1"
+   }
+  ],
+  "notModelled": [
+   "The page states a weekend rule only; whether a bank or state holiday moves the date is stated in the Employer Handbook per a search summary and was not read, so holidays are treated as moving it.",
+   "The $100 per-report penalty and the 1.5% monthly interest come from a search summary and were not read.",
+   "The agency's file format specifications, penalties not quoted above and portal enrollment steps were not read."
+  ]
+ }
 }

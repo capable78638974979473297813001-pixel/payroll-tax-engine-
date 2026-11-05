@@ -10,6 +10,22 @@
    "revision": "NJ-WT, September 2025",
    "verifiedOn": "2026-11-04",
    "verifiedBy": "read from the stored copy in watcher/state/snapshots/nj-fb66759b8e.txt.gz: 'Quarterly Return - Form NJ-927', Quarterly Due Dates, Seasonal Businesses, Monthly Payments - Form NJ-500 and Monthly Due Dates, Weekly Payers - Form NJ-927-W, Weekly Due Dates and Guidelines, domestic (household) employers, penalties, EFT codes and the required date format, and the worked example. THE SEPTEMBER 2025 EDITION. Not read: unemployment, disability and family-leave reporting rules administered by the Department of Labor and Workforce Development."
+  },
+  {
+   "id": "U1",
+   "title": "New Jersey Department of Labor, Employer Rate Information, Contributions and Due Dates",
+   "url": "https://www.nj.gov/labor/ea/employer-services/rate-info/",
+   "revision": "page as stored in watcher/state/snapshots",
+   "verifiedOn": "2026-11-05",
+   "verifiedBy": "read from the stored copy: the NJ-927 and WR-30 must be received no later than the 30th day of the month after the quarter, regardless of a Saturday, Sunday or holiday; no extension is granted for a weekend or holiday; due dates April 30, July 30, October 30 and January 30."
+  },
+  {
+   "id": "U2",
+   "title": "U.S. Department of Labor, Significant Provisions of State Unemployment Insurance Laws, effective January 2026",
+   "url": "https://oui.doleta.gov/unemploy/content/sigpros/2020-2029/January2026.pdf",
+   "revision": "effective January 2026",
+   "verifiedOn": "2026-11-05",
+   "verifiedBy": "fetched directly from oui.doleta.gov on 2026-11-05 and read (layout text): the Taxes column's taxable wage base for the state's row (a federal compilation of the state laws)."
   }
  ],
  "agencies": {
@@ -17,6 +33,11 @@
    "name": "New Jersey Division of Taxation",
    "portalUrl": "https://www.nj.gov/treasury/taxation/",
    "source": "S1"
+  },
+  "ui": {
+   "name": "New Jersey Department of Labor and Workforce Development, Employer Accounts",
+   "portalUrl": "https://www.nj.gov/labor/ea/",
+   "source": "U1"
   }
  },
  "calendar": {
@@ -155,5 +176,32 @@
  "notModelled": [
   "New Jersey unemployment, disability and family-leave deposits: not read.",
   "New-hire reporting: not read."
- ]
+ ],
+ "ui": {
+  "wageBase": 4480000,
+  "wageBaseYear": 2026,
+  "employerTaxLineId": "NJ_SUI_ER",
+  "returns": [
+   {
+    "id": "NJ-927_WR-30",
+    "name": "Employer's Quarterly Report (NJ-927) and Quarterly Wage Report (WR-30)",
+    "frequency": "quarterly",
+    "due": {
+     "kind": "day_of_month_after_quarter",
+     "day": 30,
+     "noRoll": true
+    },
+    "contents": [
+     "Received no later than the 30th day of the month after the quarter (April 30, July 30, October 30, January 30), including when that is a Saturday, Sunday or holiday; no extension for a weekend or holiday.",
+     "Together with the remittance due (Department rate-information page)."
+    ],
+    "source": "U1"
+   }
+  ],
+  "notModelled": [
+   "The Department's wording is 'received', so an electronic or mailed submission that arrives after the printed date is late; postmark treatment was not read.",
+   "NJ-927 is also the withholding return and is scheduled in the withholding section; the two share a date.",
+   "The agency's filing format specifications, penalties and portal enrollment steps were not read."
+  ]
+ }
 }

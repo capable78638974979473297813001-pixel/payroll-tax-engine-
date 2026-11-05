@@ -10,6 +10,22 @@
    "revision": "REV-415 (SU) 01-23, cross-checked with the Department's Employer Withholding page",
    "verifiedOn": "2026-11-04",
    "verifiedBy": "read from the stored copy in watcher/state/snapshots/pa-9fa00e5442.txt.gz (frequency determination; the URL in the watcher's record is truncated: confirm it from the Department's Employer Withholding page) and the page stored as pa-8251b0b3ee (https://www.pa.gov/agencies/revenue/resources/tax-types-and-information/employer-withholding), which gives the same four schedules. Not read: Pennsylvania unemployment (L&I) and local earned income tax rules."
+  },
+  {
+   "id": "U1",
+   "title": "Pennsylvania UC quarterly tax forms: instructions for completing UC-2 and UC-2A (UC-2INS)",
+   "url": "https://www.pa.gov/content/dam/copapwp-pagov/en/dli/documents/uc/uc-forms/uc-2ins.pdf",
+   "revision": "instructions fetched live 2026-11-05",
+   "verifiedOn": "2026-11-05",
+   "verifiedBy": "fetched directly from pa.gov on 2026-11-05 and read: 'If a due date falls on a Saturday, Sunday, or legal holiday, the reports will become due on the next business day. Reports and payment are due for each quarter as follows' (January-March: April 30; April-June: July 31; July-September: October 31; October-December: January 31); interest on contributions paid after the due date under Section 308 of the Law (43 P.S. 788)."
+  },
+  {
+   "id": "U2",
+   "title": "U.S. Department of Labor, Significant Provisions of State Unemployment Insurance Laws, effective January 2026",
+   "url": "https://oui.doleta.gov/unemploy/content/sigpros/2020-2029/January2026.pdf",
+   "revision": "effective January 2026",
+   "verifiedOn": "2026-11-05",
+   "verifiedBy": "fetched directly from oui.doleta.gov on 2026-11-05 and read (layout text): the Taxes column's taxable wage base for the state's row (a federal compilation of the state laws)."
   }
  ],
  "agencies": {
@@ -17,6 +33,11 @@
    "name": "Pennsylvania Department of Revenue",
    "portalUrl": "https://mypath.pa.gov",
    "source": "S1"
+  },
+  "ui": {
+   "name": "Pennsylvania Department of Labor & Industry, Unemployment Compensation Tax Services",
+   "portalUrl": "https://www.pa.gov/agencies/dli/programs-services/unemployment/for-employers/wage-report",
+   "source": "U1"
   }
  },
  "calendar": {
@@ -140,5 +161,29 @@
  "notModelled": [
   "Pennsylvania unemployment insurance and local taxes: not read.",
   "New-hire reporting: not read."
- ]
+ ],
+ "ui": {
+  "wageBase": 1000000,
+  "wageBaseYear": 2026,
+  "employerTaxLineId": "PA_SUI_ER",
+  "returns": [
+   {
+    "id": "UC-2_UC-2A",
+    "name": "Employer's Report for Unemployment Compensation (UC-2) and Report of Wages Paid to Each Employee (UC-2A)",
+    "frequency": "quarterly",
+    "due": {
+     "kind": "last_day_of_month_after_quarter"
+    },
+    "contents": [
+     "Reports and payment are due on or before April 30, July 31, October 31 and January 31; a Saturday, Sunday or legal holiday moves the date to the next business day.",
+     "UC-2 reports quarterly gross and taxable wages and the contributions due; UC-2A lists each employee's wages and credit weeks."
+    ],
+    "source": "U1"
+   }
+  ],
+  "notModelled": [
+   "Pennsylvania's UCMS online filing requirement and the late-report penalty (15% of contributions, $125 minimum, $450 maximum per a search summary of the UC-2 instructions) were not read in the page extracted.",
+   "The agency's file format specifications, penalties not quoted above and portal enrollment steps were not read."
+  ]
+ }
 }

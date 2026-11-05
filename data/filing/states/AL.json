@@ -10,6 +10,22 @@
    "revision": "booklet posted January 2026 (Form A-4 Rev. 4/2025 inside)",
    "verifiedOn": "2026-11-04",
    "verifiedBy": "read from the stored copy in watcher/state/snapshots/al-7b1543356b.txt.gz: Mailing Addresses and Due Dates (electronic threshold, Form A-3 date), Withholding Tax Returns (Form A-1, monthly Form A-6 rule), amended returns, the A-3 reconciliation and information return dates. Not read: the occupational tax sections, Alabama unemployment compensation."
+  },
+  {
+   "id": "U1",
+   "title": "Alabama Department of Labor FAQ: when is the last day I can file my Quarterly Contribution and Wage Report",
+   "url": "https://adol.alabama.gov/faq/when-is-the-last-day-i-can-file-my-quarterly-contribution-and-wage-report-and-not-be-late/",
+   "revision": "FAQ page, fetched live 2026-11-05",
+   "verifiedOn": "2026-11-05",
+   "verifiedBy": "fetched directly from adol.alabama.gov on 2026-11-05 and read: 'Contribution and Wage Reports are due the last day of the month following the end of the quarter (January 31, April 30, July 31, and October 31.)'"
+  },
+  {
+   "id": "U2",
+   "title": "U.S. Department of Labor, Significant Provisions of State Unemployment Insurance Laws, effective January 2026",
+   "url": "https://oui.doleta.gov/unemploy/content/sigpros/2020-2029/January2026.pdf",
+   "revision": "effective January 2026",
+   "verifiedOn": "2026-11-05",
+   "verifiedBy": "fetched directly from oui.doleta.gov on 2026-11-05 and read (layout text): the Taxes column's taxable wage base for the state's row (a federal compilation of the state laws)."
   }
  ],
  "agencies": {
@@ -17,6 +33,11 @@
    "name": "Alabama Department of Revenue, Withholding Tax Section",
    "portalUrl": "https://myalabamataxes.alabama.gov",
    "source": "S1"
+  },
+  "ui": {
+   "name": "Alabama Department of Labor, Unemployment Compensation Tax",
+   "portalUrl": "https://labor.alabama.gov",
+   "source": "U1"
   }
  },
  "calendar": {
@@ -122,5 +143,29 @@
  "notModelled": [
   "Alabama unemployment compensation: not read.",
   "New-hire reporting: not read."
- ]
+ ],
+ "ui": {
+  "wageBase": 800000,
+  "wageBaseYear": 2026,
+  "employerTaxLineId": "AL_SUI_ER",
+  "returns": [
+   {
+    "id": "UC-CR4",
+    "name": "Quarterly Contribution and Wage Report",
+    "frequency": "quarterly",
+    "due": {
+     "kind": "last_day_of_month_after_quarter"
+    },
+    "contents": [
+     "Due the last day of the month after the quarter: January 31, April 30, July 31 and October 31 (Department FAQ)."
+    ],
+    "source": "U1"
+   }
+  ],
+  "notModelled": [
+   "Alabama's rule for a due date that falls on a weekend or holiday: the FAQ text read does not state one, so the next business day is assumed.",
+   "Electronic-filing mandate (the Department's rule on employers with five or more employees came from a search summary, not a page read), penalties, and the reporting file format.",
+   "The agency's filing format specifications, penalties and portal enrollment steps were not read."
+  ]
+ }
 }

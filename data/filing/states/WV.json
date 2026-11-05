@@ -10,6 +10,22 @@
    "revision": "web page, no edition printed; stored copy checked 2026-11-04",
    "verifiedOn": "2026-11-04",
    "verifiedBy": "read from the stored copy in watcher/state/snapshots/wv-800855f068.txt.gz: How to Register and General Information - Employer's Withholding (remittance, quarterly returns, EFT threshold, annual filers, W-2 and IT-103 reconciliation, electronic filing for payroll services)."
+  },
+  {
+   "id": "U1",
+   "title": "WorkForce West Virginia: Tax Filing & Reporting",
+   "url": "https://workforcewv.org/businesses/unemployment-tax-information/tax-filing-reporting/",
+   "revision": "page fetched live 2026-11-05",
+   "verifiedOn": "2026-11-05",
+   "verifiedBy": "fetched directly from workforcewv.org on 2026-11-05 and read: quarterly unemployment tax filings are due one month after the end of each quarter (quarter ending March 31: April 30; June 30: July 31; September 30: October 31; December 31: January 31)."
+  },
+  {
+   "id": "U2",
+   "title": "U.S. Department of Labor, Significant Provisions of State Unemployment Insurance Laws, effective January 2026",
+   "url": "https://oui.doleta.gov/unemploy/content/sigpros/2020-2029/January2026.pdf",
+   "revision": "effective January 2026",
+   "verifiedOn": "2026-11-05",
+   "verifiedBy": "fetched directly from oui.doleta.gov on 2026-11-05 and read (layout text): the Taxes column's taxable wage base for the state's row (a federal compilation of the state laws)."
   }
  ],
  "agencies": {
@@ -17,6 +33,11 @@
    "name": "West Virginia State Tax Department, Tax Division",
    "portalUrl": "https://mytaxes.wvtax.gov",
    "source": "S1"
+  },
+  "ui": {
+   "name": "WorkForce West Virginia, Unemployment Compensation Tax",
+   "portalUrl": "https://workforcewv.org/businesses/unemployment-tax-information/tax-filing-reporting/",
+   "source": "U1"
   }
  },
  "calendar": {
@@ -131,5 +152,29 @@
  "notModelled": [
   "West Virginia unemployment insurance: not read.",
   "New-hire reporting: not read."
- ]
+ ],
+ "ui": {
+  "wageBase": 950000,
+  "wageBaseYear": 2026,
+  "employerTaxLineId": "WV_SUI_ER",
+  "returns": [
+   {
+    "id": "quarterly-report",
+    "name": "Quarterly contribution and wage report",
+    "frequency": "quarterly",
+    "due": {
+     "kind": "last_day_of_month_after_quarter"
+    },
+    "contents": [
+     "Due April 30, July 31, October 31 and January 31 (the page says filings are 'typically due' one month after the quarter)."
+    ],
+    "source": "U1"
+   }
+  ],
+  "notModelled": [
+   "The page read states no weekend or holiday rule (a search summary of the June 2024 Employer Handbook says a report may be postmarked by the following business day; the handbook was not read), so the next business day is assumed.",
+   "The page says 'typically due'; the statutory wording was not read.",
+   "The agency's file format specifications, penalties not quoted above and portal enrollment steps were not read."
+  ]
+ }
 }

@@ -18,6 +18,22 @@
    "revision": "FAQ pages, no edition printed; fetched live 2026-11-05",
    "verifiedOn": "2026-11-05",
    "verifiedBy": "fetched directly from revenue.louisiana.gov on 2026-11-05 and read: When are my payments due? (quarterly, monthly and semi-monthly payment dates) and When must I file Form L-1? (https://revenue.louisiana.gov/tax-education-and-faqs/faqs/withholding-tax/when-must-i-file-form-l1/: the quarterly and semi-monthly return due dates and the zero-return rule)."
+  },
+  {
+   "id": "U1",
+   "title": "Louisiana Workforce Commission, Unemployment Insurance Tax Guide for Employers (2025 edition)",
+   "url": "https://www.laworks.net/Downloads/UI/WTS/UI_EmployerTaxGuidelines.pdf",
+   "revision": "2025 edition, fetched live 2026-11-05",
+   "verifiedOn": "2026-11-05",
+   "verifiedBy": "fetched directly from laworks.net on 2026-11-05 and read: 'Quarterly Wage Reporting': liable businesses file an Employer's Quarterly Wage & Tax Report online and remit any tax due no later than the last day of the month (April 30, July 31, Oct. 31, Jan. 31) following the close of the calendar quarter; interest and penalty begin the first day past the due date (1 percent per month interest, penalty capped at 25 percent, R.S. 23:1543(A)). The agency's overview page words the same date as 'within 30 days after the end of the quarter'."
+  },
+  {
+   "id": "U2",
+   "title": "U.S. Department of Labor, Significant Provisions of State Unemployment Insurance Laws, effective January 2026",
+   "url": "https://oui.doleta.gov/unemploy/content/sigpros/2020-2029/January2026.pdf",
+   "revision": "effective January 2026",
+   "verifiedOn": "2026-11-05",
+   "verifiedBy": "fetched directly from oui.doleta.gov on 2026-11-05 and read (layout text): the Taxes column's taxable wage base for the state's row (a federal compilation of the state laws)."
   }
  ],
  "agencies": {
@@ -25,6 +41,11 @@
    "name": "Louisiana Department of Revenue",
    "portalUrl": "https://latap.revenue.louisiana.gov",
    "source": "S1"
+  },
+  "ui": {
+   "name": "Louisiana Workforce Commission (Louisiana Works), Unemployment Insurance Tax",
+   "portalUrl": "https://www.laworks.net/UnemploymentInsurance/UI_WageTaxReportingOverview.asp",
+   "source": "U1"
   }
  },
  "calendar": {
@@ -149,5 +170,30 @@
  "notModelled": [
   "Louisiana unemployment insurance: not read.",
   "New-hire reporting: not read."
- ]
+ ],
+ "ui": {
+  "wageBase": 700000,
+  "wageBaseYear": 2026,
+  "employerTaxLineId": "LA_SUI_ER",
+  "returns": [
+   {
+    "id": "quarterly-wage-and-tax",
+    "name": "Employer's Quarterly Wage & Tax Report",
+    "frequency": "quarterly",
+    "due": {
+     "kind": "last_day_of_month_after_quarter"
+    },
+    "contents": [
+     "Filed online and any tax remitted no later than April 30, July 31, October 31 and January 31 (the last day of the month after the quarter); interest of 1 percent a month and a penalty capped at 25 percent begin the day after the due date (R.S. 23:1543(A))."
+    ],
+    "source": "U1"
+   }
+  ],
+  "notModelled": [
+   "The Commission's overview page says 'within 30 days after the end of the quarter'; the 2025 guide prints the last-day-of-month dates and those are modelled.",
+   "The weekend rule is not stated in the passages read, so the next business day is assumed.",
+   "The domestic employer annual report (due January 31) and the other penalties in R.S. 23:1538 are recorded as text only.",
+   "The agency's file format specifications, penalties not quoted above and portal enrollment steps were not read."
+  ]
+ }
 }

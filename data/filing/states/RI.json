@@ -18,6 +18,22 @@
    "revision": "v.1 - 12/2025",
    "verifiedOn": "2026-11-03",
    "verifiedBy": "read from the stored copy under watcher/state/snapshots/ri-bdb5673f09~d4d90b7e.txt.gz (the document linked from https://tax.ri.gov/tax-sections/withholding-tax): Form WTM, Form RI-941 including bulk filing by Payroll Letter of Intent, and the W-2 requirements."
+  },
+  {
+   "id": "U1",
+   "title": "Rhode Island Unemployment Insurance and Temporary Disability Insurance Programs, 260-RICR-40-05-1, section 1.7 (Contributions and Reports)",
+   "url": "https://rules.sos.ri.gov/regulations/part/260-40-05-1",
+   "revision": "regulation as published by the Rhode Island Department of State, fetched live 2026-11-05",
+   "verifiedOn": "2026-11-05",
+   "verifiedBy": "fetched directly from rules.sos.ri.gov on 2026-11-05 and read 1.7: contributions are made quarterly and reports are due on or before the last day of the calendar month next following the close of each quarter; an employer who fails to report or pay may be required to report monthly; 'Whenever the day on which contributions are due falls on a Sunday or legal holiday, payment thereof shall be made on the next following business day'; the postmark determines the date of receipt."
+  },
+  {
+   "id": "U2",
+   "title": "U.S. Department of Labor, Significant Provisions of State Unemployment Insurance Laws, effective January 2026",
+   "url": "https://oui.doleta.gov/unemploy/content/sigpros/2020-2029/January2026.pdf",
+   "revision": "effective January 2026",
+   "verifiedOn": "2026-11-05",
+   "verifiedBy": "fetched directly from oui.doleta.gov on 2026-11-05 and read (layout text): the Taxes column's taxable wage base for the state's row (a federal compilation of the state laws)."
   }
  ],
  "agencies": {
@@ -25,6 +41,11 @@
    "name": "Rhode Island Division of Taxation",
    "portalUrl": "https://taxportal.ri.gov/",
    "source": "S2"
+  },
+  "ui": {
+   "name": "Rhode Island Department of Labor and Training (DLT), Employer Tax Unit",
+   "portalUrl": "https://dlt.ri.gov/employers/employer-tax-unit",
+   "source": "U1"
   }
  },
  "calendar": {
@@ -511,5 +532,31 @@
   "Rhode Island unemployment and temporary disability insurance: not read.",
   "Registration trigger and deadline: not read.",
   "New-hire reporting: not read."
- ]
+ ],
+ "ui": {
+  "wageBase": 3080000,
+  "wageBaseYear": 2026,
+  "employerTaxLineId": "RI_SUI_ER",
+  "returns": [
+   {
+    "id": "TX-17",
+    "name": "Quarterly Tax and Wage Report (Form TX-17)",
+    "frequency": "quarterly",
+    "due": {
+     "kind": "last_day_of_month_after_quarter"
+    },
+    "contents": [
+     "Due on or before the last day of the month after the quarter (April 30, July 31, October 31, January 31); the regulation moves a due date that falls on a Sunday or legal holiday to the next business day, and the postmark determines the date of receipt.",
+     "An employer that fails to report or pay when required may be put on monthly reporting at the Director's discretion (260-RICR-40-05-1, 1.7)."
+    ],
+    "source": "U1"
+   }
+  ],
+  "notModelled": [
+   "The regulation names Sunday and legal holidays only: a due date on a Saturday is not addressed, so this profile moves it to the next business day, which may be later than the regulation requires.",
+   "The Employer Tax Unit's own pages refuse automated access and were not read: the TX-17 form, its electronic-filing threshold (25 or more employees per a search summary), and the penalty schedule are not modelled.",
+   "The profile wage base is $30,800; the TX-17 also lists $32,300 for employers with an experience rate of 9.19 or higher (DOL compilation), which is not modelled.",
+   "The agency's file format specifications, penalties not quoted above and portal enrollment steps were not read."
+  ]
+ }
 }

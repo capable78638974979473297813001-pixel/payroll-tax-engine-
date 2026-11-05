@@ -10,6 +10,22 @@
    "revision": "Publication W-166 (1/26)",
    "verifiedOn": "2026-11-04",
    "verifiedBy": "read from the stored copy in watcher/state/snapshots/wi-bf48d4174b.txt.gz: section 4 'Depositing Withheld Taxes' (reporting requirements, WT-6 filing options, reporting periods table, due dates, annual reconciliation WT-7, extensions). Not read: Wisconsin unemployment insurance (Department of Workforce Development) rules."
+  },
+  {
+   "id": "U1",
+   "title": "Wisconsin DWD Unemployment Insurance Employer Handbook, Part 4 Account Reporting: Tax",
+   "url": "https://dwd.wisconsin.gov/ui201/t4201.htm",
+   "revision": "handbook page fetched live 2026-11-05",
+   "verifiedOn": "2026-11-05",
+   "verifiedBy": "fetched directly from dwd.wisconsin.gov on 2026-11-05 and read: 'Quarterly Due Dates' (1st quarter due April 30, with the other quarters on July 31, October 31 and January 31) and 'Due Dates Falling on Weekends or Holidays: Per DWD 110.07(4) the due date will be the next day that is not a Saturday, Sunday or legal holiday under state or federal law.' The DWD File Tax Report page (read) says DWD will stop mailing Quarterly Tax Reports in 2027 and urges electronic filing."
+  },
+  {
+   "id": "U2",
+   "title": "U.S. Department of Labor, Significant Provisions of State Unemployment Insurance Laws, effective January 2026",
+   "url": "https://oui.doleta.gov/unemploy/content/sigpros/2020-2029/January2026.pdf",
+   "revision": "effective January 2026",
+   "verifiedOn": "2026-11-05",
+   "verifiedBy": "fetched directly from oui.doleta.gov on 2026-11-05 and read (layout text): the Taxes column's taxable wage base for the state's row (a federal compilation of the state laws)."
   }
  ],
  "agencies": {
@@ -17,6 +33,11 @@
    "name": "Wisconsin Department of Revenue",
    "portalUrl": "https://tap.revenue.wi.gov/mta/",
    "source": "S1"
+  },
+  "ui": {
+   "name": "Wisconsin Department of Workforce Development (DWD), Unemployment Insurance Division",
+   "portalUrl": "https://dwd.wisconsin.gov/uitax/file-tax-report.htm",
+   "source": "U1"
   }
  },
  "calendar": {
@@ -138,5 +159,29 @@
  "notModelled": [
   "Wisconsin unemployment insurance: not read.",
   "New-hire reporting: not read."
- ]
+ ],
+ "ui": {
+  "wageBase": 1400000,
+  "wageBaseYear": 2026,
+  "employerTaxLineId": "WI_SUI_ER",
+  "returns": [
+   {
+    "id": "UCT-101",
+    "name": "Quarterly contribution report (UCT-101) and wage report",
+    "frequency": "quarterly",
+    "due": {
+     "kind": "last_day_of_month_after_quarter"
+    },
+    "contents": [
+     "Due April 30, July 31, October 31 and January 31; a Saturday, Sunday or legal holiday under state or federal law moves it to the next day that is not one (DWD 110.07(4)).",
+     "DWD will stop mailing Quarterly Tax Reports in 2027; employers should file electronically (DWD File Tax Report page)."
+    ],
+    "source": "U1"
+   }
+  ],
+  "notModelled": [
+   "The handbook page's edition date is not shown; the employer-size threshold for mandatory electronic filing (25 or more employees per a search summary) and the late-filing fee were not read.",
+   "The agency's file format specifications, penalties not quoted above and portal enrollment steps were not read."
+  ]
+ }
 }

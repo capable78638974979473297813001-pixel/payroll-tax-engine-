@@ -10,6 +10,22 @@
    "revision": "web page, no edition printed; stored copy checked 2026-11-04",
    "verifiedOn": "2026-11-04",
    "verifiedBy": "read from the stored copy in watcher/state/snapshots/nc-e720098358.txt.gz: Filing Frequency and Due Dates, Online Filing for Withholding, the NC-3 annual reconciliation, the electronic funds transfer threshold, seasonal filers, due dates on weekends and holidays, and how frequencies are updated. NC-30 (the withholding tables and instructions) pages 11-12 were not stored."
+  },
+  {
+   "id": "U1",
+   "title": "NC DES: File, Adjust or Review Quarterly Tax & Wage Report",
+   "url": "https://www.des.nc.gov/employers/file-adjust-or-review-quarterly-tax-wage-report",
+   "revision": "page fetched live 2026-11-05",
+   "verifiedOn": "2026-11-05",
+   "verifiedBy": "fetched directly from des.nc.gov on 2026-11-05 and read: the Reporting Time Period table (first quarter due April 30, second July 31, third October 31, fourth January 31); only employers with nine or fewer employee wage items may file on paper; a mailed report must be postmarked by the due date (metered mail is not proof of timeliness); penalties and interest follow a missed report or payment (interest under G.S. 105-241.21)."
+  },
+  {
+   "id": "U2",
+   "title": "U.S. Department of Labor, Significant Provisions of State Unemployment Insurance Laws, effective January 2026",
+   "url": "https://oui.doleta.gov/unemploy/content/sigpros/2020-2029/January2026.pdf",
+   "revision": "effective January 2026",
+   "verifiedOn": "2026-11-05",
+   "verifiedBy": "fetched directly from oui.doleta.gov on 2026-11-05 and read (layout text): the Taxes column's taxable wage base for the state's row (a federal compilation of the state laws)."
   }
  ],
  "agencies": {
@@ -17,6 +33,11 @@
    "name": "North Carolina Department of Revenue",
    "portalUrl": "https://www.ncdor.gov",
    "source": "S1"
+  },
+  "ui": {
+   "name": "North Carolina Division of Employment Security (DES)",
+   "portalUrl": "https://www.des.nc.gov/employers/file-adjust-or-review-quarterly-tax-wage-report",
+   "source": "U1"
   }
  },
  "calendar": {
@@ -143,5 +164,29 @@
  "notModelled": [
   "North Carolina unemployment insurance: not read.",
   "New-hire reporting: not read."
- ]
+ ],
+ "ui": {
+  "wageBase": 3420000,
+  "wageBaseYear": 2026,
+  "employerTaxLineId": "NC_SUI_ER",
+  "returns": [
+   {
+    "id": "NCUI-101",
+    "name": "Employer's Quarterly Tax and Wage Report (Form NCUI 101)",
+    "frequency": "quarterly",
+    "due": {
+     "kind": "last_day_of_month_after_quarter"
+    },
+    "contents": [
+     "Due April 30, July 31, October 31 and January 31; filed online unless the employer has nine or fewer employee wage items.",
+     "A mailed report must be postmarked by the due date; metered mail is not proof of timeliness."
+    ],
+    "source": "U1"
+   }
+  ],
+  "notModelled": [
+   "The page does not state a weekend or holiday rule; the next business day is assumed. (A search summary of DES's 2026 Employer Desk Guide lists November 2, 2026 for the third quarter, consistent with that assumption; the guide was not read.)",
+   "The agency's file format specifications, penalties not quoted above and portal enrollment steps were not read."
+  ]
+ }
 }

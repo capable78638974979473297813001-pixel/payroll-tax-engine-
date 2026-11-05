@@ -10,6 +10,22 @@
    "revision": "2026 booklet (start using January 1, 2026)",
    "verifiedOn": "2026-11-04",
    "verifiedBy": "read from the stored copy in watcher/state/snapshots/mn-4b376a9ce0.txt.gz: Deposit Schedules (semiweekly, monthly, exception, annual), Electronic Deposit Requirements, How to Make Deposits, File a Return (quarterly and annual filers, worksheets). Not read: Minnesota unemployment (DEED), Paid Leave premiums, the W-2/1099 filing layouts."
+  },
+  {
+   "id": "U1",
+   "title": "Unemployment Insurance Minnesota: Reports and payments due dates",
+   "url": "https://www.uimn.org/employers/help-and-support/emp-hbook/due-date.jsp",
+   "revision": "page fetched live 2026-11-05",
+   "verifiedOn": "2026-11-05",
+   "verifiedBy": "fetched directly from uimn.org on 2026-11-05 and read: wage detail reports (Minnesota Statutes 268.044, 268.051, 268B.12) must be received on or before April 30, July 31, October 31 and January 31; a weekend or legal holiday moves the due date to the following business day; employers with no employees submit a Zero Wage Report; payments must be received by the same date. The page's text is framed around joint UI and Paid Leave accounts."
+  },
+  {
+   "id": "U2",
+   "title": "U.S. Department of Labor, Significant Provisions of State Unemployment Insurance Laws, effective January 2026",
+   "url": "https://oui.doleta.gov/unemploy/content/sigpros/2020-2029/January2026.pdf",
+   "revision": "effective January 2026",
+   "verifiedOn": "2026-11-05",
+   "verifiedBy": "fetched directly from oui.doleta.gov on 2026-11-05 and read (layout text): the Taxes column's taxable wage base for the state's row (a federal compilation of the state laws)."
   }
  ],
  "agencies": {
@@ -17,6 +33,11 @@
    "name": "Minnesota Department of Revenue",
    "portalUrl": "https://www.revenue.state.mn.us/",
    "source": "S1"
+  },
+  "ui": {
+   "name": "Minnesota Department of Employment and Economic Development (DEED), Unemployment Insurance",
+   "portalUrl": "https://www.uimn.org/employers/",
+   "source": "U1"
   }
  },
  "calendar": {
@@ -142,5 +163,30 @@
  "notModelled": [
   "Minnesota unemployment insurance and Paid Leave: not read.",
   "New-hire reporting: not read."
- ]
+ ],
+ "ui": {
+  "wageBase": 4400000,
+  "wageBaseYear": 2026,
+  "employerTaxLineId": "MN_SUI_ER",
+  "returns": [
+   {
+    "id": "wage-detail-report",
+    "name": "Quarterly wage detail report and payment",
+    "frequency": "quarterly",
+    "due": {
+     "kind": "last_day_of_month_after_quarter"
+    },
+    "contents": [
+     "Wage detail reports must be received by the department on or before April 30, July 31, October 31 and January 31; a weekend or legal holiday moves the date to the following business day.",
+     "Employers with no employees submit a Zero Wage Report; the payment must be received by the same date."
+    ],
+    "source": "U1"
+   }
+  ],
+  "notModelled": [
+   "The page read describes joint UI/Paid Leave accounts; the UI-only rule is taken to be the same date because the page's reference is to Minnesota Statutes 268.044 and 268.051 (UI), but the UI-only page was not separately read.",
+   "Paid Leave premiums share these dates; the Paid Leave program is outside this profile.",
+   "The agency's file format specifications, penalties not quoted above and portal enrollment steps were not read."
+  ]
+ }
 }

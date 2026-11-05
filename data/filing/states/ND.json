@@ -10,6 +10,22 @@
    "revision": "28221 - Updated Format 4-2026; content revised 12/2025",
    "verifiedOn": "2026-11-04",
    "verifiedBy": "read from the stored copy in watcher/state/snapshots/nd-dfb87d4460.txt.gz: Section 1 (Form 306, filing and payment methods, electronic requirements, When to File Form 306, Annual Filing, penalty and interest) and Section 3 (information returns: how and when to file, TAP and the upload web service). Not read: Section 2 (voluntary non-wage withholding) and Form RWT-941 (retirement-plan payer) details beyond the quarter table."
+  },
+  {
+   "id": "U1",
+   "title": "Job Service North Dakota, Employer's Handbook for the Unemployment Insurance Program in North Dakota (2024)",
+   "url": "https://www.jobsnd.com/sites/www/files/documents/jsnd-documents/uiemployershandbookjsnd40362024.pdf",
+   "revision": "2024 handbook, fetched live 2026-11-05",
+   "verifiedOn": "2026-11-05",
+   "verifiedBy": "fetched directly from jobsnd.com on 2026-11-05 and read: the reporting-due-dates table (April 30, July 31, October 31, January 31) and 'If the due date falls on a weekend or a holiday, the due date is moved forward to the next business day following the weekend or holiday'. The agency's File Reports page (read) adds that liable employers must electronically file the quarterly Contribution and Wage Reports (UI EASY) and that all employers file and pay electronically."
+  },
+  {
+   "id": "U2",
+   "title": "U.S. Department of Labor, Significant Provisions of State Unemployment Insurance Laws, effective January 2026",
+   "url": "https://oui.doleta.gov/unemploy/content/sigpros/2020-2029/January2026.pdf",
+   "revision": "effective January 2026",
+   "verifiedOn": "2026-11-05",
+   "verifiedBy": "fetched directly from oui.doleta.gov on 2026-11-05 and read (layout text): the Taxes column's taxable wage base for the state's row (a federal compilation of the state laws)."
   }
  ],
  "agencies": {
@@ -17,6 +33,11 @@
    "name": "North Dakota Office of State Tax Commissioner",
    "portalUrl": "https://tap.tax.nd.gov",
    "source": "S1"
+  },
+  "ui": {
+   "name": "Job Service North Dakota, Unemployment Insurance Tax",
+   "portalUrl": "https://www.jobsnd.com/unemployment-business-tax/file-reports",
+   "source": "U1"
   }
  },
  "calendar": {
@@ -128,5 +149,29 @@
  "notModelled": [
   "North Dakota unemployment insurance: not read.",
   "New-hire reporting: not read."
- ]
+ ],
+ "ui": {
+  "wageBase": 4660000,
+  "wageBaseYear": 2026,
+  "employerTaxLineId": "ND_SUI_ER",
+  "returns": [
+   {
+    "id": "contribution-and-wage-report",
+    "name": "Employer's Contribution and Wage Report",
+    "frequency": "quarterly",
+    "due": {
+     "kind": "last_day_of_month_after_quarter"
+    },
+    "contents": [
+     "Due April 30, July 31, October 31 and January 31 with the tax; a weekend or holiday moves the date to the next business day (handbook).",
+     "Liable employers file the report electronically (UI EASY) with the tax due; reports and payments not submitted electronically on time are subject to interest and penalty (agency File Reports page)."
+    ],
+    "source": "U1"
+   }
+  ],
+  "notModelled": [
+   "The handbook is the 2024 edition; the handbook's mandatory-electronic threshold has changed between editions and the agency page now says all employers file and pay electronically.",
+   "The agency's file format specifications, penalties not quoted above and portal enrollment steps were not read."
+  ]
+ }
 }

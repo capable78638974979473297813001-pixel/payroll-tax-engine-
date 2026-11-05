@@ -10,6 +10,22 @@
    "revision": "WH-105 (Rev. 2/13/23)",
    "verifiedOn": "2026-11-04",
    "verifiedBy": "read from the stored copy in watcher/state/snapshots/sc-25117bc99e.txt.gz: Who Must Withhold, Submitting W-2s, Filing Returns (WH-1605, WH-1606), the payment rules for resident and nonresident employers, the due-date table, and the annual filer note. THE 2023 EDITION: the Department's current withholding page (watcher copy sc-f29ced8fb2) says the same in summary but was not compared line by line."
+  },
+  {
+   "id": "U1",
+   "title": "SC DEW: File a Wage Report",
+   "url": "https://dew.sc.gov/unemployment-tax-information/file-wage-report",
+   "revision": "page fetched live 2026-11-05",
+   "verifiedOn": "2026-11-05",
+   "verifiedBy": "fetched directly from dew.sc.gov on 2026-11-05 and read: the due-date table (January-March: April 30; April-June: July 31; July-September: October 31; October-December: January 31); corrections through the SUITS online portal for the most recent 16 quarters; paper reports and payments are mailed to the Department."
+  },
+  {
+   "id": "U2",
+   "title": "U.S. Department of Labor, Significant Provisions of State Unemployment Insurance Laws, effective January 2026",
+   "url": "https://oui.doleta.gov/unemploy/content/sigpros/2020-2029/January2026.pdf",
+   "revision": "effective January 2026",
+   "verifiedOn": "2026-11-05",
+   "verifiedBy": "fetched directly from oui.doleta.gov on 2026-11-05 and read (layout text): the Taxes column's taxable wage base for the state's row (a federal compilation of the state laws)."
   }
  ],
  "agencies": {
@@ -17,6 +33,11 @@
    "name": "South Carolina Department of Revenue",
    "portalUrl": "https://mydorway.dor.sc.gov",
    "source": "S1"
+  },
+  "ui": {
+   "name": "South Carolina Department of Employment and Workforce (DEW)",
+   "portalUrl": "https://dew.sc.gov/unemployment-tax-information/file-wage-report",
+   "source": "U1"
   }
  },
  "calendar": {
@@ -129,5 +150,30 @@
  "notModelled": [
   "South Carolina unemployment insurance: not read.",
   "New-hire reporting: not read."
- ]
+ ],
+ "ui": {
+  "wageBase": 1400000,
+  "wageBaseYear": 2026,
+  "employerTaxLineId": "SC_SUI_ER",
+  "returns": [
+   {
+    "id": "UCE-120",
+    "name": "Quarterly wage report (Form UCE-120) and contribution payment",
+    "frequency": "quarterly",
+    "due": {
+     "kind": "last_day_of_month_after_quarter"
+    },
+    "contents": [
+     "Due April 30, July 31, October 31 and January 31 (DEW).",
+     "Adjustments to a submitted report can be made in SUITS for the most recent 16 quarters."
+    ],
+    "source": "U1"
+   }
+  ],
+  "notModelled": [
+   "The page read states no weekend or holiday rule; the next business day is assumed. (A search summary of the SC Business One Stop says no extension is given for weekends or holidays; that page was not read, so it is not modelled.)",
+   "The late-report penalty (10% of tax, $25 minimum, $1,000 maximum per a search summary of the Installment Payment Agreement page) was not read.",
+   "The agency's file format specifications, penalties not quoted above and portal enrollment steps were not read."
+  ]
+ }
 }

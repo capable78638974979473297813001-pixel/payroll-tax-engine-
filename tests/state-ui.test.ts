@@ -71,3 +71,52 @@ describe('Nevada, New Hampshire and Tennessee (read from the states\' regulation
     assert.match(loadProfile('NV').mandates.efile!.text, /waiver of not more than 1 year/);
   });
 });
+
+describe('unemployment sections added for the withholding states (batch 8)', () => {
+  const BATCH = ['AL', 'AR', 'CO', 'CT', 'DC', 'DE', 'GA', 'HI', 'IA', 'ID', 'IL', 'IN', 'KY', 'LA', 'MD', 'ME', 'MI', 'MN', 'MO', 'MS', 'MT', 'NC', 'ND', 'NE', 'NJ', 'NM', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC', 'UT', 'VA', 'VT', 'WI', 'WV'];
+  const ANCHORS = ['2026-02-10', '2026-05-10', '2026-08-10', '2026-11-10'];
+  const dates = (st: string) => { const p = loadProfile(st); return ANCHORS.map((d) => resolveDue(p.ui!.returns[0].due, d, p).dueDate); };
+
+  test('every one has an unemployment section, one quarterly return, and the three states whose pages could not be read have none', () => {
+    for (const st of BATCH) {
+      const ui = loadProfile(st).ui;
+      assert.ok(ui, st);
+      assert.equal(ui!.returns.length, 1, st);
+      assert.equal(ui!.returns[0].frequency, 'quarterly', st);
+    }
+    for (const st of ['AZ', 'KS', 'MA']) assert.equal(loadProfile(st).ui, undefined, st);
+  });
+
+  test('the last day of the month after the quarter, rolled past weekends (Oct 31, 2026 is a Saturday; Jan 31, 2027 a Sunday)', () => {
+    const special = new Set(['NJ', 'MI']);
+    for (const st of BATCH.filter((s) => !special.has(s))) assert.deepEqual(dates(st), ['2026-04-30', '2026-07-31', '2026-11-02', '2027-02-01'], st);
+  });
+
+  test('New Jersey: the 30th, and the Department says a weekend or holiday gives no extension', () => {
+    assert.deepEqual(dates('NJ'), ['2026-04-30', '2026-07-30', '2026-10-30', '2027-01-30']); // Jan 30, 2027 is a Saturday: not rolled
+  });
+
+  test('Michigan: the 25th (April 25 and July 25, 2026 are Saturdays, October 25 a Sunday)', () => {
+    assert.deepEqual(dates('MI'), ['2026-04-27', '2026-07-27', '2026-10-26', '2027-01-25']);
+  });
+
+  test('wage bases agree with the U.S. Department of Labor compilation of January 2026', () => {
+    const DOL: Record<string, number> = { AL: 8000, AR: 7000, CO: 30600, CT: 27000, DE: 14500, DC: 9000, GA: 9500, HI: 64500, ID: 58300, IL: 14250, IN: 9500, IA: 20400, KY: 12000, LA: 7000, ME: 12000, MD: 8500, MN: 44000, MS: 14000, MO: 9000, MT: 47300, NJ: 44800, NM: 34800, NC: 34200, ND: 46600, OH: 9000, OK: 25000, OR: 56700, PA: 10000, RI: 30800, SC: 14000, UT: 50700, VA: 8000, VT: 15400, WI: 14000, WV: 9500 };
+    for (const [st, dollarsBase] of Object.entries(DOL)) assert.equal(loadProfile(st).ui!.wageBase, dollarsBase * 100, st);
+  });
+
+  test('each return cites the agency source, and the wage base cites the federal compilation', () => {
+    for (const st of BATCH) {
+      const p = loadProfile(st);
+      const ids = p.sources.map((s) => s.id);
+      assert.ok(ids.includes('U1') && ids.includes('U2'), st);
+      assert.equal(p.ui!.returns[0].source, 'U1', st);
+      assert.equal(p.agencies.ui?.source, 'U1', st);
+      assert.ok(p.sources.some((s) => /Significant Provisions of State Unemployment Insurance Laws/.test(s.title)), st);
+    }
+  });
+
+  test('every unread item is recorded, never filled in', () => {
+    for (const st of BATCH) assert.ok(loadProfile(st).ui!.notModelled.length >= 2, st);
+  });
+});

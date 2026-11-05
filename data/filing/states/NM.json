@@ -18,6 +18,22 @@
    "revision": "TRD-41414 Ins 07/01/2026",
    "verifiedOn": "2026-11-05",
    "verifiedBy": "fetched directly from realfile.tax.newmexico.gov on 2026-11-05 and read: 'When and where to file and pay' (each return due on or before the 25th of the month following the end of the tax period, next business day if a weekend or holiday; monthly, quarterly or semiannual status from the registration certificate; the semi-annual table; the electronic mandate), and the TAP FAQ (https://www.tax.newmexico.gov/individuals/wp-content/uploads/sites/5/2026/05/TAP-FAQs-on-Workers-Compensation-Fee-Return-and-Employees-Quarterly-Wage-and-Withholding-Report.pdf: the TRD-41431 is e-file mandated and due the 25th after the quarter, the first due April 25, 2026; bulk file in TAP; TRD-41414 is a separate return)."
+  },
+  {
+   "id": "U1",
+   "title": "New Mexico Administrative Code 11.3.400.404 (Wage and contribution reports by employing units), as published in the New Mexico Register vol. XXXI issue 10 (May 19, 2020) emergency amendment",
+   "url": "https://www.srca.nm.gov/nmac/nmregister/xxxi/11.3.400emeramend.html",
+   "revision": "emergency amendment text, fetched live 2026-11-05",
+   "verifiedOn": "2026-11-05",
+   "verifiedBy": "fetched directly from srca.nm.gov on 2026-11-05 and read 11.3.400.404(A)(1): an employer's wage and contribution report must be filed electronically on the department's web page on or before the last day of the month immediately following the end of the calendar quarter; if the due date falls on a Saturday, Sunday or legal holiday the report is due on the next department business day; a report is required even if no wages were paid or no tax is due unless liability has been terminated or suspended; corrections are submitted as adjustments in the employer's online account. This is the 2020 emergency amendment's text of the rule; the current codified rule was not read."
+  },
+  {
+   "id": "U2",
+   "title": "U.S. Department of Labor, Significant Provisions of State Unemployment Insurance Laws, effective January 2026",
+   "url": "https://oui.doleta.gov/unemploy/content/sigpros/2020-2029/January2026.pdf",
+   "revision": "effective January 2026",
+   "verifiedOn": "2026-11-05",
+   "verifiedBy": "fetched directly from oui.doleta.gov on 2026-11-05 and read (layout text): the Taxes column's taxable wage base for the state's row (a federal compilation of the state laws)."
   }
  ],
  "agencies": {
@@ -25,6 +41,11 @@
    "name": "New Mexico Taxation and Revenue Department",
    "portalUrl": "https://tap.state.nm.us",
    "source": "S1"
+  },
+  "ui": {
+   "name": "New Mexico Department of Workforce Solutions (DWS), Unemployment Insurance Tax",
+   "portalUrl": "https://www.dws.nm.gov/",
+   "source": "U1"
   }
  },
  "calendar": {
@@ -175,5 +196,30 @@
  "notModelled": [
   "New Mexico unemployment insurance: not read.",
   "New-hire reporting: not read."
- ]
+ ],
+ "ui": {
+  "wageBase": 3480000,
+  "wageBaseYear": 2026,
+  "employerTaxLineId": "NM_SUI_ER",
+  "returns": [
+   {
+    "id": "ES-903",
+    "name": "Employer's Quarterly Wage and Contribution Report (ES-903)",
+    "frequency": "quarterly",
+    "due": {
+     "kind": "last_day_of_month_after_quarter"
+    },
+    "contents": [
+     "Filed electronically on or before the last day of the month after the quarter (April 30, July 31, October 31, January 31); a Saturday, Sunday or legal holiday moves it to the next department business day.",
+     "A report is required even when no wages were paid or no tax is due, unless the employer's liability has been terminated or suspended (NMSA 51-1-18)."
+    ],
+    "source": "U1"
+   }
+  ],
+  "notModelled": [
+   "The rule text read is the 2020 emergency amendment as printed in the New Mexico Register; the codified current rule and the Department's own pages (which refuse automated access) were not read.",
+   "The emergency amendment's allowance for the Department to extend the deadline by up to one month in a declared emergency is recorded as text only.",
+   "The agency's file format specifications, penalties not quoted above and portal enrollment steps were not read."
+  ]
+ }
 }

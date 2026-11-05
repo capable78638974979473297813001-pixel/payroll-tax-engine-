@@ -10,6 +10,22 @@
    "revision": "PUB-131 (R-01/26), January 2026",
    "verifiedOn": "2026-11-04",
    "verifiedBy": "read from the stored copy in watcher/state/snapshots/il-2a6ba9c9a5.txt.gz: When am I required to file Form IL-941, When am I required to pay, weekend due dates, How is my payment frequency determined, How do I pay and file (electronic mandates, FSET, ACH credit), the separate-payments-for-two-quarters note and its example. Not read: Publication 131-D (the due-date table), Publication 110 (W-2 filing), or any unemployment (IDES) rule."
+  },
+  {
+   "id": "U1",
+   "title": "IDES Quarterly Filing Requirements",
+   "url": "https://ides.illinois.gov/employer-resources/taxes-reporting/quarterly-filing-requirements.html",
+   "revision": "page fetched live 2026-11-05",
+   "verifiedOn": "2026-11-05",
+   "verifiedBy": "fetched directly from ides.illinois.gov on 2026-11-05 and read: employers must file wage reports (Form UI-3/40) and pay contributions in the month after the quarter closes, on or before April 30, July 31, October 31 and January 31, electronically or on paper forms from the site."
+  },
+  {
+   "id": "U2",
+   "title": "U.S. Department of Labor, Significant Provisions of State Unemployment Insurance Laws, effective January 2026",
+   "url": "https://oui.doleta.gov/unemploy/content/sigpros/2020-2029/January2026.pdf",
+   "revision": "effective January 2026",
+   "verifiedOn": "2026-11-05",
+   "verifiedBy": "fetched directly from oui.doleta.gov on 2026-11-05 and read (layout text): the Taxes column's taxable wage base for the state's row (a federal compilation of the state laws)."
   }
  ],
  "agencies": {
@@ -17,6 +33,11 @@
    "name": "Illinois Department of Revenue",
    "portalUrl": "https://mytax.illinois.gov",
    "source": "S1"
+  },
+  "ui": {
+   "name": "Illinois Department of Employment Security (IDES)",
+   "portalUrl": "https://ides.illinois.gov/employer-resources/taxes-reporting/quarterly-filing-requirements.html",
+   "source": "U1"
   }
  },
  "calendar": {
@@ -122,5 +143,30 @@
  "notModelled": [
   "Illinois unemployment insurance: not read.",
   "New-hire reporting: not read."
- ]
+ ],
+ "ui": {
+  "wageBase": 1425000,
+  "wageBaseYear": 2026,
+  "employerTaxLineId": "IL_SUI_ER",
+  "returns": [
+   {
+    "id": "UI-3_40",
+    "name": "Employer's Contribution and Wage Report (Form UI-3/40)",
+    "frequency": "quarterly",
+    "due": {
+     "kind": "last_day_of_month_after_quarter"
+    },
+    "contents": [
+     "Wage reports and contributions are due on or before April 30, July 31, October 31 and January 31.",
+     "The page does not state a weekend or holiday rule."
+    ],
+    "source": "U1"
+   }
+  ],
+  "notModelled": [
+   "Weekend and holiday rule is not stated on the page read, so the next business day is assumed.",
+   "Electronic-filing threshold (25 or more employees), monthly wage reporting for large filers, the 2% monthly interest and the 30-day extension on written request come from search summaries and the UI-3/40 instructions, which were not read.",
+   "The agency's file format specifications, penalties not quoted above and portal enrollment steps were not read."
+  ]
+ }
 }

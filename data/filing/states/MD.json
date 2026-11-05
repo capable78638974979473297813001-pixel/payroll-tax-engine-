@@ -26,6 +26,22 @@
    "revision": "statute and regulation text; fetched live 2026-11-05",
    "verifiedOn": "2026-11-05",
    "verifiedBy": "fetched directly from mgaleg.maryland.gov and regs.maryland.gov on 2026-11-05 and read: Tax-General 10-822 (quarterly return due on or before the 15th day of the month that follows the quarter; a person who reasonably expects $700 or more of withholding in a quarter files monthly; a person who expects less than $250 in a year files annually on or before January 31; a person that withheld $15,000 or more in the preceding calendar year files within 3 business days following each payroll that causes the total accumulated tax withheld to equal or exceed $700; waiver to file monthly) and COMAR 03.04.01.01 (monthly basis: at least $700 expected for a quarter, return and payment on or before the 15th day of the following month; quarterly basis: less than $700, on or before the 15th day of the following month; the $15,000 / $700 accelerated rule; waiver). Used at https://regs.maryland.gov/us/md/exec/comar/03.04.01.01."
+  },
+  {
+   "id": "U1",
+   "title": "Maryland Department of Labor, Employers' Quick Reference Guide (Division of Unemployment Insurance)",
+   "url": "https://labor.maryland.gov/employment/empguide/empguide.pdf",
+   "revision": "guide fetched live 2026-11-05 (edition date not printed on the pages read)",
+   "verifiedOn": "2026-11-05",
+   "verifiedBy": "fetched directly from labor.maryland.gov on 2026-11-05 and read: employers report payroll and pay UI taxes within one month of the end of each quarter; the due-date table (March 31 to April 30 through December 31 to January 31); if the due date is a Saturday or Sunday, reports are due the next business day; interest at 1.5% a month."
+  },
+  {
+   "id": "U2",
+   "title": "U.S. Department of Labor, Significant Provisions of State Unemployment Insurance Laws, effective January 2026",
+   "url": "https://oui.doleta.gov/unemploy/content/sigpros/2020-2029/January2026.pdf",
+   "revision": "effective January 2026",
+   "verifiedOn": "2026-11-05",
+   "verifiedBy": "fetched directly from oui.doleta.gov on 2026-11-05 and read (layout text): the Taxes column's taxable wage base for the state's row (a federal compilation of the state laws)."
   }
  ],
  "agencies": {
@@ -33,6 +49,11 @@
    "name": "Comptroller of Maryland, Revenue Administration Division",
    "portalUrl": "https://mdtaxconnect.gov",
    "source": "S1"
+  },
+  "ui": {
+   "name": "Maryland Department of Labor, Division of Unemployment Insurance",
+   "portalUrl": "https://labor.maryland.gov/employment/",
+   "source": "U1"
   }
  },
  "calendar": {
@@ -153,5 +174,30 @@
  "notModelled": [
   "Maryland unemployment insurance: not read.",
   "New-hire reporting: not read."
- ]
+ ],
+ "ui": {
+  "wageBase": 850000,
+  "wageBaseYear": 2026,
+  "employerTaxLineId": "MD_SUI_ER",
+  "returns": [
+   {
+    "id": "quarterly-contribution-report",
+    "name": "Quarterly contribution and wage report and UI tax payment",
+    "frequency": "quarterly",
+    "due": {
+     "kind": "last_day_of_month_after_quarter"
+    },
+    "contents": [
+     "Payroll is reported and UI taxes paid within one month of quarter end: April 30, July 31, October 31 and January 31; a Saturday or Sunday moves the date to the next business day.",
+     "Interest is charged at 1.5% a month on late payments (guide)."
+    ],
+    "source": "U1"
+   }
+  ],
+  "notModelled": [
+   "The guide's rule names Saturday and Sunday only; whether a holiday moves the date is not stated, so holidays are treated as moving it.",
+   "The guide's edition date is not printed in the text read.",
+   "The agency's file format specifications, penalties not quoted above and portal enrollment steps were not read."
+  ]
+ }
 }

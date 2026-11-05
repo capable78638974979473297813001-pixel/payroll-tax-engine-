@@ -10,6 +10,22 @@
    "revision": "web page, no edition printed; stored copy checked 2026-11-04",
    "verifiedOn": "2026-11-04",
    "verifiedBy": "read in full from the stored copy in watcher/state/snapshots/mt-2599ef4f7b.txt.gz: filing requirements, due dates, withholding payment schedules and look-back, payment and filing options, truncated TINs, amending the reconciliation."
+  },
+  {
+   "id": "U1",
+   "title": "Montana Department of Labor & Industry, Unemployment Insurance Employer Handbook",
+   "url": "https://uid.dli.mt.gov/Portals/55/Documents/Contributions-Bureau/dli-uid-ui010.pdf",
+   "revision": "handbook (revised 2020 on its cover), fetched live 2026-11-05",
+   "verifiedOn": "2026-11-05",
+   "verifiedBy": "fetched directly from uid.dli.mt.gov on 2026-11-05 and read: the quarterly due-date table (April 30, July 31, October 31, January 31) and 'If the due date is on a weekend or holiday, the next business day becomes the date the quarterly reports and payment must be submitted'. The handbook is a 2020 revision."
+  },
+  {
+   "id": "U2",
+   "title": "U.S. Department of Labor, Significant Provisions of State Unemployment Insurance Laws, effective January 2026",
+   "url": "https://oui.doleta.gov/unemploy/content/sigpros/2020-2029/January2026.pdf",
+   "revision": "effective January 2026",
+   "verifiedOn": "2026-11-05",
+   "verifiedBy": "fetched directly from oui.doleta.gov on 2026-11-05 and read (layout text): the Taxes column's taxable wage base for the state's row (a federal compilation of the state laws)."
   }
  ],
  "agencies": {
@@ -17,6 +33,11 @@
    "name": "Montana Department of Revenue",
    "portalUrl": "https://tap.dor.mt.gov",
    "source": "S1"
+  },
+  "ui": {
+   "name": "Montana Department of Labor and Industry, Unemployment Insurance Division",
+   "portalUrl": "https://uid.dli.mt.gov/employers/eservices/",
+   "source": "U1"
   }
  },
  "calendar": {
@@ -126,5 +147,28 @@
  "notModelled": [
   "Montana unemployment insurance: not read.",
   "New-hire reporting: not read."
- ]
+ ],
+ "ui": {
+  "wageBase": 4730000,
+  "wageBaseYear": 2026,
+  "employerTaxLineId": "MT_SUI_ER",
+  "returns": [
+   {
+    "id": "quarterly-report",
+    "name": "Quarterly wage report and contribution payment",
+    "frequency": "quarterly",
+    "due": {
+     "kind": "last_day_of_month_after_quarter"
+    },
+    "contents": [
+     "Due April 30, July 31, October 31 and January 31; a weekend or holiday moves the date to the next business day (handbook)."
+    ],
+    "source": "U1"
+   }
+  ],
+  "notModelled": [
+   "The handbook cover reads 'Revised 2020': the schedule is long-standing but the electronic-filing threshold (employers with 20 or more employees per a search summary of the e-filing handbook), the $25 late-report penalty and the 1.5% monthly interest were not re-read in a current document.",
+   "The agency's file format specifications, penalties not quoted above and portal enrollment steps were not read."
+  ]
+ }
 }

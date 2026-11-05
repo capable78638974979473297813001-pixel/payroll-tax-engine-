@@ -10,6 +10,22 @@
    "revision": "Rev. 4/25, effective June 1, 2025",
    "verifiedOn": "2026-11-03",
    "verifiedBy": "read from the stored copy in watcher/state/snapshots/ut-f0f098aed0.txt.gz: Electronic Filing Requirements, How to Get a Withholding Account, How to File Returns, Due Dates (Annual, Quarterly with quarterly payments, Quarterly with monthly payments), Annual Reconciliations/W-2s/1099s, Filing Status Changes, W-2 and 1099 Requirements, and the penalty table. THE JUNE 2025 EDITION: a newer revision may exist (the stored copy of the Tax Commission's current Pub 14 page was not compared). Not read: payroll service provider liability, the Utah unemployment (Workforce Services) rules."
+  },
+  {
+   "id": "U1",
+   "title": "Utah Department of Workforce Services: quarterly wage reports",
+   "url": "https://jobs.utah.gov/UI/Employer/Public/Questions/QuarterlyReporting.aspx",
+   "revision": "page fetched live 2026-11-05",
+   "verifiedOn": "2026-11-05",
+   "verifiedBy": "fetched directly from jobs.utah.gov on 2026-11-05 and read: the schedule (quarter end March 31, June 30, September 30, December 31; wage report and contributions due April 30, July 31, October 31, January 31) and that reports and contributions received after the due date are subject to penalty and interest."
+  },
+  {
+   "id": "U2",
+   "title": "U.S. Department of Labor, Significant Provisions of State Unemployment Insurance Laws, effective January 2026",
+   "url": "https://oui.doleta.gov/unemploy/content/sigpros/2020-2029/January2026.pdf",
+   "revision": "effective January 2026",
+   "verifiedOn": "2026-11-05",
+   "verifiedBy": "fetched directly from oui.doleta.gov on 2026-11-05 and read (layout text): the Taxes column's taxable wage base for the state's row (a federal compilation of the state laws)."
   }
  ],
  "agencies": {
@@ -17,6 +33,11 @@
    "name": "Utah State Tax Commission",
    "portalUrl": "https://tap.utah.gov",
    "source": "S1"
+  },
+  "ui": {
+   "name": "Utah Department of Workforce Services, Unemployment Insurance",
+   "portalUrl": "https://jobs.utah.gov/UI/Employer/Public/Questions/QuarterlyReporting.aspx",
+   "source": "U1"
   }
  },
  "calendar": {
@@ -140,5 +161,29 @@
  "notModelled": [
   "Utah unemployment insurance (Workforce Services): not read.",
   "New-hire reporting: not read."
- ]
+ ],
+ "ui": {
+  "wageBase": 5070000,
+  "wageBaseYear": 2026,
+  "employerTaxLineId": "UT_SUI_ER",
+  "returns": [
+   {
+    "id": "quarterly-wage-and-contribution",
+    "name": "Quarterly wage report and contribution payment",
+    "frequency": "quarterly",
+    "due": {
+     "kind": "last_day_of_month_after_quarter"
+    },
+    "contents": [
+     "Wage reports and contributions are due April 30, July 31, October 31 and January 31; reports and contributions received after the due date are subject to penalty and interest (Department page)."
+    ],
+    "source": "U1"
+   }
+  ],
+  "notModelled": [
+   "The page read states no weekend or holiday rule; the next business day is assumed.",
+   "The penalty schedule (5% up to 15 days late, rising to a 25% cap) and the optional annual filing for domestic employers come from a search summary of the Employer Handbook and were not read.",
+   "The agency's file format specifications, penalties not quoted above and portal enrollment steps were not read."
+  ]
+ }
 }

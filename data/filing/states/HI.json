@@ -10,6 +10,22 @@
    "revision": "Booklet A (Rev. 2025)",
    "verifiedOn": "2026-11-04",
    "verifiedBy": "read from the stored copy in watcher/state/snapshots/hi-dea958dcf2.txt.gz: the calendar of employer due dates, Section 3 'Determination of Tax Remittance Frequency' (quarterly, monthly, semiweekly and the Three-Day Banking Rule), the HW-14, HW-30 and HW-2 sections, and the electronic filing and penalty notes. The extracted text drops the heading and opening sentence of the semiweekly paragraph (its dollar threshold and federal-schedule condition), so the semiweekly derivation is NOT modelled. THE 2025 EDITION."
+  },
+  {
+   "id": "U1",
+   "title": "Hawaii DLIR UI Division, Handbook for Employers",
+   "url": "https://labor.hawaii.gov/ui/test-handbook-for-employers/",
+   "revision": "handbook page fetched live 2026-11-05",
+   "verifiedOn": "2026-11-05",
+   "verifiedBy": "fetched directly from labor.hawaii.gov on 2026-11-05 and read: Form UC-B6 (Quarterly Wage, Contribution and Employment and Training Assessment Report) is due on or before the last day of the month after the quarter (April 30, July 31, October 31, January 31), must be filed each quarter even if no wages were paid, and a late UC-B6 carries a $30 penalty. The page is titled as a test copy of the handbook."
+  },
+  {
+   "id": "U2",
+   "title": "U.S. Department of Labor, Significant Provisions of State Unemployment Insurance Laws, effective January 2026",
+   "url": "https://oui.doleta.gov/unemploy/content/sigpros/2020-2029/January2026.pdf",
+   "revision": "effective January 2026",
+   "verifiedOn": "2026-11-05",
+   "verifiedBy": "fetched directly from oui.doleta.gov on 2026-11-05 and read (layout text): the Taxes column's taxable wage base for the state's row (a federal compilation of the state laws)."
   }
  ],
  "agencies": {
@@ -17,6 +33,11 @@
    "name": "Hawaii Department of Taxation",
    "portalUrl": "https://hitax.hawaii.gov",
    "source": "S1"
+  },
+  "ui": {
+   "name": "Hawaii Department of Labor and Industrial Relations, Unemployment Insurance Division",
+   "portalUrl": "https://labor.hawaii.gov/ui/",
+   "source": "U1"
   }
  },
  "calendar": {
@@ -135,5 +156,30 @@
  "notModelled": [
   "Hawaii unemployment insurance: not read.",
   "New-hire reporting: not read."
- ]
+ ],
+ "ui": {
+  "wageBase": 6450000,
+  "wageBaseYear": 2026,
+  "employerTaxLineId": "HI_SUI_ER",
+  "returns": [
+   {
+    "id": "UC-B6",
+    "name": "Quarterly Wage, Contribution and Employment and Training Assessment Report (Form UC-B6)",
+    "frequency": "quarterly",
+    "due": {
+     "kind": "last_day_of_month_after_quarter"
+    },
+    "contents": [
+     "Due no later than April 30, July 31, October 31 and January 31; filed each quarter even when no wages were paid.",
+     "A $30 penalty applies if the UC-B6 is not submitted on or before the last day of the month after the quarter; benefits-related consequences also apply (handbook)."
+    ],
+    "source": "U1"
+   }
+  ],
+  "notModelled": [
+   "The handbook page is a 'test' copy; Hawaii's current maximum-wage-base notice (the weekly wage base) and the Department's employer FAQ were not reconciled to it.",
+   "The weekend rule is not stated in the passage read, so the next business day is assumed.",
+   "The agency's file format specifications, penalties not quoted above and portal enrollment steps were not read."
+  ]
+ }
 }

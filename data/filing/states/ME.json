@@ -10,6 +10,22 @@
    "revision": "2026 booklet, August 2026 revision",
    "verifiedOn": "2026-11-04",
    "verifiedBy": "read from the stored copy in watcher/state/snapshots/me-17ca301d46.txt.gz: DOs and DON'Ts for clients of payroll processors, Due Date (semiweekly), electronic payment requirement, Form 941ME (quarterly return), instruction 7 (Payment) and instruction 9 (payee statements). Not read: the withholding calendar's date rows, Maine unemployment (Department of Labor) rules."
+  },
+  {
+   "id": "U1",
+   "title": "Maine Department of Labor, Unemployment Contributions Quarterly Report (Form ME UC-1) instructions, 2026",
+   "url": "https://www.maine.gov/unemployment/docs/2026/employers/2026_ME_UC1_instructions.pdf",
+   "revision": "2026 instructions, fetched live 2026-11-05",
+   "verifiedOn": "2026-11-05",
+   "verifiedBy": "fetched directly from maine.gov on 2026-11-05 and read: Form ME UC-1 is used to calculate unemployment contributions and report employee wages for the quarter; the quarterly report is due by or on the last day of the month after the end of each calendar quarter; questions about electronic filing go to the Division."
+  },
+  {
+   "id": "U2",
+   "title": "U.S. Department of Labor, Significant Provisions of State Unemployment Insurance Laws, effective January 2026",
+   "url": "https://oui.doleta.gov/unemploy/content/sigpros/2020-2029/January2026.pdf",
+   "revision": "effective January 2026",
+   "verifiedOn": "2026-11-05",
+   "verifiedBy": "fetched directly from oui.doleta.gov on 2026-11-05 and read (layout text): the Taxes column's taxable wage base for the state's row (a federal compilation of the state laws)."
   }
  ],
  "agencies": {
@@ -17,6 +33,11 @@
    "name": "Maine Revenue Services",
    "portalUrl": "https://revenue.maine.gov",
    "source": "S1"
+  },
+  "ui": {
+   "name": "Maine Department of Labor, Unemployment Insurance Tax",
+   "portalUrl": "https://www.maine.gov/unemployment/",
+   "source": "U1"
   }
  },
  "calendar": {
@@ -118,5 +139,31 @@
  "notModelled": [
   "Maine unemployment insurance: not read.",
   "New-hire reporting: not read."
- ]
+ ],
+ "ui": {
+  "wageBase": 1200000,
+  "wageBaseYear": 2026,
+  "employerTaxLineId": "ME_SUI_ER",
+  "returns": [
+   {
+    "id": "ME_UC-1",
+    "name": "Unemployment Contributions Quarterly Report (Form ME UC-1)",
+    "frequency": "quarterly",
+    "due": {
+     "kind": "last_day_of_month_after_quarter"
+    },
+    "contents": [
+     "Due by or on the last day of the month after the end of each calendar quarter (April 30, July 31, October 31, January 31).",
+     "The form calculates the quarter's unemployment contributions and reports employee wages."
+    ],
+    "source": "U1"
+   }
+  ],
+  "notModelled": [
+   "The weekend and holiday rule is not stated in the passage read, so the next business day is assumed.",
+   "The payroll penalty ($25 or 10% of taxes due appears in a search summary of the Department's FAQ) was not read.",
+   "Which of the employer's other quarterly programs (Paid Family and Medical Leave) share this report: not read.",
+   "The agency's file format specifications, penalties not quoted above and portal enrollment steps were not read."
+  ]
+ }
 }

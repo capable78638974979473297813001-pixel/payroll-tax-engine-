@@ -10,6 +10,22 @@
    "revision": "8-429-1998 Rev. 11-2025",
    "verifiedOn": "2026-11-03",
    "verifiedBy": "read from the stored copy in watcher/state/snapshots/ne-1c1f4767ff.txt.gz: 'Filing and Payment Requirements' (Quarterly Return, Monthly Deposits, Monthly Deposit Filing, Annual Filers, Annual Reconciliation, W-2 copies) and 'Electronic Payments'"
+  },
+  {
+   "id": "U1",
+   "title": "Nebraska Department of Labor, Employer's Guide to Unemployment Insurance",
+   "url": "https://dol.nebraska.gov/webdocs/Resources/Items/Employer%20Guide%20to%20Unemployment%20Insurance_Rebrand.pdf",
+   "revision": "guide fetched live 2026-11-05 (edition date not printed in the text read)",
+   "verifiedOn": "2026-11-05",
+   "verifiedBy": "fetched directly from dol.nebraska.gov on 2026-11-05 and read: Reporting Deadlines table (Quarter 1 due Apr. 30, Quarter 2 Jul. 31, Quarter 3 Oct. 31, Quarter 4 Jan. 31); the Combined Tax Report, wage report and payment must be received by the due dates; employers with a payroll exceeding $100,000 in either of the two previous years are expected to file reports and pay electronically (Neb. Rev. Stat. 48-648(6)); combined tax is due on the first day and delinquent after the last day of the month."
+  },
+  {
+   "id": "U2",
+   "title": "U.S. Department of Labor, Significant Provisions of State Unemployment Insurance Laws, effective January 2026",
+   "url": "https://oui.doleta.gov/unemploy/content/sigpros/2020-2029/January2026.pdf",
+   "revision": "effective January 2026",
+   "verifiedOn": "2026-11-05",
+   "verifiedBy": "fetched directly from oui.doleta.gov on 2026-11-05 and read (layout text): the Taxes column's taxable wage base for the state's row (a federal compilation of the state laws)."
   }
  ],
  "agencies": {
@@ -17,6 +33,11 @@
    "name": "Nebraska Department of Revenue (DOR)",
    "portalUrl": "https://revenue.nebraska.gov",
    "source": "S1"
+  },
+  "ui": {
+   "name": "Nebraska Department of Labor, Unemployment Insurance",
+   "portalUrl": "https://dol.nebraska.gov/unemployment-insurance",
+   "source": "U1"
   }
  },
  "calendar": {
@@ -118,5 +139,30 @@
  "notModelled": [
   "Nebraska unemployment tax (Nebraska Department of Labor): not read.",
   "New-hire reporting and registration rules: not read."
- ]
+ ],
+ "ui": {
+  "wageBase": 900000,
+  "wageBaseYear": 2026,
+  "employerTaxLineId": "NE_SUI_ER",
+  "returns": [
+   {
+    "id": "UI-11T",
+    "name": "Combined Tax Report (UI-11T) and Wage Report",
+    "frequency": "quarterly",
+    "due": {
+     "kind": "last_day_of_month_after_quarter"
+    },
+    "contents": [
+     "Due Apr. 30, Jul. 31, Oct. 31 and Jan. 31; the Combined Tax Report, wage report and payment must be received by the due date.",
+     "Employers with a payroll exceeding $100,000 in either of the two previous years are expected to file and pay electronically (Neb. Rev. Stat. 48-648(6))."
+    ],
+    "source": "U1"
+   }
+  ],
+  "notModelled": [
+   "The guide's edition date is not printed in the text read, and the guide discusses a delinquency date after the last day of the month; the penalty schedule was not transcribed.",
+   "The weekend and holiday rule is not stated in the passage read, so the next business day is assumed.",
+   "The agency's file format specifications, penalties not quoted above and portal enrollment steps were not read."
+  ]
+ }
 }

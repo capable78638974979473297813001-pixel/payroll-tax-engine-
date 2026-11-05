@@ -10,6 +10,22 @@
    "revision": "2025 instructions (file dated 12/18/24)",
    "verifiedOn": "2026-11-05",
    "verifiedBy": "fetched directly from otr.cfo.dc.gov on 2026-11-05 and read: When Must You File, General Instructions (payment frequencies and the 20th-day rule), how to complete the FR-900Q (electronic filing, the account number, third-party payers), specific instructions, the list of related forms. THE 2025 EDITION; the 2026 instructions were not read."
+  },
+  {
+   "id": "U1",
+   "title": "DC DOES: Reporting Questions",
+   "url": "https://does.dc.gov/service/reporting-questions",
+   "revision": "page fetched live 2026-11-05",
+   "verifiedOn": "2026-11-05",
+   "verifiedBy": "fetched directly from does.dc.gov on 2026-11-05 and read: employers file an Employer's Quarterly Contribution and Wage Report (Form UC-30) each quarter, due on April 30, July 31, October 31 and January 31."
+  },
+  {
+   "id": "U2",
+   "title": "U.S. Department of Labor, Significant Provisions of State Unemployment Insurance Laws, effective January 2026",
+   "url": "https://oui.doleta.gov/unemploy/content/sigpros/2020-2029/January2026.pdf",
+   "revision": "effective January 2026",
+   "verifiedOn": "2026-11-05",
+   "verifiedBy": "fetched directly from oui.doleta.gov on 2026-11-05 and read (layout text): the Taxes column's taxable wage base for the state's row (a federal compilation of the state laws)."
   }
  ],
  "agencies": {
@@ -17,6 +33,11 @@
    "name": "DC Office of Tax and Revenue",
    "portalUrl": "https://mytax.dc.gov",
    "source": "S1"
+  },
+  "ui": {
+   "name": "District of Columbia Department of Employment Services (DOES), Office of Unemployment Compensation",
+   "portalUrl": "https://does.dc.gov/service/reporting-questions",
+   "source": "U1"
   }
  },
  "calendar": {
@@ -108,5 +129,30 @@
  "notModelled": [
   "DC unemployment insurance and Paid Family Leave: not read.",
   "New-hire reporting: not read."
- ]
+ ],
+ "ui": {
+  "wageBase": 900000,
+  "wageBaseYear": 2026,
+  "employerTaxLineId": "DC_SUI_ER",
+  "returns": [
+   {
+    "id": "UC-30",
+    "name": "Employer's Quarterly Contribution and Wage Report (Form UC-30)",
+    "frequency": "quarterly",
+    "due": {
+     "kind": "last_day_of_month_after_quarter"
+    },
+    "contents": [
+     "Due April 30, July 31, October 31 and January 31 (DOES).",
+     "The page does not state a weekend or holiday rule."
+    ],
+    "source": "U1"
+   }
+  ],
+  "notModelled": [
+   "Weekend and holiday rule: DOES's page is silent, so the next business day is assumed. (A search summary says reports are due on the printed date even on a non-business day; that was not read in a DOES page, so it is not modelled.)",
+   "Electronic-filing threshold (the Employer Self Service Portal), late penalty and the zero-wage report: summarised by search only, not read.",
+   "The agency's file format specifications, penalties not quoted above and portal enrollment steps were not read."
+  ]
+ }
 }

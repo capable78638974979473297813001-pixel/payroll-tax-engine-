@@ -18,6 +18,22 @@
    "revision": "Form 4282 Revised 03-2026; Form 2414W Revised 12-2025",
    "verifiedOn": "2026-11-05",
    "verifiedBy": "fetched directly from dor.mo.gov on 2026-11-05 and read: the guide's section 11 (monthly, quarterly and annual filing requirements), section 12 (quarter-monthly: eligibility, the periods, the 90% payment, the guide's own example), the Employer Withholding Tax Due Dates table, and Form 2414W (https://dor.mo.gov/forms/2414W_2026.pdf): the 48 quarter-monthly payment due dates for 2026, the monthly and quarterly return due dates, and the electronic requirement. The guide's example ($12,000 payroll January 15 -> $10,800 due January 21; $15,000 payroll January 31 -> $13,500 due February 4) is a test."
+  },
+  {
+   "id": "U1",
+   "title": "Missouri Division of Employment Security, Quarterly Reports",
+   "url": "https://labor.mo.gov/des/employers/quarterly-reports",
+   "revision": "page fetched live 2026-11-05",
+   "verifiedOn": "2026-11-05",
+   "verifiedBy": "fetched directly from labor.mo.gov on 2026-11-05 and read: the report is filed and contributions paid by the last day of the month following the end of each quarter; the due-date chart (submission period, delinquent date, first and second penalty); 'When the date falls on a Saturday, Sunday, or holiday, the first working date following is considered timely'; penalty of 10 percent of the tax due or $100, whichever is greater, one month after delinquency and 20 percent or $200 two months after."
+  },
+  {
+   "id": "U2",
+   "title": "U.S. Department of Labor, Significant Provisions of State Unemployment Insurance Laws, effective January 2026",
+   "url": "https://oui.doleta.gov/unemploy/content/sigpros/2020-2029/January2026.pdf",
+   "revision": "effective January 2026",
+   "verifiedOn": "2026-11-05",
+   "verifiedBy": "fetched directly from oui.doleta.gov on 2026-11-05 and read (layout text): the Taxes column's taxable wage base for the state's row (a federal compilation of the state laws)."
   }
  ],
  "agencies": {
@@ -25,6 +41,11 @@
    "name": "Missouri Department of Revenue",
    "portalUrl": "https://mytax.dor.mo.gov",
    "source": "S1"
+  },
+  "ui": {
+   "name": "Missouri Department of Labor and Industrial Relations, Division of Employment Security",
+   "portalUrl": "https://labor.mo.gov/des/employers/quarterly-reports",
+   "source": "U1"
   }
  },
  "calendar": {
@@ -539,5 +560,30 @@
  "notModelled": [
   "Missouri unemployment insurance: not read.",
   "New-hire reporting: not read."
- ]
+ ],
+ "ui": {
+  "wageBase": 900000,
+  "wageBaseYear": 2026,
+  "employerTaxLineId": "MO_SUI_ER",
+  "returns": [
+   {
+    "id": "MODES-4",
+    "name": "Missouri Quarterly Contribution and Wage Report (MODES-4)",
+    "frequency": "quarterly",
+    "due": {
+     "kind": "last_day_of_month_after_quarter"
+    },
+    "contents": [
+     "Filed and contributions paid by the last day of the month after the quarter (April 30, July 31, October 31, January 31); a Saturday, Sunday or holiday moves it to the first working date following.",
+     "A report not filed by the last day of the month after the delinquent date carries a penalty of 10 percent of the tax due or $100, whichever is greater, rising to 20 percent or $200 two months after (Division chart); interest accrues on delinquent contributions."
+    ],
+    "source": "U1"
+   }
+  ],
+  "notModelled": [
+   "Missouri's electronic-filing mandate and the UInteract portal enrollment were not read.",
+   "The extension for good cause (up to three months, request by the due date) appears in a search summary of the statute and was not read.",
+   "The agency's file format specifications, penalties not quoted above and portal enrollment steps were not read."
+  ]
+ }
 }

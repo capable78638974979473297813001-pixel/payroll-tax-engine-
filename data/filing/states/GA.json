@@ -10,6 +10,22 @@
    "revision": "2026 edition, updated September 2026",
    "verifiedOn": "2026-11-04",
    "verifiedBy": "read from the stored copy in watcher/state/snapshots/ga-944bb83df9~84d4aacc.txt.gz: the 2026 due-date table, 'Withholding Requirements Summary' (payer status, thresholds, semi-weekly due days), Filing Status (EFT over $500, One-Day Rule, annual, quarterly and monthly filers). The stored text is jumbled by the PDF layout in places; the summary table was read as printed. Not read: the unemployment (Georgia Department of Labor) rules and the Georgia Tax Center registration steps."
+  },
+  {
+   "id": "U1",
+   "title": "Georgia Department of Labor: File Tax and Wage Reports and Make Payments",
+   "url": "https://dol.georgia.gov/file-tax-and-wage-reports-and-make-payments",
+   "revision": "page fetched live 2026-11-05",
+   "verifiedOn": "2026-11-05",
+   "verifiedBy": "fetched directly from dol.georgia.gov on 2026-11-05 and read: reports and any payment due must be filed on or before April 30, July 31, October 31 and January 31 (a weekend or legal holiday moves the date to the next business day); taxes are due on the first $9,500 per employee; qualified employers may defer quarterly taxes of $5.00 or less to January 31; domestic employers file Form DOL-4A annually by January 31."
+  },
+  {
+   "id": "U2",
+   "title": "U.S. Department of Labor, Significant Provisions of State Unemployment Insurance Laws, effective January 2026",
+   "url": "https://oui.doleta.gov/unemploy/content/sigpros/2020-2029/January2026.pdf",
+   "revision": "effective January 2026",
+   "verifiedOn": "2026-11-05",
+   "verifiedBy": "fetched directly from oui.doleta.gov on 2026-11-05 and read (layout text): the Taxes column's taxable wage base for the state's row (a federal compilation of the state laws)."
   }
  ],
  "agencies": {
@@ -17,6 +33,11 @@
    "name": "Georgia Department of Revenue",
    "portalUrl": "https://gtc.dor.ga.gov",
    "source": "S1"
+  },
+  "ui": {
+   "name": "Georgia Department of Labor, Unemployment Insurance Tax",
+   "portalUrl": "https://dol.georgia.gov/file-tax-and-wage-reports-and-make-payments",
+   "source": "U1"
   }
  },
  "calendar": {
@@ -149,5 +170,31 @@
  "notModelled": [
   "Georgia unemployment insurance: not read.",
   "New-hire reporting: not read."
- ]
+ ],
+ "ui": {
+  "wageBase": 950000,
+  "wageBaseYear": 2026,
+  "employerTaxLineId": "GA_SUI_ER",
+  "returns": [
+   {
+    "id": "DOL-4",
+    "name": "Employer's Quarterly Tax and Wage Report (Form DOL-4)",
+    "frequency": "quarterly",
+    "due": {
+     "kind": "last_day_of_month_after_quarter"
+    },
+    "contents": [
+     "Reports and any payment due are filed on or before April 30, July 31, October 31 and January 31; a weekend or legal holiday moves the date to the next business day.",
+     "Qualified employers may defer quarterly taxes of $5.00 or less until January 31 of the following year.",
+     "Domestic employers file the annual Form DOL-4A and pay by January 31 of the following year (not scheduled here)."
+    ],
+    "source": "U1"
+   }
+  ],
+  "notModelled": [
+   "Domestic-employer annual report DOL-4A is recorded as text only.",
+   "Georgia's electronic-filing mandate for tax and wage reports is described in a Department notice found by search that was not read.",
+   "The agency's file format specifications, penalties not quoted above and portal enrollment steps were not read."
+  ]
+ }
 }

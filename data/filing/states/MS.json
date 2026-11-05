@@ -10,6 +10,22 @@
    "revision": "Pub 89-700-25-1 (Rev. 07/25), file revised 1.13.2026",
    "verifiedOn": "2026-11-04",
    "verifiedBy": "read from the stored copy in watcher/state/snapshots/ms-f79d3f52fc.txt.gz: the cover notes (electronic filing, FSET bulk program, W-2 and 1099 formats), instruction 14 (monthly or quarterly return) and the Mississippi Withholding Tax Calendar. Not read: Mississippi unemployment (MDES) rules."
+  },
+  {
+   "id": "U1",
+   "title": "MDES Employer FAQs",
+   "url": "https://mdes.ms.gov/employer-faqs/",
+   "revision": "FAQ page as stored in watcher/state/snapshots",
+   "verifiedOn": "2026-11-05",
+   "verifiedBy": "read from the stored copy: 'Quarterly wage reports and taxes are due by the last day of the month following the close of each calendar quarter, unless the report date is a Saturday, Sunday, or a state or federal holiday', the four dates, the late-filing penalty starting 30 days after the due date, the additional late-payment penalty after 60 days, and the Monthly Local Payment Plan (MLPP) extended payment dates."
+  },
+  {
+   "id": "U2",
+   "title": "U.S. Department of Labor, Significant Provisions of State Unemployment Insurance Laws, effective January 2026",
+   "url": "https://oui.doleta.gov/unemploy/content/sigpros/2020-2029/January2026.pdf",
+   "revision": "effective January 2026",
+   "verifiedOn": "2026-11-05",
+   "verifiedBy": "fetched directly from oui.doleta.gov on 2026-11-05 and read (layout text): the Taxes column's taxable wage base for the state's row (a federal compilation of the state laws)."
   }
  ],
  "agencies": {
@@ -17,6 +33,11 @@
    "name": "Mississippi Department of Revenue, Income Tax Bureau",
    "portalUrl": "https://www.dor.ms.gov",
    "source": "S1"
+  },
+  "ui": {
+   "name": "Mississippi Department of Employment Security (MDES)",
+   "portalUrl": "https://mdes.ms.gov",
+   "source": "U1"
   }
  },
  "calendar": {
@@ -122,5 +143,31 @@
  "notModelled": [
   "Mississippi unemployment insurance: not read.",
   "New-hire reporting: not read."
- ]
+ ],
+ "ui": {
+  "wageBase": 1400000,
+  "wageBaseYear": 2026,
+  "employerTaxLineId": "MS_SUI_ER",
+  "returns": [
+   {
+    "id": "quarterly-wage-and-tax",
+    "name": "Quarterly wage report and tax payment",
+    "frequency": "quarterly",
+    "due": {
+     "kind": "last_day_of_month_after_quarter"
+    },
+    "contents": [
+     "Due April 30, July 31, October 31 and January 31; a Saturday, Sunday or state or federal holiday moves it to the next business day.",
+     "A late-filing penalty is charged beginning 30 days after the due date and an additional late-payment penalty 60 days after (or when a warrant for collection is issued).",
+     "Employers enrolled in MLPP pay by bank draft on extended dates (May 15, August 15, November 15, January 31); the wage report stays due on the standard date."
+    ],
+    "source": "U1"
+   }
+  ],
+  "notModelled": [
+   "The MLPP payment dates are recorded as text only; they are not scheduled.",
+   "Penalty amounts and the electronic-filing mandate were not read.",
+   "The agency's filing format specifications, penalties and portal enrollment steps were not read."
+  ]
+ }
 }

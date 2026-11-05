@@ -18,6 +18,22 @@
    "revision": "OAC 710:90, 2026 edition; section 710:90-3-4 last amended 7-11-13",
    "verifiedOn": "2026-11-05",
    "verifiedBy": "fetched directly from oklahoma.gov on 2026-11-05 and read: 710:90-3-4 'Payment of tax and filing of tax returns' in full (the quarterly return, the less-than-$500 quarterly remittance, monthly remittance after a quarter over $500, the Federal Semiweekly Deposit Schedule rule and its banking-day wording, zero returns)."
+  },
+  {
+   "id": "U1",
+   "title": "Oklahoma Employment Security Commission, Unemployment Insurance: An Employer's Guide",
+   "url": "https://digitalprairie.ok.gov/digital/api/collection/stgovpub/id/217944/download",
+   "revision": "guide on the Oklahoma Digital Prairie state-documents site; an older edition (cover names Governor Mary Fallin)",
+   "verifiedOn": "2026-11-05",
+   "verifiedBy": "fetched directly from digitalprairie.ok.gov on 2026-11-05 and read: 'The quarterly wage report is due by the last day of the month following the end of the calendar quarter' and the table April 30, July 31, October 31, January 31. The edition predates 2026 by several years. The agency's current Wage Reporting page (read) requires employers and third-party administrators to file the quarterly wage report online and describes penalties after a Notice of Non-Receipt (OES-054)."
+  },
+  {
+   "id": "U2",
+   "title": "U.S. Department of Labor, Significant Provisions of State Unemployment Insurance Laws, effective January 2026",
+   "url": "https://oui.doleta.gov/unemploy/content/sigpros/2020-2029/January2026.pdf",
+   "revision": "effective January 2026",
+   "verifiedOn": "2026-11-05",
+   "verifiedBy": "fetched directly from oui.doleta.gov on 2026-11-05 and read (layout text): the Taxes column's taxable wage base for the state's row (a federal compilation of the state laws)."
   }
  ],
  "agencies": {
@@ -25,6 +41,11 @@
    "name": "Oklahoma Tax Commission",
    "portalUrl": "https://oklahoma.gov/tax.html",
    "source": "S1"
+  },
+  "ui": {
+   "name": "Oklahoma Employment Security Commission (OESC)",
+   "portalUrl": "https://oklahoma.gov/oesc/employers/tax/wage-reporting.html",
+   "source": "U1"
   }
  },
  "calendar": {
@@ -135,5 +156,30 @@
  "notModelled": [
   "Oklahoma unemployment insurance: not read.",
   "New-hire reporting: not read."
- ]
+ ],
+ "ui": {
+  "wageBase": 2500000,
+  "wageBaseYear": 2026,
+  "employerTaxLineId": "OK_SUI_ER",
+  "returns": [
+   {
+    "id": "quarterly-contribution-and-wage",
+    "name": "Quarterly contribution and wage report",
+    "frequency": "quarterly",
+    "due": {
+     "kind": "last_day_of_month_after_quarter"
+    },
+    "contents": [
+     "Due by the last day of the month following the quarter: April 30, July 31, October 31, January 31.",
+     "Employers and third-party administrators file the quarterly wage report online (agency Wage Reporting page); penalties and interest follow a Notice of Non-Receipt (OES-054) unanswered after 15 days."
+    ],
+    "source": "U1"
+   }
+  ],
+  "notModelled": [
+   "The due-date text comes from an older edition of the Commission's guide; OAC 240:10-5-91 (cited in a search summary) was not read and the current wage-reporting page prints no date.",
+   "The weekend and holiday rule is not stated in the passages read, so the next business day is assumed.",
+   "The agency's file format specifications, penalties not quoted above and portal enrollment steps were not read."
+  ]
+ }
 }

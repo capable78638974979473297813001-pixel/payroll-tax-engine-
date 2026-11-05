@@ -78,9 +78,12 @@ describe('coverage: every jurisdiction is accounted for', () => {
     assert.equal(by.FL.withholding, 'no wage income tax');
     assert.equal(by.PR.withholding, 'partial'); // the paycheck engine has no Puerto Rico data: unemployment rules only
     assert.equal(by.PR.ui, 'modelled');
-    assert.equal(by.CO.ui, 'NOT MODELLED');
+    assert.equal(by.CO.ui, 'modelled'); // CDLE's premium-and-wage-report FAQ
     assert.equal(by.CT.withholding, 'modelled');
-    assert.equal(by.CT.ui, 'NOT MODELLED'); // Connecticut's guide covers withholding only
+    assert.equal(by.CT.ui, 'modelled'); // the Department of Labor's own due-date article
+    // Every modelled jurisdiction has an unemployment section except the three whose agency pages could not be read.
+    const uiGaps = modelledStates().filter((code) => by[code].ui !== 'modelled');
+    assert.deepEqual(uiGaps, ['AZ', 'KS', 'MA']);
   });
   test('an unmodelled state throws NOT MODELLED instead of returning an empty profile', () => {
     assert.equal(hasProfile('ZZ'), false);

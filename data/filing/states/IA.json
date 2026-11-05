@@ -18,6 +18,22 @@
    "revision": "web page, no edition printed; fetched live 2026-11-05",
    "verifiedOn": "2026-11-05",
    "verifiedBy": "fetched directly from revenue.iowa.gov on 2026-11-05 and read: Iowa Withholding Tax Filing Frequencies (quarterly, monthly, semimonthly, with their payment and return due dates), the electronic requirements, W-2/1099 e-filing by February 15, and the weekend rule (Iowa Code 421.9A)."
+  },
+  {
+   "id": "U1",
+   "title": "Iowa Administrative Code 871, chapter 23, rule 23.8 (Due date of quarterly contribution and payroll) and chapter 22, rule 22.3",
+   "url": "https://www.legis.iowa.gov/docs/iac/chapter/871.23.pdf",
+   "revision": "IAC 3/4/26 (chapter 23); IAC 2/5/25 (chapter 22)",
+   "verifiedOn": "2026-11-05",
+   "verifiedBy": "fetched directly from legis.iowa.gov on 2026-11-05 and read: 871-23.8(1)(a) contributions are due quarterly on the last day of the month following the quarter; (b) a Saturday, Sunday or legal holiday moves the due date to the next following business day, mailed reports count on the postmark date; 871-22.3 every employer must electronically submit the contribution and payroll report each quarter, even when no contributions are due."
+  },
+  {
+   "id": "U2",
+   "title": "U.S. Department of Labor, Significant Provisions of State Unemployment Insurance Laws, effective January 2026",
+   "url": "https://oui.doleta.gov/unemploy/content/sigpros/2020-2029/January2026.pdf",
+   "revision": "effective January 2026",
+   "verifiedOn": "2026-11-05",
+   "verifiedBy": "fetched directly from oui.doleta.gov on 2026-11-05 and read (layout text): the Taxes column's taxable wage base for the state's row (a federal compilation of the state laws)."
   }
  ],
  "agencies": {
@@ -25,6 +41,11 @@
    "name": "Iowa Department of Revenue",
    "portalUrl": "https://revenue.iowa.gov/",
    "source": "S1"
+  },
+  "ui": {
+   "name": "Iowa Workforce Development, Unemployment Insurance Tax Bureau",
+   "portalUrl": "https://workforce.iowa.gov/employers",
+   "source": "U1"
   }
  },
  "calendar": {
@@ -153,5 +174,30 @@
  "notModelled": [
   "Iowa unemployment insurance: not read.",
   "New-hire reporting: not read."
- ]
+ ],
+ "ui": {
+  "wageBase": 2040000,
+  "wageBaseYear": 2026,
+  "employerTaxLineId": "IA_SUI_ER",
+  "returns": [
+   {
+    "id": "contribution-and-payroll",
+    "name": "Quarterly contribution and payroll report",
+    "frequency": "quarterly",
+    "due": {
+     "kind": "last_day_of_month_after_quarter"
+    },
+    "contents": [
+     "Contributions and the quarterly wage detail are due the last day of the month after the quarter; a Saturday, Sunday or legal holiday moves the date to the next following business day (871 IAC 23.8).",
+     "Employers must electronically submit the report each quarter, even with no contributions due or no employees (871 IAC 22.3).",
+     "Mailed reports count as received on the postmark date (871 IAC 23.8(1)(b))."
+    ],
+    "source": "U1"
+   }
+  ],
+  "notModelled": [
+   "Iowa's penalty under Iowa Code 96.14(2) and the delinquency notice process: described in the rule text only in outline; not read in the Code.",
+   "The agency's file format specifications, penalties not quoted above and portal enrollment steps were not read."
+  ]
+ }
 }
