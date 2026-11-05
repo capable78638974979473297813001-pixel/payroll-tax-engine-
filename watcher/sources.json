@@ -20,6 +20,126 @@
    ]
   },
   {
+   "id": "us-1c1f4767ff",
+   "jurisdiction": "US",
+   "title": "2026 Nebraska Circular EN: Income Tax Withholding on Wages, Pensions and Annuities, and Gambling Winnings",
+   "url": "https://revenue.nebraska.gov/sites/default/files/doc/business/Cir_En_2025/2026cir_en_whole.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/filing/states/NE.json",
+    "data/pension/state-withholding-2026.json",
+    "data/states/NE-2026.json",
+    "data/states/NE-2027.json"
+   ]
+  },
+  {
+   "id": "us-d9f64cd9b0",
+   "jurisdiction": "US",
+   "title": "2026 Rhode Island Withholding Tax Booklet (instructions 6, 9, 10 and the 2026 Withholding Tax Payment Calendar)",
+   "url": "https://tax.ri.gov/sites/g/files/xkgbur541/files/2025-12/2026%20Withholding%20Tax%20Booklet.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/filing/states/RI.json",
+    "data/states/RI-2026.json",
+    "data/states/RI-2027.json"
+   ]
+  },
+  {
+   "id": "us-7b1543356b",
+   "jurisdiction": "US",
+   "title": "Alabama Withholding Tax Tables and Instructions for Employers and Withholding Agents",
+   "url": "https://www.revenue.alabama.gov/wp-content/uploads/2026/01/whbooklet_0126.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/filing/states/AL.json",
+    "data/states/AL-2026.json",
+    "data/states/AL-2027.json"
+   ]
+  },
+  {
+   "id": "us-0cb66b630c",
+   "jurisdiction": "US",
+   "title": "Alaska Employment Security Tax Handbook (taxbook) with the 2026 Quarterly Contribution Report (TQ01C) and 2026 UI Tax Rates page",
+   "url": "https://labor.alaska.gov/estax/documents/taxbook.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/filing/states/AK.json"
+   ]
+  },
+  {
+   "id": "us-48690e4eef",
+   "jurisdiction": "US",
+   "title": "Arizona Department of Revenue: Employer Withholding Filing Obligations (web page)",
+   "url": "https://azdor.gov/business/withholding-tax/employer-withholding-filing-obligations",
+   "origin": "data",
+   "used_by": [
+    "data/filing/states/AZ.json"
+   ]
+  },
+  {
+   "id": "us-9958a98fa8",
+   "jurisdiction": "US",
+   "title": "Arizona Withholding Tax Procedure WTP 16-1, Procedure for Determining When an Employer Must Remit Arizona Withholding Tax",
+   "url": "https://azdor.gov/sites/default/files/2023-03/PROCEDURES_WTHOLD_2016_WTP16-1.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/filing/states/AZ.json"
+   ]
+  },
+  {
+   "id": "us-3934dddb01",
+   "jurisdiction": "US",
+   "title": "Arkansas DFA Withholding Tax Employer's Instructions",
+   "url": "https://www.dfa.arkansas.gov/wp-content/uploads/withholdInstructions.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/filing/states/AR.json"
+   ]
+  },
+  {
+   "id": "us-0afe64d6b9",
+   "jurisdiction": "US",
+   "title": "Colorado Wage Withholding Tax Guide",
+   "url": "https://tax.colorado.gov/sites/tax/files/documents/Wage_Withholding_Tax_Guide_Jan_2026.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/filing/states/CO.json",
+    "data/states/CO-2026.json",
+    "data/states/CO-2027.json"
+   ]
+  },
+  {
+   "id": "us-75b91b6b44",
+   "jurisdiction": "US",
+   "title": "Connecticut Employer's Tax Guide, Circular CT",
+   "url": "https://portal.ct.gov/-/media/drs/publications/pubsip/2025/ip-2025-1.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/filing/states/CT.json",
+    "data/states/CT-2025.json"
+   ]
+  },
+  {
+   "id": "us-51d4c808c4",
+   "jurisdiction": "US",
+   "title": "Contacts for State UI Tax Information and Assistance",
+   "url": "https://oui.doleta.gov/unemploy/agencies.asp",
+   "origin": "data",
+   "used_by": [
+    "data/filing/ui-agencies.json"
+   ]
+  },
+  {
+   "id": "us-7f33bee538",
+   "jurisdiction": "US",
+   "title": "DC Office of Tax and Revenue: 2025 FR-900Q Employer/Payor Withholding Tax - Reporting Instructions",
+   "url": "https://otr.cfo.dc.gov/sites/default/files/dc/sites/otr/publication/attachments/2025_FR900Q_Instructions_121824.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/filing/states/DC.json"
+   ]
+  },
+  {
    "id": "us-d3629736d3",
    "jurisdiction": "US",
    "title": "DOL FUTA credit reduction states",
@@ -266,6 +386,29 @@
    ]
   },
   {
+   "id": "us-84d4aaccbe",
+   "jurisdiction": "US",
+   "title": "Georgia Employer's Tax Guide",
+   "url": "https://dor.georgia.gov/document/document/2026-employers-tax-guide-updated-september-2026/download",
+   "origin": "data",
+   "used_by": [
+    "data/filing/states/GA.json"
+   ]
+  },
+  {
+   "id": "us-dea958dcf2",
+   "jurisdiction": "US",
+   "title": "Hawaii Department of Taxation, Booklet A: Employer's Tax Guide",
+   "url": "https://files.hawaii.gov/tax/news/pubs/25BkltA.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/filing/states/HI.json",
+    "data/states/HI-2025.json",
+    "data/states/HI-2026.json",
+    "data/states/HI-2027.json"
+   ]
+  },
+  {
    "id": "us-bac2c79c3f",
    "jurisdiction": "US",
    "title": "IRS Form W-4",
@@ -433,6 +576,261 @@
    ]
   },
   {
+   "id": "us-882a4325e8",
+   "jurisdiction": "US",
+   "title": "Idaho State Tax Commission: Withholding (web page)",
+   "url": "https://tax.idaho.gov/search-category/income-tax/withholding/",
+   "origin": "data",
+   "used_by": [
+    "data/filing/states/ID.json",
+    "data/pension/state-withholding-2026.json"
+   ]
+  },
+  {
+   "id": "us-9c8de440a3",
+   "jurisdiction": "US",
+   "title": "Idaho State Tax Commission: Withholding Due Dates and Withholding Filing (web pages)",
+   "url": "https://tax.idaho.gov/taxes/income-tax/withholding/withholding-due-dates/",
+   "origin": "data",
+   "used_by": [
+    "data/filing/states/ID.json"
+   ]
+  },
+  {
+   "id": "us-2a6ba9c9a5",
+   "jurisdiction": "US",
+   "title": "Illinois Publication 131, Withholding Income Tax Payment and Filing Requirements",
+   "url": "https://tax.illinois.gov/content/dam/soi/en/web/tax/research/publications/pubs/documents/pub-131.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/filing/states/IL.json",
+    "data/pension/state-withholding-2026.json"
+   ]
+  },
+  {
+   "id": "us-a71181ab28",
+   "jurisdiction": "US",
+   "title": "Indiana Department of Revenue: Business FAQ",
+   "url": "https://www.in.gov/dor/i-am-a/business-corp/business-faq/",
+   "origin": "data",
+   "used_by": [
+    "data/filing/states/IN.json"
+   ]
+  },
+  {
+   "id": "us-4527e473d4",
+   "jurisdiction": "US",
+   "title": "Instructions for Form NYS-45, Quarterly Combined Withholding, Wage Reporting, and Unemployment Insurance Return",
+   "url": "https://www.tax.ny.gov/pdf/current_forms/wt/nys45i.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/filing/states/NY.json",
+    "data/states/NY-2026.json",
+    "data/states/NY-2027.json"
+   ]
+  },
+  {
+   "id": "us-cf9a8c38df",
+   "jurisdiction": "US",
+   "title": "Iowa Department of Revenue: Filing Frequency & Return Due Dates (web page)",
+   "url": "https://revenue.iowa.gov/taxes/file-my-taxes/business-taxes/filing-frequency-return-due-dates",
+   "origin": "data",
+   "used_by": [
+    "data/filing/states/IA.json"
+   ]
+  },
+  {
+   "id": "us-8e1835e33b",
+   "jurisdiction": "US",
+   "title": "Iowa Department of Revenue: Iowa Withholding Tax Information (web page)",
+   "url": "https://revenue.iowa.gov/taxes/tax-guidance/withholding-tax/iowa-withholding-tax-information",
+   "origin": "data",
+   "used_by": [
+    "data/filing/states/IA.json",
+    "data/pension/state-withholding-2026.json"
+   ]
+  },
+  {
+   "id": "us-14a62766a5",
+   "jurisdiction": "US",
+   "title": "Louisiana Department of Revenue FAQs: When are my payments due? and When must I file Form L-1?",
+   "url": "https://revenue.louisiana.gov/tax-education-and-faqs/faqs/withholding-tax/when-are-my-payments-due/",
+   "origin": "data",
+   "used_by": [
+    "data/filing/states/LA.json"
+   ]
+  },
+  {
+   "id": "us-17ca301d46",
+   "jurisdiction": "US",
+   "title": "Maine Revenue Services: Withholding Tax Instruction and Tables (August 2026 revision)",
+   "url": "https://www.maine.gov/revenue/sites/maine.gov.revenue/files/inline-files/26_wh_tab_instr_August2026.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/filing/states/ME.json",
+    "data/states/ME-2026.json"
+   ]
+  },
+  {
+   "id": "us-c039e59872",
+   "jurisdiction": "US",
+   "title": "Maryland Employer Withholding Guide, effective January 2024 (revised December 2023), section 5 'How to file'",
+   "url": "https://www.marylandcomptroller.gov/content/dam/mdcomp/tax/instructions/2024/Withholding-Guide.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/filing/states/MD.json"
+   ]
+  },
+  {
+   "id": "us-0ebe1aa731",
+   "jurisdiction": "US",
+   "title": "Maryland Tax-General Article section 10-822, and COMAR 03.04.01.01 (Withholding of Tax at Source)",
+   "url": "https://mgaleg.maryland.gov/mgawebsite/laws/StatuteText?article=gtg&section=10-822",
+   "origin": "data",
+   "used_by": [
+    "data/filing/states/MD.json"
+   ]
+  },
+  {
+   "id": "us-205400bcad",
+   "jurisdiction": "US",
+   "title": "Massachusetts DOR Form M-3 (Rev. 11/16) and Form W-2 Electronic Filing Specifications (Rev. 20191219), stored copies",
+   "url": "https://www.mass.gov/doc/form-m-3-reconciliation-of-massachusetts-income-taxes-withheld-for-employers/download",
+   "origin": "data",
+   "used_by": [
+    "data/filing/states/MA.json"
+   ]
+  },
+  {
+   "id": "us-76eb9d1bd2",
+   "jurisdiction": "US",
+   "title": "Massachusetts DOR: Withholding Tax Guide, and Form M-941 Instructions: Tax Return of Income Taxes Withheld (web pages)",
+   "url": "https://www.mass.gov/info-details/withholding-tax-guide",
+   "origin": "data",
+   "used_by": [
+    "data/filing/states/MA.json"
+   ]
+  },
+  {
+   "id": "us-4b376a9ce0",
+   "jurisdiction": "US",
+   "title": "Minnesota Income Tax Withholding Instruction Booklet and Tax Tables 2026",
+   "url": "https://www.revenue.state.mn.us/sites/default/files/2025-12/wh-inst-26.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/filing/states/MN.json",
+    "data/pension/state-withholding-2026.json",
+    "data/states/MN-2026.json",
+    "data/states/MN-2027.json"
+   ]
+  },
+  {
+   "id": "us-f79d3f52fc",
+   "jurisdiction": "US",
+   "title": "Mississippi Withholding Income Tax Tables and Employer Instructions, Pub 89-700-25-1",
+   "url": "https://www.dor.ms.gov/sites/default/files/tax-forms/business/89700251revised1.13.2026.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/filing/states/MS.json",
+    "data/states/MS-2026.json",
+    "data/states/MS-2027.json"
+   ]
+  },
+  {
+   "id": "us-a8348dd409",
+   "jurisdiction": "US",
+   "title": "Missouri Department of Revenue: Withholding Tax FAQ",
+   "url": "https://dor.mo.gov/faq/taxation/business/withholding.html",
+   "origin": "data",
+   "used_by": [
+    "data/filing/states/MO.json",
+    "data/pension/state-withholding-2026.json"
+   ]
+  },
+  {
+   "id": "us-00d8a5c0bb",
+   "jurisdiction": "US",
+   "title": "Nevada Administrative Code chapter 612 (Unemployment Compensation): NAC 612.035 and NAC 612.260",
+   "url": "https://www.leg.state.nv.us/nac/NAC-612.html",
+   "origin": "data",
+   "used_by": [
+    "data/filing/states/NV.json"
+   ]
+  },
+  {
+   "id": "us-783a98d3a2",
+   "jurisdiction": "US",
+   "title": "Nevada Revised Statutes chapter 612, NRS 612.545 (Base)",
+   "url": "https://www.leg.state.nv.us/nrs/nrs-612.html",
+   "origin": "data",
+   "used_by": [
+    "data/filing/states/NV.json"
+   ]
+  },
+  {
+   "id": "us-ba5afa436b",
+   "jurisdiction": "US",
+   "title": "New Mexico TRD-41414 Instructions (07/01/2026) and TAP FAQs on TRD-41431",
+   "url": "https://realfile.tax.newmexico.gov/trd-41414ins.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/filing/states/NM.json"
+   ]
+  },
+  {
+   "id": "us-d04ec1889a",
+   "jurisdiction": "US",
+   "title": "New York Tax Department: Withholding tax filing requirements; Withholding tax due dates; Instructions for Form NYS-1",
+   "url": "https://www.tax.ny.gov/bus/wt/duedates.htm",
+   "origin": "data",
+   "used_by": [
+    "data/filing/states/NY.json"
+   ]
+  },
+  {
+   "id": "us-e720098358",
+   "jurisdiction": "US",
+   "title": "North Carolina Department of Revenue: Withholding Tax Frequently Asked Questions",
+   "url": "https://www.ncdor.gov/withholding-tax-frequently-asked-questions",
+   "origin": "data",
+   "used_by": [
+    "data/filing/states/NC.json",
+    "data/states/NC-2026.json",
+    "data/states/NC-2027.json"
+   ]
+  },
+  {
+   "id": "us-dfb87d4460",
+   "jurisdiction": "US",
+   "title": "North Dakota Income Tax Withholding & Information Returns Guideline",
+   "url": "https://www.tax.nd.gov/sites/www/files/documents/guidelines/business/it-withhold/income-tax-withholding-information-returns-guideline.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/filing/states/ND.json",
+    "data/pension/state-withholding-2026.json"
+   ]
+  },
+  {
+   "id": "us-66c9c823cf",
+   "jurisdiction": "US",
+   "title": "Oklahoma Administrative Code 710:90, Chapter 90 Withholding, section 710:90-3-4 (2026)",
+   "url": "https://oklahoma.gov/content/dam/ok/en/tax/documents/resources/rules-and-policies/agency-rules/2026/Chapter90-Withholding-2026.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/filing/states/OK.json"
+   ]
+  },
+  {
+   "id": "us-061b44c5dd",
+   "jurisdiction": "US",
+   "title": "Oregon Department of Revenue: 2026 Withholding and Transit Tax Calendar and Important Due Dates",
+   "url": "https://www.oregon.gov/dor/forms/FormsPubs/withholding-calendar_206-400.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/filing/states/OR.json"
+   ]
+  },
+  {
    "id": "us-6652b63bcb",
    "jurisdiction": "US",
    "title": "P.L. 119-21 on govinfo.gov (official text)",
@@ -447,6 +845,16 @@
    ]
   },
   {
+   "id": "us-3b309e8c97",
+   "jurisdiction": "US",
+   "title": "Puerto Rico Departamento del Trabajo y Recursos Humanos: Servicio Contributivo (portal), Reglamento N\u00famero 1 (SINOT), and Ley 74-1956 de Seguridad de Empleo (revised January 2025)",
+   "url": "https://trabajo.pr.gov/servicio_contributivo.asp",
+   "origin": "data",
+   "used_by": [
+    "data/filing/states/PR.json"
+   ]
+  },
+  {
    "id": "us-8d731c3946",
    "jurisdiction": "US",
    "title": "RRB Program Letter 2025-01 (monthly base) and RRB FY2026 Justification of Budget Estimates (rates)",
@@ -454,6 +862,90 @@
    "origin": "data",
    "used_by": [
     "data/federal/2025.json"
+   ]
+  },
+  {
+   "id": "us-d4d90b7ef0",
+   "jurisdiction": "US",
+   "title": "Rhode Island Withholding Tax Filing & Transmittal Requirements (Form WTM, RI-941, W-2s, RI W-3, Tax Portal)",
+   "url": "https://tax.ri.gov/sites/g/files/xkgbur541/files/2026-01/Withholding%20Filing%20Requirements_12302025.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/filing/states/RI.json"
+   ]
+  },
+  {
+   "id": "us-25117bc99e",
+   "jurisdiction": "US",
+   "title": "South Carolina Withholding Tax Information Guide, WH-105",
+   "url": "https://dor.sc.gov/sites/dor/files/forms/WH105.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/filing/states/SC.json",
+    "data/states/SC-2026.json",
+    "data/states/SC-2027.json"
+   ]
+  },
+  {
+   "id": "us-554b24e328",
+   "jurisdiction": "US",
+   "title": "South Dakota Department of Labor & Regulation: Reemployment Assistance Tax - Wage Reporting; Reemployment Assistance for Businesses (web pages)",
+   "url": "https://dlr.sd.gov/ra/businesses/wage_reporting.aspx",
+   "origin": "data",
+   "used_by": [
+    "data/filing/states/SD.json"
+   ]
+  },
+  {
+   "id": "us-bdc339810a",
+   "jurisdiction": "US",
+   "title": "State of Missouri Employer's Tax Guide, Form 4282 (Revised 03-2026), and Form 2414W (Revised 12-2025) 2026 Quarter-Monthly Withholding Payment Due Dates",
+   "url": "https://dor.mo.gov/forms/4282_2026.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/filing/states/MO.json"
+   ]
+  },
+  {
+   "id": "us-f226858004",
+   "jurisdiction": "US",
+   "title": "Tennessee Department of Labor and Workforce Development: Frequently Asked Questions - Employers (Employer e-Services)",
+   "url": "https://www.tn.gov/content/dam/tn/workforce/documents/employers/FAQ-UI-Tax-Employers.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/filing/states/TN.json"
+   ]
+  },
+  {
+   "id": "us-5ad0d69992",
+   "jurisdiction": "US",
+   "title": "Tennessee Department of Labor and Workforce Development: UI Tax Rates (taxable wage base)",
+   "url": "https://www.tn.gov/workforce/employers/tax-and-insurance-redirect/unemployment-insurance-tax/ui-tax-rates.html",
+   "origin": "data",
+   "used_by": [
+    "data/filing/states/TN.json",
+    "data/states/TN-2026.json",
+    "data/states/TN-2027.json"
+   ]
+  },
+  {
+   "id": "us-d39ebbcd12",
+   "jurisdiction": "US",
+   "title": "Texas Workforce Commission: Manage a Tax Account (Unemployment Tax Services)",
+   "url": "https://www.twc.texas.gov/services/manage-tax",
+   "origin": "data",
+   "used_by": [
+    "data/filing/states/TX.json"
+   ]
+  },
+  {
+   "id": "us-eb402b7c8d",
+   "jurisdiction": "US",
+   "title": "Texas Workforce Commission: Unemployment Tax",
+   "url": "https://www.twc.texas.gov/programs/unemployment-tax",
+   "origin": "data",
+   "used_by": [
+    "data/filing/states/TX.json"
    ]
   },
   {
@@ -591,6 +1083,17 @@
    ]
   },
   {
+   "id": "us-4b2b9bce49",
+   "jurisdiction": "US",
+   "title": "U.S. Department of Labor, Significant Provisions of State Unemployment Insurance Laws, effective January 2026",
+   "url": "https://oui.doleta.gov/unemploy/content/sigpros/2020-2029/January2026.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/filing/states/NH.json",
+    "data/filing/states/NV.json"
+   ]
+  },
+  {
    "id": "us-d4b95327e4",
    "jurisdiction": "US",
    "title": "US Railroad Retirement Board, Program Letter 2025-01",
@@ -598,6 +1101,83 @@
    "origin": "data",
    "used_by": [
     "data/federal/2025.json"
+   ]
+  },
+  {
+   "id": "us-f0f098aed0",
+   "jurisdiction": "US",
+   "title": "Utah Withholding Tax Guide, Publication 14",
+   "url": "https://files.tax.utah.gov/tax/forms/2025/pub-14.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/filing/states/UT.json",
+    "data/states/UT-2025.json"
+   ]
+  },
+  {
+   "id": "us-96f1d2d987",
+   "jurisdiction": "US",
+   "title": "Virgin Islands Department of Labor: Unemployment Taxes Overview, Employer Handbook, and the 2026 UI tax rates announcement",
+   "url": "https://unemployment.vidol.gov/unemployment-taxes-overview/",
+   "origin": "data",
+   "used_by": [
+    "data/filing/states/VI.json"
+   ]
+  },
+  {
+   "id": "us-b3a051ecad",
+   "jurisdiction": "US",
+   "title": "Virginia Employer Withholding Instructions (Virginia Tax)",
+   "url": "https://www.tax.virginia.gov/sites/default/files/vatax-pdf/employer-withholding-instructions.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/filing/states/VA.json",
+    "data/pension/state-withholding-2026.json",
+    "data/states/VA-2025.json",
+    "data/states/VA-2026.json",
+    "data/states/VA-2027.json"
+   ]
+  },
+  {
+   "id": "us-4a9c88e8c8",
+   "jurisdiction": "US",
+   "title": "Washington Employment Security Department: How to file your quarterly tax and wage reports; How we determine tax rates (web pages)",
+   "url": "https://esd.wa.gov/employer-requirements/quarterly-reports/how-file-your-quarterly-tax-and-wage-reports",
+   "origin": "data",
+   "used_by": [
+    "data/filing/states/WA.json"
+   ]
+  },
+  {
+   "id": "us-800855f068",
+   "jurisdiction": "US",
+   "title": "West Virginia Tax Division: Withholding Help and General Information (web page)",
+   "url": "https://tax.wv.gov/Business/Withholding/HelpAndGeneralInformation/Pages/WithholdingHelpAndGeneralInformation.aspx",
+   "origin": "data",
+   "used_by": [
+    "data/filing/states/WV.json",
+    "data/states/WV-2026.json",
+    "data/states/WV-2027.json"
+   ]
+  },
+  {
+   "id": "us-8524adaf58",
+   "jurisdiction": "US",
+   "title": "Withholding Kentucky Income Tax: Instructions for Employers (42A003)",
+   "url": "https://revenue.ky.gov/Forms/42A003.pdf",
+   "origin": "data",
+   "used_by": [
+    "data/filing/states/KY.json"
+   ]
+  },
+  {
+   "id": "us-70a32365dc",
+   "jurisdiction": "US",
+   "title": "Wyoming Department of Workforce Services: Reporting Due Dates; Unemployment Taxable Wage Base; WYUI portal (web pages)",
+   "url": "https://dws.wyo.gov/dws-division/unemployment-insurance/employers/reporting-due-dates/",
+   "origin": "data",
+   "used_by": [
+    "data/filing/states/WY.json"
    ]
   },
   {
@@ -935,17 +1515,6 @@
    ]
   },
   {
-   "id": "al-7b1543356b",
-   "jurisdiction": "AL",
-   "title": "Withholding Tax Tables and Instructions for Employers and Withholding Agents (Rev. 01/26)",
-   "url": "https://www.revenue.alabama.gov/wp-content/uploads/2026/01/whbooklet_0126.pdf",
-   "origin": "data",
-   "used_by": [
-    "data/states/AL-2026.json",
-    "data/states/AL-2027.json"
-   ]
-  },
-  {
    "id": "ar-bf3a49f465",
    "jurisdiction": "AR",
    "title": "AR4EC -- Employee's Withholding Exemption Certificate (R 02/07/2025)",
@@ -1203,7 +1772,10 @@
    "jurisdiction": "CA",
    "title": "California DE 44 employer's guide",
    "url": "https://edd.ca.gov/siteassets/files/pdf_pub_ctr/de44.pdf",
-   "origin": "curated"
+   "origin": "curated",
+   "used_by": [
+    "data/filing/states/CA.json"
+   ]
   },
   {
    "id": "ca-f9df989d71",
@@ -1584,17 +2156,6 @@
    ]
   },
   {
-   "id": "co-0afe64d6b9",
-   "jurisdiction": "CO",
-   "title": "Colorado Wage Withholding Tax Guide, January 2026",
-   "url": "https://tax.colorado.gov/sites/tax/files/documents/Wage_Withholding_Tax_Guide_Jan_2026.pdf",
-   "origin": "data",
-   "used_by": [
-    "data/states/CO-2026.json",
-    "data/states/CO-2027.json"
-   ]
-  },
-  {
    "id": "co-f33b5d7026",
    "jurisdiction": "CO",
    "title": "Colorado wage withholding",
@@ -1648,16 +2209,6 @@
    "url": "https://portal.ct.gov/drs/publications/informational-publications/2026/2026-informational-publications",
    "kind": "index",
    "origin": "curated"
-  },
-  {
-   "id": "ct-75b91b6b44",
-   "jurisdiction": "CT",
-   "title": "Connecticut DRS -- IP 2025(1) Circular CT Employer's Tax Guide (issued 2024-12-17), including TPG-211 2025 Withholding Calculation Rules (Rev. 12/24)",
-   "url": "https://portal.ct.gov/-/media/drs/publications/pubsip/2025/ip-2025-1.pdf",
-   "origin": "data",
-   "used_by": [
-    "data/states/CT-2025.json"
-   ]
   },
   {
    "id": "ct-8add94a686",
@@ -1907,6 +2458,7 @@
    "kind": "index",
    "origin": "curated",
    "used_by": [
+    "data/filing/states/DE.json",
     "data/states/DE-2026.json",
     "data/states/DE-2027.json"
    ]
@@ -2073,18 +2625,6 @@
    "origin": "curated"
   },
   {
-   "id": "hi-dea958dcf2",
-   "jurisdiction": "HI",
-   "title": "Hawaii Department of Taxation -- Booklet A, Employer's Tax Guide (Rev. 2025)",
-   "url": "https://files.hawaii.gov/tax/news/pubs/25BkltA.pdf",
-   "origin": "data",
-   "used_by": [
-    "data/states/HI-2025.json",
-    "data/states/HI-2026.json",
-    "data/states/HI-2027.json"
-   ]
-  },
-  {
    "id": "hi-4d28f20ef3",
    "jurisdiction": "HI",
    "title": "Hawaii Department of Taxation: news",
@@ -2188,16 +2728,6 @@
    ]
   },
   {
-   "id": "ia-8e1835e33b",
-   "jurisdiction": "IA",
-   "title": "Iowa Department of Revenue, Withholding Tax Information (IAC 701-307.1(2))",
-   "url": "https://revenue.iowa.gov/taxes/tax-guidance/withholding-tax/iowa-withholding-tax-information",
-   "origin": "data",
-   "used_by": [
-    "data/pension/state-withholding-2026.json"
-   ]
-  },
-  {
    "id": "ia-0cdcab3179",
    "jurisdiction": "IA",
    "title": "Iowa Department of Revenue: press releases",
@@ -2298,16 +2828,6 @@
    "origin": "data",
    "used_by": [
     "data/states/ID-2025.json"
-   ]
-  },
-  {
-   "id": "id-882a4325e8",
-   "jurisdiction": "ID",
-   "title": "Idaho State Tax Commission, withholding: retirement-income payers",
-   "url": "https://tax.idaho.gov/search-category/income-tax/withholding/",
-   "origin": "data",
-   "used_by": [
-    "data/pension/state-withholding-2026.json"
    ]
   },
   {
@@ -2437,16 +2957,6 @@
    "url": "https://tax.illinois.gov/research/news.html",
    "kind": "index",
    "origin": "curated"
-  },
-  {
-   "id": "il-2a6ba9c9a5",
-   "jurisdiction": "IL",
-   "title": "Illinois Publication 131 / Form IL-941 instructions: voluntary withholding agreements",
-   "url": "https://tax.illinois.gov/content/dam/soi/en/web/tax/research/publications/pubs/documents/pub-131.pdf",
-   "origin": "data",
-   "used_by": [
-    "data/pension/state-withholding-2026.json"
-   ]
   },
   {
    "id": "il-00c7f8095a",
@@ -2633,6 +3143,7 @@
    "url": "https://www.ksrevenue.gov/pdf/kw100.pdf",
    "origin": "curated",
    "used_by": [
+    "data/filing/states/KS.json",
     "data/states/KS-2026.json",
     "data/states/KS-2027.json"
    ]
@@ -3484,7 +3995,10 @@
    "title": "Louisiana withholding",
    "url": "https://revenue.louisiana.gov/businesses/widely-used-tax-types/withholding/",
    "kind": "index",
-   "origin": "curated"
+   "origin": "curated",
+   "used_by": [
+    "data/filing/states/LA.json"
+   ]
   },
   {
    "id": "la-44bbdd7887",
@@ -3724,6 +4238,7 @@
    "url": "https://www.marylandcomptroller.gov/content/dam/mdcomp/tax/legal-publications/facts/withholding-tax-facts-2026.pdf",
    "origin": "curated",
    "used_by": [
+    "data/filing/states/MD.json",
     "data/states/MD-2026.json",
     "data/states/MD-2027.json"
    ]
@@ -3844,16 +4359,6 @@
    "origin": "data",
    "used_by": [
     "data/states/ME-2025.json"
-   ]
-  },
-  {
-   "id": "me-17ca301d46",
-   "jurisdiction": "ME",
-   "title": "Maine Revenue Services \u2014 2026 Withholding Tables, Revised August 2026 (26_wh_tab_instr_August2026.pdf)",
-   "url": "https://www.maine.gov/revenue/sites/maine.gov.revenue/files/inline-files/26_wh_tab_instr_August2026.pdf",
-   "origin": "data",
-   "used_by": [
-    "data/states/ME-2026.json"
    ]
   },
   {
@@ -4099,7 +4604,10 @@
    "title": "Michigan withholding tax",
    "url": "https://www.michigan.gov/taxes/business-taxes/withholding",
    "kind": "index",
-   "origin": "curated"
+   "origin": "curated",
+   "used_by": [
+    "data/filing/states/MI.json"
+   ]
   },
   {
    "id": "mi-51876c3133",
@@ -4225,18 +4733,6 @@
    "used_by": [
     "data/garnishment/state-overrides-2026.json",
     "data/garnishment/state-overrides-2027.json"
-   ]
-  },
-  {
-   "id": "mn-4b376a9ce0",
-   "jurisdiction": "MN",
-   "title": "Minnesota 2026 Withholding Tax Instructions and Tables",
-   "url": "https://www.revenue.state.mn.us/sites/default/files/2025-12/wh-inst-26.pdf",
-   "origin": "data",
-   "used_by": [
-    "data/pension/state-withholding-2026.json",
-    "data/states/MN-2026.json",
-    "data/states/MN-2027.json"
    ]
   },
   {
@@ -4377,16 +4873,6 @@
    ]
   },
   {
-   "id": "mo-a8348dd409",
-   "jurisdiction": "MO",
-   "title": "Missouri DOR withholding FAQ: pension withholding is voluntary",
-   "url": "https://dor.mo.gov/faq/taxation/business/withholding.html",
-   "origin": "data",
-   "used_by": [
-    "data/pension/state-withholding-2026.json"
-   ]
-  },
-  {
    "id": "mo-02e00fb2ac",
    "jurisdiction": "MO",
    "title": "Missouri Department of Labor and Industrial Relations -- Minimum Wage",
@@ -4474,17 +4960,6 @@
    "url": "https://www.dor.ms.gov/business/withholding-tax",
    "kind": "index",
    "origin": "curated"
-  },
-  {
-   "id": "ms-f79d3f52fc",
-   "jurisdiction": "MS",
-   "title": "Pub 89-700-25-1 (Rev. 07/25) -- Withholding Income Tax Tables and Employer Instructions, effective January 1, 2026",
-   "url": "https://www.dor.ms.gov/sites/default/files/tax-forms/business/89700251revised1.13.2026.pdf",
-   "origin": "data",
-   "used_by": [
-    "data/states/MS-2026.json",
-    "data/states/MS-2027.json"
-   ]
   },
   {
    "id": "ms-90e917f2e5",
@@ -4583,7 +5058,10 @@
    "title": "Montana withholding",
    "url": "https://revenue.mt.gov/taxes/withholding-tax/wage-withholding-returns-and-payments",
    "kind": "index",
-   "origin": "curated"
+   "origin": "curated",
+   "used_by": [
+    "data/filing/states/MT.json"
+   ]
   },
   {
    "id": "mt-2ae1b2691d",
@@ -4608,17 +5086,6 @@
    "jurisdiction": "NC",
    "title": "NC Division of Employment Security -- Tax Rate Information",
    "url": "https://www.des.nc.gov/employers/tax-rate-information",
-   "origin": "data",
-   "used_by": [
-    "data/states/NC-2026.json",
-    "data/states/NC-2027.json"
-   ]
-  },
-  {
-   "id": "nc-e720098358",
-   "jurisdiction": "NC",
-   "title": "NCDOR -- Withholding Tax Frequently Asked Questions",
-   "url": "https://www.ncdor.gov/withholding-tax-frequently-asked-questions",
    "origin": "data",
    "used_by": [
     "data/states/NC-2026.json",
@@ -4686,16 +5153,6 @@
    ]
   },
   {
-   "id": "nd-dfb87d4460",
-   "jurisdiction": "ND",
-   "title": "North Dakota Income Tax Withholding & Information Returns Guideline",
-   "url": "https://www.tax.nd.gov/sites/www/files/documents/guidelines/business/it-withhold/income-tax-withholding-information-returns-guideline.pdf",
-   "origin": "data",
-   "used_by": [
-    "data/pension/state-withholding-2026.json"
-   ]
-  },
-  {
    "id": "nd-6c3b61d236",
    "jurisdiction": "ND",
    "title": "North Dakota Office of State Tax Commissioner -- Income Tax Withholding Rates and Instructions, 2025 Calendar Year",
@@ -4728,18 +5185,6 @@
    "url": "https://dol.nebraska.gov/webdocs/Resources/Items/2026%20UI%20guide%20to%20understanding.pdf",
    "origin": "data",
    "used_by": [
-    "data/states/NE-2026.json",
-    "data/states/NE-2027.json"
-   ]
-  },
-  {
-   "id": "ne-1c1f4767ff",
-   "jurisdiction": "NE",
-   "title": "Nebraska 2026 Circular EN, Pensions and Annuities",
-   "url": "https://revenue.nebraska.gov/sites/default/files/doc/business/Cir_En_2025/2026cir_en_whole.pdf",
-   "origin": "data",
-   "used_by": [
-    "data/pension/state-withholding-2026.json",
     "data/states/NE-2026.json",
     "data/states/NE-2027.json"
    ]
@@ -4980,6 +5425,7 @@
    "url": "https://www.nj.gov/treasury/taxation/pdf/current/njwt.pdf",
    "origin": "curated",
    "used_by": [
+    "data/filing/states/NJ.json",
     "data/pension/state-withholding-2026.json",
     "data/states/NJ-2026.json",
     "data/states/NJ-2027.json"
@@ -5086,6 +5532,7 @@
    "url": "https://realfile.tax.newmexico.gov/FYI-104.pdf",
    "origin": "curated",
    "used_by": [
+    "data/filing/states/NM.json",
     "data/pension/state-withholding-2026.json",
     "data/states/NM-2026.json",
     "data/states/NM-2027.json"
@@ -5224,17 +5671,6 @@
    "jurisdiction": "NY",
    "title": "IT-2104, Employee's Withholding Allowance Certificate (2026)",
    "url": "https://www.tax.ny.gov/pdf/current_forms/it/it2104_fill_in.pdf",
-   "origin": "data",
-   "used_by": [
-    "data/states/NY-2026.json",
-    "data/states/NY-2027.json"
-   ]
-  },
-  {
-   "id": "ny-4527e473d4",
-   "jurisdiction": "NY",
-   "title": "Instructions for Form NYS-45 (tax.ny.gov)",
-   "url": "https://www.tax.ny.gov/pdf/current_forms/wt/nys45i.pdf",
    "origin": "data",
    "used_by": [
     "data/states/NY-2026.json",
@@ -5862,7 +6298,10 @@
    "title": "Ohio employer withholding",
    "url": "https://tax.ohio.gov/business/employer-withholding",
    "kind": "index",
-   "origin": "curated"
+   "origin": "curated",
+   "used_by": [
+    "data/filing/states/OH.json"
+   ]
   },
   {
    "id": "oh-26b7d9348c",
@@ -6203,7 +6642,10 @@
    "title": "Oklahoma withholding OW-2",
    "url": "https://oklahoma.gov/tax/businesses/withholding.html",
    "kind": "index",
-   "origin": "curated"
+   "origin": "curated",
+   "used_by": [
+    "data/filing/states/OK.json"
+   ]
   },
   {
    "id": "ok-0baa065a73",
@@ -6553,7 +6995,10 @@
    "title": "Pennsylvania employer withholding",
    "url": "https://www.pa.gov/agencies/revenue/resources/tax-types-and-information/employer-withholding",
    "kind": "index",
-   "origin": "curated"
+   "origin": "curated",
+   "used_by": [
+    "data/filing/states/PA.json"
+   ]
   },
   {
    "id": "pa-9fa00e5442",
@@ -6587,17 +7032,6 @@
    "used_by": [
     "data/states/PA-2026.json",
     "data/states/PA-2027.json"
-   ]
-  },
-  {
-   "id": "ri-d9f64cd9b0",
-   "jurisdiction": "RI",
-   "title": "2026 Rhode Island Employer's Income Tax Withholding Tables (RI Division of Taxation)",
-   "url": "https://tax.ri.gov/sites/g/files/xkgbur541/files/2025-12/2026%20Withholding%20Tax%20Booklet.pdf",
-   "origin": "data",
-   "used_by": [
-    "data/states/RI-2026.json",
-    "data/states/RI-2027.json"
    ]
   },
   {
@@ -6738,17 +7172,6 @@
    "origin": "curated"
   },
   {
-   "id": "sc-25117bc99e",
-   "jurisdiction": "SC",
-   "title": "WH-105 (Rev. 2/13/23) -- South Carolina Withholding Tax Information Guide",
-   "url": "https://dor.sc.gov/sites/dor/files/forms/WH105.pdf",
-   "origin": "data",
-   "used_by": [
-    "data/states/SC-2026.json",
-    "data/states/SC-2027.json"
-   ]
-  },
-  {
    "id": "sc-059afd732f",
    "jurisdiction": "SC",
    "title": "WH-1603F (Rev. 11/4/25) -- Formula for Computing South Carolina 2026 Withholding Tax",
@@ -6783,16 +7206,6 @@
    "jurisdiction": "UT",
    "title": "Utah State Tax Commission -- Publication 14 Rev. 4/24, Withholding Tax Guide",
    "url": "https://files.tax.utah.gov/tax/forms/2024/pub-14.pdf",
-   "origin": "data",
-   "used_by": [
-    "data/states/UT-2025.json"
-   ]
-  },
-  {
-   "id": "ut-f0f098aed0",
-   "jurisdiction": "UT",
-   "title": "Utah State Tax Commission -- Publication 14 Rev. 4/25, Withholding Tax Guide",
-   "url": "https://files.tax.utah.gov/tax/forms/2025/pub-14.pdf",
    "origin": "data",
    "used_by": [
     "data/states/UT-2025.json"
@@ -6891,19 +7304,6 @@
    ]
   },
   {
-   "id": "va-b3a051ecad",
-   "jurisdiction": "VA",
-   "title": "Virginia Tax, Income Tax Withholding Guide for Employers (Rev. 10/26)",
-   "url": "https://www.tax.virginia.gov/sites/default/files/vatax-pdf/employer-withholding-instructions.pdf",
-   "origin": "data",
-   "used_by": [
-    "data/pension/state-withholding-2026.json",
-    "data/states/VA-2025.json",
-    "data/states/VA-2026.json",
-    "data/states/VA-2027.json"
-   ]
-  },
-  {
    "id": "va-f3cdc7eea5",
    "jurisdiction": "VA",
    "title": "Virginia Tax: news",
@@ -6997,7 +7397,10 @@
    "title": "Vermont withholding",
    "url": "https://tax.vermont.gov/business/withholding",
    "kind": "index",
-   "origin": "curated"
+   "origin": "curated",
+   "used_by": [
+    "data/filing/states/VT.json"
+   ]
   },
   {
    "id": "wa-10f9d16467",
@@ -7310,6 +7713,7 @@
    "url": "https://www.revenue.wi.gov/DOR%20Publications/pb166.pdf",
    "origin": "curated",
    "used_by": [
+    "data/filing/states/WI.json",
     "data/states/WI-2025.json",
     "data/states/WI-2026.json",
     "data/states/WI-2027.json"
@@ -7392,17 +7796,6 @@
    "jurisdiction": "WV",
    "title": "WV IT-100.2A -- Tables for Percentage Method of Withholding (March 2026 revision)",
    "url": "https://tax.wv.gov/Documents/Withholding/it100.2a.pdf",
-   "origin": "data",
-   "used_by": [
-    "data/states/WV-2026.json",
-    "data/states/WV-2027.json"
-   ]
-  },
-  {
-   "id": "wv-800855f068",
-   "jurisdiction": "WV",
-   "title": "WV State Tax Division -- Withholding Help and General Information page, \"Supplemental Wages\" guidance",
-   "url": "https://tax.wv.gov/Business/Withholding/HelpAndGeneralInformation/Pages/WithholdingHelpAndGeneralInformation.aspx",
    "origin": "data",
    "used_by": [
     "data/states/WV-2026.json",

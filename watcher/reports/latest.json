@@ -1,27 +1,31 @@
 {
- "date": "2026-11-04",
+ "date": "2026-11-05",
  "counts": {
-  "unchanged": 984,
-  "changed": 20,
-  "blocked": 42,
+  "unchanged": 1221,
+  "changed": 38,
+  "new": 54,
+  "blocked": 48,
   "gone": 7,
-  "unreachable": 7
+  "unreachable": 14
  },
- "total": 1060,
+ "total": 1382,
  "changed": [
   {
    "id": "ar-ae6960acd2",
    "jurisdiction": "AR",
    "title": "Arkansas DFA: news",
    "url": "https://www.dfa.arkansas.gov/news/",
-   "detail": "3 lines added, 8 removed; 1 links added, 1 removed",
-   "figures_added": [],
+   "detail": "6 lines added, 7 removed; 1 links added, 1 removed",
+   "figures_added": [
+    "6,400",
+    "6,400"
+   ],
    "figures_removed": [],
    "links_added": [
-    "https://www.dfa.arkansas.gov/news/october-2026-general-revenue-report-posted/"
+    "https://www.dfa.arkansas.gov/news/dfa-agents-seize-6400-illegal-products-make-arrests/"
    ],
    "links_removed": [
-    "https://www.dfa.arkansas.gov/news/state-successfully-implements-major-upgrade-to-accounting-system/"
+    "https://www.dfa.arkansas.gov/news/sec-hudson-announces-additions-to-dfa-leadership-team/"
    ],
    "significant": true
   },
@@ -38,10 +42,22 @@
    "significant": true
   },
   {
-   "id": "co-002adac414",
-   "jurisdiction": "CO",
-   "title": "Boulder County -- Local Minimum Wage",
-   "url": "https://bouldercounty.gov/departments/commissioners/local-minimum-wage/",
+   "id": "ca-f9df989d71",
+   "jurisdiction": "CA",
+   "title": "California DIR -- minimum wage set to increase to $17.40 per hour (News Release 2026-66)",
+   "url": "https://www.dir.ca.gov/DIRNews/2026/2026-66.html",
+   "detail": "2 lines added, 0 removed",
+   "figures_added": [],
+   "figures_removed": [],
+   "links_added": [],
+   "links_removed": [],
+   "significant": true
+  },
+  {
+   "id": "md-8bd8af5775",
+   "jurisdiction": "MD",
+   "title": "Maryland Comptroller (marylandtaxes.gov): home (announcements)",
+   "url": "https://www.marylandtaxes.gov/",
    "detail": "1 lines added, 1 removed",
    "figures_added": [],
    "figures_removed": [],
@@ -50,10 +66,22 @@
    "significant": true
   },
   {
-   "id": "de-b524d54773",
-   "jurisdiction": "DE",
-   "title": "Delaware House Bill 13 (153rd General Assembly) + House Substitute No. 2 for HB13 -- bracket-restructuring proposal",
-   "url": "https://legis.delaware.gov/BillDetail?LegislationId=141813",
+   "id": "md-9dcde44192",
+   "jurisdiction": "MD",
+   "title": "Montgomery County, MD tipped-employee cash wage ($4.00/hr, Montgomery County Code Sec. 27-69)",
+   "url": "https://www.montgomerycountymd.gov/humanrights/min-wage.html",
+   "detail": "7 lines added, 2 removed",
+   "figures_added": [],
+   "figures_removed": [],
+   "links_added": [],
+   "links_removed": [],
+   "significant": true
+  },
+  {
+   "id": "mi-f5fa14dee6",
+   "jurisdiction": "MI",
+   "title": "Michigan withholding tax",
+   "url": "https://www.michigan.gov/taxes/business-taxes/withholding",
    "detail": "2 lines added, 2 removed",
    "figures_added": [],
    "figures_removed": [],
@@ -62,115 +90,17 @@
    "significant": true
   },
   {
-   "id": "ga-0af971f8e2",
-   "jurisdiction": "GA",
-   "title": "Georgia DOR: press releases",
-   "url": "https://dor.georgia.gov/press-releases",
-   "detail": "2 lines added, 2 removed; 1 links added, 1 removed",
-   "figures_added": [],
-   "figures_removed": [],
-   "links_added": [
-    "https://dor.georgia.gov/press-releases/2026-11-03/gov-kemp-dor-announce-distribution-homeowner-tax-relief-grants"
-   ],
-   "links_removed": [
-    "https://dor.georgia.gov/press-releases/2026-05-04/special-tax-refunds-begin-issuing"
-   ],
-   "significant": true
-  },
-  {
-   "id": "in-f3e8cf456b",
-   "jurisdiction": "IN",
-   "title": "Indiana DOR withholding",
-   "url": "https://www.in.gov/dor/i-am-a/business-corp/withholding/",
-   "detail": "1 links added, 1 removed",
-   "figures_added": [],
-   "figures_removed": [],
-   "links_added": [
-    "https://www.in.gov/dor/files/IDORWTH2016V1.0.zip"
-   ],
-   "links_removed": [
-    "https://www.in.gov/dor/files/IDORWTH2016V1.0"
-   ],
-   "significant": true
-  },
-  {
-   "id": "ks-6a3e772e2e",
-   "jurisdiction": "KS",
-   "title": "K.S.A. \u00a7 60-2310 \u2014 wage garnishment: maximum part of earnings subject to garnishment is the lesser of 25% of aggregate disposable earnings, or the amount by which disposable earnings exceed 30 times the federal minimum hourly wage",
-   "url": "https://www.ksrevisor.gov/statutes/chapters/ch60/060_023_0010.html",
-   "detail": "0 lines added, 5 removed; 0 links added, 5 removed",
-   "figures_added": [],
-   "figures_removed": [],
-   "links_added": [],
-   "links_removed": [
-    "https://www.ksrevisor.gov/docs/LCC_Packet20260929/Item 1 PROPOSED MINUTES August 17 and September 3, 2026.pdf",
-    "https://www.ksrevisor.gov/docs/LCC_Packet20260929/Item 3 USD 489 RAC Closing of Building Resolution 09-2026.pdf",
-    "https://www.ksrevisor.gov/docs/LCC_Packet20260929/Item 4 Proposed Recommended Legislative Holidays for 2027.pdf",
-    "https://www.ksrevisor.gov/docs/LCC_Packet20260929/LCC Agenda September 29, 2026.pdf",
-    "https://www.ksrevisor.gov/statutes/chapters/ch60/docs/LCC_Packet20260929/LCC Meeting Notice September 29, 2026.pdf"
-   ],
-   "significant": true
-  },
-  {
-   "id": "ky-829edc7fb7~394f1a03",
-   "jurisdiction": "KY",
-   "title": "Need to update or cancel a business account? (linked from Kentucky withholding)",
-   "url": "http://revenue.ky.gov/Forms/10A104.pdf",
-   "detail": "106 lines added, 109 removed",
-   "figures_added": [],
-   "figures_removed": [],
-   "links_added": [],
-   "links_removed": [],
-   "significant": true
-  },
-  {
-   "id": "mi-b2211f9083",
-   "jurisdiction": "MI",
-   "title": "Other Michigan cities with income tax (City of Grand Rapids rate table)",
-   "url": "https://www.grandrapidsmi.gov/departments/fiscal-services/income-tax/other-michigan-cities-with-income-tax/",
-   "detail": "9 lines added, 8 removed (link lists / headlines only)",
-   "figures_added": [],
-   "figures_removed": [],
-   "links_added": [],
-   "links_removed": [],
-   "significant": false
-  },
-  {
-   "id": "mn-bb67f51ead",
+   "id": "mn-93ce91b34d",
    "jurisdiction": "MN",
-   "title": "City of Saint Paul -- Minimum Wage Increases for Small and Micro Businesses (effective July 1, 2026)",
-   "url": "https://www.stpaul.gov/news/city-saint-paul-minimum-wage-increases-small-and-micro-businesses",
-   "detail": "4 lines added, 4 removed",
-   "figures_added": [],
-   "figures_removed": [],
-   "links_added": [],
-   "links_removed": [],
-   "significant": true
-  },
-  {
-   "id": "mo-2d09c4e722",
-   "jurisdiction": "MO",
-   "title": "St. Louis: earnings tax department",
-   "url": "https://www.stlouis-mo.gov/government/departments/collector/earnings-tax/index.cfm",
-   "detail": "2 lines added, 2 removed; 0 links added, 1 removed",
+   "title": "Minnesota withholding tax",
+   "url": "https://www.revenue.state.mn.us/withholding-tax",
+   "detail": "0 lines added, 2 removed; 0 links added, 1 removed",
    "figures_added": [],
    "figures_removed": [],
    "links_added": [],
    "links_removed": [
-    "https://www.stlouis-mo.gov/government/departments/collector/earnings-tax/documents/p-10-w-10-form-fillable.cfm"
+    "https://www.revenue.state.mn.us/2025-federal-nonconformity-income-tax"
    ],
-   "significant": true
-  },
-  {
-   "id": "nj-0db1e90800",
-   "jurisdiction": "NJ",
-   "title": "New Jersey Division of Taxation: what's new",
-   "url": "https://www.nj.gov/treasury/taxation/whatsnew.shtml",
-   "detail": "0 lines added, 5 removed",
-   "figures_added": [],
-   "figures_removed": [],
-   "links_added": [],
-   "links_removed": [],
    "significant": true
   },
   {
@@ -178,7 +108,59 @@
    "jurisdiction": "NJ",
    "title": "New Jersey employer payroll tax",
    "url": "https://www.nj.gov/treasury/taxation/businesses/payroll/index.shtml",
-   "detail": "0 lines added, 5 removed",
+   "detail": "9 lines added, 11 removed; 1 links added, 5 removed",
+   "figures_added": [],
+   "figures_removed": [
+    "7%"
+   ],
+   "links_added": [
+    "https://www.nj.gov/treasury/securechoiceprogram/employers/index.shtml"
+   ],
+   "links_removed": [
+    "https://www.nj.gov/treasury/securechoiceprogram/employers.shtml",
+    "https://www.nj.gov/treasury/taxation/njit25.shtml",
+    "https://www.nj.gov/treasury/taxation/noticegit.shtml",
+    "https://www.nj.gov/treasury/taxation/pdf/current/nj165.pdf",
+    "https://www.nj.gov/treasury/taxation/pdf/current/njwt.pdf"
+   ],
+   "significant": true
+  },
+  {
+   "id": "ny-c0f5031cb1~db5f1e4d",
+   "jurisdiction": "NY",
+   "title": "2021 IC Rule (linked from data/minimum-wage/federal-2026.json (this engine's)",
+   "url": "https://www.federalregister.gov/documents/2021/01/07/2020-29274/independent-contractor-status-under-the-fair-labor-standards-act",
+   "detail": "2 lines added, 2 removed",
+   "figures_added": [
+    "91,749"
+   ],
+   "figures_removed": [
+    "91,721"
+   ],
+   "links_added": [],
+   "links_removed": [],
+   "significant": true
+  },
+  {
+   "id": "ny-d4f2c6eeff~d2fc2171",
+   "jurisdiction": "NY",
+   "title": "fact sheet PDF (linked from IRS -- Determining if an employer is an applicable)",
+   "url": "http://www.treasury.gov/press-center/press-releases/Documents/Fact%20Sheet%20021014.pdf",
+   "detail": "10 lines added, 11 removed",
+   "figures_added": [
+    "6,500"
+   ],
+   "figures_removed": [],
+   "links_added": [],
+   "links_removed": [],
+   "significant": true
+  },
+  {
+   "id": "oh-062f3b7675",
+   "jurisdiction": "OH",
+   "title": null,
+   "url": "https://www.ritaohio.com/municipalities",
+   "detail": "1 lines added, 0 removed",
    "figures_added": [],
    "figures_removed": [],
    "links_added": [],
@@ -186,11 +168,257 @@
    "significant": true
   },
   {
-   "id": "ny-448945c630",
-   "jurisdiction": "NY",
-   "title": "Tax.NY.gov: information for retired persons",
-   "url": "https://www.tax.ny.gov/pit/file/information_for_seniors.htm",
-   "detail": "11 lines added, 1 removed",
+   "id": "oh-f299d093c6",
+   "jurisdiction": "OH",
+   "title": "City of Cheviot Tax Department -- JEDD INFORMATION (Contracts with Green Township)",
+   "url": "https://cheviot.org/departments/tax/",
+   "detail": "2 lines added, 2 removed",
+   "figures_added": [],
+   "figures_removed": [],
+   "links_added": [],
+   "links_removed": [],
+   "significant": true
+  },
+  {
+   "id": "oh-557c86e52b",
+   "jurisdiction": "OH",
+   "title": "RITA (Regional Income Tax Agency): news and updates (municipal rate and law changes)",
+   "url": "https://www.ritaohio.com/Resources/News",
+   "detail": "5 lines added, 4 removed; 1 links added, 1 removed",
+   "figures_added": [],
+   "figures_removed": [],
+   "links_added": [
+    "https://www.ritaohio.com/Resources/News/ViewNews?gid=e3a41188-c05b-4105-b66a-1341c4f7445b"
+   ],
+   "links_removed": [
+    "https://www.ritaohio.com/Resources/News/ViewNews?gid=a571ed87-6005-49fa-ac23-0275c38c7de2"
+   ],
+   "significant": true
+  },
+  {
+   "id": "oh-22f49a043c",
+   "jurisdiction": "OH",
+   "title": "RITA -- Tax Rates Table, 2025 new municipalities and tax rate changes",
+   "url": "https://www.ritaohio.com/TaxRatesTable",
+   "detail": "1 lines added, 0 removed",
+   "figures_added": [],
+   "figures_removed": [],
+   "links_added": [],
+   "links_removed": [],
+   "significant": true
+  },
+  {
+   "id": "oh-cfb9c9e685",
+   "jurisdiction": "OH",
+   "title": "RITA member page (the JEDD's administering agency) -- Recent Tax and Credit History",
+   "url": "https://www.ritaohio.com/Municipalities/Home/MemberPage?id=047",
+   "detail": "1 lines added, 0 removed",
+   "figures_added": [],
+   "figures_removed": [],
+   "links_added": [],
+   "links_removed": [],
+   "significant": true
+  },
+  {
+   "id": "oh-7d9e4cc914",
+   "jurisdiction": "OH",
+   "title": "RITA member page (the JEDD's administering agency) -- Recent Tax and Credit History",
+   "url": "https://www.ritaohio.com/Municipalities/Home/MemberPage?id=247",
+   "detail": "1 lines added, 0 removed",
+   "figures_added": [],
+   "figures_removed": [],
+   "links_added": [],
+   "links_removed": [],
+   "significant": true
+  },
+  {
+   "id": "oh-3b76750224",
+   "jurisdiction": "OH",
+   "title": "RITA member page -- Avon (rate history)",
+   "url": "https://www.ritaohio.com/municipalities/Home/MemberPage?id=020",
+   "detail": "1 lines added, 0 removed",
+   "figures_added": [],
+   "figures_removed": [],
+   "links_added": [],
+   "links_removed": [],
+   "significant": true
+  },
+  {
+   "id": "oh-c764d3cf54",
+   "jurisdiction": "OH",
+   "title": "RITA member page -- Circleville (rate history)",
+   "url": "https://www.ritaohio.com/municipalities/Home/MemberPage?id=190",
+   "detail": "1 lines added, 0 removed",
+   "figures_added": [],
+   "figures_removed": [],
+   "links_added": [],
+   "links_removed": [],
+   "significant": true
+  },
+  {
+   "id": "oh-33b5895ad2",
+   "jurisdiction": "OH",
+   "title": "RITA member page -- DeGraff (rate history)",
+   "url": "https://www.ritaohio.com/municipalities/Home/MemberPage?id=249",
+   "detail": "1 lines added, 0 removed",
+   "figures_added": [],
+   "figures_removed": [],
+   "links_added": [],
+   "links_removed": [],
+   "significant": true
+  },
+  {
+   "id": "oh-b7e3e38768",
+   "jurisdiction": "OH",
+   "title": "RITA member page -- Germantown (rate history)",
+   "url": "https://www.ritaohio.com/municipalities/Home/MemberPage?id=353",
+   "detail": "1 lines added, 0 removed",
+   "figures_added": [],
+   "figures_removed": [],
+   "links_added": [],
+   "links_removed": [],
+   "significant": true
+  },
+  {
+   "id": "oh-4042a711fd",
+   "jurisdiction": "OH",
+   "title": "RITA member page -- Hanging Rock (rate history)",
+   "url": "https://www.ritaohio.com/municipalities/Home/MemberPage?id=616",
+   "detail": "1 lines added, 0 removed",
+   "figures_added": [],
+   "figures_removed": [],
+   "links_added": [],
+   "links_removed": [],
+   "significant": true
+  },
+  {
+   "id": "oh-3a77278cb4",
+   "jurisdiction": "OH",
+   "title": "RITA member page -- Lockbourne (rate history)",
+   "url": "https://www.ritaohio.com/municipalities/Home/MemberPage?id=427",
+   "detail": "1 lines added, 0 removed",
+   "figures_added": [],
+   "figures_removed": [],
+   "links_added": [],
+   "links_removed": [],
+   "significant": true
+  },
+  {
+   "id": "oh-917a7eb627",
+   "jurisdiction": "OH",
+   "title": "RITA member page -- Milford JEDD VIII",
+   "url": "https://www.ritaohio.com/municipalities/Home/MemberPage?id=869",
+   "detail": "1 lines added, 0 removed",
+   "figures_added": [],
+   "figures_removed": [],
+   "links_added": [],
+   "links_removed": [],
+   "significant": true
+  },
+  {
+   "id": "oh-7f647951da",
+   "jurisdiction": "OH",
+   "title": "RITA member page -- Millville (rate history)",
+   "url": "https://www.ritaohio.com/municipalities/Home/MemberPage?id=691",
+   "detail": "1 lines added, 0 removed",
+   "figures_added": [],
+   "figures_removed": [],
+   "links_added": [],
+   "links_removed": [],
+   "significant": true
+  },
+  {
+   "id": "oh-f424ff0fc1",
+   "jurisdiction": "OH",
+   "title": "RITA member page -- North Canton (rate history)",
+   "url": "https://www.ritaohio.com/municipalities/Home/MemberPage?id=546",
+   "detail": "1 lines added, 0 removed",
+   "figures_added": [],
+   "figures_removed": [],
+   "links_added": [],
+   "links_removed": [],
+   "significant": true
+  },
+  {
+   "id": "oh-15bd387bd3",
+   "jurisdiction": "OH",
+   "title": "RITA member page -- North Hampton (rate history)",
+   "url": "https://www.ritaohio.com/municipalities/Home/MemberPage?id=695",
+   "detail": "1 lines added, 0 removed",
+   "figures_added": [],
+   "figures_removed": [],
+   "links_added": [],
+   "links_removed": [],
+   "significant": true
+  },
+  {
+   "id": "oh-c14dbbe03e",
+   "jurisdiction": "OH",
+   "title": "RITA member page -- Oak Hill (rate history)",
+   "url": "https://www.ritaohio.com/municipalities/Home/MemberPage?id=624",
+   "detail": "1 lines added, 0 removed",
+   "figures_added": [],
+   "figures_removed": [],
+   "links_added": [],
+   "links_removed": [],
+   "significant": true
+  },
+  {
+   "id": "oh-8c7dd91687",
+   "jurisdiction": "OH",
+   "title": "RITA member page -- Rio Grande (rate history)",
+   "url": "https://www.ritaohio.com/municipalities/Home/MemberPage?id=588",
+   "detail": "1 lines added, 0 removed",
+   "figures_added": [],
+   "figures_removed": [],
+   "links_added": [],
+   "links_removed": [],
+   "significant": true
+  },
+  {
+   "id": "oh-d4b192b4da",
+   "jurisdiction": "OH",
+   "title": "RITA member page -- Stockport (rate history)",
+   "url": "https://www.ritaohio.com/municipalities/Home/MemberPage?id=719",
+   "detail": "1 lines added, 0 removed",
+   "figures_added": [],
+   "figures_removed": [],
+   "links_added": [],
+   "links_removed": [],
+   "significant": true
+  },
+  {
+   "id": "oh-2fd5ea2a78",
+   "jurisdiction": "OH",
+   "title": "RITA: tax professionals news",
+   "url": "https://www.ritaohio.com/TaxProfessionals/News",
+   "detail": "1 lines added, 0 removed; 1 links added, 0 removed",
+   "figures_added": [],
+   "figures_removed": [],
+   "links_added": [
+    "https://www.ritaohio.com/Resources/News/ViewNews?gid=e3a41188-c05b-4105-b66a-1341c4f7445b"
+   ],
+   "links_removed": [],
+   "significant": true
+  },
+  {
+   "id": "oh-5d5aa5d040",
+   "jurisdiction": "OH",
+   "title": "The Finder: directory of every Ohio municipality (a new entry here is a new jurisdiction)",
+   "url": "https://thefinder.tax.ohio.gov/api/file-downloads?type=municipality",
+   "detail": "1 lines added, 1 removed",
+   "figures_added": [],
+   "figures_removed": [],
+   "links_added": [],
+   "links_removed": [],
+   "significant": true
+  },
+  {
+   "id": "oh-aa448ef54d",
+   "jurisdiction": "OH",
+   "title": "The Finder: directory of every Ohio school district",
+   "url": "https://thefinder.tax.ohio.gov/api/file-downloads?type=schoolDistrict",
+   "detail": "1 lines added, 1 removed",
    "figures_added": [],
    "figures_removed": [],
    "links_added": [],
@@ -202,30 +430,19 @@
    "jurisdiction": "OR",
    "title": "Oregon Department of Revenue: news",
    "url": "https://www.oregon.gov/dor/news/Pages/default.aspx",
-   "detail": "21 lines added, 20 removed; 3 links added, 2 removed",
+   "detail": "21 lines added, 21 removed; 4 links added, 2 removed",
    "figures_added": [],
    "figures_removed": [],
    "links_added": [
-    "https://apps.oregon.gov/oregon-newsroom/OR/DCBS/Posts/Post/aca-open-enrollment-period",
+    "https://apps.oregon.gov/oregon-newsroom/OR/ODA/Posts/Post/HPAI-confirmed-in-Clackamas-County",
+    "https://apps.oregon.gov/oregon-newsroom/OR/OPRD/Posts/Post/oprd-commission-Nov2026",
+    "https://apps.oregon.gov/oregon-newsroom/OR/OPRD/Posts/Post/sitka-sedge-public-meeting",
+    "https://apps.oregon.gov/oregon-newsroom/OR/Posts/Search?from=11%2F4%2F2026&to=11%2F4%2F2026"
+   ],
+   "links_removed": [
     "https://apps.oregon.gov/oregon-newsroom/OR/ODA/Posts/Post/celebration-of-one-health-day-in-oregon",
     "https://apps.oregon.gov/oregon-newsroom/OR/SOS/Posts/Post/election-day-oregon-elected-leaders-provide-update-election-integrity-turnout"
    ],
-   "links_removed": [
-    "https://apps.oregon.gov/oregon-newsroom/OR/SOS/Posts/Post/election-integrity-TV-PSA-launched-oregon-secretary-of-state",
-    "https://apps.oregon.gov/oregon-newsroom/OR/SOS/Posts/Post/secretary-read-to-hold-election-day-press-conference-with-sen-wyden-attorney-general-rayfield-PSU-president-cudd"
-   ],
-   "significant": true
-  },
-  {
-   "id": "pa-a87a8e850b",
-   "jurisdiction": "PA",
-   "title": "NJ Division of Taxation -- Reciprocal Personal Income Tax Agreement (PA/NJ)",
-   "url": "https://www.nj.gov/treasury/taxation/njit25.shtml",
-   "detail": "0 lines added, 5 removed",
-   "figures_added": [],
-   "figures_removed": [],
-   "links_added": [],
-   "links_removed": [],
    "significant": true
   },
   {
@@ -233,18 +450,30 @@
    "jurisdiction": "SC",
    "title": "South Carolina Department of Revenue: news",
    "url": "https://dor.sc.gov/news",
-   "detail": "3 links added, 2 removed",
+   "detail": "2 links added, 3 removed",
    "figures_added": [],
    "figures_removed": [],
    "links_added": [
+    "https://dor.sc.gov/arrests",
+    "https://dor.sc.gov/tax-tips"
+   ],
+   "links_removed": [
     "https://dor.sc.gov/index%2Ephp/arrests",
     "https://dor.sc.gov/index%2Ephp/news",
     "https://dor.sc.gov/index%2Ephp/tax-tips"
    ],
-   "links_removed": [
-    "https://dor.sc.gov/arrests",
-    "https://dor.sc.gov/tax-tips"
-   ],
+   "significant": true
+  },
+  {
+   "id": "us-03925825a0",
+   "jurisdiction": "US",
+   "title": null,
+   "url": "https://thefinder.tax.ohio.gov/?tab=fileDownloads",
+   "detail": "1 lines added, 1 removed",
+   "figures_added": [],
+   "figures_removed": [],
+   "links_added": [],
+   "links_removed": [],
    "significant": true
   },
   {
@@ -260,23 +489,23 @@
    "significant": true
   },
   {
-   "id": "wi-53244e93fe",
-   "jurisdiction": "WI",
-   "title": "Wis. Stat. \u00a7 71.03(13) \u2014 'Wisconsin adjusted gross income' defined",
-   "url": "https://docs.legis.wisconsin.gov/document/statutes/71.03",
-   "detail": "1 lines added, 1 removed",
+   "id": "wa-10f9d16467",
+   "jurisdiction": "WA",
+   "title": "City of Burien -- Minimum Wage (BMC Chapter 5.16, Administrative Rule 2026-01)",
+   "url": "https://www.burienwa.gov/MinimumWage",
+   "detail": "4 lines added, 2 removed (link lists / headlines only)",
    "figures_added": [],
    "figures_removed": [],
    "links_added": [],
    "links_removed": [],
-   "significant": true
+   "significant": false
   },
   {
-   "id": "wi-eb437d4ba6",
+   "id": "wi-909b5f1dab",
    "jurisdiction": "WI",
-   "title": "Wis. Stat. \u00a7 812.34 \u2014 80% of disposable earnings exempt from garnishment (i.e. 20% reachable), further limited by the amount by which disposable earnings exceed 30x the FEDERAL minimum hourly wage",
-   "url": "https://docs.legis.wisconsin.gov/document/statutes/812.34",
-   "detail": "1 lines added, 1 removed",
+   "title": "2026 Tax Rate Schedule for Employers (DWD, full Schedule D reserve-percentage rate table)",
+   "url": "https://dwd.wisconsin.gov/ui/employers/taxrates.htm",
+   "detail": "read with a headless browser; 1 lines added, 0 removed",
    "figures_added": [],
    "figures_removed": [],
    "links_added": [],
@@ -284,18 +513,17 @@
    "significant": true
   }
  ],
- "significant_changes": 19,
+ "significant_changes": 37,
  "broken": [
+  "https://oklahoma.gov/tax/businesses/withholding-tax.html",
   "https://www.tuskegeealabama.gov/finance-department/files/occupational-tax-form",
   "https://www.tuskegeealabama.gov/sites/g/files/vyhlif3946/f/uploads/infobrochure_word.pdf",
   "https://www.auroragov.org/business_services/taxes__licensing/occupational_privilege_tax",
   "https://www.greenwoodvillage.com/206/Occupational-Privilege-Tax",
   "https://www.ilga.gov/legislation/ilcs/ilcs4.asp?DocName=073500050K12-803",
   "https://illinoiscomptroller.gov/state-agencies/bulletins-forms/payroll-bulletins/illinois-state-income-tax-exemptions-2026",
-  "https://grantcounty.ky.gov/occupational-licensing/",
   "https://pl.mn.gov/resources/calculators/premium-rate-and-contributions",
   "https://ohioauditor.gov/Auditsearch/Reports/2023/Liberty_Township_22_21_Henry_FINAL.pdf",
-  "https://oklahoma.gov/tax/businesses/withholding-tax.html",
   "https://www.wilsonvilleoregon.gov/finance/page/transit-payroll-tax-information"
  ],
  "attention": [
@@ -463,12 +691,18 @@
    "detail": "only 0 of 2627 rows carry a rate, so the 2027 register is not published yet; nothing to compare"
   }
  ],
- "followed_documents": 378,
+ "followed_documents": 666,
  "followed_documents_unread": 6,
- "followed_documents_deferred": 703,
- "verified": 1004,
- "unverified": 56,
+ "followed_documents_deferred": 443,
+ "verified": 1313,
+ "unverified": 69,
  "never_baselined": [
+  "https://tax.colorado.gov/news",
+  "https://tax.colorado.gov/withholding-tax",
+  "https://otr.cfo.dc.gov/page/withholding-tax-forms-and-publications",
+  "https://www.mass.gov/doc/form-m-3-reconciliation-of-massachusetts-income-taxes-withheld-for-employers/download",
+  "https://www.mass.gov/info-details/withholding-tax-guide",
+  "https://oklahoma.gov/tax/businesses/withholding-tax.html",
   "https://birminghamal.hdlgov.com/base64files/TAXES_FORM_4.pdf",
   "https://library.municode.com/al/gadsden/codes/code_of_ordinances",
   "https://library.municode.com/ky/hickman/codes/code_of_ordinances?nodeId=COOR_CH14LIBURE_ARTIIOCLITA",
@@ -479,15 +713,10 @@
   "https://des.az.gov/sites/default/files/dl/UIT-0603A_FY26.pdf",
   "https://www.auroragov.org/business_services/taxes__licensing/occupational_privilege_tax",
   "https://www.greenwoodvillage.com/206/Occupational-Privilege-Tax",
-  "https://tax.colorado.gov/DR1098",
-  "https://tax.colorado.gov/news",
-  "https://tax.colorado.gov/withholding-tax",
   "https://does.dc.gov/service/office-wage-hour-compliance-0",
-  "https://otr.cfo.dc.gov/page/withholding-tax-forms-and-publications",
   "https://www.wilmingtonde.gov/residents/earned-income-tax-and-net-profits-tax",
   "https://www.ilga.gov/legislation/ilcs/ilcs4.asp?DocName=073500050K12-803",
   "https://illinoiscomptroller.gov/state-agencies/bulletins-forms/payroll-bulletins/illinois-state-income-tax-exemptions-2026",
-  "https://codelibrary.amlegal.com/codes/elizabethtownky/latest/elizabethtown_ky/0-0-0-3203",
   "https://codelibrary.amlegal.com/codes/marionky/latest/marion_ky/0-0-0-22684",
   "https://codelibrary.amlegal.com/codes/mckeeky/latest/mckee_ky/0-0-0-2883",
   "https://pikevilleky.gov/business/",
@@ -500,8 +729,7 @@
   "https://www.ny.gov/sites/default/files/atoms/files/PSL_FAQ_PaidSickLeaveFAQ.pdf",
   "https://paidfamilyleave.ny.gov/2025",
   "https://villageofcollegecorner.org/wp-content/uploads/2025/04/Rita-Repeal.pdf",
-  "https://oklahoma.gov/tax/businesses/withholding-tax.html",
   "https://www.wilsonvilleoregon.gov/finance/page/transit-payroll-tax-information"
  ],
- "max_consecutive_failures": 38
+ "max_consecutive_failures": 39
 }
