@@ -57,12 +57,12 @@ describe('coverage: every jurisdiction is accounted for', () => {
       assert.ok(x.agencyLines.length > 0 && x.website, x.code);
     }
   });
-  test('forty-eight states are modelled (eight only partly; Texas, Florida, Tennessee, Alaska, South Dakota, Washington and Wyoming have no wage income tax); every other row says NOT MODELLED rather than implying nothing is owed', () => {
-    assert.deepEqual(modelledStates(), ['AK', 'AL', 'AR', 'AZ', 'CA', 'CO', 'CT', 'DC', 'DE', 'FL', 'GA', 'HI', 'IA', 'ID', 'IL', 'IN', 'KS', 'KY', 'LA', 'MD', 'ME', 'MI', 'MN', 'MO', 'MS', 'MT', 'NC', 'ND', 'NE', 'NJ', 'NM', 'NY', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC', 'SD', 'TN', 'TX', 'UT', 'VA', 'VT', 'WA', 'WI', 'WV', 'WY']);
+  test('all fifty-three jurisdictions are modelled (ten only partly; Massachusetts, Nevada and New Hampshire from secondary sources; Puerto Rico and the Virgin Islands unemployment only); every other row says NOT MODELLED rather than implying nothing is owed', () => {
+    assert.deepEqual(modelledStates(), ['AK', 'AL', 'AR', 'AZ', 'CA', 'CO', 'CT', 'DC', 'DE', 'FL', 'GA', 'HI', 'IA', 'ID', 'IL', 'IN', 'KS', 'KY', 'LA', 'MA', 'MD', 'ME', 'MI', 'MN', 'MO', 'MS', 'MT', 'NC', 'ND', 'NE', 'NH', 'NJ', 'NM', 'NV', 'NY', 'OH', 'OK', 'OR', 'PA', 'PR', 'RI', 'SC', 'SD', 'TN', 'TX', 'UT', 'VA', 'VI', 'VT', 'WA', 'WI', 'WV', 'WY']);
     const c = coverage();
     assert.equal(c.length, 53);
     for (const row of c) {
-      if (['AK', 'AL', 'AR', 'AZ', 'CA', 'CO', 'CT', 'DC', 'DE', 'FL', 'GA', 'HI', 'IA', 'ID', 'IL', 'IN', 'KS', 'KY', 'LA', 'MD', 'ME', 'MI', 'MN', 'MO', 'MS', 'MT', 'NC', 'ND', 'NE', 'NJ', 'NM', 'NY', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC', 'SD', 'TN', 'TX', 'UT', 'VA', 'VT', 'WA', 'WI', 'WV', 'WY'].includes(row.code)) assert.equal(row.modelled, true);
+      if (['AK', 'AL', 'AR', 'AZ', 'CA', 'CO', 'CT', 'DC', 'DE', 'FL', 'GA', 'HI', 'IA', 'ID', 'IL', 'IN', 'KS', 'KY', 'LA', 'MA', 'MD', 'ME', 'MI', 'MN', 'MO', 'MS', 'MT', 'NC', 'ND', 'NE', 'NH', 'NJ', 'NM', 'NV', 'NY', 'OH', 'OK', 'OR', 'PA', 'PR', 'RI', 'SC', 'SD', 'TN', 'TX', 'UT', 'VA', 'VI', 'VT', 'WA', 'WI', 'WV', 'WY'].includes(row.code)) assert.equal(row.modelled, true);
       else {
         assert.equal(row.modelled, false, row.code);
         assert.equal(row.functions.ui, 'NOT MODELLED', row.code);
@@ -76,14 +76,15 @@ describe('coverage: every jurisdiction is accounted for', () => {
     assert.equal(by.NY.withholding, 'partial'); // return modelled, deposit schedule not
     assert.equal(by.TX.withholding, 'no wage income tax');
     assert.equal(by.FL.withholding, 'no wage income tax');
-    assert.equal(by.MA.withholding, 'NOT MODELLED');
+    assert.equal(by.PR.withholding, 'partial'); // the paycheck engine has no Puerto Rico data: unemployment rules only
+    assert.equal(by.PR.ui, 'modelled');
     assert.equal(by.CO.ui, 'NOT MODELLED');
     assert.equal(by.CT.withholding, 'modelled');
     assert.equal(by.CT.ui, 'NOT MODELLED'); // Connecticut's guide covers withholding only
   });
   test('an unmodelled state throws NOT MODELLED instead of returning an empty profile', () => {
-    assert.equal(hasProfile('NV'), false);
-    assert.throws(() => loadProfile('NV'), /NOT MODELLED/);
+    assert.equal(hasProfile('ZZ'), false);
+    assert.throws(() => loadProfile('ZZ'), /NOT MODELLED/);
   });
 });
 
@@ -319,7 +320,7 @@ describe('a full year of REAL engine pay runs in each pilot state', () => {
 
 describe('state filings run through the shared lifecycle, and nothing is transmitted', () => {
   test('every modelled state registers its channels, each with enrollment and a "not read" specification', () => {
-    assert.deepEqual(registerAllStateChannels(), ['AK', 'AL', 'AR', 'AZ', 'CA', 'CO', 'CT', 'DC', 'DE', 'FL', 'GA', 'HI', 'IA', 'ID', 'IL', 'IN', 'KS', 'KY', 'LA', 'MD', 'ME', 'MI', 'MN', 'MO', 'MS', 'MT', 'NC', 'ND', 'NE', 'NJ', 'NM', 'NY', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC', 'SD', 'TN', 'TX', 'UT', 'VA', 'VT', 'WA', 'WI', 'WV', 'WY']);
+    assert.deepEqual(registerAllStateChannels(), ['AK', 'AL', 'AR', 'AZ', 'CA', 'CO', 'CT', 'DC', 'DE', 'FL', 'GA', 'HI', 'IA', 'ID', 'IL', 'IN', 'KS', 'KY', 'LA', 'MA', 'MD', 'ME', 'MI', 'MN', 'MO', 'MS', 'MT', 'NC', 'ND', 'NE', 'NH', 'NJ', 'NM', 'NV', 'NY', 'OH', 'OK', 'OR', 'PA', 'PR', 'RI', 'SC', 'SD', 'TN', 'TX', 'UT', 'VA', 'VI', 'VT', 'WA', 'WI', 'WV', 'WY']);
     const ca = stateChannels(CA);
     assert.deepEqual(ca.map((c) => c.id), ['state:CA:e_services', 'state:CA:ner']);
     assert.match(ca[0].enrollment.join(' '), /Register online for an employer payroll tax account number/);

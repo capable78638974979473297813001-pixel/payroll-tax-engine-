@@ -25,6 +25,12 @@ export interface Source {
   revision?: string;
   verifiedOn: string;
   verifiedBy: string;
+  /**
+   * True when the rules were NOT read from the agency's own document (the agency refused automated access) but taken
+   * from a search-engine summary of its pages. Every analysis and report built on such a profile carries the warning
+   * `state_source_secondary` until someone reads the agency's document and clears the flag.
+   */
+  secondary?: boolean;
 }
 
 /** When a return or payment is due. Every rule moves to the next business day when the date is not one, unless `rollsForward` is false. */
@@ -44,6 +50,8 @@ export type DueRule =
   /** Kansas semi-monthly: the anchor is a period end; periods ending on or before the 15th are due `firstHalfDay` of the same month, later ones `secondHalfDay` of the next month. */
   /** Calendar days after the END of the anchor's month (Indiana: monthly 30, early filers 20). */
   | { kind: 'calendar_days_after_month_end'; days: number }
+  /** Massachusetts monthly: the `day` of the next month, except wages of March, June, September and December, due the LAST day of the next month. */
+  | { kind: 'monthly_with_quarter_end'; day: number }
   | { kind: 'semimonthly_days'; firstHalfDay: number; secondHalfDay: number }
   /** A fixed day of the month after the quarter (Kansas quarterly: the 25th). */
   | { kind: 'day_of_month_after_quarter'; day: number }
@@ -107,7 +115,7 @@ export interface AssignedFrequencySpec {
     newEmployer: string;
   };
   frequencies: Record<string, {
-    period: 'week_sat_fri' | 'month' | 'quarter' | 'year' | 'semiweekly_threshold' | 'published_calendar' | 'eighth_monthly' | 'semiweekly' | 'month_threshold' | 'follow_federal';
+    period: 'week_sat_fri' | 'month' | 'quarter' | 'year' | 'semiweekly_threshold' | 'published_calendar' | 'eighth_monthly' | 'semiweekly' | 'month_threshold' | 'follow_federal' | 'period_threshold';
     /** For `semiweekly_threshold` the due rule is that of the REMAINDER (paid with the quarterly return). */
     due: DueRule;
     /**
@@ -292,6 +300,7 @@ export function validateProfile(p: StateProfile): string[] {
             if (i > 0 && !(rows[i - 1].to < r.from)) bad.push(`withholding.deposits.frequencies.${n}.calendar[${i}]: overlaps or is out of order`);
           });
         }
+        if (f.period === 'period_threshold' && !((f.thresholdExclusive ?? 0) > 0 && (f.bankingDays ?? 0) >= 1 && (f.periodEnds ?? []).length >= 2)) bad.push(`withholding.deposits.frequencies.${n}: period_threshold needs a positive threshold, bankingDays and periodEnds`);
         if (f.period === 'semiweekly_threshold' && !((f.thresholdExclusive ?? 0) > 0 && (f.bankingDays ?? 0) >= 1)) bad.push(`withholding.deposits.frequencies.${n}: semiweekly_threshold needs a positive threshold and bankingDays`);
       }
     } else if (d.kind === 'quarter_month_threshold') {

@@ -2,9 +2,9 @@
 
 _Generated from `data/filing/` by `scripts/state-coverage.ts`; `tests/state-coverage.test.ts` fails if this file is stale. Do not edit by hand._
 
-**53 jurisdictions** (the 53 unemployment-tax agencies the US Department of Labor lists: 50 states, DC, Puerto Rico, US Virgin Islands). **48 have a state profile** (AK, AL, AR, AZ, CA, CO, CT, DC, DE, FL, GA, HI, IA, ID, IL, IN, KS, KY, LA, MD, ME, MI, MN, MO, MS, MT, NC, ND, NE, NJ, NM, NY, OH, OK, OR, PA, RI, SC, SD, TN, TX, UT, VA, VT, WA, WI, WV, WY). The rest are **NOT MODELLED**: their own documents have not been read, and nothing is assumed about what they require. A row saying NOT MODELLED does not mean nothing is owed.
+**53 jurisdictions** (the 53 unemployment-tax agencies the US Department of Labor lists: 50 states, DC, Puerto Rico, US Virgin Islands). **53 have a state profile** (AK, AL, AR, AZ, CA, CO, CT, DC, DE, FL, GA, HI, IA, ID, IL, IN, KS, KY, LA, MA, MD, ME, MI, MN, MO, MS, MT, NC, ND, NE, NH, NJ, NM, NV, NY, OH, OK, OR, PA, PR, RI, SC, SD, TN, TX, UT, VA, VI, VT, WA, WI, WV, WY). The rest are **NOT MODELLED**: their own documents have not been read, and nothing is assumed about what they require. A row saying NOT MODELLED does not mean nothing is owed.
 
-Unemployment reporting modelled for 9 of 53. Withholding deposits modelled for 33, partly for 8. New-hire reporting modelled for 2.
+Unemployment reporting modelled for 13 of 53. Withholding deposits modelled for 34, partly for 10. New-hire reporting modelled for 2.
 
 **Nothing is transmitted to any state.** No state transport is connected; the sandbox rehearses and says so, and live transports refuse with the enrollment steps each profile records.
 
@@ -31,15 +31,15 @@ Unemployment reporting modelled for 9 of 53. Withholding deposits modelled for 3
 | LA | Louisiana | Louisiana Workforce Commission, PO Box 94094, Baton Rouge, LA 70804 | partial | NOT MODELLED | NOT MODELLED |
 | ME | Maine | Department of Labor, PO Box 259, Augusta, ME 04332-0259 | modelled | NOT MODELLED | NOT MODELLED |
 | MD | Maryland | Department of Labor, Licensing, & Regulation, 1100 North Eutaw St,, Room 414, Baltimore, MD 21201-2201 | partial | NOT MODELLED | NOT MODELLED |
-| MA | Massachusetts | Division of Employment and Training, 19 Staniford Street, Boston, MA 02114-2589 | NOT MODELLED | NOT MODELLED | NOT MODELLED |
+| MA | Massachusetts | Division of Employment and Training, 19 Staniford Street, Boston, MA 02114-2589 | modelled | NOT MODELLED | NOT MODELLED |
 | MI | Michigan | Department of Licensing and Regulatory Affairs, 3024 W Grand Blvd, Detroit, MI 48202-6024 | modelled | NOT MODELLED | NOT MODELLED |
 | MN | Minnesota | Department of Employment & Economic Development, 332 Minnesota Street, Suite E200, St. Paul, MN 55101-1351 | modelled | NOT MODELLED | NOT MODELLED |
 | MS | Mississippi | Department of Employment Security, PO Box 1699, Jackson, MS | modelled | NOT MODELLED | NOT MODELLED |
 | MO | Missouri | Division of Employment Security, PO Box 59, Jefferson City, MO 65104-0059 | partial | NOT MODELLED | NOT MODELLED |
 | MT | Montana | Unemployment Insurance Division, PO Box 6339, Helena, MT 59604-6339 | modelled | NOT MODELLED | NOT MODELLED |
 | NE | Nebraska | Department of Labor, Box 94600, State House Station, Lincoln, NE 68509-4600 | modelled | NOT MODELLED | NOT MODELLED |
-| NV | Nevada | Department of Employment Training and Rehabilitation, 500 East Third Street, Carson City, NV 89713-0030 | no wage income tax | NOT MODELLED | NOT MODELLED |
-| NH | New Hampshire | Department of Employment Security, 32 South Main Street, Concord, NH 03301-4857 | no wage income tax | NOT MODELLED | NOT MODELLED |
+| NV | Nevada | Department of Employment Training and Rehabilitation, 500 East Third Street, Carson City, NV 89713-0030 | no wage income tax | modelled | NOT MODELLED |
+| NH | New Hampshire | Department of Employment Security, 32 South Main Street, Concord, NH 03301-4857 | no wage income tax | modelled | NOT MODELLED |
 | NJ | New Jersey | Department of Labor & Workforce Development, PO Box 947, Trenton, NJ 08625-0947 | modelled | NOT MODELLED | NOT MODELLED |
 | NM | New Mexico | Department of Workforce Solutions, PO Box 2281, Albuquerque, NM 87103-2281 | partial | NOT MODELLED | NOT MODELLED |
 | NY | New York | Department of Labor, State Campus, Building 12, Room 500, Albany, NY 12240-0339 | partial | modelled | NOT MODELLED |
@@ -49,7 +49,7 @@ Unemployment reporting modelled for 9 of 53. Withholding deposits modelled for 3
 | OK | Oklahoma | Employment Security Commission, PO Box 52003, Oklahoma City, OK 73152-2003 | partial | NOT MODELLED | NOT MODELLED |
 | OR | Oregon | Employment Department, 875 Union Street NE, Room 107, Salem, OR 97311-0030 | modelled | NOT MODELLED | NOT MODELLED |
 | PA | Pennsylvania | Dept of Labor and Industry, 7th and Forster Street, Room 915, Harrisburg, PA 17121-0001 | modelled | NOT MODELLED | NOT MODELLED |
-| PR | Puerto Rico | Department of Labor and Human Resources, PO Box 1020, San Juan, PR 000919 | NOT MODELLED | NOT MODELLED | NOT MODELLED |
+| PR | Puerto Rico | Department of Labor and Human Resources, PO Box 1020, San Juan, PR 000919 | partial | modelled | NOT MODELLED |
 | RI | Rhode Island | Division of Taxation, One Capitol Hill, Ste 36, Providence, RI 29085-5829 | modelled | NOT MODELLED | NOT MODELLED |
 | SC | South Carolina | Employment Security Commission, PO Box 995, Columbia, SC 29202-0995 | modelled | NOT MODELLED | NOT MODELLED |
 | SD | South Dakota | Department of Labor, PO Box 4730, Aberdeen, SD 57402-4730 | no wage income tax | modelled | NOT MODELLED |
@@ -57,7 +57,7 @@ Unemployment reporting modelled for 9 of 53. Withholding deposits modelled for 3
 | TX | Texas | Workforce Commission, PO Box 149037, Austin, TX 78714-9037 | no wage income tax | modelled | NOT MODELLED |
 | UT | Utah | Department of Workforce Services, PO Box 45288, Salt Lake City, UT 84145-0288 | modelled | NOT MODELLED | NOT MODELLED |
 | VT | Vermont | Department of Labor, PO Box 488, Montpelier, VT 05601-0488 | modelled | NOT MODELLED | NOT MODELLED |
-| VI | Virgin Islands | Department of Labor, PO Box 302608, St. Thomas, VI 00803-2608 | NOT MODELLED | NOT MODELLED | NOT MODELLED |
+| VI | Virgin Islands | Department of Labor, PO Box 302608, St. Thomas, VI 00803-2608 | partial | modelled | NOT MODELLED |
 | VA | Virginia | Employment Commission, PO Box 1358, Richmond, VA 23218-1358 | modelled | NOT MODELLED | NOT MODELLED |
 | WA | Washington | Employment Security Department, PO Box 9046, Olympia, WA 98507-9046 | no wage income tax | modelled | NOT MODELLED |
 | WV | West Virginia | Bureau of Employment Programs, 112 California Avenue, Charleston, WV 25305-0016 | modelled | NOT MODELLED | NOT MODELLED |

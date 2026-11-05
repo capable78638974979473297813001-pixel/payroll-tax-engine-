@@ -2,7 +2,7 @@ import { fmt, type Cents } from '../../src/money.ts';
 import { addDays, quarterOf, semiweeklyPeriodEnd, weekday } from '../federal/calendar.ts';
 import type { DepositAnalysis, DepositObligation } from '../federal/deposits.ts';
 import type { Finding } from '../federal/form941.ts';
-import { holidayFinding, nthStateBusinessDayAfter, onOrNextStateBusinessDay, resolveDue } from './calendar.ts';
+import { holidayFinding, nthStateBusinessDayAfter, onOrNextStateBusinessDay, resolveDue, secondarySourceFinding } from './calendar.ts';
 import type { StateDay } from './ledger.ts';
 import type { AssignedFrequencySpec, BandDepositSpec, FederalDepositRule, QuarterMonthThresholdSpec, StateDepositSchedule, StateProfile } from './profile.ts';
 
@@ -235,7 +235,7 @@ function rulesYearFinding(profile: StateProfile, rulesYear: number | undefined, 
   };
 }
 
-function periodKey(period: 'week_sat_fri' | 'month' | 'quarter' | 'year' | 'semiweekly_threshold' | 'published_calendar' | 'eighth_monthly' | 'semiweekly' | 'month_threshold' | 'follow_federal', date: string, weekSplit: 'quarter' | 'year' = 'quarter'): { key: string; anchor: string } {
+function periodKey(period: 'week_sat_fri' | 'month' | 'quarter' | 'year' | 'semiweekly_threshold' | 'published_calendar' | 'eighth_monthly' | 'semiweekly' | 'month_threshold' | 'follow_federal' | 'period_threshold', date: string, weekSplit: 'quarter' | 'year' = 'quarter'): { key: string; anchor: string } {
   const q = quarterOf(date);
   switch (period) {
     case 'week_sat_fri': {
@@ -264,6 +264,7 @@ function periodKey(period: 'week_sat_fri' | 'month' | 'quarter' | 'year' | 'semi
     case 'eighth_monthly':
     case 'month_threshold':
     case 'follow_federal':
+    case 'period_threshold':
       throw new Error(`${period} periods are handled before periodKey is called`);
   }
 }
@@ -274,7 +275,14 @@ function periodKey(period: 'week_sat_fri' | 'month' | 'quarter' | 'year' | 'semi
  * threshold is due `bankingDays` banking days after the close. Whatever is left at quarter end is the remainder
  * paid with the quarterly return.
  */
-function semiweeklyThresholdObligations(profile: StateProfile, f: { thresholdExclusive?: Cents; bankingDays?: number; due: AssignedFrequencySpec['frequencies'][string]['due'] }, days: readonly StateDay[], extra: readonly string[]): StateDepositObligation[] {
+function semiweeklyThresholdObligations(profile: StateProfile, f: { thresholdExclusive?: Cents; bankingDays?: number; periodEnds?: number[]; due: AssignedFrequencySpec['frequencies'][string]['due'] }, days: readonly StateDay[], extra: readonly string[]): StateDepositObligation[] {
+  const endOf = (date: string): string => {
+    if (!f.periodEnds) return semiweeklyPeriodEnd(date);
+    const last = Number(lastDayOfMonthIso(date).slice(8, 10));
+    const day = Number(date.slice(8, 10));
+    const endDay = Math.min(f.periodEnds.find((e) => Math.min(e, last) >= day)!, last);
+    return `${date.slice(0, 7)}-${String(endDay).padStart(2, '0')}`;
+  };
   const out: StateDepositObligation[] = [];
   const byQuarter = new Map<string, StateDay[]>();
   for (const d of days) {
@@ -284,7 +292,7 @@ function semiweeklyThresholdObligations(profile: StateProfile, f: { thresholdExc
   }
   for (const [qkey, ds] of byQuarter) {
     const periods = new Map<string, StateDay[]>();
-    for (const d of ds) periods.set(semiweeklyPeriodEnd(d.date), [...(periods.get(semiweeklyPeriodEnd(d.date)) ?? []), d]);
+    for (const d of ds) periods.set(endOf(d.date), [...(periods.get(endOf(d.date)) ?? []), d]);
     let pending: StateDay[] = [];
     for (const end of [...periods.keys()].sort()) {
       pending = pending.concat(periods.get(end)!);
@@ -293,7 +301,7 @@ function semiweeklyThresholdObligations(profile: StateProfile, f: { thresholdExc
       if (w + ins > f.thresholdExclusive!) {
         const dueDate = nthStateBusinessDayAfter(end, f.bankingDays!, profile, extra);
         out.push({
-          id: `${profile.state}-semiweekly-${end}`, state: profile.state, schedule: 'semiweekly', payDates: pending.map((d) => d.date),
+          id: `${profile.state}-semiweekly-${end}`, state: profile.state, schedule: f.periodEnds ? 'sub_monthly' : 'semiweekly', payDates: pending.map((d) => d.date),
           year: Number(qkey.slice(0, 4)), quarter: quarterOf(pending[0].date), withholding: w, employeeInsurance: ins, employerUi: 0, amount: w + ins,
           dueDate, notes: [`Semi-weekly period closing ${end}: ${fmt(w + ins)} accumulated, more than ${fmt(f.thresholdExclusive!)}, due ${f.bankingDays} banking days later.`],
         });
@@ -481,7 +489,7 @@ function analyzeFrequencyGroups(profile: StateProfile, spec: AssignedFrequencySp
     return { obligations: out, findings };
   }
 
-  if (f.period === 'semiweekly_threshold') {
+  if (f.period === 'semiweekly_threshold' || f.period === 'period_threshold') {
     const obligations = semiweeklyThresholdObligations(profile, f, days, opts.extraHolidays ?? []);
     obligations.sort((a, b) => a.dueDate.localeCompare(b.dueDate) || a.id.localeCompare(b.id));
     return { obligations, findings };
@@ -587,6 +595,18 @@ function analyzeQuarterMonthThreshold(profile: StateProfile, spec: QuarterMonthT
  * is kept for the earlier signature.
  */
 export function analyzeStateDeposits(
+  profile: StateProfile,
+  days: readonly StateDay[],
+  federal: DepositAnalysis | undefined,
+  options: StateDepositOptions | readonly string[] = {},
+): StateDepositAnalysis {
+  const result = analyzeStateDepositsInner(profile, days, federal, options);
+  const sf = secondarySourceFinding(profile);
+  if (sf) result.findings.push(sf);
+  return result;
+}
+
+function analyzeStateDepositsInner(
   profile: StateProfile,
   days: readonly StateDay[],
   federal: DepositAnalysis | undefined,

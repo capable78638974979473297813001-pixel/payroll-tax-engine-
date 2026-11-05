@@ -2,7 +2,7 @@ import { fmt, type Cents } from '../../src/money.ts';
 import { quarterBounds } from '../federal/calendar.ts';
 import type { Finding } from '../federal/form941.ts';
 import type { PayRun } from '../types.ts';
-import { holidayFinding, resolveDue, type ResolvedDue } from './calendar.ts';
+import { holidayFinding, resolveDue, secondarySourceFinding, type ResolvedDue } from './calendar.ts';
 import { buildStateLedger, employeeQuarterWages, type EmployeeQuarter } from './ledger.ts';
 import type { StateProfile } from './profile.ts';
 
@@ -51,6 +51,8 @@ export function stateQuarterlyReport(
   }
   const hf = holidayFinding(profile);
   if (hf) findings.push(hf);
+  const sf = secondarySourceFinding(profile);
+  if (sf) findings.push(sf);
 
   const employees = employeeQuarterWages(profile, companyId, runs, bounds);
   const days = buildStateLedger(profile, companyId, runs, bounds);

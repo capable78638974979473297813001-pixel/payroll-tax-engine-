@@ -1,0 +1,173 @@
+{
+ "state": "MA",
+ "name": "Massachusetts",
+ "verifiedOn": "2026-11-04",
+ "sources": [
+  {
+   "id": "S1",
+   "title": "SECONDARY: search-engine summaries of mass.gov's Withholding Tax Guide, Form M-941 Instructions and 830 CMR 62B.2.1",
+   "url": "https://www.mass.gov/info-details/form-m-941-instructions-tax-return-of-income-taxes-withheld",
+   "revision": "summaries returned 2026-11-05; the pages themselves were not readable",
+   "verifiedOn": "2026-11-05",
+   "verifiedBy": "NOT READ FROM THE AGENCY'S DOCUMENT. mass.gov answers every automated request with HTTP 403 ('This page is forbidden'), which was respected and not worked around. The filing frequencies, thresholds and due dates below come from two search-engine summaries (2026-11-05) of https://www.mass.gov/info-details/withholding-tax-guide, https://www.mass.gov/info-details/form-m-941-instructions-tax-return-of-income-taxes-withheld and https://www.mass.gov/regulations/830-CMR-62b21-withholding-of-taxes-on-wages-and-other-payments; the summaries agreed with each other and said the regulation page is about seven years old. Every result built on this profile carries the warning state_source_secondary.",
+   "secondary": true
+  },
+  {
+   "id": "S2",
+   "title": "Massachusetts DOR Form M-3 (Rev. 11/16) and Form W-2 Electronic Filing Specifications (Rev. 20191219), stored copies",
+   "url": "https://www.mass.gov/doc/form-m-3-reconciliation-of-massachusetts-income-taxes-withheld-for-employers/download",
+   "revision": "M-3 Rev. 11/16; W-2 specifications Rev. 20191219",
+   "verifiedOn": "2026-11-05",
+   "verifiedBy": "read in full from the watcher's stored copies (watcher/state/snapshots/ma-cdc80eeb37~205400bc.txt.gz and ma-cdc80eeb37~187a17f7.txt.gz, captured when the site last allowed it): the M-3 due date ('with Forms W-2, Copy 1, must be filed on or before January 31') and the requirement that W-2s be uploaded electronically through MassTaxConnect by registered users, employers and third-party service agents. These are the agency's own documents but are older editions."
+  }
+ ],
+ "agencies": {
+  "withholding": {
+   "name": "Massachusetts Department of Revenue (MassTaxConnect)",
+   "portalUrl": "https://mtc.dor.state.ma.us",
+   "source": "S1"
+  }
+ },
+ "calendar": {
+  "weekendsRoll": true,
+  "holidays": {
+   "verified": false
+  },
+  "source": "S1"
+ },
+ "mandates": {
+  "efile": {
+   "text": "MDOR requires submitters to transmit Form W-2 electronically using the MDOR's integrated online tax system. Registered users, employers and third party service agents must upload W-2 reports directly through their MassTaxConnect account.",
+   "source": "S2"
+  }
+ },
+ "withholding": {
+  "applies": true,
+  "taxLineIds": {
+   "withholding": "MA_SIT",
+   "employeeInsurance": []
+  },
+  "returns": [
+   {
+    "id": "M-941",
+    "name": "Form M-941, Employer's Return of Income Taxes Withheld",
+    "frequency": "quarterly",
+    "due": {
+     "kind": "last_day_of_month_after_quarter"
+    },
+    "contents": [
+     "Annual filers: return and payment by January 31; quarterly: by the last day of the month after the quarter; monthly: by the 15th of the following month (March, June, September and December wages by the last day of the following month); employers over $25,000 file quarterly through MassTaxConnect and pay on the quarter-monthly schedule.",
+     "A return showing zero tax due must be e-filed through MassTaxConnect; one period per return; payment is due with the return for the annual, quarterly and monthly schedules.",
+     "(Dates come from a secondary source; see the profile's first source.)"
+    ],
+    "source": "S1"
+   },
+   {
+    "id": "M-3",
+    "name": "Form M-3, Reconciliation of Massachusetts Income Taxes Withheld for Employers",
+    "frequency": "annual",
+    "due": {
+     "kind": "january_day_next_year",
+     "day": 31
+    },
+    "contents": [
+     "Filed with Forms W-2, Copy 1, on or before January 31; it reconciles the year's quarterly or monthly M-941 amounts withheld and remitted to the W-2 totals and the number of W-2s enclosed.",
+     "This one is read from the Department's own stored form (Rev. 11/16)."
+    ],
+    "source": "S2"
+   }
+  ],
+  "notModelled": [
+   "EVERYTHING ABOUT THE DEPOSIT SCHEDULE comes from a secondary source because mass.gov refuses automated access; read the Department's Withholding Tax Guide and Form M-941 instructions and clear the source's secondary flag.",
+   "Massachusetts Paid Family and Medical Leave and the 4% surtax mechanics: separate, not deposited with this schedule.",
+   "Massachusetts unemployment insurance (Department of Unemployment Assistance): not read.",
+   "Massachusetts's legal-holiday list (weekends only are skipped, with a warning).",
+   "The MassTaxConnect W-2 and M-941 file layouts (the W-2 specifications Rev. 20191219 are stored but were read only for their introduction)."
+  ],
+  "deposits": {
+   "kind": "assigned_frequency",
+   "interpretation": "SECONDARY SOURCE (see the profile's first source): Massachusetts sets the filing frequency from the employer's PROJECTED annual withholding: $100 or less ANNUAL (Form M-941, return and payment by January 31 of the new year); $101 to $1,200 QUARTERLY (by the last day of the month after the quarter); $1,201 to $25,000 MONTHLY (by the 15th of the following month, except wages of March, June, September and December, due the last day of the following month); MORE than $25,000 (the large-employer, accelerated schedule): quarterly returns through MassTaxConnect by the last day of the month after the quarter, with payments on a deposit schedule: when the Massachusetts tax withheld and not yet paid is $500 or more at the end of a quarter-monthly period (the 7th, 15th, 22nd or last day of the month), it must be paid within 3 business days after that period; whatever is below $500 at quarter end is paid with the quarterly return. A late deposit by a large employer draws a 5% penalty. INTERPRETATION: the $500 test is applied to the amount withheld and not previously paid over, carried forward and restarted each quarter (the regulation, which the summary calls old, words it as the cumulative amount not previously paid over at the end of any quarter-monthly period). The frequency is an INPUT (the Department assigns it from the projected figure) or is derived from a supplied projected annual withholding. A return showing zero must still be e-filed in MassTaxConnect.",
+   "lookback": {
+    "description": "Projected annual Massachusetts withholding",
+    "classes": [
+     {
+      "name": "annual",
+      "maxInclusive": 10000
+     },
+     {
+      "name": "quarterly",
+      "minExclusive": 10000,
+      "maxInclusive": 120000
+     },
+     {
+      "name": "monthly",
+      "minExclusive": 120000,
+      "maxInclusive": 2500000
+     },
+     {
+      "name": "accelerated",
+      "minExclusive": 2500000
+     }
+    ],
+    "newEmployer": "quarterly"
+   },
+   "frequencies": {
+    "annual": {
+     "period": "year",
+     "due": {
+      "kind": "january_day_next_year",
+      "day": 31
+     }
+    },
+    "quarterly": {
+     "period": "quarter",
+     "due": {
+      "kind": "last_day_of_month_after_quarter"
+     }
+    },
+    "monthly": {
+     "period": "month",
+     "due": {
+      "kind": "monthly_with_quarter_end",
+      "day": 15
+     }
+    },
+    "accelerated": {
+     "period": "period_threshold",
+     "periodEnds": [
+      7,
+      15,
+      22,
+      31
+     ],
+     "thresholdExclusive": 49999,
+     "bankingDays": 3,
+     "due": {
+      "kind": "last_day_of_month_after_quarter"
+     }
+    }
+   },
+   "deposited": [
+    "withholding"
+   ],
+   "source": "S1"
+  }
+ },
+ "channels": [
+  {
+   "id": "state:MA:masstaxconnect",
+   "function": "withholding returns and payments (M-941), W-2 upload, M-3",
+   "description": "MassTaxConnect (mtc.dor.state.ma.us): returns, payments and W-2 uploads by registered employers and third-party service agents",
+   "enrollment": [
+    "Register for withholding through MassTaxConnect (steps not read).",
+    "A third-party service agent uploads W-2 reports directly through its MassTaxConnect account (stored W-2 specifications, Rev. 20191219)."
+   ],
+   "specs": "The MassTaxConnect W-2 file specification (based on the SSA EFW2 layout) is stored in the watcher corpus; its record layouts were not read.",
+   "source": "S2"
+  }
+ ],
+ "notModelled": [
+  "Massachusetts unemployment insurance: not read.",
+  "New-hire reporting: not read."
+ ]
+}

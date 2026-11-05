@@ -1,0 +1,79 @@
+{
+ "state": "VI",
+ "name": "Virgin Islands",
+ "verifiedOn": "2026-11-05",
+ "sources": [
+  {
+   "id": "S1",
+   "title": "Virgin Islands Department of Labor: Unemployment Taxes Overview, Employer Handbook, and the 2026 UI tax rates announcement",
+   "url": "https://unemployment.vidol.gov/unemployment-taxes-overview/",
+   "revision": "web pages and handbook; 2026 announcement dated December 29, 2025; fetched live 2026-11-05",
+   "verifiedOn": "2026-11-05",
+   "verifiedBy": "fetched directly from vidol.gov and unemployment.vidol.gov on 2026-11-05 and read: the overview's quarterly due-date table and no-extension rule, the Employer Handbook (https://unemployment.vidol.gov/uidocs/UI-Employer-Handbook.pdf; the due dates; its 2015 wage base of $22,900 is superseded) and the Department's announcement of the 2026 taxable wage base ($32,100) at https://www.vidol.gov/2025/12/30/vidol-announces-2026-unemployment-insurance-tax-rates/."
+  }
+ ],
+ "agencies": {
+  "ui": {
+   "name": "U.S. Virgin Islands Department of Labor, Division of Unemployment Insurance",
+   "portalUrl": "https://unemployment.vidol.gov/unemployment-taxes-overview/",
+   "source": "S1"
+  }
+ },
+ "calendar": {
+  "weekendsRoll": true,
+  "holidays": {
+   "verified": false
+  },
+  "source": "S1"
+ },
+ "mandates": {},
+ "withholding": {
+  "applies": true,
+  "notModelled": [
+   "Virgin Islands income tax withholding (Bureau of Internal Revenue): no document read, and the paycheck engine does not compute Virgin Islands withholding."
+  ]
+ },
+ "ui": {
+  "wageBase": 3210000,
+  "wageBaseYear": 2026,
+  "employerTaxLineId": "VI_SUI_ER",
+  "returns": [
+   {
+    "id": "quarterly-wage-and-contribution-report",
+    "name": "Quarterly Wage & Contribution Report",
+    "frequency": "quarterly",
+    "due": {
+     "kind": "last_day_of_month_after_quarter"
+    },
+    "source": "S1",
+    "contents": [
+     "Due by April 30, July 31, October 31 and January 31 for the quarter covered; a report is required for each quarter an employer is covered, even if no wages were paid.",
+     "The Agency has no authority to grant extensions of time to file quarterly reports or to pay contributions; reimbursing employers pay in lieu of contributions within 30 days after being billed.",
+     "Forms are pre-printed with the employer's name, account number, due date, tax rate and taxable wage base ($32,100 for 2026; rates 2.43% to 5.4%, average 4.04%)."
+    ]
+   }
+  ],
+  "notModelled": [
+   "The Virgin Islands income tax withholding (the Bureau of Internal Revenue) is NOT modelled: no document was read, and the paycheck engine has no Virgin Islands tax data, so no wages or withholding flow into this layer for the Virgin Islands.",
+   "The engine has no 2026 data file for the Virgin Islands, so the wage base here ($32,100, from the Department's announcement) is not cross-checked against the engine.",
+   "Weekend and holiday handling of the due dates: the pages print none.",
+   "The online filing portal and its file layouts: not read."
+  ]
+ },
+ "channels": [
+  {
+   "id": "state:VI:vidol-ui",
+   "function": "quarterly wage and contribution report",
+   "description": "Virgin Islands Department of Labor, Division of Unemployment Insurance (quarterly forms mailed to active employers; online services at unemployment.vidol.gov)",
+   "enrollment": [
+    "Notify the Agency promptly when beginning business operations so the tax status can be determined (Employer Handbook); quarterly forms are mailed to every active employer."
+   ],
+   "specs": "Not read.",
+   "source": "S1"
+  }
+ ],
+ "notModelled": [
+  "The paycheck engine has no Virgin Islands tax data (no data/states/VI file), so this profile covers the unemployment report rules only.",
+  "New-hire reporting: not read."
+ ]
+}

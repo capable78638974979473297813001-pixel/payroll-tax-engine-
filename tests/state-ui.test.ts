@@ -10,6 +10,7 @@ import { loadProfile, modelledStates, resolveDue } from '../payroll/state/index.
  * independent sources have to agree.
  */
 
+const ENGINE_HAS_NO_DATA = new Set(['PR', 'VI']);
 const WITH_UI = modelledStates().filter((s) => loadProfile(s).ui);
 
 describe('every state profile with an unemployment section', () => {
@@ -18,6 +19,8 @@ describe('every state profile with an unemployment section', () => {
     for (const st of WITH_UI) {
       const ui = loadProfile(st).ui!;
       const file = `data/states/${st}-${ui.wageBaseYear}.json`;
+      // Puerto Rico and the Virgin Islands: the paycheck engine has no tax data for them, so there is nothing to compare with.
+      if (ENGINE_HAS_NO_DATA.has(st)) { assert.ok(!existsSync(file), `${st} now has engine data: compare it`); continue; }
       assert.ok(existsSync(file), `${st}: no engine data file ${file}`);
       const engine = JSON.parse(readFileSync(file, 'utf8')).suiEmployer?.wageBase;
       if (typeof engine === 'number') assert.equal(ui.wageBase, Math.round(engine * 100), `${st}: profile ${ui.wageBase} vs engine ${engine * 100}`);

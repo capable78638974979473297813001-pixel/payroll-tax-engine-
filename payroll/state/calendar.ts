@@ -108,6 +108,12 @@ export function resolveDue(rule: DueRule, anchor: string, p: StateProfile, extra
       return { dueDate: roll(`${year + 1}-01-${String(rule.day).padStart(2, '0')}`) };
     case 'calendar_days_after_month_end':
       return { dueDate: roll(addDays(lastDayOfMonth(year, month), rule.days)) };
+    case 'monthly_with_quarter_end': {
+      const m = month === 12 ? 1 : month + 1;
+      const y = month === 12 ? year + 1 : year;
+      if (month % 3 === 0) return { dueDate: roll(lastDayOfMonth(y, m)) };
+      return { dueDate: roll(`${y}-${String(m).padStart(2, '0')}-${String(rule.day).padStart(2, '0')}`) };
+    }
     case 'semimonthly_days': {
       const day = Number(anchor.slice(8, 10));
       if (day <= 15) return { dueDate: roll(`${anchor.slice(0, 7)}-${String(Math.min(rule.firstHalfDay, Number(lastDayOfMonth(year, month).slice(8, 10)))).padStart(2, '0')}`) };
@@ -134,4 +140,16 @@ export function resolveDue(rule: DueRule, anchor: string, p: StateProfile, extra
       return { dueDate: due, settleBy: rule.settleBusinessDays ? nthStateBusinessDayAfter(anchor, rule.settleBusinessDays, p, extraHolidays) : undefined };
     }
   }
+}
+
+
+/** Warning carried by every result built on a profile whose rules came from a secondary source (see `Source.secondary`). */
+export function secondarySourceFinding(p: StateProfile): { severity: 'warning'; code: string; message: string } | undefined {
+  const s = p.sources.filter((x) => x.secondary);
+  if (s.length === 0) return undefined;
+  return {
+    severity: 'warning',
+    code: 'state_source_secondary',
+    message: `${p.state}: these rules were NOT read from the agency's own document (${s.map((x) => x.title).join('; ')}); they come from a search summary of its pages because the agency refused automated access. Confirm them against the agency before filing.`,
+  };
 }

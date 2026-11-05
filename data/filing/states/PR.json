@@ -1,0 +1,81 @@
+{
+ "state": "PR",
+ "name": "Puerto Rico",
+ "verifiedOn": "2026-11-05",
+ "sources": [
+  {
+   "id": "S1",
+   "title": "Puerto Rico Departamento del Trabajo y Recursos Humanos: Servicio Contributivo (portal), Reglamento N\u00famero 1 (SINOT), and Ley 74-1956 de Seguridad de Empleo (revised January 2025)",
+   "url": "https://trabajo.pr.gov/servicio_contributivo.asp",
+   "revision": "web page; Ley 74-1956 revised 14 January 2025; fetched live 2026-11-05",
+   "verifiedOn": "2026-11-05",
+   "verifiedBy": "fetched directly from trabajo.pr.gov on 2026-11-05 and read (in Spanish): the Servicio Contributivo page (the employer portal: quarterly planillas, the $7,000 unemployment and $9,000 SINOT limits, ACH payments, employer account creation); the SINOT Reglamento N\u00fam. 1 (https://www.trabajo.pr.gov/docs/Libreria_Laboral/SINOT/Reglamento%20SINOT%20Num1.pdf), whose section on the payment period says the contribution is payable quarterly on or before the last day of the month following the close of the calendar quarter; and Ley 74-1956 (https://www.trabajo.pr.gov/docs/Division%20de%20Apelaciones/Ley%2074-1956,%20Ley%20de%20Seguridad%20de%20Empleo%20de%20Puerto%20Rico%20Revisada%20enero%202025.pdf), whose rate provisions are stated on the first $7,000 of each employee's wages. INFERENCE TO CONFIRM: the quarterly due date is read from the SINOT (disability) regulation; the portal page says the unemployment, disability and special contribution are computed on one quarterly planilla, but the unemployment Act text read does not itself print the date."
+  }
+ ],
+ "agencies": {
+  "ui": {
+   "name": "Departamento del Trabajo y Recursos Humanos de Puerto Rico, Negociado de Seguridad de Empleo",
+   "portalUrl": "https://trabajo.pr.gov/servicio_contributivo.asp",
+   "source": "S1"
+  }
+ },
+ "calendar": {
+  "weekendsRoll": true,
+  "holidays": {
+   "verified": false
+  },
+  "source": "S1"
+ },
+ "mandates": {},
+ "withholding": {
+  "applies": true,
+  "notModelled": [
+   "Puerto Rico income tax withholding (Departamento de Hacienda): no document read, and the paycheck engine does not compute Puerto Rico withholding."
+  ]
+ },
+ "ui": {
+  "wageBase": 700000,
+  "wageBaseYear": 2026,
+  "employerTaxLineId": "PR_SUI_ER",
+  "returns": [
+   {
+    "id": "planilla-trimestral",
+    "name": "Planilla trimestral (quarterly payroll declaration and contribution, Portal de Servicios a Patronos 'Remote Tax')",
+    "frequency": "quarterly",
+    "due": {
+     "kind": "last_day_of_month_after_quarter"
+    },
+    "source": "S1",
+    "contents": [
+     "Every quarter employers submit a declaration of the wages paid to each employee (Social Security number, name, amount paid in the quarter) and the number of employees in the last three months; the portal computes the unemployment, disability (SINOT) and special contribution from the current rates.",
+     "Taxable wages are limited to $7,000 per calendar year for unemployment and $9,000 for SINOT (portal page; the Act states the unemployment rates on the first $7,000).",
+     "Payable on or before the last day of the month after the quarter (read from the SINOT regulation; see the source); the Secretary may extend deadlines by memorandum, which is an input.",
+     "Payment online by ACH check through the portal; reports are filed through the Portal de Servicios a Patronos (employer account creation online, confirmed by e-mail)."
+    ]
+   }
+  ],
+  "notModelled": [
+   "Puerto Rico income tax withholding (Departamento de Hacienda) is NOT modelled: no document was read, and the paycheck engine has no Puerto Rico tax data, so no wages or withholding flow into this layer for Puerto Rico.",
+   "The unemployment contribution due date itself is not printed in the unemployment Act text read; it is taken from the SINOT regulation for the combined planilla (to confirm).",
+   "Extensions of deadlines by Secretary's memorandum (an input).",
+   "The SINOT contribution (disability) is a separate program on the same planilla and is not totalled here.",
+   "The engine has no 2026 data file for Puerto Rico, so the wage base ($7,000) is not cross-checked against the engine."
+  ]
+ },
+ "channels": [
+  {
+   "id": "state:PR:portal-patronos",
+   "function": "quarterly payroll declaration and contribution",
+   "description": "Portal de Servicios a Patronos (DTRH): employer account creation, quarterly 'Remote Tax' planilla with automatic calculation, ACH payments, quarterly wage upload",
+   "enrollment": [
+    "Create an employer account (Creaci\u00f3n de Cuenta Patronal) in the portal; confirmation is sent by e-mail; the portal lets the employer administer user access levels."
+   ],
+   "specs": "The quarterly wage upload format: not read.",
+   "source": "S1"
+  }
+ ],
+ "notModelled": [
+  "The paycheck engine has no Puerto Rico tax data (no data/states/PR file), so this profile covers the unemployment report rules only.",
+  "New-hire reporting: not read."
+ ]
+}

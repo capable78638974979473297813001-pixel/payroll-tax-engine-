@@ -141,3 +141,12 @@ ROWS.push(
   { name: 'early filer: 20 days after month end (Jan wages -> Feb 20, 2026)', state: 'IN', opts: { assignedFrequency: 'early_filer' }, pays: [['2026-01-14', 100]], expect: [['monthly', 100, '2026-02-20']] },
   { name: 'look-back: more than $1,000 a month is an early filer', state: 'IN', opts: { lookbackLiability: 1000.01 }, pays: [['2026-04-10', 100]], expect: [['monthly', 100, '2026-05-20']] },
 );
+
+// Massachusetts (SECONDARY source: a search summary of mass.gov; every result carries state_source_secondary)
+ROWS.push(
+  { name: 'projected annual withholding: $100 annual, $101 quarterly, $1,201 monthly, over $25,000 accelerated', state: 'MA', opts: { lookbackLiability: 100 }, pays: [['2026-03-13', 40]], expect: [['annual', 40, '2027-02-01']] },
+  { name: 'quarterly: the last day of the month after the quarter', state: 'MA', opts: { assignedFrequency: 'quarterly' }, pays: [['2026-02-13', 10], ['2026-08-14', 10]], expect: [['quarterly', 10, '2026-04-30'], ['quarterly', 10, '2026-11-02']] },
+  { name: 'monthly: the 15th, but March, June, September and December wages are due the last day of the following month', state: 'MA', opts: { assignedFrequency: 'monthly' }, pays: [['2026-02-13', 10], ['2026-03-13', 10], ['2026-06-12', 10], ['2026-12-11', 10]], expect: [['monthly', 10, '2026-03-16'], ['monthly', 10, '2026-04-30'], ['monthly', 10, '2026-07-31'], ['monthly', 10, '2027-02-01']] },
+  { name: 'accelerated: $500 or more at the 7th, 15th, 22nd or last day is paid within 3 business days; less carries forward', state: 'MA', opts: { assignedFrequency: 'accelerated' }, pays: [['2026-08-03', 300], ['2026-08-07', 250], ['2026-08-10', 499.99], ['2026-08-14', 100]], expect: [['sub_monthly', 550, '2026-08-12'], ['sub_monthly', 599.99, '2026-08-19']] },
+  { name: 'accelerated: exactly $500 is paid; $499.99 is not (it waits for the quarterly return)', state: 'MA', opts: { assignedFrequency: 'accelerated' }, pays: [['2026-09-04', 500], ['2026-09-08', 499.99]], expect: [['sub_monthly', 500, '2026-09-10'], ['quarterly', 499.99, '2026-11-02']] },
+);

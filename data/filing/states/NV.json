@@ -1,0 +1,86 @@
+{
+ "state": "NV",
+ "name": "Nevada",
+ "verifiedOn": "2026-11-05",
+ "sources": [
+  {
+   "id": "S1",
+   "title": "SECONDARY: search-engine summaries of Nevada DETR's quarterly reporting pages, employer handbook (9/2023), 2026 newsletters and e-file waiver instructions",
+   "url": "https://detr.nv.gov/Page/NUI_View_Quarterly_Reporting_Info",
+   "revision": "summaries returned 2026-11-05; the pages themselves were not readable",
+   "verifiedOn": "2026-11-05",
+   "verifiedBy": "NOT READ FROM THE AGENCY'S DOCUMENTS. detr.nv.gov answers automated requests with HTTP 403, which was respected and not worked around (the pages tried: NUI_View_Quarterly_Reporting_Info, UI_Tax, the June 2026 newsletter and the employer handbook). The facts below come from two search-engine summaries (2026-11-05) of those pages, which agreed on the due dates, the $43,700 2026 wage base and the mandatory online filing. Every result built on this profile carries the warning state_source_secondary.",
+   "secondary": true
+  }
+ ],
+ "agencies": {
+  "ui": {
+   "name": "Nevada Department of Employment, Training and Rehabilitation (DETR), Employment Security Division",
+   "portalUrl": "https://nui.nv.gov/ess",
+   "source": "S1"
+  }
+ },
+ "calendar": {
+  "weekendsRoll": true,
+  "holidays": {
+   "verified": false
+  },
+  "source": "S1"
+ },
+ "mandates": {
+  "efile": {
+   "text": "Employers are required to file Unemployment Insurance Contribution Reports electronically under NAC Chapter 612, unless a waiver has been formally approved by the agency (waiver requests must reach DETR at least 30 days before the report is due). If the amount due is $10,000 or more, Nevada law requires the payment to be made electronically.",
+   "source": "S1"
+  }
+ },
+ "withholding": {
+  "applies": false,
+  "notModelled": []
+ },
+ "ui": {
+  "wageBase": 4370000,
+  "wageBaseYear": 2026,
+  "employerTaxLineId": "NV_SUI_ER",
+  "returns": [
+   {
+    "id": "quarterly-contribution-report",
+    "name": "Employer's Quarterly Contribution and Wage Report (Employer Self-Service)",
+    "frequency": "quarterly",
+    "due": {
+     "kind": "last_day_of_month_after_quarter"
+    },
+    "source": "S1",
+    "contents": [
+     "Received by the last day of the first month after the quarter: April 30, July 31, October 31, January 31 (2026 Q3 November 2, 2026; Q4 February 1, 2027); a Saturday, Sunday or legal holiday moves it to the next business day. Online reports and payments should be completed by 5:00 p.m. Pacific time on the due date.",
+     "Total gross wages (including tips) are reported for every employee every quarter, even above the taxable wage limit; tax is due only up to the limit.",
+     "Filed online in Employer Self-Service (nui.nv.gov/ess); payment electronically when $10,000 or more is due; the Online Reporting Help Desk is (866) 429-9757.",
+     "(Dates and limits come from a secondary source; see the profile's first source.)"
+    ]
+   }
+  ],
+  "notModelled": [
+   "THE WHOLE SECTION is from a secondary source because detr.nv.gov refuses automated access; read DETR's quarterly reporting page and clear the source's secondary flag.",
+   "The penalty rules (the summaries disagreed: a $5 forfeit plus 0.1% of taxable wages per month after ten days, versus 1% of the amount due).",
+   "The 2027 wage base the summaries report ($45,400) and the Modernization project's new portal.",
+   "The Employer Self-Service upload layouts."
+  ]
+ },
+ "channels": [
+  {
+   "id": "state:NV:ess",
+   "function": "quarterly contribution and wage report, payment",
+   "description": "Nevada DETR Employer Self-Service (nui.nv.gov/ess); electronic filing is mandatory unless a waiver is approved",
+   "enrollment": [
+    "Register as a Nevada employer for unemployment insurance (steps not read) and file in Employer Self-Service.",
+    "Request an electronic filing waiver at least 30 days before the report is due if needed (E-file waiver instructions, 2/2020)."
+   ],
+   "specs": "Not read.",
+   "source": "S1"
+  }
+ ],
+ "notModelled": [
+  "Nevada has no state income tax on wages, so there is no state withholding.",
+  "Modernization-project changes to filing systems after 2026.",
+  "New-hire reporting: not read."
+ ]
+}

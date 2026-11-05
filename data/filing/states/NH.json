@@ -1,0 +1,79 @@
+{
+ "state": "NH",
+ "name": "New Hampshire",
+ "verifiedOn": "2026-11-05",
+ "sources": [
+  {
+   "id": "S1",
+   "title": "SECONDARY: search-engine summaries of NHES's Web Tax & New Hire Reporting System pages and tax rate chart",
+   "url": "https://www2.nhes.nh.gov/webtax/File_Employer_Quarterly_Tax_Wage_Report.pdf",
+   "revision": "summaries returned 2026-11-05; the pages themselves were not readable",
+   "verifiedOn": "2026-11-05",
+   "verifiedBy": "NOT READ FROM THE AGENCY'S DOCUMENTS. nhes.nh.gov and www2.nhes.nh.gov answer automated requests with HTTP 403, which was respected and not worked around. The due dates, the two-business-day grace period and the WebTax limit come from one search-engine summary (2026-11-05) of the 'File Employer Quarterly Tax and Wage Report' pages; a second summary found no due date, so these rest on a single summary. The $14,000 base is from the same summaries and agrees with the paycheck engine's own research. Every result built on this profile carries the warning state_source_secondary.",
+   "secondary": true
+  }
+ ],
+ "agencies": {
+  "ui": {
+   "name": "New Hampshire Employment Security (NHES), Web Tax & New Hire Reporting System",
+   "portalUrl": "https://www2.nhes.nh.gov/webtax/index.jsp",
+   "source": "S1"
+  }
+ },
+ "calendar": {
+  "weekendsRoll": true,
+  "holidays": {
+   "verified": false
+  },
+  "source": "S1"
+ },
+ "mandates": {},
+ "withholding": {
+  "applies": false,
+  "notModelled": []
+ },
+ "ui": {
+  "wageBase": 1400000,
+  "wageBaseYear": 2026,
+  "employerTaxLineId": "NH_SUI_ER",
+  "returns": [
+   {
+    "id": "quarterly-tax-and-wage-report",
+    "name": "Employer Quarterly Tax and Wage Report (WebTax)",
+    "frequency": "quarterly",
+    "due": {
+     "kind": "last_day_of_month_after_quarter"
+    },
+    "source": "S1",
+    "contents": [
+     "Every employer files a tax and wage report for every calendar quarter while providing employment, and pays the unemployment compensation tax when filing.",
+     "Due April 30, July 31, October 31 and January 31; the summaries say a report filed no later than midnight (Eastern) within 2 business days after the due date is treated as timely (a grace period, not an extension); later reports may incur late fees and interest.",
+     "WebTax may only be used by employers with no more than 1,000 employees; larger employers file differently.",
+     "(Dates come from a single secondary summary; see the profile's first source.)"
+    ]
+   }
+  ],
+  "notModelled": [
+   "THE WHOLE SECTION is from a secondary source because NHES refuses automated access; read the NHES WebTax pages and clear the source's secondary flag.",
+   "The two-business-day grace period is recorded but not applied to the due date (the due date stays the conservative one).",
+   "How a report is filed by employers over 1,000 employees, and any electronic filing mandate: not found.",
+   "The trust-fund reduction that changes each quarter's rate (an input: 1.0% for Q4 2026 per the rate chart summary)."
+  ]
+ },
+ "channels": [
+  {
+   "id": "state:NH:webtax",
+   "function": "quarterly tax and wage report",
+   "description": "NHES Web Tax & New Hire Reporting System (WebTax) for employers of up to 1,000 employees",
+   "enrollment": [
+    "Register your company with New Hampshire Employment Security (steps not read) and file through WebTax."
+   ],
+   "specs": "Not read.",
+   "source": "S1"
+  }
+ ],
+ "notModelled": [
+  "New Hampshire has no tax on wages, so there is no state withholding.",
+  "New-hire reporting: the same WebTax system takes new-hire reports; not read."
+ ]
+}

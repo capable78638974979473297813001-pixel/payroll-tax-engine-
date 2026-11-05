@@ -5,7 +5,17 @@ runs, using **state profiles**: data files in `data/filing/states/` with a citat
 Import it as `import { state } from './payroll/index.ts'`. Coverage is in
 [`STATE-COVERAGE.md`](STATE-COVERAGE.md) (generated; a test fails if it is stale).
 
-**Status: 48 of 53 jurisdictions are modelled; 5 are NOT MODELLED (MA, NV, NH, PR, VI).** Thirty-three have a full withholding profile (deposit schedule, returns, mandates, channels), eight have a **partial** one (mandates, channels and what returns the stored agency documents state, but no deposit schedule is computed: IA, ID, LA, MD, MO, NM, NY, OK), and seven have no wage income tax and are modelled for **unemployment insurance only**: TX, FL, AK, SD, WA, WY (quarterly report due dates, wage base, channels) and TN (wage base only; the Department's due-date page refused an automated fetch). Massachusetts, Nevada and New Hampshire refused an automated fetch (HTTP 403), which was respected and not worked around; Puerto Rico and the Virgin Islands were not covered. Nothing is assumed for the unmodelled ones, and a lookup for one fails loudly. Outside those seven, unemployment insurance is modelled only for California and New York. **Nothing is transmitted to any state**: no state transport is connected.
+**Status: all 53 jurisdictions have a profile. They are not equally verified; read the tiers.**
+
+| Tier | Jurisdictions | What it means |
+| --- | --- | --- |
+| Full withholding profile, read from the agency's own document | AL, AR, AZ, CA, CO, CT, DC, DE, GA, HI, IL, IN, KS, KY, ME, MI, MN, MS, MT, NC, ND, NE, NJ, OH, OR, PA, RI, SC, UT, VA, VT, WI, WV (33) | Deposit schedule, returns, mandates and channels, each rule cited to the document it was read from |
+| Partial withholding | IA, ID, LA, MD, MO, NM, NY, OK (8) | Mandates, channels and what returns the documents state; **no deposit schedule is computed** because the documents do not give one |
+| No wage income tax, unemployment only, read from the agency | TX, FL, AK, SD, WA, WY (6), TN (wage base only) | Quarterly report due dates, wage base, mandates, channels |
+| **Secondary source** | **MA, NV, NH** | The agency refuses automated access (HTTP 403), which was respected. Rules come from search-engine summaries of its pages, not its documents. **Every analysis and report for these three carries the warning `state_source_secondary`**, and `tests/state-secondary.test.ts` pins exactly which states are in this tier, so a flag can only be cleared deliberately. Massachusetts' M-3 and W-2 facts are read from the agency's own stored forms. |
+| Unemployment only, outside the paycheck engine | PR, VI | The Puerto Rico and Virgin Islands unemployment report rules, read from the departments' own pages (Puerto Rico's in Spanish; its due date is inferred from the SINOT regulation). **The paycheck engine has no Puerto Rico or Virgin Islands tax data**, so no wages or withholding flow in, and their income tax withholding is NOT modelled. |
+
+Everything modelled is **withholding and its returns**, except the unemployment-only rows above; state unemployment insurance for the other states (beyond CA and NY) is not modelled. **Nothing is transmitted to any state**: no state transport is connected.
 
 ## What it does
 
@@ -179,3 +189,7 @@ New engine support: a `follow_federal` frequency (the state payment is due with 
 | WA | ESD quarterly reports and tax-rate pages | Quarterly tax and wage report, $78,200 base | Paid Leave and WA Cares have their own report, not modelled |
 | WY | DWS reporting due dates, taxable wage base and WYUI pages | Quarterly report, $33,800 base | |
 | TN | UI Tax Rates page | $7,000 base only | The quarterly due-date page refused an automated fetch |
+
+## Batch 5: the last five, and the secondary-source rule
+
+`Source.secondary` marks a source that was not the agency's own document. It exists because MA, NV and NH refuse automated requests; the rules recorded for them are the best available but unconfirmed, and the warning travels with every result so a person must confirm them before filing. To upgrade one: read the agency's own page (a person can; the agency allows browsers), update the profile, delete `secondary`, and the pin in `tests/state-secondary.test.ts` will say so. New engine support: the `period_threshold` frequency (Massachusetts' quarter-monthly $500 deposit rule) and the `monthly_with_quarter_end` due rule.
