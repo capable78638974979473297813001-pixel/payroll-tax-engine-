@@ -54,8 +54,9 @@ describe('tax year 2027 (provisional)', () => {
     // Kentucky (2027 standard deduction $3,470, DOR) and Washington (2027 paid-leave premium 1.2%, employee
     // 70.7%, ESD) have published their 2027 figures; tests/audit-2026-10-25.test.ts pins those exactly.
     // North Carolina (3.49% + 0.1%), Mississippi (3.75%) and Nebraska (2027 Circular EN) have enacted or published
-    // 2027 figures too; tests/state-2027-enacted.test.ts pins them.
-    for (const st of STATES.filter((s) => !['IN', 'ME', 'AK', 'KY', 'WA', 'NC', 'MS', 'NE'].includes(s))) {
+    // 2027 figures too; tests/state-2027-enacted.test.ts pins them. New York's 2027 Paid Family Leave premium
+    // (0.452%, cap $451.81) is published by the WCB and pinned there as well.
+    for (const st of STATES.filter((s) => !['IN', 'ME', 'AK', 'KY', 'WA', 'NC', 'MS', 'NE', 'NY'].includes(s))) {
       const a = calculatePaycheck(pay('2026-10-16', st));
       const b = calculatePaycheck(pay('2027-01-15', st));
       assert.deepEqual(b.taxes.map((t) => [t.id, t.amount]), a.taxes.map((t) => [t.id, t.amount]), st);

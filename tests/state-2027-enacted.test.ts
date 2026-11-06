@@ -115,3 +115,20 @@ describe('2027 state unemployment wage bases published by the state or fixed by 
     assert.equal(nj.statePaidLeaveEmployee.wageBase, 177_100);
   });
 });
+
+describe('New York 2027 Paid Family Leave (WCB: 0.452% of gross wages, maximum $451.81 a year)', () => {
+  test('0.452% in 2027, still 0.432% in 2026', () => {
+    // $3,000 gross: 3,000 x 0.452% = 13.56; 3,000 x 0.432% = 12.96
+    assert.equal(sit(calculatePaycheck(pay('2027-01-15', 'NY', 'biweekly', 300_000)), 'NY_PFML_EE'), 1_356);
+    assert.equal(sit(calculatePaycheck(pay('2026-12-15', 'NY', 'biweekly', 300_000)), 'NY_PFML_EE'), 1_296);
+  });
+
+  test('the cap is 52 x the 2027 NYSAWW ($1,922.25) = $99,957, which gives the WCB\'s $451.81', () => {
+    const f = file('NY-2027');
+    assert.equal(f.statePaidLeaveEmployee.rate, 0.00452);
+    assert.equal(f.statePaidLeaveEmployee.wageBase, 52 * 1922.25);
+    assert.equal(Math.round(f.statePaidLeaveEmployee.wageBase * f.statePaidLeaveEmployee.rate * 100) / 100, 451.81);
+    assert.match(JSON.stringify(f.provisional.updatedFor2027), /paidfamilyleave\.ny\.gov\/2027/);
+  });
+});
+
