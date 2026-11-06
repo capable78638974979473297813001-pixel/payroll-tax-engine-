@@ -773,6 +773,22 @@
           "effectiveFrom": "2025-07-01",
           "effectiveTo": "2026-06-30",
           "note": "California bars any tip credit statewide; the tipped cash wage always equals the standard rate."
+        },
+        {
+          "id": "government_supported_employee",
+          "label": "Government Supported Employees",
+          "hourly": 17.35,
+          "hourlyCents": 1735,
+          "effectiveFrom": "2026-07-01",
+          "test": "A small class defined by the ordinance (employees whose wages are supported by government funding). The engine cannot see this status, so the headline $19.61 binds; this records the lower rate the city publishes for that class.",
+          "sources": [
+            {
+              "title": "San Francisco OLSE -- Minimum Wage Ordinance",
+              "url": "https://www.sf.gov/information--minimum-wage-ordinance",
+              "verifiedOn": "2026-11-06",
+              "verifiedBy": "San Francisco Office of Labor Standards Enforcement, Minimum Wage Ordinance https://www.sf.gov/information--minimum-wage-ordinance read directly 2026-11-06: 'currently $19.61 as of July 1, 2026' and 'A small number of \"Government Supported Employees\" are subject to a minimum wage rate of $17.35 beginning July 1, 2026.'"
+            }
+          ]
         }
       ]
     },
