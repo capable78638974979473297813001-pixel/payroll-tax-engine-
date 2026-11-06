@@ -1,0 +1,70 @@
+{
+  "year": 2026,
+  "companyId": "demo",
+  "city": "Grand Rapids",
+  "employer": {
+    "street": "1 MAIN ST",
+    "city": "TEST",
+    "state": "MI",
+    "zip": "49503",
+    "ein": "012345678",
+    "name": "Demo",
+    "corporation": true
+  },
+  "runs": [
+    {
+      "id": "r",
+      "companyId": "demo",
+      "status": "approved",
+      "checkDate": "2026-04-02",
+      "lines": [
+        {
+          "employeeId": "a",
+          "taxLines": [
+            {
+              "id": "MI_LOCAL",
+              "amount": 1234
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "allocations": [
+    {
+      "city": "Grand Rapids",
+      "runId": "r",
+      "employeeId": "a",
+      "localWagesCents": 80000,
+      "withheldCents": 1234
+    }
+  ],
+  "deposits": [
+    {
+      "city": "Grand Rapids",
+      "month": 4,
+      "id": "receipt",
+      "amountCents": 1000
+    }
+  ],
+  "statements": [
+    {
+      "street": "1 MAIN ST",
+      "city": "TEST",
+      "state": "MI",
+      "zip": "49503",
+      "taxCity": "Grand Rapids",
+      "employeeId": "a",
+      "ssn": "012345679",
+      "first": "Jane",
+      "last": "Test",
+      "middle": "Lee",
+      "box1Cents": 90000,
+      "box3Cents": 91000,
+      "box5Cents": 92000,
+      "deferredCents": 1000,
+      "localWagesCents": 80000,
+      "withheldCents": 1234
+    }
+  ]
+}
