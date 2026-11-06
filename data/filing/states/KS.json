@@ -10,6 +10,14 @@
    "revision": "KW-100 (Rev. 10-24), rates for wages paid on or after July 1, 2024",
    "verifiedOn": "2026-11-04",
    "verifiedBy": "read from the stored copy in watcher/state/snapshots/ks-41963fbebb.txt.gz: Filing Frequencies and Due Dates (the five-frequency chart), Completing a KW-5 (electronic requirement), the KW-3 annual return (January 31), changing frequency, and the registration item for filing frequency. THE OCTOBER 2024 EDITION: the stored copy is the Department's current KW-100 link, but it carries 2024 rates, so check for a newer edition."
+  },
+  {
+   "id": "N1",
+   "title": "U.S. Department of Health and Human Services, Office of Child Support Services: State New Hire Reporting Contacts and Program Information matrix",
+   "url": "https://ocsp.acf.hhs.gov/irg/irgpdf.pdf?geoType=OGP&groupCode=EMP&addrType=NHR&addrClassType=EMP",
+   "revision": "Kansas entry updated 03/22/2025",
+   "verifiedOn": "2026-11-06",
+   "verifiedBy": "read from the federal matrix (layout text of the PDF fetched live 2026-11-06) the Kansas entry, 'Updated On: 03/22/2025': reporting timeframe 'Within 20 days of hire date'. This matrix is the Office of Child Support Services' consolidated list of each state directory's own timeframe, contact and website; the state's statute or directory page was not separately read."
   }
  ],
  "agencies": {
@@ -17,6 +25,10 @@
    "name": "Kansas Department of Revenue",
    "portalUrl": "https://www.ksrevenue.gov/",
    "source": "S1"
+  },
+  "newHire": {
+   "name": "Kansas State Directory of New Hires",
+   "source": "N1"
   }
  },
  "calendar": {
@@ -179,6 +191,13 @@
  ],
  "notModelled": [
   "Kansas unemployment insurance: not read.",
-  "New-hire reporting: not read."
- ]
+  "New-hire reporting: not read.",
+  "Unemployment: NOT MODELLED. The Department of Labor's pages (dol.ks.gov, kansasemployer.gov) answer 403 to automated requests. Read elsewhere: K.S.A. 44-710 (reimbursing employers file quarterly wage reports by the last day of the month following the quarter; reports are deemed filed when mailed) and K.A.R. 50-2-3(f) (a payment day on a Saturday, Sunday or holiday moves to the first regular business day), but neither states the regular due date for contributing employers (K.A.R. 50-2-3(b) gives a 25th-day rule only for a newly liable employer's first payment). The wage base ($15,100, U.S. Department of Labor, January 2026) and the electronic-filing threshold were not recorded in the profile.",
+  "New-hire reporting (Kansas): the days are counted from the hire date, as calendar days with no weekend roll; the directory's data elements, transmission methods and independent-contractor rule are in the federal matrix and were not transcribed."
+ ],
+ "newHire": {
+  "form": "New-hire report (federal Form W-4 or an equivalent) to the Kansas State Directory of New Hires; within 20 days of hire date",
+  "daysFromStart": 20,
+  "source": "N1"
+ }
 }

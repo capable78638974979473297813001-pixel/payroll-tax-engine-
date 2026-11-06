@@ -1,4 +1,5 @@
 import type { Company, Employee } from './types.ts';
+import { hasProfile, loadProfile } from './state/index.ts';
 
 /**
  * The federal new-hire reporting requirement (PRWORA, the Personal
@@ -8,10 +9,7 @@ import type { Company, Employee } from './types.ts';
  * child-support income-withholding orders can find them. Required data
  * elements and the 20-day federal default deadline are fixed by the
  * federal statute itself; a state MAY require faster reporting (several
- * do), which this module does not attempt to enumerate — see
- * `deadlineDaysForState()`'s own doc comment for why that's disclosed
- * rather than guessed, the same choice this project makes everywhere it
- * hasn't done the per-state legal research (README.md's own Known gaps).
+ * do), which `deadlineDaysForState()` reads from the state filing profiles.
  */
 
 export interface NewHireReport {
@@ -26,21 +24,19 @@ export interface NewHireReport {
 export const FEDERAL_DEFAULT_DEADLINE_DAYS = 20;
 
 /**
- * Deliberately returns the federal default for EVERY state rather than a
- * researched per-state table. Several states genuinely require faster
- * reporting than 20 days — that is real, sourceable state law this
- * project has not yet researched state by state, the same category of gap
- * as payroll/timeAndAttendance.ts's un-modelled Alaska/Nevada/Colorado
- * overtime rules. Returning the federal default is the SAFE direction to
- * be wrong in: a caller who reports by day 20 everywhere will occasionally
- * report a few days later than a stricter state technically allows, never
- * later than federal law's own outer bound. Closing this properly means
- * building a `data/new-hire-reporting/` file per state with a cited
- * source and verifiedOn date, exactly like every other jurisdiction fact
- * in this project — not a table invented here without one.
+ * The state's own deadline, in calendar days from hire, from the state filing
+ * profile (`data/filing/states/<ST>.json`, each citing the federal Office of
+ * Child Support Services matrix of state timeframes). Several states are
+ * shorter than the federal 20 days (Alabama and Maine 7, Georgia and Vermont
+ * 10, Massachusetts, Rhode Island and West Virginia 14, Iowa and Mississippi
+ * 15). A jurisdiction with no profile or no stated rule (Puerto Rico, the
+ * Virgin Islands, an unknown code) gets the federal 20-day outer bound, which
+ * no state may exceed.
  */
-export function deadlineDaysForState(_stateCode: string): number {
-  return FEDERAL_DEFAULT_DEADLINE_DAYS;
+export function deadlineDaysForState(stateCode: string): number {
+  const code = stateCode.toUpperCase();
+  if (!hasProfile(code)) return FEDERAL_DEFAULT_DEADLINE_DAYS;
+  return loadProfile(code).newHire?.daysFromStart ?? FEDERAL_DEFAULT_DEADLINE_DAYS;
 }
 
 function addDays(iso: string, days: number): string {

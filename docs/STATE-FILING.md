@@ -13,7 +13,7 @@ Import it as `import { state } from './payroll/index.ts'`. Coverage is in
 | No wage income tax, unemployment only (9) | TX, FL, AK, SD, WA, WY (read from the agency); NV, NH, TN (read from the state's published regulations and the U.S. Department of Labor, because the agencies' own pages refuse automated access) | Quarterly report due dates, wage base, mandates where the regulation states one, channels. For NV, NH and TN the agencies' portal details, penalties and grace periods are NOT recorded because their pages were not readable |
 | Unemployment only, outside the paycheck engine (2) | PR, VI | The Puerto Rico and Virgin Islands unemployment report rules, read from the departments' own pages (Puerto Rico's in Spanish; its due date is inferred from the SINOT regulation). **The paycheck engine has no Puerto Rico or Virgin Islands tax data**, so no wages or withholding flow in, and their income tax withholding is NOT modelled. |
 
-Everything modelled is **withholding and its returns**, plus the **quarterly unemployment report** (due date, wage base, what it carries) for every jurisdiction except Arizona, Kansas and Massachusetts, whose labor agencies' pages refuse automated access and whose rules could not be read elsewhere. Those three say NOT MODELLED for unemployment. Rate notices, charges, claims and benefit-side filings are not modelled anywhere. **Nothing is transmitted to any state**: no state transport is connected.
+Everything modelled is **withholding and its returns**, plus the **quarterly unemployment report** (due date, wage base, what it carries) for every state and DC except Kansas, whose labor agency pages refuse automated access and whose contributing-employer due date is not in the statute or regulation text that could be read. Kansas says NOT MODELLED for unemployment. **New-hire reporting** (deadline in calendar days, the directory agency) is modelled for all 50 states and DC; the paycheck engine's new-hire worklist (`payroll/newHireReporting.ts`) now uses each state's own number of days. Rate notices, charges, claims and benefit-side filings are not modelled anywhere. **Nothing is transmitted to any state**: no state transport is connected.
 
 ## What it does
 
@@ -96,7 +96,7 @@ to the monthly deposit; the rest to the quarterly one. If EDD's reading differs,
 - Utah and Rhode Island: Rhode Island temporary disability insurance and years after 2026; registration steps; holiday lists.
 - Delaware and North Dakota: Delaware electronic filing options; North Dakota's web-service specification.
 - Connecticut: the CT-941 line layout. Nebraska: the 941N line layout.
-- Unemployment reporting (batch 8): Arizona, Kansas and Massachusetts are not modelled; every other state's section records
+- Unemployment reporting (batch 8): Kansas is not modelled; every other state's section records
   what was read and what was not (penalties, file formats, portal enrollment, mandatory electronic-filing thresholds in
   several states). Several states' pages print no weekend rule, so the next business day is assumed and the section says so.
 - Every state: no state transport is connected, so no filing is sent. Subject-wages definitions are the
@@ -232,4 +232,15 @@ Thirty-seven states and DC that had a withholding profile but no unemployment se
 - **Michigan**: the 25th of the month after the quarter (January, April, July, October 25).
 - **New Jersey**: the 30th, and the Department states that a weekend or holiday gives **no extension**, so the profile does not roll it (new `noRoll` option on `day_of_month_after_quarter`).
 - **Ohio** is read from Ohio Revised Code 4141.20 (the ODJFS page prints no dates in the text read); **Rhode Island** from 260-RICR-40-05-1 (the regulation moves Sunday and holiday due dates but is silent on Saturday: recorded); **New Mexico** from the 2020 emergency amendment to 11.3.400.404 as printed in the New Mexico Register; **Oklahoma** from an older edition of the Commission's guide; **Oregon** from the Secretary of State's employer guide.
-- **Not modelled for unemployment: Arizona, Kansas, Massachusetts.** The agencies' pages answered 403 to a plain request and the rules could not be read from another official source; nothing was filled in from memory or from search summaries.
+- **Arizona and Massachusetts** (agency pages refuse automated access) are read from their own rules as republished by Cornell's Legal Information Institute: Arizona Administrative Code R6-3-1704 and Massachusetts 430 CMR 5.03 and 5.06.
+- **Kansas stays NOT MODELLED for unemployment.** K.S.A. 44-710 gives the last-day-of-month date only for reimbursing employers, K.A.R. 50-2-3 gives a weekend rule and a 25th-day rule for a newly liable employer's first payment, and neither states the regular date for contributing employers. The profile records what was read; nothing was filled in from memory or search summaries.
+
+## Batch 9: new-hire reporting for every state and DC (2026-11-06)
+
+Every state and DC now has a `newHire` rule (`daysFromStart`, the directory agency, a source) except none: 51 of 51. Territories (Puerto Rico, the Virgin Islands) are left out by decision.
+
+- **Source:** the U.S. Department of Health and Human Services, Office of Child Support Services, *State New Hire Reporting Contacts and Program Information* matrix (fetched 2026-11-06; each profile cites its own state's entry and that entry's update date). It lists each state's reporting timeframe, directory website and contact. The state statutes were not separately read, except where the matrix entry names one (Arizona, Kentucky, New York, Pennsylvania, Virginia).
+- **Shorter than the federal 20 days:** Alabama and Maine 7; Georgia and Vermont 10; Massachusetts, Rhode Island and West Virginia 14; Iowa and Mississippi 15. All others are 20. The days are calendar days; some states count from hire, some from the start date or first day of work (recorded per state in `notModelled`).
+- **Maryland** is the exception to the source: the matrix entry gives no number of days, so the 20 days come from the Maryland Department of Human Services page.
+- Federal law also lets an employer reporting electronically or by magnetic medium transmit twice a month, 12 to 16 days apart; the deadline recorded is the non-magnetic one the matrix lists. Data elements, transmission methods and independent-contractor rules are in the matrix and were not transcribed.
+- `deadlineDaysForState()` (the HR worklist) now reads the state's profile; it falls back to the federal 20 only for the territories and unknown codes.

@@ -18,6 +18,30 @@
    "revision": "WTP 16-1 (supersedes WTP 92-3), 2016 procedure",
    "verifiedOn": "2026-11-05",
    "verifiedBy": "fetched directly from azdor.gov on 2026-11-05 and read: how the prior-four-quarter average is figured (existing, new, purchased, merged businesses), the quarterly deposit schedule and its payment due dates. THE 2016 PROCEDURE: the Department's 2026 page agrees on the thresholds, but the rest of the procedure (the page of the schedule that follows the federal deposits) was read only to the end of the quarterly section."
+  },
+  {
+   "id": "U1",
+   "title": "Arizona Administrative Code R6-3-1704 (Due Date of Quarterly Reports, Contributions, and Payments in Lieu of Contributions) and R6-3-1703 (Employer Reports), Department of Economic Security rules",
+   "url": "https://www.law.cornell.edu/regulations/arizona/Ariz-Admin-Code-SS-R6-3-1704",
+   "revision": "rule text as republished by Cornell Legal Information Institute, fetched live 2026-11-05",
+   "verifiedOn": "2026-11-05",
+   "verifiedBy": "fetched directly from law.cornell.edu on 2026-11-05 and read R6-3-1704: quarterly contribution and wage reports are due and contributions payable on or before the last day of the month following the close of each calendar quarter; a due date that falls on a Saturday, Sunday or legal holiday moves to the next following business day; mailed reports count on the postmark date; a report or payment not received by the due date is delinquent, with the report penalty set by A.R.S. 23-723(A) and interest at 1% per month on unpaid contributions; the Department may grant a written extension for filing a report on a written request made before the due date. The DES pages themselves answer 403 to automated requests and were not read."
+  },
+  {
+   "id": "U2",
+   "title": "U.S. Department of Labor, Significant Provisions of State Unemployment Insurance Laws, effective January 2026",
+   "url": "https://oui.doleta.gov/unemploy/content/sigpros/2020-2029/January2026.pdf",
+   "revision": "effective January 2026",
+   "verifiedOn": "2026-11-05",
+   "verifiedBy": "fetched directly from oui.doleta.gov on 2026-11-05 and read (layout text): the Taxes column's taxable wage base for the state's row (a federal compilation of the state laws)."
+  },
+  {
+   "id": "N1",
+   "title": "U.S. Department of Health and Human Services, Office of Child Support Services: State New Hire Reporting Contacts and Program Information matrix",
+   "url": "https://ocsp.acf.hhs.gov/irg/irgpdf.pdf?geoType=OGP&groupCode=EMP&addrType=NHR&addrClassType=EMP",
+   "revision": "Arizona entry updated 04/17/2025",
+   "verifiedOn": "2026-11-06",
+   "verifiedBy": "read from the federal matrix (layout text of the PDF fetched live 2026-11-06) the Arizona entry, 'Updated On: 04/17/2025': reporting timeframe 'Within 20 days of hire date (A.R.S. 23-722.01(D))'. This matrix is the Office of Child Support Services' consolidated list of each state directory's own timeframe, contact and website; the state's statute or directory page was not separately read except where the entry names the statute."
   }
  ],
  "agencies": {
@@ -25,6 +49,16 @@
    "name": "Arizona Department of Revenue",
    "portalUrl": "https://aztaxes.gov",
    "source": "S1"
+  },
+  "ui": {
+   "name": "Arizona Department of Economic Security (DES), Unemployment Insurance Tax",
+   "portalUrl": "https://des.az.gov/employers",
+   "source": "U1"
+  },
+  "newHire": {
+   "name": "Arizona State Directory of New Hires",
+   "source": "N1",
+   "portalUrl": "https://newhire-reporting.com/az-newhire/default.aspx"
   }
  },
  "calendar": {
@@ -160,6 +194,38 @@
  ],
  "notModelled": [
   "Arizona unemployment insurance: not read.",
-  "New-hire reporting: not read."
- ]
+  "New-hire reporting: not read.",
+  "New-hire reporting (Arizona): the days are counted from the hire date, as calendar days with no weekend roll; the directory's data elements, transmission methods and independent-contractor rule are in the federal matrix and were not transcribed."
+ ],
+ "ui": {
+  "wageBase": 800000,
+  "wageBaseYear": 2026,
+  "employerTaxLineId": "AZ_SUI_ER",
+  "returns": [
+   {
+    "id": "quarterly-contribution-and-wage",
+    "name": "Quarterly contribution and wage report",
+    "frequency": "quarterly",
+    "due": {
+     "kind": "last_day_of_month_after_quarter"
+    },
+    "contents": [
+     "Reports are due and contributions payable on or before the last day of the month after the quarter (April 30, July 31, October 31, January 31); a Saturday, Sunday or legal holiday moves the date to the next following business day (R6-3-1704).",
+     "Mailed reports count as received on the postmark date. A report not received by the due date is delinquent: the penalty is set by A.R.S. 23-723(A) (one-tenth of one percent of the quarter's wages, at least $35 and at most $200, subject to waiver for good cause) and unpaid contributions carry interest at 1% a month.",
+     "The Department may grant a written extension for filing a report if the employer asks in writing before the due date (R6-3-1704)."
+    ],
+    "source": "U1"
+   }
+  ],
+  "notModelled": [
+   "Arizona DES's own pages (including the UC-018 form and the Tax and Wage System) refuse automated access and were not read: form names, the portal, and any electronic-filing threshold are not modelled.",
+   "The rule's date for payments in lieu of contributions (the last day of the second month, R6-3-1705) is recorded as text only; it applies to reimbursing employers.",
+   "The agency's file format specifications, penalties not quoted above and portal enrollment steps were not read."
+  ]
+ },
+ "newHire": {
+  "form": "New-hire report (federal Form W-4 or an equivalent) to the Arizona State Directory of New Hires; within 20 days of hire date (A.R.S. 23-722.01(D))",
+  "daysFromStart": 20,
+  "source": "N1"
+ }
 }

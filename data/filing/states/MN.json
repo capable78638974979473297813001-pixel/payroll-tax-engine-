@@ -26,6 +26,14 @@
    "revision": "effective January 2026",
    "verifiedOn": "2026-11-05",
    "verifiedBy": "fetched directly from oui.doleta.gov on 2026-11-05 and read (layout text): the Taxes column's taxable wage base for the state's row (a federal compilation of the state laws)."
+  },
+  {
+   "id": "N1",
+   "title": "U.S. Department of Health and Human Services, Office of Child Support Services: State New Hire Reporting Contacts and Program Information matrix",
+   "url": "https://ocsp.acf.hhs.gov/irg/irgpdf.pdf?geoType=OGP&groupCode=EMP&addrType=NHR&addrClassType=EMP",
+   "revision": "Minnesota entry updated 09/24/2026",
+   "verifiedOn": "2026-11-06",
+   "verifiedBy": "read from the federal matrix (layout text of the PDF fetched live 2026-11-06) the Minnesota entry, 'Updated On: 09/24/2026': reporting timeframe 'Within 20 days of hire date or rehire date'. This matrix is the Office of Child Support Services' consolidated list of each state directory's own timeframe, contact and website; the state's statute or directory page was not separately read."
   }
  ],
  "agencies": {
@@ -38,6 +46,11 @@
    "name": "Minnesota Department of Employment and Economic Development (DEED), Unemployment Insurance",
    "portalUrl": "https://www.uimn.org/employers/",
    "source": "U1"
+  },
+  "newHire": {
+   "name": "Minnesota State Directory of New Hires",
+   "source": "N1",
+   "portalUrl": "https://mn-newhire.com/"
   }
  },
  "calendar": {
@@ -162,7 +175,8 @@
  ],
  "notModelled": [
   "Minnesota unemployment insurance and Paid Leave: not read.",
-  "New-hire reporting: not read."
+  "New-hire reporting: not read.",
+  "New-hire reporting (Minnesota): the days are counted from the hire or rehire date, as calendar days with no weekend roll; the directory's data elements, transmission methods and independent-contractor rule are in the federal matrix and were not transcribed."
  ],
  "ui": {
   "wageBase": 4400000,
@@ -188,5 +202,10 @@
    "Paid Leave premiums share these dates; the Paid Leave program is outside this profile.",
    "The agency's file format specifications, penalties not quoted above and portal enrollment steps were not read."
   ]
+ },
+ "newHire": {
+  "form": "New-hire report (federal Form W-4 or an equivalent) to the Minnesota State Directory of New Hires; within 20 days of hire date or rehire date",
+  "daysFromStart": 20,
+  "source": "N1"
  }
 }

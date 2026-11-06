@@ -26,6 +26,14 @@
    "revision": "effective January 2026",
    "verifiedOn": "2026-11-05",
    "verifiedBy": "fetched directly from oui.doleta.gov on 2026-11-05 and read (layout text): the Taxes column's taxable wage base for the state's row (a federal compilation of the state laws)."
+  },
+  {
+   "id": "N1",
+   "title": "U.S. Department of Health and Human Services, Office of Child Support Services: State New Hire Reporting Contacts and Program Information matrix",
+   "url": "https://ocsp.acf.hhs.gov/irg/irgpdf.pdf?geoType=OGP&groupCode=EMP&addrType=NHR&addrClassType=EMP",
+   "revision": "Kentucky entry updated 12/09/2025",
+   "verifiedOn": "2026-11-06",
+   "verifiedBy": "read from the federal matrix (layout text of the PDF fetched live 2026-11-06) the Kentucky entry, 'Updated On: 12/09/2025': reporting timeframe 'KRS 405.435(2): within 20 calendar days of hiring and/or re-hiring an individual who resides and/or works in Kentucky'. This matrix is the Office of Child Support Services' consolidated list of each state directory's own timeframe, contact and website; the state's statute or directory page was not separately read except where the entry names the statute."
   }
  ],
  "agencies": {
@@ -38,6 +46,11 @@
    "name": "Kentucky Office of Unemployment Insurance (OUI), Employer Services",
    "portalUrl": "https://ui.ky.gov",
    "source": "U1"
+  },
+  "newHire": {
+   "name": "Kentucky State Directory of New Hires",
+   "source": "N1",
+   "portalUrl": "https://ky-newhire.com/#/public/public-landing/login"
   }
  },
  "calendar": {
@@ -423,7 +436,8 @@
  ],
  "notModelled": [
   "Kentucky unemployment insurance: not read.",
-  "New-hire reporting: not read."
+  "New-hire reporting: not read.",
+  "New-hire reporting (Kentucky): the days are counted from the hiring or re-hiring, as calendar days with no weekend roll; the directory's data elements, transmission methods and independent-contractor rule are in the federal matrix and were not transcribed."
  ],
  "ui": {
   "wageBase": 1200000,
@@ -449,5 +463,10 @@
    "Kentucky's state holiday list was not read, so a holiday-driven roll carries the generic holiday warning.",
    "The agency's filing format specifications, penalties and portal enrollment steps were not read."
   ]
+ },
+ "newHire": {
+  "form": "New-hire report (federal Form W-4 or an equivalent) to the Kentucky State Directory of New Hires; kRS 405.435(2): within 20 calendar days of hiring and/or re-hiring an individual who resides and/or works in Kentucky",
+  "daysFromStart": 20,
+  "source": "N1"
  }
 }

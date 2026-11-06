@@ -26,6 +26,14 @@
    "revision": "effective January 2026",
    "verifiedOn": "2026-11-05",
    "verifiedBy": "fetched directly from oui.doleta.gov on 2026-11-05 and read (layout text): the Taxes column's taxable wage base for the state's row (a federal compilation of the state laws)."
+  },
+  {
+   "id": "N1",
+   "title": "U.S. Department of Health and Human Services, Office of Child Support Services: State New Hire Reporting Contacts and Program Information matrix",
+   "url": "https://ocsp.acf.hhs.gov/irg/irgpdf.pdf?geoType=OGP&groupCode=EMP&addrType=NHR&addrClassType=EMP",
+   "revision": "West Virginia entry updated 08/18/2025",
+   "verifiedOn": "2026-11-06",
+   "verifiedBy": "read from the federal matrix (layout text of the PDF fetched live 2026-11-06) the West Virginia entry, 'Updated On: 08/18/2025': reporting timeframe 'Within 14 days of hire date'. This matrix is the Office of Child Support Services' consolidated list of each state directory's own timeframe, contact and website; the state's statute or directory page was not separately read."
   }
  ],
  "agencies": {
@@ -38,6 +46,11 @@
    "name": "WorkForce West Virginia, Unemployment Compensation Tax",
    "portalUrl": "https://workforcewv.org/businesses/unemployment-tax-information/tax-filing-reporting/",
    "source": "U1"
+  },
+  "newHire": {
+   "name": "West Virginia State Directory of New Hires",
+   "source": "N1",
+   "portalUrl": "https://www.wv-newhire.com/"
   }
  },
  "calendar": {
@@ -151,7 +164,8 @@
  ],
  "notModelled": [
   "West Virginia unemployment insurance: not read.",
-  "New-hire reporting: not read."
+  "New-hire reporting: not read.",
+  "New-hire reporting (West Virginia): the days are counted from the hire date, as calendar days with no weekend roll; the directory's data elements, transmission methods and independent-contractor rule are in the federal matrix and were not transcribed."
  ],
  "ui": {
   "wageBase": 950000,
@@ -176,5 +190,10 @@
    "The page says 'typically due'; the statutory wording was not read.",
    "The agency's file format specifications, penalties not quoted above and portal enrollment steps were not read."
   ]
+ },
+ "newHire": {
+  "form": "New-hire report (federal Form W-4 or an equivalent) to the West Virginia State Directory of New Hires; within 14 days of hire date",
+  "daysFromStart": 14,
+  "source": "N1"
  }
 }

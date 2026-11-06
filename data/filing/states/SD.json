@@ -10,6 +10,14 @@
    "revision": "web pages, no edition printed; fetched live 2026-11-05",
    "verifiedOn": "2026-11-05",
    "verifiedBy": "fetched directly from dlr.sd.gov on 2026-11-05 and read: How do I file, When do I file (the quarterly table), penalties and interest, the taxable wage base ($15,000), electronic reporting, zero reports. The Reemployment Assistance for Businesses page (https://dlr.sd.gov/ra/businesses/default.aspx) states the 2026 wage base and the due dates."
+  },
+  {
+   "id": "N1",
+   "title": "U.S. Department of Health and Human Services, Office of Child Support Services: State New Hire Reporting Contacts and Program Information matrix",
+   "url": "https://ocsp.acf.hhs.gov/irg/irgpdf.pdf?geoType=OGP&groupCode=EMP&addrType=NHR&addrClassType=EMP",
+   "revision": "South Dakota entry updated 04/29/2025",
+   "verifiedOn": "2026-11-06",
+   "verifiedBy": "read from the federal matrix (layout text of the PDF fetched live 2026-11-06) the South Dakota entry, 'Updated On: 04/29/2025': reporting timeframe 'Within 20 days of hire date'. This matrix is the Office of Child Support Services' consolidated list of each state directory's own timeframe, contact and website; the state's statute or directory page was not separately read."
   }
  ],
  "agencies": {
@@ -17,6 +25,11 @@
    "name": "South Dakota Department of Labor & Regulation, Reemployment Assistance",
    "portalUrl": "https://dlr.sd.gov/ra/businesses/default.aspx",
    "source": "S1"
+  },
+  "newHire": {
+   "name": "South Dakota State Directory of New Hires",
+   "source": "N1",
+   "portalUrl": "https://dlr.sd.gov/ra/new_hire_reporting/default.aspx"
   }
  },
  "calendar": {
@@ -72,6 +85,12 @@
  ],
  "notModelled": [
   "South Dakota has no state income tax on wages, so there is no state withholding.",
-  "New-hire reporting: not read."
- ]
+  "New-hire reporting: not read.",
+  "New-hire reporting (South Dakota): the days are counted from the hire date, as calendar days with no weekend roll; the directory's data elements, transmission methods and independent-contractor rule are in the federal matrix and were not transcribed."
+ ],
+ "newHire": {
+  "form": "New-hire report (federal Form W-4 or an equivalent) to the South Dakota State Directory of New Hires; within 20 days of hire date",
+  "daysFromStart": 20,
+  "source": "N1"
+ }
 }
