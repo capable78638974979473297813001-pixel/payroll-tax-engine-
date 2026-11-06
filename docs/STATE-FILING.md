@@ -272,3 +272,9 @@ What remains stored is specific to a jurisdiction: an unread rule, an older edit
 - **Hawaii**: the Department's withholding FAQ states what the booklet text lacked: above $40,000 of annual liability the schedule is semi-weekly (Wednesday for wages paid the preceding Wednesday to Friday, Friday for Saturday to Tuesday). The look-back now derives it, and the profile records the electronic-filing and electronic-payment mandates over $40,000 (with their $25-per-form and 2% penalties). Booklet A (Rev. 2025, 12/1/2025) is the current edition.
 - Still older than the year: New Jersey (September 2025 NJ-WT; the Division's forms page could not be read to confirm nothing newer), Connecticut, DC, Delaware (no edition date on the page), Maryland.
 - Stored notes: 286.
+
+## Batch 13: remaining current-effect items closed (2026-11-06)
+
+- **Pennsylvania local taxes**: the DCED statewide EIT/LST register downloaded 2026-11-06 was compared with `data/local/PA-EIT-LST-2026.json` for every municipality (resident, nonresident and school-district EIT, total resident rate, municipal and school-district LST, low-income exemptions). Nothing differs except Collingdale Boro, Liberty Twp and Springfield Twp, whose register rate is the 1% EIT the file already schedules for 2026-07-01 over a 0 base. Philadelphia and McKeesport Area SD are unchanged.
+- **Rhode Island tipped cash wage**: $3.89 confirmed in R.I. Gen. Laws 28-12-5(c); the engine was already correct.
+- **Not verified (official pages unreadable here: 403/404)**: Sonoma and Petaluma learner wages, Fremont nonprofit exemption, Cook County training-wage reduction. They stay at the figures already stored and are reported as unverified.
