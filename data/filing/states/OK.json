@@ -183,7 +183,8 @@
     },
     "contents": [
      "Due by the last day of the month following the quarter: April 30, July 31, October 31, January 31.",
-     "Employers and third-party administrators file the quarterly wage report online (agency Wage Reporting page); penalties and interest follow a Notice of Non-Receipt (OES-054) unanswered after 15 days."
+     "Employers and third-party administrators file the quarterly wage report online (agency Wage Reporting page); penalties and interest follow a Notice of Non-Receipt (OES-054) unanswered after 15 days.",
+     "Penalty for failing to file Form OES-3 within 15 days of the Notice of Non-Receipt: $100 plus 10 percent of the contribution due (older guide); the agency's current Wage Reporting page states $200 plus 10 percent for experience-rated employers. Interest accrues at 1 percent a month on past-due contributions."
     ],
     "source": "U1"
    }
@@ -191,7 +192,8 @@
   "notModelled": [
    "The due-date text comes from an older edition of the Commission's guide; OAC 240:10-5-91 (cited in a search summary) was not read and the current wage-reporting page prints no date.",
    "The weekend and holiday rule is not stated in the passages read, so the next business day is assumed.",
-   "The agency's file format specifications, penalties not quoted above and portal enrollment steps were not read."
+   "The agency's file format specifications and portal enrollment steps were not read.",
+   "The older guide's $100 and the current page's $200 first penalty differ; the current page governs."
   ]
  },
  "newHire": {

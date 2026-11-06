@@ -157,15 +157,16 @@
     },
     "contents": [
      "Due April 30, July 31, October 31 and January 31 (DOES).",
-     "The page does not state a weekend or holiday rule."
+     "The page does not state a weekend or holiday rule.",
+     "Reports and taxes not submitted on time are subject to penalty and interest: interest at 1.5 percent of the tax due per month or fraction thereof until paid, and a penalty of 10 percent of the tax due, but not less than $100 (DOES Reporting Questions page)."
     ],
     "source": "U1"
    }
   ],
   "notModelled": [
    "Weekend and holiday rule: DOES's page is silent, so the next business day is assumed. (A search summary says reports are due on the printed date even on a non-business day; that was not read in a DOES page, so it is not modelled.)",
-   "Electronic-filing threshold (the Employer Self Service Portal), late penalty and the zero-wage report: summarised by search only, not read.",
-   "The agency's file format specifications, penalties not quoted above and portal enrollment steps were not read."
+   "The agency's file format specifications and portal enrollment steps were not read.",
+   "Electronic-filing threshold (the Employer Self Service Portal) and the zero-wage report: summarised by search only, not read."
   ]
  },
  "newHire": {

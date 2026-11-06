@@ -182,7 +182,8 @@
     },
     "contents": [
      "Due no later than April 30, July 31, October 31 and January 31; filed each quarter even when no wages were paid.",
-     "A $30 penalty applies if the UC-B6 is not submitted on or before the last day of the month after the quarter; benefits-related consequences also apply (handbook)."
+     "A $30 penalty applies if the UC-B6 is not submitted on or before the last day of the month after the quarter; benefits-related consequences also apply (handbook).",
+     "Penalties: late contribution payment 10% but not less than $100, with interest of two-thirds of one percent a month on contributions and penalty unpaid 15 days after the due date; a late Form UC-B6 $30; a late separation report (Form UC-BP-35) $10 (handbook 'Penalties' section)."
     ],
     "source": "U1"
    }
@@ -190,7 +191,7 @@
   "notModelled": [
    "The handbook page is a 'test' copy; Hawaii's current maximum-wage-base notice (the weekly wage base) and the Department's employer FAQ were not reconciled to it.",
    "The weekend rule is not stated in the passage read, so the next business day is assumed.",
-   "The agency's file format specifications, penalties not quoted above and portal enrollment steps were not read."
+   "The agency's file format specifications and portal enrollment steps were not read."
   ]
  },
  "newHire": {

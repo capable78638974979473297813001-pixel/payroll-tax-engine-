@@ -205,14 +205,15 @@
     },
     "contents": [
      "Reports and payments are due the last day of April, July, October and January for the quarter ended the preceding month; there is no grace period.",
-     "When the last day falls on a weekend or holiday the next business day is the due date (Idaho Code 72-1349)."
+     "When the last day falls on a weekend or holiday the next business day is the due date (Idaho Code 72-1349).",
+     "Late payment penalty: 4 percent of the tax due or $20, whichever is greater, for each month or fraction of a month the quarterly tax is delinquent, accruing separately on each quarter and never exceeding the tax due (Idaho Code 72-1354, handbook)."
     ],
     "source": "U1"
    }
   ],
   "notModelled": [
-   "Idaho's late-penalty schedule and the 16-quarter reset appear in the handbook and in search summaries; the schedule was not transcribed.",
-   "The agency's file format specifications, penalties not quoted above and portal enrollment steps were not read."
+   "The agency's file format specifications and portal enrollment steps were not read.",
+   "Idaho's penalties for failing to file a report on time and the 16-quarter reset appear in search summaries and were not read in the handbook text."
   ]
  },
  "newHire": {

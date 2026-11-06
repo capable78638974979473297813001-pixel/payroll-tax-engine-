@@ -174,14 +174,15 @@
     },
     "contents": [
      "Due April 30, July 31, October 31 and January 31 with the tax; a weekend or holiday moves the date to the next business day (handbook).",
-     "Liable employers file the report electronically (UI EASY) with the tax due; reports and payments not submitted electronically on time are subject to interest and penalty (agency File Reports page)."
+     "Liable employers file the report electronically (UI EASY) with the tax due; reports and payments not submitted electronically on time are subject to interest and penalty (agency File Reports page).",
+     "Penalty for a late, incomplete or illegible report: 5% of the contributions due for each month or part of a month until submitted, at least $25 for the first month of the first delinquent report in a calendar year and at least $100 for later ones, the later months capped at 20% of contributions due and the whole penalty at $500 per report; a penalty can apply even when no wages were paid. Unpaid contributions bear interest at 1.5% a month (2024 handbook)."
     ],
     "source": "U1"
    }
   ],
   "notModelled": [
    "The handbook is the 2024 edition; the handbook's mandatory-electronic threshold has changed between editions and the agency page now says all employers file and pay electronically.",
-   "The agency's file format specifications, penalties not quoted above and portal enrollment steps were not read."
+   "The agency's file format specifications and portal enrollment steps were not read."
   ]
  },
  "newHire": {

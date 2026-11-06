@@ -209,7 +209,8 @@
     },
     "contents": [
      "Payroll is reported and UI taxes paid within one month of quarter end: April 30, July 31, October 31 and January 31; a Saturday or Sunday moves the date to the next business day.",
-     "Interest is charged at 1.5% a month on late payments (guide)."
+     "Interest is charged at 1.5% a month on late payments (guide).",
+     "Reports and payments not made on time risk interest at 1.5% a month on late payments and a penalty assessment of $35 for each late report or improper filing (Employers' Quick Reference Guide)."
     ],
     "source": "U1"
    }
@@ -217,7 +218,7 @@
   "notModelled": [
    "The guide's rule names Saturday and Sunday only; whether a holiday moves the date is not stated, so holidays are treated as moving it.",
    "The guide's edition date is not printed in the text read.",
-   "The agency's file format specifications, penalties not quoted above and portal enrollment steps were not read."
+   "The agency's file format specifications and portal enrollment steps were not read."
   ]
  },
  "newHire": {

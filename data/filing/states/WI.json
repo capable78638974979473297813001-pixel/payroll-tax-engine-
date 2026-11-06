@@ -185,14 +185,15 @@
     },
     "contents": [
      "Due April 30, July 31, October 31 and January 31; a Saturday, Sunday or legal holiday under state or federal law moves it to the next day that is not one (DWD 110.07(4)).",
-     "DWD will stop mailing Quarterly Tax Reports in 2027; employers should file electronically (DWD File Tax Report page)."
+     "DWD will stop mailing Quarterly Tax Reports in 2027; employers should file electronically (DWD File Tax Report page).",
+     "Employers with 25 or more employees must file their tax report online unless an employer agent prepares it; continued paper filing carries a $25 penalty, and an employer agent that prepares UI reports must file electronically ($25 penalty for each employer report not filed electronically) (Employer Handbook)."
     ],
     "source": "U1"
    }
   ],
   "notModelled": [
-   "The handbook page's edition date is not shown; the employer-size threshold for mandatory electronic filing (25 or more employees per a search summary) and the late-filing fee were not read.",
-   "The agency's file format specifications, penalties not quoted above and portal enrollment steps were not read."
+   "The agency's file format specifications and portal enrollment steps were not read.",
+   "The handbook page's edition date is not shown, and the late-filing fee on the UCT-101 was not read."
   ]
  },
  "newHire": {

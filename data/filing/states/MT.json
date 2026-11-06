@@ -171,14 +171,15 @@
      "kind": "last_day_of_month_after_quarter"
     },
     "contents": [
-     "Due April 30, July 31, October 31 and January 31; a weekend or holiday moves the date to the next business day (handbook)."
+     "Due April 30, July 31, October 31 and January 31; a weekend or holiday moves the date to the next business day (handbook).",
+     "Failure to file the quarterly report by the due date: a late filing penalty of $25; interest on tax not paid when due at 1.5% a month or any part of a month, 18% a year (Employer Handbook, Section 6)."
     ],
     "source": "U1"
    }
   ],
   "notModelled": [
-   "The handbook cover reads 'Revised 2020': the schedule is long-standing but the electronic-filing threshold (employers with 20 or more employees per a search summary of the e-filing handbook), the $25 late-report penalty and the 1.5% monthly interest were not re-read in a current document.",
-   "The agency's file format specifications, penalties not quoted above and portal enrollment steps were not read."
+   "The agency's file format specifications and portal enrollment steps were not read.",
+   "The handbook cover reads 'Revised 2020': the schedule is long-standing but its electronic-filing threshold (employers with 20 or more employees per a search summary of the e-filing handbook) was not re-read in a current document."
   ]
  },
  "newHire": {

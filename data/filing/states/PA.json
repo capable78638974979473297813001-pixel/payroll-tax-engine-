@@ -189,14 +189,15 @@
     },
     "contents": [
      "Reports and payment are due on or before April 30, July 31, October 31 and January 31; a Saturday, Sunday or legal holiday moves the date to the next business day.",
-     "UC-2 reports quarterly gross and taxable wages and the contributions due; UC-2A lists each employee's wages and credit weeks."
+     "UC-2 reports quarterly gross and taxable wages and the contributions due; UC-2A lists each employee's wages and credit weeks.",
+     "Failing to file the quarterly report timely or in the prescribed manner carries a penalty of 15% of the contributions payable for the quarter, minimum $125 and maximum $450; non-compliance with the mandatory electronic filing requirement is penalised unless a waiver is in place; a dishonored payment carries 10% of its face value (minimum $25, maximum $1,000); failing the electronic payment requirement can cost 10% of the payment (minimum $25, maximum $500) (UC-2 instructions)."
     ],
     "source": "U1"
    }
   ],
   "notModelled": [
-   "Pennsylvania's UCMS online filing requirement and the late-report penalty (15% of contributions, $125 minimum, $450 maximum per a search summary of the UC-2 instructions) were not read in the page extracted.",
-   "The agency's file format specifications, penalties not quoted above and portal enrollment steps were not read."
+   "The agency's file format specifications and portal enrollment steps were not read.",
+   "The size threshold for entering wage detail manually versus by file upload was not read."
   ]
  },
  "newHire": {

@@ -202,14 +202,15 @@
     "contents": [
      "Contributions and the quarterly wage detail are due the last day of the month after the quarter; a Saturday, Sunday or legal holiday moves the date to the next following business day (871 IAC 23.8).",
      "Employers must electronically submit the report each quarter, even with no contributions due or no employees (871 IAC 22.3).",
-     "Mailed reports count as received on the postmark date (871 IAC 23.8(1)(b))."
+     "Mailed reports count as received on the postmark date (871 IAC 23.8(1)(b)).",
+     "Interest at 1 percent per month (or 1/30 of 1 percent a day) from the due date on contributions not paid when due, unless good cause waives it; no late-report penalty applies when the employer proves no wages were paid (871 IAC 23.8(5))."
     ],
     "source": "U1"
    }
   ],
   "notModelled": [
    "Iowa's penalty under Iowa Code 96.14(2) and the delinquency notice process: described in the rule text only in outline; not read in the Code.",
-   "The agency's file format specifications, penalties not quoted above and portal enrollment steps were not read."
+   "The agency's file format specifications and portal enrollment steps were not read."
   ]
  },
  "newHire": {

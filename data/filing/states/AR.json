@@ -17,7 +17,7 @@
    "url": "https://dws.arkansas.gov/wp-content/uploads/Employer_Handbook_20220811.pdf",
    "revision": "handbook dated 2022-08-11, fetched live 2026-11-05",
    "verifiedOn": "2026-11-05",
-   "verifiedBy": "fetched directly from dws.arkansas.gov on 2026-11-05 and read: 'Quarterly wage reports are due quarterly on the following schedule' (January-March: April 30; April-June: July 31; July-September: October 31; October-December: January 31); the tax payment is remitted with the report and is delinquent if not postmarked or received on or before the last day of the month after the quarter; interest 1.5% a month on delinquent payments. The handbook is the August 2022 edition."
+   "verifiedBy": "fetched directly from dws.arkansas.gov on 2026-11-05 and read: 'Quarterly wage reports are due quarterly on the following schedule' (January-March: April 30; April-June: July 31; July-September: October 31; October-December: January 31); the tax payment is remitted with the report and is delinquent if not postmarked or received on or before the last day of the month after the quarter; interest 1.5% a month on delinquent payments. The handbook is the August 2022 edition. The penalty schedule is from the DWS-ARK-209B instructions (https://dws.arkansas.gov/wp-content/uploads/DWS-ARK-209-BI.pdf, fetched live 2026-11-05), which also state 5%/$10 for the first 20 days of delinquency and 10%/$20 after."
   },
   {
    "id": "U2",
@@ -171,15 +171,16 @@
     },
     "contents": [
      "Report and payment are due April 30, July 31, October 31 and January 31; payments are delinquent if not postmarked or received by the last day of the month after the quarter.",
-     "Interest of 1.5% a month accrues on delinquent payments (handbook)."
+     "Interest of 1.5% a month accrues on delinquent payments (handbook).",
+     "Penalties: during the first 20 days of delinquency 5% of the contributions due or $10, whichever is greater; from the 21st day 10% or $20, whichever is greater; further penalties if the report must be estimated or records subpoenaed (DWS-ARK-209B instructions). Interest 1.5% a month on delinquent payments (handbook)."
     ],
     "source": "U1"
    }
   ],
   "notModelled": [
-   "The handbook is a 2022 edition: the filing-method rule (electronic filing; paper only for fewer than five employees per a search summary of 11 CAR 1-205) and current penalties were not re-read.",
    "The weekend and holiday rule is not stated in the passages read, so the next business day is assumed.",
-   "The agency's file format specifications, penalties not quoted above and portal enrollment steps were not read."
+   "The agency's file format specifications and portal enrollment steps were not read.",
+   "The handbook is a 2022 edition and the Division's electronic-filing rule (paper only for fewer than five employees, per a search summary of 11 CAR 1-205) was not read."
   ]
  },
  "newHire": {

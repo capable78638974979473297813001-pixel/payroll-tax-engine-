@@ -165,16 +165,16 @@
     },
     "contents": [
      "Due by or on the last day of the month after the end of each calendar quarter (April 30, July 31, October 31, January 31).",
-     "The form calculates the quarter's unemployment contributions and reports employee wages."
+     "The form calculates the quarter's unemployment contributions and reports employee wages.",
+     "Interest from January 1, 2026 is 10% a year, compounded monthly. Penalty for failure to pay on time: 1% a month up to 25% of contributions due. Penalty for failure to file a report on time: 10% of the tax liability or $25, whichever is greater; more than 60 days after demand, the greater of $25 or 25% of the amount due (ME UC-1 instructions)."
     ],
     "source": "U1"
    }
   ],
   "notModelled": [
    "The weekend and holiday rule is not stated in the passage read, so the next business day is assumed.",
-   "The payroll penalty ($25 or 10% of taxes due appears in a search summary of the Department's FAQ) was not read.",
    "Which of the employer's other quarterly programs (Paid Family and Medical Leave) share this report: not read.",
-   "The agency's file format specifications, penalties not quoted above and portal enrollment steps were not read."
+   "The agency's file format specifications and portal enrollment steps were not read."
   ]
  },
  "newHire": {

@@ -190,14 +190,15 @@
     },
     "contents": [
      "Due April 30, July 31, October 31 and January 31; filed online unless the employer has nine or fewer employee wage items.",
-     "A mailed report must be postmarked by the due date; metered mail is not proof of timeliness."
+     "A mailed report must be postmarked by the due date; metered mail is not proof of timeliness.",
+     "Employers reporting wages for 10 or more employees must file the report in electronic format; a failure to file electronically carries a $25.00 penalty. Late filing penalty is 5% of the tax due per month or portion of a month, to a maximum of 25%; late payment penalty is 10% of the tax due; interest is charged at the rate set under G.S. 105-241.21(i) (DES page)."
     ],
     "source": "U1"
    }
   ],
   "notModelled": [
    "The page does not state a weekend or holiday rule; the next business day is assumed. (A search summary of DES's 2026 Employer Desk Guide lists November 2, 2026 for the third quarter, consistent with that assumption; the guide was not read.)",
-   "The agency's file format specifications, penalties not quoted above and portal enrollment steps were not read."
+   "The agency's file format specifications and portal enrollment steps were not read."
   ]
  },
  "newHire": {
