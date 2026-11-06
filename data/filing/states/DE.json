@@ -266,9 +266,8 @@
    }
   ],
   "notModelled": [
-   "The handbook is an undated stored copy; Delaware's current form numbers, electronic-filing mandate and penalty amounts were not re-read on the Division's pages.",
-   "The weekend rule is not stated in the passage read, so the next business day is assumed.",
-   "The agency's filing format specifications, penalties and portal enrollment steps were not read."
-  ]
+   "The handbook is an undated stored copy; Delaware's current form numbers, electronic-filing mandate and penalty amounts were not re-read on the Division's pages."
+  ],
+  "weekendRuleStated": false
  }
 }

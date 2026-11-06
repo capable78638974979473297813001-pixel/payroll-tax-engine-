@@ -166,9 +166,7 @@
    "source": "S1"
   }
  ],
- "notModelled": [
-  "New-hire reporting (Oklahoma): the days are counted from the hire date, as calendar days with no weekend roll; the directory's data elements, transmission methods and independent-contractor rule are in the federal matrix and were not transcribed."
- ],
+ "notModelled": [],
  "ui": {
   "wageBase": 2500000,
   "wageBaseYear": 2026,
@@ -191,10 +189,9 @@
   ],
   "notModelled": [
    "The due-date text comes from an older edition of the Commission's guide; OAC 240:10-5-91 (cited in a search summary) was not read and the current wage-reporting page prints no date.",
-   "The weekend and holiday rule is not stated in the passages read, so the next business day is assumed.",
-   "The agency's file format specifications and portal enrollment steps were not read.",
    "The older guide's $100 and the current page's $200 first penalty differ; the current page governs."
-  ]
+  ],
+  "weekendRuleStated": false
  },
  "newHire": {
   "form": "New-hire report (federal Form W-4 or an equivalent) to the Oklahoma State Directory of New Hires; within 20 days of hire date",

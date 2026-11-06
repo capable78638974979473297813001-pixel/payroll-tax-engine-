@@ -1,7 +1,7 @@
 import { test, describe } from 'node:test';
 import assert from 'node:assert/strict';
 
-import { loadProfile, modelledStates, newHireDeadline, newHireStatus, coverage } from '../payroll/state/index.ts';
+import { loadProfile, modelledStates, newHireDeadline, newHireStatus, coverage, notModelledFor, COMMON_NOT_MODELLED } from '../payroll/state/index.ts';
 import { deadlineDaysForState, FEDERAL_DEFAULT_DEADLINE_DAYS } from '../payroll/newHireReporting.ts';
 
 /**
@@ -66,5 +66,15 @@ describe('coverage', () => {
   test('new-hire reporting is modelled for 51 of 53; only the territories say NOT MODELLED', () => {
     const rows = coverage();
     assert.deepEqual(rows.filter((r) => r.functions.newHire !== 'modelled').map((r) => r.code).sort(), ['PR', 'VI']);
+  });
+});
+
+describe('common gaps are stated once and still returned for each profile', () => {
+  test('the new-hire details gap is derived for every profile with a rule, not stored 49 times', () => {
+    for (const st of STATES) {
+      const p = loadProfile(st);
+      assert.ok(!p.notModelled.some((n) => n.startsWith('New-hire reporting (') && st !== 'MD'), st);
+      assert.ok(notModelledFor(p).includes(COMMON_NOT_MODELLED.newHireDetails), st);
+    }
   });
 });

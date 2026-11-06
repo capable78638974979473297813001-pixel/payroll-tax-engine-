@@ -169,10 +169,10 @@
   ],
   "notModelled": [
    "Seasonal filing status and the written waiver that allows a small employer (5 or fewer employees) to file monthly.",
-   "The booklet does not state what happens when a due date falls on a weekend or holiday; the next business day is assumed, and Virginia's legal-holiday list was not read.",
    "The Electronic Payment Guide (ACH credit file formats) and Web Upload validation rules.",
    "Registration steps."
-  ]
+  ],
+  "weekendRuleStated": false
  },
  "channels": [
   {
@@ -188,8 +188,7 @@
   }
  ],
  "notModelled": [
-  "Registration trigger and deadline: not read.",
-  "New-hire reporting (Virginia): the days are counted from the employee's first day on the job, as calendar days with no weekend roll; the directory's data elements, transmission methods and independent-contractor rule are in the federal matrix and were not transcribed."
+  "Registration trigger and deadline: not read."
  ],
  "ui": {
   "wageBase": 800000,
@@ -211,10 +210,10 @@
    }
   ],
   "notModelled": [
-   "The FAQ's own answer to the weekend and holiday question does not state a rule in the text read, so the next business day is assumed.",
    "The $100 late-filing penalty and 1.5% monthly interest come from a search summary of the FC-20 instructions and were not read.",
    "The agency's file format specifications, penalties not quoted above and portal enrollment steps were not read."
-  ]
+  ],
+  "weekendRuleStated": false
  },
  "newHire": {
   "form": "New-hire report (federal Form W-4 or an equivalent) to the Virginia State Directory of New Hires; within twenty (20) days of the employee's first day on the job (Va. Code 63.2-1946)",

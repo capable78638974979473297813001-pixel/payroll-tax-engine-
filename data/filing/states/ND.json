@@ -138,7 +138,6 @@
   "notModelled": [
    "The January 31 due date for information returns is taken from the guideline's quarter table and its Section 3 summary; the section's own due-date sentence was not isolated.",
    "The web-service technical specification at www.tax.nd.gov/SoftwareDevelopers.",
-   "North Dakota's legal-holiday list (weekends only are skipped, with a warning).",
    "Form RWT-941 (retirement-plan payer withholding), monthly election for those payers, and voluntary non-wage withholding."
   ]
  },
@@ -157,9 +156,7 @@
    "source": "S1"
   }
  ],
- "notModelled": [
-  "New-hire reporting (North Dakota): the days are counted from the date of hire, as calendar days with no weekend roll; the directory's data elements, transmission methods and independent-contractor rule are in the federal matrix and were not transcribed."
- ],
+ "notModelled": [],
  "ui": {
   "wageBase": 4660000,
   "wageBaseYear": 2026,
@@ -181,8 +178,7 @@
    }
   ],
   "notModelled": [
-   "The handbook is the 2024 edition; the handbook's mandatory-electronic threshold has changed between editions and the agency page now says all employers file and pay electronically.",
-   "The agency's file format specifications and portal enrollment steps were not read."
+   "The handbook is the 2024 edition; the handbook's mandatory-electronic threshold has changed between editions and the agency page now says all employers file and pay electronically."
   ]
  },
  "newHire": {

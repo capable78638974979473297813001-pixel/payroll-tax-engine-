@@ -90,7 +90,6 @@
   ],
   "notModelled": [
    "The withholding calendar rows in the booklet: dates here are computed from the stated rules, not read from the calendar.",
-   "Maine's legal-holiday list (weekends only are skipped, with a warning).",
    "Annual W-2 / 1099 state filing dates: the booklet says statements go to payees by the federal due date; the state filing rule was not isolated.",
    "The State Tax Assessor's power to require more frequent remittances.",
    "The Maine Tax Portal file layouts."
@@ -148,9 +147,7 @@
    "source": "S1"
   }
  ],
- "notModelled": [
-  "New-hire reporting (Maine): the days are counted from the hire date, as calendar days with no weekend roll; the directory's data elements, transmission methods and independent-contractor rule are in the federal matrix and were not transcribed."
- ],
+ "notModelled": [],
  "ui": {
   "wageBase": 1200000,
   "wageBaseYear": 2026,
@@ -172,10 +169,9 @@
    }
   ],
   "notModelled": [
-   "The weekend and holiday rule is not stated in the passage read, so the next business day is assumed.",
-   "Which of the employer's other quarterly programs (Paid Family and Medical Leave) share this report: not read.",
-   "The agency's file format specifications and portal enrollment steps were not read."
-  ]
+   "Which of the employer's other quarterly programs (Paid Family and Medical Leave) share this report: not read."
+  ],
+  "weekendRuleStated": false
  },
  "newHire": {
   "form": "New-hire report (federal Form W-4 or an equivalent) to the Maine State Directory of New Hires; within 7 days of hire date",

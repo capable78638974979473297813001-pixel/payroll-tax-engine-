@@ -100,7 +100,6 @@
    "The 2023 edition is the one read: confirm against the Department's current guide.",
    "Nonresident employers' quarterly/monthly payment rule (stated in the guide; not modelled).",
    "Annual filers (voluntary withholding from farmers, domestic help, fishermen, pastors): the guide defers to the Department's page.",
-   "South Carolina's legal-holiday list (weekends only are skipped, with a warning).",
    "Whether payroll service providers have separate filing steps ('info for payroll service providers' on the Department's page)."
   ],
   "deposits": {
@@ -159,9 +158,7 @@
    "source": "S1"
   }
  ],
- "notModelled": [
-  "New-hire reporting (South Carolina): the days are counted from the start date, as calendar days with no weekend roll; the directory's data elements, transmission methods and independent-contractor rule are in the federal matrix and were not transcribed."
- ],
+ "notModelled": [],
  "ui": {
   "wageBase": 1400000,
   "wageBaseYear": 2026,
@@ -182,10 +179,11 @@
    }
   ],
   "notModelled": [
-   "The page read states no weekend or holiday rule; the next business day is assumed. (A search summary of the SC Business One Stop says no extension is given for weekends or holidays; that page was not read, so it is not modelled.)",
    "The late-report penalty (10% of tax, $25 minimum, $1,000 maximum per a search summary of the Installment Payment Agreement page) was not read.",
-   "The agency's file format specifications, penalties not quoted above and portal enrollment steps were not read."
-  ]
+   "The agency's file format specifications, penalties not quoted above and portal enrollment steps were not read.",
+   "A search summary of the SC Business One Stop says no extension is given for weekends or holidays; that page was not read, so it is not modelled. The profile moves the date to the next business day, which may be later than that source implies."
+  ],
+  "weekendRuleStated": false
  },
  "newHire": {
   "form": "New-hire report (federal Form W-4 or an equivalent) to the South Carolina State Directory of New Hires; within 20 days of start date",

@@ -178,9 +178,7 @@
  ],
  "notModelled": [
   "Registration trigger and deadline.",
-  "State legal-holiday list.",
-  "Withholding deposit schedule (see withholding).",
-  "New-hire reporting (New York): the days are counted from the hiring or re-hiring, as calendar days with no weekend roll; the directory's data elements, transmission methods and independent-contractor rule are in the federal matrix and were not transcribed."
+  "Withholding deposit schedule (see withholding)."
  ],
  "newHire": {
   "form": "New-hire report (federal Form W-4 or an equivalent) to the New York State Directory of New Hires; within twenty calendar days of the employer's hiring or re-hiring of the employee (N.Y. Tax Law 171-h)",

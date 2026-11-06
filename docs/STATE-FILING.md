@@ -252,3 +252,14 @@ Every state and DC now has a `newHire` rule (`daysFromStart`, the directory agen
 - California's EDD table prints February 17, 2026 both as Lunar New Year (next business day February 18) and as Presidents' Day's next business day (February 17). The date is left out of the holiday dates so the computed date is never later than either reading.
 - Colorado's Department of Revenue holiday page and Wisconsin's DOR calendar were found but not used (Colorado's answers a bot challenge; Wisconsin's calendar prints legal holidays inside a property-tax calendar whose columns could not be read reliably).
 - **Unemployment penalties and electronic-filing rules read from the stored agency texts** and added to the quarterly return for AR, DC, HI, IA, ID, ME, MD, MT, NC, ND, NE, OK, PA and WI (late-report and late-payment penalties, interest, and where the text states them the electronic-filing size threshold: NC 10 or more employees, WI 25 or more with a $25 paper penalty, PA mandatory). The generic "penalties were not read" note is narrowed to file formats and portal enrollment for those states; the others still carry the wider note.
+
+## Batch 11: notes consolidated (2026-11-06)
+
+Stored `notModelled` entries fall from 409 to 291 without dropping any fact. Gaps that were the same in every profile are stated once in code (`COMMON_NOT_MODELLED` in `payroll/state/profile.ts`) and `notModelledFor(profile)` returns a profile's own notes followed by the common ones that apply to it:
+
+- **File formats and portal enrollment** (was repeated in about 40 profiles): the agencies' bulk-upload specifications and enrollment steps were not read beyond what each profile's `channels` records.
+- **New-hire details** (was 49 copies): the federal matrix's data elements, transmission methods and independent-contractor rules were not transcribed. The per-state clock (from hire or from the start date) is already in `newHire.form`.
+- **Legal-holiday lists** (was about 40 copies): derived from `calendar.holidays.verified`; the runtime warning is unchanged.
+- **Weekend or holiday rule not printed by the source** (was 20 copies): now `ui.weekendRuleStated: false` (or `withholding.weekendRuleStated`), and the common note is derived from it. AL, AR, DC, DE, HI, IL, IN, LA, ME, NC, NE, NH, NV, OH, OK, SC, TN, UT, VA, WV. States with a more specific weekend finding (MA, MD, RI, VT, SC's contrary source summary) keep their own note.
+
+What remains stored is specific to a jurisdiction: an unread rule, an older edition, a deliberate exclusion, or a source conflict.

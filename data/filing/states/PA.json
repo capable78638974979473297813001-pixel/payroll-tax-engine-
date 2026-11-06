@@ -87,7 +87,7 @@
    "The page's quarterly reconciliation and W-2 transmittal due dates: the January 31 and quarterly reconciliation dates are not stated in the text read, so only the quarterly return is recorded.",
    "Pennsylvania local earned income tax: no document read.",
    "Whether Pennsylvania's flat 3.07% applies to every pay (rate belongs to the paycheck engine, not this layer).",
-   "Pennsylvania's legal-holiday list and what the Department counts as a banking day (weekends only are skipped, with a warning).",
+   "What the Department counts as a banking day.",
    "Electronic filing mandates: the page lists myPATH and Telefile without stating a mandate."
   ],
   "deposits": {
@@ -172,8 +172,7 @@
   }
  ],
  "notModelled": [
-  "Pennsylvania local taxes: not read.",
-  "New-hire reporting (Pennsylvania): the days are counted from the hire date, as calendar days with no weekend roll; the directory's data elements, transmission methods and independent-contractor rule are in the federal matrix and were not transcribed."
+  "Pennsylvania local taxes: not read."
  ],
  "ui": {
   "wageBase": 1000000,
@@ -196,7 +195,6 @@
    }
   ],
   "notModelled": [
-   "The agency's file format specifications and portal enrollment steps were not read.",
    "The size threshold for entering wage detail manually versus by file upload was not read."
   ]
  },

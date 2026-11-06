@@ -2,7 +2,7 @@ import { test, describe } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync, existsSync } from 'node:fs';
 
-import { loadProfile, modelledStates, resolveDue } from '../payroll/state/index.ts';
+import { loadProfile, modelledStates, resolveDue, notModelledFor, COMMON_NOT_MODELLED } from '../payroll/state/index.ts';
 
 /**
  * Unemployment-insurance sections of the state profiles. Each wage base was read from the agency, and is
@@ -117,7 +117,19 @@ describe('unemployment sections added for the withholding states (batch 8)', () 
     }
   });
 
-  test('every unread item is recorded, never filled in', () => {
-    for (const st of BATCH) assert.ok(loadProfile(st).ui!.notModelled.length >= 2, st);
+  test('every unread item is recorded, never filled in: the profile\'s own notes plus the common ones', () => {
+    for (const st of BATCH) {
+      const notes = notModelledFor(loadProfile(st));
+      assert.ok(notes.length >= 2, st);
+      assert.ok(notes.includes(COMMON_NOT_MODELLED.filingChannels), st);
+    }
+  });
+
+  test('states whose source prints no weekend rule carry the flag and the derived note', () => {
+    for (const st of ['AL', 'AR', 'DC', 'DE', 'HI', 'IL', 'IN', 'LA', 'ME', 'NC', 'NE', 'NH', 'NV', 'OH', 'OK', 'SC', 'TN', 'UT', 'VA', 'WV']) {
+      const p = loadProfile(st);
+      assert.equal(p.ui!.weekendRuleStated, false, st);
+      assert.ok(notModelledFor(p).some((n) => /^Unemployment reports: The source prints no weekend/.test(n)), st);
+    }
   });
 });

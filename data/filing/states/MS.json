@@ -135,7 +135,6 @@
   ],
   "notModelled": [
    "The thresholds the Department uses to assign monthly or quarterly: not in the guide.",
-   "Mississippi's state-holiday list (weekends only are skipped, with a warning).",
    "The January 31 W-2 date is used for the annual return; the February 28 date for 1099s is recorded in the contents only."
   ]
  },
@@ -152,9 +151,7 @@
    "source": "S1"
   }
  ],
- "notModelled": [
-  "New-hire reporting (Mississippi): the days are counted from the hire date, as calendar days with no weekend roll; the directory's data elements, transmission methods and independent-contractor rule are in the federal matrix and were not transcribed."
- ],
+ "notModelled": [],
  "ui": {
   "wageBase": 1400000,
   "wageBaseYear": 2026,
@@ -177,8 +174,7 @@
   ],
   "notModelled": [
    "The MLPP payment dates are recorded as text only; they are not scheduled.",
-   "Penalty amounts and the electronic-filing mandate were not read.",
-   "The agency's filing format specifications, penalties and portal enrollment steps were not read."
+   "Penalty amounts and the electronic-filing mandate were not read."
   ]
  },
  "newHire": {

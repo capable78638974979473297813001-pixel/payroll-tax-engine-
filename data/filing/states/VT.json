@@ -90,7 +90,6 @@
   "notModelled": [
    "Vermont's MONTHLY and QUARTERLY payment dates: the page states the monthly 25th/February 23 rule but no due date for Form WHT-436, so the third monthly payment and the quarterly payment are not computed.",
    "Form WHT-436 (Quarterly Withholding Reconciliation) due dates.",
-   "Vermont's legal-holiday list (weekends only are skipped, with a warning).",
    "The Vermont WHT-434, 1099 and EFW-2 filing specifications (listed on the page, not read)."
   ],
   "deposits": {
@@ -130,9 +129,7 @@
    "source": "S1"
   }
  ],
- "notModelled": [
-  "New-hire reporting (Vermont): the days are counted from the hire date, as calendar days with no weekend roll; the directory's data elements, transmission methods and independent-contractor rule are in the federal matrix and were not transcribed."
- ],
+ "notModelled": [],
  "ui": {
   "wageBase": 1540000,
   "wageBaseYear": 2026,

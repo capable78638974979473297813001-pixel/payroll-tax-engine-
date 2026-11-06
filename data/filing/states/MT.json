@@ -86,7 +86,6 @@
   ],
   "notModelled": [
    "The page gives no separate periodic return: payments are made with Form MW-1 or electronically and reconciled on the MW-3.",
-   "Montana's legal-holiday list (weekends only are skipped, with a warning).",
    "Whether the federal $100,000 one-day rule applies to accelerated filers (not stated).",
    "TAP and approved-software-vendor file layouts."
   ],
@@ -155,9 +154,7 @@
    "source": "S1"
   }
  ],
- "notModelled": [
-  "New-hire reporting (Montana): the days are counted from the hire date, as calendar days with no weekend roll; the directory's data elements, transmission methods and independent-contractor rule are in the federal matrix and were not transcribed."
- ],
+ "notModelled": [],
  "ui": {
   "wageBase": 4730000,
   "wageBaseYear": 2026,
@@ -178,7 +175,6 @@
    }
   ],
   "notModelled": [
-   "The agency's file format specifications and portal enrollment steps were not read.",
    "The handbook cover reads 'Revised 2020': the schedule is long-standing but its electronic-filing threshold (employers with 20 or more employees per a search summary of the e-filing handbook) was not re-read in a current document."
   ]
  },

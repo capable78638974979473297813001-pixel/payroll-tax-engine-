@@ -92,7 +92,7 @@
   "notModelled": [
    "Weekly and semi-weekly payment schedules: named, no dates or thresholds in the instructions.",
    "Annual filers (Form FR-900A) and the payment voucher FR-900P.",
-   "The 2026 edition of the instructions; the DC Paid Family Leave tax; DC's legal-holiday list (weekends only are skipped, with a warning).",
+   "The 2026 edition of the instructions; the DC Paid Family Leave tax.",
    "The MyTax.DC.gov bulk filing specification (FR-900Q) and electronic W-2 filing: listed in the instructions, not read."
   ],
   "deposits": {
@@ -140,8 +140,7 @@
   }
  ],
  "notModelled": [
-  "DC Paid Family Leave: not read.",
-  "New-hire reporting (District of Columbia): the days are counted from the hire (or rehire) date, as calendar days with no weekend roll; the directory's data elements, transmission methods and independent-contractor rule are in the federal matrix and were not transcribed."
+  "DC Paid Family Leave: not read."
  ],
  "ui": {
   "wageBase": 900000,
@@ -164,10 +163,10 @@
    }
   ],
   "notModelled": [
-   "Weekend and holiday rule: DOES's page is silent, so the next business day is assumed. (A search summary says reports are due on the printed date even on a non-business day; that was not read in a DOES page, so it is not modelled.)",
-   "The agency's file format specifications and portal enrollment steps were not read.",
-   "Electronic-filing threshold (the Employer Self Service Portal) and the zero-wage report: summarised by search only, not read."
-  ]
+   "Electronic-filing threshold (the Employer Self Service Portal) and the zero-wage report: summarised by search only, not read.",
+   "A search summary says DC reports are due on the printed date even on a non-business day; that was not read in a DOES page, so it is not modelled."
+  ],
+  "weekendRuleStated": false
  },
  "newHire": {
   "form": "New-hire report (federal Form W-4 or an equivalent) to the District of Columbia State Directory of New Hires; within 20 days of hire (or rehire) date",

@@ -161,7 +161,6 @@
    "The 2026 edition of the guide: thresholds, dates and forms may differ.",
    "Annual remitters (by request, seasonal, household, agricultural employers).",
    "The myconneCT file layouts for bulk W-2 and CT-W3 upload.",
-   "Connecticut's legal-holiday list.",
    "Connecticut's separate paid-leave contributions (CT Paid Leave Authority): not read."
   ]
  },
@@ -180,8 +179,7 @@
  ],
  "notModelled": [
   "Registration trigger and deadline: not read.",
-  "The 2026 edition of the Employer's Tax Guide.",
-  "New-hire reporting (Connecticut): the days are counted from the hire date, as calendar days with no weekend roll; the directory's data elements, transmission methods and independent-contractor rule are in the federal matrix and were not transcribed."
+  "The 2026 edition of the Employer's Tax Guide."
  ],
  "ui": {
   "wageBase": 2700000,

@@ -169,7 +169,6 @@
   },
   "notModelled": [
    "The payroll tax deposit return form (DE 88) field layout and the e-Services bulk file format were not read.",
-   "California's own legal-holiday list was not read (due dates skip weekends only and carry a warning).",
    "The 15% late-payment penalty is stated in DE 44 but interest and penalties are not computed."
   ]
  },
@@ -246,7 +245,6 @@
  "notModelled": [
   "Return form line layouts and file formats (see section notes).",
   "Local taxes in California are outside this profile.",
-  "California's legal-holiday list for years other than 2026: the EDD page publishes 2026 only, so other years skip weekends only and the result carries a warning.",
   "EDD's 2026 table lists February 17 both as Lunar New Year (next business day February 18) and as the next business day after Presidents' Day (February 16). The two cannot both hold, so February 17 is left out of the holiday dates: a due date on February 16 resolves to February 17 as printed, and one on February 17 resolves to February 17, one day earlier than the table's February 18 (the safe direction)."
  ]
 }

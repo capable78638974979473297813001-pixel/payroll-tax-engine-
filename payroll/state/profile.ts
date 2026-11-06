@@ -230,6 +230,8 @@ export interface StateProfile {
     deposits?: DepositSpec;
     /** The withholding returns (quarterly reconciliation, annual reconciliation) and when each is due. */
     returns?: ReturnSpec[];
+    /** `false`: the source prints no weekend or holiday rule for these dates, so the next business day is an assumption. */
+    weekendRuleStated?: boolean;
     notModelled: string[];
   };
   ui?: {
@@ -237,6 +239,8 @@ export interface StateProfile {
     wageBaseYear: number;
     employerTaxLineId: string;
     returns: ReturnSpec[];
+    /** `false`: the source prints no weekend or holiday rule for these dates, so the next business day is an assumption. */
+    weekendRuleStated?: boolean;
     notModelled: string[];
   };
   newHire?: { form: string; daysFromStart: number; source: string };
@@ -244,6 +248,28 @@ export interface StateProfile {
   channels: { id: string; function: string; description: string; enrollment: string[]; specs: string; source: string }[];
   /** Everything about this jurisdiction that was NOT verified, and why. */
   notModelled: string[];
+}
+
+/**
+ * Gaps that are the same for every profile are stated once here instead of repeated in each file. A profile's own
+ * `notModelled` lists what is particular to that jurisdiction; `notModelledFor()` returns both, so nothing is hidden.
+ */
+export const COMMON_NOT_MODELLED = {
+  filingChannels: 'Agency file-format specifications (bulk wage, W-2 and return uploads) and portal enrollment steps were not read for any jurisdiction beyond what the profile\'s channels list records.',
+  newHireDetails: 'New-hire reporting: the data elements, transmission methods and independent-contractor rules in the federal matrix were not transcribed.',
+  holidays: 'Legal-holiday lists: only an agency\'s own published list is applied (see calendar.holidays). Where it is not verified, due dates skip weekends only and the result carries a warning.',
+  weekend: 'The source prints no weekend or holiday rule for this date; moving it to the next business day is an assumption.',
+} as const;
+
+/** Everything not modelled for a jurisdiction: its own notes, then the common ones that apply to it. */
+export function notModelledFor(p: StateProfile): string[] {
+  const own = [...p.notModelled, ...(p.withholding?.notModelled ?? []), ...(p.ui?.notModelled ?? [])];
+  const common: string[] = [COMMON_NOT_MODELLED.filingChannels];
+  if (p.newHire) common.push(COMMON_NOT_MODELLED.newHireDetails);
+  if (!p.calendar.holidays.verified) common.push(COMMON_NOT_MODELLED.holidays);
+  if (p.ui?.weekendRuleStated === false) common.push(`Unemployment reports: ${COMMON_NOT_MODELLED.weekend}`);
+  if (p.withholding?.weekendRuleStated === false) common.push(`Withholding: ${COMMON_NOT_MODELLED.weekend}`);
+  return [...own, ...common];
 }
 
 export function profilePath(code: string): string {

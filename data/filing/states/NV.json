@@ -86,11 +86,11 @@
    }
   ],
   "notModelled": [
-   "Nevada's weekend and holiday rule for the due date: not in NAC 612.260, so assumed (next business day).",
    "The Division's penalties, its Employer Self-Service portal and its waiver form: the Division's pages refuse automated access and were not read.",
    "Whether electronic payment is separately mandated above a dollar amount: not in the code text read.",
    "The 2027 wage base (the Division's summary reports $45,400; the U.S. Department of Labor's July 2026 edition lists the same, not re-read for the profile)."
-  ]
+  ],
+  "weekendRuleStated": false
  },
  "channels": [
   {
@@ -106,8 +106,7 @@
   }
  ],
  "notModelled": [
-  "Nevada has no state income tax on wages, so there is no state withholding.",
-  "New-hire reporting (Nevada): the days are counted from the hire date, as calendar days with no weekend roll; the directory's data elements, transmission methods and independent-contractor rule are in the federal matrix and were not transcribed."
+  "Nevada has no state income tax on wages, so there is no state withholding."
  ],
  "newHire": {
   "form": "New-hire report (federal Form W-4 or an equivalent) to the Nevada State Directory of New Hires; within 20 days of hire date",

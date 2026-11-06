@@ -198,8 +198,7 @@
  "notModelled": [
   "The 5% penalty on late deposits by employers over $25,000 and the performer withholding rules.",
   "Massachusetts Paid Family and Medical Leave and the 4% surtax: separate, not deposited with this schedule.",
-  "The MassTaxConnect W-2 and M-941 file layouts; Massachusetts's legal-holiday list (weekends only are skipped, with a warning).",
-  "New-hire reporting (Massachusetts): the days are counted from the effective date of employment or reinstatement, as calendar days with no weekend roll; the directory's data elements, transmission methods and independent-contractor rule are in the federal matrix and were not transcribed."
+  "The MassTaxConnect W-2 and M-941 file layouts."
  ],
  "ui": {
   "wageBase": 1500000,

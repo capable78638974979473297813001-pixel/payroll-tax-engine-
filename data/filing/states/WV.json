@@ -105,7 +105,6 @@
    }
   ],
   "notModelled": [
-   "West Virginia's legal-holiday list (weekends only are skipped, with a warning).",
    "Form numbers of the monthly and quarterly returns (the page says tax reporting forms are computer-generated and mailed before their due dates).",
    "EFT enrollment details (WV/EFT-5 application) and the MyTaxes file layouts."
   ],
@@ -161,9 +160,7 @@
    "source": "S1"
   }
  ],
- "notModelled": [
-  "New-hire reporting (West Virginia): the days are counted from the hire date, as calendar days with no weekend roll; the directory's data elements, transmission methods and independent-contractor rule are in the federal matrix and were not transcribed."
- ],
+ "notModelled": [],
  "ui": {
   "wageBase": 950000,
   "wageBaseYear": 2026,
@@ -183,10 +180,11 @@
    }
   ],
   "notModelled": [
-   "The page read states no weekend or holiday rule (a search summary of the June 2024 Employer Handbook says a report may be postmarked by the following business day; the handbook was not read), so the next business day is assumed.",
    "The page says 'typically due'; the statutory wording was not read.",
-   "The agency's file format specifications, penalties not quoted above and portal enrollment steps were not read."
-  ]
+   "The agency's file format specifications, penalties not quoted above and portal enrollment steps were not read.",
+   "A search summary of the June 2024 Employer Handbook says a report may be postmarked by the following business day; the handbook was not read."
+  ],
+  "weekendRuleStated": false
  },
  "newHire": {
   "form": "New-hire report (federal Form W-4 or an equivalent) to the West Virginia State Directory of New Hires; within 14 days of hire date",

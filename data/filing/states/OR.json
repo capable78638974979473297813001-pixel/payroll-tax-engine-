@@ -100,8 +100,7 @@
    "The thresholds that make an employer monthly, quarterly or semi-weekly: not in the stored documents.",
    "The Q4 2026 and all 2027 calendar rows: the 2026 calendar ends at the Q3 date; later pay dates draw state_calendar_not_published.",
    "Paid Leave Oregon contributions (Oregon Employment Department): not deposited with the Department of Revenue and not read here.",
-   "The Statewide Transit Tax (OR-STT-2), the Oregon Workers' Benefit Fund assessment, and Portland, TriMet and Lane transit/local taxes.",
-   "Oregon's legal-holiday list."
+   "The Statewide Transit Tax (OR-STT-2), the Oregon Workers' Benefit Fund assessment, and Portland, TriMet and Lane transit/local taxes."
   ],
   "deposits": {
    "kind": "assigned_frequency",
@@ -238,8 +237,7 @@
   }
  ],
  "notModelled": [
-  "Paid Leave Oregon: not read.",
-  "New-hire reporting (Oregon): the days are counted from the hire date, as calendar days with no weekend roll; the directory's data elements, transmission methods and independent-contractor rule are in the federal matrix and were not transcribed."
+  "Paid Leave Oregon: not read."
  ],
  "ui": {
   "wageBase": 5670000,
@@ -263,8 +261,7 @@
   ],
   "notModelled": [
    "The Employment Department's own pages were not read; the guide is the Secretary of State's.",
-   "The Oregon guide labels this as a combined payroll report; which lines belong to UI versus Paid Leave Oregon and the Workers' Benefit Fund assessment was not parsed.",
-   "The agency's filing format specifications, penalties and portal enrollment steps were not read."
+   "The Oregon guide labels this as a combined payroll report; which lines belong to UI versus Paid Leave Oregon and the Workers' Benefit Fund assessment was not parsed."
   ]
  },
  "newHire": {

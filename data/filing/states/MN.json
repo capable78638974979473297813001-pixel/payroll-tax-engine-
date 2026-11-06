@@ -200,9 +200,7 @@
   }
  ],
  "notModelled": [
-  "Minnesota Paid Leave: not read.",
-  "New-hire reporting (Minnesota): the days are counted from the hire or rehire date, as calendar days with no weekend roll; the directory's data elements, transmission methods and independent-contractor rule are in the federal matrix and were not transcribed.",
-  "Minnesota's legal-holiday list for years other than 2026: the Department's page publishes 2026 only, so other years skip weekends only and the result carries a warning."
+  "Minnesota Paid Leave: not read."
  ],
  "ui": {
   "wageBase": 4400000,

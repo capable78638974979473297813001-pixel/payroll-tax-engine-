@@ -184,9 +184,7 @@
    "source": "S1"
   }
  ],
- "notModelled": [
-  "New-hire reporting (Iowa): the days are counted from the hiring or rehiring, as calendar days with no weekend roll; the directory's data elements, transmission methods and independent-contractor rule are in the federal matrix and were not transcribed."
- ],
+ "notModelled": [],
  "ui": {
   "wageBase": 2040000,
   "wageBaseYear": 2026,
@@ -209,8 +207,7 @@
    }
   ],
   "notModelled": [
-   "Iowa's penalty under Iowa Code 96.14(2) and the delinquency notice process: described in the rule text only in outline; not read in the Code.",
-   "The agency's file format specifications and portal enrollment steps were not read."
+   "Iowa's penalty under Iowa Code 96.14(2) and the delinquency notice process: described in the rule text only in outline; not read in the Code."
   ]
  },
  "newHire": {
