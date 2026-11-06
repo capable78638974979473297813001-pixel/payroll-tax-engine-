@@ -88,3 +88,21 @@ describe('employer unemployment 2027 (employer cost only)', () => {
     assert.deepEqual(file('OK-2026').suiEmployer.experienceRange, { min: 0.002, max: 0.058 });
   });
 });
+
+describe('Nevada Career Enhancement Program assessment (NRS 612.606: 0.05% of wages, not owed at the 5.4% rate)', () => {
+  test('computed beside the unemployment line in 2026 and 2027', () => {
+    for (const d of ['2026-12-15', '2027-01-15']) {
+      const r = calculatePaycheck(pay(d, 'NV', 'biweekly', 300_000));
+      assert.equal(line(r, 'NV_CEP_ER'), 150, d); // 3,000 x 0.05%
+    }
+  });
+});
+
+describe('Delaware 2027 unemployment add-on (recorded, not computed)', () => {
+  test('the 0.175% administration and technology add-on is on file with its source', () => {
+    const f = file('DE-2027');
+    assert.equal(f.suiEmployer.administrationTechnologyAddOn, 0.00175);
+    updated(f, /0\.175%/);
+  });
+});
+

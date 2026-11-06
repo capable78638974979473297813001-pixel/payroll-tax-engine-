@@ -19,7 +19,7 @@ describe('2027 local minimum wages read from the localities\' own pages', () => 
     ['MN', 'minneapolis', 1702], ['NM', 'albuquerque', 1300], ['NM', 'santa_fe_city', 1750],
     ['CA', 'san_diego', 1835], ['CA', 'richmond', 1961], ['CA', 'hayward', 1839], ['CA', 'daly_city', 1810],
     ['CA', 'burlingame', 1847], ['CA', 'el_cerrito', 1936], ['CA', 'san_mateo', 1925], ['CA', 'foster_city', 1836],
-    ['CA', 'san_carlos', 1835], ['CA', 'half_moon_bay', 1852], ['CA', 'san_mateo_county_unincorporated', 1858],
+    ['AZ', 'flagstaff', 1895], ['CA', 'san_carlos', 1835], ['CA', 'half_moon_bay', 1852], ['CA', 'san_mateo_county_unincorporated', 1858],
   ] as const) {
     test(`${state} ${locality} is ${expected} cents on ${D}`, () => assert.equal(cents(state, locality), expected));
   }
@@ -62,5 +62,30 @@ describe('Connecticut bartenders (Conn. Gen. Stat. 31-60; Department of Labor ti
       assert.equal(v.hourly, 8.23, String(year));
       assert.equal(Math.round((min - v.hourly) * 100) / 100, v.maxTipCredit, String(year));
     }
+  });
+});
+
+describe('New York home care aides, 2027 (Department of Labor: $20.00 downstate, $19.00 elsewhere)', () => {
+  test('the sectoral file carries the 2027 figures and 2026 is unchanged', async () => {
+    const { readFileSync } = await import('node:fs');
+    const r = (y: number) => JSON.parse(readFileSync(new URL(`../data/minimum-wage/sectoral/NY-sectoral-${y}.json`, import.meta.url), 'utf8')).sectors;
+    const by = (y: number, id: string) => r(y).find((x: { id: string }) => x.id === id).hourly;
+    assert.deepEqual([by(2027, 'home_care_aide_downstate'), by(2027, 'home_care_aide_upstate')], [20, 19]);
+    assert.deepEqual([by(2026, 'home_care_aide_downstate'), by(2026, 'home_care_aide_upstate')], [19.65, 18.65]);
+  });
+});
+
+describe('Saint Paul 2027 (city announcement of 2027-09-01: tiers step on January 1 and July 1)', () => {
+  const sp = (date: string, employeeCount: number) => minimumWage({ checkDate: date, state: 'MN', locality: 'saint_paul', employeeCount }).cents;
+  test('large and macro $17.02 all year; small $16.37 then $17.02 from July 1; micro $14.25 then $15.00 from July 1', () => {
+    assert.deepEqual([sp('2027-02-01', 200), sp('2027-02-01', 50), sp('2027-02-01', 3)], [1702, 1637, 1425]);
+    assert.deepEqual([sp('2027-08-01', 200), sp('2027-08-01', 50), sp('2027-08-01', 3)], [1702, 1702, 1500]);
+  });
+});
+
+describe('Montgomery County, Maryland keeps its three size tiers (county page: $18.00 / $16.50 / $15.95 from July 1, 2026)', () => {
+  test('large, mid-size and small employers resolve to their own rates', () => {
+    const mc = (n: number) => minimumWage({ checkDate: '2026-09-01', state: 'MD', locality: 'montgomery_county', employeeCount: n }).cents;
+    assert.deepEqual([mc(100), mc(30), mc(5)], [1800, 1650, 1595]);
   });
 });
