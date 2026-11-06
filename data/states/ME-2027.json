@@ -6,7 +6,15 @@
     "status": "carry-forward-from-2026",
     "createdOn": "2026-10-13",
     "basedOn": "data/states/ME-2026.json",
-    "note": "Carried forward from the 2026 file on 2026-10-13. Not yet checked against the 2027 official source: every figure is 2026's unless listed in updatedFor2027. Remove this block only after each figure has been re-verified against its 2027 source."
+    "note": "Carried forward from the 2026 file on 2026-10-13. Not yet checked against the 2027 official source: every figure is 2026's unless listed in updatedFor2027. Remove this block only after each figure has been re-verified against its 2027 source.",
+    "updatedFor2027": [
+      {
+        "path": "maineWithholding.standardDeduction / surcharge",
+        "from": "original 2026 booklet: $12,450 / $27,750, no surcharge",
+        "to": "August 2026 revised booklet: $12,850 / $28,550 and a 2% surcharge on annualized income above $1,000,000 single / $1,500,000 married",
+        "source": "Maine Revenue Services' withholding booklet revised August 2026 (https://www.maine.gov/revenue/sites/maine.gov.revenue/files/inline-files/26_wh_tab_instr_August2026.pdf), the controlling figures in ME-2026.json from 2026-08-01. Carried into 2027 because the 2027 file had dropped the revision; the booklet refers only to 2027 remittance frequency, so no 2027 withholding schedule exists yet and these are the latest official figures, to be replaced when MRS publishes the 2027 booklet."
+      }
+    ]
   },
   "method": "bracket_phaseout_deduction_whole_dollar",
   "roundFinalToWholeDollar": true,
@@ -54,12 +62,12 @@
     "allowanceAmount": 5300,
     "standardDeduction": {
       "single": {
-        "max": 12450,
+        "max": 12850,
         "phaseOutStart": 102250,
         "phaseOutEnd": 177250
       },
       "married": {
-        "max": 27750,
+        "max": 28550,
         "phaseOutStart": 204550,
         "phaseOutEnd": 354550
       }
@@ -105,6 +113,16 @@
           "rate": 0.0715
         }
       ]
+    },
+    "surcharge": {
+      "single": {
+        "threshold": 1000000,
+        "rate": 0.02
+      },
+      "married": {
+        "threshold": 1500000,
+        "rate": 0.02
+      }
     }
   },
   "statePaidLeaveEmployee": {

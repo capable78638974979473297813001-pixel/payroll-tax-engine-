@@ -48,9 +48,8 @@ describe('tax year 2027 (provisional)', () => {
   });
 
   test("a 2027 check equals a late-2026 check in every state (2026's mid-year overlays are folded in), except Indiana's rate cut, Maine, Alaska and the figures published or enacted since", () => {
-    // Maine: ME-2026 folds in MRS's August 2026 booklet (new withholding deduction and surcharge); ME-2027 still
-    // carries the earlier booklet's figures until the 2027 follow-up updates it. Alaska: AK-2026's employer
-    // new-employer rate was corrected to 1.00%; AK-2027 still carries 1.5% until the same follow-up.
+    // Maine's August 2026 booklet revision and Alaska's corrected 1.00% employer rate are carried into the 2027
+    // files (checked 2026-11-06), so those two are no longer exceptions.
     // Kentucky (2027 standard deduction $3,470, DOR) and Washington (2027 paid-leave premium 1.2%, employee
     // 70.7%, ESD) have published their 2027 figures; tests/audit-2026-10-25.test.ts pins those exactly.
     // North Carolina (3.49% + 0.1%), Mississippi (3.75%) and Nebraska (2027 Circular EN) have enacted or published
@@ -58,7 +57,7 @@ describe('tax year 2027 (provisional)', () => {
     // (0.452%, cap $451.81) is published by the WCB and pinned there as well. California (SDI 1.4%, 2027 Method B
     // tables), New Jersey (worker TDI/FLI 0.24%), Colorado (FAMLI 0.86%), Maryland (FAMLI 0.9% starts), Missouri
     // (UI base $8,500) and Oklahoma (UI range) are pinned in tests/state-updates-2027.test.ts.
-    for (const st of STATES.filter((s) => !['IN', 'ME', 'AK', 'KY', 'WA', 'NC', 'MS', 'NE', 'NY', 'CA', 'NJ', 'CO', 'MD', 'MO', 'OK'].includes(s))) {
+    for (const st of STATES.filter((s) => !['IN', 'KY', 'WA', 'NC', 'MS', 'NE', 'NY', 'CA', 'NJ', 'CO', 'MD', 'MO', 'OK'].includes(s))) {
       const a = calculatePaycheck(pay('2026-10-16', st));
       const b = calculatePaycheck(pay('2027-01-15', st));
       assert.deepEqual(b.taxes.map((t) => [t.id, t.amount]), a.taxes.map((t) => [t.id, t.amount]), st);

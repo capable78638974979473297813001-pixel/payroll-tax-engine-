@@ -9,9 +9,9 @@
       "id": "seattle",
       "name": "Seattle",
       "level": "city",
-      "hourly": 21.3,
-      "hourlyCents": 2130,
-      "effectiveFrom": "2026-01-01",
+      "hourly": 22.14,
+      "hourlyCents": 2214,
+      "effectiveFrom": "2027-01-01",
       "adjustmentDate": "01-01",
       "coverage": "All employers regardless of size. Seattle's employer-size tiers, and the old ability of small employers to count tips or medical-benefit payments toward minimum compensation, both ENDED on 2025-01-01.",
       "sources": [
@@ -47,17 +47,17 @@
       "id": "burien",
       "name": "Burien",
       "level": "city",
-      "hourly": 21.78,
-      "hourlyCents": 2178,
-      "effectiveFrom": "2026-01-01",
+      "hourly": 22.49,
+      "hourlyCents": 2249,
+      "effectiveFrom": "2027-01-01",
       "adjustmentDate": "01-01",
       "coverage": "Employers with 501 or more employees.",
       "variants": [
         {
           "id": "midsize",
           "label": "Employers with 16-500 employees",
-          "hourly": 20.78,
-          "hourlyCents": 2078,
+          "hourly": 22.49,
+          "hourlyCents": 2249,
           "appliesWhen": {
             "employeeCountMin": 16,
             "employeeCountMax": 500
@@ -66,8 +66,8 @@
         {
           "id": "small",
           "label": "Employers with 15 or fewer employees",
-          "hourly": 19.28,
-          "hourlyCents": 1928,
+          "hourly": 20.49,
+          "hourlyCents": 2049,
           "appliesWhen": {
             "employeeCountMax": 15
           }
@@ -193,17 +193,17 @@
       "id": "king_county_unincorporated",
       "name": "King County (unincorporated areas only)",
       "level": "county",
-      "hourly": 20.82,
-      "hourlyCents": 2082,
-      "effectiveFrom": "2026-01-01",
+      "hourly": 21.57,
+      "hourlyCents": 2157,
+      "effectiveFrom": "2027-01-01",
       "adjustmentDate": "01-01",
       "coverage": "Employers with 500 or more employees, for work performed in UNINCORPORATED King County only. Seattle, Tukwila, Burien, Renton and SeaTac are incorporated cities with their own ordinances above.",
       "variants": [
         {
           "id": "midsize",
           "label": "Employers with 16-499 employees",
-          "hourly": 19.82,
-          "hourlyCents": 1982,
+          "hourly": 21.57,
+          "hourlyCents": 2157,
           "appliesWhen": {
             "employeeCountMin": 16,
             "employeeCountMax": 499
@@ -212,8 +212,8 @@
         {
           "id": "small_high_revenue",
           "label": "Employers with 15 or fewer employees and $2 million or more in annual gross revenue",
-          "hourly": 19.82,
-          "hourlyCents": 1982,
+          "hourly": 21.57,
+          "hourlyCents": 2157,
           "appliesWhen": {
             "employeeCountMax": 15
           }
@@ -221,14 +221,14 @@
         {
           "id": "small_low_revenue",
           "label": "Employers with 15 or fewer employees and under $2 million in annual gross revenue",
-          "hourly": 18.32,
-          "hourlyCents": 1832,
+          "hourly": 19.57,
+          "hourlyCents": 1957,
           "appliesWhen": {
             "employeeCountMax": 15
           }
         }
       ],
-      "note": "The three reduced tiers are a temporary phase-in that ends in 2031, when every employer pays the single county rate.",
+      "note": "2027: the county's page states one exception: employers with 15 or fewer employees and annual gross revenue under $2 million may pay $2.00 less ($19.57); the other reduced tiers have ended, so midsize and small high-revenue employers pay the full $21.57. The three reduced tiers are a temporary phase-in that ends in 2031, when every employer pays the single county rate.",
       "appliesWhen": {
         "employeeCountMin": 500
       }
@@ -264,7 +264,26 @@
     "status": "carry-forward-from-2026",
     "createdOn": "2026-10-25",
     "basedOn": "data/minimum-wage/local/WA-local-2026.json",
-    "note": "Carried forward from the 2026 file on 2026-10-25 so that a 2027-dated query resolves instead of failing. Every figure is 2026's unless listed in updatedFor2027 (each with the state agency's own announcement or the statute). Remove this block only after every figure has been re-read against a 2027 source. LOCAL ORDINANCES ARE NOT YET UPDATED for 2027: many step on 1 January 2027 (e.g. Denver $19.84, Minneapolis $17.02, Seattle, Flagstaff, Albuquerque, Portland ME). The figures here are 2026's until each ordinance is re-read.",
-    "updatedFor2027": []
+    "note": "Carried forward from the 2026 file on 2026-10-25 so that a 2027-dated query resolves instead of failing. Every figure is 2026's unless listed in updatedFor2027 (each with the state agency's own announcement or the statute). Remove this block only after every figure has been re-read against a 2027 source. LOCAL ORDINANCES ARE NOT YET UPDATED for 2027: many step on 1 January 2027 (e.g. Denver $19.84, Minneapolis $17.02, Seattle, Flagstaff, Albuquerque, Portland ME). The figures here are 2026's until each ordinance is re-read. 2026-11-06: Seattle, Burien and unincorporated King County were re-read from the cities' and county's own pages and updated; Tukwila, Renton and Everett pages answer 403 to automated requests and Bellingham's page still shows the prior-year dollar, so those stay at 2026 figures.",
+    "updatedFor2027": [
+      {
+        "path": "jurisdictions[seattle].hourly",
+        "from": 21.3,
+        "to": 22.14,
+        "source": "Seattle Office of Labor Standards, 'Office of Labor Standards Announces Seattle's 2027 Minimum Wage' (September 28, 2026) https://laborstandards.seattle.gov/2026/09/28/office-of-labor-standards-announces-seattles-2027-minimum-wage/ read directly 2026-11-06: 'Starting January 1, 2027, businesses will pay employees $22.14 per hour.' All employers regardless of schedule size."
+      },
+      {
+        "path": "jurisdictions[burien].hourly",
+        "from": 21.78,
+        "to": "22.49 large and medium / 20.49 small",
+        "source": "City of Burien, Minimum Wage https://www.burienwa.gov/city_hall/laws_regulations/minimum_wage read directly 2026-11-06: 2027 large employer rate $22.49 ($21.7752 + 0.7185 CPI-W increase), medium employer rate equal to the then-current large employer rate, small employer rate $20.49 (BMC 5.16)."
+      },
+      {
+        "path": "jurisdictions[king_county_unincorporated].hourly",
+        "from": 20.82,
+        "to": "21.57 / 19.57 for the small low-revenue tier",
+        "source": "King County, Minimum wage in unincorporated King County https://kingcounty.gov/en/dept/local-services/governance-leadership/local-government-for-unincorporated-king-county/minimum-wage read directly 2026-11-06: 'Starting January 1, 2027, the minimum wage for work done in unincorporated King County will be $21.57 per hour. There is only one exception in 2027: Employers with 15 or fewer employees and an annual gross revenue of less than $2 million can pay $2.00 less, or $19.57 per hour.'"
+      }
+    ]
   }
 }
