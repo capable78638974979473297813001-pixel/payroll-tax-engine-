@@ -213,7 +213,7 @@ export function prepare(input) {
   const seen = new Map();
   for (const row of statements) {
     const employee = employees.get(id(row.employeeId));
-    check(row.city === selected && employee, 'W-2 lacks matching city payroll allocation');
+    check(row.taxCity === selected && employee, 'W-2 lacks matching city payroll allocation');
     unique(seen, row.employeeId, true);
     check(employee.withheldCents === row.withheldCents && employee.localWagesCents === row.localWagesCents,
       'Employee W-2 boxes 18/19 differ from payroll');
