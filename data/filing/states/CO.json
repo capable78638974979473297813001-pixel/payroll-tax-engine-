@@ -155,8 +155,8 @@
    }
   ],
   "notModelled": [
-   "Colorado unemployment insurance (Colorado Department of Labor and Employment) and FAMLI premiums: no document read.",
-   "The registration form and its steps, and the Colorado new-hire reporting deadline.",
+   "Colorado FAMLI premiums (Colorado Department of Labor and Employment): no document read.",
+   "The registration form and its steps.",
    "The Revenue Online file layouts for electronic W-2 submission.",
    "Colorado's legal-holiday list (weekends only are skipped, with a warning).",
    "Penalty and interest amounts beyond the guide's opening sentence (the greater of $5 or 5% of the unpaid tax)."
@@ -177,7 +177,7 @@
   }
  ],
  "notModelled": [
-  "Colorado unemployment insurance (CDLE) and FAMLI: not read.",
+  "Colorado FAMLI premiums: not read.",
   "New-hire reporting (Colorado): the days are counted from the hire date, as calendar days with no weekend roll; the directory's data elements, transmission methods and independent-contractor rule are in the federal matrix and were not transcribed."
  ],
  "ui": {

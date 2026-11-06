@@ -167,7 +167,7 @@
   "notModelled": [
    "The September 2025 edition is the only one read; confirm against the Division's current guide.",
    "Form NJ-W-3 (annual reconciliation) and W-2 / 1099 filing: the table of contents lists them (pages 16-19) but the section text was not read, so no due date is recorded.",
-   "New Jersey unemployment, disability and family-leave contributions (Department of Labor and Workforce Development): not deposited here.",
+   "New Jersey disability and family-leave contributions (Department of Labor and Workforce Development): not deposited here.",
    "Contractor (construction) withholdings, pension and gambling withholdings.",
    "New Jersey's legal-holiday list (weekends only are skipped, with a warning).",
    "ACH debit/credit registration; EFT codes are recorded in the guide (quarterly 01130, monthly 01120, weekly 01170) but no payment file layout was read."
@@ -187,8 +187,7 @@
   }
  ],
  "notModelled": [
-  "New Jersey unemployment, disability and family-leave deposits: not read.",
-  "New-hire reporting: not read.",
+  "New Jersey disability and family-leave contribution deposits: not read.",
   "New-hire reporting (New Jersey): the days are counted from the hire (or rehire) date, as calendar days with no weekend roll; the directory's data elements, transmission methods and independent-contractor rule are in the federal matrix and were not transcribed."
  ],
  "ui": {

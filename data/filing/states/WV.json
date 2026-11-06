@@ -105,7 +105,6 @@
    }
   ],
   "notModelled": [
-   "West Virginia unemployment insurance (WorkForce West Virginia): no document read.",
    "West Virginia's legal-holiday list (weekends only are skipped, with a warning).",
    "Form numbers of the monthly and quarterly returns (the page says tax reporting forms are computer-generated and mailed before their due dates).",
    "EFT enrollment details (WV/EFT-5 application) and the MyTaxes file layouts."
@@ -163,8 +162,6 @@
   }
  ],
  "notModelled": [
-  "West Virginia unemployment insurance: not read.",
-  "New-hire reporting: not read.",
   "New-hire reporting (West Virginia): the days are counted from the hire date, as calendar days with no weekend roll; the directory's data elements, transmission methods and independent-contractor rule are in the federal matrix and were not transcribed."
  ],
  "ui": {

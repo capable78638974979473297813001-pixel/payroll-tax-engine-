@@ -134,7 +134,6 @@
    }
   ],
   "notModelled": [
-   "Mississippi unemployment insurance (Mississippi Department of Employment Security): no document read.",
    "The thresholds the Department uses to assign monthly or quarterly: not in the guide.",
    "Mississippi's state-holiday list (weekends only are skipped, with a warning).",
    "The January 31 W-2 date is used for the annual return; the February 28 date for 1099s is recorded in the contents only."
@@ -154,8 +153,6 @@
   }
  ],
  "notModelled": [
-  "Mississippi unemployment insurance: not read.",
-  "New-hire reporting: not read.",
   "New-hire reporting (Mississippi): the days are counted from the hire date, as calendar days with no weekend roll; the directory's data elements, transmission methods and independent-contractor rule are in the federal matrix and were not transcribed."
  ],
  "ui": {

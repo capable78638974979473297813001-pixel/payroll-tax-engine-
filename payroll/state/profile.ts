@@ -215,8 +215,11 @@ export interface StateProfile {
   agencies: { withholding?: Agency; ui?: Agency; newHire?: Agency };
   calendar: {
     weekendsRoll: boolean;
-    /** Legal holidays that move a due date. `verified: false` means the state's list was not read; due dates then carry a warning. */
-    holidays: { verified: boolean; dates?: string[]; source?: string };
+    /**
+     * Legal holidays that move a due date. `verified: true` means the agency's own list was read for every year in `years`.
+     * `verified: false` with `dates` means only the listed dates (for `years`) were read; due dates then carry a warning.
+     */
+    holidays: { verified: boolean; dates?: string[]; years?: number[]; source?: string };
     source: string;
   };
   registration?: { daysAfterTrigger: number; trigger: string; source: string };
@@ -325,6 +328,12 @@ export function validateProfile(p: StateProfile): string[] {
   if (p.withholding?.applies && !p.withholding.deposits && p.withholding.notModelled.length === 0) bad.push('withholding applies but neither deposits nor notModelled is given');
   for (const r of p.ui?.returns ?? []) cite(`ui.returns.${r.id}`, r.source);
   for (const r of p.withholding?.returns ?? []) cite(`withholding.returns.${r.id}`, r.source);
+  const hol = p.calendar.holidays;
+  if (hol.dates?.length || hol.verified) {
+    cite('calendar.holidays', hol.source ?? '');
+    if (!hol.dates?.length || !(hol.years?.length)) bad.push('calendar.holidays: a holiday list needs dates and the years it covers');
+    for (const d of hol.dates ?? []) if (!/^\d{4}-\d{2}-\d{2}$/.test(d)) bad.push(`calendar.holidays: bad date ${d}`);
+  }
   if (p.newHire) cite('newHire', p.newHire.source);
   for (const c of p.channels) cite(`channels.${c.id}`, c.source);
   return bad;

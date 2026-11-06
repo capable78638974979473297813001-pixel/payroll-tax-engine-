@@ -92,7 +92,7 @@
   "notModelled": [
    "Weekly and semi-weekly payment schedules: named, no dates or thresholds in the instructions.",
    "Annual filers (Form FR-900A) and the payment voucher FR-900P.",
-   "The 2026 edition of the instructions; DC unemployment insurance (Department of Employment Services); the DC Paid Family Leave tax; DC's legal-holiday list (weekends only are skipped, with a warning).",
+   "The 2026 edition of the instructions; the DC Paid Family Leave tax; DC's legal-holiday list (weekends only are skipped, with a warning).",
    "The MyTax.DC.gov bulk filing specification (FR-900Q) and electronic W-2 filing: listed in the instructions, not read."
   ],
   "deposits": {
@@ -140,8 +140,7 @@
   }
  ],
  "notModelled": [
-  "DC unemployment insurance and Paid Family Leave: not read.",
-  "New-hire reporting: not read.",
+  "DC Paid Family Leave: not read.",
   "New-hire reporting (District of Columbia): the days are counted from the hire (or rehire) date, as calendar days with no weekend roll; the directory's data elements, transmission methods and independent-contractor rule are in the federal matrix and were not transcribed."
  ],
  "ui": {

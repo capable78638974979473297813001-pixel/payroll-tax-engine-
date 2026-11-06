@@ -108,7 +108,6 @@
   }
  ],
  "notModelled": [
-  "New-hire reporting (Texas Attorney General's office) not read.",
   "Local taxes: none are modelled for Texas; the engine's data says Texas has no wage income tax or local payroll tax.",
   "New-hire reporting (Texas): the days are counted from the the date the employee starts earning wages, as calendar days with no weekend roll; the directory's data elements, transmission methods and independent-contractor rule are in the federal matrix and were not transcribed."
  ],

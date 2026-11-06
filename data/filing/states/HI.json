@@ -99,7 +99,6 @@
   ],
   "notModelled": [
    "The semiweekly threshold and its federal-schedule condition: the paragraph's opening sentence is missing from the stored text.",
-   "Hawaii unemployment insurance (Department of Labor and Industrial Relations): no document read.",
    "Hawaii's state-holiday list and the Three-Day Banking Rule's extra day (weekends only are skipped, with a warning).",
    "The Hawaii Tax Online Bulk File System layouts and the electronic filing mandate under section 231-8.5 HRS (named in the penalty section, thresholds not read).",
    "Whether the 2025 edition is current."
@@ -167,8 +166,6 @@
   }
  ],
  "notModelled": [
-  "Hawaii unemployment insurance: not read.",
-  "New-hire reporting: not read.",
   "New-hire reporting (Hawaii): the days are counted from the hire date, as calendar days with no weekend roll; the directory's data elements, transmission methods and independent-contractor rule are in the federal matrix and were not transcribed."
  ],
  "ui": {

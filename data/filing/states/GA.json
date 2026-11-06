@@ -160,7 +160,6 @@
    }
   ],
   "notModelled": [
-   "Georgia unemployment insurance (Georgia Department of Labor): no document read.",
    "Georgia's state-holiday and Federal Reserve holiday list (weekends only are skipped, with a warning).",
    "The January 31 date used for G-1003 is the W-2 / 1099-NEC date; the March 1 date for other 1099s is not modelled as a separate return.",
    "ACH credit registration (Form EFT-002) and the Georgia Tax Center upload layouts."
@@ -181,8 +180,6 @@
   }
  ],
  "notModelled": [
-  "Georgia unemployment insurance: not read.",
-  "New-hire reporting: not read.",
   "New-hire reporting (Georgia): the days are counted from the hire date, as calendar days with no weekend roll; the directory's data elements, transmission methods and independent-contractor rule are in the federal matrix and were not transcribed."
  ],
  "ui": {

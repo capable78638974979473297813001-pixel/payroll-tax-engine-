@@ -170,7 +170,6 @@
   ],
   "notModelled": [
    "Anything newer than the October 2024 edition: thresholds and forms may have changed.",
-   "Kansas unemployment insurance (Kansas Department of Labor): the guide only points to KDOL.",
    "Kansas's legal-holiday list (weekends only are skipped, with a warning) and the meaning of 'banking days' for quad-monthly filers.",
    "The KCSC file layouts for bulk W-2 and 1099 upload; registration steps beyond the filing-frequency item.",
    "The Department's power to require more frequent payment."
@@ -190,8 +189,6 @@
   }
  ],
  "notModelled": [
-  "Kansas unemployment insurance: not read.",
-  "New-hire reporting: not read.",
   "Unemployment: NOT MODELLED. The Department of Labor's pages (dol.ks.gov, kansasemployer.gov) answer 403 to automated requests. Read elsewhere: K.S.A. 44-710 (reimbursing employers file quarterly wage reports by the last day of the month following the quarter; reports are deemed filed when mailed) and K.A.R. 50-2-3(f) (a payment day on a Saturday, Sunday or holiday moves to the first regular business day), but neither states the regular due date for contributing employers (K.A.R. 50-2-3(b) gives a 25th-day rule only for a newly liable employer's first payment). The wage base ($15,100, U.S. Department of Labor, January 2026) and the electronic-filing threshold were not recorded in the profile.",
   "New-hire reporting (Kansas): the days are counted from the hire date, as calendar days with no weekend roll; the directory's data elements, transmission methods and independent-contractor rule are in the federal matrix and were not transcribed."
  ],

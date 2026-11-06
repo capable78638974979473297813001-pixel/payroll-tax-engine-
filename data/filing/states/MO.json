@@ -571,8 +571,6 @@
   }
  ],
  "notModelled": [
-  "Missouri unemployment insurance: not read.",
-  "New-hire reporting: not read.",
   "New-hire reporting (Missouri): the days are counted from the hire date, as calendar days with no weekend roll; the directory's data elements, transmission methods and independent-contractor rule are in the federal matrix and were not transcribed."
  ],
  "ui": {

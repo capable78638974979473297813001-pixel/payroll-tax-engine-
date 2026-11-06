@@ -105,7 +105,6 @@
   ],
   "notModelled": [
    "Arkansas's July 2024 edition is the one read: confirm against the Department's current instructions.",
-   "Arkansas unemployment insurance (Department of Workforce Services): the instructions only point to it, and new-hire reporting goes to its registry.",
    "Pension and annuity withholding (AR3PAR, monthly), pass-through entity withholding (AR941PT, due April 15) and the Texarkana exemption forms.",
    "Arkansas's legal-holiday list (weekends only are skipped, with a warning).",
    "ATAP and W-2 submission website file layouts; the ACH Credit CCD+TXP addenda details."
@@ -156,8 +155,6 @@
   }
  ],
  "notModelled": [
-  "Arkansas unemployment insurance: not read.",
-  "New-hire reporting: only the pointer to the Department of Workforce Services was read.",
   "New-hire reporting (Arkansas): the days are counted from the hire date, as calendar days with no weekend roll; the directory's data elements, transmission methods and independent-contractor rule are in the federal matrix and were not transcribed."
  ],
  "ui": {

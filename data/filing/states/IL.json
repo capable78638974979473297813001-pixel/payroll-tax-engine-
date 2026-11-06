@@ -94,7 +94,6 @@
   ],
   "notModelled": [
    "Publication 131-D (the published due-date table) was not read; dates here are computed from the rules in Publication 131.",
-   "Illinois unemployment insurance (Illinois Department of Employment Security): no document read.",
    "Illinois's state-holiday list (weekends only are skipped, with a warning).",
    "W-2 / 1099 filing (Publication 110) and the electronic mandate for them: named in Publication 131, rules not read.",
    "The mid-year switch to semi-weekly after exceeding $12,000 in a quarter."
@@ -154,8 +153,6 @@
   }
  ],
  "notModelled": [
-  "Illinois unemployment insurance: not read.",
-  "New-hire reporting: not read.",
   "New-hire reporting (Illinois): the days are counted from the hire date, as calendar days with no weekend roll; the directory's data elements, transmission methods and independent-contractor rule are in the federal matrix and were not transcribed."
  ],
  "ui": {

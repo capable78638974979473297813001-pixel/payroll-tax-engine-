@@ -522,7 +522,7 @@
   ],
   "notModelled": [
    "Any year other than 2026 for due dates: no calendar was read. 2027 pay dates draw state_calendar_not_published until the 2027 booklet is added.",
-   "Rhode Island unemployment insurance (Department of Labor and Training), temporary disability / caregiver insurance contributions: no document read.",
+   "Rhode Island temporary disability / caregiver insurance contributions (Department of Labor and Training): no document read.",
    "Rhode Island's legal-holiday list (the calendar itself is the oracle for 2026).",
    "The tax-type codes for EFT credit payments (01102 weekly, 01103 monthly, 01104 quarterly) are recorded in the booklet but no payment file layout was read.",
    "The W-2 / RI W-3 bulk template layouts and the Tax Portal upload steps."
@@ -542,9 +542,8 @@
   }
  ],
  "notModelled": [
-  "Rhode Island unemployment and temporary disability insurance: not read.",
+  "Rhode Island temporary disability insurance: not read.",
   "Registration trigger and deadline: not read.",
-  "New-hire reporting: not read.",
   "New-hire reporting (Rhode Island): the days are counted from the start date, as calendar days with no weekend roll; the directory's data elements, transmission methods and independent-contractor rule are in the federal matrix and were not transcribed."
  ],
  "ui": {

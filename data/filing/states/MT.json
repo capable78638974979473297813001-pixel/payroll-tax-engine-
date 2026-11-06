@@ -86,7 +86,6 @@
   ],
   "notModelled": [
    "The page gives no separate periodic return: payments are made with Form MW-1 or electronically and reconciled on the MW-3.",
-   "Montana unemployment insurance (Department of Labor & Industry): no document read.",
    "Montana's legal-holiday list (weekends only are skipped, with a warning).",
    "Whether the federal $100,000 one-day rule applies to accelerated filers (not stated).",
    "TAP and approved-software-vendor file layouts."
@@ -157,8 +156,6 @@
   }
  ],
  "notModelled": [
-  "Montana unemployment insurance: not read.",
-  "New-hire reporting: not read.",
   "New-hire reporting (Montana): the days are counted from the hire date, as calendar days with no weekend roll; the directory's data elements, transmission methods and independent-contractor rule are in the federal matrix and were not transcribed."
  ],
  "ui": {

@@ -10,6 +10,14 @@
    "revision": "DE 44 Rev. 52 (4-26)",
    "verifiedOn": "2026-11-03",
    "verifiedBy": "read from the stored copy in watcher/state/snapshots/ca-8949de8a07.txt.gz: '2026 Forms and Due Dates' and 'California Deposit Requirements' (p.5), 'Payroll Tax Deposit (DE 88)' (p.60-61) incl. the 2026 quarterly payment table, 'About Employers' (p.6), '2026 Payroll Tax Rates, Taxable Wage Limits' (p.8), Important Information"
+  },
+  {
+   "id": "H1",
+   "title": "California EDD: Holidays (observed legal holidays and their effect on payroll tax due dates, 2026)",
+   "url": "https://edd.ca.gov/en/payroll_taxes/holidays/",
+   "revision": "2026 table, fetched live 2026-11-06",
+   "verifiedOn": "2026-11-06",
+   "verifiedBy": "fetched directly from edd.ca.gov and read: 'When the due date for reporting or paying payroll taxes falls on a legal holiday, the due date is extended to the next business day', and the Observed Legal Holidays table for 2026 (nineteen dates, including Lincoln's Birthday, Lunar New Year, Good Friday, Genocide Remembrance Day, California Admission Day, Native American Day, Columbus Day and the day after Thanksgiving). The page publishes 2026 only."
   }
  ],
  "agencies": {
@@ -32,7 +40,31 @@
  "calendar": {
   "weekendsRoll": true,
   "holidays": {
-   "verified": false
+   "verified": false,
+   "dates": [
+    "2026-01-01",
+    "2026-01-19",
+    "2026-02-12",
+    "2026-02-16",
+    "2026-03-31",
+    "2026-04-03",
+    "2026-04-24",
+    "2026-05-25",
+    "2026-06-19",
+    "2026-07-03",
+    "2026-09-07",
+    "2026-09-09",
+    "2026-09-25",
+    "2026-10-12",
+    "2026-11-11",
+    "2026-11-26",
+    "2026-11-27",
+    "2026-12-25"
+   ],
+   "years": [
+    2026
+   ],
+   "source": "H1"
   },
   "source": "S1"
  },
@@ -212,8 +244,9 @@
   }
  ],
  "notModelled": [
-  "State legal-holiday list.",
   "Return form line layouts and file formats (see section notes).",
-  "Local taxes in California are outside this profile."
+  "Local taxes in California are outside this profile.",
+  "California's legal-holiday list for years other than 2026: the EDD page publishes 2026 only, so other years skip weekends only and the result carries a warning.",
+  "EDD's 2026 table lists February 17 both as Lunar New Year (next business day February 18) and as the next business day after Presidents' Day (February 16). The two cannot both hold, so February 17 is left out of the holiday dates: a due date on February 16 resolves to February 17 as printed, and one on February 17 resolves to February 17, one day earlier than the table's February 18 (the safe direction)."
  ]
 }

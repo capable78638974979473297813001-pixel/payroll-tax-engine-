@@ -34,6 +34,14 @@
    "revision": "Minnesota entry updated 09/24/2026",
    "verifiedOn": "2026-11-06",
    "verifiedBy": "read from the federal matrix (layout text of the PDF fetched live 2026-11-06) the Minnesota entry, 'Updated On: 09/24/2026': reporting timeframe 'Within 20 days of hire date or rehire date'. This matrix is the Office of Child Support Services' consolidated list of each state directory's own timeframe, contact and website; the state's statute or directory page was not separately read."
+  },
+  {
+   "id": "H1",
+   "title": "Minnesota Department of Revenue: Withholding Tax Holiday Schedules (2026)",
+   "url": "https://www.revenue.state.mn.us/withholding-tax-holiday-schedules",
+   "revision": "page last updated 2025-12-26, fetched live 2026-11-06",
+   "verifiedOn": "2026-11-06",
+   "verifiedBy": "fetched directly from revenue.state.mn.us and read: 'If the withholding tax filing or deposit due date falls on a holiday, the due date is extended to the next business day', and the 2026 schedule (New Year's Day Jan. 1, Martin Luther King Jr. Day Jan. 19, Presidents Day Feb. 16, Emancipation Day April 16, Memorial Day May 25, Juneteenth June 19, Independence Day July 6, Labor Day Sept. 7, Indigenous Peoples' Day Oct. 12, Veterans Day Nov. 11, Thanksgiving Nov. 26, Thanksgiving Friday Nov. 27, Christmas Day Dec. 25). The page publishes 2026 only."
   }
  ],
  "agencies": {
@@ -56,7 +64,26 @@
  "calendar": {
   "weekendsRoll": true,
   "holidays": {
-   "verified": false
+   "verified": false,
+   "dates": [
+    "2026-01-01",
+    "2026-01-19",
+    "2026-02-16",
+    "2026-04-16",
+    "2026-05-25",
+    "2026-06-19",
+    "2026-07-06",
+    "2026-09-07",
+    "2026-10-12",
+    "2026-11-11",
+    "2026-11-26",
+    "2026-11-27",
+    "2026-12-25"
+   ],
+   "years": [
+    2026
+   ],
+   "source": "H1"
   },
   "source": "S1"
  },
@@ -151,10 +178,9 @@
    }
   ],
   "notModelled": [
-   "Minnesota unemployment insurance (Department of Employment and Economic Development) and Paid Leave premiums: no document read.",
+   "Minnesota Paid Leave premiums (Department of Employment and Economic Development): no document read.",
    "The annual filer's interim deposit rule (deposit the month after the withholding exceeds $500).",
    "Whether a federal one-day deposit changes the Minnesota deposit (the booklet says it does not).",
-   "Minnesota's legal-holiday list (weekends only are skipped, with a warning).",
    "The 5% penalty for failing to pay electronically when required.",
    "The W-2 / 1099 filing layouts ('Forms W-2 and 1099', page 12) and the e-Services bulk file formats."
   ]
@@ -174,9 +200,9 @@
   }
  ],
  "notModelled": [
-  "Minnesota unemployment insurance and Paid Leave: not read.",
-  "New-hire reporting: not read.",
-  "New-hire reporting (Minnesota): the days are counted from the hire or rehire date, as calendar days with no weekend roll; the directory's data elements, transmission methods and independent-contractor rule are in the federal matrix and were not transcribed."
+  "Minnesota Paid Leave: not read.",
+  "New-hire reporting (Minnesota): the days are counted from the hire or rehire date, as calendar days with no weekend roll; the directory's data elements, transmission methods and independent-contractor rule are in the federal matrix and were not transcribed.",
+  "Minnesota's legal-holiday list for years other than 2026: the Department's page publishes 2026 only, so other years skip weekends only and the result carries a warning."
  ],
  "ui": {
   "wageBase": 4400000,

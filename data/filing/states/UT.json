@@ -149,7 +149,6 @@
    }
   ],
   "notModelled": [
-   "Utah unemployment insurance (Utah Department of Workforce Services): no document read.",
    "Whether this June 2025 edition is current; thresholds and dates may have changed.",
    "Utah's legal-holiday list (weekends only are skipped, with a warning).",
    "The Taxpayer Access Point file layouts for bulk reconciliation and W-2 upload.",
@@ -172,8 +171,6 @@
   }
  ],
  "notModelled": [
-  "Utah unemployment insurance (Workforce Services): not read.",
-  "New-hire reporting: not read.",
   "New-hire reporting (Utah): the days are counted from the new hire or rehire date, as calendar days with no weekend roll; the directory's data elements, transmission methods and independent-contractor rule are in the federal matrix and were not transcribed."
  ],
  "ui": {

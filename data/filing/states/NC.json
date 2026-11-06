@@ -103,7 +103,6 @@
    }
   ],
   "notModelled": [
-   "North Carolina unemployment insurance (Division of Employment Security): no document read.",
    "The NC-30 booklet pages 11-12 and the NC-5Q due date: the FAQ gives the quarterly deadline for quarterly filers but not NC-5Q's own date for semiweekly payers.",
    "Seasonal filer registration.",
    "North Carolina's legal-holiday list (weekends only are skipped, with a warning).",
@@ -175,8 +174,6 @@
   }
  ],
  "notModelled": [
-  "North Carolina unemployment insurance: not read.",
-  "New-hire reporting: not read.",
   "New-hire reporting (North Carolina): the days are counted from the start date, as calendar days with no weekend roll; the directory's data elements, transmission methods and independent-contractor rule are in the federal matrix and were not transcribed."
  ],
  "ui": {

@@ -129,7 +129,6 @@
   ],
   "notModelled": [
    "The additional criteria that allow annual payment (the page says 'and who meets additional criteria' without listing them).",
-   "Arizona unemployment insurance (Department of Economic Security): registered together with withholding on Form JT-1, but its rules were not read.",
    "Arizona's legal-holiday list (weekends only are skipped, with a warning) and the rest of WTP 16-1 beyond the quarterly schedule.",
    "The 5% EFT-failure penalty (A.R.S. 42-1125(O)) and the AZFSET / registered-transmitter file layouts (Publication 701).",
    "Withholding Due Date Calendar (PDF) linked from the page: not read; dates here are computed from the stated rules."
@@ -193,8 +192,6 @@
   }
  ],
  "notModelled": [
-  "Arizona unemployment insurance: not read.",
-  "New-hire reporting: not read.",
   "New-hire reporting (Arizona): the days are counted from the hire date, as calendar days with no weekend roll; the directory's data elements, transmission methods and independent-contractor rule are in the federal matrix and were not transcribed."
  ],
  "ui": {

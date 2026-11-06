@@ -106,7 +106,6 @@
   "notModelled": [
    "The annual status ($83.33 or less a month) due date and the exact meaning of '30 days after the end of the month'.",
    "Indiana's county income tax (withheld and remitted through the same return, with a county of residence and county of work for each employee): not modelled; this layer does not split the state and county amounts.",
-   "Indiana unemployment insurance (Department of Workforce Development): no document read.",
    "The SFTP / INTIME file layouts for WH-1, WH-3, EFW2 and Publication 1220 (guides are stored in the watcher corpus, not read).",
    "Indiana's state-holiday list (weekends only are skipped, with a warning)."
   ],
@@ -164,8 +163,6 @@
   }
  ],
  "notModelled": [
-  "Indiana unemployment insurance: not read.",
-  "New-hire reporting: not read.",
   "New-hire reporting (Indiana): the days are counted from the hire, as calendar days with no weekend roll; the directory's data elements, transmission methods and independent-contractor rule are in the federal matrix and were not transcribed."
  ],
  "ui": {

@@ -99,7 +99,7 @@
   "notModelled": [
    "The thresholds that make an employer monthly, quarterly or semi-weekly: not in the stored documents.",
    "The Q4 2026 and all 2027 calendar rows: the 2026 calendar ends at the Q3 date; later pay dates draw state_calendar_not_published.",
-   "Oregon unemployment insurance and Paid Leave Oregon contributions (Oregon Employment Department): not deposited with the Department of Revenue and not read here.",
+   "Paid Leave Oregon contributions (Oregon Employment Department): not deposited with the Department of Revenue and not read here.",
    "The Statewide Transit Tax (OR-STT-2), the Oregon Workers' Benefit Fund assessment, and Portland, TriMet and Lane transit/local taxes.",
    "Oregon's legal-holiday list."
   ],
@@ -238,8 +238,7 @@
   }
  ],
  "notModelled": [
-  "Oregon unemployment and Paid Leave Oregon: not read.",
-  "New-hire reporting: not read.",
+  "Paid Leave Oregon: not read.",
   "New-hire reporting (Oregon): the days are counted from the hire date, as calendar days with no weekend roll; the directory's data elements, transmission methods and independent-contractor rule are in the federal matrix and were not transcribed."
  ],
  "ui": {

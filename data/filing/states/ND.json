@@ -136,7 +136,6 @@
    }
   ],
   "notModelled": [
-   "North Dakota unemployment insurance (Job Service North Dakota): no document read.",
    "The January 31 due date for information returns is taken from the guideline's quarter table and its Section 3 summary; the section's own due-date sentence was not isolated.",
    "The web-service technical specification at www.tax.nd.gov/SoftwareDevelopers.",
    "North Dakota's legal-holiday list (weekends only are skipped, with a warning).",
@@ -159,8 +158,6 @@
   }
  ],
  "notModelled": [
-  "North Dakota unemployment insurance: not read.",
-  "New-hire reporting: not read.",
   "New-hire reporting (North Dakota): the days are counted from the date of hire, as calendar days with no weekend roll; the directory's data elements, transmission methods and independent-contractor rule are in the federal matrix and were not transcribed."
  ],
  "ui": {

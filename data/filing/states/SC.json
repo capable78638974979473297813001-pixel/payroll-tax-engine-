@@ -100,7 +100,6 @@
    "The 2023 edition is the one read: confirm against the Department's current guide.",
    "Nonresident employers' quarterly/monthly payment rule (stated in the guide; not modelled).",
    "Annual filers (voluntary withholding from farmers, domestic help, fishermen, pastors): the guide defers to the Department's page.",
-   "South Carolina unemployment insurance (Department of Employment and Workforce): no document read.",
    "South Carolina's legal-holiday list (weekends only are skipped, with a warning).",
    "Whether payroll service providers have separate filing steps ('info for payroll service providers' on the Department's page)."
   ],
@@ -161,8 +160,6 @@
   }
  ],
  "notModelled": [
-  "South Carolina unemployment insurance: not read.",
-  "New-hire reporting: not read.",
   "New-hire reporting (South Carolina): the days are counted from the start date, as calendar days with no weekend roll; the directory's data elements, transmission methods and independent-contractor rule are in the federal matrix and were not transcribed."
  ],
  "ui": {

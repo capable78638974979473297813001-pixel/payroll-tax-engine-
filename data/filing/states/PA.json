@@ -85,7 +85,7 @@
   ],
   "notModelled": [
    "The page's quarterly reconciliation and W-2 transmittal due dates: the January 31 and quarterly reconciliation dates are not stated in the text read, so only the quarterly return is recorded.",
-   "Pennsylvania unemployment (Department of Labor & Industry) and local earned income tax: no document read.",
+   "Pennsylvania local earned income tax: no document read.",
    "Whether Pennsylvania's flat 3.07% applies to every pay (rate belongs to the paycheck engine, not this layer).",
    "Pennsylvania's legal-holiday list and what the Department counts as a banking day (weekends only are skipped, with a warning).",
    "Electronic filing mandates: the page lists myPATH and Telefile without stating a mandate."
@@ -172,8 +172,7 @@
   }
  ],
  "notModelled": [
-  "Pennsylvania unemployment insurance and local taxes: not read.",
-  "New-hire reporting: not read.",
+  "Pennsylvania local taxes: not read.",
   "New-hire reporting (Pennsylvania): the days are counted from the hire date, as calendar days with no weekend roll; the directory's data elements, transmission methods and independent-contractor rule are in the federal matrix and were not transcribed."
  ],
  "ui": {

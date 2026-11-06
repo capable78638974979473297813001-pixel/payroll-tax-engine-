@@ -107,7 +107,6 @@
    "The $100,000 next-banking-day rule (applies to the combined state and school district withholding).",
    "School district income tax withholding (Form SD 101, SD 141): a separate Ohio tax, not deposited by this layer.",
    "Ohio municipal (city) income tax withholding: separate agencies; not modelled.",
-   "Ohio unemployment insurance (Department of Job and Family Services): no document read.",
    "Ohio's legal-holiday list: the printed calendar is the oracle for 2026.",
    "The Ohio Treasurer of State EFT layout and the Bulk Filing Implementation Guide (stored but not read)."
   ],
@@ -795,8 +794,7 @@
   }
  ],
  "notModelled": [
-  "Ohio unemployment insurance and municipal taxes: not read.",
-  "New-hire reporting: not read.",
+  "Ohio municipal taxes: not read.",
   "New-hire reporting (Ohio): the days are counted from the hire date, as calendar days with no weekend roll; the directory's data elements, transmission methods and independent-contractor rule are in the federal matrix and were not transcribed."
  ],
  "ui": {

@@ -101,7 +101,6 @@
   "notModelled": [
    "Michigan's ACCELERATED schedule (same day as the federal payment; pre-payment by the 20th and a reconciliation by the 20th of the next month): the rule is stated but follows the federal schedule and is not modelled.",
    "The thresholds Treasury uses to assign monthly, quarterly or annual: not on the page.",
-   "Michigan unemployment insurance (Unemployment Insurance Agency): no document read.",
    "Michigan's State-holiday list (weekends only are skipped, with a warning).",
    "City income tax withholding (Michigan cities file separately).",
    "The Income Record Form Remittance Guide's file layouts."
@@ -158,8 +157,6 @@
   }
  ],
  "notModelled": [
-  "Michigan unemployment insurance: not read.",
-  "New-hire reporting: not read.",
   "New-hire reporting (Michigan): the days are counted from the date of hire or re-hire, as calendar days with no weekend roll; the directory's data elements, transmission methods and independent-contractor rule are in the federal matrix and were not transcribed."
  ],
  "ui": {

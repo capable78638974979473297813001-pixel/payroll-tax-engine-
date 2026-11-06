@@ -121,7 +121,6 @@
    "The one-day deposit for $100,000 or more accumulated in a reporting period (103 KAR 1:060).",
    "Weekend/holiday rule: the instructions print none; moving to the next business day is an assumption.",
    "The twice-monthly table is held for 2026 and 2027 only; later pay dates draw state_calendar_not_published.",
-   "Kentucky unemployment insurance (Office of Unemployment Insurance): no document read.",
    "Kentucky's legal-holiday list (weekends only are skipped, with a warning).",
    "Local (occupational license) taxes, which are separate agencies."
   ],
@@ -435,8 +434,6 @@
   }
  ],
  "notModelled": [
-  "Kentucky unemployment insurance: not read.",
-  "New-hire reporting: not read.",
   "New-hire reporting (Kentucky): the days are counted from the hiring or re-hiring, as calendar days with no weekend roll; the directory's data elements, transmission methods and independent-contractor rule are in the federal matrix and were not transcribed."
  ],
  "ui": {

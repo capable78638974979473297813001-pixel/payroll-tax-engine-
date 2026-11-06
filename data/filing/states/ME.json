@@ -89,7 +89,6 @@
    }
   ],
   "notModelled": [
-   "Maine unemployment insurance (Maine Department of Labor): no document read.",
    "The withholding calendar rows in the booklet: dates here are computed from the stated rules, not read from the calendar.",
    "Maine's legal-holiday list (weekends only are skipped, with a warning).",
    "Annual W-2 / 1099 state filing dates: the booklet says statements go to payees by the federal due date; the state filing rule was not isolated.",
@@ -150,8 +149,6 @@
   }
  ],
  "notModelled": [
-  "Maine unemployment insurance: not read.",
-  "New-hire reporting: not read.",
   "New-hire reporting (Maine): the days are counted from the hire date, as calendar days with no weekend roll; the directory's data elements, transmission methods and independent-contractor rule are in the federal matrix and were not transcribed."
  ],
  "ui": {
