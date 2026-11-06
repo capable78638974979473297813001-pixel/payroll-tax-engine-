@@ -6,7 +6,15 @@
     "status": "carry-forward-from-2026",
     "createdOn": "2026-10-13",
     "basedOn": "data/states/MD-2026.json",
-    "note": "Carried forward from the 2026 file on 2026-10-13. Not yet checked against the 2027 official source: every figure is 2026's unless listed in updatedFor2027. Remove this block only after each figure has been re-verified against its 2027 source."
+    "note": "Carried forward from the 2026 file on 2026-10-13. Not yet checked against the 2027 official source: every figure is 2026's unless listed in updatedFor2027. Remove this block only after each figure has been re-verified against its 2027 source.",
+    "updatedFor2027": [
+      {
+        "path": "statePaidLeaveEmployee / statePaidLeaveEmployer (new)",
+        "from": "absent",
+        "to": "0.45% employee, 0.9% total, SS wage cap",
+        "source": "Maryland Department of Labor FAMLI, Make contributions https://paidleave.maryland.gov/employers/make-contributions/ read directly 2026-11-06: 'MD Labor set the initial contribution rate at 0.9% of wages up to the Social Security wage cap. The contribution amount is split equally between employers and employees (0.45% each)', applying to wages paid from January 1, 2027 (first payment due April 30, 2027); employers with fewer than 15 total employees (Maryland and out-of-state) are only responsible for remitting 50% of the rate and may withhold that amount from employee pay; size is measured each quarter in 2027; the total rate cannot exceed 1.2%."
+      }
+    ]
   },
   "method": "bracket_state_plus_local",
   "$methodComment": "2026 Maryland Employer Withholding Guide (Comptroller of Maryland, fetched and read directly): STATE tax (a 10-tier graduated bracket, 2%-6.5%, with two NEW top brackets for 2026 per 2025 legislation) plus LOCAL tax (each of Maryland's 23 counties + Baltimore City sets its own rate) computed on the SAME taxable income (gross wages less a flat standard deduction less exemptions x a flat per-exemption amount) and SUMMED into one combined withholding line. The guide's own words: 'Because each county sets its local income tax rate, there is the possibility of having 24 different local income tax rates. We have calculated 10 local income tax rates. Use the rate that equals or slightly exceeds the actual local income tax rate' -- i.e. the GUIDE's own published tables round UP to 1 of 10 buckets for paper/manual use; this engine instead computes the EXACT county rate directly (state bracket lookup + exact local rate, both applied to the same taxable income), the same 'exact method over pre-rounded table' preference already used for California's Method B over Method A. VERIFIED against the guide's own published '2.25 PERCENT LOCAL INCOME TAX' combined table: reconstructing state-bracket-tier-4-through-10 rates (4.75/5.00/5.25/5.50/5.75/6.25/6.50%) each plus 2.25% reproduces the guide's own combined rates (7.00/7.25/7.50/7.75/8.00/8.50/8.75%) EXACTLY, 7-for-7, before trusting this derivation approach over transcribing 24 redundant pre-combined tables.",
@@ -384,5 +392,18 @@
     "topStateRate": 0.065,
     "election": "employer_option",
     "confidence": "primary_source_confirmed"
+  },
+  "statePaidLeaveEmployee": {
+    "rate": 0.0045,
+    "wageBase": "ssWageBase",
+    "exemptPretax": [],
+    "$comment": "Maryland FAMLI employee share: 0.45% of wages up to the Social Security wage cap (half of the 0.9% total). The employer may withhold up to this amount; this engine withholds the full half. Reuses the generic statePaidLeaveEmployeeTax() dispatch (no new engine code), like Colorado. Source: Maryland Department of Labor FAMLI, Make contributions https://paidleave.maryland.gov/employers/make-contributions/ read directly 2026-11-06: 'MD Labor set the initial contribution rate at 0.9% of wages up to the Social Security wage cap. The contribution amount is split equally between employers and employees (0.45% each)', applying to wages paid from January 1, 2027 (first payment due April 30, 2027); employers with fewer than 15 total employees (Maryland and out-of-state) are only responsible for remitting 50% of the rate and may withhold that amount from employee pay; size is measured each quarter in 2027; the total rate cannot exceed 1.2%."
+  },
+  "statePaidLeaveEmployer": {
+    "totalRate": 0.009,
+    "employeeShareFraction": 0.5,
+    "wageBase": "ssWageBase",
+    "exemptPretax": [],
+    "$comment": "Maryland FAMLI employer share = 0.9% total minus the 0.45% employee share. Gated on certificate.employerLiableForPaidLeaveShare: an employer with fewer than 15 total employees (counting Maryland and out-of-state) owes only the employee share, so the caller sets the certificate true only for employers with 15 or more. Source: Maryland Department of Labor FAMLI, Make contributions https://paidleave.maryland.gov/employers/make-contributions/ read directly 2026-11-06: 'MD Labor set the initial contribution rate at 0.9% of wages up to the Social Security wage cap. The contribution amount is split equally between employers and employees (0.45% each)', applying to wages paid from January 1, 2027 (first payment due April 30, 2027); employers with fewer than 15 total employees (Maryland and out-of-state) are only responsible for remitting 50% of the rate and may withhold that amount from employee pay; size is measured each quarter in 2027; the total rate cannot exceed 1.2%."
   }
 }

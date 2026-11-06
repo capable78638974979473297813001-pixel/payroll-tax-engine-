@@ -1011,7 +1011,7 @@
       },
       {
         "q": "What is Missouri's unemployment tax wage base?",
-        "a": "Missouri's state unemployment wage base is $9,000 for 2026 in Omnia.tax's rule files. The federal FUTA wage base is $7,000 in every state."
+        "a": "Missouri's state unemployment wage base is $9,000 for 2026 and $8,500 for 2027 in Omnia.tax's rule files. The federal FUTA wage base is $7,000 in every state."
       },
       {
         "q": "What unemployment rate does a new employer pay in Missouri?",
@@ -7499,7 +7499,7 @@
     "faq": [
       {
         "q": "What is the unemployment tax wage base in Missouri?",
-        "a": "$9,000 for 2026 in Omnia.tax's rule files. Missouri's state unemployment tax applies only to each employee's wages up to that amount in a year."
+        "a": "$9,000 for 2026 and $8,500 for 2027 in Omnia.tax's rule files. Missouri's state unemployment tax applies only to each employee's wages up to that amount in a year."
       },
       {
         "q": "What unemployment tax rate does a new employer pay in Missouri?",

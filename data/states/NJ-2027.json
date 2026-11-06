@@ -10,9 +10,31 @@
     "updatedFor2027": [
       {
         "path": "suiEmployer.wageBase; stateUnemploymentEmployee.wageBase; stateDisabilityEmployee.wageBase; statePaidLeaveEmployee.wageBase",
-        "from": [44800, 44800, 171100, 171100],
-        "to": [46400, 46400, 177100, 177100],
+        "from": [
+          44800,
+          44800,
+          171100,
+          171100
+        ],
+        "to": [
+          46400,
+          46400,
+          177100,
+          177100
+        ],
         "source": "New Jersey Division of Employer Accounts, Rate information: '2027 Taxable Wage Base (UI and WF/SWF - workers and employers, TDI - employers): $46,400' and '(TDI, FLI - workers only): $177,100' https://www.nj.gov/labor/ea/employer-services/rate-info/ (read 2026-10-25). The same page says the 2027 worker RATES 'will be available later this year', so the 2026 rates are kept."
+      },
+      {
+        "path": "stateDisabilityEmployee.rate",
+        "from": 0.0019,
+        "to": 0.0024,
+        "source": "NJ Division of Employer Accounts, Rate information https://www.nj.gov/labor/ea/employer-services/rate-info/ read directly 2026-11-06: Worker rates for January 1 to December 31, 2027: D.I. 0.0024 and F.L.I. 0.0024; taxable wage base (TDI, FLI - workers only) $177,100."
+      },
+      {
+        "path": "statePaidLeaveEmployee.rate",
+        "from": 0.0023,
+        "to": 0.0024,
+        "source": "NJ Division of Employer Accounts, Rate information https://www.nj.gov/labor/ea/employer-services/rate-info/ read directly 2026-11-06: Worker rates for January 1 to December 31, 2027: D.I. 0.0024 and F.L.I. 0.0024; taxable wage base (TDI, FLI - workers only) $177,100."
       }
     ]
   },
@@ -1950,7 +1972,10 @@
       }
     }
   },
-  "exemptPretax": ["deferral_401k", "commuter"],
+  "exemptPretax": [
+    "deferral_401k",
+    "commuter"
+  ],
   "exemptPretaxResolved": "RESOLVED 2026-10-13 (corrects an earlier note that said NJ taxes 401(k) and cafeteria deferrals alike): NJ-WT (September 2025, https://www.nj.gov/treasury/taxation/pdf/current/njwt.pdf, read directly) lists '401(k) contributions up to the federal limit' and 'Commuter Transportation Benefits - up to a certain limit' under Compensation Not Subject to Withholding, and lists 'Employee contributions to retirement plans other than a 401(k) in the year they are made', '401(k) contributions that exceed the federal limit' and 'Amounts an employee takes out of cafeteria plans' as subject to withholding. TB-39(R) (https://nj.gov/treasury/taxation/pdf/pubs/tb/tb39r.pdf) agrees: 401(k) follows the federal treatment (N.J.S.A. 54A:6-21) and salary-reduction cafeteria benefits (premium conversion, FSA) are taxable. So exemptPretax is [deferral_401k, commuter]; 403(b), 457, SIMPLE, section 125, HSA, FSA and dependent care stay in the base. Over-limit 401(k) is already moved to post-tax by capElectiveDeferrals(), so it stays taxable as NJ-WT requires.",
   "reciprocity": {
     "reciprocalStates": [
@@ -1971,12 +1996,12 @@
     "$comment": "Combined employee UI (0.3825%) + Workforce Development/Supplemental Workforce Fund (0.0425%) contribution, reported together as one line on NJ payroll (NJ-927) -- modeled as a single rate rather than two separate TaxLines since both share the exact same wage base and YTD tracker, and no employer-facing document treats them as separable withholding lines the way NY splits PFL from DBL."
   },
   "stateDisabilityEmployee": {
-    "rate": 0.0019,
+    "rate": 0.0024,
     "wageBase": 177100,
     "$comment": "Temporary Disability Insurance (TDI), state plan. Uses the wageBase (annual, YTD-tracked) branch of stateDisabilityEmployeeTax(), NOT New York DBL's per-period weeklyCapDollars branch -- NJ TDI is an ordinary annual wage-base cap, structurally identical to statePaidLeaveEmployee's mechanism."
   },
   "statePaidLeaveEmployee": {
-    "rate": 0.0023,
+    "rate": 0.0024,
     "wageBase": 177100,
     "$comment": "Family Leave Insurance (FLI). Shares the same $177,100 TDI/FLI wage base (2027), tracked separately per input.ytd.statePaidLeave.NJ."
   },

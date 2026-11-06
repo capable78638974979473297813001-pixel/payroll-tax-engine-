@@ -55,8 +55,10 @@ describe('tax year 2027 (provisional)', () => {
     // 70.7%, ESD) have published their 2027 figures; tests/audit-2026-10-25.test.ts pins those exactly.
     // North Carolina (3.49% + 0.1%), Mississippi (3.75%) and Nebraska (2027 Circular EN) have enacted or published
     // 2027 figures too; tests/state-2027-enacted.test.ts pins them. New York's 2027 Paid Family Leave premium
-    // (0.452%, cap $451.81) is published by the WCB and pinned there as well.
-    for (const st of STATES.filter((s) => !['IN', 'ME', 'AK', 'KY', 'WA', 'NC', 'MS', 'NE', 'NY'].includes(s))) {
+    // (0.452%, cap $451.81) is published by the WCB and pinned there as well. California (SDI 1.4%, 2027 Method B
+    // tables), New Jersey (worker TDI/FLI 0.24%), Colorado (FAMLI 0.86%), Maryland (FAMLI 0.9% starts), Missouri
+    // (UI base $8,500) and Oklahoma (UI range) are pinned in tests/state-updates-2027.test.ts.
+    for (const st of STATES.filter((s) => !['IN', 'ME', 'AK', 'KY', 'WA', 'NC', 'MS', 'NE', 'NY', 'CA', 'NJ', 'CO', 'MD', 'MO', 'OK'].includes(s))) {
       const a = calculatePaycheck(pay('2026-10-16', st));
       const b = calculatePaycheck(pay('2027-01-15', st));
       assert.deepEqual(b.taxes.map((t) => [t.id, t.amount]), a.taxes.map((t) => [t.id, t.amount]), st);
