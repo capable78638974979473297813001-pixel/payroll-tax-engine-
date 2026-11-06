@@ -9,15 +9,15 @@
       "id": "minneapolis",
       "name": "Minneapolis",
       "level": "city",
-      "hourly": 16.37,
-      "hourlyCents": 1637,
-      "effectiveFrom": "2026-01-01",
+      "hourly": 17.02,
+      "hourlyCents": 1702,
+      "effectiveFrom": "2027-01-01",
       "adjustmentDate": "01-01",
       "coverage": "ALL employers regardless of size, and all employees regardless of age. Minneapolis's own large/small employer split ended when the small-business schedule caught up.",
       "tipped": {
         "tipCreditAllowed": false,
-        "cashWage": 16.37,
-        "cashWageCents": 1637,
+        "cashWage": 17.02,
+        "cashWageCents": 1702,
         "maxTipCredit": 0.0,
         "maxTipCreditCents": 0,
         "note": "Minnesota bars any tip credit statewide, so the full local rate is owed in cash."
@@ -28,6 +28,12 @@
           "url": "https://www.minneapolismn.gov/news/2025/december/minimum-wage/",
           "verifiedOn": "2026-09-08",
           "verifiedBy": "cross_source_confirmed this session: $16.37 for all employers effective 2026-01-01."
+        },
+        {
+          "title": "City of Minneapolis -- Minimum Wage (2027)",
+          "url": "https://minimumwage.minneapolismn.gov/",
+          "verifiedOn": "2026-11-06",
+          "verifiedBy": "City of Minneapolis Minimum Wage https://minimumwage.minneapolismn.gov/ read directly 2026-11-06: 'In 2026, the Minneapolis Minimum Wage is $16.37. On January 1, 2027, it will increase to $17.02.' Tips do not count toward the wage."
         }
       ]
     },
@@ -136,6 +142,13 @@
     "createdOn": "2026-10-25",
     "basedOn": "data/minimum-wage/local/MN-local-2026.json",
     "note": "Carried forward from the 2026 file on 2026-10-25 so that a 2027-dated query resolves instead of failing. Every figure is 2026's unless listed in updatedFor2027 (each with the state agency's own announcement or the statute). Remove this block only after every figure has been re-read against a 2027 source. LOCAL ORDINANCES ARE NOT YET UPDATED for 2027: many step on 1 January 2027 (e.g. Denver $19.84, Minneapolis $17.02, Seattle, Flagstaff, Albuquerque, Portland ME). The figures here are 2026's until each ordinance is re-read.",
-    "updatedFor2027": []
+    "updatedFor2027": [
+      {
+        "path": "jurisdictions[minneapolis].hourly",
+        "from": 16.37,
+        "to": 17.02,
+        "source": "City of Minneapolis Minimum Wage https://minimumwage.minneapolismn.gov/ read directly 2026-11-06: 'In 2026, the Minneapolis Minimum Wage is $16.37. On January 1, 2027, it will increase to $17.02.' Tips do not count toward the wage."
+      }
+    ]
   }
 }

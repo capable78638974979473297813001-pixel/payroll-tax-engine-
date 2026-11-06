@@ -104,9 +104,9 @@
       "id": "burlingame",
       "name": "Burlingame",
       "level": "city",
-      "hourly": 17.86,
-      "hourlyCents": 1786,
-      "effectiveFrom": "2026-01-01",
+      "hourly": 18.47,
+      "hourlyCents": 1847,
+      "effectiveFrom": "2027-01-01",
       "adjustmentDate": "01-01",
       "tipped": {
         "tipCreditAllowed": false,
@@ -115,7 +115,15 @@
         "maxTipCredit": 0.0,
         "maxTipCreditCents": 0,
         "note": "California bars any tip credit statewide (Labor Code 351); the full local rate is owed in cash."
-      }
+      },
+      "sources": [
+        {
+          "title": "Burlingame -- minimum wage (2027)",
+          "url": "https://burlingame.org/307/Minimum-Wage-Information",
+          "verifiedOn": "2026-11-06",
+          "verifiedBy": "City of Burlingame, Minimum Wage Information https://burlingame.org/307/Minimum-Wage-Information read directly 2026-11-06: 'January 1, 2027 | $17.86 plus 2026 CPI for a total of $18.47'."
+        }
+      ]
     },
     {
       "id": "cupertino",
@@ -138,9 +146,9 @@
       "id": "daly_city",
       "name": "Daly City",
       "level": "city",
-      "hourly": 17.5,
-      "hourlyCents": 1750,
-      "effectiveFrom": "2026-01-01",
+      "hourly": 18.1,
+      "hourlyCents": 1810,
+      "effectiveFrom": "2027-01-01",
       "adjustmentDate": "01-01",
       "tipped": {
         "tipCreditAllowed": false,
@@ -149,7 +157,15 @@
         "maxTipCredit": 0.0,
         "maxTipCreditCents": 0,
         "note": "California bars any tip credit statewide (Labor Code 351); the full local rate is owed in cash."
-      }
+      },
+      "sources": [
+        {
+          "title": "Daly City -- minimum wage (2027)",
+          "url": "https://www.dalycity.org/388/Minimum-Wage",
+          "verifiedOn": "2026-11-06",
+          "verifiedBy": "City of Daly City, Minimum Wage https://www.dalycity.org/388/Minimum-Wage read directly 2026-11-06: 'January 1, 2027 | $18.10 per hour'; 'Effective January 1, 2027, Daly City's local minimum wage of $18.10 applies to all businesses within the geographic boundaries of Daly City and any employee working at least two or more hours per week' (tips not included)."
+        }
+      ]
     },
     {
       "id": "east_palo_alto",
@@ -172,9 +188,9 @@
       "id": "el_cerrito",
       "name": "El Cerrito",
       "level": "city",
-      "hourly": 18.82,
-      "hourlyCents": 1882,
-      "effectiveFrom": "2026-01-01",
+      "hourly": 19.36,
+      "hourlyCents": 1936,
+      "effectiveFrom": "2027-01-01",
       "adjustmentDate": "01-01",
       "tipped": {
         "tipCreditAllowed": false,
@@ -183,7 +199,15 @@
         "maxTipCredit": 0.0,
         "maxTipCreditCents": 0,
         "note": "California bars any tip credit statewide (Labor Code 351); the full local rate is owed in cash."
-      }
+      },
+      "sources": [
+        {
+          "title": "El Cerrito -- minimum wage (2027)",
+          "url": "https://www.elcerrito.gov/940/Minimum-Wage-Ordinance",
+          "verifiedOn": "2026-11-06",
+          "verifiedBy": "City of El Cerrito, Minimum Wage Ordinance https://www.elcerrito.gov/940/Minimum-Wage-Ordinance read directly 2026-11-06: 'January 1, 2027: $19.36 per hour'."
+        }
+      ]
     },
     {
       "id": "emeryville",
@@ -228,9 +252,9 @@
       "id": "foster_city",
       "name": "Foster City",
       "level": "city",
-      "hourly": 17.85,
-      "hourlyCents": 1785,
-      "effectiveFrom": "2026-01-01",
+      "hourly": 18.36,
+      "hourlyCents": 1836,
+      "effectiveFrom": "2027-01-01",
       "adjustmentDate": "01-01",
       "tipped": {
         "tipCreditAllowed": false,
@@ -239,7 +263,15 @@
         "maxTipCredit": 0.0,
         "maxTipCreditCents": 0,
         "note": "California bars any tip credit statewide (Labor Code 351); the full local rate is owed in cash."
-      }
+      },
+      "sources": [
+        {
+          "title": "Foster City -- minimum wage (2027)",
+          "url": "https://www.fostercity.org/288/City-of-Foster-City-Minimum-Wage-Ordinan",
+          "verifiedOn": "2026-11-06",
+          "verifiedBy": "City of Foster City, Minimum Wage Ordinance https://www.fostercity.org/288/City-of-Foster-City-Minimum-Wage-Ordinan read directly 2026-11-06: 'Effective January 1, 2027, the minimum wage for the City of Foster City is $18.36 per hour for all employees, according to the adopted Minimum Wage Ordinance.'"
+        }
+      ]
     },
     {
       "id": "fremont",
@@ -284,9 +316,9 @@
       "id": "half_moon_bay",
       "name": "Half Moon Bay",
       "level": "city",
-      "hourly": 17.91,
-      "hourlyCents": 1791,
-      "effectiveFrom": "2026-01-01",
+      "hourly": 18.52,
+      "hourlyCents": 1852,
+      "effectiveFrom": "2027-01-01",
       "adjustmentDate": "01-01",
       "tipped": {
         "tipCreditAllowed": false,
@@ -295,15 +327,23 @@
         "maxTipCredit": 0.0,
         "maxTipCreditCents": 0,
         "note": "California bars any tip credit statewide (Labor Code 351); the full local rate is owed in cash."
-      }
+      },
+      "sources": [
+        {
+          "title": "Half Moon Bay -- minimum wage (2027)",
+          "url": "http://www.hmbcity.com/minimumwage",
+          "verifiedOn": "2026-11-06",
+          "verifiedBy": "City of Half Moon Bay, Local Minimum Wage http://www.hmbcity.com/minimumwage read directly 2026-11-06: 'Effective January 1, 2027 the minimum wage for the City of Half Moon Bay is $18.52 per hour for all employees.' The page's schedule labels the increase 2.5% CPI-U, which does not reconcile to $18.52 from $17.91 (3.4%); the stated dollar amount is applied."
+        }
+      ]
     },
     {
       "id": "hayward",
       "name": "Hayward",
       "level": "city",
-      "hourly": 17.79,
-      "hourlyCents": 1779,
-      "effectiveFrom": "2026-01-01",
+      "hourly": 18.39,
+      "hourlyCents": 1839,
+      "effectiveFrom": "2027-01-01",
       "adjustmentDate": "01-01",
       "tipped": {
         "tipCreditAllowed": false,
@@ -316,8 +356,8 @@
         {
           "id": "small_employer",
           "label": "Employers with 25 or fewer employees",
-          "hourly": 16.9,
-          "hourlyCents": 1690,
+          "hourly": 17.4,
+          "hourlyCents": 1740,
           "test": "Hayward's small-employer tier is pinned to the CALIFORNIA state minimum wage, so it moves whenever the state rate does.",
           "appliesWhen": {
             "employeeCountMax": 25
@@ -326,7 +366,15 @@
       ],
       "appliesWhen": {
         "employeeCountMin": 26
-      }
+      },
+      "sources": [
+        {
+          "title": "City of Hayward -- Local Minimum Wage (2027)",
+          "url": "https://www.hayward-ca.gov/local-minimum-wage",
+          "verifiedOn": "2026-11-06",
+          "verifiedBy": "City of Hayward, Local Minimum Wage https://www.hayward-ca.gov/local-minimum-wage read directly 2026-11-06: 'Beginning January 1, 2027, large employers with 26 or more employees are subject to a $18.39/hour minimum wage' and 'small employers with 25 or fewer employees are subject to a $17.40/hour minimum wage per State Law'."
+        }
+      ]
     },
     {
       "id": "los_altos",
@@ -690,9 +738,9 @@
       "id": "richmond",
       "name": "Richmond",
       "level": "city",
-      "hourly": 19.18,
-      "hourlyCents": 1918,
-      "effectiveFrom": "2026-01-01",
+      "hourly": 19.61,
+      "hourlyCents": 1961,
+      "effectiveFrom": "2027-01-01",
       "adjustmentDate": "01-01",
       "tipped": {
         "tipCreditAllowed": false,
@@ -701,15 +749,23 @@
         "maxTipCredit": 0.0,
         "maxTipCreditCents": 0,
         "note": "California bars any tip credit statewide (Labor Code 351); the full local rate is owed in cash."
-      }
+      },
+      "sources": [
+        {
+          "title": "City of Richmond -- Minimum Wage Ordinance (2027)",
+          "url": "https://www.richmondca.gov/2615/Minimum-Wage-Ordinance",
+          "verifiedOn": "2026-11-06",
+          "verifiedBy": "City of Richmond, Richmond's Minimum Wage Ordinance https://www.richmondca.gov/2615/Minimum-Wage-Ordinance read directly 2026-11-06: 'Effective January 1, 2027 the Richmond Minimum Wage will be: $19.61 per hour'."
+        }
+      ]
     },
     {
       "id": "san_carlos",
       "name": "San Carlos",
       "level": "city",
-      "hourly": 17.75,
-      "hourlyCents": 1775,
-      "effectiveFrom": "2026-01-01",
+      "hourly": 18.35,
+      "hourlyCents": 1835,
+      "effectiveFrom": "2027-01-01",
       "adjustmentDate": "01-01",
       "tipped": {
         "tipCreditAllowed": false,
@@ -718,15 +774,23 @@
         "maxTipCredit": 0.0,
         "maxTipCreditCents": 0,
         "note": "California bars any tip credit statewide (Labor Code 351); the full local rate is owed in cash."
-      }
+      },
+      "sources": [
+        {
+          "title": "San Carlos -- minimum wage (2027)",
+          "url": "https://www.cityofsancarlos.org/business/minimum_wage.php",
+          "verifiedOn": "2026-11-06",
+          "verifiedBy": "City of San Carlos, Minimum Wage https://www.cityofsancarlos.org/business/minimum_wage.php read directly 2026-11-06: schedule 'January 1, 2026 $17.75 / hour; January 1, 2027 $18.35 / hour; January 1, 2028 and beyond: previous year plus CPI-U (not rounded) (max 3.5%)'."
+        }
+      ]
     },
     {
       "id": "san_diego",
       "name": "San Diego",
       "level": "city",
-      "hourly": 17.75,
-      "hourlyCents": 1775,
-      "effectiveFrom": "2026-01-01",
+      "hourly": 18.35,
+      "hourlyCents": 1835,
+      "effectiveFrom": "2027-01-01",
       "adjustmentDate": "01-01",
       "tipped": {
         "tipCreditAllowed": false,
@@ -735,7 +799,15 @@
         "maxTipCredit": 0.0,
         "maxTipCreditCents": 0,
         "note": "California bars any tip credit statewide (Labor Code 351); the full local rate is owed in cash."
-      }
+      },
+      "sources": [
+        {
+          "title": "City of San Diego -- 2027 Minimum Wage Official Notice",
+          "url": "https://www.sandiego.gov/sites/default/files/2026-09/2027-minimum-wage-notice-5-languages-sept-2026.pdf",
+          "verifiedOn": "2026-11-06",
+          "verifiedBy": "City of San Diego, Official Notice effective January 1, 2027 https://www.sandiego.gov/sites/default/files/2026-09/2027-minimum-wage-notice-5-languages-sept-2026.pdf read directly 2026-11-06: 'Beginning January 1, 2027, employees who perform at least two (2) hours of work in one work week within the geographic boundaries of the City of San Diego must be paid wages of not less than $18.35 per hour... Tips do not count towards payment of the minimum wage.'"
+        }
+      ]
     },
     {
       "id": "san_francisco",
@@ -797,9 +869,9 @@
       "id": "san_mateo",
       "name": "San Mateo",
       "level": "city",
-      "hourly": 18.6,
-      "hourlyCents": 1860,
-      "effectiveFrom": "2026-01-01",
+      "hourly": 19.25,
+      "hourlyCents": 1925,
+      "effectiveFrom": "2027-01-01",
       "adjustmentDate": "01-01",
       "tipped": {
         "tipCreditAllowed": false,
@@ -808,15 +880,23 @@
         "maxTipCredit": 0.0,
         "maxTipCreditCents": 0,
         "note": "California bars any tip credit statewide (Labor Code 351); the full local rate is owed in cash."
-      }
+      },
+      "sources": [
+        {
+          "title": "San Mateo -- minimum wage (2027)",
+          "url": "https://www.cityofsanmateo.org/3278/Minimum-Wage",
+          "verifiedOn": "2026-11-06",
+          "verifiedBy": "City of San Mateo, Minimum Wage https://www.cityofsanmateo.org/3278/Minimum-Wage read directly 2026-11-06: 'As of January 1, 2027, employers in the City of San Mateo must pay each employee who work in the City of San Mateo, no less than $19.25 per hour.'"
+        }
+      ]
     },
     {
       "id": "san_mateo_county_unincorporated",
       "name": "San Mateo County (unincorporated areas only)",
       "level": "county",
-      "hourly": 17.95,
-      "hourlyCents": 1795,
-      "effectiveFrom": "2026-01-01",
+      "hourly": 18.58,
+      "hourlyCents": 1858,
+      "effectiveFrom": "2027-01-01",
       "adjustmentDate": "01-01",
       "tipped": {
         "tipCreditAllowed": false,
@@ -825,7 +905,15 @@
         "maxTipCredit": 0.0,
         "maxTipCreditCents": 0
       },
-      "coverage": "Applies ONLY in unincorporated San Mateo County -- the county's many incorporated cities each set their own rate (nine of them appear separately in this file)."
+      "coverage": "Applies ONLY in unincorporated San Mateo County -- the county's many incorporated cities each set their own rate (nine of them appear separately in this file).",
+      "sources": [
+        {
+          "title": "San Mateo County (unincorporated areas only) -- minimum wage (2027)",
+          "url": "https://www.smcgov.org/ceo/unincorporated-minimum-wage",
+          "verifiedOn": "2026-11-06",
+          "verifiedBy": "County of San Mateo, Minimum Wage Information https://www.smcgov.org/ceo/unincorporated-minimum-wage read directly 2026-11-06: 'Starting January 1, 2027, the minimum wage will increase to $18.58 per hour in unincorporated San Mateo County.'"
+        }
+      ]
     },
     {
       "id": "santa_clara",
@@ -1031,7 +1119,74 @@
     "status": "carry-forward-from-2026",
     "createdOn": "2026-10-25",
     "basedOn": "data/minimum-wage/local/CA-local-2026.json",
-    "note": "Carried forward from the 2026 file on 2026-10-25 so that a 2027-dated query resolves instead of failing. Every figure is 2026's unless listed in updatedFor2027 (each with the state agency's own announcement or the statute). Remove this block only after every figure has been re-read against a 2027 source. LOCAL ORDINANCES ARE NOT YET UPDATED for 2027: many step on 1 January 2027 (e.g. Denver $19.84, Minneapolis $17.02, Seattle, Flagstaff, Albuquerque, Portland ME). The figures here are 2026's until each ordinance is re-read.",
-    "updatedFor2027": []
+    "note": "Carried forward from the 2026 file on 2026-10-25 so that a 2027-dated query resolves instead of failing. Every figure is 2026's unless listed in updatedFor2027 (each with the state agency's own announcement or the statute). Remove this block only after every figure has been re-read against a 2027 source. LOCAL ORDINANCES ARE NOT YET UPDATED for 2027: many step on 1 January 2027 (e.g. Denver $19.84, Minneapolis $17.02, Seattle, Flagstaff, Albuquerque, Portland ME). The figures here are 2026's until each ordinance is re-read. 2026-11-06: San Diego, Richmond and Hayward were re-read from the cities' own pages and updated. Palo Alto, San Jose, Sunnyvale, Santa Clara, Cupertino and South San Francisco answer 403 or an empty page to automated requests, and the remaining cities' 2027 notices were not read, so their entries stay at the 2026 figures. 2026-11-06 (second pass): Daly City, Burlingame, El Cerrito, San Mateo, Foster City and San Carlos were also re-read and updated. Half Moon Bay and unincorporated San Mateo County were also re-read and updated (2026-11-06). Not read and left at 2026: Palo Alto, San Jose, Sunnyvale, Santa Clara, Cupertino, South San Francisco, Santa Rosa, Los Altos, Novato, Petaluma and West Hollywood (pages answer 403, are empty to a plain request, or carry no 2027 notice).",
+    "updatedFor2027": [
+      {
+        "path": "jurisdictions[san_diego].hourly",
+        "from": 17.75,
+        "to": 18.35,
+        "source": "City of San Diego, Official Notice effective January 1, 2027 https://www.sandiego.gov/sites/default/files/2026-09/2027-minimum-wage-notice-5-languages-sept-2026.pdf read directly 2026-11-06: 'Beginning January 1, 2027, employees who perform at least two (2) hours of work in one work week within the geographic boundaries of the City of San Diego must be paid wages of not less than $18.35 per hour... Tips do not count towards payment of the minimum wage.'"
+      },
+      {
+        "path": "jurisdictions[richmond].hourly",
+        "from": 19.18,
+        "to": 19.61,
+        "source": "City of Richmond, Richmond's Minimum Wage Ordinance https://www.richmondca.gov/2615/Minimum-Wage-Ordinance read directly 2026-11-06: 'Effective January 1, 2027 the Richmond Minimum Wage will be: $19.61 per hour'."
+      },
+      {
+        "path": "jurisdictions[hayward].hourly",
+        "from": 17.79,
+        "to": "18.39 large / 17.40 small",
+        "source": "City of Hayward, Local Minimum Wage https://www.hayward-ca.gov/local-minimum-wage read directly 2026-11-06: 'Beginning January 1, 2027, large employers with 26 or more employees are subject to a $18.39/hour minimum wage' and 'small employers with 25 or fewer employees are subject to a $17.40/hour minimum wage per State Law'."
+      },
+      {
+        "path": "jurisdictions[daly_city].hourly",
+        "from": 17.5,
+        "to": 18.1,
+        "source": "City of Daly City, Minimum Wage https://www.dalycity.org/388/Minimum-Wage read directly 2026-11-06: 'January 1, 2027 | $18.10 per hour'; 'Effective January 1, 2027, Daly City's local minimum wage of $18.10 applies to all businesses within the geographic boundaries of Daly City and any employee working at least two or more hours per week' (tips not included)."
+      },
+      {
+        "path": "jurisdictions[burlingame].hourly",
+        "from": 17.86,
+        "to": 18.47,
+        "source": "City of Burlingame, Minimum Wage Information https://burlingame.org/307/Minimum-Wage-Information read directly 2026-11-06: 'January 1, 2027 | $17.86 plus 2026 CPI for a total of $18.47'."
+      },
+      {
+        "path": "jurisdictions[el_cerrito].hourly",
+        "from": 18.82,
+        "to": 19.36,
+        "source": "City of El Cerrito, Minimum Wage Ordinance https://www.elcerrito.gov/940/Minimum-Wage-Ordinance read directly 2026-11-06: 'January 1, 2027: $19.36 per hour'."
+      },
+      {
+        "path": "jurisdictions[san_mateo].hourly",
+        "from": 18.6,
+        "to": 19.25,
+        "source": "City of San Mateo, Minimum Wage https://www.cityofsanmateo.org/3278/Minimum-Wage read directly 2026-11-06: 'As of January 1, 2027, employers in the City of San Mateo must pay each employee who work in the City of San Mateo, no less than $19.25 per hour.'"
+      },
+      {
+        "path": "jurisdictions[foster_city].hourly",
+        "from": 17.85,
+        "to": 18.36,
+        "source": "City of Foster City, Minimum Wage Ordinance https://www.fostercity.org/288/City-of-Foster-City-Minimum-Wage-Ordinan read directly 2026-11-06: 'Effective January 1, 2027, the minimum wage for the City of Foster City is $18.36 per hour for all employees, according to the adopted Minimum Wage Ordinance.'"
+      },
+      {
+        "path": "jurisdictions[san_carlos].hourly",
+        "from": 17.75,
+        "to": 18.35,
+        "source": "City of San Carlos, Minimum Wage https://www.cityofsancarlos.org/business/minimum_wage.php read directly 2026-11-06: schedule 'January 1, 2026 $17.75 / hour; January 1, 2027 $18.35 / hour; January 1, 2028 and beyond: previous year plus CPI-U (not rounded) (max 3.5%)'."
+      },
+      {
+        "path": "jurisdictions[half_moon_bay].hourly",
+        "from": 17.91,
+        "to": 18.52,
+        "source": "City of Half Moon Bay, Local Minimum Wage http://www.hmbcity.com/minimumwage read directly 2026-11-06: 'Effective January 1, 2027 the minimum wage for the City of Half Moon Bay is $18.52 per hour for all employees.' The page's schedule labels the increase 2.5% CPI-U, which does not reconcile to $18.52 from $17.91 (3.4%); the stated dollar amount is applied."
+      },
+      {
+        "path": "jurisdictions[san_mateo_county_unincorporated].hourly",
+        "from": 17.95,
+        "to": 18.58,
+        "source": "County of San Mateo, Minimum Wage Information https://www.smcgov.org/ceo/unincorporated-minimum-wage read directly 2026-11-06: 'Starting January 1, 2027, the minimum wage will increase to $18.58 per hour in unincorporated San Mateo County.'"
+      }
+    ]
   }
 }

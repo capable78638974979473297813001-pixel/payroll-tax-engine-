@@ -8,14 +8,14 @@
       "id": "denver",
       "name": "Denver",
       "level": "city_and_county",
-      "hourly": 19.29,
-      "hourlyCents": 1929,
-      "effectiveFrom": "2026-01-01",
+      "hourly": 19.84,
+      "hourlyCents": 1984,
+      "effectiveFrom": "2027-01-01",
       "adjustmentDate": "01-01",
       "tipped": {
         "tipCreditAllowed": true,
-        "cashWage": 16.27,
-        "cashWageCents": 1627,
+        "cashWage": 16.82,
+        "cashWageCents": 1682,
         "maxTipCredit": 3.02,
         "maxTipCreditCents": 302,
         "note": "Denver's tip offset is the same $3.02 the Colorado constitution allows, and -- unlike the state rule -- it may be applied ONLY to food and beverage workers. Every other tipped occupation in Denver is owed the full $19.29."
@@ -27,6 +27,12 @@
           "url": "https://www.denvergov.org/Government/Agencies-Departments-Offices/Agencies-Departments-Offices-Directory/Department-of-Finance/News/2025/Denver-Local-Minimum-Wage-Adjusts-to-19.29-per-Hour-for-2026",
           "verifiedOn": "2026-09-08",
           "verifiedBy": "Fetched and read directly this session at Denver Labor's own Citywide Minimum Wage page. Quoted: 'The local minimum wage in 2026 is $19.29 per hour' and 'Denver's minimum wage for qualified tipped workers in the food and beverage industry increased to $16.27 per hour, as long as they receive $3.02 in documented tips,' both effective 2026-01-01. (An earlier attempt this session, at the Department of Finance's press-release URL, 403'd; the Denver Labor page above is the ongoing authoritative page and fetched cleanly.)"
+        },
+        {
+          "title": "City and County of Denver -- Minimum Wage (2027)",
+          "url": "https://denvergov.org/Government/Agencies-Departments-Offices/Agencies-Departments-Offices-Directory/Auditors-Office/Denver-Labor/Citywide-Minimum-Wage/Minimum-Wage",
+          "verifiedOn": "2026-11-06",
+          "verifiedBy": "Denver Auditor's Office, Denver's Minimum Wage https://denvergov.org/Government/Agencies-Departments-Offices/Agencies-Departments-Offices-Directory/Auditors-Office/Denver-Labor/Citywide-Minimum-Wage/Minimum-Wage read directly 2026-11-06: 'Denver's minimum wage is $19.29 per hour in 2026, and it will increase to $19.84 per hour in 2027' and a maximum tip credit of $3.02 for food and beverage workers; the tipped cash wage $16.82 is $19.84 less that stated credit (the city's page prints the $16.27 figure only for 2026)."
         }
       ]
     },
@@ -34,14 +40,14 @@
       "id": "boulder",
       "name": "Boulder",
       "level": "city",
-      "hourly": 16.82,
-      "hourlyCents": 1682,
-      "effectiveFrom": "2026-01-01",
+      "hourly": 18.17,
+      "hourlyCents": 1817,
+      "effectiveFrom": "2027-01-01",
       "adjustmentDate": "01-01",
       "tipped": {
         "tipCreditAllowed": true,
-        "cashWage": 13.8,
-        "cashWageCents": 1380,
+        "cashWage": 15.15,
+        "cashWageCents": 1515,
         "maxTipCredit": 3.02,
         "maxTipCreditCents": 302,
         "note": "The Colorado constitutional $3.02 tip offset, applied against Boulder's higher local rate."
@@ -52,6 +58,12 @@
           "url": "https://bouldercolorado.gov/local-minimum-wage",
           "verifiedOn": "2026-09-08",
           "verifiedBy": "Fetched and read directly this session at the City of Boulder's own Local Minimum Wage page. Quoted: 'Beginning January 1, 2026: $16.82 per hour' and 'no more than $3.02 per hour in tip income, or tip credit, may be used to partially offset payment of this wage.' (An earlier attempt this session 404'd; confirmed reachable on retry.)"
+        },
+        {
+          "title": "City of Boulder -- Local Minimum Wage (2027)",
+          "url": "https://bouldercolorado.gov/local-minimum-wage",
+          "verifiedOn": "2026-11-06",
+          "verifiedBy": "City of Boulder, Local Minimum Wage https://bouldercolorado.gov/local-minimum-wage read directly 2026-11-06: 'Beginning January 1, 2027: $18.17 per hour'; the page states a maximum tip offset of $3.02, so the tipped cash wage is $15.15."
         }
       ]
     },
@@ -59,35 +71,34 @@
       "id": "boulder_county_unincorporated",
       "name": "Boulder County (unincorporated areas only)",
       "level": "county",
-      "hourly": 16.82,
-      "hourlyCents": 1682,
-      "effectiveFrom": "2026-01-01",
+      "hourly": 17.43,
+      "hourlyCents": 1743,
+      "effectiveFrom": "2027-01-01",
       "adjustmentDate": "01-01",
       "tipped": {
         "tipCreditAllowed": true,
-        "cashWage": 13.8,
-        "cashWageCents": 1380,
+        "cashWage": 14.41,
+        "cashWageCents": 1441,
         "maxTipCredit": 3.02,
         "maxTipCreditCents": 302
       },
       "coverage": "UNINCORPORATED Boulder County only, including any employee performing four or more hours of work per week there. Incorporated towns in the county other than the City of Boulder follow the Colorado state rate.",
-      "scheduledChanges": [
-        {
-          "hourly": 17.32,
-          "hourlyCents": 1732,
-          "tippedCashWage": 14.3,
-          "note": "The county adopted a published schedule through 2030 ($17.84 in 2028, $18.38 in 2029, $18.93 in 2030), each step an estimated 3% CPI increase for the Denver-Aurora-Lakewood area.",
-          "effectiveDate": "2027-01-01"
-        }
-      ],
+      "scheduledChanges": [],
       "sources": [
         {
           "title": "Boulder County -- Local Minimum Wage",
           "url": "https://bouldercounty.gov/departments/commissioners/local-minimum-wage/",
           "verifiedOn": "2026-09-08",
           "verifiedBy": "Fetched and read directly this session: $16.82 standard and $13.80 tipped effective 2026-01-01, plus the county's own published 2027-2030 schedule. The Board of County Commissioners voted 2025-11-20 to align the county schedule with the City of Boulder's."
+        },
+        {
+          "title": "Boulder County -- Local Minimum Wage (2027)",
+          "url": "https://bouldercounty.gov/departments/commissioners/local-minimum-wage",
+          "verifiedOn": "2026-11-06",
+          "verifiedBy": "Boulder County, Local Minimum Wage https://bouldercounty.gov/departments/commissioners/local-minimum-wage read directly 2026-11-06: '16.82/hour in 2026. Starting on Jan. 1, 2027, the local minimum wage in unincorporated Boulder County is $17.43/hour'; tipped schedule 2027 $14.41."
         }
-      ]
+      ],
+      "note": "2027: the county's amended schedule is $17.43 (tipped $14.41) from Jan. 1, 2027, then each January 1 the Denver-Aurora-Lakewood CPI increase; the earlier $17.32 projection (3% CPI) was superseded."
     },
     {
       "id": "edgewater",
@@ -132,6 +143,25 @@
     "createdOn": "2026-10-25",
     "basedOn": "data/minimum-wage/local/CO-local-2026.json",
     "note": "Carried forward from the 2026 file on 2026-10-25 so that a 2027-dated query resolves instead of failing. Every figure is 2026's unless listed in updatedFor2027 (each with the state agency's own announcement or the statute). Remove this block only after every figure has been re-read against a 2027 source. LOCAL ORDINANCES ARE NOT YET UPDATED for 2027: many step on 1 January 2027 (e.g. Denver $19.84, Minneapolis $17.02, Seattle, Flagstaff, Albuquerque, Portland ME). The figures here are 2026's until each ordinance is re-read.",
-    "updatedFor2027": []
+    "updatedFor2027": [
+      {
+        "path": "jurisdictions[denver].hourly",
+        "from": 19.29,
+        "to": 19.84,
+        "source": "Denver Auditor's Office, Denver's Minimum Wage https://denvergov.org/Government/Agencies-Departments-Offices/Agencies-Departments-Offices-Directory/Auditors-Office/Denver-Labor/Citywide-Minimum-Wage/Minimum-Wage read directly 2026-11-06: 'Denver's minimum wage is $19.29 per hour in 2026, and it will increase to $19.84 per hour in 2027' and a maximum tip credit of $3.02 for food and beverage workers; the tipped cash wage $16.82 is $19.84 less that stated credit (the city's page prints the $16.27 figure only for 2026)."
+      },
+      {
+        "path": "jurisdictions[boulder].hourly",
+        "from": 16.82,
+        "to": 18.17,
+        "source": "City of Boulder, Local Minimum Wage https://bouldercolorado.gov/local-minimum-wage read directly 2026-11-06: 'Beginning January 1, 2027: $18.17 per hour'; the page states a maximum tip offset of $3.02, so the tipped cash wage is $15.15."
+      },
+      {
+        "path": "jurisdictions[boulder_county_unincorporated].hourly",
+        "from": "16.82 with a scheduled 17.32",
+        "to": "17.43 / tipped 14.41",
+        "source": "Boulder County, Local Minimum Wage https://bouldercounty.gov/departments/commissioners/local-minimum-wage read directly 2026-11-06: '16.82/hour in 2026. Starting on Jan. 1, 2027, the local minimum wage in unincorporated Boulder County is $17.43/hour'; tipped schedule 2027 $14.41."
+      }
+    ]
   }
 }
