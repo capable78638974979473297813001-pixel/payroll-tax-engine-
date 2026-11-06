@@ -263,3 +263,12 @@ Stored `notModelled` entries fall from 409 to 291 without dropping any fact. Gap
 - **Weekend or holiday rule not printed by the source** (was 20 copies): now `ui.weekendRuleStated: false` (or `withholding.weekendRuleStated`), and the common note is derived from it. AL, AR, DC, DE, HI, IL, IN, LA, ME, NC, NE, NH, NV, OH, OK, SC, TN, UT, VA, WV. States with a more specific weekend finding (MA, MD, RI, VT, SC's contrary source summary) keep their own note.
 
 What remains stored is specific to a jurisdiction: an unread rule, an older edition, a deliberate exclusion, or a source conflict.
+
+## Batch 12: editions refreshed and one threshold found (2026-11-06)
+
+- **Arkansas** now reads the DFA employer instructions effective 01/01/2026 (revised 4/27/26) and **Utah** Publication 14 Rev. 4/26; both state the same deposit rules as the older editions read before, so `rulesYear` is 2026 and the "older edition" notes are gone.
+- **South Carolina**: the Department's live withholding page confirms the 2023 guide's resident and nonresident payment rules and the return dates, so the rules are read for 2026 (the guide itself stays the 2023 edition and the profile says so).
+- **Kansas**: the Department's live KW-100 is still Rev. 10-24 and its forms page lists no newer one, so the October 2024 guide is the current edition; the rules-year warning on 2026 pay dates is gone.
+- **Hawaii**: the Department's withholding FAQ states what the booklet text lacked: above $40,000 of annual liability the schedule is semi-weekly (Wednesday for wages paid the preceding Wednesday to Friday, Friday for Saturday to Tuesday). The look-back now derives it, and the profile records the electronic-filing and electronic-payment mandates over $40,000 (with their $25-per-form and 2% penalties). Booklet A (Rev. 2025, 12/1/2025) is the current edition.
+- Still older than the year: New Jersey (September 2025 NJ-WT; the Division's forms page could not be read to confirm nothing newer), Connecticut, DC, Delaware (no edition date on the page), Maryland.
+- Stored notes: 286.

@@ -9,7 +9,7 @@
    "url": "https://www.ksrevenue.gov/pdf/kw100.pdf",
    "revision": "KW-100 (Rev. 10-24), rates for wages paid on or after July 1, 2024",
    "verifiedOn": "2026-11-04",
-   "verifiedBy": "read from the stored copy in watcher/state/snapshots/ks-41963fbebb.txt.gz: Filing Frequencies and Due Dates (the five-frequency chart), Completing a KW-5 (electronic requirement), the KW-3 annual return (January 31), changing frequency, and the registration item for filing frequency. THE OCTOBER 2024 EDITION: the stored copy is the Department's current KW-100 link, but it carries 2024 rates, so check for a newer edition."
+   "verifiedBy": "read from the stored copy in watcher/state/snapshots/ks-41963fbebb.txt.gz: Filing Frequencies and Due Dates (the five-frequency chart), Completing a KW-5 (electronic requirement), the KW-3 annual return (January 31), changing frequency, and the registration item for filing frequency. THE OCTOBER 2024 EDITION: the stored copy is the Department's current KW-100 link, but it carries 2024 rates, so check for a newer edition. CONFIRMED CURRENT 2026-11-06: the Department's live KW-100 PDF (ksrevenue.gov/pdf/kw100.pdf) is still Rev. 10-24, and its Withholding Tax Forms page lists no newer edition."
   },
   {
    "id": "N1",
@@ -52,7 +52,7 @@
   },
   "deposits": {
    "kind": "assigned_frequency",
-   "rulesYear": 2024,
+   "rulesYear": 2026,
    "interpretation": "Kansas assigns one of five filing frequencies by the size of the employer's ANNUAL withholding (K.S.A. 79-3298): quad-monthly above $100,000.00; semi-monthly $8,000.01 to $100,000.00; monthly $1,200.01 to $8,000.00; quarterly $200.01 to $1,200.00; annually $200.00 or less. The initial frequency comes from the estimate on the business tax application, the Department reviews deposit history each year (notices mailed about November, effective January 1), and an employer must not file more or less often than assigned, so the frequency is an INPUT or is derived from a supplied annual liability. QUAD-MONTHLY: periods end on the 7th, 15th, 21st and last day, each due within three banking days. SEMI-MONTHLY: periods 1st-15th (due the 25th of the same month) and 16th-end (due the 10th of the next month). MONTHLY: due the 15th of the next month. QUARTERLY: due April 25, July 25, October 25 and January 25. ANNUAL: due January 25. A KW-5 is filed for every period even with no tax, and the director may require more frequent payments if money may be diverted. Due dates on a weekend or legal holiday move to the next regular business day. THIS IS THE OCTOBER 2024 EDITION.",
    "lookback": {
     "description": "Kansas annual withholding",
@@ -169,7 +169,6 @@
    }
   ],
   "notModelled": [
-   "Anything newer than the October 2024 edition: thresholds and forms may have changed.",
    "The meaning of 'banking days' for quad-monthly filers.",
    "The KCSC file layouts for bulk W-2 and 1099 upload; registration steps beyond the filing-frequency item.",
    "The Department's power to require more frequent payment."

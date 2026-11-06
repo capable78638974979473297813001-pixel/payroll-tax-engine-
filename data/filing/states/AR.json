@@ -6,10 +6,10 @@
   {
    "id": "S1",
    "title": "Arkansas DFA Withholding Tax Employer's Instructions",
-   "url": "https://www.dfa.arkansas.gov/wp-content/uploads/withholdInstructions.pdf",
-   "revision": "Effective 01/01/2024, updated 07/01/2024 (Revised: 07/01/2024)",
-   "verifiedOn": "2026-11-05",
-   "verifiedBy": "fetched directly from dfa.arkansas.gov on 2026-11-05 and read: the due-dates summary (January 31 and February 28 filings), Monthly Filers, Annual Filers, Electronic Funds Transfer, Annual Requirements, penalty and interest. THE JULY 2024 EDITION; the Department's live Due Dates page (also fetched 2026-11-05) lists the same year-end dates. Not read: pension and annuity, pass-through-entity and Texarkana sections in detail."
+   "url": "https://www.dfa.arkansas.gov/wp-content/uploads/Withholding-Tax-Instructions-for-Employers.pdf",
+   "revision": "Effective 01/01/2026, Revised: 4/27/26",
+   "verifiedOn": "2026-11-06",
+   "verifiedBy": "fetched directly from dfa.arkansas.gov on 2026-11-06 and read: the calendar and Due Dates (January 31 and February 28 filings; a due date on a Saturday, Sunday or legal holiday is timely if postmarked the next business day), Withholding and Remittance (monthly filers send AR941M on or before the 15th day following the reporting period; every new registration starts as monthly; a zero voucher for a month with no tax), Reclassification of Filing Status (annual if deposits are under $1,000 in a reported period; AR941A and remittance by January 31), Annual Requirements (AR3MAR by February 28), and Electronic Funds Transfer (employers averaging $20,000 or more a month file electronically). THE 2026 EDITION, which states the same rules as the July 2024 edition read earlier. Not read: pension and annuity, pass-through-entity and Texarkana sections in detail."
   },
   {
    "id": "U1",
@@ -104,13 +104,12 @@
    }
   ],
   "notModelled": [
-   "Arkansas's July 2024 edition is the one read: confirm against the Department's current instructions.",
    "Pension and annuity withholding (AR3PAR, monthly), pass-through entity withholding (AR941PT, due April 15) and the Texarkana exemption forms.",
    "ATAP and W-2 submission website file layouts; the ACH Credit CCD+TXP addenda details."
   ],
   "deposits": {
    "kind": "assigned_frequency",
-   "rulesYear": 2024,
+   "rulesYear": 2026,
    "interpretation": "Arkansas has two filing statuses. MONTHLY (every new registration starts here, and it stays until the Commissioner notifies a change): Arkansas income tax withheld on payments made in a calendar month must be RECEIVED on or before the 15th of the following month, with Form AR941M or electronically; a zero voucher is required for a month with no tax. ANNUAL: an employer whose total Arkansas income tax withheld is under $1,000 for the calendar year AND who has been notified by the Commissioner of the change in classification pays by January 31 of the following year; annual is an INPUT (the notification), never derived, and a return and voucher are required even for a year with no tax. The look-back amount supplied is therefore ignored (an amount draws an error rather than a guess). Due dates on a Saturday, Sunday or legal holiday move to the next business day. THIS IS THE JULY 2024 EDITION.",
    "lookback": {
     "description": "None: the Commissioner assigns the status",

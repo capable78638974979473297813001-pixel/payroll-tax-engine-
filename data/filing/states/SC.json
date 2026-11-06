@@ -34,6 +34,14 @@
    "revision": "South Carolina entry updated 03/22/2025",
    "verifiedOn": "2026-11-06",
    "verifiedBy": "read from the federal matrix (layout text of the PDF fetched live 2026-11-06) the South Carolina entry, 'Updated On: 03/22/2025': reporting timeframe 'Within 20 days of start date'. This matrix is the Office of Child Support Services' consolidated list of each state directory's own timeframe, contact and website; the state's statute or directory page was not separately read."
+  },
+  {
+   "id": "S2",
+   "title": "South Carolina Department of Revenue: Withholding (return and payment due dates)",
+   "url": "https://dor.sc.gov/tax/withholding",
+   "revision": "page fetched live 2026-11-06",
+   "verifiedOn": "2026-11-06",
+   "verifiedBy": "fetched directly from dor.sc.gov and read: return due dates (April 30, July 31, October 31, January 31; WH-1605 for the first three quarters and WH-1606 for the fourth/annual), and Payment due dates: resident withholding agents pay with the same frequency as their federal payments; nonresident agents pay quarterly under $500 a quarter (last day of the month after the quarter) and monthly at $500 or more (15th of the following month). This confirms, line for line, the rules read from the 2023 guide."
   }
  ],
  "agencies": {
@@ -97,14 +105,14 @@
    }
   ],
   "notModelled": [
-   "The 2023 edition is the one read: confirm against the Department's current guide.",
    "Nonresident employers' quarterly/monthly payment rule (stated in the guide; not modelled).",
    "Annual filers (voluntary withholding from farmers, domestic help, fishermen, pastors): the guide defers to the Department's page.",
-   "Whether payroll service providers have separate filing steps ('info for payroll service providers' on the Department's page)."
+   "Whether payroll service providers have separate filing steps ('info for payroll service providers' on the Department's page).",
+   "The WH-105 guide is the 2023 edition; the Department's live withholding page (S2) states the same resident and nonresident payment rules and the same return dates, so the deposit rules are read for 2026."
   ],
   "deposits": {
    "kind": "federal_bands",
-   "rulesYear": 2023,
+   "rulesYear": 2026,
    "interpretation": "South Carolina requires RESIDENT employers (principal place of business in South Carolina) to pay their withholding at the same time their federal payments are due, regardless of the state amount: the federal schedule (next-day, semiweekly, monthly) applies unchanged, with no dollar bands. The due dates are the federal ones: semiweekly the Wednesday after a Wednesday-Friday payday and the Friday after a Saturday-Tuesday payday; monthly by the 15th; next-day the next business day after a payday over $100,000. NONRESIDENT employers pay quarterly or monthly instead (under $500 of South Carolina tax for the quarter: by the last day of the month after the quarter; once withholding reaches $500 in the quarter: by the 15th of the following month) and are NOT modelled here: the profile is applied as the resident rule. Payments alone do not satisfy the filing requirement. THIS IS THE 2023 EDITION of the guide.",
    "bands": [
     {
