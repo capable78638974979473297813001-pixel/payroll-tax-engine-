@@ -18,6 +18,30 @@
    "revision": "M-3 Rev. 11/16; W-2 specifications Rev. 20191219",
    "verifiedOn": "2026-11-05",
    "verifiedBy": "read from the watcher's stored copies (watcher/state/snapshots/ma-cdc80eeb37~205400bc.txt.gz and ma-cdc80eeb37~187a17f7.txt.gz): the M-3 form's lines and the requirement that W-2s be uploaded through MassTaxConnect by registered users, employers and third-party service agents. OLDER EDITIONS: the M-3 form's January 31 date is superseded by the Guide (February 28 for paper W-2s and M-3; March 31 machine-readable W-2s for 50 or more employees)."
+  },
+  {
+   "id": "U1",
+   "title": "Code of Massachusetts Regulations 430 CMR 5.03 (Contribution Reports) and 430 CMR 5.06, Department of Unemployment Assistance",
+   "url": "https://www.law.cornell.edu/regulations/massachusetts/430-CMR-5-03",
+   "revision": "regulation text as republished by Cornell Legal Information Institute, fetched live 2026-11-05",
+   "verifiedOn": "2026-11-05",
+   "verifiedBy": "fetched directly from law.cornell.edu on 2026-11-05 and read 430 CMR 5.03(4): contributions on wages paid are due and payable on the last day of the first month succeeding the quarter in which the wages were paid; all employers filing quarterly unemployment insurance contribution reports file them using the electronic transmittal the Commissioner prescribes (beginning with the quarter ending December 31, 2008); for payroll processing services remitting by electronic funds transfer (5.03(13)(d)), a payment is timely only if credited to the Division's bank account by the statutory due date, and a Saturday, Sunday or legal holiday moves the payment date to the next succeeding business day; 5.06(5): non-profit and governmental employers paying in lieu of contributions file a quarterly wage and employment report due the last day of the first month succeeding the quarter. The mass.gov pages answer 403 to automated requests and were not read."
+  },
+  {
+   "id": "U2",
+   "title": "U.S. Department of Labor, Significant Provisions of State Unemployment Insurance Laws, effective January 2026",
+   "url": "https://oui.doleta.gov/unemploy/content/sigpros/2020-2029/January2026.pdf",
+   "revision": "effective January 2026",
+   "verifiedOn": "2026-11-05",
+   "verifiedBy": "fetched directly from oui.doleta.gov on 2026-11-05 and read (layout text): the Taxes column's taxable wage base for the state's row (a federal compilation of the state laws)."
+  },
+  {
+   "id": "N1",
+   "title": "U.S. Department of Health and Human Services, Office of Child Support Services: State New Hire Reporting Contacts and Program Information matrix",
+   "url": "https://ocsp.acf.hhs.gov/irg/irgpdf.pdf?geoType=OGP&groupCode=EMP&addrType=NHR&addrClassType=EMP",
+   "revision": "Massachusetts entry updated 05/28/2026",
+   "verifiedOn": "2026-11-06",
+   "verifiedBy": "read from the federal matrix (layout text of the PDF fetched live 2026-11-06) the Massachusetts entry, 'Updated On: 05/28/2026': reporting timeframe 'Within 14 days of an employee's or independent contractor's effective date of employment or effective date of reinstatement (a lapse in pay of 30 calendar days or more)'. This matrix is the Office of Child Support Services' consolidated list of each state directory's own timeframe, contact and website; the state's statute or directory page was not separately read."
   }
  ],
  "agencies": {
@@ -25,6 +49,16 @@
    "name": "Massachusetts Department of Revenue (MassTaxConnect)",
    "portalUrl": "https://mtc.dor.state.ma.us",
    "source": "S1"
+  },
+  "ui": {
+   "name": "Massachusetts Department of Unemployment Assistance (DUA)",
+   "portalUrl": "https://www.mass.gov/info-details/employer-contributions-to-unemployment",
+   "source": "U1"
+  },
+  "newHire": {
+   "name": "Massachusetts State Directory of New Hires",
+   "source": "N1",
+   "portalUrl": "http://www.mass.gov/dor/child-support/employers/new-hire-reporting/"
   }
  },
  "calendar": {
@@ -162,9 +196,40 @@
   }
  ],
  "notModelled": [
-  "Massachusetts unemployment insurance (Department of Unemployment Assistance) and its quarterly wage reports: not read.",
   "The 5% penalty on late deposits by employers over $25,000 and the performer withholding rules.",
   "Massachusetts Paid Family and Medical Leave and the 4% surtax: separate, not deposited with this schedule.",
-  "The MassTaxConnect W-2 and M-941 file layouts; Massachusetts's legal-holiday list (weekends only are skipped, with a warning)."
- ]
+  "The MassTaxConnect W-2 and M-941 file layouts."
+ ],
+ "ui": {
+  "wageBase": 1500000,
+  "wageBaseYear": 2026,
+  "employerTaxLineId": "MA_SUI_ER",
+  "returns": [
+   {
+    "id": "quarterly-contribution-and-wage",
+    "name": "Quarterly unemployment insurance contribution and wage report",
+    "frequency": "quarterly",
+    "due": {
+     "kind": "last_day_of_month_after_quarter"
+    },
+    "contents": [
+     "Contributions are due and payable on the last day of the first month succeeding the quarter (April 30, July 31, October 31, January 31) (430 CMR 5.03(4)).",
+     "All employers file the quarterly contribution report electronically in the form and manner the Commissioner prescribes (430 CMR 5.03(4)(d)). For payroll processing services paying by electronic funds transfer, the payment must be credited by the statutory due date and a Saturday, Sunday or legal holiday moves it to the next succeeding business day (5.03(13)(d)).",
+     "Non-profit and governmental employers paying in lieu of contributions file a quarterly wage and employment report due the same day (430 CMR 5.06(5))."
+    ],
+    "source": "U1"
+   }
+  ],
+  "notModelled": [
+   "The regulation states the Saturday, Sunday and legal-holiday rule only for payroll processing services' electronic payments (5.03(13)(d)); the same next-business-day rule is applied to every employer's report and payment, which the text read does not state.",
+   "Massachusetts's own pages (the Unemployment Services for Employers portal, the 3 p.m. report and 5 p.m. payment cutoffs, penalties and 12% interest) refuse automated access and were not read.",
+   "The health insurance contribution report in the regulation is a separate quarterly report and is not modelled.",
+   "The agency's file format specifications, penalties not quoted above and portal enrollment steps were not read."
+  ]
+ },
+ "newHire": {
+  "form": "New-hire report (federal Form W-4 or an equivalent) to the Massachusetts State Directory of New Hires; within 14 days of an employee's or independent contractor's effective date of employment or effective date of reinstatement (a lapse in pay of 30 calendar days or more)",
+  "daysFromStart": 14,
+  "source": "N1"
+ }
 }

@@ -13,6 +13,12 @@
         "from": 14500,
         "to": 16500,
         "source": "Delaware H.B. 433 (2024) fixes the taxable wage base at $16,500 from 2027 ($14,500 in 2026): https://legis.delaware.gov/BillDetail/141505 ; EY Tax Alert 2025-0647. DDOL's 2027 calculator page also lists the new tax system. Read 2026-10-25."
+      },
+      {
+        "path": "suiEmployer.administrationTechnologyAddOn (recorded, not computed)",
+        "from": "absent",
+        "to": 0.00175,
+        "source": "Delaware's 2027 calculator page (labor.delaware.gov/divisions/unemployment-insurance/unemployment-insurance-tax-calculator/, read directly 2026-11-06): the employer's final 2027 UI tax rate is the benefit-ratio rate from the tax schedule (A-H, chosen by the trust fund's solvency) PLUS industry and employer-size add-on rates PLUS a 0.175% add-on for administration and technology. Recorded only: the flat 1% new-employer rate above predates this system and the new employer rate under it, the industry and size add-ons and the schedules were not read, so the engine's DE_SUI_ER for 2027 is not certified."
       }
     ]
   },
@@ -204,7 +210,9 @@
     },
     "experienceRangeSource": "Fixed 2026-09-01: this block previously read {0.006, 0.056}, a transcription slip that disagreed with both the live Delaware Merit Rate Table (labor.delaware.gov, Lowest Rate 0.3% / Highest Rate 5.4%) and this same file's own primary-sourced unemploymentInsurance.experiencedRateRange block elsewhere in the file ({lowest: 0.003, highest: 0.054}).",
     "employerSuppliedRateRequired": false,
-    "confidence": "primary_source_confirmed"
+    "confidence": "primary_source_confirmed",
+    "administrationTechnologyAddOn": 0.00175,
+    "administrationTechnologyAddOnNote": "Delaware's 2027 calculator page (labor.delaware.gov/divisions/unemployment-insurance/unemployment-insurance-tax-calculator/, read directly 2026-11-06): the employer's final 2027 UI tax rate is the benefit-ratio rate from the tax schedule (A-H, chosen by the trust fund's solvency) PLUS industry and employer-size add-on rates PLUS a 0.175% add-on for administration and technology. Recorded only: the flat 1% new-employer rate above predates this system and the new employer rate under it, the industry and size add-ons and the schedules were not read, so the engine's DE_SUI_ER for 2027 is not certified."
   },
   "statePaidLeaveEmployer": {
     "totalRate": 0.008,

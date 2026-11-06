@@ -10,6 +10,38 @@
    "revision": "WH-105 (Rev. 2/13/23)",
    "verifiedOn": "2026-11-04",
    "verifiedBy": "read from the stored copy in watcher/state/snapshots/sc-25117bc99e.txt.gz: Who Must Withhold, Submitting W-2s, Filing Returns (WH-1605, WH-1606), the payment rules for resident and nonresident employers, the due-date table, and the annual filer note. THE 2023 EDITION: the Department's current withholding page (watcher copy sc-f29ced8fb2) says the same in summary but was not compared line by line."
+  },
+  {
+   "id": "U1",
+   "title": "SC DEW: File a Wage Report",
+   "url": "https://dew.sc.gov/unemployment-tax-information/file-wage-report",
+   "revision": "page fetched live 2026-11-05",
+   "verifiedOn": "2026-11-05",
+   "verifiedBy": "fetched directly from dew.sc.gov on 2026-11-05 and read: the due-date table (January-March: April 30; April-June: July 31; July-September: October 31; October-December: January 31); corrections through the SUITS online portal for the most recent 16 quarters; paper reports and payments are mailed to the Department."
+  },
+  {
+   "id": "U2",
+   "title": "U.S. Department of Labor, Significant Provisions of State Unemployment Insurance Laws, effective January 2026",
+   "url": "https://oui.doleta.gov/unemploy/content/sigpros/2020-2029/January2026.pdf",
+   "revision": "effective January 2026",
+   "verifiedOn": "2026-11-05",
+   "verifiedBy": "fetched directly from oui.doleta.gov on 2026-11-05 and read (layout text): the Taxes column's taxable wage base for the state's row (a federal compilation of the state laws)."
+  },
+  {
+   "id": "N1",
+   "title": "U.S. Department of Health and Human Services, Office of Child Support Services: State New Hire Reporting Contacts and Program Information matrix",
+   "url": "https://ocsp.acf.hhs.gov/irg/irgpdf.pdf?geoType=OGP&groupCode=EMP&addrType=NHR&addrClassType=EMP",
+   "revision": "South Carolina entry updated 03/22/2025",
+   "verifiedOn": "2026-11-06",
+   "verifiedBy": "read from the federal matrix (layout text of the PDF fetched live 2026-11-06) the South Carolina entry, 'Updated On: 03/22/2025': reporting timeframe 'Within 20 days of start date'. This matrix is the Office of Child Support Services' consolidated list of each state directory's own timeframe, contact and website; the state's statute or directory page was not separately read."
+  },
+  {
+   "id": "S2",
+   "title": "South Carolina Department of Revenue: Withholding (return and payment due dates)",
+   "url": "https://dor.sc.gov/tax/withholding",
+   "revision": "page fetched live 2026-11-06",
+   "verifiedOn": "2026-11-06",
+   "verifiedBy": "fetched directly from dor.sc.gov and read: return due dates (April 30, July 31, October 31, January 31; WH-1605 for the first three quarters and WH-1606 for the fourth/annual), and Payment due dates: resident withholding agents pay with the same frequency as their federal payments; nonresident agents pay quarterly under $500 a quarter (last day of the month after the quarter) and monthly at $500 or more (15th of the following month). This confirms, line for line, the rules read from the 2023 guide."
   }
  ],
  "agencies": {
@@ -17,6 +49,16 @@
    "name": "South Carolina Department of Revenue",
    "portalUrl": "https://mydorway.dor.sc.gov",
    "source": "S1"
+  },
+  "ui": {
+   "name": "South Carolina Department of Employment and Workforce (DEW)",
+   "portalUrl": "https://dew.sc.gov/unemployment-tax-information/file-wage-report",
+   "source": "U1"
+  },
+  "newHire": {
+   "name": "South Carolina State Directory of New Hires",
+   "source": "N1",
+   "portalUrl": "https://newhire.sc.gov/"
   }
  },
  "calendar": {
@@ -63,16 +105,14 @@
    }
   ],
   "notModelled": [
-   "The 2023 edition is the one read: confirm against the Department's current guide.",
    "Nonresident employers' quarterly/monthly payment rule (stated in the guide; not modelled).",
    "Annual filers (voluntary withholding from farmers, domestic help, fishermen, pastors): the guide defers to the Department's page.",
-   "South Carolina unemployment insurance (Department of Employment and Workforce): no document read.",
-   "South Carolina's legal-holiday list (weekends only are skipped, with a warning).",
-   "Whether payroll service providers have separate filing steps ('info for payroll service providers' on the Department's page)."
+   "Whether payroll service providers have separate filing steps ('info for payroll service providers' on the Department's page).",
+   "The WH-105 guide is the 2023 edition; the Department's live withholding page (S2) states the same resident and nonresident payment rules and the same return dates, so the deposit rules are read for 2026."
   ],
   "deposits": {
    "kind": "federal_bands",
-   "rulesYear": 2023,
+   "rulesYear": 2026,
    "interpretation": "South Carolina requires RESIDENT employers (principal place of business in South Carolina) to pay their withholding at the same time their federal payments are due, regardless of the state amount: the federal schedule (next-day, semiweekly, monthly) applies unchanged, with no dollar bands. The due dates are the federal ones: semiweekly the Wednesday after a Wednesday-Friday payday and the Friday after a Saturday-Tuesday payday; monthly by the 15th; next-day the next business day after a payday over $100,000. NONRESIDENT employers pay quarterly or monthly instead (under $500 of South Carolina tax for the quarter: by the last day of the month after the quarter; once withholding reaches $500 in the quarter: by the 15th of the following month) and are NOT modelled here: the profile is applied as the resident rule. Payments alone do not satisfy the filing requirement. THIS IS THE 2023 EDITION of the guide.",
    "bands": [
     {
@@ -126,8 +166,36 @@
    "source": "S1"
   }
  ],
- "notModelled": [
-  "South Carolina unemployment insurance: not read.",
-  "New-hire reporting: not read."
- ]
+ "notModelled": [],
+ "ui": {
+  "wageBase": 1400000,
+  "wageBaseYear": 2026,
+  "employerTaxLineId": "SC_SUI_ER",
+  "returns": [
+   {
+    "id": "UCE-120",
+    "name": "Quarterly wage report (Form UCE-120) and contribution payment",
+    "frequency": "quarterly",
+    "due": {
+     "kind": "last_day_of_month_after_quarter"
+    },
+    "contents": [
+     "Due April 30, July 31, October 31 and January 31 (DEW).",
+     "Adjustments to a submitted report can be made in SUITS for the most recent 16 quarters."
+    ],
+    "source": "U1"
+   }
+  ],
+  "notModelled": [
+   "The late-report penalty (10% of tax, $25 minimum, $1,000 maximum per a search summary of the Installment Payment Agreement page) was not read.",
+   "The agency's file format specifications, penalties not quoted above and portal enrollment steps were not read.",
+   "A search summary of the SC Business One Stop says no extension is given for weekends or holidays; that page was not read, so it is not modelled. The profile moves the date to the next business day, which may be later than that source implies."
+  ],
+  "weekendRuleStated": false
+ },
+ "newHire": {
+  "form": "New-hire report (federal Form W-4 or an equivalent) to the South Carolina State Directory of New Hires; within 20 days of start date",
+  "daysFromStart": 20,
+  "source": "N1"
+ }
 }

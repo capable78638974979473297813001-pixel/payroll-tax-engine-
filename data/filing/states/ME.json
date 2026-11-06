@@ -10,6 +10,30 @@
    "revision": "2026 booklet, August 2026 revision",
    "verifiedOn": "2026-11-04",
    "verifiedBy": "read from the stored copy in watcher/state/snapshots/me-17ca301d46.txt.gz: DOs and DON'Ts for clients of payroll processors, Due Date (semiweekly), electronic payment requirement, Form 941ME (quarterly return), instruction 7 (Payment) and instruction 9 (payee statements). Not read: the withholding calendar's date rows, Maine unemployment (Department of Labor) rules."
+  },
+  {
+   "id": "U1",
+   "title": "Maine Department of Labor, Unemployment Contributions Quarterly Report (Form ME UC-1) instructions, 2026",
+   "url": "https://www.maine.gov/unemployment/docs/2026/employers/2026_ME_UC1_instructions.pdf",
+   "revision": "2026 instructions, fetched live 2026-11-05",
+   "verifiedOn": "2026-11-05",
+   "verifiedBy": "fetched directly from maine.gov on 2026-11-05 and read: Form ME UC-1 is used to calculate unemployment contributions and report employee wages for the quarter; the quarterly report is due by or on the last day of the month after the end of each calendar quarter; questions about electronic filing go to the Division."
+  },
+  {
+   "id": "U2",
+   "title": "U.S. Department of Labor, Significant Provisions of State Unemployment Insurance Laws, effective January 2026",
+   "url": "https://oui.doleta.gov/unemploy/content/sigpros/2020-2029/January2026.pdf",
+   "revision": "effective January 2026",
+   "verifiedOn": "2026-11-05",
+   "verifiedBy": "fetched directly from oui.doleta.gov on 2026-11-05 and read (layout text): the Taxes column's taxable wage base for the state's row (a federal compilation of the state laws)."
+  },
+  {
+   "id": "N1",
+   "title": "U.S. Department of Health and Human Services, Office of Child Support Services: State New Hire Reporting Contacts and Program Information matrix",
+   "url": "https://ocsp.acf.hhs.gov/irg/irgpdf.pdf?geoType=OGP&groupCode=EMP&addrType=NHR&addrClassType=EMP",
+   "revision": "Maine entry updated 03/22/2025",
+   "verifiedOn": "2026-11-06",
+   "verifiedBy": "read from the federal matrix (layout text of the PDF fetched live 2026-11-06) the Maine entry, 'Updated On: 03/22/2025': reporting timeframe 'Within 7 days of hire date'. This matrix is the Office of Child Support Services' consolidated list of each state directory's own timeframe, contact and website; the state's statute or directory page was not separately read."
   }
  ],
  "agencies": {
@@ -17,6 +41,16 @@
    "name": "Maine Revenue Services",
    "portalUrl": "https://revenue.maine.gov",
    "source": "S1"
+  },
+  "ui": {
+   "name": "Maine Department of Labor, Unemployment Insurance Tax",
+   "portalUrl": "https://www.maine.gov/unemployment/",
+   "source": "U1"
+  },
+  "newHire": {
+   "name": "Maine State Directory of New Hires",
+   "source": "N1",
+   "portalUrl": "https://portal.maine.gov/newhire/"
   }
  },
  "calendar": {
@@ -55,9 +89,7 @@
    }
   ],
   "notModelled": [
-   "Maine unemployment insurance (Maine Department of Labor): no document read.",
    "The withholding calendar rows in the booklet: dates here are computed from the stated rules, not read from the calendar.",
-   "Maine's legal-holiday list (weekends only are skipped, with a warning).",
    "Annual W-2 / 1099 state filing dates: the booklet says statements go to payees by the federal due date; the state filing rule was not isolated.",
    "The State Tax Assessor's power to require more frequent remittances.",
    "The Maine Tax Portal file layouts."
@@ -115,8 +147,35 @@
    "source": "S1"
   }
  ],
- "notModelled": [
-  "Maine unemployment insurance: not read.",
-  "New-hire reporting: not read."
- ]
+ "notModelled": [],
+ "ui": {
+  "wageBase": 1200000,
+  "wageBaseYear": 2026,
+  "employerTaxLineId": "ME_SUI_ER",
+  "returns": [
+   {
+    "id": "ME_UC-1",
+    "name": "Unemployment Contributions Quarterly Report (Form ME UC-1)",
+    "frequency": "quarterly",
+    "due": {
+     "kind": "last_day_of_month_after_quarter"
+    },
+    "contents": [
+     "Due by or on the last day of the month after the end of each calendar quarter (April 30, July 31, October 31, January 31).",
+     "The form calculates the quarter's unemployment contributions and reports employee wages.",
+     "Interest from January 1, 2026 is 10% a year, compounded monthly. Penalty for failure to pay on time: 1% a month up to 25% of contributions due. Penalty for failure to file a report on time: 10% of the tax liability or $25, whichever is greater; more than 60 days after demand, the greater of $25 or 25% of the amount due (ME UC-1 instructions)."
+    ],
+    "source": "U1"
+   }
+  ],
+  "notModelled": [
+   "Which of the employer's other quarterly programs (Paid Family and Medical Leave) share this report: not read."
+  ],
+  "weekendRuleStated": false
+ },
+ "newHire": {
+  "form": "New-hire report (federal Form W-4 or an equivalent) to the Maine State Directory of New Hires; within 7 days of hire date",
+  "daysFromStart": 7,
+  "source": "N1"
+ }
 }

@@ -10,6 +10,14 @@
    "revision": "web pages, no edition printed; fetched live 2026-11-05",
    "verifiedOn": "2026-11-05",
    "verifiedBy": "fetched directly from dws.wyo.gov on 2026-11-05 and read: the Reporting Due Dates table (quarter, due date, delinquent date), the Unemployment Taxable Wage Base table (2026: $33,800; the page also lists 2027 at $34,900), and the WYUI portal page (file and amend quarterly reports, pay online or print voucher coupons). The wage base page is https://dws.wyo.gov/dws-division/unemployment-insurance/wyui/unemployment-taxable-wage-base/ and the portal page https://dws.wyo.gov/dws-division/unemployment-insurance/wyui/."
+  },
+  {
+   "id": "N1",
+   "title": "U.S. Department of Health and Human Services, Office of Child Support Services: State New Hire Reporting Contacts and Program Information matrix",
+   "url": "https://ocsp.acf.hhs.gov/irg/irgpdf.pdf?geoType=OGP&groupCode=EMP&addrType=NHR&addrClassType=EMP",
+   "revision": "Wyoming entry updated 10/12/2026",
+   "verifiedOn": "2026-11-06",
+   "verifiedBy": "read from the federal matrix (layout text of the PDF fetched live 2026-11-06) the Wyoming entry, 'Updated On: 10/12/2026': reporting timeframe 'Within 20 days of hire date'. This matrix is the Office of Child Support Services' consolidated list of each state directory's own timeframe, contact and website; the state's statute or directory page was not separately read."
   }
  ],
  "agencies": {
@@ -17,6 +25,10 @@
    "name": "Wyoming Department of Workforce Services, Unemployment Insurance",
    "portalUrl": "https://dws.wyo.gov/dws-division/unemployment-insurance/wyui/",
    "source": "S1"
+  },
+  "newHire": {
+   "name": "Wyoming State Directory of New Hires",
+   "source": "N1"
   }
  },
  "calendar": {
@@ -70,7 +82,11 @@
   }
  ],
  "notModelled": [
-  "Wyoming has no state income tax on wages, so there is no state withholding.",
-  "New-hire reporting: not read."
- ]
+  "Wyoming has no state income tax on wages, so there is no state withholding."
+ ],
+ "newHire": {
+  "form": "New-hire report (federal Form W-4 or an equivalent) to the Wyoming State Directory of New Hires; within 20 days of hire date",
+  "daysFromStart": 20,
+  "source": "N1"
+ }
 }

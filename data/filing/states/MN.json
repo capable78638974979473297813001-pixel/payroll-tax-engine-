@@ -10,6 +10,38 @@
    "revision": "2026 booklet (start using January 1, 2026)",
    "verifiedOn": "2026-11-04",
    "verifiedBy": "read from the stored copy in watcher/state/snapshots/mn-4b376a9ce0.txt.gz: Deposit Schedules (semiweekly, monthly, exception, annual), Electronic Deposit Requirements, How to Make Deposits, File a Return (quarterly and annual filers, worksheets). Not read: Minnesota unemployment (DEED), Paid Leave premiums, the W-2/1099 filing layouts."
+  },
+  {
+   "id": "U1",
+   "title": "Unemployment Insurance Minnesota: Reports and payments due dates",
+   "url": "https://www.uimn.org/employers/help-and-support/emp-hbook/due-date.jsp",
+   "revision": "page fetched live 2026-11-05",
+   "verifiedOn": "2026-11-05",
+   "verifiedBy": "fetched directly from uimn.org on 2026-11-05 and read: wage detail reports (Minnesota Statutes 268.044, 268.051, 268B.12) must be received on or before April 30, July 31, October 31 and January 31; a weekend or legal holiday moves the due date to the following business day; employers with no employees submit a Zero Wage Report; payments must be received by the same date. The page's text is framed around joint UI and Paid Leave accounts."
+  },
+  {
+   "id": "U2",
+   "title": "U.S. Department of Labor, Significant Provisions of State Unemployment Insurance Laws, effective January 2026",
+   "url": "https://oui.doleta.gov/unemploy/content/sigpros/2020-2029/January2026.pdf",
+   "revision": "effective January 2026",
+   "verifiedOn": "2026-11-05",
+   "verifiedBy": "fetched directly from oui.doleta.gov on 2026-11-05 and read (layout text): the Taxes column's taxable wage base for the state's row (a federal compilation of the state laws)."
+  },
+  {
+   "id": "N1",
+   "title": "U.S. Department of Health and Human Services, Office of Child Support Services: State New Hire Reporting Contacts and Program Information matrix",
+   "url": "https://ocsp.acf.hhs.gov/irg/irgpdf.pdf?geoType=OGP&groupCode=EMP&addrType=NHR&addrClassType=EMP",
+   "revision": "Minnesota entry updated 09/24/2026",
+   "verifiedOn": "2026-11-06",
+   "verifiedBy": "read from the federal matrix (layout text of the PDF fetched live 2026-11-06) the Minnesota entry, 'Updated On: 09/24/2026': reporting timeframe 'Within 20 days of hire date or rehire date'. This matrix is the Office of Child Support Services' consolidated list of each state directory's own timeframe, contact and website; the state's statute or directory page was not separately read."
+  },
+  {
+   "id": "H1",
+   "title": "Minnesota Department of Revenue: Withholding Tax Holiday Schedules (2026)",
+   "url": "https://www.revenue.state.mn.us/withholding-tax-holiday-schedules",
+   "revision": "page last updated 2025-12-26, fetched live 2026-11-06",
+   "verifiedOn": "2026-11-06",
+   "verifiedBy": "fetched directly from revenue.state.mn.us and read: 'If the withholding tax filing or deposit due date falls on a holiday, the due date is extended to the next business day', and the 2026 schedule (New Year's Day Jan. 1, Martin Luther King Jr. Day Jan. 19, Presidents Day Feb. 16, Emancipation Day April 16, Memorial Day May 25, Juneteenth June 19, Independence Day July 6, Labor Day Sept. 7, Indigenous Peoples' Day Oct. 12, Veterans Day Nov. 11, Thanksgiving Nov. 26, Thanksgiving Friday Nov. 27, Christmas Day Dec. 25). The page publishes 2026 only."
   }
  ],
  "agencies": {
@@ -17,12 +49,41 @@
    "name": "Minnesota Department of Revenue",
    "portalUrl": "https://www.revenue.state.mn.us/",
    "source": "S1"
+  },
+  "ui": {
+   "name": "Minnesota Department of Employment and Economic Development (DEED), Unemployment Insurance",
+   "portalUrl": "https://www.uimn.org/employers/",
+   "source": "U1"
+  },
+  "newHire": {
+   "name": "Minnesota State Directory of New Hires",
+   "source": "N1",
+   "portalUrl": "https://mn-newhire.com/"
   }
  },
  "calendar": {
   "weekendsRoll": true,
   "holidays": {
-   "verified": false
+   "verified": false,
+   "dates": [
+    "2026-01-01",
+    "2026-01-19",
+    "2026-02-16",
+    "2026-04-16",
+    "2026-05-25",
+    "2026-06-19",
+    "2026-07-06",
+    "2026-09-07",
+    "2026-10-12",
+    "2026-11-11",
+    "2026-11-26",
+    "2026-11-27",
+    "2026-12-25"
+   ],
+   "years": [
+    2026
+   ],
+   "source": "H1"
   },
   "source": "S1"
  },
@@ -117,10 +178,9 @@
    }
   ],
   "notModelled": [
-   "Minnesota unemployment insurance (Department of Employment and Economic Development) and Paid Leave premiums: no document read.",
+   "Minnesota Paid Leave premiums (Department of Employment and Economic Development): no document read.",
    "The annual filer's interim deposit rule (deposit the month after the withholding exceeds $500).",
    "Whether a federal one-day deposit changes the Minnesota deposit (the booklet says it does not).",
-   "Minnesota's legal-holiday list (weekends only are skipped, with a warning).",
    "The 5% penalty for failing to pay electronically when required.",
    "The W-2 / 1099 filing layouts ('Forms W-2 and 1099', page 12) and the e-Services bulk file formats."
   ]
@@ -140,7 +200,36 @@
   }
  ],
  "notModelled": [
-  "Minnesota unemployment insurance and Paid Leave: not read.",
-  "New-hire reporting: not read."
- ]
+  "Minnesota Paid Leave: not read."
+ ],
+ "ui": {
+  "wageBase": 4400000,
+  "wageBaseYear": 2026,
+  "employerTaxLineId": "MN_SUI_ER",
+  "returns": [
+   {
+    "id": "wage-detail-report",
+    "name": "Quarterly wage detail report and payment",
+    "frequency": "quarterly",
+    "due": {
+     "kind": "last_day_of_month_after_quarter"
+    },
+    "contents": [
+     "Wage detail reports must be received by the department on or before April 30, July 31, October 31 and January 31; a weekend or legal holiday moves the date to the following business day.",
+     "Employers with no employees submit a Zero Wage Report; the payment must be received by the same date."
+    ],
+    "source": "U1"
+   }
+  ],
+  "notModelled": [
+   "The page read describes joint UI/Paid Leave accounts; the UI-only rule is taken to be the same date because the page's reference is to Minnesota Statutes 268.044 and 268.051 (UI), but the UI-only page was not separately read.",
+   "Paid Leave premiums share these dates; the Paid Leave program is outside this profile.",
+   "The agency's file format specifications, penalties not quoted above and portal enrollment steps were not read."
+  ]
+ },
+ "newHire": {
+  "form": "New-hire report (federal Form W-4 or an equivalent) to the Minnesota State Directory of New Hires; within 20 days of hire date or rehire date",
+  "daysFromStart": 20,
+  "source": "N1"
+ }
 }

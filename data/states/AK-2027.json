@@ -6,7 +6,15 @@
     "status": "carry-forward-from-2026",
     "createdOn": "2026-10-13",
     "basedOn": "data/states/AK-2026.json",
-    "note": "Carried forward from the 2026 file on 2026-10-13. Not yet checked against the 2027 official source: every figure is 2026's unless listed in updatedFor2027. Remove this block only after each figure has been re-verified against its 2027 source."
+    "note": "Carried forward from the 2026 file on 2026-10-13. Not yet checked against the 2027 official source: every figure is 2026's unless listed in updatedFor2027. Remove this block only after each figure has been re-verified against its 2027 source.",
+    "updatedFor2027": [
+      {
+        "path": "suiEmployer.newEmployerRate",
+        "from": 0.015,
+        "to": 0.01,
+        "source": "Carry-forward defect: the 2027 copy had reverted AK-2026's corrected employer-only rate. https://labor.alaska.gov/estax/2026-industry-rates.html (2026 table; no 2027 table published as of 2026-11-06)."
+      }
+    ]
   },
   "method": "no_income_tax",
   "exemptPretax": [],
@@ -61,8 +69,8 @@
     "$comment": "Normalized employer-side unemployment parameters — the shape src/taxes/state.ts reads. The detailed unemploymentInsurance block above stays the record of research; this exists because that block's shape varies too much between states to compute from directly (wage bases as objects, industry-keyed rate maps, differently-named keys).",
     "wageBase": 54200,
     "wageBaseSource": "2026 taxable wage bases cross-checked against EY's published 2026 state-by-state table; where this file already carried a numeric wage base, the two agreed unless noted in wageBaseNote.",
-    "newEmployerRate": 0.015,
-    "newEmployerRateSource": "OnPay's published 2026 state-by-state SUI table (secondary), used only where this file had no figure of its own. Cross-source tier, not primary.",
+    "newEmployerRate": 0.01,
+    "newEmployerRateSource": "Carried from AK-2026.json, which was CORRECTED 2026-10-18 from 0.015 to 0.01 against the Department's own table: labor.alaska.gov 'UI Tax Rates For New (Industry) Employers, 2026' lists Employer Rate 1.00, Employee Rate 0.50, Total Rate 1.50 for every industry ('The Total Rate = Employer Rate + Employee Rate'). The 2027 industry table was not found on 2026-11-06, so the 2026 employer-only figure carries forward; the earlier 1.5% was the TOTAL rate (employer plus employee) taken from a secondary table.",
     "experienceRange": {
       "min": 0.01,
       "max": 0.054

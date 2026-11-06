@@ -475,8 +475,8 @@ describe('Kansas (KW-100, Rev. 10-24): five frequencies from annual withholding'
     const r = ks([stDay('2025-03-03', 10), stDay('2025-03-07', 10), stDay('2025-03-10', 10), stDay('2025-03-17', 10), stDay('2025-03-24', 10), stDay('2025-03-31', 10)], { assignedFrequency: 'quad_monthly' });
     assert.deepEqual(r.obligations.map((o) => [o.payDates.join('+'), o.dueDate]), [['2025-03-03+2025-03-07', '2025-03-12'], ['2025-03-10', '2025-03-19'], ['2025-03-17', '2025-03-26'], ['2025-03-24+2025-03-31', '2025-04-03']]);
   });
-  test('the 2024 edition draws a rules-year warning on 2026 pay dates; the mandate is the guide\'s own words', () => {
-    assert.equal(ks([stDay('2026-03-13', 10)], { assignedFrequency: 'monthly' }).findings.some((f) => f.code === 'state_rules_year_mismatch'), true);
+  test('the October 2024 guide is still the Department\'s current edition (checked 2026-11-06), so 2026 pay dates draw no warning; the mandate is the guide\'s own words', () => {
+    assert.equal(ks([stDay('2026-03-13', 10)], { assignedFrequency: 'monthly' }).findings.some((f) => f.code === 'state_rules_year_mismatch'), false);
     assert.match(KS.mandates.efile!.text, /filed and payment of tax made electronically/);
   });
   test('1,000 payroll years conserve every dollar for semi-monthly and quad-monthly', () => {
@@ -584,8 +584,9 @@ describe('South Carolina (WH-105): residents pay when their federal payments are
   test('federal monthly: by the 15th of the following month', () => {
     assert.deepEqual(sc('monthly', [['2026-08-07', 80, 5_000]]).obligations.map((o) => [o.schedule, o.dueDate]), [['monthly', '2026-09-15']]);
   });
-  test('the 2023 edition draws a rules-year warning on 2026 pay dates; quarterly returns as the guide prints them', () => {
-    assert.equal(sc('monthly', [['2026-08-07', 80, 5_000]]).findings.some((f) => f.code === 'state_rules_year_mismatch'), true);
+  test('the 2023 guide is confirmed by the Department\'s live page, so 2026 pay dates draw no rules-year warning; quarterly returns as the guide prints them', () => {
+    assert.equal(sc('monthly', [['2026-08-07', 80, 5_000]]).findings.some((f) => f.code === 'state_rules_year_mismatch'), false);
+    assert.equal(sc('monthly', [['2025-08-07', 80, 5_000]]).findings.some((f) => f.code === 'state_rules_year_mismatch'), true);
     assert.deepEqual(withholdingReturnDates(SC, '2026-06-01').map((r) => r.id), ['WH-1605', 'WH-1606']);
   });
 });

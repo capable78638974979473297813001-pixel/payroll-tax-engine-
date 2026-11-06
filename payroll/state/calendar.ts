@@ -42,12 +42,12 @@ export function nthStateBusinessDayAfter(date: string, n: number, p: StateProfil
 
 /** The warning every date computed from an unverified holiday list must carry. */
 export function holidayFinding(p: StateProfile): Finding | undefined {
-  if (p.calendar.holidays.verified) return undefined;
-  return {
-    severity: 'warning',
-    code: HOLIDAYS_NOT_MODELLED,
-    message: `${p.state}: the state's legal-holiday list has not been read, so due dates skip weekends only. A date that falls on a state holiday may really be due the next business day; check it against the agency's calendar.`,
-  };
+  const h = p.calendar.holidays;
+  if (h.verified) return undefined;
+  const message = h.dates?.length
+    ? `${p.state}: only the agency's ${(h.years ?? []).join(' and ')} legal-holiday list has been read. A due date in another year that falls on a state holiday may really be due the next business day; check it against the agency's calendar.`
+    : `${p.state}: the state's legal-holiday list has not been read, so due dates skip weekends only. A date that falls on a state holiday may really be due the next business day; check it against the agency's calendar.`;
+  return { severity: 'warning', code: HOLIDAYS_NOT_MODELLED, message };
 }
 
 export interface ResolvedDue {
@@ -125,7 +125,8 @@ export function resolveDue(rule: DueRule, anchor: string, p: StateProfile, extra
       const endMonth = quarterOf(anchor) * 3 + 1;
       const y = endMonth > 12 ? year + 1 : year;
       const m = endMonth > 12 ? 1 : endMonth;
-      return { dueDate: roll(`${y}-${String(m).padStart(2, '0')}-${String(rule.day).padStart(2, '0')}`) };
+      const printed = `${y}-${String(m).padStart(2, '0')}-${String(rule.day).padStart(2, '0')}`;
+      return { dueDate: rule.noRoll ? printed : roll(printed) };
     }
     case 'semiweekly_following': {
       const want = weekday(anchor) === 5 ? rule.afterFriday : rule.afterTuesday;

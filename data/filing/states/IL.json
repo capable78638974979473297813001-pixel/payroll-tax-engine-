@@ -10,6 +10,30 @@
    "revision": "PUB-131 (R-01/26), January 2026",
    "verifiedOn": "2026-11-04",
    "verifiedBy": "read from the stored copy in watcher/state/snapshots/il-2a6ba9c9a5.txt.gz: When am I required to file Form IL-941, When am I required to pay, weekend due dates, How is my payment frequency determined, How do I pay and file (electronic mandates, FSET, ACH credit), the separate-payments-for-two-quarters note and its example. Not read: Publication 131-D (the due-date table), Publication 110 (W-2 filing), or any unemployment (IDES) rule."
+  },
+  {
+   "id": "U1",
+   "title": "IDES Quarterly Filing Requirements",
+   "url": "https://ides.illinois.gov/employer-resources/taxes-reporting/quarterly-filing-requirements.html",
+   "revision": "page fetched live 2026-11-05",
+   "verifiedOn": "2026-11-05",
+   "verifiedBy": "fetched directly from ides.illinois.gov on 2026-11-05 and read: employers must file wage reports (Form UI-3/40) and pay contributions in the month after the quarter closes, on or before April 30, July 31, October 31 and January 31, electronically or on paper forms from the site."
+  },
+  {
+   "id": "U2",
+   "title": "U.S. Department of Labor, Significant Provisions of State Unemployment Insurance Laws, effective January 2026",
+   "url": "https://oui.doleta.gov/unemploy/content/sigpros/2020-2029/January2026.pdf",
+   "revision": "effective January 2026",
+   "verifiedOn": "2026-11-05",
+   "verifiedBy": "fetched directly from oui.doleta.gov on 2026-11-05 and read (layout text): the Taxes column's taxable wage base for the state's row (a federal compilation of the state laws)."
+  },
+  {
+   "id": "N1",
+   "title": "U.S. Department of Health and Human Services, Office of Child Support Services: State New Hire Reporting Contacts and Program Information matrix",
+   "url": "https://ocsp.acf.hhs.gov/irg/irgpdf.pdf?geoType=OGP&groupCode=EMP&addrType=NHR&addrClassType=EMP",
+   "revision": "Illinois entry updated 03/22/2025",
+   "verifiedOn": "2026-11-06",
+   "verifiedBy": "read from the federal matrix (layout text of the PDF fetched live 2026-11-06) the Illinois entry, 'Updated On: 03/22/2025': reporting timeframe 'Within 20 days of hire date'. This matrix is the Office of Child Support Services' consolidated list of each state directory's own timeframe, contact and website; the state's statute or directory page was not separately read."
   }
  ],
  "agencies": {
@@ -17,6 +41,16 @@
    "name": "Illinois Department of Revenue",
    "portalUrl": "https://mytax.illinois.gov",
    "source": "S1"
+  },
+  "ui": {
+   "name": "Illinois Department of Employment Security (IDES)",
+   "portalUrl": "https://ides.illinois.gov/employer-resources/taxes-reporting/quarterly-filing-requirements.html",
+   "source": "U1"
+  },
+  "newHire": {
+   "name": "Illinois State Directory of New Hires",
+   "source": "N1",
+   "portalUrl": "https://newhire.hfs.illinois.gov/NewHireWeb/NewHireReporting.jsp"
   }
  },
  "calendar": {
@@ -60,8 +94,6 @@
   ],
   "notModelled": [
    "Publication 131-D (the published due-date table) was not read; dates here are computed from the rules in Publication 131.",
-   "Illinois unemployment insurance (Illinois Department of Employment Security): no document read.",
-   "Illinois's state-holiday list (weekends only are skipped, with a warning).",
    "W-2 / 1099 filing (Publication 110) and the electronic mandate for them: named in Publication 131, rules not read.",
    "The mid-year switch to semi-weekly after exceeding $12,000 in a quarter."
   ],
@@ -119,8 +151,35 @@
    "source": "S1"
   }
  ],
- "notModelled": [
-  "Illinois unemployment insurance: not read.",
-  "New-hire reporting: not read."
- ]
+ "notModelled": [],
+ "ui": {
+  "wageBase": 1425000,
+  "wageBaseYear": 2026,
+  "employerTaxLineId": "IL_SUI_ER",
+  "returns": [
+   {
+    "id": "UI-3_40",
+    "name": "Employer's Contribution and Wage Report (Form UI-3/40)",
+    "frequency": "quarterly",
+    "due": {
+     "kind": "last_day_of_month_after_quarter"
+    },
+    "contents": [
+     "Wage reports and contributions are due on or before April 30, July 31, October 31 and January 31.",
+     "The page does not state a weekend or holiday rule."
+    ],
+    "source": "U1"
+   }
+  ],
+  "notModelled": [
+   "Electronic-filing threshold (25 or more employees), monthly wage reporting for large filers, the 2% monthly interest and the 30-day extension on written request come from search summaries and the UI-3/40 instructions, which were not read.",
+   "The agency's file format specifications, penalties not quoted above and portal enrollment steps were not read."
+  ],
+  "weekendRuleStated": false
+ },
+ "newHire": {
+  "form": "New-hire report (federal Form W-4 or an equivalent) to the Illinois State Directory of New Hires; within 20 days of hire date",
+  "daysFromStart": 20,
+  "source": "N1"
+ }
 }

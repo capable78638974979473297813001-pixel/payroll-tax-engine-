@@ -13,6 +13,18 @@
         "from": 30600,
         "to": 32100,
         "source": "Colorado Department of Labor and Employment, Account Management / Premium Rates: 'The 2027 chargeable wage base increased to $32,100.00, from $30,600, in 2026.' https://cdle.colorado.gov/ui/employers/requirements/premiums/premium-rates (read 2026-10-25)"
+      },
+      {
+        "path": "statePaidLeaveEmployee.rate",
+        "from": 0.0044,
+        "to": 0.0043,
+        "source": "Colorado FAMLI Division: premiums reduce from 0.88% to 0.86% of gross wages effective January 1, 2027 (https://famli.colorado.gov/rules-guidance and the CDLE press release 'Colorado's Family and Medical Leave Insurance (FAMLI) Announces Lower Premium Rate Starting in 2027'), read 2026-11-06; the employee share is half, 0.43% (employees never pay more than 50% of the total)."
+      },
+      {
+        "path": "statePaidLeaveEmployer.totalRate",
+        "from": 0.0088,
+        "to": 0.0086,
+        "source": "Colorado FAMLI Division: premiums reduce from 0.88% to 0.86% of gross wages effective January 1, 2027 (https://famli.colorado.gov/rules-guidance and the CDLE press release 'Colorado's Family and Medical Leave Insurance (FAMLI) Announces Lower Premium Rate Starting in 2027'), read 2026-11-06; the employee share is half, 0.43% (employees never pay more than 50% of the total)."
       }
     ]
   },
@@ -178,14 +190,14 @@
     }
   },
   "statePaidLeaveEmployee": {
-    "rate": 0.0044,
+    "rate": 0.0043,
     "wageBase": "ssWageBase",
     "wageBaseFix": "CORRECTED 2026-09-06: was a hand-copied literal 184500, the same disclosed drift risk already closed for WA/CT/MA/DE/ME/CO's own SS-linked Paid Leave programs the same pass -- now resolved LIVE from data/federal/2026.json's own socialSecurity.wageBase by resolvePaidLeaveWageBase() in src/taxes/state.ts.",
     "exemptPretax": [],
     "$comment": "FAMLI employee share — reuses the existing generic statePaidLeaveEmployeeTax() dispatch (built for Washington), no new engine code needed. Wage base pegged to the federal Social Security wage cap, same must-keep-in-sync-with-federal.json risk already disclosed for CT/NY/WA's own SS-linked premiums in this project. Owed by EVERY employer regardless of size (unlike the employer share below) — FAMLI's own page: 'Businesses with nine or fewer employees should submit wage reports and send in 0.44% of their employees wages.'"
   },
   "statePaidLeaveEmployer": {
-    "totalRate": 0.0088,
+    "totalRate": 0.0086,
     "employeeShareFraction": 0.5,
     "wageBase": "ssWageBase",
     "wageBaseFix": "CORRECTED 2026-09-06: same hand-copied-literal fix as statePaidLeaveEmployee above.",

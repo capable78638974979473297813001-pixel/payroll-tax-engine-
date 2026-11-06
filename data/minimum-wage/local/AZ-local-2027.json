@@ -8,9 +8,9 @@
       "id": "flagstaff",
       "name": "Flagstaff",
       "level": "city",
-      "hourly": 18.35,
-      "hourlyCents": 1835,
-      "effectiveFrom": "2026-01-01",
+      "hourly": 18.95,
+      "hourlyCents": 1895,
+      "effectiveFrom": "2027-01-01",
       "adjustmentDate": "01-01",
       "coverage": "All employers, for work performed in Flagstaff.",
       "tipped": {
@@ -27,6 +27,12 @@
           "url": "https://www.flagstaff.az.gov/CivicAlerts.aspx?AID=2165",
           "verifiedOn": "2026-09-08",
           "verifiedBy": "cross_source_confirmed this session from the city's own announcement: $18.35 effective 2026-01-01, and no lower minimum wage for tipped employees from 2026 onward."
+        },
+        {
+          "title": "City of Flagstaff -- Minimum Wage (2027)",
+          "url": "https://www.flagstaff.az.gov/3520/Minimum-Wage",
+          "verifiedOn": "2026-11-06",
+          "verifiedBy": "City of Flagstaff, Minimum Wage https://www.flagstaff.az.gov/3520/Minimum-Wage read directly 2026-11-06: 'Effective January 1, 2027 Flagstaff's minimum wage will be $18.95 per hour. All employees will be required to make the full minimum wage, regardless of whether or not they regularly earn tips.'"
         }
       ]
     },
@@ -72,6 +78,13 @@
     "createdOn": "2026-10-25",
     "basedOn": "data/minimum-wage/local/AZ-local-2026.json",
     "note": "Carried forward from the 2026 file on 2026-10-25 so that a 2027-dated query resolves instead of failing. Every figure is 2026's unless listed in updatedFor2027 (each with the state agency's own announcement or the statute). Remove this block only after every figure has been re-read against a 2027 source. LOCAL ORDINANCES ARE NOT YET UPDATED for 2027: many step on 1 January 2027 (e.g. Denver $19.84, Minneapolis $17.02, Seattle, Flagstaff, Albuquerque, Portland ME). The figures here are 2026's until each ordinance is re-read.",
-    "updatedFor2027": []
+    "updatedFor2027": [
+      {
+        "path": "jurisdictions[flagstaff].hourly",
+        "from": 18.35,
+        "to": 18.95,
+        "source": "City of Flagstaff, Minimum Wage https://www.flagstaff.az.gov/3520/Minimum-Wage read directly 2026-11-06: 'Effective January 1, 2027 Flagstaff's minimum wage will be $18.95 per hour. All employees will be required to make the full minimum wage, regardless of whether or not they regularly earn tips.'"
+      }
+    ]
   }
 }

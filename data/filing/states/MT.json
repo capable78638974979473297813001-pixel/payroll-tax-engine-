@@ -10,6 +10,30 @@
    "revision": "web page, no edition printed; stored copy checked 2026-11-04",
    "verifiedOn": "2026-11-04",
    "verifiedBy": "read in full from the stored copy in watcher/state/snapshots/mt-2599ef4f7b.txt.gz: filing requirements, due dates, withholding payment schedules and look-back, payment and filing options, truncated TINs, amending the reconciliation."
+  },
+  {
+   "id": "U1",
+   "title": "Montana Department of Labor & Industry, Unemployment Insurance Employer Handbook",
+   "url": "https://uid.dli.mt.gov/Portals/55/Documents/Contributions-Bureau/dli-uid-ui010.pdf",
+   "revision": "handbook (revised 2020 on its cover), fetched live 2026-11-05",
+   "verifiedOn": "2026-11-05",
+   "verifiedBy": "fetched directly from uid.dli.mt.gov on 2026-11-05 and read: the quarterly due-date table (April 30, July 31, October 31, January 31) and 'If the due date is on a weekend or holiday, the next business day becomes the date the quarterly reports and payment must be submitted'. The handbook is a 2020 revision."
+  },
+  {
+   "id": "U2",
+   "title": "U.S. Department of Labor, Significant Provisions of State Unemployment Insurance Laws, effective January 2026",
+   "url": "https://oui.doleta.gov/unemploy/content/sigpros/2020-2029/January2026.pdf",
+   "revision": "effective January 2026",
+   "verifiedOn": "2026-11-05",
+   "verifiedBy": "fetched directly from oui.doleta.gov on 2026-11-05 and read (layout text): the Taxes column's taxable wage base for the state's row (a federal compilation of the state laws)."
+  },
+  {
+   "id": "N1",
+   "title": "U.S. Department of Health and Human Services, Office of Child Support Services: State New Hire Reporting Contacts and Program Information matrix",
+   "url": "https://ocsp.acf.hhs.gov/irg/irgpdf.pdf?geoType=OGP&groupCode=EMP&addrType=NHR&addrClassType=EMP",
+   "revision": "Montana entry updated 09/24/2026",
+   "verifiedOn": "2026-11-06",
+   "verifiedBy": "read from the federal matrix (layout text of the PDF fetched live 2026-11-06) the Montana entry, 'Updated On: 09/24/2026': reporting timeframe 'Within 20 days of hire date'. This matrix is the Office of Child Support Services' consolidated list of each state directory's own timeframe, contact and website; the state's statute or directory page was not separately read."
   }
  ],
  "agencies": {
@@ -17,6 +41,15 @@
    "name": "Montana Department of Revenue",
    "portalUrl": "https://tap.dor.mt.gov",
    "source": "S1"
+  },
+  "ui": {
+   "name": "Montana Department of Labor and Industry, Unemployment Insurance Division",
+   "portalUrl": "https://uid.dli.mt.gov/employers/eservices/",
+   "source": "U1"
+  },
+  "newHire": {
+   "name": "Montana State Directory of New Hires",
+   "source": "N1"
   }
  },
  "calendar": {
@@ -53,8 +86,6 @@
   ],
   "notModelled": [
    "The page gives no separate periodic return: payments are made with Form MW-1 or electronically and reconciled on the MW-3.",
-   "Montana unemployment insurance (Department of Labor & Industry): no document read.",
-   "Montana's legal-holiday list (weekends only are skipped, with a warning).",
    "Whether the federal $100,000 one-day rule applies to accelerated filers (not stated).",
    "TAP and approved-software-vendor file layouts."
   ],
@@ -123,8 +154,33 @@
    "source": "S1"
   }
  ],
- "notModelled": [
-  "Montana unemployment insurance: not read.",
-  "New-hire reporting: not read."
- ]
+ "notModelled": [],
+ "ui": {
+  "wageBase": 4730000,
+  "wageBaseYear": 2026,
+  "employerTaxLineId": "MT_SUI_ER",
+  "returns": [
+   {
+    "id": "quarterly-report",
+    "name": "Quarterly wage report and contribution payment",
+    "frequency": "quarterly",
+    "due": {
+     "kind": "last_day_of_month_after_quarter"
+    },
+    "contents": [
+     "Due April 30, July 31, October 31 and January 31; a weekend or holiday moves the date to the next business day (handbook).",
+     "Failure to file the quarterly report by the due date: a late filing penalty of $25; interest on tax not paid when due at 1.5% a month or any part of a month, 18% a year (Employer Handbook, Section 6)."
+    ],
+    "source": "U1"
+   }
+  ],
+  "notModelled": [
+   "The handbook cover reads 'Revised 2020': the schedule is long-standing but its electronic-filing threshold (employers with 20 or more employees per a search summary of the e-filing handbook) was not re-read in a current document."
+  ]
+ },
+ "newHire": {
+  "form": "New-hire report (federal Form W-4 or an equivalent) to the Montana State Directory of New Hires; within 20 days of hire date",
+  "daysFromStart": 20,
+  "source": "N1"
+ }
 }

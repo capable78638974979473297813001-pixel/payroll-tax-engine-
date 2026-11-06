@@ -26,6 +26,14 @@
    "revision": "effective January 2026",
    "verifiedOn": "2026-11-05",
    "verifiedBy": "fetched directly from oui.doleta.gov on 2026-11-05 and read (layout text): the Taxes column's taxable wage base for the state's row (a federal compilation of the state laws)."
+  },
+  {
+   "id": "N1",
+   "title": "U.S. Department of Health and Human Services, Office of Child Support Services: State New Hire Reporting Contacts and Program Information matrix",
+   "url": "https://ocsp.acf.hhs.gov/irg/irgpdf.pdf?geoType=OGP&groupCode=EMP&addrType=NHR&addrClassType=EMP",
+   "revision": "Nevada entry updated 03/22/2025",
+   "verifiedOn": "2026-11-06",
+   "verifiedBy": "read from the federal matrix (layout text of the PDF fetched live 2026-11-06) the Nevada entry, 'Updated On: 03/22/2025': reporting timeframe 'Within 20 days of hire date'. This matrix is the Office of Child Support Services' consolidated list of each state directory's own timeframe, contact and website; the state's statute or directory page was not separately read."
   }
  ],
  "agencies": {
@@ -33,6 +41,11 @@
    "name": "Nevada Department of Employment, Training and Rehabilitation (DETR), Employment Security Division",
    "portalUrl": "https://detr.nv.gov",
    "source": "S1"
+  },
+  "newHire": {
+   "name": "Nevada State Directory of New Hires",
+   "source": "N1",
+   "portalUrl": "http://ui.nv.gov/ess.html"
   }
  },
  "calendar": {
@@ -73,11 +86,11 @@
    }
   ],
   "notModelled": [
-   "Nevada's weekend and holiday rule for the due date: not in NAC 612.260, so assumed (next business day).",
    "The Division's penalties, its Employer Self-Service portal and its waiver form: the Division's pages refuse automated access and were not read.",
    "Whether electronic payment is separately mandated above a dollar amount: not in the code text read.",
    "The 2027 wage base (the Division's summary reports $45,400; the U.S. Department of Labor's July 2026 edition lists the same, not re-read for the profile)."
-  ]
+  ],
+  "weekendRuleStated": false
  },
  "channels": [
   {
@@ -93,7 +106,11 @@
   }
  ],
  "notModelled": [
-  "Nevada has no state income tax on wages, so there is no state withholding.",
-  "New-hire reporting: not read."
- ]
+  "Nevada has no state income tax on wages, so there is no state withholding."
+ ],
+ "newHire": {
+  "form": "New-hire report (federal Form W-4 or an equivalent) to the Nevada State Directory of New Hires; within 20 days of hire date",
+  "daysFromStart": 20,
+  "source": "N1"
+ }
 }

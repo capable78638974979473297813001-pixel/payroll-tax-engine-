@@ -8,31 +8,30 @@
       "id": "santa_fe_city",
       "name": "Santa Fe (city)",
       "level": "city",
-      "hourly": 15.4,
-      "hourlyCents": 1540,
-      "effectiveFrom": "2026-03-01",
+      "hourly": 17.5,
+      "hourlyCents": 1750,
+      "effectiveFrom": "2027-01-01",
       "adjustmentDate": "03-01",
-      "coverage": "All employers within the city limits. Santa Fe's 'Living Wage' adjusts on MARCH 1 -- a cycle shared with no other jurisdiction in this database.",
+      "coverage": "All employers within the city limits. Santa Fe's 'Living Wage' adjusts on MARCH 1 -- a cycle shared with no other jurisdiction in this database. 2027: the $17.50 step takes effect January 1, 2027 (not March 1, 2027); annual adjustments by the new formula begin March 1, 2028.",
       "tipped": {
         "tipCreditAllowed": false,
         "cashWage": 15.4,
         "cashWageCents": 1540,
         "note": "Santa Fe's own official 2025 living-wage notice (Municipal Code Sec. 28-1, fetched and text-extracted directly from the city's PDF this pass) states the tip-counting rule verbatim -- 'workers who customarily receive more than one hundred dollars ($100) per month in tips or commissions: any tips or commissions received and retained by a worker shall be counted as wages and credited towards satisfaction of the Living Wage' -- but publishes NO separate minimum CASH wage figure anywhere in that document. A secondary search result claimed a $3.00 base cash wage for Santa Fe; that figure appears nowhere in the city's own notice and is almost certainly that source conflating New Mexico's STATEWIDE $3.00 tipped cash wage with Santa Fe's own (cash-wage-silent) ordinance. Modelled here as no tip credit and a $15.40 floor, since that is what the primary document actually supports -- not the $3.00 figure, which was checked and rejected rather than incorporated."
       },
-      "scheduledChanges": [
-        {
-          "hourly": 17.5,
-          "hourlyCents": 1750,
-          "note": "A larger, separately adopted step, reported alongside the 2026 adjustment.",
-          "effectiveDate": "2027-03-01"
-        }
-      ],
+      "scheduledChanges": [],
       "sources": [
         {
           "title": "City of Santa Fe -- Living Wage Ordinance notice (Municipal Code Sec. 28-1 SFCC 1987)",
           "url": "https://santafenm.gov/media/news_pdf/2025_Living_Wage_Ordinance.pdf",
           "verifiedOn": "2026-09-08",
           "verifiedBy": "PDF downloaded and its text extracted directly this session (WebFetch's own conversion returned only binary noise; decompressing the PDF's content streams and pulling the text-showing operators worked, same technique used for the American Samoa poster). This specific PDF is the ORDINANCE'S 2025 notice ($15.00/hour effective 2025-03-01); the 2026 $15.40 rate itself rests on the separate cross-sourced citation already carried above. Confirmed directly: the tip-counting rule quoted in the note, and that no minimum cash wage for tipped workers is published anywhere in the ordinance's own text."
+        },
+        {
+          "title": "City of Santa Fe -- Living Wage (2027)",
+          "url": "https://santafenm.gov/economic-development/living-wage-in-the-city-of-santa-fe",
+          "verifiedOn": "2026-11-06",
+          "verifiedBy": "City of Santa Fe, Living Wage in the City of Santa Fe https://santafenm.gov/economic-development/living-wage-in-the-city-of-santa-fe read directly 2026-11-06: '$15.40 as of March 1, 2026' and 'January 1, 2027: $17.50 -- a one-time legislative jump'; 'March 1, 2028: $17.50 + adjustment'. Tips may count toward the living wage for workers customarily earning $100 a month or more in tips, with a $3.00 base wage."
         }
       ],
       "variants": [
@@ -146,27 +145,27 @@
       "id": "albuquerque",
       "name": "Albuquerque",
       "level": "city",
-      "hourly": 12.0,
-      "hourlyCents": 1200,
-      "effectiveFrom": "2026-01-01",
+      "hourly": 13.0,
+      "hourlyCents": 1300,
+      "effectiveFrom": "2027-01-01",
       "adjustmentDate": "01-01",
-      "coverage": "The city's OWN ordinance rate is $11.85 ($10.85 where the employer provides at least $2,500/yr in healthcare or childcare benefits), but New Mexico's $12.00 state rate supersedes both -- so $12.00 is the prevailing standard wage in Albuquerque.",
+      "coverage": "From January 1, 2027 the City of Albuquerque minimum wage is $13.00 an hour (ordinance O-26-33). It is $12.00 where the employer provides health-care and/or child-care benefits and pays at least $2,500 a year toward them; the engine cannot see benefits, so it carries the standard $13.00 and records the $12.00 rate beside it. New Mexico's own minimum wage is a separate floor the engine also applies.",
       "tipped": {
         "tipCreditAllowed": true,
         "cashWage": 7.2,
         "cashWageCents": 720,
-        "maxTipCredit": 4.8,
-        "maxTipCreditCents": 480,
+        "maxTipCredit": 5.8,
+        "maxTipCreditCents": 580,
         "note": "THE REASON THIS ENTRY EXISTS. Albuquerque's tipped minimum of $7.20 is far ABOVE New Mexico's statewide $3.00 tipped wage, so the city ordinance still binds for tipped employees even though the state rate has overtaken it for everyone else. Dropping Albuquerque as 'surpassed by state law' would underpay every tipped worker in the state's largest city by $4.20 an hour."
       },
       "localOrdinanceRate": {
-        "hourly": 11.85,
-        "hourlyCents": 1185,
+        "hourly": 13.0,
+        "hourlyCents": 1300,
         "withQualifyingBenefits": {
-          "hourly": 10.85,
-          "hourlyCents": 1085
+          "hourly": 12.0,
+          "hourlyCents": 1200
         },
-        "note": "Carried so the record shows what the ordinance itself says, distinct from the prevailing figure."
+        "note": "Albuquerque's 2027 notice: $13.00; $12.00 with qualifying benefits; tipped $7.20."
       },
       "sources": [
         {
@@ -174,6 +173,12 @@
           "url": "https://www.cabq.gov/legal/albuquerque-minimum-wage-information",
           "verifiedOn": "2026-09-08",
           "verifiedBy": "Fetched and read directly this session. Quoted: 'the State of New Mexico's $12.00 per hour minimum wage supersedes the City's minimum wage and is the prevailing wage. This prevailing wage is $12.00 per hour' and 'Starting January 1, 2026, the minimum wage for tipped employees will be $7.20.'"
+        },
+        {
+          "title": "City of Albuquerque -- 2027 minimum wage notice",
+          "url": "https://www.cabq.gov/legal/albuquerque-minimum-wage-information",
+          "verifiedOn": "2026-11-06",
+          "verifiedBy": "City of Albuquerque, Notice Regarding 2027 Minimum Wage Rate https://www.cabq.gov/legal/documents/adjustment-in-annual-minimum-wage-english-spanish-updated-language-bmr-final.pdf and https://www.cabq.gov/legal/albuquerque-minimum-wage-information read directly 2026-11-06: effective January 1, 2027 the minimum wage is $13.00 an hour; $12.00 if the employer provides health-care and/or child-care benefits (at least $2,500 a year); tipped employees $7.20."
         }
       ]
     },
@@ -234,6 +239,19 @@
     "createdOn": "2026-10-25",
     "basedOn": "data/minimum-wage/local/NM-local-2026.json",
     "note": "Carried forward from the 2026 file on 2026-10-25 so that a 2027-dated query resolves instead of failing. Every figure is 2026's unless listed in updatedFor2027 (each with the state agency's own announcement or the statute). Remove this block only after every figure has been re-read against a 2027 source. LOCAL ORDINANCES ARE NOT YET UPDATED for 2027: many step on 1 January 2027 (e.g. Denver $19.84, Minneapolis $17.02, Seattle, Flagstaff, Albuquerque, Portland ME). The figures here are 2026's until each ordinance is re-read.",
-    "updatedFor2027": []
+    "updatedFor2027": [
+      {
+        "path": "jurisdictions[albuquerque].hourly",
+        "from": 12.0,
+        "to": 13.0,
+        "source": "City of Albuquerque, Notice Regarding 2027 Minimum Wage Rate https://www.cabq.gov/legal/documents/adjustment-in-annual-minimum-wage-english-spanish-updated-language-bmr-final.pdf and https://www.cabq.gov/legal/albuquerque-minimum-wage-information read directly 2026-11-06: effective January 1, 2027 the minimum wage is $13.00 an hour; $12.00 if the employer provides health-care and/or child-care benefits (at least $2,500 a year); tipped employees $7.20."
+      },
+      {
+        "path": "jurisdictions[santa_fe_city] 2027 step",
+        "from": "17.50 scheduled 2027-03-01",
+        "to": "17.50 effective 2027-01-01",
+        "source": "City of Santa Fe, Living Wage in the City of Santa Fe https://santafenm.gov/economic-development/living-wage-in-the-city-of-santa-fe read directly 2026-11-06: '$15.40 as of March 1, 2026' and 'January 1, 2027: $17.50 -- a one-time legislative jump'; 'March 1, 2028: $17.50 + adjustment'. Tips may count toward the living wage for workers customarily earning $100 a month or more in tips, with a $3.00 base wage."
+      }
+    ]
   }
 }

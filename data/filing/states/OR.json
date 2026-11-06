@@ -10,6 +10,30 @@
    "revision": "150-206-400 (Rev. 03-24-26)",
    "verifiedOn": "2026-11-04",
    "verifiedBy": "read in full from the stored copy in watcher/state/snapshots/or-76c5f8eb90~061b44c5.txt.gz: the month-by-month list of monthly-depositor payment dates, the quarterly Form OQ dates, Q4 2025 / OA / OR-STT-2 / W-2 / OR-WR (Feb 2), and the semi-weekly note. The Oregon business guide (employer-guide.pdf) and the Department's withholding page were searched but state no depositor thresholds, so those are not modelled."
+  },
+  {
+   "id": "U1",
+   "title": "Oregon Secretary of State, Employer Guide (business guides)",
+   "url": "https://sos.oregon.gov/business/Documents/business-guides/employer-guide.pdf",
+   "revision": "guide as stored in watcher/state/snapshots",
+   "verifiedOn": "2026-11-05",
+   "verifiedBy": "read from the stored copy: the 'Quarterly reporting due dates' table (April 30, July 31, October 31, January 31; the same as federal Form 941, moved to the next day that is not a weekend or holiday), quarterly versus annual filing for small agricultural and domestic employers, and the penalty paragraph. This is a state publication, not the Employment Department's own page."
+  },
+  {
+   "id": "U2",
+   "title": "U.S. Department of Labor, Significant Provisions of State Unemployment Insurance Laws, effective January 2026",
+   "url": "https://oui.doleta.gov/unemploy/content/sigpros/2020-2029/January2026.pdf",
+   "revision": "effective January 2026",
+   "verifiedOn": "2026-11-05",
+   "verifiedBy": "fetched directly from oui.doleta.gov on 2026-11-05 and read (layout text): the Taxes column's taxable wage base for the state's row (a federal compilation of the state laws)."
+  },
+  {
+   "id": "N1",
+   "title": "U.S. Department of Health and Human Services, Office of Child Support Services: State New Hire Reporting Contacts and Program Information matrix",
+   "url": "https://ocsp.acf.hhs.gov/irg/irgpdf.pdf?geoType=OGP&groupCode=EMP&addrType=NHR&addrClassType=EMP",
+   "revision": "Oregon entry updated 04/23/2025",
+   "verifiedOn": "2026-11-06",
+   "verifiedBy": "read from the federal matrix (layout text of the PDF fetched live 2026-11-06) the Oregon entry, 'Updated On: 04/23/2025': reporting timeframe 'Within 20 days of hire date'. This matrix is the Office of Child Support Services' consolidated list of each state directory's own timeframe, contact and website; the state's statute or directory page was not separately read."
   }
  ],
  "agencies": {
@@ -17,6 +41,15 @@
    "name": "Oregon Department of Revenue (withholding, Statewide Transit Tax); Oregon Employment Department (unemployment, Paid Leave)",
    "portalUrl": "https://revenueonline.dor.oregon.gov",
    "source": "S1"
+  },
+  "ui": {
+   "name": "Oregon Employment Department, Unemployment Insurance Tax",
+   "portalUrl": "https://www.oregon.gov/employ/Businesses/Tax/Pages/default.aspx",
+   "source": "U1"
+  },
+  "newHire": {
+   "name": "Oregon State Directory of New Hires",
+   "source": "N1"
   }
  },
  "calendar": {
@@ -66,9 +99,8 @@
   "notModelled": [
    "The thresholds that make an employer monthly, quarterly or semi-weekly: not in the stored documents.",
    "The Q4 2026 and all 2027 calendar rows: the 2026 calendar ends at the Q3 date; later pay dates draw state_calendar_not_published.",
-   "Oregon unemployment insurance and Paid Leave Oregon contributions (Oregon Employment Department): not deposited with the Department of Revenue and not read here.",
-   "The Statewide Transit Tax (OR-STT-2), the Oregon Workers' Benefit Fund assessment, and Portland, TriMet and Lane transit/local taxes.",
-   "Oregon's legal-holiday list."
+   "Paid Leave Oregon contributions (Oregon Employment Department): not deposited with the Department of Revenue and not read here.",
+   "The Statewide Transit Tax (OR-STT-2), the Oregon Workers' Benefit Fund assessment, and Portland, TriMet and Lane transit/local taxes."
   ],
   "deposits": {
    "kind": "assigned_frequency",
@@ -205,7 +237,36 @@
   }
  ],
  "notModelled": [
-  "Oregon unemployment and Paid Leave Oregon: not read.",
-  "New-hire reporting: not read."
- ]
+  "Paid Leave Oregon: not read."
+ ],
+ "ui": {
+  "wageBase": 5670000,
+  "wageBaseYear": 2026,
+  "employerTaxLineId": "OR_SUI_ER",
+  "returns": [
+   {
+    "id": "OQ",
+    "name": "Quarterly combined payroll report (Form OQ) and Paid Leave Oregon, workers' benefit fund and UI tax",
+    "frequency": "quarterly",
+    "due": {
+     "kind": "last_day_of_month_after_quarter"
+    },
+    "contents": [
+     "Quarterly reports are due April 30, July 31, October 31 and January 31, the same as federal Form 941; a weekend or holiday moves the date to the next day that is not one.",
+     "Certain smaller agricultural and domestic (in-home) employers may file annually.",
+     "Employers who file after the due date, file incorrectly formatted reports or fail to pay on time may be charged penalties and interest."
+    ],
+    "source": "U1"
+   }
+  ],
+  "notModelled": [
+   "The Employment Department's own pages were not read; the guide is the Secretary of State's.",
+   "The Oregon guide labels this as a combined payroll report; which lines belong to UI versus Paid Leave Oregon and the Workers' Benefit Fund assessment was not parsed."
+  ]
+ },
+ "newHire": {
+  "form": "New-hire report (federal Form W-4 or an equivalent) to the Oregon State Directory of New Hires; within 20 days of hire date",
+  "daysFromStart": 20,
+  "source": "N1"
+ }
 }

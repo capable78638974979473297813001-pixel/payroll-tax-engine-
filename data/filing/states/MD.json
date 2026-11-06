@@ -26,6 +26,38 @@
    "revision": "statute and regulation text; fetched live 2026-11-05",
    "verifiedOn": "2026-11-05",
    "verifiedBy": "fetched directly from mgaleg.maryland.gov and regs.maryland.gov on 2026-11-05 and read: Tax-General 10-822 (quarterly return due on or before the 15th day of the month that follows the quarter; a person who reasonably expects $700 or more of withholding in a quarter files monthly; a person who expects less than $250 in a year files annually on or before January 31; a person that withheld $15,000 or more in the preceding calendar year files within 3 business days following each payroll that causes the total accumulated tax withheld to equal or exceed $700; waiver to file monthly) and COMAR 03.04.01.01 (monthly basis: at least $700 expected for a quarter, return and payment on or before the 15th day of the following month; quarterly basis: less than $700, on or before the 15th day of the following month; the $15,000 / $700 accelerated rule; waiver). Used at https://regs.maryland.gov/us/md/exec/comar/03.04.01.01."
+  },
+  {
+   "id": "U1",
+   "title": "Maryland Department of Labor, Employers' Quick Reference Guide (Division of Unemployment Insurance)",
+   "url": "https://labor.maryland.gov/employment/empguide/empguide.pdf",
+   "revision": "guide fetched live 2026-11-05 (edition date not printed on the pages read)",
+   "verifiedOn": "2026-11-05",
+   "verifiedBy": "fetched directly from labor.maryland.gov on 2026-11-05 and read: employers report payroll and pay UI taxes within one month of the end of each quarter; the due-date table (March 31 to April 30 through December 31 to January 31); if the due date is a Saturday or Sunday, reports are due the next business day; interest at 1.5% a month."
+  },
+  {
+   "id": "U2",
+   "title": "U.S. Department of Labor, Significant Provisions of State Unemployment Insurance Laws, effective January 2026",
+   "url": "https://oui.doleta.gov/unemploy/content/sigpros/2020-2029/January2026.pdf",
+   "revision": "effective January 2026",
+   "verifiedOn": "2026-11-05",
+   "verifiedBy": "fetched directly from oui.doleta.gov on 2026-11-05 and read (layout text): the Taxes column's taxable wage base for the state's row (a federal compilation of the state laws)."
+  },
+  {
+   "id": "N1",
+   "title": "U.S. Department of Health and Human Services, Office of Child Support Services: State New Hire Reporting Contacts and Program Information matrix",
+   "url": "https://ocsp.acf.hhs.gov/irg/irgpdf.pdf?geoType=OGP&groupCode=EMP&addrType=NHR&addrClassType=EMP",
+   "revision": "Maryland entry updated 05/27/2026",
+   "verifiedOn": "2026-11-06",
+   "verifiedBy": "read from the federal matrix (layout text of the PDF fetched live 2026-11-06) the Maryland entry, 'Updated On: 05/27/2026', which does not state a number of days (its timeframe cell reads 'This is not received by Maryland New Hires any longer. It is not accepted either.', apparently about paper forms); the days come from the Maryland Department of Human Services page below. The entry also gives the directory website https://www.mdnewhire.com and says Maryland does not require independent-contractor reporting."
+  },
+  {
+   "id": "N2",
+   "title": "Maryland Department of Human Services, Child Support Services: Report new hires",
+   "url": "https://dhs.maryland.gov/child-support-services/report-new-hires/",
+   "revision": "page fetched live 2026-11-06",
+   "verifiedOn": "2026-11-06",
+   "verifiedBy": "fetched directly from dhs.maryland.gov and read: 'Employers are required by law to report newly hired or rehired employees within 20 days.'"
   }
  ],
  "agencies": {
@@ -33,6 +65,16 @@
    "name": "Comptroller of Maryland, Revenue Administration Division",
    "portalUrl": "https://mdtaxconnect.gov",
    "source": "S1"
+  },
+  "ui": {
+   "name": "Maryland Department of Labor, Division of Unemployment Insurance",
+   "portalUrl": "https://labor.maryland.gov/employment/",
+   "source": "U1"
+  },
+  "newHire": {
+   "name": "Maryland State Directory of New Hires",
+   "portalUrl": "https://www.mdnewhire.com/",
+   "source": "N2"
   }
  },
  "calendar": {
@@ -151,7 +193,36 @@
   }
  ],
  "notModelled": [
-  "Maryland unemployment insurance: not read.",
-  "New-hire reporting: not read."
- ]
+  "New-hire reporting (Maryland): the Department of Human Services page states 20 days; whether they run from hire or from the first work day, and the data elements and transmission methods, were not read."
+ ],
+ "ui": {
+  "wageBase": 850000,
+  "wageBaseYear": 2026,
+  "employerTaxLineId": "MD_SUI_ER",
+  "returns": [
+   {
+    "id": "quarterly-contribution-report",
+    "name": "Quarterly contribution and wage report and UI tax payment",
+    "frequency": "quarterly",
+    "due": {
+     "kind": "last_day_of_month_after_quarter"
+    },
+    "contents": [
+     "Payroll is reported and UI taxes paid within one month of quarter end: April 30, July 31, October 31 and January 31; a Saturday or Sunday moves the date to the next business day.",
+     "Interest is charged at 1.5% a month on late payments (guide).",
+     "Reports and payments not made on time risk interest at 1.5% a month on late payments and a penalty assessment of $35 for each late report or improper filing (Employers' Quick Reference Guide)."
+    ],
+    "source": "U1"
+   }
+  ],
+  "notModelled": [
+   "The guide's rule names Saturday and Sunday only; whether a holiday moves the date is not stated, so holidays are treated as moving it.",
+   "The guide's edition date is not printed in the text read."
+  ]
+ },
+ "newHire": {
+  "form": "New-hire report (federal Form W-4 or an equivalent) to the Maryland State Directory of New Hires; due within 20 days of hire",
+  "daysFromStart": 20,
+  "source": "N2"
+ }
 }

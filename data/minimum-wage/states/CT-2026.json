@@ -21,17 +21,17 @@
     "maxTipCredit": 10.56,
     "maxTipCreditCents": 1056,
     "tippedEmployeeThreshold": null,
-    "note": "Connecticut runs TWO tipped rates, split by occupation rather than by employer: hotel and restaurant staff at a $6.38 cash wage, bartenders at $8.71. Both are frozen dollar figures, so every ECI increase lands entirely on the tip credit."
+    "note": "Connecticut runs TWO tipped rates, split by occupation rather than by employer: hotel and restaurant staff at a $6.38 cash wage, bartenders at $8.23. Both are frozen dollar figures, so every ECI increase lands entirely on the tip credit."
   },
   "variants": [
     {
-      "hourly": 8.71,
-      "hourlyCents": 871,
+      "hourly": 8.23,
+      "hourlyCents": 823,
       "id": "tipped_bartender",
       "label": "Bartender cash wage",
       "test": "An employee who customarily and regularly receives tips while working as a bartender.",
-      "maxTipCredit": 8.23,
-      "note": "Conn. Gen. Stat. 31-60(b) sets a separate, smaller tip credit for bartenders."
+      "maxTipCredit": 8.71,
+      "note": "CORRECTED 2026-11-06: the bartender CASH wage is $8.23 and the tip credit is the rest of the minimum wage ($8.71 at $16.94); the file had the two reversed ($8.71 cash, $8.23 credit). Conn. Gen. Stat. 31-60 sets $8.23 as the employer's share for bartenders who customarily receive gratuities, and the Department of Labor's tip statement (effective 2026-01-01) reads: 'As a bartender, I have received gratuities of at least 51.42% of the minimum wage of $16.94 per hour (equaling at least $8.71 per hour)... My guaranteed wage is $8.23 per hour in 2026.'"
     }
   ],
   "youthAndTraining": [],

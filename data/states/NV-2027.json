@@ -19,6 +19,12 @@
         "from": 43700,
         "to": 45400,
         "source": "Nevada DETR, What's New in UI Tax: 'Effective January 1, 2027, the taxable wage base for calendar year 2027 is $45,400.' https://detr.nv.gov/Page/UI_Tax (read 2026-10-25)"
+      },
+      {
+        "path": "suiEmployer.employerAssessments (new)",
+        "from": "CEP 0.05% documented but not computed",
+        "to": "CEP 0.05% computed as NV_CEP_ER",
+        "source": "NRS 612.606 (leg.state.nv.us/nrs/nrs-612.html), read directly 2026-11-06: in addition to any other contribution each employer pays .05 percent of the wages the employer pays into the Unemployment Compensation Administration Fund for the employment and training program; not owed by an employer assigned the 5.4 percent rate under NRS 612.550(6). Same wage base as the unemployment tax is assumed (the section says 'wages the employer pays' and NRS 612.545 defines wages as capped at the taxable wage)."
       }
     ]
   },
@@ -101,6 +107,17 @@
       "max": 0.054
     },
     "employerSuppliedRateRequired": false,
-    "confidence": "inherited_from_this_file"
+    "confidence": "inherited_from_this_file",
+    "employerAssessments": [
+      {
+        "id": "CEP",
+        "name": "Nevada Career Enhancement Program assessment",
+        "rate": 0.0005,
+        "exceptWhenRateIn": [
+          0.054
+        ]
+      }
+    ],
+    "employerAssessmentsSource": "NRS 612.606 (leg.state.nv.us/nrs/nrs-612.html), read directly 2026-11-06: in addition to any other contribution each employer pays .05 percent of the wages the employer pays into the Unemployment Compensation Administration Fund for the employment and training program; not owed by an employer assigned the 5.4 percent rate under NRS 612.550(6). Same wage base as the unemployment tax is assumed (the section says 'wages the employer pays' and NRS 612.545 defines wages as capped at the taxable wage)."
   }
 }

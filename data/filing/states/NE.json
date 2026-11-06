@@ -10,6 +10,30 @@
    "revision": "8-429-1998 Rev. 11-2025",
    "verifiedOn": "2026-11-03",
    "verifiedBy": "read from the stored copy in watcher/state/snapshots/ne-1c1f4767ff.txt.gz: 'Filing and Payment Requirements' (Quarterly Return, Monthly Deposits, Monthly Deposit Filing, Annual Filers, Annual Reconciliation, W-2 copies) and 'Electronic Payments'"
+  },
+  {
+   "id": "U1",
+   "title": "Nebraska Department of Labor, Employer's Guide to Unemployment Insurance",
+   "url": "https://dol.nebraska.gov/webdocs/Resources/Items/Employer%20Guide%20to%20Unemployment%20Insurance_Rebrand.pdf",
+   "revision": "guide fetched live 2026-11-05 (edition date not printed in the text read)",
+   "verifiedOn": "2026-11-05",
+   "verifiedBy": "fetched directly from dol.nebraska.gov on 2026-11-05 and read: Reporting Deadlines table (Quarter 1 due Apr. 30, Quarter 2 Jul. 31, Quarter 3 Oct. 31, Quarter 4 Jan. 31); the Combined Tax Report, wage report and payment must be received by the due dates; employers with a payroll exceeding $100,000 in either of the two previous years are expected to file reports and pay electronically (Neb. Rev. Stat. 48-648(6)); combined tax is due on the first day and delinquent after the last day of the month."
+  },
+  {
+   "id": "U2",
+   "title": "U.S. Department of Labor, Significant Provisions of State Unemployment Insurance Laws, effective January 2026",
+   "url": "https://oui.doleta.gov/unemploy/content/sigpros/2020-2029/January2026.pdf",
+   "revision": "effective January 2026",
+   "verifiedOn": "2026-11-05",
+   "verifiedBy": "fetched directly from oui.doleta.gov on 2026-11-05 and read (layout text): the Taxes column's taxable wage base for the state's row (a federal compilation of the state laws)."
+  },
+  {
+   "id": "N1",
+   "title": "U.S. Department of Health and Human Services, Office of Child Support Services: State New Hire Reporting Contacts and Program Information matrix",
+   "url": "https://ocsp.acf.hhs.gov/irg/irgpdf.pdf?geoType=OGP&groupCode=EMP&addrType=NHR&addrClassType=EMP",
+   "revision": "Nebraska entry updated 09/21/2026",
+   "verifiedOn": "2026-11-06",
+   "verifiedBy": "read from the federal matrix (layout text of the PDF fetched live 2026-11-06) the Nebraska entry, 'Updated On: 09/21/2026': reporting timeframe 'Within 20 days of hire date'. This matrix is the Office of Child Support Services' consolidated list of each state directory's own timeframe, contact and website; the state's statute or directory page was not separately read."
   }
  ],
  "agencies": {
@@ -17,6 +41,16 @@
    "name": "Nebraska Department of Revenue (DOR)",
    "portalUrl": "https://revenue.nebraska.gov",
    "source": "S1"
+  },
+  "ui": {
+   "name": "Nebraska Department of Labor, Unemployment Insurance",
+   "portalUrl": "https://dol.nebraska.gov/unemployment-insurance",
+   "source": "U1"
+  },
+  "newHire": {
+   "name": "Nebraska State Directory of New Hires",
+   "source": "N1",
+   "portalUrl": "https://ne-newhire.com/"
   }
  },
  "calendar": {
@@ -99,7 +133,6 @@
   "notModelled": [
    "The 12-month look-back or any DOR-assigned frequency other than the monthly-threshold rule and the annual-filer license.",
    "Form 501N deposit transmittal and DOR e-pay field layouts.",
-   "Nebraska's legal-holiday list.",
    "Local or other Nebraska taxes."
   ]
  },
@@ -116,7 +149,36 @@
   }
  ],
  "notModelled": [
-  "Nebraska unemployment tax (Nebraska Department of Labor): not read.",
-  "New-hire reporting and registration rules: not read."
- ]
+  "Registration rules: not read."
+ ],
+ "ui": {
+  "wageBase": 900000,
+  "wageBaseYear": 2026,
+  "employerTaxLineId": "NE_SUI_ER",
+  "returns": [
+   {
+    "id": "UI-11T",
+    "name": "Combined Tax Report (UI-11T) and Wage Report",
+    "frequency": "quarterly",
+    "due": {
+     "kind": "last_day_of_month_after_quarter"
+    },
+    "contents": [
+     "Due Apr. 30, Jul. 31, Oct. 31 and Jan. 31; the Combined Tax Report, wage report and payment must be received by the due date.",
+     "Employers with a payroll exceeding $100,000 in either of the two previous years are expected to file and pay electronically (Neb. Rev. Stat. 48-648(6)).",
+     "Penalty: an employer that fails to file the combined tax report and wage report by the tenth day of the second month following the quarter pays 0.1% of the quarter's total gross wages, at least $25 and at most $200 (Neb. Rev. Stat. 48-656(3), per the guide). Overpayments are claimed within four years (Neb. Rev. Stat. 48-660)."
+    ],
+    "source": "U1"
+   }
+  ],
+  "notModelled": [
+   "The guide's edition date is not printed in the text read, and the guide discusses a delinquency date after the last day of the month; the penalty schedule was not transcribed."
+  ],
+  "weekendRuleStated": false
+ },
+ "newHire": {
+  "form": "New-hire report (federal Form W-4 or an equivalent) to the Nebraska State Directory of New Hires; within 20 days of hire date",
+  "daysFromStart": 20,
+  "source": "N1"
+ }
 }

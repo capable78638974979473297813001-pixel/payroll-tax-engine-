@@ -9,15 +9,15 @@
       "id": "minneapolis",
       "name": "Minneapolis",
       "level": "city",
-      "hourly": 16.37,
-      "hourlyCents": 1637,
-      "effectiveFrom": "2026-01-01",
+      "hourly": 17.02,
+      "hourlyCents": 1702,
+      "effectiveFrom": "2027-01-01",
       "adjustmentDate": "01-01",
       "coverage": "ALL employers regardless of size, and all employees regardless of age. Minneapolis's own large/small employer split ended when the small-business schedule caught up.",
       "tipped": {
         "tipCreditAllowed": false,
-        "cashWage": 16.37,
-        "cashWageCents": 1637,
+        "cashWage": 17.02,
+        "cashWageCents": 1702,
         "maxTipCredit": 0.0,
         "maxTipCreditCents": 0,
         "note": "Minnesota bars any tip credit statewide, so the full local rate is owed in cash."
@@ -28,6 +28,12 @@
           "url": "https://www.minneapolismn.gov/news/2025/december/minimum-wage/",
           "verifiedOn": "2026-09-08",
           "verifiedBy": "cross_source_confirmed this session: $16.37 for all employers effective 2026-01-01."
+        },
+        {
+          "title": "City of Minneapolis -- Minimum Wage (2027)",
+          "url": "https://minimumwage.minneapolismn.gov/",
+          "verifiedOn": "2026-11-06",
+          "verifiedBy": "City of Minneapolis Minimum Wage https://minimumwage.minneapolismn.gov/ read directly 2026-11-06: 'In 2026, the Minneapolis Minimum Wage is $16.37. On January 1, 2027, it will increase to $17.02.' Tips do not count toward the wage."
         }
       ]
     },
@@ -35,56 +41,56 @@
       "id": "saint_paul",
       "name": "Saint Paul",
       "level": "city",
-      "hourly": 16.37,
-      "hourlyCents": 1637,
-      "effectiveFrom": "2026-01-01",
+      "hourly": 17.02,
+      "hourlyCents": 1702,
+      "effectiveFrom": "2027-01-01",
       "adjustmentDate": "01-01",
       "coverage": "Macro (10,001+) and large (101-10,000) businesses.",
       "variants": [
         {
-          "id": "small_h1",
-          "label": "Small businesses (6-100 employees), January 1 - June 30, 2026",
-          "hourly": 15.0,
-          "hourlyCents": 1500,
-          "effectiveFrom": "2026-01-01",
-          "effectiveTo": "2026-06-30",
-          "test": "Pre-catch-up figure.",
-          "appliesWhen": {
-            "employeeCountMin": 6,
-            "employeeCountMax": 100
-          }
-        },
-        {
-          "id": "small_h2",
-          "label": "Small businesses (6-100 employees), July 1 - December 31, 2026",
+          "id": "small_2027_h1",
+          "label": "Small businesses (6-100 employees), January 1 - June 30, 2027",
           "hourly": 16.37,
           "hourlyCents": 1637,
-          "effectiveFrom": "2026-07-01",
-          "test": "Saint Paul's small-business tier CAUGHT UP to the large rate on 2026-07-01. As of this file's asOf date (in the second half of the year) the two are equal.",
+          "effectiveFrom": "2027-01-01",
+          "test": "City announcement of 2027 rates (2026-09-01).",
+          "appliesWhen": {
+            "employeeCountMin": 6,
+            "employeeCountMax": 100
+          },
+          "effectiveTo": "2027-06-30"
+        },
+        {
+          "id": "small_2027_h2",
+          "label": "Small businesses (6-100 employees), from July 1, 2027",
+          "hourly": 17.02,
+          "hourlyCents": 1702,
+          "effectiveFrom": "2027-07-01",
+          "test": "Small catches up to the large rate on 2027-07-01.",
           "appliesWhen": {
             "employeeCountMin": 6,
             "employeeCountMax": 100
           }
         },
         {
-          "id": "micro_h1",
-          "label": "Micro businesses (5 or fewer employees), January 1 - June 30, 2026",
-          "hourly": 13.25,
-          "hourlyCents": 1325,
-          "effectiveFrom": "2026-01-01",
-          "effectiveTo": "2026-06-30",
-          "test": "Pre-July-2026 figure.",
-          "appliesWhen": {
-            "employeeCountMax": 5
-          }
-        },
-        {
-          "id": "micro_h2",
-          "label": "Micro businesses (5 or fewer employees), July 1 - December 31, 2026",
+          "id": "micro_2027_h1",
+          "label": "Micro businesses (5 or fewer employees), January 1 - June 30, 2027",
           "hourly": 14.25,
           "hourlyCents": 1425,
-          "effectiveFrom": "2026-07-01",
-          "test": "Still below the other tiers -- Saint Paul's micro schedule converges later than small's.",
+          "effectiveFrom": "2027-01-01",
+          "test": "City announcement of 2027 rates (2026-09-01).",
+          "appliesWhen": {
+            "employeeCountMax": 5
+          },
+          "effectiveTo": "2027-06-30"
+        },
+        {
+          "id": "micro_2027_h2",
+          "label": "Micro businesses (5 or fewer employees), from July 1, 2027",
+          "hourly": 15.0,
+          "hourlyCents": 1500,
+          "effectiveFrom": "2027-07-01",
+          "test": "City announcement of 2027 rates (2026-09-01).",
           "appliesWhen": {
             "employeeCountMax": 5
           }
@@ -95,13 +101,13 @@
           "hourly": 13.95,
           "hourlyCents": 1395,
           "effectiveFrom": "2026-07-01",
-          "test": "After 90 days a youth employee moves to the rate for the employer's size tier."
+          "test": "After 90 days a youth employee moves to the rate for the employer's size tier. The 2027 youth rate was not in the city's announcement; the city's rule is 85% of the small-business rate rounded up to the nickel, which would be $13.95 while small is $16.37 and $14.50 once small is $17.02 on 2027-07-01 (not applied)."
         }
       ],
       "tipped": {
         "tipCreditAllowed": false,
-        "cashWage": 16.37,
-        "cashWageCents": 1637,
+        "cashWage": 17.02,
+        "cashWageCents": 1702,
         "maxTipCredit": 0.0,
         "maxTipCreditCents": 0,
         "note": "No tip credit -- Minnesota state law."
@@ -112,6 +118,12 @@
           "url": "https://www.stpaul.gov/news/city-saint-paul-minimum-wage-increases-small-and-micro-businesses",
           "verifiedOn": "2026-09-08",
           "verifiedBy": "Fetched and read directly this session. Quoted: 'The minimum wage hourly rate will be: $16.37 for small businesses (6-100 employees) $14.25 for micro businesses (5 employees or fewer)', plus the $13.95 youth rate for ages 14-17 during the first 90 days. CORRECTED to record BOTH halves of 2026 (small $15.00/micro $13.25 Jan-Jun, $16.37/$14.25 Jul-Dec) -- matching the same before/after-mid-year-step pattern already used for Renton's and Everett's WA ordinances elsewhere in this database, rather than only the half in effect on this file's own asOf date."
+        },
+        {
+          "title": "City of Saint Paul -- 2027 minimum wage rates",
+          "url": "https://www.stpaul.gov/news/announcing-city-saint-paul-minimum-wage-rates-2027",
+          "verifiedOn": "2026-11-06",
+          "verifiedBy": "City of Saint Paul, Announcing City of Saint Paul Minimum Wage Rates for 2027 (September 1, 2026) https://www.stpaul.gov/news/announcing-city-saint-paul-minimum-wage-rates-2027 read directly 2026-11-06: effective January 1, 2027 $17.02 for large and macro businesses (101+ employees), $16.37 for small (6-100), $14.25 for micro (5 or fewer); effective July 1, 2027 $17.02 large, $17.02 small, $15.00 micro."
         }
       ],
       "appliesWhen": {
@@ -136,6 +148,19 @@
     "createdOn": "2026-10-25",
     "basedOn": "data/minimum-wage/local/MN-local-2026.json",
     "note": "Carried forward from the 2026 file on 2026-10-25 so that a 2027-dated query resolves instead of failing. Every figure is 2026's unless listed in updatedFor2027 (each with the state agency's own announcement or the statute). Remove this block only after every figure has been re-read against a 2027 source. LOCAL ORDINANCES ARE NOT YET UPDATED for 2027: many step on 1 January 2027 (e.g. Denver $19.84, Minneapolis $17.02, Seattle, Flagstaff, Albuquerque, Portland ME). The figures here are 2026's until each ordinance is re-read.",
-    "updatedFor2027": []
+    "updatedFor2027": [
+      {
+        "path": "jurisdictions[minneapolis].hourly",
+        "from": 16.37,
+        "to": 17.02,
+        "source": "City of Minneapolis Minimum Wage https://minimumwage.minneapolismn.gov/ read directly 2026-11-06: 'In 2026, the Minneapolis Minimum Wage is $16.37. On January 1, 2027, it will increase to $17.02.' Tips do not count toward the wage."
+      },
+      {
+        "path": "jurisdictions[saint_paul]",
+        "from": "16.37 large; small 16.37; micro 14.25",
+        "to": "17.02 large; small 16.37 then 17.02 (July 1); micro 14.25 then 15.00 (July 1)",
+        "source": "City of Saint Paul, Announcing City of Saint Paul Minimum Wage Rates for 2027 (September 1, 2026) https://www.stpaul.gov/news/announcing-city-saint-paul-minimum-wage-rates-2027 read directly 2026-11-06: effective January 1, 2027 $17.02 for large and macro businesses (101+ employees), $16.37 for small (6-100), $14.25 for micro (5 or fewer); effective July 1, 2027 $17.02 large, $17.02 small, $15.00 micro."
+      }
+    ]
   }
 }

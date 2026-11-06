@@ -10,6 +10,30 @@
    "revision": "web page, no edition printed; stored copy checked 2026-11-04",
    "verifiedOn": "2026-11-04",
    "verifiedBy": "read from the stored copy in watcher/state/snapshots/vt-a359b6d000.txt.gz: Payment Frequency for Employers (quarterly, monthly, semiweekly), Quarterly Reconciliation (WHT-436), Annual Reconciliation (WHT-434), How to File (electronic requirements), amending, and the list of specifications."
+  },
+  {
+   "id": "U1",
+   "title": "Vermont Department of Labor: Quarterly Reporting & Taxable Wage Information",
+   "url": "https://labor.vermont.gov/unemployment-insurance/ui-employers/quarterly-reporting-taxable-wage-information",
+   "revision": "page fetched live 2026-11-05",
+   "verifiedOn": "2026-11-05",
+   "verifiedBy": "fetched directly from labor.vermont.gov on 2026-11-05 and read: all employers file quarterly UI wage and contribution reports electronically; due dates (January-March: April 30; April-June: July 31; July-September: October 31; October-December: January 31); 'If the report due date falls on a weekend, the due date will be the next business day.'"
+  },
+  {
+   "id": "U2",
+   "title": "U.S. Department of Labor, Significant Provisions of State Unemployment Insurance Laws, effective January 2026",
+   "url": "https://oui.doleta.gov/unemploy/content/sigpros/2020-2029/January2026.pdf",
+   "revision": "effective January 2026",
+   "verifiedOn": "2026-11-05",
+   "verifiedBy": "fetched directly from oui.doleta.gov on 2026-11-05 and read (layout text): the Taxes column's taxable wage base for the state's row (a federal compilation of the state laws)."
+  },
+  {
+   "id": "N1",
+   "title": "U.S. Department of Health and Human Services, Office of Child Support Services: State New Hire Reporting Contacts and Program Information matrix",
+   "url": "https://ocsp.acf.hhs.gov/irg/irgpdf.pdf?geoType=OGP&groupCode=EMP&addrType=NHR&addrClassType=EMP",
+   "revision": "Vermont entry updated 11/05/2026",
+   "verifiedOn": "2026-11-06",
+   "verifiedBy": "read from the federal matrix (layout text of the PDF fetched live 2026-11-06) the Vermont entry, 'Updated On: 11/05/2026': reporting timeframe 'Within 10 days of hire date'. This matrix is the Office of Child Support Services' consolidated list of each state directory's own timeframe, contact and website; the state's statute or directory page was not separately read."
   }
  ],
  "agencies": {
@@ -17,6 +41,15 @@
    "name": "Vermont Department of Taxes",
    "portalUrl": "https://myvtax.vermont.gov",
    "source": "S1"
+  },
+  "ui": {
+   "name": "Vermont Department of Labor, Unemployment Insurance and Wages Division",
+   "portalUrl": "https://labor.vermont.gov/unemployment-insurance/ui-employers/quarterly-reporting-taxable-wage-information",
+   "source": "U1"
+  },
+  "newHire": {
+   "name": "Vermont State Directory of New Hires",
+   "source": "N1"
   }
  },
  "calendar": {
@@ -57,8 +90,6 @@
   "notModelled": [
    "Vermont's MONTHLY and QUARTERLY payment dates: the page states the monthly 25th/February 23 rule but no due date for Form WHT-436, so the third monthly payment and the quarterly payment are not computed.",
    "Form WHT-436 (Quarterly Withholding Reconciliation) due dates.",
-   "Vermont unemployment insurance (Department of Labor): no document read.",
-   "Vermont's legal-holiday list (weekends only are skipped, with a warning).",
    "The Vermont WHT-434, 1099 and EFW-2 filing specifications (listed on the page, not read)."
   ],
   "deposits": {
@@ -98,8 +129,35 @@
    "source": "S1"
   }
  ],
- "notModelled": [
-  "Vermont unemployment insurance: not read.",
-  "New-hire reporting: not read."
- ]
+ "notModelled": [],
+ "ui": {
+  "wageBase": 1540000,
+  "wageBaseYear": 2026,
+  "employerTaxLineId": "VT_SUI_ER",
+  "returns": [
+   {
+    "id": "wage-and-contribution",
+    "name": "Employer's Quarterly Wage and Contribution Report",
+    "frequency": "quarterly",
+    "due": {
+     "kind": "last_day_of_month_after_quarter"
+    },
+    "contents": [
+     "Due April 30, July 31, October 31 and January 31; if the date falls on a weekend the due date is the next business day.",
+     "All employers file the report electronically in the online UI system."
+    ],
+    "source": "U1"
+   }
+  ],
+  "notModelled": [
+   "The page states a weekend rule only; whether a bank or state holiday moves the date is stated in the Employer Handbook per a search summary and was not read, so holidays are treated as moving it.",
+   "The $100 per-report penalty and the 1.5% monthly interest come from a search summary and were not read.",
+   "The agency's file format specifications, penalties not quoted above and portal enrollment steps were not read."
+  ]
+ },
+ "newHire": {
+  "form": "New-hire report (federal Form W-4 or an equivalent) to the Vermont State Directory of New Hires; within 10 days of hire date",
+  "daysFromStart": 10,
+  "source": "N1"
+ }
 }

@@ -5,7 +5,15 @@
     "status": "carry-forward-from-2026",
     "createdOn": "2026-10-13",
     "basedOn": "data/local/OH-school-districts-2026.json",
-    "note": "Carried forward from the 2026 file on 2026-10-13. Not yet checked against the 2027 official source: every figure is 2026's unless listed in updatedFor2027. Remove this block only after each figure has been re-verified against its 2027 source."
+    "note": "Carried forward from the 2026 file on 2026-10-13. Not yet checked against the 2027 official source: every figure is 2026's unless listed in updatedFor2027. Remove this block only after each figure has been re-verified against its 2027 source.",
+    "updatedFor2027": [
+      {
+        "path": "districts[sdNumber 0606, 2605, 3305, 4902, 5008].rate",
+        "from": "1% / 1% / 1% / 1.25% / 1% (2026 rates carried forward)",
+        "to": "Waynesfield-Goshen 0%, Pike-Delta-York 1.25%, Riverdale 0%, Jonathan Alder 0.50%, Sebring 0%",
+        "source": "https://thefinder.tax.ohio.gov (file-downloads SD/OHSDRateTable.csv), read 2026-11-06. All 214 districts compared for 2027-01-01: these five were the only differences from the carried-forward 2026 rates; the same table reproduces all 214 of the 2026 rates."
+      }
+    ]
   },
   "asOf": "2026-08-11",
   "source": {
@@ -160,7 +168,9 @@
       "name": "Waynesfield-Goshen LSD (expires 2026)",
       "rate2026": 0.01,
       "earnedIncomeOnlyBase": false,
-      "firstYearEffective": 1992
+      "firstYearEffective": 1992,
+      "rate": 0.0,
+      "rateNote": "2027 rate from Ohio Dept of Taxation's Finder school-district rate table (SD/OHSDRateTable.csv), read 2026-11-06: the rate effective 2027-01-01; rate2026 keeps the 2026 rate."
     },
     {
       "county": "Butler",
@@ -610,7 +620,9 @@
       "name": "Pike-Delta-York LSD (existing 1% expires 2026, 1.25% CPT begins 2027)",
       "rate2026": 0.01,
       "earnedIncomeOnlyBase": false,
-      "firstYearEffective": 2022
+      "firstYearEffective": 2022,
+      "rate": 0.0125,
+      "rateNote": "2027 rate from Ohio Dept of Taxation's Finder school-district rate table (SD/OHSDRateTable.csv), read 2026-11-06: the rate effective 2027-01-01; rate2026 keeps the 2026 rate."
     },
     {
       "county": "Fulton",
@@ -817,7 +829,9 @@
       "name": "Riverdale LSD (expires 2026)",
       "rate2026": 0.01,
       "earnedIncomeOnlyBase": false,
-      "firstYearEffective": 2000
+      "firstYearEffective": 2000,
+      "rate": 0.0,
+      "rateNote": "2027 rate from Ohio Dept of Taxation's Finder school-district rate table (SD/OHSDRateTable.csv), read 2026-11-06: the rate effective 2027-01-01; rate2026 keeps the 2026 rate."
     },
     {
       "county": "Hardin",
@@ -1060,7 +1074,9 @@
       "name": "Jonathan Alder LSD (0.75% expires 2026, 0.50% expires 2031)",
       "rate2026": 0.0125,
       "earnedIncomeOnlyBase": true,
-      "firstYearEffective": 2007
+      "firstYearEffective": 2007,
+      "rate": 0.005,
+      "rateNote": "2027 rate from Ohio Dept of Taxation's Finder school-district rate table (SD/OHSDRateTable.csv), read 2026-11-06: the rate effective 2027-01-01; rate2026 keeps the 2026 rate."
     },
     {
       "county": "Madison",
@@ -1087,7 +1103,9 @@
       "name": "Sebring LSD (expires 2026)",
       "rate2026": 0.01,
       "earnedIncomeOnlyBase": true,
-      "firstYearEffective": 2007
+      "firstYearEffective": 2007,
+      "rate": 0.0,
+      "rateNote": "2027 rate from Ohio Dept of Taxation's Finder school-district rate table (SD/OHSDRateTable.csv), read 2026-11-06: the rate effective 2027-01-01; rate2026 keeps the 2026 rate."
     },
     {
       "county": "Mahoning",

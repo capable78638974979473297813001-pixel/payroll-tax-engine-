@@ -18,6 +18,30 @@
    "revision": "web pages, no edition printed; fetched live 2026-11-05",
    "verifiedOn": "2026-11-05",
    "verifiedBy": "fetched directly from tax.idaho.gov on 2026-11-05 and read: Withholding Due Dates (Form 910 by filing cycle, Form 967 and W-2s, 1099s, weekend rule) and Withholding Filing (the criteria for semimonthly, monthly, quarterly and annual cycles, cycle changes by November 15, TAP, PEOs, powers of attorney) at https://tax.idaho.gov/taxes/income-tax/withholding/withholding-filing/."
+  },
+  {
+   "id": "U1",
+   "title": "Idaho Department of Labor, Unemployment Insurance Tax Information handbook (November 2025)",
+   "url": "https://www.labor.idaho.gov/wp-content/uploads/2025/11/Handbook_Tax-information_Nov.-2025-1.pdf",
+   "revision": "dated 11/5/2025",
+   "verifiedOn": "2026-11-05",
+   "verifiedBy": "fetched directly from labor.idaho.gov on 2026-11-05 and read: reports and payments due the last day of the month after each quarter (Idaho Code 72-1311), no grace period, a weekend or holiday moves the due date to the next workday (Idaho Code 72-1349), quarterly reports required even with no wages."
+  },
+  {
+   "id": "U2",
+   "title": "U.S. Department of Labor, Significant Provisions of State Unemployment Insurance Laws, effective January 2026",
+   "url": "https://oui.doleta.gov/unemploy/content/sigpros/2020-2029/January2026.pdf",
+   "revision": "effective January 2026",
+   "verifiedOn": "2026-11-05",
+   "verifiedBy": "fetched directly from oui.doleta.gov on 2026-11-05 and read (layout text): the Taxes column's taxable wage base for the state's row (a federal compilation of the state laws)."
+  },
+  {
+   "id": "N1",
+   "title": "U.S. Department of Health and Human Services, Office of Child Support Services: State New Hire Reporting Contacts and Program Information matrix",
+   "url": "https://ocsp.acf.hhs.gov/irg/irgpdf.pdf?geoType=OGP&groupCode=EMP&addrType=NHR&addrClassType=EMP",
+   "revision": "Idaho entry updated 03/22/2025",
+   "verifiedOn": "2026-11-06",
+   "verifiedBy": "read from the federal matrix (layout text of the PDF fetched live 2026-11-06) the Idaho entry, 'Updated On: 03/22/2025': reporting timeframe 'Within 20 days of start date'. This matrix is the Office of Child Support Services' consolidated list of each state directory's own timeframe, contact and website; the state's statute or directory page was not separately read."
   }
  ],
  "agencies": {
@@ -25,6 +49,15 @@
    "name": "Idaho State Tax Commission",
    "portalUrl": "https://tap.idaho.gov",
    "source": "S1"
+  },
+  "ui": {
+   "name": "Idaho Department of Labor, Unemployment Insurance Tax",
+   "portalUrl": "https://www.labor.idaho.gov/employers/",
+   "source": "U1"
+  },
+  "newHire": {
+   "name": "Idaho State Directory of New Hires",
+   "source": "N1"
   }
  },
  "calendar": {
@@ -155,8 +188,34 @@
    "source": "S1"
   }
  ],
- "notModelled": [
-  "Idaho unemployment insurance: not read.",
-  "New-hire reporting: not read."
- ]
+ "notModelled": [],
+ "ui": {
+  "wageBase": 5830000,
+  "wageBaseYear": 2026,
+  "employerTaxLineId": "ID_SUI_ER",
+  "returns": [
+   {
+    "id": "TX20_TX26",
+    "name": "Quarterly unemployment tax report and payment (Forms TX20, TX26)",
+    "frequency": "quarterly",
+    "due": {
+     "kind": "last_day_of_month_after_quarter"
+    },
+    "contents": [
+     "Reports and payments are due the last day of April, July, October and January for the quarter ended the preceding month; there is no grace period.",
+     "When the last day falls on a weekend or holiday the next business day is the due date (Idaho Code 72-1349).",
+     "Late payment penalty: 4 percent of the tax due or $20, whichever is greater, for each month or fraction of a month the quarterly tax is delinquent, accruing separately on each quarter and never exceeding the tax due (Idaho Code 72-1354, handbook)."
+    ],
+    "source": "U1"
+   }
+  ],
+  "notModelled": [
+   "Idaho's penalties for failing to file a report on time and the 16-quarter reset appear in search summaries and were not read in the handbook text."
+  ]
+ },
+ "newHire": {
+  "form": "New-hire report (federal Form W-4 or an equivalent) to the Idaho State Directory of New Hires; within 20 days of start date",
+  "daysFromStart": 20,
+  "source": "N1"
+ }
 }

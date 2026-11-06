@@ -10,6 +10,30 @@
    "revision": "web page, no edition printed; stored copy checked 2026-11-04",
    "verifiedOn": "2026-11-04",
    "verifiedBy": "read from the stored copy in watcher/state/snapshots/mi-f5fa14dee6.txt.gz: Due Dates, Filing Deadlines (twice: bullet list and table), Accelerated Filers, Payroll Service Providers, the Authorized Representative Declaration (Form 151). The Michigan Withholding Guide (446, 2026) is stored but its frequency sections were not found."
+  },
+  {
+   "id": "U1",
+   "title": "Michigan UIA, Quarterly Reports (employer FAQ)",
+   "url": "https://www.michigan.gov/leo/bureaus-agencies/uia/employers/frequently-asked-questions-for-employers/for-employers/quarterly-reports",
+   "revision": "page fetched live 2026-11-05",
+   "verifiedOn": "2026-11-05",
+   "verifiedBy": "fetched directly from michigan.gov on 2026-11-05 and read: reports are due by January 25, April 25, July 25 and October 25 each calendar year; if the 25th is a weekend day or holiday the report must be received on the next business day at the latest."
+  },
+  {
+   "id": "U2",
+   "title": "U.S. Department of Labor, Significant Provisions of State Unemployment Insurance Laws, effective January 2026",
+   "url": "https://oui.doleta.gov/unemploy/content/sigpros/2020-2029/January2026.pdf",
+   "revision": "effective January 2026",
+   "verifiedOn": "2026-11-05",
+   "verifiedBy": "fetched directly from oui.doleta.gov on 2026-11-05 and read (layout text): the Taxes column's taxable wage base for the state's row (a federal compilation of the state laws)."
+  },
+  {
+   "id": "N1",
+   "title": "U.S. Department of Health and Human Services, Office of Child Support Services: State New Hire Reporting Contacts and Program Information matrix",
+   "url": "https://ocsp.acf.hhs.gov/irg/irgpdf.pdf?geoType=OGP&groupCode=EMP&addrType=NHR&addrClassType=EMP",
+   "revision": "Michigan entry updated 05/28/2026",
+   "verifiedOn": "2026-11-06",
+   "verifiedBy": "read from the federal matrix (layout text of the PDF fetched live 2026-11-06) the Michigan entry, 'Updated On: 05/28/2026': reporting timeframe 'Within 20 calendar days after the date of hire or re-hire'. This matrix is the Office of Child Support Services' consolidated list of each state directory's own timeframe, contact and website; the state's statute or directory page was not separately read."
   }
  ],
  "agencies": {
@@ -17,6 +41,16 @@
    "name": "Michigan Department of Treasury",
    "portalUrl": "https://mto.treasury.michigan.gov",
    "source": "S1"
+  },
+  "ui": {
+   "name": "Michigan Unemployment Insurance Agency (UIA), Department of Labor and Economic Opportunity",
+   "portalUrl": "https://www.michigan.gov/leo/bureaus-agencies/uia",
+   "source": "U1"
+  },
+  "newHire": {
+   "name": "Michigan State Directory of New Hires",
+   "source": "N1",
+   "portalUrl": "https://www.mi-newhire.com/"
   }
  },
  "calendar": {
@@ -67,8 +101,6 @@
   "notModelled": [
    "Michigan's ACCELERATED schedule (same day as the federal payment; pre-payment by the 20th and a reconciliation by the 20th of the next month): the rule is stated but follows the federal schedule and is not modelled.",
    "The thresholds Treasury uses to assign monthly, quarterly or annual: not on the page.",
-   "Michigan unemployment insurance (Unemployment Insurance Agency): no document read.",
-   "Michigan's State-holiday list (weekends only are skipped, with a warning).",
    "City income tax withholding (Michigan cities file separately).",
    "The Income Record Form Remittance Guide's file layouts."
   ],
@@ -123,8 +155,36 @@
    "source": "S1"
   }
  ],
- "notModelled": [
-  "Michigan unemployment insurance: not read.",
-  "New-hire reporting: not read."
- ]
+ "notModelled": [],
+ "ui": {
+  "wageBase": 950000,
+  "wageBaseYear": 2026,
+  "employerTaxLineId": "MI_SUI_ER",
+  "returns": [
+   {
+    "id": "quarterly-wage-tax-report",
+    "name": "Employer's Quarterly Wage/Tax Report",
+    "frequency": "quarterly",
+    "due": {
+     "kind": "day_of_month_after_quarter",
+     "day": 25
+    },
+    "contents": [
+     "Due by January 25, April 25, July 25 and October 25 (the 25th of the month after the quarter); if the 25th is a weekend day or holiday the report must be received on the next business day at the latest."
+    ],
+    "source": "U1"
+   }
+  ],
+  "notModelled": [
+   "Michigan's taxable wage base is $9,500 for most employers; the data file carries a lower $9,000 figure for a qualified-employer case. The profile uses $9,500 and the DOL compilation lists '$9,000 or $9,500'; which applies depends on a rate-notice classification not modelled.",
+   "The UIA's own April 2026 notice that the MiWAM Form 1028 upload format is no longer accepted was found in a search summary and not read; accepted formats are not scheduled here.",
+   "The $55 non-reporting penalty appears in a search summary of the FAQ and was not read.",
+   "The agency's file format specifications, penalties not quoted above and portal enrollment steps were not read."
+  ]
+ },
+ "newHire": {
+  "form": "New-hire report (federal Form W-4 or an equivalent) to the Michigan State Directory of New Hires; within 20 calendar days after the date of hire or re-hire",
+  "daysFromStart": 20,
+  "source": "N1"
+ }
 }

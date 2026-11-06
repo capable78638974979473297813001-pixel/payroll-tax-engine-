@@ -10,6 +10,30 @@
    "revision": "2025 instructions (file dated 12/18/24)",
    "verifiedOn": "2026-11-05",
    "verifiedBy": "fetched directly from otr.cfo.dc.gov on 2026-11-05 and read: When Must You File, General Instructions (payment frequencies and the 20th-day rule), how to complete the FR-900Q (electronic filing, the account number, third-party payers), specific instructions, the list of related forms. THE 2025 EDITION; the 2026 instructions were not read."
+  },
+  {
+   "id": "U1",
+   "title": "DC DOES: Reporting Questions",
+   "url": "https://does.dc.gov/service/reporting-questions",
+   "revision": "page fetched live 2026-11-05",
+   "verifiedOn": "2026-11-05",
+   "verifiedBy": "fetched directly from does.dc.gov on 2026-11-05 and read: employers file an Employer's Quarterly Contribution and Wage Report (Form UC-30) each quarter, due on April 30, July 31, October 31 and January 31."
+  },
+  {
+   "id": "U2",
+   "title": "U.S. Department of Labor, Significant Provisions of State Unemployment Insurance Laws, effective January 2026",
+   "url": "https://oui.doleta.gov/unemploy/content/sigpros/2020-2029/January2026.pdf",
+   "revision": "effective January 2026",
+   "verifiedOn": "2026-11-05",
+   "verifiedBy": "fetched directly from oui.doleta.gov on 2026-11-05 and read (layout text): the Taxes column's taxable wage base for the state's row (a federal compilation of the state laws)."
+  },
+  {
+   "id": "N1",
+   "title": "U.S. Department of Health and Human Services, Office of Child Support Services: State New Hire Reporting Contacts and Program Information matrix",
+   "url": "https://ocsp.acf.hhs.gov/irg/irgpdf.pdf?geoType=OGP&groupCode=EMP&addrType=NHR&addrClassType=EMP",
+   "revision": "District of Columbia entry updated 03/22/2025",
+   "verifiedOn": "2026-11-06",
+   "verifiedBy": "read from the federal matrix (layout text of the PDF fetched live 2026-11-06) the District of Columbia entry, 'Updated On: 03/22/2025': reporting timeframe 'Within 20 days of hire (or rehire) date'. This matrix is the Office of Child Support Services' consolidated list of each state directory's own timeframe, contact and website; the state's statute or directory page was not separately read."
   }
  ],
  "agencies": {
@@ -17,6 +41,16 @@
    "name": "DC Office of Tax and Revenue",
    "portalUrl": "https://mytax.dc.gov",
    "source": "S1"
+  },
+  "ui": {
+   "name": "District of Columbia Department of Employment Services (DOES), Office of Unemployment Compensation",
+   "portalUrl": "https://does.dc.gov/service/reporting-questions",
+   "source": "U1"
+  },
+  "newHire": {
+   "name": "District of Columbia State Directory of New Hires",
+   "source": "N1",
+   "portalUrl": "https://dc-newhire.com/"
   }
  },
  "calendar": {
@@ -58,7 +92,7 @@
   "notModelled": [
    "Weekly and semi-weekly payment schedules: named, no dates or thresholds in the instructions.",
    "Annual filers (Form FR-900A) and the payment voucher FR-900P.",
-   "The 2026 edition of the instructions; DC unemployment insurance (Department of Employment Services); the DC Paid Family Leave tax; DC's legal-holiday list (weekends only are skipped, with a warning).",
+   "The 2026 edition of the instructions; the DC Paid Family Leave tax.",
    "The MyTax.DC.gov bulk filing specification (FR-900Q) and electronic W-2 filing: listed in the instructions, not read."
   ],
   "deposits": {
@@ -106,7 +140,37 @@
   }
  ],
  "notModelled": [
-  "DC unemployment insurance and Paid Family Leave: not read.",
-  "New-hire reporting: not read."
- ]
+  "DC Paid Family Leave: not read."
+ ],
+ "ui": {
+  "wageBase": 900000,
+  "wageBaseYear": 2026,
+  "employerTaxLineId": "DC_SUI_ER",
+  "returns": [
+   {
+    "id": "UC-30",
+    "name": "Employer's Quarterly Contribution and Wage Report (Form UC-30)",
+    "frequency": "quarterly",
+    "due": {
+     "kind": "last_day_of_month_after_quarter"
+    },
+    "contents": [
+     "Due April 30, July 31, October 31 and January 31 (DOES).",
+     "The page does not state a weekend or holiday rule.",
+     "Reports and taxes not submitted on time are subject to penalty and interest: interest at 1.5 percent of the tax due per month or fraction thereof until paid, and a penalty of 10 percent of the tax due, but not less than $100 (DOES Reporting Questions page)."
+    ],
+    "source": "U1"
+   }
+  ],
+  "notModelled": [
+   "Electronic-filing threshold (the Employer Self Service Portal) and the zero-wage report: summarised by search only, not read.",
+   "A search summary says DC reports are due on the printed date even on a non-business day; that was not read in a DOES page, so it is not modelled."
+  ],
+  "weekendRuleStated": false
+ },
+ "newHire": {
+  "form": "New-hire report (federal Form W-4 or an equivalent) to the District of Columbia State Directory of New Hires; within 20 days of hire (or rehire) date",
+  "daysFromStart": 20,
+  "source": "N1"
+ }
 }

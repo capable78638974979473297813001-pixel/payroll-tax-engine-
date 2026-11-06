@@ -26,6 +26,14 @@
    "revision": "page last read 2026-11-03",
    "verifiedOn": "2026-11-03",
    "verifiedBy": "page fetched directly: UTS wage-report filing and Required Wage Report Information"
+  },
+  {
+   "id": "N1",
+   "title": "U.S. Department of Health and Human Services, Office of Child Support Services: State New Hire Reporting Contacts and Program Information matrix",
+   "url": "https://ocsp.acf.hhs.gov/irg/irgpdf.pdf?geoType=OGP&groupCode=EMP&addrType=NHR&addrClassType=EMP",
+   "revision": "Texas entry updated 03/22/2025",
+   "verifiedOn": "2026-11-06",
+   "verifiedBy": "read from the federal matrix (layout text of the PDF fetched live 2026-11-06) the Texas entry, 'Updated On: 03/22/2025': reporting timeframe 'Within 20 calendar days from the date on which the employee starts earning wages'. This matrix is the Office of Child Support Services' consolidated list of each state directory's own timeframe, contact and website; the state's statute or directory page was not separately read."
   }
  ],
  "agencies": {
@@ -33,6 +41,11 @@
    "name": "Texas Workforce Commission (TWC), Unemployment Tax Services",
    "portalUrl": "https://apps.twc.texas.gov/UITAXSERV/security/logon.do",
    "source": "S3"
+  },
+  "newHire": {
+   "name": "Texas State Directory of New Hires",
+   "source": "N1",
+   "portalUrl": "https://employer.oag.texas.gov/employerportal/s/new-hire-general-information"
   }
  },
  "calendar": {
@@ -78,7 +91,6 @@
   ],
   "notModelled": [
    "The wage-report upload layout for more than 1,000 employees (TWC QuickFile) was not read.",
-   "Texas legal holidays were not read.",
    "The tax rate notice is an input; the 2026 minimum is 0.32% and maximum 6.32% (S1)."
   ]
  },
@@ -95,7 +107,11 @@
   }
  ],
  "notModelled": [
-  "New-hire reporting (Texas Attorney General's office) not read.",
   "Local taxes: none are modelled for Texas; the engine's data says Texas has no wage income tax or local payroll tax."
- ]
+ ],
+ "newHire": {
+  "form": "New-hire report (federal Form W-4 or an equivalent) to the Texas State Directory of New Hires; within 20 calendar days from the date on which the employee starts earning wages",
+  "daysFromStart": 20,
+  "source": "N1"
+ }
 }

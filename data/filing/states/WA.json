@@ -10,6 +10,14 @@
    "revision": "web pages, no edition printed; fetched live 2026-11-05",
    "verifiedOn": "2026-11-05",
    "verifiedBy": "fetched directly from esd.wa.gov on 2026-11-05 and read: how to file (SecureAccess Washington and EAMS), due dates for quarterly reports, no-payroll reports, and the taxable wage base table (2026: $78,200) on https://esd.wa.gov/employer-requirements/unemployment-taxes/how-we-determine-tax-rates. Washington Paid Family and Medical Leave and WA Cares are separate programs run by the same department with their own quarterly report and are not modelled here."
+  },
+  {
+   "id": "N1",
+   "title": "U.S. Department of Health and Human Services, Office of Child Support Services: State New Hire Reporting Contacts and Program Information matrix",
+   "url": "https://ocsp.acf.hhs.gov/irg/irgpdf.pdf?geoType=OGP&groupCode=EMP&addrType=NHR&addrClassType=EMP",
+   "revision": "Washington entry updated 03/22/2025",
+   "verifiedOn": "2026-11-06",
+   "verifiedBy": "read from the federal matrix (layout text of the PDF fetched live 2026-11-06) the Washington entry, 'Updated On: 03/22/2025': reporting timeframe 'Within 20 days of hire date'. This matrix is the Office of Child Support Services' consolidated list of each state directory's own timeframe, contact and website; the state's statute or directory page was not separately read."
   }
  ],
  "agencies": {
@@ -17,6 +25,11 @@
    "name": "Washington Employment Security Department (ESD)",
    "portalUrl": "https://esd.wa.gov/employer-requirements/quarterly-reports",
    "source": "S1"
+  },
+  "newHire": {
+   "name": "Washington State Directory of New Hires",
+   "source": "N1",
+   "portalUrl": "http://www.NewHire.wa.gov"
   }
  },
  "calendar": {
@@ -73,7 +86,11 @@
   }
  ],
  "notModelled": [
-  "Washington has no state income tax on wages, so there is no state withholding.",
-  "New-hire reporting: not read."
- ]
+  "Washington has no state income tax on wages, so there is no state withholding."
+ ],
+ "newHire": {
+  "form": "New-hire report (federal Form W-4 or an equivalent) to the Washington State Directory of New Hires; within 20 days of hire date",
+  "daysFromStart": 20,
+  "source": "N1"
+ }
 }

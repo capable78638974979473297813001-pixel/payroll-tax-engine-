@@ -10,6 +10,30 @@
    "revision": "January 2026",
    "verifiedOn": "2026-11-03",
    "verifiedBy": "read from the stored copy in watcher/state/snapshots/co-0afe64d6b9.txt.gz: Part 3 'Filing frequency and due dates' (the table, weekly filing, year-end weekly filing period and its worked example), 'Filing and payment options' (EFT, Revenue Online, paper DR 1094), correcting errors, and the January 31 W-2 requirement (DR 1093). Not read: the registration form steps, penalties beyond the first sentence, or any unemployment (CDLE) or FAMLI document."
+  },
+  {
+   "id": "U1",
+   "title": "CDLE Pay Premiums and Report Wages FAQ",
+   "url": "https://cdle.colorado.gov/employers/pay-premiums-and-report-wages/pay-premiums-and-report-wages-faq",
+   "revision": "FAQ page, fetched live 2026-11-05",
+   "verifiedOn": "2026-11-05",
+   "verifiedBy": "fetched directly from cdle.colorado.gov on 2026-11-05 and read: quarterly wage detail reports, monthly employment data and premium payments are due the last day of the month following the quarter; a Saturday, Sunday or legal holiday moves a timely payment to the next business day; the delinquent-premium penalty paragraph."
+  },
+  {
+   "id": "U2",
+   "title": "U.S. Department of Labor, Significant Provisions of State Unemployment Insurance Laws, effective January 2026",
+   "url": "https://oui.doleta.gov/unemploy/content/sigpros/2020-2029/January2026.pdf",
+   "revision": "effective January 2026",
+   "verifiedOn": "2026-11-05",
+   "verifiedBy": "fetched directly from oui.doleta.gov on 2026-11-05 and read (layout text): the Taxes column's taxable wage base for the state's row (a federal compilation of the state laws)."
+  },
+  {
+   "id": "N1",
+   "title": "U.S. Department of Health and Human Services, Office of Child Support Services: State New Hire Reporting Contacts and Program Information matrix",
+   "url": "https://ocsp.acf.hhs.gov/irg/irgpdf.pdf?geoType=OGP&groupCode=EMP&addrType=NHR&addrClassType=EMP",
+   "revision": "Colorado entry updated 03/22/2025",
+   "verifiedOn": "2026-11-06",
+   "verifiedBy": "read from the federal matrix (layout text of the PDF fetched live 2026-11-06) the Colorado entry, 'Updated On: 03/22/2025': reporting timeframe 'Within 20 days of hire date'. This matrix is the Office of Child Support Services' consolidated list of each state directory's own timeframe, contact and website; the state's statute or directory page was not separately read."
   }
  ],
  "agencies": {
@@ -17,6 +41,16 @@
    "name": "Colorado Department of Revenue",
    "portalUrl": "https://tax.colorado.gov/revenue-online",
    "source": "S1"
+  },
+  "ui": {
+   "name": "Colorado Department of Labor and Employment (CDLE), Unemployment Insurance",
+   "portalUrl": "https://cdle.colorado.gov/employers",
+   "source": "U1"
+  },
+  "newHire": {
+   "name": "Colorado State Directory of New Hires",
+   "source": "N1",
+   "portalUrl": "http://www.newhire.state.co.us"
   }
  },
  "calendar": {
@@ -121,10 +155,9 @@
    }
   ],
   "notModelled": [
-   "Colorado unemployment insurance (Colorado Department of Labor and Employment) and FAMLI premiums: no document read.",
-   "The registration form and its steps, and the Colorado new-hire reporting deadline.",
+   "Colorado FAMLI premiums (Colorado Department of Labor and Employment): no document read.",
+   "The registration form and its steps.",
    "The Revenue Online file layouts for electronic W-2 submission.",
-   "Colorado's legal-holiday list (weekends only are skipped, with a warning).",
    "Penalty and interest amounts beyond the guide's opening sentence (the greater of $5 or 5% of the unpaid tax)."
   ]
  },
@@ -143,6 +176,37 @@
   }
  ],
  "notModelled": [
-  "Colorado unemployment insurance (CDLE) and FAMLI: not read."
- ]
+  "Colorado FAMLI premiums: not read."
+ ],
+ "ui": {
+  "wageBase": 3060000,
+  "wageBaseYear": 2026,
+  "employerTaxLineId": "CO_SUI_ER",
+  "returns": [
+   {
+    "id": "UITR-1",
+    "name": "Quarterly wage detail report and premium payment",
+    "frequency": "quarterly",
+    "due": {
+     "kind": "last_day_of_month_after_quarter"
+    },
+    "contents": [
+     "Quarterly wage detail reports, monthly employment data and premium payments are due the last day of the month after the quarter: April 30, July 31, October 31 and January 31.",
+     "If the date is a Saturday, Sunday or legal holiday the payment is timely on the next business day (CDLE FAQ; the FAQ states it for the premium payment).",
+     "Premium owed at the June 30 annual computation date carries a penalty of the past-due amount or 1% of taxable payroll, whichever is less, billed in four quarterly installments."
+    ],
+    "source": "U1"
+   }
+  ],
+  "notModelled": [
+   "The monthly employment data report is listed in the FAQ but its form and format were not read, and is not scheduled here.",
+   "Colorado's wage base is indexed and a 2027 value was not read.",
+   "Penalty for a late report ($50 per occurrence appears in a search summary, not a page read), the MyUI Employer+ portal steps, and the file format."
+  ]
+ },
+ "newHire": {
+  "form": "New-hire report (federal Form W-4 or an equivalent) to the Colorado State Directory of New Hires; within 20 days of hire date",
+  "daysFromStart": 20,
+  "source": "N1"
+ }
 }

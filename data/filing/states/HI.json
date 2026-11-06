@@ -10,6 +10,38 @@
    "revision": "Booklet A (Rev. 2025)",
    "verifiedOn": "2026-11-04",
    "verifiedBy": "read from the stored copy in watcher/state/snapshots/hi-dea958dcf2.txt.gz: the calendar of employer due dates, Section 3 'Determination of Tax Remittance Frequency' (quarterly, monthly, semiweekly and the Three-Day Banking Rule), the HW-14, HW-30 and HW-2 sections, and the electronic filing and penalty notes. The extracted text drops the heading and opening sentence of the semiweekly paragraph (its dollar threshold and federal-schedule condition), so the semiweekly derivation is NOT modelled. THE 2025 EDITION."
+  },
+  {
+   "id": "U1",
+   "title": "Hawaii DLIR UI Division, Handbook for Employers",
+   "url": "https://labor.hawaii.gov/ui/test-handbook-for-employers/",
+   "revision": "handbook page fetched live 2026-11-05",
+   "verifiedOn": "2026-11-05",
+   "verifiedBy": "fetched directly from labor.hawaii.gov on 2026-11-05 and read: Form UC-B6 (Quarterly Wage, Contribution and Employment and Training Assessment Report) is due on or before the last day of the month after the quarter (April 30, July 31, October 31, January 31), must be filed each quarter even if no wages were paid, and a late UC-B6 carries a $30 penalty. The page is titled as a test copy of the handbook."
+  },
+  {
+   "id": "U2",
+   "title": "U.S. Department of Labor, Significant Provisions of State Unemployment Insurance Laws, effective January 2026",
+   "url": "https://oui.doleta.gov/unemploy/content/sigpros/2020-2029/January2026.pdf",
+   "revision": "effective January 2026",
+   "verifiedOn": "2026-11-05",
+   "verifiedBy": "fetched directly from oui.doleta.gov on 2026-11-05 and read (layout text): the Taxes column's taxable wage base for the state's row (a federal compilation of the state laws)."
+  },
+  {
+   "id": "N1",
+   "title": "U.S. Department of Health and Human Services, Office of Child Support Services: State New Hire Reporting Contacts and Program Information matrix",
+   "url": "https://ocsp.acf.hhs.gov/irg/irgpdf.pdf?geoType=OGP&groupCode=EMP&addrType=NHR&addrClassType=EMP",
+   "revision": "Hawaii entry updated 03/22/2025",
+   "verifiedOn": "2026-11-06",
+   "verifiedBy": "read from the federal matrix (layout text of the PDF fetched live 2026-11-06) the Hawaii entry, 'Updated On: 03/22/2025': reporting timeframe 'Within 20 days of hire date'. This matrix is the Office of Child Support Services' consolidated list of each state directory's own timeframe, contact and website; the state's statute or directory page was not separately read."
+  },
+  {
+   "id": "S2",
+   "title": "Hawaii Department of Taxation: Withholding Tax (employer FAQ)",
+   "url": "https://tax.hawaii.gov/geninfo/a2_b2_4empl_whhold/",
+   "revision": "page fetched live 2026-11-06",
+   "verifiedOn": "2026-11-06",
+   "verifiedBy": "fetched directly from tax.hawaii.gov and read: payment frequency by withholding tax liability (greater than $40,000 semi-weekly, due Wednesday for wages paid the immediately preceding Wednesday, Thursday or Friday and Friday for wages paid the preceding Saturday through Tuesday; $5,000 to $40,000 monthly, the 15th of the month after the month; less than $5,000 quarterly, April 15, July 15, October 15, January 15); taxpayers with withholding liabilities over $40,000 must e-pay (a 2% penalty otherwise); employers whose annual withholding liability exceeds $40,000 must file all withholding forms, including W-2 and HW-2, electronically ($25 per form penalty up to $50 per employee, section 235-63 HRS)."
   }
  ],
  "agencies": {
@@ -17,6 +49,16 @@
    "name": "Hawaii Department of Taxation",
    "portalUrl": "https://hitax.hawaii.gov",
    "source": "S1"
+  },
+  "ui": {
+   "name": "Hawaii Department of Labor and Industrial Relations, Unemployment Insurance Division",
+   "portalUrl": "https://labor.hawaii.gov/ui/",
+   "source": "U1"
+  },
+  "newHire": {
+   "name": "Hawaii State Directory of New Hires",
+   "source": "N1",
+   "portalUrl": "http://ag.hawaii.gov/csea/employer-information/"
   }
  },
  "calendar": {
@@ -26,7 +68,16 @@
   },
   "source": "S1"
  },
- "mandates": {},
+ "mandates": {
+  "efile": {
+   "text": "Employers whose annual withholding tax liability exceeds $40,000 must electronically file all withholding tax forms, including Forms W-2 and HW-2, regardless of the number filed; a penalty of $25 per form not filed electronically, up to $50 per employee, applies (section 235-63, HRS).",
+   "source": "S2"
+  },
+  "epay": {
+   "text": "Taxpayers with withholding tax liabilities over $40,000 must e-pay; failure to do so draws a 2% penalty of the tax required to be shown on the return.",
+   "source": "S2"
+  }
+ },
  "withholding": {
   "applies": true,
   "taxLineIds": {
@@ -64,16 +115,13 @@
    }
   ],
   "notModelled": [
-   "The semiweekly threshold and its federal-schedule condition: the paragraph's opening sentence is missing from the stored text.",
-   "Hawaii unemployment insurance (Department of Labor and Industrial Relations): no document read.",
-   "Hawaii's state-holiday list and the Three-Day Banking Rule's extra day (weekends only are skipped, with a warning).",
-   "The Hawaii Tax Online Bulk File System layouts and the electronic filing mandate under section 231-8.5 HRS (named in the penalty section, thresholds not read).",
-   "Whether the 2025 edition is current."
+   "The Three-Day Banking Rule's extra day.",
+   "The Hawaii Tax Online bulk-file layouts (the electronic filing and payment mandates are now recorded from the Department's FAQ)."
   ],
   "deposits": {
    "kind": "assigned_frequency",
    "rulesYear": 2025,
-   "interpretation": "Hawaii sets the remittance frequency from the ANNUAL State withholding liability: $5,000 or less QUARTERLY (Form VP-1 by the 15th day of the month following the quarter); more than $5,000 and not more than $40,000 MONTHLY (VP-1 by the 15th of the month following the month). Above $40,000 the booklet describes a SEMIWEEKLY schedule that follows the IRS semi-weekly schedule (wages paid Wednesday to Friday due the Wednesday after, Saturday to Tuesday the Friday after, with the federal Three-Day Banking Rule: if a weekday in the three after the period end is a banking holiday the employer gets one more banking day), but the stored text does not include the paragraph's opening condition, so a look-back above $40,000 does NOT derive a frequency (an error is returned) and 'semiweekly' must be supplied; its holiday extension is not applied because the state holiday list is unverified (weekends only). Hawaii does not use the federal four-quarter look-back. The frequency is otherwise an INPUT or derived from the annual liability supplied.",
+   "interpretation": "Hawaii sets the remittance frequency from the ANNUAL State withholding liability: $5,000 or less QUARTERLY (Form VP-1 by the 15th day of the month following the quarter); more than $5,000 and not more than $40,000 MONTHLY (VP-1 by the 15th of the month following the month). Above $40,000 the Department's page (S2) states a SEMIWEEKLY schedule: wages paid Wednesday to Friday due the Wednesday after, Saturday to Tuesday the Friday after (the booklet adds the federal Three-Day Banking Rule's extra banking day, which is not applied because the state holiday list is unverified: weekends only). Hawaii does not use the federal four-quarter look-back. The frequency is otherwise an INPUT or derived from the annual liability supplied.",
    "lookback": {
     "description": "Annual Hawaii State withholding tax liability",
     "classes": [
@@ -85,6 +133,10 @@
       "name": "monthly",
       "minExclusive": 500000,
       "maxInclusive": 4000000
+     },
+     {
+      "name": "semiweekly",
+      "minExclusive": 4000000
      }
     ],
     "newEmployer": "quarterly"
@@ -132,8 +184,35 @@
    "source": "S1"
   }
  ],
- "notModelled": [
-  "Hawaii unemployment insurance: not read.",
-  "New-hire reporting: not read."
- ]
+ "notModelled": [],
+ "ui": {
+  "wageBase": 6450000,
+  "wageBaseYear": 2026,
+  "employerTaxLineId": "HI_SUI_ER",
+  "returns": [
+   {
+    "id": "UC-B6",
+    "name": "Quarterly Wage, Contribution and Employment and Training Assessment Report (Form UC-B6)",
+    "frequency": "quarterly",
+    "due": {
+     "kind": "last_day_of_month_after_quarter"
+    },
+    "contents": [
+     "Due no later than April 30, July 31, October 31 and January 31; filed each quarter even when no wages were paid.",
+     "A $30 penalty applies if the UC-B6 is not submitted on or before the last day of the month after the quarter; benefits-related consequences also apply (handbook).",
+     "Penalties: late contribution payment 10% but not less than $100, with interest of two-thirds of one percent a month on contributions and penalty unpaid 15 days after the due date; a late Form UC-B6 $30; a late separation report (Form UC-BP-35) $10 (handbook 'Penalties' section)."
+    ],
+    "source": "U1"
+   }
+  ],
+  "notModelled": [
+   "The handbook page is a 'test' copy; Hawaii's current maximum-wage-base notice (the weekly wage base) and the Department's employer FAQ were not reconciled to it."
+  ],
+  "weekendRuleStated": false
+ },
+ "newHire": {
+  "form": "New-hire report (federal Form W-4 or an equivalent) to the Hawaii State Directory of New Hires; within 20 days of hire date",
+  "daysFromStart": 20,
+  "source": "N1"
+ }
 }

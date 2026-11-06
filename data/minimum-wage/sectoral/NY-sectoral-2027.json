@@ -7,21 +7,21 @@
     {
       "id": "home_care_aide_downstate",
       "name": "Home care aides -- New York City, Nassau, Suffolk and Westchester counties",
-      "hourly": 19.65,
-      "hourlyCents": 1965,
-      "effectiveFrom": "2026-01-01",
+      "hourly": 20.0,
+      "hourlyCents": 2000,
+      "effectiveFrom": "2027-01-01",
       "coverage": "Public Health Law 3614-f. A 'home care aide' is a home health aide or personal care aide whose primary responsibility is in-home assistance with activities of daily living for a Medicaid-funded or licensed/certified home care services agency, LHCSA or fiscal intermediary client -- narrower than 'anyone who does home care work'; casual/informal caregivers and relatives are excluded by the statute's own definition. Region matches the SAME four downstate counties as Labor Law 652's own 'downstate' region.",
-      "note": "$1.00 above the same region's ordinary Labor Law 652 rate of $17.00 -- home care aides are NOT paid the standard minimum wage, and an agency paying the ordinary state rate instead of this one is underpaying by a widening margin every year both schedules step.",
+      "note": "$1.00 above the same region's ordinary Labor Law 652 rate of $17.00 -- home care aides are NOT paid the standard minimum wage, and an agency paying the ordinary state rate instead of this one is underpaying by a widening margin every year both schedules step. 2027: set to $20.00 by the Department of Labor's announcement (the $3.00-above-standard cap).",
       "confidence": "cross_source_confirmed"
     },
     {
       "id": "home_care_aide_upstate",
       "name": "Home care aides -- remainder of New York State",
-      "hourly": 18.65,
-      "hourlyCents": 1865,
-      "effectiveFrom": "2026-01-01",
+      "hourly": 19.0,
+      "hourlyCents": 1900,
+      "effectiveFrom": "2027-01-01",
       "coverage": "Public Health Law 3614-f, same occupation test as the downstate figure, applied everywhere outside NYC, Nassau, Suffolk and Westchester.",
-      "note": "$2.65 above the same region's ordinary Labor Law 652 rate of $16.00 -- a WIDER gap than downstate's, because the home care aide schedule has stepped by a fixed statewide dollar amount each year while the two Labor Law 652 regions diverged from each other on a separate track.",
+      "note": "$2.65 above the same region's ordinary Labor Law 652 rate of $16.00 -- a WIDER gap than downstate's, because the home care aide schedule has stepped by a fixed statewide dollar amount each year while the two Labor Law 652 regions diverged from each other on a separate track. 2027: set to $19.00 by the Department of Labor's announcement (the $3.00-above-standard cap).",
       "confidence": "cross_source_confirmed"
     }
   ],
@@ -43,6 +43,12 @@
       "url": "https://www.rivkinradler.com/publications/ny-amends-home-care-worker-minimum-wage/",
       "verifiedOn": "2026-09-09",
       "verifiedBy": "Found via search this session (not directly fetched) as a second, independent legal-industry source agreeing on the same $19.65 downstate / $18.65 upstate figures, satisfying this database's cross_source_confirmed standard alongside LeadingAge NY."
+    },
+    {
+      "title": "NYS Department of Labor -- Your New York State Minimum Wage (home care 2027)",
+      "url": "https://dol.ny.gov/minimum-wage",
+      "verifiedOn": "2026-11-06",
+      "verifiedBy": "New York State Department of Labor, Your New York State Minimum Wage https://dol.ny.gov/minimum-wage read directly 2026-11-06: 'The minimum wage for home care aides will increase on January 1, 2027, to: $20.00 per hour in New York City, Long Island, and Westchester County; $19.00 per hour in the rest of the state', adjusted for inflation but capped at $3.00 above the standard minimum wage."
     }
   ],
   "confidence": "cross_source_confirmed",
@@ -58,6 +64,19 @@
     "createdOn": "2026-10-25",
     "basedOn": "data/minimum-wage/sectoral/NY-sectoral-2026.json",
     "note": "Carried forward from the 2026 file on 2026-10-25 so that a 2027-dated query resolves instead of failing. Every figure is 2026's unless listed in updatedFor2027 (each with the state agency's own announcement or the statute). Remove this block only after every figure has been re-read against a 2027 source.",
-    "updatedFor2027": []
+    "updatedFor2027": [
+      {
+        "path": "sectors[home_care_aide_downstate].hourly",
+        "from": 19.65,
+        "to": 20.0,
+        "source": "New York State Department of Labor, Your New York State Minimum Wage https://dol.ny.gov/minimum-wage read directly 2026-11-06: 'The minimum wage for home care aides will increase on January 1, 2027, to: $20.00 per hour in New York City, Long Island, and Westchester County; $19.00 per hour in the rest of the state', adjusted for inflation but capped at $3.00 above the standard minimum wage."
+      },
+      {
+        "path": "sectors[home_care_aide_upstate].hourly",
+        "from": 18.65,
+        "to": 19.0,
+        "source": "New York State Department of Labor, Your New York State Minimum Wage https://dol.ny.gov/minimum-wage read directly 2026-11-06: 'The minimum wage for home care aides will increase on January 1, 2027, to: $20.00 per hour in New York City, Long Island, and Westchester County; $19.00 per hour in the rest of the state', adjusted for inflation but capped at $3.00 above the standard minimum wage."
+      }
+    ]
   }
 }

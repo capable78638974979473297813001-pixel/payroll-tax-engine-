@@ -2,7 +2,7 @@ import { test, describe } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync, existsSync } from 'node:fs';
 
-import { loadProfile, modelledStates, resolveDue } from '../payroll/state/index.ts';
+import { loadProfile, modelledStates, resolveDue, notModelledFor, COMMON_NOT_MODELLED } from '../payroll/state/index.ts';
 
 /**
  * Unemployment-insurance sections of the state profiles. Each wage base was read from the agency, and is
@@ -69,5 +69,67 @@ describe('Nevada, New Hampshire and Tennessee (read from the states\' regulation
   });
   test('Nevada requires electronic filing with a waiver of at most one year (NAC 612.035)', () => {
     assert.match(loadProfile('NV').mandates.efile!.text, /waiver of not more than 1 year/);
+  });
+});
+
+describe('unemployment sections added for the withholding states (batch 8)', () => {
+  const BATCH = ['AL', 'AR', 'AZ', 'CO', 'CT', 'DC', 'DE', 'GA', 'HI', 'IA', 'ID', 'IL', 'IN', 'KY', 'LA', 'MA', 'MD', 'ME', 'MI', 'MN', 'MO', 'MS', 'MT', 'NC', 'ND', 'NE', 'NJ', 'NM', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC', 'UT', 'VA', 'VT', 'WI', 'WV'];
+  const ANCHORS = ['2026-02-10', '2026-05-10', '2026-08-10', '2026-11-10'];
+  const dates = (st: string) => { const p = loadProfile(st); return ANCHORS.map((d) => resolveDue(p.ui!.returns[0].due, d, p).dueDate); };
+
+  test('every one has an unemployment section, one quarterly return, and Kansas, whose contributing-employer due date could not be read, has none', () => {
+    for (const st of BATCH) {
+      const ui = loadProfile(st).ui;
+      assert.ok(ui, st);
+      assert.equal(ui!.returns.length, 1, st);
+      assert.equal(ui!.returns[0].frequency, 'quarterly', st);
+    }
+    assert.equal(loadProfile('KS').ui, undefined);
+    assert.match(loadProfile('KS').notModelled.join(' '), /Unemployment: NOT MODELLED/);
+  });
+
+  test('the last day of the month after the quarter, rolled past weekends (Oct 31, 2026 is a Saturday; Jan 31, 2027 a Sunday)', () => {
+    const special = new Set(['NJ', 'MI']);
+    for (const st of BATCH.filter((s) => !special.has(s))) assert.deepEqual(dates(st), ['2026-04-30', '2026-07-31', '2026-11-02', '2027-02-01'], st);
+  });
+
+  test('New Jersey: the 30th, and the Department says a weekend or holiday gives no extension', () => {
+    assert.deepEqual(dates('NJ'), ['2026-04-30', '2026-07-30', '2026-10-30', '2027-01-30']); // Jan 30, 2027 is a Saturday: not rolled
+  });
+
+  test('Michigan: the 25th (April 25 and July 25, 2026 are Saturdays, October 25 a Sunday)', () => {
+    assert.deepEqual(dates('MI'), ['2026-04-27', '2026-07-27', '2026-10-26', '2027-01-25']);
+  });
+
+  test('wage bases agree with the U.S. Department of Labor compilation of January 2026', () => {
+    const DOL: Record<string, number> = { AL: 8000, AR: 7000, AZ: 8000, MA: 15000, CO: 30600, CT: 27000, DE: 14500, DC: 9000, GA: 9500, HI: 64500, ID: 58300, IL: 14250, IN: 9500, IA: 20400, KY: 12000, LA: 7000, ME: 12000, MD: 8500, MN: 44000, MS: 14000, MO: 9000, MT: 47300, NJ: 44800, NM: 34800, NC: 34200, ND: 46600, OH: 9000, OK: 25000, OR: 56700, PA: 10000, RI: 30800, SC: 14000, UT: 50700, VA: 8000, VT: 15400, WI: 14000, WV: 9500 };
+    for (const [st, dollarsBase] of Object.entries(DOL)) assert.equal(loadProfile(st).ui!.wageBase, dollarsBase * 100, st);
+  });
+
+  test('each return cites the agency source, and the wage base cites the federal compilation', () => {
+    for (const st of BATCH) {
+      const p = loadProfile(st);
+      const ids = p.sources.map((s) => s.id);
+      assert.ok(ids.includes('U1') && ids.includes('U2'), st);
+      assert.equal(p.ui!.returns[0].source, 'U1', st);
+      assert.equal(p.agencies.ui?.source, 'U1', st);
+      assert.ok(p.sources.some((s) => /Significant Provisions of State Unemployment Insurance Laws/.test(s.title)), st);
+    }
+  });
+
+  test('every unread item is recorded, never filled in: the profile\'s own notes plus the common ones', () => {
+    for (const st of BATCH) {
+      const notes = notModelledFor(loadProfile(st));
+      assert.ok(notes.length >= 2, st);
+      assert.ok(notes.includes(COMMON_NOT_MODELLED.filingChannels), st);
+    }
+  });
+
+  test('states whose source prints no weekend rule carry the flag and the derived note', () => {
+    for (const st of ['AL', 'AR', 'DC', 'DE', 'HI', 'IL', 'IN', 'LA', 'ME', 'NC', 'NE', 'NH', 'NV', 'OH', 'OK', 'SC', 'TN', 'UT', 'VA', 'WV']) {
+      const p = loadProfile(st);
+      assert.equal(p.ui!.weekendRuleStated, false, st);
+      assert.ok(notModelledFor(p).some((n) => /^Unemployment reports: The source prints no weekend/.test(n)), st);
+    }
   });
 });

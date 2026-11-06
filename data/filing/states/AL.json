@@ -10,6 +10,30 @@
    "revision": "booklet posted January 2026 (Form A-4 Rev. 4/2025 inside)",
    "verifiedOn": "2026-11-04",
    "verifiedBy": "read from the stored copy in watcher/state/snapshots/al-7b1543356b.txt.gz: Mailing Addresses and Due Dates (electronic threshold, Form A-3 date), Withholding Tax Returns (Form A-1, monthly Form A-6 rule), amended returns, the A-3 reconciliation and information return dates. Not read: the occupational tax sections, Alabama unemployment compensation."
+  },
+  {
+   "id": "U1",
+   "title": "Alabama Department of Labor FAQ: when is the last day I can file my Quarterly Contribution and Wage Report",
+   "url": "https://adol.alabama.gov/faq/when-is-the-last-day-i-can-file-my-quarterly-contribution-and-wage-report-and-not-be-late/",
+   "revision": "FAQ page, fetched live 2026-11-05",
+   "verifiedOn": "2026-11-05",
+   "verifiedBy": "fetched directly from adol.alabama.gov on 2026-11-05 and read: 'Contribution and Wage Reports are due the last day of the month following the end of the quarter (January 31, April 30, July 31, and October 31.)'"
+  },
+  {
+   "id": "U2",
+   "title": "U.S. Department of Labor, Significant Provisions of State Unemployment Insurance Laws, effective January 2026",
+   "url": "https://oui.doleta.gov/unemploy/content/sigpros/2020-2029/January2026.pdf",
+   "revision": "effective January 2026",
+   "verifiedOn": "2026-11-05",
+   "verifiedBy": "fetched directly from oui.doleta.gov on 2026-11-05 and read (layout text): the Taxes column's taxable wage base for the state's row (a federal compilation of the state laws)."
+  },
+  {
+   "id": "N1",
+   "title": "U.S. Department of Health and Human Services, Office of Child Support Services: State New Hire Reporting Contacts and Program Information matrix",
+   "url": "https://ocsp.acf.hhs.gov/irg/irgpdf.pdf?geoType=OGP&groupCode=EMP&addrType=NHR&addrClassType=EMP",
+   "revision": "Alabama entry updated 07/28/2026",
+   "verifiedOn": "2026-11-06",
+   "verifiedBy": "read from the federal matrix (layout text of the PDF fetched live 2026-11-06) the Alabama entry, 'Updated On: 07/28/2026': reporting timeframe 'Within seven days of hiring (an employer reporting electronically or by magnetic medium may instead transmit twice a month, not less than 12 nor more than 16 days apart)'. This matrix is the Office of Child Support Services' consolidated list of each state directory's own timeframe, contact and website; the state's statute or directory page was not separately read."
   }
  ],
  "agencies": {
@@ -17,6 +41,16 @@
    "name": "Alabama Department of Revenue, Withholding Tax Section",
    "portalUrl": "https://myalabamataxes.alabama.gov",
    "source": "S1"
+  },
+  "ui": {
+   "name": "Alabama Department of Labor, Unemployment Compensation Tax",
+   "portalUrl": "https://labor.alabama.gov",
+   "source": "U1"
+  },
+  "newHire": {
+   "name": "Alabama State Directory of New Hires",
+   "source": "N1",
+   "portalUrl": "https://www.labor.alabama.gov/nh/new-hire.aspx"
   }
  },
  "calendar": {
@@ -69,9 +103,7 @@
    }
   ],
   "notModelled": [
-   "Alabama unemployment compensation (Department of Workforce): no document read.",
    "Occupational tax withholding (separate local-style tax): not modelled.",
-   "Alabama's legal-holiday list (weekends only are skipped, with a warning).",
    "The My Alabama Taxes (MAT) bulk file layouts for A-3/W-2."
   ],
   "deposits": {
@@ -119,8 +151,33 @@
    "source": "S1"
   }
  ],
- "notModelled": [
-  "Alabama unemployment compensation: not read.",
-  "New-hire reporting: not read."
- ]
+ "notModelled": [],
+ "ui": {
+  "wageBase": 800000,
+  "wageBaseYear": 2026,
+  "employerTaxLineId": "AL_SUI_ER",
+  "returns": [
+   {
+    "id": "UC-CR4",
+    "name": "Quarterly Contribution and Wage Report",
+    "frequency": "quarterly",
+    "due": {
+     "kind": "last_day_of_month_after_quarter"
+    },
+    "contents": [
+     "Due the last day of the month after the quarter: January 31, April 30, July 31 and October 31 (Department FAQ)."
+    ],
+    "source": "U1"
+   }
+  ],
+  "notModelled": [
+   "Electronic-filing mandate (the Department's rule on employers with five or more employees came from a search summary, not a page read), penalties, and the reporting file format."
+  ],
+  "weekendRuleStated": false
+ },
+ "newHire": {
+  "form": "New-hire report (federal Form W-4 or an equivalent) to the Alabama State Directory of New Hires; within seven days of hiring (an employer reporting electronically or by magnetic medium may instead transmit twice a month, not less than 12 nor more than 16 days apart)",
+  "daysFromStart": 7,
+  "source": "N1"
+ }
 }

@@ -10,6 +10,30 @@
    "revision": "REV-415 (SU) 01-23, cross-checked with the Department's Employer Withholding page",
    "verifiedOn": "2026-11-04",
    "verifiedBy": "read from the stored copy in watcher/state/snapshots/pa-9fa00e5442.txt.gz (frequency determination; the URL in the watcher's record is truncated: confirm it from the Department's Employer Withholding page) and the page stored as pa-8251b0b3ee (https://www.pa.gov/agencies/revenue/resources/tax-types-and-information/employer-withholding), which gives the same four schedules. Not read: Pennsylvania unemployment (L&I) and local earned income tax rules."
+  },
+  {
+   "id": "U1",
+   "title": "Pennsylvania UC quarterly tax forms: instructions for completing UC-2 and UC-2A (UC-2INS)",
+   "url": "https://www.pa.gov/content/dam/copapwp-pagov/en/dli/documents/uc/uc-forms/uc-2ins.pdf",
+   "revision": "instructions fetched live 2026-11-05",
+   "verifiedOn": "2026-11-05",
+   "verifiedBy": "fetched directly from pa.gov on 2026-11-05 and read: 'If a due date falls on a Saturday, Sunday, or legal holiday, the reports will become due on the next business day. Reports and payment are due for each quarter as follows' (January-March: April 30; April-June: July 31; July-September: October 31; October-December: January 31); interest on contributions paid after the due date under Section 308 of the Law (43 P.S. 788)."
+  },
+  {
+   "id": "U2",
+   "title": "U.S. Department of Labor, Significant Provisions of State Unemployment Insurance Laws, effective January 2026",
+   "url": "https://oui.doleta.gov/unemploy/content/sigpros/2020-2029/January2026.pdf",
+   "revision": "effective January 2026",
+   "verifiedOn": "2026-11-05",
+   "verifiedBy": "fetched directly from oui.doleta.gov on 2026-11-05 and read (layout text): the Taxes column's taxable wage base for the state's row (a federal compilation of the state laws)."
+  },
+  {
+   "id": "N1",
+   "title": "U.S. Department of Health and Human Services, Office of Child Support Services: State New Hire Reporting Contacts and Program Information matrix",
+   "url": "https://ocsp.acf.hhs.gov/irg/irgpdf.pdf?geoType=OGP&groupCode=EMP&addrType=NHR&addrClassType=EMP",
+   "revision": "Pennsylvania entry updated 11/05/2026",
+   "verifiedOn": "2026-11-06",
+   "verifiedBy": "read from the federal matrix (layout text of the PDF fetched live 2026-11-06) the Pennsylvania entry, 'Updated On: 11/05/2026': reporting timeframe 'Within 20 days of the hire date (23 Pa.C.S. 4392(d))'. This matrix is the Office of Child Support Services' consolidated list of each state directory's own timeframe, contact and website; the state's statute or directory page was not separately read except where the entry names the statute."
   }
  ],
  "agencies": {
@@ -17,6 +41,16 @@
    "name": "Pennsylvania Department of Revenue",
    "portalUrl": "https://mypath.pa.gov",
    "source": "S1"
+  },
+  "ui": {
+   "name": "Pennsylvania Department of Labor & Industry, Unemployment Compensation Tax Services",
+   "portalUrl": "https://www.pa.gov/agencies/dli/programs-services/unemployment/for-employers/wage-report",
+   "source": "U1"
+  },
+  "newHire": {
+   "name": "Pennsylvania State Directory of New Hires",
+   "source": "N1",
+   "portalUrl": "https://www.pacareerlink.pa.gov"
   }
  },
  "calendar": {
@@ -51,9 +85,9 @@
   ],
   "notModelled": [
    "The page's quarterly reconciliation and W-2 transmittal due dates: the January 31 and quarterly reconciliation dates are not stated in the text read, so only the quarterly return is recorded.",
-   "Pennsylvania unemployment (Department of Labor & Industry) and local earned income tax: no document read.",
+   "Pennsylvania local earned income tax: no document read.",
    "Whether Pennsylvania's flat 3.07% applies to every pay (rate belongs to the paycheck engine, not this layer).",
-   "Pennsylvania's legal-holiday list and what the Department counts as a banking day (weekends only are skipped, with a warning).",
+   "What the Department counts as a banking day.",
    "Electronic filing mandates: the page lists myPATH and Telefile without stating a mandate."
   ],
   "deposits": {
@@ -138,7 +172,35 @@
   }
  ],
  "notModelled": [
-  "Pennsylvania unemployment insurance and local taxes: not read.",
-  "New-hire reporting: not read."
- ]
+  "Pennsylvania local taxes: not read."
+ ],
+ "ui": {
+  "wageBase": 1000000,
+  "wageBaseYear": 2026,
+  "employerTaxLineId": "PA_SUI_ER",
+  "returns": [
+   {
+    "id": "UC-2_UC-2A",
+    "name": "Employer's Report for Unemployment Compensation (UC-2) and Report of Wages Paid to Each Employee (UC-2A)",
+    "frequency": "quarterly",
+    "due": {
+     "kind": "last_day_of_month_after_quarter"
+    },
+    "contents": [
+     "Reports and payment are due on or before April 30, July 31, October 31 and January 31; a Saturday, Sunday or legal holiday moves the date to the next business day.",
+     "UC-2 reports quarterly gross and taxable wages and the contributions due; UC-2A lists each employee's wages and credit weeks.",
+     "Failing to file the quarterly report timely or in the prescribed manner carries a penalty of 15% of the contributions payable for the quarter, minimum $125 and maximum $450; non-compliance with the mandatory electronic filing requirement is penalised unless a waiver is in place; a dishonored payment carries 10% of its face value (minimum $25, maximum $1,000); failing the electronic payment requirement can cost 10% of the payment (minimum $25, maximum $500) (UC-2 instructions)."
+    ],
+    "source": "U1"
+   }
+  ],
+  "notModelled": [
+   "The size threshold for entering wage detail manually versus by file upload was not read."
+  ]
+ },
+ "newHire": {
+  "form": "New-hire report (federal Form W-4 or an equivalent) to the Pennsylvania State Directory of New Hires; within 20 days of the hire date (23 Pa.C.S. 4392(d))",
+  "daysFromStart": 20,
+  "source": "N1"
+ }
 }

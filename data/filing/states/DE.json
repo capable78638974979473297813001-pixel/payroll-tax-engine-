@@ -10,6 +10,30 @@
    "revision": "web page, no edition printed; the watcher last changed the stored copy 2026-10-20",
    "verifiedOn": "2026-11-04",
    "verifiedBy": "read from the stored copy in watcher/state/snapshots/de-196392c3ba.txt.gz: Section 1 (filing methods and thresholds), Section 3 (registration, new hires, W-2, annual reconciliation W-3) and Section 5 (monthly, quarterly and eighth-monthly deposits). The page reproduces regulation text that still contains examples from 2000; the dollar thresholds are the page's current ones. Not read: the withholding tables and exemption sections."
+  },
+  {
+   "id": "U1",
+   "title": "Delaware Unemployment Insurance Employer Handbook",
+   "url": "https://laborfiles.delaware.gov/main/dui/handbook/UI%20Employer%20Handbook.pdf",
+   "revision": "handbook as stored in watcher/state/snapshots",
+   "verifiedOn": "2026-11-05",
+   "verifiedBy": "read from the stored copy in watcher/state/snapshots: the Forms UC-8/8A section: 'filed (postmarked) on or before the last day of the month following the appropriate calendar quarter, i.e., January 31, April 30, July 31, and October 31', a report is required even if no wages were paid, the $17.25 late fine, 1.5% monthly interest. The handbook edition date was not recorded."
+  },
+  {
+   "id": "U2",
+   "title": "U.S. Department of Labor, Significant Provisions of State Unemployment Insurance Laws, effective January 2026",
+   "url": "https://oui.doleta.gov/unemploy/content/sigpros/2020-2029/January2026.pdf",
+   "revision": "effective January 2026",
+   "verifiedOn": "2026-11-05",
+   "verifiedBy": "fetched directly from oui.doleta.gov on 2026-11-05 and read (layout text): the Taxes column's taxable wage base for the state's row (a federal compilation of the state laws)."
+  },
+  {
+   "id": "H1",
+   "title": "Delaware Division of Revenue: Holiday Table (2026-2029)",
+   "url": "https://revenuefiles.delaware.gov/2025/2026_Holiday_Table.pdf",
+   "revision": "table of observed holidays 2026 through 2029, fetched live 2026-11-06",
+   "verifiedOn": "2026-11-06",
+   "verifiedBy": "fetched directly from revenuefiles.delaware.gov and read the Holiday Table: the observed dates for 2026 and 2027 (including Good Friday, Election Day, Columbus Day, Presidents' Day, the day after Thanksgiving, and the observed Independence Day, Christmas and New Year's Day dates such as July 3, 2026 and December 24 and 31, 2027)."
   }
  ],
  "agencies": {
@@ -22,12 +46,52 @@
    "name": "Delaware Division of Child Support Services (State Directory of New Hires)",
    "portalUrl": "http://newhire.dhss.delaware.gov",
    "source": "S1"
+  },
+  "ui": {
+   "name": "Delaware Department of Labor, Division of Unemployment Insurance",
+   "portalUrl": "https://labor.delaware.gov/divisions/unemployment-insurance/employer-services/",
+   "source": "U1"
   }
  },
  "calendar": {
   "weekendsRoll": true,
   "holidays": {
-   "verified": false
+   "verified": true,
+   "dates": [
+    "2026-01-01",
+    "2026-01-19",
+    "2026-02-16",
+    "2026-04-03",
+    "2026-05-25",
+    "2026-06-19",
+    "2026-07-03",
+    "2026-09-07",
+    "2026-10-12",
+    "2026-11-03",
+    "2026-11-11",
+    "2026-11-26",
+    "2026-11-27",
+    "2026-12-25",
+    "2027-01-01",
+    "2027-01-18",
+    "2027-02-15",
+    "2027-03-26",
+    "2027-05-31",
+    "2027-06-18",
+    "2027-07-05",
+    "2027-09-06",
+    "2027-10-11",
+    "2027-11-11",
+    "2027-11-25",
+    "2027-11-26",
+    "2027-12-24",
+    "2027-12-31"
+   ],
+   "years": [
+    2026,
+    2027
+   ],
+   "source": "H1"
   },
   "source": "S1"
  },
@@ -154,10 +218,8 @@
    }
   ],
   "notModelled": [
-   "Delaware unemployment insurance (Department of Labor): no document read.",
    "Whether Delaware requires withholding returns or payments to be made electronically: the page was not found to say so, so no mandate is recorded.",
    "The page carries no edition date, so no rulesYear check is made: confirm the thresholds against the Division's current notices.",
-   "Delaware's state-holiday list (weekends only are skipped, with a warning).",
    "Registration is by the Combined Registration Application through OneStop; its steps were not read in detail."
   ]
  },
@@ -175,13 +237,37 @@
   }
  ],
  "notModelled": [
-  "Delaware unemployment insurance: not read.",
   "Electronic filing and payment options.",
-  "Whether this page is the current regulation text."
+  "Whether this page is the current regulation text.",
+  "Delaware's holiday dates after 2027 (the Division's table runs to 2029 but only 2026 and 2027 are loaded)."
  ],
  "newHire": {
   "form": "New-hire report (federal Form W-4 or an equivalent) to the Delaware State Directory of New Hires, Division of Child Support Services; the page says the 20 days run from hiring",
   "daysFromStart": 20,
   "source": "S1"
+ },
+ "ui": {
+  "wageBase": 1450000,
+  "wageBaseYear": 2026,
+  "employerTaxLineId": "DE_SUI_ER",
+  "returns": [
+   {
+    "id": "UC-8_UC-8A",
+    "name": "Quarterly Contribution and Wage Report (Forms UC-8 and UC-8A)",
+    "frequency": "quarterly",
+    "due": {
+     "kind": "last_day_of_month_after_quarter"
+    },
+    "contents": [
+     "Filed (postmarked) on or before the last day of the month after the quarter, even if no wages were paid; payment for any tax liability goes with it.",
+     "A $17.25 fine applies when the report is submitted more than five days after the due date, and interest accrues at 1.5% a month on unpaid tax (handbook)."
+    ],
+    "source": "U1"
+   }
+  ],
+  "notModelled": [
+   "The handbook is an undated stored copy; Delaware's current form numbers, electronic-filing mandate and penalty amounts were not re-read on the Division's pages."
+  ],
+  "weekendRuleStated": false
  }
 }

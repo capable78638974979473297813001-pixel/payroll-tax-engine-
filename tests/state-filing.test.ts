@@ -78,9 +78,12 @@ describe('coverage: every jurisdiction is accounted for', () => {
     assert.equal(by.FL.withholding, 'no wage income tax');
     assert.equal(by.PR.withholding, 'partial'); // the paycheck engine has no Puerto Rico data: unemployment rules only
     assert.equal(by.PR.ui, 'modelled');
-    assert.equal(by.CO.ui, 'NOT MODELLED');
+    assert.equal(by.CO.ui, 'modelled'); // CDLE's premium-and-wage-report FAQ
     assert.equal(by.CT.withholding, 'modelled');
-    assert.equal(by.CT.ui, 'NOT MODELLED'); // Connecticut's guide covers withholding only
+    assert.equal(by.CT.ui, 'modelled'); // the Department of Labor's own due-date article
+    // Every modelled jurisdiction has an unemployment section except Kansas, whose due date for contributing employers is in a page that could not be read.
+    const uiGaps = modelledStates().filter((code) => by[code].ui !== 'modelled');
+    assert.deepEqual(uiGaps, ['KS']);
   });
   test('an unmodelled state throws NOT MODELLED instead of returning an empty profile', () => {
     assert.equal(hasProfile('ZZ'), false);
@@ -242,8 +245,8 @@ describe('honest about what is not read', () => {
     const t = (v?: number) => analyzeStateDeposits(NY, [stDay('2026-08-07', 700)], undefined, v === undefined ? {} : { lookbackLiability: dollars(v) }).obligations[0].dueDate;
     assert.deepEqual([t(14_999.99), t(15_000), t()], ['2026-08-14', '2026-08-12', '2026-08-14']);
   });
-  test('New York has no new-hire rule in its profile: it refuses rather than assuming the federal 20 days', () => {
-    assert.throws(() => newHireDeadline(NY, '2026-03-02'), /NOT MODELLED/);
+  test('a profile with no new-hire rule (Puerto Rico) refuses rather than assuming the federal 20 days', () => {
+    assert.throws(() => newHireDeadline(loadProfile('PR'), '2026-03-02'), /NOT MODELLED/);
   });
   test('Texas has no wage income tax, so there is no withholding to deposit; and no deposit table to invent', () => {
     const federal = analyzeDeposits([fedDay('2026-08-07', dollars(5_000))], { startingSchedule: 'monthly' });

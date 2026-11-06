@@ -10,6 +10,30 @@
    "revision": "web page, no edition printed; fetched live 2026-11-05",
    "verifiedOn": "2026-11-05",
    "verifiedBy": "fetched directly from in.gov on 2026-11-05 and read: electronic filing, 'What determines my filing frequency', the monthly-average table (annual, monthly, early filer), changes of frequency, the payroll service provider versus PEO answer, W-2 and WH-3 electronic filing, and the employee statement dates."
+  },
+  {
+   "id": "U1",
+   "title": "Indiana DWD, Quarterly Report Due Dates",
+   "url": "https://www.in.gov/dwd/indiana-unemployment/employers/employer-guide/wage-reporting-need-to-know/quarterly-report-due-dates/",
+   "revision": "page fetched live 2026-11-05",
+   "verifiedOn": "2026-11-05",
+   "verifiedBy": "fetched directly from in.gov on 2026-11-05 and read: wage report due dates on or before April 30, July 31, October 31 and January 31; both contributory and reimbursable employers must file quarterly wage reports electronically unless granted a waiver (646 IAC 5-2-2); electronic payment is required (646 IAC 5-2-17)."
+  },
+  {
+   "id": "U2",
+   "title": "U.S. Department of Labor, Significant Provisions of State Unemployment Insurance Laws, effective January 2026",
+   "url": "https://oui.doleta.gov/unemploy/content/sigpros/2020-2029/January2026.pdf",
+   "revision": "effective January 2026",
+   "verifiedOn": "2026-11-05",
+   "verifiedBy": "fetched directly from oui.doleta.gov on 2026-11-05 and read (layout text): the Taxes column's taxable wage base for the state's row (a federal compilation of the state laws)."
+  },
+  {
+   "id": "N1",
+   "title": "U.S. Department of Health and Human Services, Office of Child Support Services: State New Hire Reporting Contacts and Program Information matrix",
+   "url": "https://ocsp.acf.hhs.gov/irg/irgpdf.pdf?geoType=OGP&groupCode=EMP&addrType=NHR&addrClassType=EMP",
+   "revision": "Indiana entry updated 03/27/2025",
+   "verifiedOn": "2026-11-06",
+   "verifiedBy": "read from the federal matrix (layout text of the PDF fetched live 2026-11-06) the Indiana entry, 'Updated On: 03/27/2025': reporting timeframe 'Employers must report within 20 days of an employee's hire'. This matrix is the Office of Child Support Services' consolidated list of each state directory's own timeframe, contact and website; the state's statute or directory page was not separately read."
   }
  ],
  "agencies": {
@@ -17,6 +41,16 @@
    "name": "Indiana Department of Revenue",
    "portalUrl": "https://intime.dor.in.gov",
    "source": "S1"
+  },
+  "ui": {
+   "name": "Indiana Department of Workforce Development (DWD), Unemployment Insurance Employer Services",
+   "portalUrl": "https://www.in.gov/dwd/indiana-unemployment/employers/",
+   "source": "U1"
+  },
+  "newHire": {
+   "name": "Indiana State Directory of New Hires",
+   "source": "N1",
+   "portalUrl": "http://www.in-newhire.com"
   }
  },
  "calendar": {
@@ -28,8 +62,8 @@
  },
  "mandates": {
   "efile": {
-   "text": "All businesses in Indiana must file and pay their sales and withholding taxes electronically. If your average monthly tax exceeds $5,000, you are required to make payments by Electronic Funds Transfer.",
-   "source": "S1"
+   "text": "Both contributory and reimbursable employers are required to file quarterly wage reports electronically unless they have applied for, and been granted, an electronic filing waiver (646 IAC 5-2-2). Electronic payment is required by DWD for all unemployment liabilities (646 IAC 5-2-17).",
+   "source": "U1"
   }
  },
  "withholding": {
@@ -72,9 +106,7 @@
   "notModelled": [
    "The annual status ($83.33 or less a month) due date and the exact meaning of '30 days after the end of the month'.",
    "Indiana's county income tax (withheld and remitted through the same return, with a county of residence and county of work for each employee): not modelled; this layer does not split the state and county amounts.",
-   "Indiana unemployment insurance (Department of Workforce Development): no document read.",
-   "The SFTP / INTIME file layouts for WH-1, WH-3, EFW2 and Publication 1220 (guides are stored in the watcher corpus, not read).",
-   "Indiana's state-holiday list (weekends only are skipped, with a warning)."
+   "The SFTP / INTIME file layouts for WH-1, WH-3, EFW2 and Publication 1220 (guides are stored in the watcher corpus, not read)."
   ],
   "deposits": {
    "kind": "assigned_frequency",
@@ -129,8 +161,35 @@
    "source": "S1"
   }
  ],
- "notModelled": [
-  "Indiana unemployment insurance: not read.",
-  "New-hire reporting: not read."
- ]
+ "notModelled": [],
+ "ui": {
+  "wageBase": 950000,
+  "wageBaseYear": 2026,
+  "employerTaxLineId": "IN_SUI_ER",
+  "returns": [
+   {
+    "id": "quarterly-wage-report",
+    "name": "Quarterly wage report",
+    "frequency": "quarterly",
+    "due": {
+     "kind": "last_day_of_month_after_quarter"
+    },
+    "contents": [
+     "Due on or before April 30, July 31, October 31 and January 31.",
+     "Filed electronically unless a waiver was granted (646 IAC 5-2-2); payment is also electronic (646 IAC 5-2-17)."
+    ],
+    "source": "U1"
+   }
+  ],
+  "notModelled": [
+   "The enhanced wage-record fields required from Q4 2026 (first due January 31, 2027) appear in a search summary and were not read.",
+   "The agency's file format specifications, penalties not quoted above and portal enrollment steps were not read."
+  ],
+  "weekendRuleStated": false
+ },
+ "newHire": {
+  "form": "New-hire report (federal Form W-4 or an equivalent) to the Indiana State Directory of New Hires; employers must report within 20 days of an employee's hire",
+  "daysFromStart": 20,
+  "source": "N1"
+ }
 }

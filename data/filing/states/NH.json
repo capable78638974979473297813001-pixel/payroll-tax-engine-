@@ -18,6 +18,14 @@
    "revision": "effective January 2026",
    "verifiedOn": "2026-11-05",
    "verifiedBy": "fetched directly from oui.doleta.gov on 2026-11-05 and read (layout text): the Taxes column's taxable wage base for the state's row (a federal compilation of the state laws)."
+  },
+  {
+   "id": "N1",
+   "title": "U.S. Department of Health and Human Services, Office of Child Support Services: State New Hire Reporting Contacts and Program Information matrix",
+   "url": "https://ocsp.acf.hhs.gov/irg/irgpdf.pdf?geoType=OGP&groupCode=EMP&addrType=NHR&addrClassType=EMP",
+   "revision": "New Hampshire entry updated 03/22/2025",
+   "verifiedOn": "2026-11-06",
+   "verifiedBy": "read from the federal matrix (layout text of the PDF fetched live 2026-11-06) the New Hampshire entry, 'Updated On: 03/22/2025': reporting timeframe 'Within 20 days of hire date'. This matrix is the Office of Child Support Services' consolidated list of each state directory's own timeframe, contact and website; the state's statute or directory page was not separately read."
   }
  ],
  "agencies": {
@@ -25,6 +33,10 @@
    "name": "New Hampshire Employment Security (NHES)",
    "portalUrl": "https://www.nhes.nh.gov",
    "source": "S1"
+  },
+  "newHire": {
+   "name": "New Hampshire State Directory of New Hires",
+   "source": "N1"
   }
  },
  "calendar": {
@@ -62,9 +74,9 @@
   "notModelled": [
    "Monthly filing required by the department for a poor reporting record (Emp 304.01(b)): a department decision, not computed here.",
    "How reports are filed (the department's WebTax system, its limits by employee count, any grace period and the penalty fees): the department's pages refuse automated access and were not read.",
-   "The quarterly trust-fund reduction that changes the rate: an input from the department's rate notice.",
-   "Weekend and holiday handling of the due date: not in Emp 304.01, so assumed (next business day)."
-  ]
+   "The quarterly trust-fund reduction that changes the rate: an input from the department's rate notice."
+  ],
+  "weekendRuleStated": false
  },
  "channels": [
   {
@@ -79,7 +91,11 @@
   }
  ],
  "notModelled": [
-  "New Hampshire has no tax on wages, so there is no state withholding.",
-  "New-hire reporting: not read."
- ]
+  "New Hampshire has no tax on wages, so there is no state withholding."
+ ],
+ "newHire": {
+  "form": "New-hire report (federal Form W-4 or an equivalent) to the New Hampshire State Directory of New Hires; within 20 days of hire date",
+  "daysFromStart": 20,
+  "source": "N1"
+ }
 }

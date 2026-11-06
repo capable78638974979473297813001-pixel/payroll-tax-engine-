@@ -6,10 +6,34 @@
   {
    "id": "S1",
    "title": "Utah Withholding Tax Guide, Publication 14",
-   "url": "https://files.tax.utah.gov/tax/forms/2025/pub-14.pdf",
-   "revision": "Rev. 4/25, effective June 1, 2025",
-   "verifiedOn": "2026-11-03",
-   "verifiedBy": "read from the stored copy in watcher/state/snapshots/ut-f0f098aed0.txt.gz: Electronic Filing Requirements, How to Get a Withholding Account, How to File Returns, Due Dates (Annual, Quarterly with quarterly payments, Quarterly with monthly payments), Annual Reconciliations/W-2s/1099s, Filing Status Changes, W-2 and 1099 Requirements, and the penalty table. THE JUNE 2025 EDITION: a newer revision may exist (the stored copy of the Tax Commission's current Pub 14 page was not compared). Not read: payroll service provider liability, the Utah unemployment (Workforce Services) rules."
+   "url": "https://files.tax.utah.gov/tax/forms/pubs/pub-14.pdf",
+   "revision": "Rev. 4/26, tables effective June 1, 2026",
+   "verifiedOn": "2026-11-06",
+   "verifiedBy": "fetched directly from files.tax.utah.gov on 2026-11-06 and read: Due Dates (a Saturday, Sunday or legal holiday moves a due date to the next business day; the IRS semiweekly and $100,000 rules do not apply), Annual Returns with Annual Payments (household employers, January 31), Quarterly Returns with Quarterly Payments (under $1,000 a month; April 30, July 31, October 31, January 31) and Quarterly Returns with Monthly Payments ($1,000 or more a month; each payment the last day of the following month). THE REV. 4/26 EDITION, which states the same rules as the June 2025 edition read earlier from the watcher's stored copy. Not read: payroll service provider liability, the Utah unemployment rules in this guide."
+  },
+  {
+   "id": "U1",
+   "title": "Utah Department of Workforce Services: quarterly wage reports",
+   "url": "https://jobs.utah.gov/UI/Employer/Public/Questions/QuarterlyReporting.aspx",
+   "revision": "page fetched live 2026-11-05",
+   "verifiedOn": "2026-11-05",
+   "verifiedBy": "fetched directly from jobs.utah.gov on 2026-11-05 and read: the schedule (quarter end March 31, June 30, September 30, December 31; wage report and contributions due April 30, July 31, October 31, January 31) and that reports and contributions received after the due date are subject to penalty and interest."
+  },
+  {
+   "id": "U2",
+   "title": "U.S. Department of Labor, Significant Provisions of State Unemployment Insurance Laws, effective January 2026",
+   "url": "https://oui.doleta.gov/unemploy/content/sigpros/2020-2029/January2026.pdf",
+   "revision": "effective January 2026",
+   "verifiedOn": "2026-11-05",
+   "verifiedBy": "fetched directly from oui.doleta.gov on 2026-11-05 and read (layout text): the Taxes column's taxable wage base for the state's row (a federal compilation of the state laws)."
+  },
+  {
+   "id": "N1",
+   "title": "U.S. Department of Health and Human Services, Office of Child Support Services: State New Hire Reporting Contacts and Program Information matrix",
+   "url": "https://ocsp.acf.hhs.gov/irg/irgpdf.pdf?geoType=OGP&groupCode=EMP&addrType=NHR&addrClassType=EMP",
+   "revision": "Utah entry updated 09/22/2026",
+   "verifiedOn": "2026-11-06",
+   "verifiedBy": "read from the federal matrix (layout text of the PDF fetched live 2026-11-06) the Utah entry, 'Updated On: 09/22/2026': reporting timeframe 'Within 20 days of the new hire or rehire date'. This matrix is the Office of Child Support Services' consolidated list of each state directory's own timeframe, contact and website; the state's statute or directory page was not separately read."
   }
  ],
  "agencies": {
@@ -17,6 +41,16 @@
    "name": "Utah State Tax Commission",
    "portalUrl": "https://tap.utah.gov",
    "source": "S1"
+  },
+  "ui": {
+   "name": "Utah Department of Workforce Services, Unemployment Insurance",
+   "portalUrl": "https://jobs.utah.gov/UI/Employer/Public/Questions/QuarterlyReporting.aspx",
+   "source": "U1"
+  },
+  "newHire": {
+   "name": "Utah State Directory of New Hires",
+   "source": "N1",
+   "portalUrl": "https://jobs.utah.gov/ui/employer/employerhome.aspx"
   }
  },
  "calendar": {
@@ -40,7 +74,7 @@
   },
   "deposits": {
    "kind": "assigned_frequency",
-   "rulesYear": 2025,
+   "rulesYear": 2026,
    "interpretation": "Utah does not follow the federal deposit periods: the IRS semiweekly and $100,000 next-day rules do not apply. Payments are monthly, quarterly or annual. An employer who withholds LESS than $1,000 each month files and pays quarterly, by the last day of the month after the quarter. An employer who withholds $1,000 or MORE each month files quarterly but pays MONTHLY, each payment due the last day of the following month. A household employer who reports on federal Schedule H or files Form 944 may pay annually, due January 31. The Tax Commission reviews each account annually from the previous year's filings and may change the status; a quarterly payer may ask in writing to pay monthly. The status is therefore an INPUT (what the Commission assigned) or is derived from a supplied typical monthly withholding; the guide does not say how to treat a year in which some months are over and some under $1,000, and that is left to the Commission's assignment. The annual status is never derived and must be given.",
    "lookback": {
     "description": "Utah income tax withheld each month (typical month)",
@@ -115,9 +149,6 @@
    }
   ],
   "notModelled": [
-   "Utah unemployment insurance (Utah Department of Workforce Services): no document read.",
-   "Whether this June 2025 edition is current; thresholds and dates may have changed.",
-   "Utah's legal-holiday list (weekends only are skipped, with a warning).",
    "The Taxpayer Access Point file layouts for bulk reconciliation and W-2 upload.",
    "Payroll service provider liability and registration rules (the guide has a section; not read in detail).",
    "The bond requirement ($25,000 to $500,000 for a history of late filing or payment)."
@@ -137,8 +168,34 @@
    "source": "S1"
   }
  ],
- "notModelled": [
-  "Utah unemployment insurance (Workforce Services): not read.",
-  "New-hire reporting: not read."
- ]
+ "notModelled": [],
+ "ui": {
+  "wageBase": 5070000,
+  "wageBaseYear": 2026,
+  "employerTaxLineId": "UT_SUI_ER",
+  "returns": [
+   {
+    "id": "quarterly-wage-and-contribution",
+    "name": "Quarterly wage report and contribution payment",
+    "frequency": "quarterly",
+    "due": {
+     "kind": "last_day_of_month_after_quarter"
+    },
+    "contents": [
+     "Wage reports and contributions are due April 30, July 31, October 31 and January 31; reports and contributions received after the due date are subject to penalty and interest (Department page)."
+    ],
+    "source": "U1"
+   }
+  ],
+  "notModelled": [
+   "The penalty schedule (5% up to 15 days late, rising to a 25% cap) and the optional annual filing for domestic employers come from a search summary of the Employer Handbook and were not read.",
+   "The agency's file format specifications, penalties not quoted above and portal enrollment steps were not read."
+  ],
+  "weekendRuleStated": false
+ },
+ "newHire": {
+  "form": "New-hire report (federal Form W-4 or an equivalent) to the Utah State Directory of New Hires; within 20 days of the new hire or rehire date",
+  "daysFromStart": 20,
+  "source": "N1"
+ }
 }

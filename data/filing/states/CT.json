@@ -10,6 +10,30 @@
    "revision": "IP 2025(1), issued 12/17/2024, effective January 1, 2025",
    "verifiedOn": "2026-11-03",
    "verifiedBy": "read from the stored copy in watcher/state/snapshots/ct-75b91b6b44.txt.gz: the cover (electronic filing and payment), the remitter classifications and schedules (Weekly, Monthly, Quarterly, Annual, New Employers), 'Quarterly Reconciliation' (Form CT-941 due dates), 'Annual Reconciliation' (Form CT-W3), electronic filing of W-2s and myconneCT. THE 2025 EDITION: no 2026 edition was read."
+  },
+  {
+   "id": "U1",
+   "title": "Connecticut DOL knowledge base: What are the due dates of my quarterly tax returns?",
+   "url": "https://portal.ct.gov/dol/knowledge-base/articles/unemployment-taxes/what-are-the-due-dates-of-my-quarterly-tax-returns",
+   "revision": "article dated 2024-09-04, fetched live 2026-11-05",
+   "verifiedOn": "2026-11-05",
+   "verifiedBy": "fetched directly from portal.ct.gov on 2026-11-05 and read: returns and payments due on or before 4/30, 7/31, 10/31 and 1/31; reimbursing employers' dates extended 15 days; a Saturday, Sunday or holiday moves the date to the next business day. The article is dated September 2024; the Department's April 2026 employer guide was not read."
+  },
+  {
+   "id": "U2",
+   "title": "U.S. Department of Labor, Significant Provisions of State Unemployment Insurance Laws, effective January 2026",
+   "url": "https://oui.doleta.gov/unemploy/content/sigpros/2020-2029/January2026.pdf",
+   "revision": "effective January 2026",
+   "verifiedOn": "2026-11-05",
+   "verifiedBy": "fetched directly from oui.doleta.gov on 2026-11-05 and read (layout text): the Taxes column's taxable wage base for the state's row (a federal compilation of the state laws)."
+  },
+  {
+   "id": "N1",
+   "title": "U.S. Department of Health and Human Services, Office of Child Support Services: State New Hire Reporting Contacts and Program Information matrix",
+   "url": "https://ocsp.acf.hhs.gov/irg/irgpdf.pdf?geoType=OGP&groupCode=EMP&addrType=NHR&addrClassType=EMP",
+   "revision": "Connecticut entry updated 06/24/2025",
+   "verifiedOn": "2026-11-06",
+   "verifiedBy": "read from the federal matrix (layout text of the PDF fetched live 2026-11-06) the Connecticut entry, 'Updated On: 06/24/2025': reporting timeframe 'Within 20 days of hire date'. This matrix is the Office of Child Support Services' consolidated list of each state directory's own timeframe, contact and website; the state's statute or directory page was not separately read."
   }
  ],
  "agencies": {
@@ -17,6 +41,16 @@
    "name": "Connecticut Department of Revenue Services (DRS)",
    "portalUrl": "https://portal.ct.gov/DRS-myconneCT",
    "source": "S1"
+  },
+  "ui": {
+   "name": "Connecticut Department of Labor, Unemployment Insurance Tax Division",
+   "portalUrl": "https://portal.ct.gov/dol/divisions/unemployment-insurance-tax",
+   "source": "U1"
+  },
+  "newHire": {
+   "name": "Connecticut State Directory of New Hires",
+   "source": "N1",
+   "portalUrl": "https://ct.gov/ReportNewHires"
   }
  },
  "calendar": {
@@ -127,8 +161,7 @@
    "The 2026 edition of the guide: thresholds, dates and forms may differ.",
    "Annual remitters (by request, seasonal, household, agricultural employers).",
    "The myconneCT file layouts for bulk W-2 and CT-W3 upload.",
-   "Connecticut's legal-holiday list.",
-   "Connecticut's separate paid-leave contributions (CT Paid Leave Authority) and unemployment tax (CT Department of Labor): neither guide was read."
+   "Connecticut's separate paid-leave contributions (CT Paid Leave Authority): not read."
   ]
  },
  "channels": [
@@ -145,9 +178,37 @@
   }
  ],
  "notModelled": [
-  "Connecticut unemployment tax (CT Department of Labor): not read.",
-  "New-hire reporting: the guide only points to the Department of Labor; the rule was not read.",
   "Registration trigger and deadline: not read.",
   "The 2026 edition of the Employer's Tax Guide."
- ]
+ ],
+ "ui": {
+  "wageBase": 2700000,
+  "wageBaseYear": 2026,
+  "employerTaxLineId": "CT_SUI_ER",
+  "returns": [
+   {
+    "id": "quarterly-return",
+    "name": "Quarterly unemployment tax return and wage report",
+    "frequency": "quarterly",
+    "due": {
+     "kind": "last_day_of_month_after_quarter"
+    },
+    "contents": [
+     "Returns and payments are due on or before April 30, July 31, October 31 and January 31; a Saturday, Sunday or holiday moves the date to the next business day.",
+     "Reimbursing employers' quarterly due dates are extended 15 days beyond those dates (not modelled: the profile schedules the contributory date)."
+    ],
+    "source": "U1"
+   }
+  ],
+  "notModelled": [
+   "Reimbursing employers' 15-day extension is recorded as text only.",
+   "A $25 late fee for a missing no-wage return, and the file format, come from search summaries and were not read in the Department's pages.",
+   "The agency's file format specifications, penalties not quoted above and portal enrollment steps were not read."
+  ]
+ },
+ "newHire": {
+  "form": "New-hire report (federal Form W-4 or an equivalent) to the Connecticut State Directory of New Hires; within 20 days of hire date",
+  "daysFromStart": 20,
+  "source": "N1"
+ }
 }
