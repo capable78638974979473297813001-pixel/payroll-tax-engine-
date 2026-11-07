@@ -329,3 +329,48 @@ The user supplied the ordinance and rule text for the three local exceptions tha
 - **Illinois statute read directly** (820 ILCS 105/4): (a)(2) an employer may pay an employee 18 or older, in the first 90 consecutive calendar days, up to 50 cents under the $15.00 wage ($14.50), except day or temporary laborers; (a)(3) an employee under 18 who has not worked more than 650 hours for the employer in the calendar year is paid $13.00 (after 650 hours, the adult wage). Illinois's `youthAndTraining` was empty and now carries both.
 - The FAQ's reduction ($15.40 - $0.50 = **$14.90**) is stored as the informational Cook trainee variant; the Illinois statute figures ($14.50 and $13.00) are in Illinois's youth and training list. The statute confirms the FAQ's $13.00 under-18 figure.
 - The engine cannot see tenure, age or worker type, so the headline $15.40 binds either way.
+
+## Batch 18: local tax re-check against current sources (2026-11-07)
+
+Each local dataset was diffed against a fresh download of its official source.
+
+- **Ohio municipal income tax (Ohio Department of Taxation's Finder feed):** 679 of 679 open rows match. Four entries differ from the feed on purpose and each carries a dated note and local source: Indian Hill 0.5% (feed 0.45%), Washington 1.75% (feed 1.95%), and the added Germantown, North Hampton, Stockport and Woodville.
+- **Ohio JEDD and JEDZ zones:** all 153 zones in force match the feed.
+- **Ohio school district income tax:** all 214 districts with a 2026 rate match the feed. One data error fixed: James A. Garfield LSD (district 6704) carried Rootstown LSD's IRN (49213); the Finder lists it as 49205. The IRN is not used in any calculation (districts are looked up by district number), so no paycheck was affected.
+- **Indiana county income tax:** all 92 counties match Departmental Notice #1 (R47 / 10-26, effective October 1, 2026); Boone is the only changed county (1.71%).
+- **Pennsylvania EIT and LST:** checked earlier today against the DCED register (all municipalities).
+- **Maryland county rates:** all 24 jurisdictions, including Anne Arundel's and Frederick's tiers, match the Comptroller's 2026 attachment.
+- **New York:** the New York City and Yonkers tables (NYS-50-T-NYC and NYS-50-T-Y, 1/26) contain 219 of the 222 stored figures; MCTMT thresholds and zone rates for quarters from July 1, 2025 match the Tax Department's page exactly.
+- **Oregon:** Workers' Benefit Fund 1.8 cents per hour (DCBS page), TriMet 0.8237%, Lane Transit 0.80% and the statewide transit tax 0.1% (Oregon Department of Revenue 2026 combined payroll tax report) match. Oregon announced a 2.2-cent WBF rate for 2027 that is still proposed; the 2027 file keeps 1.8 cents.
+- **Alabama municipal occupational tax:** the League's page matches except Opelika (1%, city's own announcement) and Tuskegee (3%, the city's own form); both are documented overrides of the League's survey.
+- **Michigan cities:** only Grand Rapids was re-read against its city page (1.5% resident, 0.75% nonresident, since July 1, 2010). The other 23 cities, Kentucky occupational taxes, Colorado, Missouri, Pennsylvania's Pittsburgh payroll tax, Seattle's payroll expense tax, West Virginia service fees, Newark and Wilmington were not re-read.
+
+## Batch 19: Michigan cities and Kentucky occupational taxes re-checked (2026-11-07)
+
+- **Michigan (24 cities).** Michigan's City Income Tax Act (MCL 141.503, 141.503a-c, 141.611) fixes the rate structure: the uniform ordinance is 1% resident / 0.5% nonresident unless the city's governing body adopts a lower rate; Detroit may levy up to 2.40% / 1.20% (141.503(2)(d)); Grand Rapids and Saginaw 1.5% / 0.75% and Highland Park 2% / 1% are the stored higher rates. Ten cities state their rates on their own pages today and all match: Grand Rapids (1.5% / 0.75% since July 1, 2010), Saginaw (1.5% / 0.75%), Flint, East Lansing, Ionia, Jackson, Muskegon, Portland, Benton Harbor and Big Rapids (1% / 0.5%). The other 14 (Albion, Battle Creek, Detroit, Grayling, Hamtramck, Highland Park, Hudson, Lansing, Lapeer, Muskegon Heights, Pontiac, Port Huron, Springfield, Walker) publish no rate on the pages that load without a browser, so they rest on the statute and the earlier Treasury-list read. A city that adopted a lower rate by resolution would not be caught.
+- **Kentucky (256 entries).** The Secretary of State's occupational tax database (KRS 67.766) offers an Excel export of every district; it was downloaded today (228 districts). Every district with a rate shown agrees with ours; the differences are text only (for example "$75 Flat Fee" against "$75 flat") or districts where the state's own list is stale or blank and we hold a newer city source (Somerset 1.2% from 2026, the state shows 0.6% from 2018). The four districts the state changed in 2026 are consistent with the file: Brandenburg, Walton, Salem (1%), Whitesville (1.15% from January 1, 2027, already scheduled). Louisville Metro (2.2% resident including the school board, 1.45% nonresident) matches the state row exactly; Lexington-Fayette's 2.25% matches the state row and our 2.75% resident figure adds the school board's 0.5%. All 87 county payroll rates match KACo's 2026 table.
+- No data changed in this batch.
+
+### Batch 19 addendum: Michigan cities, completed (2026-11-07)
+
+Twenty-three of the 24 cities now have their rate confirmed from the city's own page, form or booklet (listed with their sources on the Michigan file): Detroit's 2.4% / 1.2% is confirmed by the Michigan Treasury's own TY2025 withholding guide and TY2026 estimated-tax form; Highland Park is 2% / 1%; Grand Rapids and Saginaw 1.5% / 0.75%; the other 19 read 1% / 0.5%. **Muskegon Heights** is the one city whose own site and tax portal state no rate; East Lansing's FAQ lists it among the communities with the standard 1% resident rate, so its 1% / 0.5% rests on the statute and that listing, and the project owner confirmed it directly on 2026-11-07. No rate changed. A test now pins all 24.
+
+## Batch 20: city payroll and head taxes re-read (2026-11-07)
+
+Each figure below was read from the city's own page or form today; nothing needed to change and a test now pins them.
+
+- **Colorado head taxes:** Denver $5.75 employee and $4.00 employer at $500 or more a month; Glendale $5 and $5 above $750; Greenwood Village $2 and $2 at $250 or more; Sheridan $3 and $3; Aurora's tax was repealed effective January 1, 2025.
+- **Missouri:** Kansas City 1% earnings tax; St. Louis 1% earnings tax and the employer's 0.5% payroll expense tax.
+- **Pittsburgh** payroll expense tax 0.55% (the city's 2025 annual financial report, published June 2026).
+- **Seattle:** the 2026 payroll expense tax form matches every threshold ($9,074,409 payroll, $194,452 and $518,538 compensation, $129,634,413 and $1,296,344,132 tiers) and all six rates; social housing tax 5% above $1,000,000.
+- **Newark** payroll tax 1% (the city's page also describes a reduced 0.50% for employers whose workforce is more than half Newark residents, which the engine discloses but cannot apply from one paycheck). The $2,500 quarterly threshold rests on the city's older booklets (the 2026 booklet could not be opened) and was confirmed by the project owner on 2026-11-07.
+- **Wilmington** wage tax 1.25%: Delaware Code Title 22 ch. 9 caps it at 1.25% and a municipal document states the rate; the city's own wage tax page would not load, and the project owner confirmed the 1.25% on 2026-11-07.
+- **West Virginia city service fees:** already sourced city by city to ordinances and forms (Charleston $3 a week confirmed on the city's own page).
+- **Michigan, Muskegon Heights:** confirmed by the project owner.
+
+## Batch 21: Kentucky, Michigan and Vermont withholding read from the agencies (2026-11-07)
+
+- **Vermont:** the Department of Taxes' GB-1210-2026 (effective January 1 to December 31, 2026) was read through the TinyFish reader; all 108 stored figures (rates, bracket limits, base amounts and the withholding allowance) appear in it. Earlier this was the one state where the agency PDF was a bot-check page and nothing could be compared.
+- **Kentucky:** the Department of Revenue's 2026 withholding formula and withholding tax tables state the 3.5% flat rate and the $3,360 standard deduction (an increase of $90), matching the file.
+- **Michigan:** the Treasury's 2026 withholding information states the 4.25% rate and the $5,900 personal exemption ($5,800 in 2025), matching the file.
+- Test added for all three.

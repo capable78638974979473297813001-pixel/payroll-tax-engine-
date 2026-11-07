@@ -127,3 +127,86 @@ describe('new-employer rates against the Department of Labor January 2026 table'
     assert.match(s.newEmployerRateSource, /stays unconfirmed/);
   });
 });
+
+describe('Ohio school district identifiers (Finder feed, 2026-11-07)', () => {
+  test('James A. Garfield LSD (district 6704) carries its own IRN 49205, not Rootstown LSD\'s 49213, in every year', () => {
+    for (const y of [2025, 2026, 2027]) {
+      const d = read(`local/OH-school-districts-${y}.json`).districts.find((x: { sdNumber: string }) => x.sdNumber === '6704');
+      assert.equal(d.irn, '49205', String(y));
+    }
+  });
+  test('no two Ohio school districts share an IRN', () => {
+    const irns = read('local/OH-school-districts-2026.json').districts.map((x: { irn: string }) => x.irn);
+    assert.equal(new Set(irns).size, irns.length);
+  });
+});
+
+describe('Michigan city income tax rates (each city\'s own page, read 2026-11-07)', () => {
+  const expected: Record<string, [number, number]> = {
+    Detroit: [0.024, 0.012], 'Grand Rapids': [0.015, 0.0075], Saginaw: [0.015, 0.0075], 'Highland Park': [0.02, 0.01],
+  };
+  const standard = ['Albion', 'Battle Creek', 'Benton Harbor', 'Big Rapids', 'East Lansing', 'Flint', 'Grayling', 'Hamtramck', 'Hudson', 'Ionia', 'Jackson',
+    'Lansing', 'Lapeer', 'Muskegon', 'Muskegon Heights', 'Pontiac', 'Port Huron', 'Portland', 'Springfield', 'Walker'];
+  for (const c of standard) expected[c] = [0.01, 0.005];
+  test('all 24 cities carry the rates their own pages state, nonresident exactly half of resident', () => {
+    const cities = read('local/MI-cities-2026.json').cities as Array<{ name: string; residentRate: number; nonresidentRate: number }>;
+    assert.equal(cities.length, 24);
+    for (const c of cities) {
+      const e = expected[c.name];
+      assert.ok(e, `unexpected city ${c.name}`);
+      assert.deepEqual([c.residentRate, c.nonresidentRate], e, c.name);
+      assert.equal(c.nonresidentRate * 2, c.residentRate, c.name);
+    }
+  });
+});
+
+describe('City payroll and head taxes read from the cities\' own pages (2026-11-07)', () => {
+  test('Colorado head taxes: Denver $5.75 employee / $4.00 employer at $500 a month; Glendale $5 / $5 above $750; Greenwood Village $2 / $2 at $250; Sheridan $3 / $3; Aurora repealed 2025-01-01', () => {
+    const l = read('states/CO-2026.json').localIncomeTax;
+    assert.equal(l.denver.employeeRate, 5.75);
+    assert.equal(l.denver.employerRatePerEmployee, 4);
+    assert.equal(l.denver.monthlyEarningsThreshold, 500);
+    assert.deepEqual([l.occupationalPrivilegeTax.Glendale.employeeRate, l.occupationalPrivilegeTax.Glendale.employerRatePerEmployee, l.occupationalPrivilegeTax.Glendale.monthlyEarningsThreshold], [5, 5, 750]);
+    assert.deepEqual([l.occupationalPrivilegeTax['Greenwood Village'].employeeRate, l.occupationalPrivilegeTax['Greenwood Village'].monthlyEarningsThreshold], [2, 250]);
+    assert.equal(l.occupationalPrivilegeTax.Sheridan.employeeRate, 3);
+    assert.equal(l.aurora.repealed, true);
+  });
+  test('Missouri: Kansas City earnings tax 1%; St. Louis earnings tax 1% and employer payroll expense tax 0.5%', () => {
+    const l = read('states/MO-2026.json').localIncomeTax;
+    assert.equal(l.kansasCity.rate, 0.01);
+    assert.equal(l.stLouis.earningsTaxRate, 0.01);
+    assert.equal(l.stLouis.payrollExpenseTax.rate, 0.005);
+  });
+  test('Pittsburgh payroll expense tax 0.55%; Newark payroll tax 1%; Charleston WV $3 a week', () => {
+    assert.equal(read('states/PA-2026.json').localTax.pittsburghPayrollExpenseTax.rate, 0.0055);
+    assert.equal(read('states/NJ-2026.json').newarkPayrollTax.rate, 0.01);
+    assert.equal(read('states/WV-2026.json').localIncomeTax.serviceFeeCities.Charleston.weeklyRate, 3);
+  });
+  test('Seattle 2026 payroll expense tax thresholds and tier rates match the city\'s form; social housing tax 5% over $1,000,000', () => {
+    const w = read('states/WA-2026.json').localIncomeTax;
+    const p = w.seattlePayrollExpenseTax;
+    assert.equal(p.employerPayrollThreshold, 9074409);
+    assert.equal(p.compensationThreshold, 194452);
+    assert.equal(p.upperCompensationBand, 518538);
+    assert.deepEqual(p.tiers.map((t: { lowerBandRate: number; upperBandRate: number }) => [t.lowerBandRate, t.upperBandRate]), [[0.00746, 0.01811], [0.00746, 0.02024], [0.01492, 0.02557]]);
+    assert.equal(w.seattleSocialHousingTax.rate, 0.05);
+    assert.equal(w.seattleSocialHousingTax.compensationThreshold, 1000000);
+  });
+});
+
+describe('Kentucky, Michigan and Vermont income tax withholding (agency documents, read 2026-11-07)', () => {
+  test('Kentucky: 3.5% flat rate and $3,360 standard deduction (Department of Revenue 2026 withholding formula)', () => {
+    const k = read('states/KY-2026.json').flatRate;
+    assert.equal(k.rate, 0.035);
+    assert.equal(k.deductionAmount, 3360);
+  });
+  test('Michigan: 4.25% rate and $5,900 personal exemption (Treasury withholding information for 2026)', () => {
+    const m = read('states/MI-2026.json').flatRate;
+    assert.equal(m.rate, 0.0425);
+    assert.equal(m.allowanceAmount, 5900);
+  });
+  test('Vermont: single-filer bracket rates 3.35%, 6.6%, 7.6% and 8.75% (GB-1210-2026)', () => {
+    const rates = read('states/VT-2026.json').bracketPerPeriodAllowance.brackets.single.weekly.map((b: { rate: number }) => b.rate);
+    assert.deepEqual(rates.slice(1, 5), [0.0335, 0.066, 0.076, 0.0875]);
+  });
+});
