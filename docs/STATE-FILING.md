@@ -353,4 +353,17 @@ Each local dataset was diffed against a fresh download of its official source.
 
 ### Batch 19 addendum: Michigan cities, completed (2026-11-07)
 
-Twenty-three of the 24 cities now have their rate confirmed from the city's own page, form or booklet (listed with their sources on the Michigan file): Detroit's 2.4% / 1.2% is confirmed by the Michigan Treasury's own TY2025 withholding guide and TY2026 estimated-tax form; Highland Park is 2% / 1%; Grand Rapids and Saginaw 1.5% / 0.75%; the other 19 read 1% / 0.5%. **Muskegon Heights** is the one city whose own site and tax portal state no rate; East Lansing's FAQ lists it among the communities with the standard 1% resident rate, so its 1% / 0.5% rests on the statute and that listing. No rate changed. A test now pins all 24.
+Twenty-three of the 24 cities now have their rate confirmed from the city's own page, form or booklet (listed with their sources on the Michigan file): Detroit's 2.4% / 1.2% is confirmed by the Michigan Treasury's own TY2025 withholding guide and TY2026 estimated-tax form; Highland Park is 2% / 1%; Grand Rapids and Saginaw 1.5% / 0.75%; the other 19 read 1% / 0.5%. **Muskegon Heights** is the one city whose own site and tax portal state no rate; East Lansing's FAQ lists it among the communities with the standard 1% resident rate, so its 1% / 0.5% rests on the statute and that listing, and the project owner confirmed it directly on 2026-11-07. No rate changed. A test now pins all 24.
+
+## Batch 20: city payroll and head taxes re-read (2026-11-07)
+
+Each figure below was read from the city's own page or form today; nothing needed to change and a test now pins them.
+
+- **Colorado head taxes:** Denver $5.75 employee and $4.00 employer at $500 or more a month; Glendale $5 and $5 above $750; Greenwood Village $2 and $2 at $250 or more; Sheridan $3 and $3; Aurora's tax was repealed effective January 1, 2025.
+- **Missouri:** Kansas City 1% earnings tax; St. Louis 1% earnings tax and the employer's 0.5% payroll expense tax.
+- **Pittsburgh** payroll expense tax 0.55% (the city's 2025 annual financial report, published June 2026).
+- **Seattle:** the 2026 payroll expense tax form matches every threshold ($9,074,409 payroll, $194,452 and $518,538 compensation, $129,634,413 and $1,296,344,132 tiers) and all six rates; social housing tax 5% above $1,000,000.
+- **Newark** payroll tax 1% (the city's page also describes a reduced 0.50% for employers whose workforce is more than half Newark residents, which the engine discloses but cannot apply from one paycheck). The $2,500 quarterly threshold rests on the city's older booklets; the 2026 booklet could not be opened.
+- **Wilmington** wage tax 1.25%: Delaware Code Title 22 ch. 9 caps it at 1.25% and a municipal document states the rate; the city's own wage tax page would not load.
+- **West Virginia city service fees:** already sourced city by city to ordinances and forms (Charleston $3 a week confirmed on the city's own page).
+- **Michigan, Muskegon Heights:** confirmed by the project owner.

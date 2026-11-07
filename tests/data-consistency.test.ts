@@ -159,3 +159,37 @@ describe('Michigan city income tax rates (each city\'s own page, read 2026-11-07
     }
   });
 });
+
+describe('City payroll and head taxes read from the cities\' own pages (2026-11-07)', () => {
+  test('Colorado head taxes: Denver $5.75 employee / $4.00 employer at $500 a month; Glendale $5 / $5 above $750; Greenwood Village $2 / $2 at $250; Sheridan $3 / $3; Aurora repealed 2025-01-01', () => {
+    const l = read('states/CO-2026.json').localIncomeTax;
+    assert.equal(l.denver.employeeRate, 5.75);
+    assert.equal(l.denver.employerRatePerEmployee, 4);
+    assert.equal(l.denver.monthlyEarningsThreshold, 500);
+    assert.deepEqual([l.occupationalPrivilegeTax.Glendale.employeeRate, l.occupationalPrivilegeTax.Glendale.employerRatePerEmployee, l.occupationalPrivilegeTax.Glendale.monthlyEarningsThreshold], [5, 5, 750]);
+    assert.deepEqual([l.occupationalPrivilegeTax['Greenwood Village'].employeeRate, l.occupationalPrivilegeTax['Greenwood Village'].monthlyEarningsThreshold], [2, 250]);
+    assert.equal(l.occupationalPrivilegeTax.Sheridan.employeeRate, 3);
+    assert.equal(l.aurora.repealed, true);
+  });
+  test('Missouri: Kansas City earnings tax 1%; St. Louis earnings tax 1% and employer payroll expense tax 0.5%', () => {
+    const l = read('states/MO-2026.json').localIncomeTax;
+    assert.equal(l.kansasCity.rate, 0.01);
+    assert.equal(l.stLouis.earningsTaxRate, 0.01);
+    assert.equal(l.stLouis.payrollExpenseTax.rate, 0.005);
+  });
+  test('Pittsburgh payroll expense tax 0.55%; Newark payroll tax 1%; Charleston WV $3 a week', () => {
+    assert.equal(read('states/PA-2026.json').localTax.pittsburghPayrollExpenseTax.rate, 0.0055);
+    assert.equal(read('states/NJ-2026.json').newarkPayrollTax.rate, 0.01);
+    assert.equal(read('states/WV-2026.json').localIncomeTax.serviceFeeCities.Charleston.weeklyRate, 3);
+  });
+  test('Seattle 2026 payroll expense tax thresholds and tier rates match the city\'s form; social housing tax 5% over $1,000,000', () => {
+    const w = read('states/WA-2026.json').localIncomeTax;
+    const p = w.seattlePayrollExpenseTax;
+    assert.equal(p.employerPayrollThreshold, 9074409);
+    assert.equal(p.compensationThreshold, 194452);
+    assert.equal(p.upperCompensationBand, 518538);
+    assert.deepEqual(p.tiers.map((t: { lowerBandRate: number; upperBandRate: number }) => [t.lowerBandRate, t.upperBandRate]), [[0.00746, 0.01811], [0.00746, 0.02024], [0.01492, 0.02557]]);
+    assert.equal(w.seattleSocialHousingTax.rate, 0.05);
+    assert.equal(w.seattleSocialHousingTax.compensationThreshold, 1000000);
+  });
+});
