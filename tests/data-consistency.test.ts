@@ -127,3 +127,16 @@ describe('new-employer rates against the Department of Labor January 2026 table'
     assert.match(s.newEmployerRateSource, /stays unconfirmed/);
   });
 });
+
+describe('Ohio school district identifiers (Finder feed, 2026-11-07)', () => {
+  test('James A. Garfield LSD (district 6704) carries its own IRN 49205, not Rootstown LSD\'s 49213, in every year', () => {
+    for (const y of [2025, 2026, 2027]) {
+      const d = read(`local/OH-school-districts-${y}.json`).districts.find((x: { sdNumber: string }) => x.sdNumber === '6704');
+      assert.equal(d.irn, '49205', String(y));
+    }
+  });
+  test('no two Ohio school districts share an IRN', () => {
+    const irns = read('local/OH-school-districts-2026.json').districts.map((x: { irn: string }) => x.irn);
+    assert.equal(new Set(irns).size, irns.length);
+  });
+});

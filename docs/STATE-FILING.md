@@ -329,3 +329,18 @@ The user supplied the ordinance and rule text for the three local exceptions tha
 - **Illinois statute read directly** (820 ILCS 105/4): (a)(2) an employer may pay an employee 18 or older, in the first 90 consecutive calendar days, up to 50 cents under the $15.00 wage ($14.50), except day or temporary laborers; (a)(3) an employee under 18 who has not worked more than 650 hours for the employer in the calendar year is paid $13.00 (after 650 hours, the adult wage). Illinois's `youthAndTraining` was empty and now carries both.
 - The FAQ's reduction ($15.40 - $0.50 = **$14.90**) is stored as the informational Cook trainee variant; the Illinois statute figures ($14.50 and $13.00) are in Illinois's youth and training list. The statute confirms the FAQ's $13.00 under-18 figure.
 - The engine cannot see tenure, age or worker type, so the headline $15.40 binds either way.
+
+## Batch 18: local tax re-check against current sources (2026-11-07)
+
+Each local dataset was diffed against a fresh download of its official source.
+
+- **Ohio municipal income tax (Ohio Department of Taxation's Finder feed):** 679 of 679 open rows match. Four entries differ from the feed on purpose and each carries a dated note and local source: Indian Hill 0.5% (feed 0.45%), Washington 1.75% (feed 1.95%), and the added Germantown, North Hampton, Stockport and Woodville.
+- **Ohio JEDD and JEDZ zones:** all 153 zones in force match the feed.
+- **Ohio school district income tax:** all 214 districts with a 2026 rate match the feed. One data error fixed: James A. Garfield LSD (district 6704) carried Rootstown LSD's IRN (49213); the Finder lists it as 49205. The IRN is not used in any calculation (districts are looked up by district number), so no paycheck was affected.
+- **Indiana county income tax:** all 92 counties match Departmental Notice #1 (R47 / 10-26, effective October 1, 2026); Boone is the only changed county (1.71%).
+- **Pennsylvania EIT and LST:** checked earlier today against the DCED register (all municipalities).
+- **Maryland county rates:** all 24 jurisdictions, including Anne Arundel's and Frederick's tiers, match the Comptroller's 2026 attachment.
+- **New York:** the New York City and Yonkers tables (NYS-50-T-NYC and NYS-50-T-Y, 1/26) contain 219 of the 222 stored figures; MCTMT thresholds and zone rates for quarters from July 1, 2025 match the Tax Department's page exactly.
+- **Oregon:** Workers' Benefit Fund 1.8 cents per hour (DCBS page), TriMet 0.8237%, Lane Transit 0.80% and the statewide transit tax 0.1% (Oregon Department of Revenue 2026 combined payroll tax report) match. Oregon announced a 2.2-cent WBF rate for 2027 that is still proposed; the 2027 file keeps 1.8 cents.
+- **Alabama municipal occupational tax:** the League's page matches except Opelika (1%, city's own announcement) and Tuskegee (3%, the city's own form); both are documented overrides of the League's survey.
+- **Michigan cities:** only Grand Rapids was re-read against its city page (1.5% resident, 0.75% nonresident, since July 1, 2010). The other 23 cities, Kentucky occupational taxes, Colorado, Missouri, Pennsylvania's Pittsburgh payroll tax, Seattle's payroll expense tax, West Virginia service fees, Newark and Wilmington were not re-read.
