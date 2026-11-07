@@ -213,8 +213,9 @@ describe('verification email tells the truth', { concurrency: 1 }, () => {
     assert.equal(seen.length, 1);
     const stored = db(site).accounts[email].code as string;
     assert.match(stored, /^sha256:[0-9a-f]{64}$/);
-    const mailed = JSON.parse(bodies[0] ?? '{}') as { subject?: string };
-    const code = String(mailed.subject ?? '').slice(0, 6);
+    const mailed = JSON.parse(bodies[0] ?? '{}') as { subject?: string; text?: string };
+    assert.doesNotMatch(String(mailed.subject ?? ''), /\d{6}/, 'the code is not in the subject');
+    const code = /\b(\d{6})\b/.exec(String(mailed.text ?? ''))?.[1] ?? '';
     assert.match(code, /^\d{6}$/);
     assert.notEqual(stored, code);
     await new Promise((resolve) => setTimeout(resolve, 50));

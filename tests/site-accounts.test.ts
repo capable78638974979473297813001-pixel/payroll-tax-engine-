@@ -101,7 +101,7 @@ describe('accounts you can log back into', { skip: !havePython }, () => {
     assert.equal(m.auth, 'Bearer re_test_key');
     assert.equal(m.ua, 'omniatax-verifier/1.0', 'Resend rejects the default Python-urllib User-Agent');
     assert.equal(m.from, 'Omnia.tax <verify@omniatax.io>');
-    assert.match(m.subject, /^\d{6} is your Omnia verification code$/);
+    assert.match(m.subject, /^Your Omnia verification code$/);
     assert.ok(m.html.includes(lastCode()) && m.text.includes(lastCode()));
 
     const bad = await post('/api/verify-email', { email: EMAIL, code: lastCode() === '000000' ? '111111' : '000000' });

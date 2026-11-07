@@ -37,7 +37,7 @@ or
     <h2>Single calls or batch?</h2>
     <div class="table-wrap"><table><thead><tr><th>Use</th><th style="text-align:left">When</th></tr></thead><tbody><tr><td><code>POST /v1/paycheck</code></td><td style="text-align:left">You want the full response shape, notices and warnings, and one result per request.</td></tr><tr><td><code>POST /v1/payCalc</code></td><td style="text-align:left">You are integrating with a Symmetry-shaped client, or you want a single request for a run.</td></tr></tbody></table></div>
     <h2>Know the limits</h2>
-    <ul><li>The batch adapter uses its own jurisdiction ids, not Symmetry's. See <a href="/migrate-from-symmetry-paycalc">migrating from a payCalc integration</a>.</li><li>Rate limits apply per request, so a large batch is one call against the limit.</li><li>Keep batch sizes reasonable so one slow paycheck does not hold up the rest.</li></ul>
+    <ul><li>The batch adapter uses its own jurisdiction ids, not Symmetry's. See <a href="/migrate-from-symmetry-paycalc">migrating from a payCalc integration</a>.</li><li>Rate limits apply per request, so a large batch is one call against the limit. A batch may carry at most 500 paychecks; larger runs are split into several requests (the server answers 413 <code>batch_too_large</code> otherwise).</li><li>Keep batch sizes reasonable so one slow paycheck does not hold up the rest.</li></ul>
     <h2>Keep reading</h2>
     <p><a href="/migrate-from-symmetry-paycalc">Migrate from a Symmetry payCalc integration</a> · <a href="/payroll-tax-api-rate-limits">Payroll tax API rate limits</a> · <a href="/payroll-tax-api-pricing">Payroll tax API pricing</a> · <a href="/embedded-payroll-tax-engine">Embedded payroll tax engine</a> · <a href="/guides">All guides</a></p>
   </div>

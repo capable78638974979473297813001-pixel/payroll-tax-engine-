@@ -184,10 +184,12 @@ describe('an account survives its server being replaced with an empty one', () =
     await stop(c2.child);
   });
 
-  test('a backup made under a different secret is skipped, and the server still starts', async () => {
+  test('a backup made under a different secret is skipped, the server still starts, and health says the backup is degraded', async () => {
     const e = await startSite({ STORE_MIRROR_SECRET: 'a-different-secret-entirely' });
-    const health = await (await fetch(e.base + '/healthz')).json() as { accountBackup: { state: string } };
-    assert.equal(health.accountBackup.state, 'ok');
+    const health = await (await fetch(e.base + '/healthz')).json() as { accountBackup: { state: string; unreadable: number } };
+    // 'ok' would claim the accounts are safe; one of them cannot be read with this secret.
+    assert.equal(health.accountBackup.state, 'degraded');
+    assert.ok(health.accountBackup.unreadable >= 1);
     const login = await post(e.base, '/api/signin-password', { email: EMAIL, password: PW }, await csrf(e.base));
     assert.equal(login.status, 401, 'an account that cannot be decrypted is not restored');
     await stop(e.child);

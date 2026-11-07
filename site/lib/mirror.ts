@@ -167,11 +167,18 @@ export function restoreBundle(db: DB, bundle: AccountBundle): boolean {
 // The running mirror
 // ---------------------------------------------------------------------------------------------
 
-type State = 'off' | 'restoring' | 'ok' | 'failing';
+/**
+ * 'ok': Stripe answered and every account this process knows of is backed up in a form it can read.
+ * 'degraded': Stripe answered, but some backed-up accounts could not be decrypted with the current
+ * secret, or an account is too large to back up. Those accounts are not safe across a restart.
+ */
+type State = 'off' | 'restoring' | 'ok' | 'degraded' | 'failing';
 
 const customerOf = new Map<string, string>(); // email hash -> Stripe customer id
 const uploadedFp = new Map<string, string>(); // email hash -> fingerprint last written
 const pending = new Map<string, AccountBundle>(); // email hash -> bundle to write
+const unreadable = new Set<string>(); // email hashes whose backup the current secret cannot decrypt
+const tooLarge = new Map<string, string>(); // email hash -> fingerprint that did not fit in Stripe metadata
 let state: State = 'off';
 let lastError = '';
 let lastSyncAt = '';
@@ -183,13 +190,23 @@ let latestDb: DB | null = null;
 let flushing: Promise<void> | null = null;
 let backoffMs = 5_000;
 
-export function mirrorStatus(): { state: State; accounts: number; pending: number; lastError?: string; lastSyncAt?: string } {
-  return { state, accounts: uploadedFp.size, pending: pending.size, ...(lastError ? { lastError } : {}), ...(lastSyncAt ? { lastSyncAt } : {}) };
+export function mirrorStatus(): {
+  state: State; accounts: number; pending: number; unreadable: number; tooLarge: number; lastError?: string; lastSyncAt?: string;
+} {
+  return {
+    state, accounts: uploadedFp.size, pending: pending.size, unreadable: unreadable.size, tooLarge: tooLarge.size,
+    ...(lastError ? { lastError } : {}), ...(lastSyncAt ? { lastSyncAt } : {}),
+  };
+}
+
+/** The state to report once Stripe has answered: ok only when nothing is known to be unrecoverable. */
+function answeredState(): State {
+  return unreadable.size || tooLarge.size ? 'degraded' : 'ok';
 }
 
 /** Resolves once the account store has been checked against the backup (or after a wait, so a slow Stripe never stalls the site). */
 export function mirrorReady(): Promise<void> {
-  if (state === 'off' || state === 'ok' || state === 'failing') return Promise.resolve();
+  if (state === 'off' || state === 'ok' || state === 'degraded' || state === 'failing') return Promise.resolve();
   return Promise.race([readyPromise, new Promise<void>((resolve) => setTimeout(resolve, READY_WAIT_MS).unref())]);
 }
 
@@ -215,6 +232,8 @@ function queueChanges(db: DB): void {
     const hash = emailHash(email);
     const fp = fingerprint(bundle);
     if (uploadedFp.get(hash) === fp && !pending.has(hash)) continue;
+    // Already known not to fit; try again only once the account changes.
+    if (tooLarge.get(hash) === fp && !pending.has(hash)) continue;
     pending.set(hash, bundle);
   }
   if (pending.size) scheduleFlush(0);
@@ -233,8 +252,11 @@ async function writeOne(hash: string, bundle: AccountBundle): Promise<void> {
   const fp = fingerprint(bundle);
   const md = toMetadata(bundle, hash, fp);
   if (!md) {
-    console.error('[mirror] one account is too large to back up; skipped.');
-    uploadedFp.set(hash, fp);
+    // Not backed up, so not marked uploaded: it is reported (tooLarge, state 'degraded') and
+    // retried the next time the account changes.
+    console.error('[mirror] one account is too large to back up; it is NOT protected against a restart.');
+    tooLarge.set(hash, fp);
+    if (state === 'ok') state = 'degraded';
     return;
   }
   let id = customerOf.get(hash);
@@ -246,6 +268,10 @@ async function writeOne(hash: string, bundle: AccountBundle): Promise<void> {
   }
   await updateCustomerMetadata(id, md);
   uploadedFp.set(hash, fp);
+  tooLarge.delete(hash);
+  // Rewritten under the current secret, so it is readable again.
+  unreadable.delete(hash);
+  if (state === 'degraded') state = answeredState();
 }
 
 /** Write what is pending. Safe to call at any time; also used to flush on shutdown. */
@@ -261,7 +287,7 @@ export function flushMirror(maxMs = 25_000): Promise<void> {
         await writeOne(hash, bundle);
         if (pending.get(hash) === bundle) pending.delete(hash);
       }
-      if (state === 'failing') { state = 'ok'; lastError = ''; }
+      if (state === 'failing') { state = answeredState(); lastError = ''; }
       backoffMs = 5_000;
       lastSyncAt = new Date().toISOString();
     } catch (err) {
@@ -302,7 +328,9 @@ export async function restoreFromMirror(): Promise<{ restored: number; backedUp:
     remoteFp.set(hash, c.metadata.fp ?? '');
     try {
       bundles.push(fromMetadata(c.metadata).bundle);
+      unreadable.delete(hash);
     } catch (err) {
+      unreadable.add(hash);
       console.error(`[mirror] could not read one backed-up account (${err instanceof Error ? err.message : String(err)}). Was STORE_MIRROR_SECRET or the Stripe key changed?`);
     }
   }
@@ -316,6 +344,9 @@ export async function restoreFromMirror(): Promise<{ restored: number; backedUp:
   const local = readDb((db) => buildBundles(db));
   for (const [email, bundle] of local) {
     const hash = emailHash(email);
+    // A backup this secret cannot read is not a backup: leave it unseeded so the local copy is
+    // rewritten under the current secret.
+    if (unreadable.has(hash)) continue;
     if (remoteFp.get(hash) === fingerprint(bundle)) uploadedFp.set(hash, remoteFp.get(hash)!);
   }
   return { restored, backedUp: remote.length };
@@ -332,9 +363,11 @@ export function startMirror(): void {
     try {
       const { restored, backedUp } = await restoreFromMirror();
       console.log(`[mirror] account backup on: ${backedUp} account(s) backed up, ${restored} restored into this store.`);
-      state = 'ok';
       lastError = '';
+      // Queue the uploads before reporting a state, so health never reads 'ok' with work it has
+      // not yet counted as pending.
       queueChanges(readDb((db) => db));
+      state = answeredState();
       return true;
     } catch (err) {
       noteFailure(err);
@@ -353,7 +386,7 @@ export function startMirror(): void {
 
 /** Test hook: forget everything so a fresh start can be simulated in one process. */
 export function resetMirrorForTests(): void {
-  customerOf.clear(); uploadedFp.clear(); pending.clear();
+  customerOf.clear(); uploadedFp.clear(); pending.clear(); unreadable.clear(); tooLarge.clear();
   state = 'off'; lastError = ''; lastSyncAt = ''; started = false; latestDb = null;
   if (flushTimer) { clearTimeout(flushTimer); flushTimer = null; }
   if (diffTimer) { clearTimeout(diffTimer); diffTimer = null; }

@@ -17,7 +17,8 @@ import { createGunzip } from 'node:zlib';
  *
  *   ADDRESS_INDEX_PATH       where the index lives (unset = feature off)
  *   ADDRESS_INDEX_URL        a prebuilt index to download, optionally .gz
- *   ADDRESS_INDEX_SHA256     expected sha256 of the downloaded bytes (verified if set)
+ *   ADDRESS_INDEX_SHA256     expected sha256 of the downloaded bytes (required: a download
+ *                            without it is refused, so an unexpected file is never installed)
  *   ADDRESS_INDEX_AUTOBUILD  "1" to build it here from OpenAddresses when no URL is set
  *
  * A download is preferred: it is minutes, not hours, and costs the server
@@ -68,6 +69,10 @@ function indexHasPoints(path: string): boolean {
 }
 
 async function download(url: string, dest: string, expectedSha256: string | undefined): Promise<void> {
+  const expected = (expectedSha256 ?? '').trim().toLowerCase();
+  if (!/^[0-9a-f]{64}$/.test(expected)) {
+    throw new Error('ADDRESS_INDEX_SHA256 must be set to the 64-character sha256 of the file at ADDRESS_INDEX_URL; refusing an unverified download');
+  }
   const partial = `${dest}.download`;
   rmSync(partial, { force: true });
   log(`downloading ${url.replace(/\?.*$/, '')}`);
@@ -79,9 +84,9 @@ async function download(url: string, dest: string, expectedSha256: string | unde
   if (url.split('?')[0].endsWith('.gz')) await pipeline(source, createGunzip(), createWriteStream(partial));
   else await pipeline(source, createWriteStream(partial));
   const got = hash.digest('hex');
-  if (expectedSha256 && got.toLowerCase() !== expectedSha256.toLowerCase()) {
+  if (got.toLowerCase() !== expected) {
     rmSync(partial, { force: true });
-    throw new Error(`sha256 mismatch: expected ${expectedSha256}, got ${got}`);
+    throw new Error(`sha256 mismatch: expected ${expected}, got ${got}`);
   }
   if (!indexHasPoints(partial)) {
     rmSync(partial, { force: true });

@@ -519,7 +519,12 @@ function corsHeaders(req: IncomingMessage | undefined): Record<string, string> {
   if (!origin || Array.isArray(origin)) return {};
   let requestOrigin = '';
   try { requestOrigin = new URL(origin).origin; } catch { return {}; }
-  const allowed = new Set<string>([canonicalOrigin(), `http://localhost:${PORT}`, `http://127.0.0.1:${PORT}`]);
+  // Local origins are for development only; a production server answers its canonical origin alone.
+  const allowed = new Set<string>([canonicalOrigin()]);
+  if (process.env.NODE_ENV !== 'production') {
+    allowed.add(`http://localhost:${PORT}`);
+    allowed.add(`http://127.0.0.1:${PORT}`);
+  }
   if (!allowed.has(requestOrigin)) return {};
   return {
     'Access-Control-Allow-Origin': requestOrigin,
@@ -570,6 +575,20 @@ function csrfOk(req: IncomingMessage): boolean {
 }
 
 const MAX_BODY_BYTES = 1_000_000;
+
+/**
+ * Most paychecks one batch request (POST /v1/payCalc items, POST /v1/payroll/run employees) may
+ * carry. The rate limit counts HTTP requests, and the server is one single-threaded process, so
+ * without a cap one request could hold the CPU for everyone. MAX_BATCH_ITEMS overrides it.
+ */
+function maxBatchItems(): number {
+  const n = Number(process.env.MAX_BATCH_ITEMS ?? 500);
+  return Number.isFinite(n) && n >= 1 ? Math.floor(n) : 500;
+}
+
+function batchTooLargeMessage(count: number): string {
+  return `This batch has ${count} paychecks; the limit is ${maxBatchItems()} per request. Split it into several requests.`;
+}
 
 function readBody(req: IncomingMessage): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -3362,6 +3381,11 @@ async function handlePayCalc(req: IncomingMessage, res: ServerResponse): Promise
     sendJson(res, 400, { error: err instanceof Error ? err.message : 'Bad request.', code: 'invalid_json', requestId }, rlHeaders);
     return;
   }
+  if (requests.length > maxBatchItems()) {
+    noteUsage(ctx, req, { statusCode: 413, error: 'batch_too_large', checkDate: null, kind: 'payCalc', paychecks: 0 });
+    sendJson(res, 413, { error: batchTooLargeMessage(requests.length), code: 'batch_too_large', limit: maxBatchItems(), requestId }, rlHeaders);
+    return;
+  }
 
   let results;
   try {
@@ -3409,6 +3433,12 @@ async function handlePayrollRun(req: IncomingMessage, res: ServerResponse): Prom
   if (!body.employees?.length || !body.checkDate || !PAY_FREQUENCIES.has(frequency as PayFrequency)) {
     noteUsage(ctx, req, { statusCode: 400, error: 'validation_failed', checkDate: body.checkDate ?? null, kind: 'payroll', paychecks: 0 });
     sendJson(res, 400, { error: 'checkDate, payFrequency, and a non-empty employees[] are required.', code: 'invalid_input', requestId }, rlHeaders);
+    return;
+  }
+  if (!Array.isArray(body.employees) || body.employees.length > maxBatchItems()) {
+    const count = Array.isArray(body.employees) ? body.employees.length : 0;
+    noteUsage(ctx, req, { statusCode: 413, error: 'batch_too_large', checkDate: body.checkDate, kind: 'payroll', paychecks: 0 });
+    sendJson(res, 413, { error: Array.isArray(body.employees) ? batchTooLargeMessage(count) : 'employees must be an array.', code: Array.isArray(body.employees) ? 'batch_too_large' : 'invalid_input', limit: maxBatchItems(), requestId }, rlHeaders);
     return;
   }
   try {
@@ -3488,7 +3518,26 @@ function handleUniqueTaxId(req: IncomingMessage, res: ServerResponse, path: stri
 
 const STARTED_AT = new Date().toISOString();
 
-function handleHealth(res: ServerResponse): void {
+/**
+ * Whether this health caller may see the operational detail (data path, backup counts, start
+ * time, which integrations are configured). Loopback callers that did not come through a proxy
+ * (a local probe, `curl` inside the container, the test suite) and callers presenting
+ * HEALTH_TOKEN as a bearer token see it. Everyone else gets liveness plus the coarse storage and
+ * backup state the sign-in page reads.
+ */
+function healthDetailAllowed(req: IncomingMessage): boolean {
+  const token = (process.env.HEALTH_TOKEN ?? '').trim();
+  if (token) {
+    const presented = String(req.headers.authorization ?? '').replace(/^Bearer\s+/i, '').trim();
+    if (presented && safeEqual(presented, token)) return true;
+  }
+  // A request that a proxy forwarded is not local, whatever socket it arrived on.
+  if (req.headers['x-forwarded-for'] !== undefined || req.headers['forwarded'] !== undefined) return false;
+  const remote = req.socket.remoteAddress ?? '';
+  return remote === '127.0.0.1' || remote === '::1' || remote === '::ffff:127.0.0.1';
+}
+
+function handleHealth(req: IncomingMessage, res: ServerResponse): void {
   let states = 0;
   let ok = true;
   try {
@@ -3506,26 +3555,35 @@ function handleHealth(res: ServerResponse): void {
     store = 'unreadable';
     ok = false;
   }
-  sendJson(res, ok ? 200 : 503, {
+  const storage = storageStatus();
+  const backup = mirrorStatus();
+  const body: Record<string, unknown> = {
     status: ok ? 'ok' : 'degraded',
     version: API_VERSION,
     states,
     store,
     // 'temporary' means the account store sits on the container's own filesystem: a restart or
     // redeploy erases every account. 'unchecked' outside production.
-    storage: storageStatus().status,
-    storageReason: storageStatus().reason,
-    // 'ok': every verified account is backed up in Stripe and restored into an empty store at start.
-    accountBackup: mirrorStatus(),
-    startedAt: STARTED_AT,
-    taxYears: supportedYears(),
-    // Which integrations this server has been given keys for. Booleans only.
-    payments: stripeConfigured(),
-    metering: meteringConfigured(),
-    email: isEmailConfigured() || verifierConfigured(),
-    mail: mailStatus(),
+    storage: storage.status,
+    // Only the state is public. 'ok' means the last Stripe listing completed on this process, not
+    // that every account decrypted or that a restore drill passed.
+    accountBackup: { state: backup.state },
     time: new Date().toISOString(),
-  });
+  };
+  if (healthDetailAllowed(req)) {
+    Object.assign(body, {
+      storageReason: storage.reason,
+      accountBackup: backup,
+      startedAt: STARTED_AT,
+      taxYears: supportedYears(),
+      // Which integrations this server has been given keys for. Booleans only.
+      payments: stripeConfigured(),
+      metering: meteringConfigured(),
+      email: isEmailConfigured() || verifierConfigured(),
+      mail: mailStatus(),
+    });
+  }
+  sendJson(res, ok ? 200 : 503, body, { 'Cache-Control': 'no-store' });
 }
 
 // Tax years each state has a ruleset for (2025 covers only some states).
@@ -3963,7 +4021,7 @@ createServer((req, res) => {
     if (method === 'POST' && (url === '/api/payroll/run' || url === '/v1/payroll/run')) return handlePayrollRun(req, res);
     if (method === 'GET' && (url === '/api/uniqueTaxIds' || url === '/v1/uniqueTaxIds')) return handleUniqueTaxIds(req, res);
     if (method === 'GET' && (url.startsWith('/api/uniqueTaxIds/') || url.startsWith('/v1/uniqueTaxIds/'))) return handleUniqueTaxId(req, res, url);
-    if (method === 'GET' && (url === '/api/health' || url === '/v1/health' || url === '/healthz')) return handleHealth(res);
+    if (method === 'GET' && (url === '/api/health' || url === '/v1/health' || url === '/healthz')) return handleHealth(req, res);
     if (method === 'GET' && (url === '/v1/openapi.json' || url === '/openapi.json')) return sendJson(res, 200, openApiDocument(API_VERSION), { 'Cache-Control': 'public, max-age=300' });
     if (method === 'GET' && url === '/v1/schemas/paycheck-request.json') return sendJson(res, 200, paycheckRequestSchema, { 'Cache-Control': 'public, max-age=300' });
     if (method === 'GET' && (url === '/api/states' || url === '/v1/states')) return handleStates(res, req.url ?? url);
@@ -3996,6 +4054,15 @@ createServer((req, res) => {
   });
 }).listen(PORT, () => {
   startMirror();
+  if (process.env.NODE_ENV === 'production' && !(process.env.CONTACT_TO ?? '').trim()) {
+    console.warn('[contact] WARNING: CONTACT_TO is not set, so contact-form messages go to the built-in fallback mailbox. Set CONTACT_TO.');
+  }
+  if (mirrorStatus().state !== 'off' && !(process.env.STORE_MIRROR_SECRET ?? '').trim()) {
+    console.warn(
+      '[mirror] WARNING: STORE_MIRROR_SECRET is not set, so the account backup is encrypted with a key derived from ' +
+        'STRIPE_SECRET_KEY. Rotating that key makes every existing backup unreadable. Set STORE_MIRROR_SECRET to a long random string.',
+    );
+  }
   const liveRefused = stripeKeyRefused();
   if (liveRefused) {
     console.error(`[billing] ${liveRefused}`);
@@ -4019,7 +4086,14 @@ createServer((req, res) => {
 });
 
 // Render stops a container with SIGTERM before replacing it. Write any account change that has not
-// reached the backup yet, so a deploy right after a sign-up does not lose it.
+// reached the backup yet, so a deploy right after a sign-up does not lose it, and deliver queued
+// meter events, which live only in the local store and would otherwise be lost with the container
+// (unbilled usage). Both run together inside the platform's shutdown grace period.
 process.on('SIGTERM', () => {
-  void flushMirror(20_000).finally(() => process.exit(0));
+  const deadline = new Promise<void>((resolve) => setTimeout(resolve, 20_000).unref());
+  const meter = flushMeterQueue({ force: true }).then(
+    () => undefined,
+    (err) => { console.error('[shutdown] meter flush failed:', err instanceof Error ? err.message : err); },
+  );
+  void Promise.race([Promise.allSettled([flushMirror(20_000), meter]), deadline]).finally(() => process.exit(0));
 });

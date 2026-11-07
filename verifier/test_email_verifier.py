@@ -241,6 +241,7 @@ class DeliveryRecoveryTest(unittest.TestCase):
     def test_sign_in_mail_says_sign_in(self) -> None:
         subject, text, body = ev._message_parts("Ada Lovelace", "123456", 10, "signin")
         self.assertIn("sign-in code", subject)
+        self.assertNotIn("123456", subject, "the code stays out of the subject")
         self.assertIn("sign-in code is 123456", text)
         self.assertIn("Your sign-in code", body)
         self.assertNotIn("signup", (text + body).lower())
