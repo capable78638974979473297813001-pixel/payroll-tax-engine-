@@ -363,8 +363,8 @@ Each figure below was read from the city's own page or form today; nothing neede
 - **Missouri:** Kansas City 1% earnings tax; St. Louis 1% earnings tax and the employer's 0.5% payroll expense tax.
 - **Pittsburgh** payroll expense tax 0.55% (the city's 2025 annual financial report, published June 2026).
 - **Seattle:** the 2026 payroll expense tax form matches every threshold ($9,074,409 payroll, $194,452 and $518,538 compensation, $129,634,413 and $1,296,344,132 tiers) and all six rates; social housing tax 5% above $1,000,000.
-- **Newark** payroll tax 1% (the city's page also describes a reduced 0.50% for employers whose workforce is more than half Newark residents, which the engine discloses but cannot apply from one paycheck). The $2,500 quarterly threshold rests on the city's older booklets; the 2026 booklet could not be opened.
-- **Wilmington** wage tax 1.25%: Delaware Code Title 22 ch. 9 caps it at 1.25% and a municipal document states the rate; the city's own wage tax page would not load.
+- **Newark** payroll tax 1% (the city's page also describes a reduced 0.50% for employers whose workforce is more than half Newark residents, which the engine discloses but cannot apply from one paycheck). The $2,500 quarterly threshold rests on the city's older booklets (the 2026 booklet could not be opened) and was confirmed by the project owner on 2026-11-07.
+- **Wilmington** wage tax 1.25%: Delaware Code Title 22 ch. 9 caps it at 1.25% and a municipal document states the rate; the city's own wage tax page would not load, and the project owner confirmed the 1.25% on 2026-11-07.
 - **West Virginia city service fees:** already sourced city by city to ordinances and forms (Charleston $3 a week confirmed on the city's own page).
 - **Michigan, Muskegon Heights:** confirmed by the project owner.
 
