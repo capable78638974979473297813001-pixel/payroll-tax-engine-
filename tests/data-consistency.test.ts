@@ -193,3 +193,20 @@ describe('City payroll and head taxes read from the cities\' own pages (2026-11-
     assert.equal(w.seattleSocialHousingTax.compensationThreshold, 1000000);
   });
 });
+
+describe('Kentucky, Michigan and Vermont income tax withholding (agency documents, read 2026-11-07)', () => {
+  test('Kentucky: 3.5% flat rate and $3,360 standard deduction (Department of Revenue 2026 withholding formula)', () => {
+    const k = read('states/KY-2026.json').flatRate;
+    assert.equal(k.rate, 0.035);
+    assert.equal(k.deductionAmount, 3360);
+  });
+  test('Michigan: 4.25% rate and $5,900 personal exemption (Treasury withholding information for 2026)', () => {
+    const m = read('states/MI-2026.json').flatRate;
+    assert.equal(m.rate, 0.0425);
+    assert.equal(m.allowanceAmount, 5900);
+  });
+  test('Vermont: single-filer bracket rates 3.35%, 6.6%, 7.6% and 8.75% (GB-1210-2026)', () => {
+    const rates = read('states/VT-2026.json').bracketPerPeriodAllowance.brackets.single.weekly.map((b: { rate: number }) => b.rate);
+    assert.deepEqual(rates.slice(1, 5), [0.0335, 0.066, 0.076, 0.0875]);
+  });
+});

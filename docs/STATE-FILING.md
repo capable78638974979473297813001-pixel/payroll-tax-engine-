@@ -367,3 +367,10 @@ Each figure below was read from the city's own page or form today; nothing neede
 - **Wilmington** wage tax 1.25%: Delaware Code Title 22 ch. 9 caps it at 1.25% and a municipal document states the rate; the city's own wage tax page would not load.
 - **West Virginia city service fees:** already sourced city by city to ordinances and forms (Charleston $3 a week confirmed on the city's own page).
 - **Michigan, Muskegon Heights:** confirmed by the project owner.
+
+## Batch 21: Kentucky, Michigan and Vermont withholding read from the agencies (2026-11-07)
+
+- **Vermont:** the Department of Taxes' GB-1210-2026 (effective January 1 to December 31, 2026) was read through the TinyFish reader; all 108 stored figures (rates, bracket limits, base amounts and the withholding allowance) appear in it. Earlier this was the one state where the agency PDF was a bot-check page and nothing could be compared.
+- **Kentucky:** the Department of Revenue's 2026 withholding formula and withholding tax tables state the 3.5% flat rate and the $3,360 standard deduction (an increase of $90), matching the file.
+- **Michigan:** the Treasury's 2026 withholding information states the 4.25% rate and the $5,900 personal exemption ($5,800 in 2025), matching the file.
+- Test added for all three.
