@@ -508,7 +508,7 @@
   "unemploymentInsurance": {
     "administeredBy": "WorkForce West Virginia",
     "wageBase": 9500,
-    "newEmployerRate": 0.027,
+    "newEmployerRate": 0.02511,
     "experiencedEmployerRateRange": [
       0.015,
       0.085
