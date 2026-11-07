@@ -153,13 +153,14 @@
     return res.json();
   }).then(function (body) {
     if (!body || body.storage !== 'temporary') return;
-    // Temporary storage with a working Stripe backup: accounts are restored at every start, so say nothing.
+    // Temporary storage with a complete Stripe backup: accounts are restored at every start, so say
+    // nothing. 'degraded' (some accounts unreadable or too large to back up) still shows the notice.
     if (body.accountBackup && body.accountBackup.state === 'ok') return;
     var box = document.createElement('div');
     box.className = 'alert alert-error';
     box.setAttribute('role', 'alert');
     box.style.margin = '0 0 16px';
-    box.textContent = 'This server is saving accounts on temporary storage and its account backup is not working. Accounts are erased whenever it restarts or redeploys, so a new account can disappear within hours. The site owner needs to fix the backup (STRIPE_SECRET_KEY) or attach a persistent disk at /var/data (see docs/GO-LIVE.md).';
+    box.textContent = 'This server is saving accounts on temporary storage and its account backup is not working or is incomplete. Accounts are erased whenever it restarts or redeploys, so a new account can disappear within hours. The site owner needs to fix the backup (STRIPE_SECRET_KEY) or attach a persistent disk at /var/data (see docs/GO-LIVE.md).';
     var host = document.querySelector('main') || document.body;
     host.insertBefore(box, host.firstChild);
   }).catch(function () { /* health unreachable: say nothing */ });

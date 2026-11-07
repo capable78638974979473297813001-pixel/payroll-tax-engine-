@@ -617,7 +617,7 @@ or
       ]).replace(/text-align:left/g, 'text-align:left')],
       ['Know the limits', ul([
         'The batch adapter uses its own jurisdiction ids, not Symmetry\'s. See <a href="/migrate-from-symmetry-paycalc">migrating from a payCalc integration</a>.',
-        'Rate limits apply per request, so a large batch is one call against the limit.',
+        'Rate limits apply per request, so a large batch is one call against the limit. A batch may carry at most 500 paychecks; larger runs are split into several requests (the server answers 413 <code>batch_too_large</code> otherwise).',
         'Keep batch sizes reasonable so one slow paycheck does not hold up the rest.',
       ])],
     ],

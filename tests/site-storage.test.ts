@@ -51,7 +51,7 @@ describe('where the warning appears', () => {
   const read = (p: string) => readFileSync(new URL(`../${p}`, import.meta.url), 'utf8');
 
   test('the health report carries the storage status', () => {
-    assert.match(read('site/server.ts'), /storage: storageStatus\(\)\.status/);
+    assert.match(read('site/server.ts'), /const storage = storageStatus\(\);[\s\S]*storage: storage\.status/);
   });
 
   test('the sign-in and sign-up pages show a notice when storage is temporary', () => {

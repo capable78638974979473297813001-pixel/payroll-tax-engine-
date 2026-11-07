@@ -51,6 +51,18 @@ services:
         sync: false
       - key: STRIPE_WEBHOOK_SECRET
         sync: false
+      # Encrypts the Stripe account backup. Set it to a long random string BEFORE ever rotating
+      # STRIPE_SECRET_KEY: without it the backup key is derived from the Stripe key, and a rotation
+      # makes every existing backup unreadable.
+      - key: STORE_MIRROR_SECRET
+        sync: false
+      # Bearer token that unlocks the detailed /healthz view (data path, backup counts, integrations).
+      # Without it only loopback callers see the detail; the public body is liveness only.
+      - key: HEALTH_TOKEN
+        sync: false
+      # Where contact-form messages go. Set it; the code's fallback is a personal mailbox.
+      - key: CONTACT_TO
+        sync: false
       - key: RESEND_API_KEY
         sync: false
       - key: RESEND_FROM

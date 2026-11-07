@@ -309,6 +309,15 @@ import type { Company, Employee } from '../payroll/types.ts';
  */
 
 const PORT = Number(process.env.PORT ?? 4323);
+// This example has NO authentication: every company, employee (SSNs, bank accounts) and hire route
+// is open to whoever can reach the port. It listens on loopback only. Binding anywhere else needs
+// HOST plus an explicit PAYROLL_EXAMPLE_ALLOW_PUBLIC=1, and is never appropriate for real data.
+const HOST = (process.env.HOST ?? '127.0.0.1').trim() || '127.0.0.1';
+const LOOPBACK_HOSTS = new Set(['127.0.0.1', '::1', 'localhost']);
+if (!LOOPBACK_HOSTS.has(HOST) && process.env.PAYROLL_EXAMPLE_ALLOW_PUBLIC !== '1') {
+  console.error(`Refusing to listen on ${HOST}: examples/payroll-server.ts has no authentication and serves employee SSNs and bank details. Use HOST=127.0.0.1, or set PAYROLL_EXAMPLE_ALLOW_PUBLIC=1 if you accept that risk.`);
+  process.exit(1);
+}
 // This demo-scale server has no real login (see payroll/auditLog.ts's own
 // header comment on that boundary) — every entry it writes names this
 // fixed actor, which a real deployment replaces with its own session user.
@@ -2479,6 +2488,7 @@ const server = createServer(async (req, res) => {
 });
 
 seedDemoDataIfEmpty();
-server.listen(PORT, () => {
+server.listen(PORT, HOST, () => {
+  if (!LOOPBACK_HOSTS.has(HOST)) console.warn(`WARNING: listening on ${HOST} with no authentication (PAYROLL_EXAMPLE_ALLOW_PUBLIC=1).`);
   console.log(`Payroll admin UI: http://localhost:${PORT}`);
 });

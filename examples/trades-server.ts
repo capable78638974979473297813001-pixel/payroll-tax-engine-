@@ -68,6 +68,11 @@ import {
  */
 
 const PORT = Number(process.env.PORT ?? 4325);
+// A local demo: it seeds accounts with a known password. It listens on loopback unless HOST says
+// otherwise, and off loopback the demo seed route is turned off unless DEMO_SEED=1.
+const HOST = (process.env.HOST ?? '127.0.0.1').trim() || '127.0.0.1';
+const LOOPBACK_HOSTS = new Set(['127.0.0.1', '::1', 'localhost']);
+const DEMO_SEED_ENABLED = LOOPBACK_HOSTS.has(HOST) || process.env.DEMO_SEED === '1';
 const HERE = dirname(fileURLToPath(import.meta.url));
 
 function sendHtml(res: ServerResponse, file: string): void {
@@ -336,9 +341,11 @@ const server = createServer(async (req, res) => {
 
     // Seed the sample shop and sign in as its owner (the landing-page demo).
     if (method === 'POST' && path === '/api/demo/seed') {
+      if (!DEMO_SEED_ENABLED) return sendJson(res, 404, { error: 'The demo is turned off on this server.' });
       const result = seedDemo();
       setSessionCookie(res, createSession(result.ownerAccountId).token);
-      return sendJson(res, 200, { ...result, demoLogins: { owner: 'owner@rooterbros.test', worker: 'joe@rooterbros.test', password: 'demo' } });
+      // The demo password is printed on the sign-in page for local use; it is not echoed in API responses.
+      return sendJson(res, 200, { ...result, demoLogins: { owner: 'owner@rooterbros.test', worker: 'joe@rooterbros.test' } });
     }
 
     // ---- everything below this line requires a signed-in account ----
@@ -628,7 +635,8 @@ const server = createServer(async (req, res) => {
   }
 });
 
-server.listen(PORT, () => {
+server.listen(PORT, HOST, () => {
+  if (!LOOPBACK_HOSTS.has(HOST)) console.warn(`  WARNING: listening on ${HOST}; demo seed is ${DEMO_SEED_ENABLED ? 'ON (DEMO_SEED=1)' : 'off'}.`);
   console.log(`\n  Crewtally — time & pay for the trades`);
   console.log(`  Landing page:   http://localhost:${PORT}/`);
   console.log(`  Sign in:        http://localhost:${PORT}/login`);

@@ -145,7 +145,9 @@ export async function sendVerificationEmail(args: {
       body: JSON.stringify({
         from: sender,
         to: [args.email],
-        subject: signin ? `${args.code} is your Omnia sign-in code` : `${args.code} is your Omnia verification code`,
+        // The code stays out of the subject: subjects show up in lock-screen previews, mail logs and
+        // forwarding systems that never see the body.
+        subject: signin ? 'Your Omnia sign-in code' : 'Your Omnia verification code',
         html,
         text: `Hi ${firstName}, your Omnia ${signin ? 'sign-in' : 'verification'} code is ${args.code}. It expires in ${minutes} minute(s).`,
       }),
