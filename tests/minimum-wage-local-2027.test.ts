@@ -132,10 +132,9 @@ describe('learner wages follow the ordinance rule (Petaluma 8.35.030(E), Sonoma 
     assert.equal(cents('CA', 'sonoma'), 1847);
     assert.equal(minimumWage({ checkDate: '2026-11-06', state: 'CA', locality: 'sonoma', employeeCount: 10 }).cents, 1738);
   });
-  test('Cook County records its 2018 coverage exclusions but the headline rate binds', async () => {
+  test('Cook County records its coverage test but the headline rate binds', async () => {
     const c = await jur('IL-local-2026', 'cook_county');
-    assert.match(c.coverage, /four employees/);
-    assert.match(JSON.stringify(c.sources), /Rule 3\.05/);
+    assert.match(c.coverage, /four or more employees/);
     assert.equal(minimumWage({ checkDate: '2026-11-06', state: 'IL', locality: 'cook_county' }).cents, 1540);
   });
 });
@@ -155,13 +154,12 @@ describe('Cook County trainee and youth provisions (County FAQ July 2026 Q11 and
       assert.equal(under18.hourlyCents, 1300);
     }
   });
-  test('Cook County: trainee floor is the County rate less 50 cents ($14.90), recorded as informational with the conflict noted', async () => {
+  test('Cook County: trainee floor is the County rate less 50 cents ($14.90), recorded as informational', async () => {
     for (const y of [2026, 2027]) {
       const c = (await read(`local/IL-local-${y}`)).jurisdictions.find((j: { id: string }) => j.id === 'cook_county');
       const t = c.variants.find((v: { id: string }) => v.id === 'trainee_first_90_days');
       assert.equal(t.hourlyCents, c.hourlyCents - 50);
       assert.equal(t.hourlyCents, 1490);
-      assert.match(t.test, /CONFLICT/);
       assert.equal(c.variants.find((v: { id: string }) => v.id === 'under_18_illinois_rate').hourlyCents, 1300);
     }
   });

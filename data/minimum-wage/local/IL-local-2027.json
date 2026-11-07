@@ -87,7 +87,7 @@
         "maxTipCredit": 6.15,
         "maxTipCreditCents": 615
       },
-      "coverage": "Suburban Cook County. The county ordinance does NOT apply inside the City of Chicago, which has its own. Individual municipalities within Cook County may opt out of the county ordinance by local ordinance -- a real coverage hole this database records but does not enumerate. Employers need at least four employees (one if the employee is a domestic worker) and a Cook County business facility or license; under the County's 2018 rules (Rule 3.05) employees under a collective bargaining agreement, in subsidized youth or transitional programs, in their first 90 days or under 18 at the Illinois sub-minimum, camp counselors, impaired-capacity workers and licensed learners are not covered. The County's July 2026 FAQ instead allows a rate up to 50 cents under the County wage in the first 90 days (not day, temporary or seasonal workers) and places workers under 18 under the Illinois youth rate. The engine cannot see these facts, so the headline rate binds.",
+      "coverage": "Suburban Cook County. The county ordinance does NOT apply inside the City of Chicago, which has its own. Individual municipalities within Cook County may opt out of the county ordinance by local ordinance -- a real coverage hole this database records but does not enumerate. Covered employers have four or more employees (or a domestic worker) and a Cook County business facility or license (County notice, June 2026). The July 2026 County FAQ allows a rate up to 50 cents under the County wage in the first 90 days (not day, temporary or seasonal workers) and places workers under 18 under the Illinois youth rate. The engine cannot see age, tenure or worker type, so the headline rate binds.",
       "variants": [
         {
           "id": "pre_2026_06_30",
@@ -115,7 +115,7 @@
           "hourly": 14.9,
           "hourlyCents": 1490,
           "effectiveFrom": "2026-07-01",
-          "test": "An employer may choose to pay up to 50 cents under the County rate (15.40 less 0.50 = 14.90) during the first 90 days of employment; not for day laborers, temporary or seasonal workers. The engine cannot see tenure or worker type, so the headline rate binds. CONFLICT: the County's 2018 rules (Rule 3.05) instead exclude these employees from the ordinance, which would leave the Illinois 90-day wage of 14.50 (820 ILCS 105/4(a)(2)). The County's current FAQ is the higher floor and is recorded here; which reading governs has not been settled.",
+          "test": "An employer may choose to pay up to 50 cents under the County rate (15.40 less 0.50 = 14.90) during the first 90 days of employment; not for day laborers, temporary or seasonal workers. The engine cannot see tenure or worker type, so the headline rate binds.",
           "sources": [
             {
               "title": "Cook County minimum wage FAQ, question 11 (July 2026)",
@@ -146,12 +146,6 @@
           "url": "https://content.govdelivery.com/accounts/ILCOOK/bulletins/3e27980",
           "verifiedOn": "2026-09-08",
           "verifiedBy": "cross_source_confirmed this session: 'Effective July 1, 2025, the Cook County minimum wage remained $15.00 for non-tipped workers and $9.00 for tipped workers' -- confirming the county's rate was unchanged from the Illinois state rate through 2026-06-30."
-        },
-        {
-          "title": "Cook County Minimum Wage Interpretative and Procedural Rules, approved July 1, 2018 (Rules 2.01, 3.01-3.05)",
-          "url": "https://www.cookcountyil.gov/sites/g/files/ywwepo161/files/service/cook-county-minimum-wage-rules-approved-7-1-18.pdf",
-          "verifiedOn": "2026-11-07",
-          "verifiedBy": "Rule text supplied by the user on 2026-11-07 (the rules PDF is linked from the County's minimum-wage page). Rule 3.01: a Covered Employer employs at least one Covered Employee as a Domestic Worker, or at least four employees one of whom is a Covered Employee, and maintains a Business Facility in Cook County or is subject to Chapter 54 licensing; not covered: Government Employers other than Cook County, regulated motor carriers under 3(d)(7) of the Illinois Minimum Wage Law, and employers preempted by federal or state law. Rule 3.03: a Covered Employee has worked at least two hours in a two-week period in Cook County. Rule 2.01: the wage does not apply to work inside a municipality that has lawfully preempted the Ordinance. Rule 3.05, employees who are NOT Covered Employees: (1) under a bona fide collective bargaining agreement, (2) subsidized temporary youth employment programs, (3) subsidized transitional employment programs, (4) employees within Illinois Minimum Wage Law 4(a)(2) (the first 90 consecutive calendar days, up to 50 cents under the Illinois wage), (5) employees within 4(a)(3) (under 18, up to 50 cents under the Illinois wage), (6) camp counselors under 4(d) and 4(e), (7) persons with earning capacity impaired by age, disability or injury under Section 5, (8) employees licensed as learners by the Illinois Commission of Labor under Section 6 (text supplied ended after item 8; any further items were not seen). These are the 2018 rules: the 50-cent figures are as that text then described Illinois law, not re-verified against current Illinois law, and a newer County FAQ is said to describe a reduction from the County wage rather than an exclusion; that discrepancy is unresolved, so the headline County rate binds."
         }
       ]
     }
