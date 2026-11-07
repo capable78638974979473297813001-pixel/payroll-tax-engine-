@@ -106,3 +106,36 @@ describe('Petaluma 2027 and the local exceptions read from the cities\' pages on
     }
   });
 });
+
+describe('learner wages follow the ordinance rule (Petaluma 8.35.030(E), Sonoma 2.80.040(A): 85 percent, nearest five cents)', () => {
+  const nickel = (cents: number) => Math.round((cents * 0.85) / 5) * 5;
+  const jur = async (file: string, id: string) => {
+    const { readFileSync } = await import('node:fs');
+    return JSON.parse(readFileSync(new URL(`../data/minimum-wage/local/${file}.json`, import.meta.url), 'utf8')).jurisdictions.find((j: { id: string }) => j.id === id);
+  };
+  test('Petaluma learner: 2026 $15.55 (the city prints $15.56), 2027 $16.10', async () => {
+    const p26 = await jur('CA-local-2026', 'petaluma');
+    const p27 = await jur('CA-local-2027', 'petaluma');
+    assert.equal(p26.variants[0].hourlyCents, nickel(p26.hourlyCents));
+    assert.equal(p26.variants[0].hourlyCents, 1555);
+    assert.equal(p27.variants[0].hourlyCents, nickel(p27.hourlyCents));
+    assert.equal(p27.variants[0].hourlyCents, 1610);
+  });
+  test('Sonoma learner: $15.70 for large employers, $14.75 for small; informational, the headline rates still bind', async () => {
+    const s = await jur('CA-local-2026', 'sonoma');
+    const big = s.variants.find((v: { id: string }) => v.id === 'learner_14_17_large');
+    const small = s.variants.find((v: { id: string }) => v.id === 'learner_14_17_small');
+    assert.equal(big.hourlyCents, nickel(1847));
+    assert.equal(big.hourlyCents, 1570);
+    assert.equal(small.hourlyCents, nickel(1738));
+    assert.equal(small.hourlyCents, 1475);
+    assert.equal(cents('CA', 'sonoma'), 1847);
+    assert.equal(minimumWage({ checkDate: '2026-11-06', state: 'CA', locality: 'sonoma', employeeCount: 10 }).cents, 1738);
+  });
+  test('Cook County records its 2018 coverage exclusions but the headline rate binds', async () => {
+    const c = await jur('IL-local-2026', 'cook_county');
+    assert.match(c.coverage, /four employees/);
+    assert.match(JSON.stringify(c.sources), /Rule 3\.05/);
+    assert.equal(minimumWage({ checkDate: '2026-11-06', state: 'IL', locality: 'cook_county' }).cents, 1540);
+  });
+});
