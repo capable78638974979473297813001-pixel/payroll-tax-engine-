@@ -33,7 +33,7 @@ let dir: string;
 let child: ChildProcess;
 let fakes: Server;
 let output = '';
-const mailed: Array<{ to: string; subject: string }> = [];
+const mailed: Array<{ to: string; subject: string; text: string }> = [];
 const meterEvents: Array<Record<string, string>> = [];
 let meterFails = true;
 
@@ -43,7 +43,7 @@ const post = (path: string, body: unknown, headers: Record<string, string> = {})
 const bearer = (t: string) => ({ Authorization: `Bearer ${t}` });
 const codeFor = (email: string) => {
   const m = [...mailed].reverse().find((x) => x.to === email);
-  return m ? /^(\d{6}) /.exec(m.subject)![1] : '';
+  return m ? /\b(\d{6})\b/.exec(m.text)![1] : '';
 };
 const sendWebhook = (type: string, customer: string) => {
   const body = JSON.stringify({ type, data: { object: { customer } } });
@@ -74,7 +74,7 @@ before(async () => {
       };
       if (url === '/emails') {
         const b = JSON.parse(raw);
-        mailed.push({ to: b.to[0], subject: b.subject });
+        mailed.push({ to: b.to[0], subject: b.subject, text: b.text });
         return send(200, { id: 'email_1' });
       }
       if (url.startsWith('/v1/checkout/sessions/cs_ok')) return send(200, checkout);

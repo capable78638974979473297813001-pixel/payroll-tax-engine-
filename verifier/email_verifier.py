@@ -236,7 +236,8 @@ def _message_parts(name: str, code: str, minutes: int, purpose: str = "signup") 
     first = (name.split() or [""])[0]
     hello = f"Hi {first}, " if first else ""
     signin = purpose == "signin"
-    subject = f"{code} is your Omnia sign-in code" if signin else f"{code} is your Omnia verification code"
+    # The code stays out of the subject: subjects appear in notification previews and mail logs.
+    subject = "Your Omnia sign-in code" if signin else "Your Omnia verification code"
     ignore = (
         "If you didn't ask to sign in, ignore this email. Nothing happens without the code."
         if signin else

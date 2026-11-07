@@ -72,25 +72,30 @@ Deno.serve(async (req) => {
     return json(401, { error: 'This API key expired on ' + keyRow.expires_at + '.' });
   }
 
-  // Rate limit: count this key's own hits in the trailing 60s rather than a
-  // shared counter, so one key's burst never throttles any other key.
-  const windowStart = new Date(Date.now() - 60_000).toISOString();
-  const { count: recentCount } = await supabase
-    .from('usage_log')
-    .select('id', { count: 'exact', head: true })
-    .eq('api_key_id', keyRow.id)
-    .gte('created_at', windowStart);
-
-  if ((recentCount ?? 0) >= keyRow.rate_limit_per_minute) {
+  // Rate limit, per key. reserve_usage() counts the trailing 60s and claims
+  // a usage_log row in one locked transaction (see the 20261107 migration),
+  // so concurrent calls cannot all pass the count before any of them inserts.
+  const { data: usageId, error: reserveError } = await supabase.rpc('reserve_usage', {
+    p_key: keyRow.id,
+    p_limit: keyRow.rate_limit_per_minute,
+  });
+  if (reserveError) {
+    console.error('reserve_usage failed:', reserveError.message);
+    return json(503, { error: 'Usage could not be recorded; try again shortly.' });
+  }
+  if (usageId === null || usageId === undefined) {
     return json(429, {
       error: `Rate limit exceeded: this key allows ${keyRow.rate_limit_per_minute} requests/minute.`,
     });
   }
 
+  let rawBody: string;
   let input: PaycheckInput;
   try {
-    input = await req.json();
+    rawBody = await req.text();
+    input = JSON.parse(rawBody);
   } catch {
+    await supabase.from('usage_log').update({ status_code: 400, error: 'invalid_json' }).eq('id', usageId);
     return json(400, { error: 'Request body must be valid JSON.' });
   }
 
@@ -106,25 +111,22 @@ Deno.serve(async (req) => {
     responseBody = { error: errorText };
   }
 
-  // Fire-and-log, not fire-and-forget-the-response: the caller gets their
-  // result either way, but usage/last-used tracking happens before
-  // returning so a burst of concurrent requests can't race past it. The
-  // full request + result are captured here (not just a status code) so a
-  // later dispute over what this key did — or whether it was even this key
-  // that did it — can be settled by pulling this row, not by trusting either
-  // side's memory of the call.
+  // Record the outcome on the row reserve_usage() claimed. Payroll bodies
+  // (wages, addresses, withholding elections) are NOT stored: only SHA-256
+  // digests of the exact request and response, which still settle a dispute
+  // when the customer produces their copy, plus state, checkDate and status.
+  const responseText = JSON.stringify(responseBody);
   await Promise.all([
-    supabase.from('usage_log').insert({
-      api_key_id: keyRow.id,
-      state_code: input?.workState?.code ?? null,
+    supabase.from('usage_log').update({
+      state_code: typeof input?.workState?.code === 'string' ? input.workState.code.slice(0, 8) : null,
       status_code: status,
-      error: errorText,
-      check_date: input?.checkDate ?? null,
-      request: input ?? null,
-      result: responseBody,
-    }),
+      error: errorText ? errorText.slice(0, 500) : null,
+      check_date: typeof input?.checkDate === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(input.checkDate) ? input.checkDate : null,
+      request_sha256: await sha256Hex(rawBody),
+      result_sha256: await sha256Hex(responseText),
+    }).eq('id', usageId),
     supabase.from('api_keys').update({ last_used_at: new Date().toISOString() }).eq('id', keyRow.id),
   ]);
 
-  return json(status, responseBody);
+  return new Response(responseText, { status, headers: { 'Content-Type': 'application/json' } });
 });

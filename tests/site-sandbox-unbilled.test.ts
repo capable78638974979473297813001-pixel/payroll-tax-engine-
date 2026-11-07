@@ -26,7 +26,7 @@ const EMAIL = 'sandy@sandbox.test';
 
 const card = { id: 'pm_card', type: 'card', card: { brand: 'visa', last4: '4242' } };
 const checkout = { id: 'cs_ok', status: 'complete', customer: 'cus_sb', metadata: { omnia_email: EMAIL }, subscription: { id: 'sub_sb', default_payment_method: card } };
-const mailed: Array<{ to: string; subject: string }> = [];
+const mailed: Array<{ to: string; subject: string; text: string }> = [];
 const meterEvents: unknown[] = [];
 
 let dir: string;
@@ -55,7 +55,7 @@ before(async () => {
     req.on('end', () => {
       const url = req.url ?? '';
       const send = (status: number, body: unknown) => { res.writeHead(status, { 'Content-Type': 'application/json' }); res.end(JSON.stringify(body)); };
-      if (url === '/emails') { const b = JSON.parse(raw); mailed.push({ to: b.to[0], subject: b.subject }); return send(200, { id: 'e1' }); }
+      if (url === '/emails') { const b = JSON.parse(raw); mailed.push({ to: b.to[0], subject: b.subject, text: b.text }); return send(200, { id: 'e1' }); }
       if (url.startsWith('/v1/checkout/sessions/cs_ok')) return send(200, checkout);
       if (url === '/v1/billing/meter_events') { meterEvents.push(raw); return send(200, { identifier: 'ok' }); }
       send(404, { error: { message: 'no such route' } });
@@ -87,7 +87,7 @@ after(() => {
 
 test('an issued key is sk_live_ and trial paycheck calculations are metered', async () => {
   await post('/api/signup', { name: 'Sandy Box', email: EMAIL, company: 'Sandbox Payroll', phone: '555-000-2222', agreeToTerms: true });
-  const code = /^(\d{6}) /.exec(mailed.at(-1)!.subject)![1];
+  const code = /\b(\d{6})\b/.exec(mailed.at(-1)!.text)![1];
   const v = await post('/api/verify-email', { email: EMAIL, code });
   const session = (await v.json()).sessionToken as string;
   const terms = await (await fetch(`${BASE}/api/terms?payFrequency=biweekly&rooftop=false`, { headers: bearer(session) })).json();

@@ -54,7 +54,7 @@ async function fakeResend() {
   return { mails, state, base: `http://127.0.0.1:${port}`, close: () => server.close() };
 }
 
-const codeOf = (m: Mail | undefined) => /\b(\d{6})\b/.exec(m?.subject ?? '')?.[1] ?? '';
+const codeOf = (m: Mail | undefined) => /\b(\d{6})\b/.exec(m?.text ?? '')?.[1] ?? '';
 
 async function waitFor(url: string) {
   for (let i = 0; i < 120; i++) {
@@ -141,7 +141,7 @@ function suite(name: string, withVerifier: boolean) {
       assert.equal(resend.mails.length, before + 1, 'the code was actually emailed');
       const mail = lastMail()!;
       assert.deepEqual(mail.to, [EMAIL]);
-      assert.match(mail.subject, /^\d{6} is your Omnia sign-in code$/);
+      assert.match(mail.subject, /^Your Omnia sign-in code$/);
       assert.match(mail.html, /Your sign-in code/);
       assert.doesNotMatch(mail.html + mail.text, /signup/i);
       const v = await post('/api/verify-email', { email: EMAIL, code: codeOf(mail) });

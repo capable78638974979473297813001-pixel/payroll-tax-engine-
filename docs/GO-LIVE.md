@@ -98,7 +98,8 @@ file is renamed into place; no restart is needed. Two ways to get it there:
 
 1. **Download a prebuilt file (recommended, minutes).** Build it once on any
    machine with ~20 GB free (`ADDRESS_INDEX_PATH=./address-points.db node scripts/build-address-index.ts --download`),
-   host the file, and set `ADDRESS_INDEX_URL` (and `ADDRESS_INDEX_SHA256`) in Render.
+   host the file, and set `ADDRESS_INDEX_URL` and `ADDRESS_INDEX_SHA256` in Render. The download is
+   refused unless `ADDRESS_INDEX_SHA256` is set and matches.
    `.db.gz` is expanded as it downloads.
 2. **Build on the server (the Blueprint's default, `ADDRESS_INDEX_AUTOBUILD=1`).**
    It downloads each regional zip, ingests it, and deletes it. Expect several
@@ -263,7 +264,8 @@ and the account store came back empty. That happens when `SITE_DB_DIR` is on the
 filesystem instead of a mounted disk, because every restart and every redeploy (each merge to
 `main` redeploys when `autoDeploy` is on) replaces the container. The server checks for this: it
 prints `[storage] WARNING` and `[start] WARNING ... is not on a mounted disk` when it starts,
-`GET /healthz` returns `"storage":"temporary"`, and the sign-in and sign-up pages show a notice.
+`GET /healthz` returns `"storage":"temporary"`, and the sign-in and sign-up pages show a notice
+unless the account backup below reports `state` `ok`.
 The fix is on the host: a persistent disk mounted at `/var/data` (on Render, service > Disks, or
 deploy from `render.yaml`, which declares one; a disk needs a paid instance). Set
 `STORAGE_IS_DURABLE=1` only if the disk is genuinely durable and the check cannot see it.
@@ -274,7 +276,15 @@ keys, terms acceptances, subscription and saved scenarios) in Stripe, as custome
 account backup", and restores them into an empty store at start-up, before it answers any account
 or API request. Changes are written about two seconds after they happen and again on SIGTERM, so a
 deploy right after a sign-up keeps it. `GET /healthz` reports `accountBackup` (`state` `ok`,
-`restoring`, `failing` or `off`). The copy is encrypted (AES-256-GCM) with a key derived from
+`degraded`, `restoring`, `failing` or `off`). `ok` means Stripe answered and every account this
+process knows of is backed up in a form it can read; it is not a restore drill. `degraded` means
+Stripe answered but some backups could not be decrypted with the current secret (`unreadable`) or
+an account is too large for Stripe metadata (`tooLarge`): those accounts are not protected, and the
+sign-in pages show the notice. The counts, the data path and the integration flags are shown only
+to loopback callers or with `Authorization: Bearer $HEALTH_TOKEN`; the public body carries
+liveness, `storage` and `accountBackup.state` only. To prove the backup works, run one restore
+drill: start a copy with an empty `SITE_DB_DIR` and the same secrets, and sign in to an existing
+account. On SIGTERM the server also delivers queued meter events, which are not in the backup. The copy is encrypted (AES-256-GCM) with a key derived from
 `STORE_MIRROR_SECRET`, or from the Stripe secret key when that is unset: set `STORE_MIRROR_SECRET`
 to a long random string so rotating the Stripe key does not strand the backups. `STORE_MIRROR=0`
 turns it off and `STORE_MIRROR=1` forces it on even with a durable disk. A restricted Stripe key
