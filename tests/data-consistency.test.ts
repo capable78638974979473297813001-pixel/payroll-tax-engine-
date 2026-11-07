@@ -105,12 +105,25 @@ describe('new-employer rates against the Department of Labor January 2026 table'
       assert.ok(rate >= base - 1e-9, `${st} carries ${rate}, below DOL's base rate ${base}`);
     });
   }
-  test('Colorado, Maine and Wisconsin carry secondary all-in figures above the DOL base and say so', () => {
-    for (const st of ['CO', 'ME', 'WI']) {
-      const s = read(`states/${st}-2026.json`).suiEmployer;
-      assert.ok(s.newEmployerRate > dol[st]);
-      assert.match(s.newEmployerRateSource, /January2026\.pdf/);
-      assert.match(s.newEmployerRateSource, /Treat as an estimate/);
+  test("Colorado and Wisconsin are confirmed from the states' own pages (read 2026-11-07)", () => {
+    // CDLE Introductory Rates: non-construction 2026 0.0153 + 0.0017 + 0.0135 = 0.0305; 2027 0.0153 + 0.0017 + 0 = 0.0170.
+    assert.equal(read('states/CO-2026.json').suiEmployer.newEmployerRate, 0.0305);
+    assert.equal(read('states/CO-2027.json').suiEmployer.newEmployerRate, 0.017);
+    assert.equal(read('states/CO-2026.json').suiEmployer.wageBase, 30600);
+    assert.equal(read('states/CO-2027.json').suiEmployer.wageBase, 32100);
+    // DWD: new employer, payroll under $500,000, all others: 3.05% in 2026 and 2027; wage base $14,000.
+    for (const y of [2026, 2027]) {
+      assert.equal(read(`states/WI-${y}.json`).suiEmployer.newEmployerRate, 0.0305);
+      assert.equal(read(`states/WI-${y}.json`).suiEmployer.wageBase, 14000);
     }
+    assert.equal(read('states/CO-2026.json').suiEmployer.confidence, 'primary_source_confirmed');
+    assert.equal(read('states/WI-2026.json').suiEmployer.confidence, 'primary_source_confirmed');
+  });
+  test('Maine carries a secondary all-in figure above the DOL base and says it is unconfirmed', () => {
+    const s = read('states/ME-2026.json').suiEmployer;
+    assert.ok(s.newEmployerRate > dol.ME);
+    assert.match(s.newEmployerRateSource, /January2026\.pdf/);
+    assert.match(s.newEmployerRateSource, /Treat as an estimate/);
+    assert.match(s.newEmployerRateSource, /stays unconfirmed/);
   });
 });

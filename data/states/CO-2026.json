@@ -245,7 +245,7 @@
     "wageBase": 30600,
     "wageBaseSource": "2026 taxable wage bases cross-checked against EY's published 2026 state-by-state table; where this file already carried a numeric wage base, the two agreed unless noted in wageBaseNote.",
     "newEmployerRate": 0.0305,
-    "newEmployerRateSource": "DOL Significant Provisions of State UI Laws, January 2026 https://oui.doleta.gov/unemploy/content/sigpros/2020-2029/January2026.pdf read directly 2026-11-07 lists a new-employer BASE rate of 1.53% (note 4 there: higher rates may apply by industry and other factors in state law). The 3.05% carried here is the secondary OnPay figure, which would include CDLE's support and solvency surcharges; CDLE's page (403 to automated reads on 2026-11-07) was not available to confirm that the surcharges for new employers add to 3.05%. Treat as an estimate; an employer should supply its assigned rate. Earlier source: OnPay's published 2026 state-by-state SUI table (secondary), used only where this file had no figure of its own. Cross-source tier, not primary.",
+    "newEmployerRateSource": "Colorado Department of Labor and Employment, Introductory Rates https://cdle.colorado.gov/ui/employers/requirements/premiums/introductory-rates read directly 2026-11-07: 2026 Non-construction (also General Construction and Trades): Beginning Rate 0.0153 + Support Rate .0017 + Surcharge Rate .0135 = Combined Rate 0.0305; Heavy Construction combined 0.062850 (not modelled; the headline non-construction rate is used). Wage base $30,600 per https://cdle.colorado.gov/ui/employers/requirements/premiums/premium-rates (same date). Confirmed.",
     "experienceRange": {
       "min": 0.0072,
       "max": 0.1085

@@ -8,6 +8,7 @@
     "basedOn": "data/states/CO-2026.json",
     "note": "Carried forward from the 2026 file on 2026-10-13. Not yet checked against the 2027 official source: every figure is 2026's unless listed in updatedFor2027. Remove this block only after each figure has been re-verified against its 2027 source.",
     "updatedFor2027": [
+      {"path": "suiEmployer.newEmployerRate", "from": 0.0305, "to": 0.017, "source": "Colorado Department of Labor and Employment, Introductory Rates https://cdle.colorado.gov/ui/employers/requirements/premiums/introductory-rates read directly 2026-11-07: 2027 Non-construction (also General Construction and Trades): Beginning Rate 0.0153 + Support Rate .0017 + Surcharge .00 = Combined Rate 0.0170 ('The Solvency Surcharge is not in affect for the 2027 calendar year'); Heavy Construction combined 0.0406 (not modelled). Replaces the 2026 combined 0.0305, which included a 1.35% solvency surcharge."},
       {
         "path": "suiEmployer.wageBase",
         "from": 30600,
@@ -255,8 +256,8 @@
     "$comment": "Normalized employer-side unemployment parameters — the shape src/taxes/state.ts reads. The detailed unemploymentInsurance block above stays the record of research; this exists because that block's shape varies too much between states to compute from directly (wage bases as objects, industry-keyed rate maps, differently-named keys).",
     "wageBase": 32100,
     "wageBaseSource": "Colorado Department of Labor and Employment, Account Management / Premium Rates: 'The 2027 chargeable wage base increased to $32,100.00, from $30,600, in 2026.' https://cdle.colorado.gov/ui/employers/requirements/premiums/premium-rates (read 2026-10-25)",
-    "newEmployerRate": 0.0305,
-    "newEmployerRateSource": "OnPay's published 2026 state-by-state SUI table (secondary), used only where this file had no figure of its own. Cross-source tier, not primary.",
+    "newEmployerRate": 0.017,
+    "newEmployerRateSource": "Colorado Department of Labor and Employment, Introductory Rates https://cdle.colorado.gov/ui/employers/requirements/premiums/introductory-rates read directly 2026-11-07: 2027 Non-construction (also General Construction and Trades): Beginning Rate 0.0153 + Support Rate .0017 + Surcharge .00 = Combined Rate 0.0170 ('The Solvency Surcharge is not in affect for the 2027 calendar year'); Heavy Construction combined 0.0406 (not modelled). Replaces the 2026 combined 0.0305, which included a 1.35% solvency surcharge.",
     "experienceRange": {
       "min": 0.0072,
       "max": 0.1085
