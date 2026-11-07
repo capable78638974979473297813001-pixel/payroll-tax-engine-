@@ -140,3 +140,22 @@ describe('Ohio school district identifiers (Finder feed, 2026-11-07)', () => {
     assert.equal(new Set(irns).size, irns.length);
   });
 });
+
+describe('Michigan city income tax rates (each city\'s own page, read 2026-11-07)', () => {
+  const expected: Record<string, [number, number]> = {
+    Detroit: [0.024, 0.012], 'Grand Rapids': [0.015, 0.0075], Saginaw: [0.015, 0.0075], 'Highland Park': [0.02, 0.01],
+  };
+  const standard = ['Albion', 'Battle Creek', 'Benton Harbor', 'Big Rapids', 'East Lansing', 'Flint', 'Grayling', 'Hamtramck', 'Hudson', 'Ionia', 'Jackson',
+    'Lansing', 'Lapeer', 'Muskegon', 'Muskegon Heights', 'Pontiac', 'Port Huron', 'Portland', 'Springfield', 'Walker'];
+  for (const c of standard) expected[c] = [0.01, 0.005];
+  test('all 24 cities carry the rates their own pages state, nonresident exactly half of resident', () => {
+    const cities = read('local/MI-cities-2026.json').cities as Array<{ name: string; residentRate: number; nonresidentRate: number }>;
+    assert.equal(cities.length, 24);
+    for (const c of cities) {
+      const e = expected[c.name];
+      assert.ok(e, `unexpected city ${c.name}`);
+      assert.deepEqual([c.residentRate, c.nonresidentRate], e, c.name);
+      assert.equal(c.nonresidentRate * 2, c.residentRate, c.name);
+    }
+  });
+});
