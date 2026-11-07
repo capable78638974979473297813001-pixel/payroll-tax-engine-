@@ -153,7 +153,7 @@
   "unemploymentInsurance": {
     "$comment": "Employer-only (SUTA) — no employee contribution. UPGRADED to primary_source_confirmed this session — labor.mo.gov's own Tax Rates page was fetched and read directly (unlike KCMO/STL, it was NOT blocked).",
     "administeredBy": "Missouri Department of Labor and Industrial Relations (DOLIR), Division of Employment Security",
-    "wageBase": 9000.0,
+    "wageBase": 8500.0,
     "wageBaseNote": "DOWN from $9,500 in 2025 — confirmed as a real year-over-year decrease, now primary-sourced.",
     "newEmployerRate": {
       "mining": 0.02376,

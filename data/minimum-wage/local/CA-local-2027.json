@@ -110,8 +110,8 @@
       "adjustmentDate": "01-01",
       "tipped": {
         "tipCreditAllowed": false,
-        "cashWage": 17.86,
-        "cashWageCents": 1786,
+        "cashWage": 18.47,
+        "cashWageCents": 1847,
         "maxTipCredit": 0.0,
         "maxTipCreditCents": 0,
         "note": "California bars any tip credit statewide (Labor Code 351); the full local rate is owed in cash."
@@ -152,8 +152,8 @@
       "adjustmentDate": "01-01",
       "tipped": {
         "tipCreditAllowed": false,
-        "cashWage": 17.5,
-        "cashWageCents": 1750,
+        "cashWage": 18.1,
+        "cashWageCents": 1810,
         "maxTipCredit": 0.0,
         "maxTipCreditCents": 0,
         "note": "California bars any tip credit statewide (Labor Code 351); the full local rate is owed in cash."
@@ -194,8 +194,8 @@
       "adjustmentDate": "01-01",
       "tipped": {
         "tipCreditAllowed": false,
-        "cashWage": 18.82,
-        "cashWageCents": 1882,
+        "cashWage": 19.36,
+        "cashWageCents": 1936,
         "maxTipCredit": 0.0,
         "maxTipCreditCents": 0,
         "note": "California bars any tip credit statewide (Labor Code 351); the full local rate is owed in cash."
@@ -258,8 +258,8 @@
       "adjustmentDate": "01-01",
       "tipped": {
         "tipCreditAllowed": false,
-        "cashWage": 17.85,
-        "cashWageCents": 1785,
+        "cashWage": 18.36,
+        "cashWageCents": 1836,
         "maxTipCredit": 0.0,
         "maxTipCreditCents": 0,
         "note": "California bars any tip credit statewide (Labor Code 351); the full local rate is owed in cash."
@@ -310,6 +310,14 @@
           "effectiveTo": "2026-06-30",
           "note": "California bars any tip credit statewide; the tipped cash wage always equals the standard rate."
         }
+      ],
+      "sources": [
+        {
+          "title": "City of Fremont -- Minimum Wage",
+          "url": "https://www.fremont.gov/business/minimum-wage",
+          "verifiedOn": "2026-11-07",
+          "verifiedBy": "City of Fremont, Minimum Wage https://www.fremont.gov/business/minimum-wage read directly 2026-11-07: schedule '2025 | $17.75', '2026 | $18.05', '2027 | 2026 wage plus inflation adjustment'; 'the minimum wage ordinance exempts employees of non-profit corporations.' Employees of non-profit corporations are therefore not owed the Fremont rate; the engine cannot see employer type, so the headline rate binds."
+        }
       ]
     },
     {
@@ -322,8 +330,8 @@
       "adjustmentDate": "01-01",
       "tipped": {
         "tipCreditAllowed": false,
-        "cashWage": 17.91,
-        "cashWageCents": 1791,
+        "cashWage": 18.52,
+        "cashWageCents": 1852,
         "maxTipCredit": 0.0,
         "maxTipCreditCents": 0,
         "note": "California bars any tip credit statewide (Labor Code 351); the full local rate is owed in cash."
@@ -347,8 +355,8 @@
       "adjustmentDate": "01-01",
       "tipped": {
         "tipCreditAllowed": false,
-        "cashWage": 17.79,
-        "cashWageCents": 1779,
+        "cashWage": 18.39,
+        "cashWageCents": 1839,
         "maxTipCredit": 0.0,
         "maxTipCreditCents": 0
       },
@@ -704,18 +712,36 @@
       "id": "petaluma",
       "name": "Petaluma",
       "level": "city",
-      "hourly": 18.31,
-      "hourlyCents": 1831,
-      "effectiveFrom": "2026-01-01",
+      "hourly": 18.93,
+      "hourlyCents": 1893,
+      "effectiveFrom": "2027-01-01",
       "adjustmentDate": "01-01",
       "tipped": {
         "tipCreditAllowed": false,
-        "cashWage": 18.31,
-        "cashWageCents": 1831,
+        "cashWage": 18.93,
+        "cashWageCents": 1893,
         "maxTipCredit": 0.0,
         "maxTipCreditCents": 0,
         "note": "California bars any tip credit statewide (Labor Code 351); the full local rate is owed in cash."
-      }
+      },
+      "variants": [
+        {
+          "id": "learner_14_17",
+          "label": "Learner's wage, ages 14-17, first 160 hours (no previous similar or related experience)",
+          "hourly": 16.1,
+          "hourlyCents": 1610,
+          "effectiveFrom": "2027-01-01",
+          "test": "Applies only to an employee aged 14 to 17 during the first 160 hours in an occupation with no previous similar or related experience (not less than 85% of the minimum wage, rounded to the nearest five cents). The engine cannot see age or hours of experience, so the headline rate binds; this records the lower learner rate the city publishes."
+        }
+      ],
+      "sources": [
+        {
+          "title": "City of Petaluma -- Petaluma Minimum Wage (2027)",
+          "url": "https://cityofpetaluma.org/minimum-wage/",
+          "verifiedOn": "2026-11-07",
+          "verifiedBy": "City of Petaluma, Petaluma Minimum Wage https://cityofpetaluma.org/minimum-wage/ read directly 2026-11-07: 'The 2027 minimum wage in the Petaluma city limits will be $18.93 per hour. This wage reflects a 3.4% increase from the 2026 wage' and 'The Learner's Wage for 2027 is $16.10 per hour.'"
+        }
+      ]
     },
     {
       "id": "redwood_city",
@@ -744,8 +770,8 @@
       "adjustmentDate": "01-01",
       "tipped": {
         "tipCreditAllowed": false,
-        "cashWage": 19.18,
-        "cashWageCents": 1918,
+        "cashWage": 19.61,
+        "cashWageCents": 1961,
         "maxTipCredit": 0.0,
         "maxTipCreditCents": 0,
         "note": "California bars any tip credit statewide (Labor Code 351); the full local rate is owed in cash."
@@ -769,8 +795,8 @@
       "adjustmentDate": "01-01",
       "tipped": {
         "tipCreditAllowed": false,
-        "cashWage": 17.75,
-        "cashWageCents": 1775,
+        "cashWage": 18.35,
+        "cashWageCents": 1835,
         "maxTipCredit": 0.0,
         "maxTipCreditCents": 0,
         "note": "California bars any tip credit statewide (Labor Code 351); the full local rate is owed in cash."
@@ -794,8 +820,8 @@
       "adjustmentDate": "01-01",
       "tipped": {
         "tipCreditAllowed": false,
-        "cashWage": 17.75,
-        "cashWageCents": 1775,
+        "cashWage": 18.35,
+        "cashWageCents": 1835,
         "maxTipCredit": 0.0,
         "maxTipCreditCents": 0,
         "note": "California bars any tip credit statewide (Labor Code 351); the full local rate is owed in cash."
@@ -891,8 +917,8 @@
       "adjustmentDate": "01-01",
       "tipped": {
         "tipCreditAllowed": false,
-        "cashWage": 18.6,
-        "cashWageCents": 1860,
+        "cashWage": 19.25,
+        "cashWageCents": 1925,
         "maxTipCredit": 0.0,
         "maxTipCreditCents": 0,
         "note": "California bars any tip credit statewide (Labor Code 351); the full local rate is owed in cash."
@@ -916,8 +942,8 @@
       "adjustmentDate": "01-01",
       "tipped": {
         "tipCreditAllowed": false,
-        "cashWage": 17.95,
-        "cashWageCents": 1795,
+        "cashWage": 18.58,
+        "cashWageCents": 1858,
         "maxTipCredit": 0.0,
         "maxTipCreditCents": 0
       },
@@ -1033,7 +1059,15 @@
       ],
       "appliesWhen": {
         "employeeCountMin": 26
-      }
+      },
+      "sources": [
+        {
+          "title": "City of Sonoma -- Sonoma Minimum Wage",
+          "url": "https://www.sonomacity.org/wages/",
+          "verifiedOn": "2026-11-07",
+          "verifiedBy": "City of Sonoma, Sonoma Minimum Wage https://www.sonomacity.org/wages/ read directly 2026-11-07: '$18.47/hour for large employers (26 or more employees) and $17.38/hour for small employers (25 or fewer employees)'; 'A \"Learner\" may be paid not less than 85% of the local minimum wage (rounded to the nearest nickel) during his/her first 160 hours of employment' (age 14 to 17, per the page). The page prints no 2027 rate, so the 2026 figures carry forward."
+        }
+      ]
     },
     {
       "id": "south_san_francisco",
@@ -1202,6 +1236,12 @@
         "from": 17.95,
         "to": 18.58,
         "source": "County of San Mateo, Minimum Wage Information https://www.smcgov.org/ceo/unincorporated-minimum-wage read directly 2026-11-06: 'Starting January 1, 2027, the minimum wage will increase to $18.58 per hour in unincorporated San Mateo County.'"
+      },
+      {
+        "path": "jurisdictions[petaluma].hourly",
+        "from": 18.31,
+        "to": 18.93,
+        "source": "City of Petaluma, Petaluma Minimum Wage https://cityofpetaluma.org/minimum-wage/ read directly 2026-11-07: 'The 2027 minimum wage in the Petaluma city limits will be $18.93 per hour. This wage reflects a 3.4% increase from the 2026 wage' and 'The Learner's Wage for 2027 is $16.10 per hour.'"
       }
     ]
   }

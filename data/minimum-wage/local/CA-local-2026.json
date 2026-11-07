@@ -278,6 +278,14 @@
           "effectiveTo": "2026-06-30",
           "note": "California bars any tip credit statewide; the tipped cash wage always equals the standard rate."
         }
+      ],
+      "sources": [
+        {
+          "title": "City of Fremont -- Minimum Wage",
+          "url": "https://www.fremont.gov/business/minimum-wage",
+          "verifiedOn": "2026-11-07",
+          "verifiedBy": "City of Fremont, Minimum Wage https://www.fremont.gov/business/minimum-wage read directly 2026-11-07: schedule '2025 | $17.75', '2026 | $18.05', '2027 | 2026 wage plus inflation adjustment'; 'the minimum wage ordinance exempts employees of non-profit corporations.' Employees of non-profit corporations are therefore not owed the Fremont rate; the engine cannot see employer type, so the headline rate binds."
+        }
       ]
     },
     {
@@ -667,7 +675,25 @@
         "maxTipCredit": 0.0,
         "maxTipCreditCents": 0,
         "note": "California bars any tip credit statewide (Labor Code 351); the full local rate is owed in cash."
-      }
+      },
+      "variants": [
+        {
+          "id": "learner_14_17",
+          "label": "Learner's wage, ages 14-17, first 160 hours (no previous similar or related experience)",
+          "hourly": 15.56,
+          "hourlyCents": 1556,
+          "effectiveFrom": "2026-01-01",
+          "test": "Applies only to an employee aged 14 to 17 during the first 160 hours in an occupation with no previous similar or related experience. The engine cannot see age or hours of experience, so the headline rate binds. The city prints $15.56; 85% of $18.31 rounded to the nearest five cents would be $15.55, so the printed figure is recorded as published."
+        }
+      ],
+      "sources": [
+        {
+          "title": "City of Petaluma -- Petaluma Minimum Wage",
+          "url": "https://cityofpetaluma.org/minimum-wage/",
+          "verifiedOn": "2026-11-07",
+          "verifiedBy": "City of Petaluma, Petaluma Minimum Wage https://cityofpetaluma.org/minimum-wage/ read directly 2026-11-07: 'The 2026 minimum wage in the Petaluma city limits is $18.31 per hour' and 'The Learner's Wage for 2026 is $15.56 per hour.'"
+        }
+      ]
     },
     {
       "id": "redwood_city",
@@ -945,7 +971,15 @@
       ],
       "appliesWhen": {
         "employeeCountMin": 26
-      }
+      },
+      "sources": [
+        {
+          "title": "City of Sonoma -- Sonoma Minimum Wage",
+          "url": "https://www.sonomacity.org/wages/",
+          "verifiedOn": "2026-11-07",
+          "verifiedBy": "City of Sonoma, Sonoma Minimum Wage https://www.sonomacity.org/wages/ read directly 2026-11-07: '$18.47/hour for large employers (26 or more employees) and $17.38/hour for small employers (25 or fewer employees)'; 'A \"Learner\" may be paid not less than 85% of the local minimum wage (rounded to the nearest nickel) during his/her first 160 hours of employment' (age 14 to 17, per the page). The page prints no 2027 rate, so the 2026 figures carry forward."
+        }
+      ]
     },
     {
       "id": "south_san_francisco",

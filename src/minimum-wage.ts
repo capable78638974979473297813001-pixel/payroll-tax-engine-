@@ -521,7 +521,11 @@ export function minimumWage(query: MinimumWageQuery): MinimumWageAnswer {
         caveat: found.note as string | undefined,
       });
     } else if (tipped) {
-      if (found.tipped) {
+      // An ordinance that allows no tip credit owes the full local rate in cash, so its tipped
+      // floor is its standard rate for the employer's size tier, not the single tipped figure
+      // stored on the jurisdiction (which is the large-employer rate and ignores tiers).
+      const noLocalCredit = found.tipped ? !found.tipped.tipCreditAllowed : !state.tipped.tipCreditAllowed;
+      if (found.tipped && !noLocalCredit) {
         const pred = historicalPredecessor(found.variants, 'tipped', query.checkDate);
         const scheduled = pred ? undefined : applicableScheduledChange(found, query.checkDate);
         const scheduledCents = found.tipped.tipCreditAllowed
@@ -545,7 +549,7 @@ export function minimumWage(query: MinimumWageQuery): MinimumWageAnswer {
                 ? ` (scheduled change effective ${scheduled?.effectiveDate})`
                 : ''),
         });
-      } else if (!state.tipped.tipCreditAllowed) {
+      } else if (noLocalCredit) {
         // The ordinance publishes no distinct tipped figure, but its STATE
         // bans tip credits outright — a fact that reaches every locality in
         // that state, not just the ones that bothered to restate it (found
@@ -564,7 +568,9 @@ export function minimumWage(query: MinimumWageQuery): MinimumWageAnswer {
           cents: tier.amount ? toCents(tier.amount as MinimumWageAmount) : undefined,
           basis: tier.notCovered
             ? 'Employer is below this ordinance’s size threshold — not covered'
-            : 'No local tipped figure, but the state allows no tip credit anywhere — the local standard rate is the cash floor',
+            : found.tipped
+              ? 'Local ordinance allows no tip credit — the full local rate is owed in cash'
+              : 'No local tipped figure, but the state allows no tip credit anywhere — the local standard rate is the cash floor',
           caveat:
             !tier.narrowed && (found.variants ?? []).some((v) => v.appliesWhen)
               ? 'This ordinance publishes employer-size tiers; no employeeCount was supplied, so the headline rate is used.'

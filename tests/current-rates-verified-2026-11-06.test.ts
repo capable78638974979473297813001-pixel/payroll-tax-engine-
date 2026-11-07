@@ -88,3 +88,17 @@ describe('Pennsylvania local EIT and LST (DCED statewide register, downloaded 20
     }
   });
 });
+
+describe('tipped queries in cities with employer-size tiers follow the tier (no tip credit in California)', () => {
+  const t = (locality: string, employeeCount: number) =>
+    minimumWage({ checkDate: D, state: 'CA', locality, employeeCount, tipped: true }).cents;
+  const s = (locality: string, employeeCount: number) =>
+    minimumWage({ checkDate: D, state: 'CA', locality, employeeCount }).cents;
+  test('Hayward and Novato: the tipped cash floor equals the standard floor for small and large employers', () => {
+    for (const [loc, n] of [['hayward', 3], ['hayward', 12], ['hayward', 100], ['novato', 3], ['novato', 12], ['novato', 150], ['novato', 600]] as const) {
+      assert.equal(t(loc, n), s(loc, n), `${loc} ${n}`);
+    }
+    assert.equal(t('novato', 150), 1773);
+    assert.equal(t('hayward', 12), 1690);
+  });
+});

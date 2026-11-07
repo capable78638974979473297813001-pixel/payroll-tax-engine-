@@ -89,3 +89,20 @@ describe('Montgomery County, Maryland keeps its three size tiers (county page: $
     assert.deepEqual([mc(100), mc(30), mc(5)], [1800, 1650, 1595]);
   });
 });
+
+describe('Petaluma 2027 and the local exceptions read from the cities\' pages on 2026-11-07', () => {
+  test('Petaluma is $18.93 from 2027-01-01 (city page) and $18.31 in 2026; the learner rate is recorded but cannot bind', () => {
+    assert.equal(cents('CA', 'petaluma'), 1893);
+    assert.equal(minimumWage({ checkDate: '2026-11-06', state: 'CA', locality: 'petaluma' }).cents, 1831);
+    assert.equal(minimumWage({ checkDate: D, state: 'CA', locality: 'petaluma', tipped: true }).cents, 1893);
+  });
+  test('California cities have no tip credit: the tipped cash wage equals the rate in every 2027 local file', async () => {
+    const { readdirSync, readFileSync } = await import('node:fs');
+    const dir = new URL('../data/minimum-wage/local/', import.meta.url);
+    for (const f of readdirSync(dir).filter((n) => n.endsWith('-local-2027.json'))) {
+      for (const j of JSON.parse(readFileSync(new URL(f, dir), 'utf8')).jurisdictions) {
+        if (j.tipped && j.tipped.tipCreditAllowed === false) assert.equal(j.tipped.cashWageCents, j.hourlyCents, `${f} ${j.id}`);
+      }
+    }
+  });
+});
