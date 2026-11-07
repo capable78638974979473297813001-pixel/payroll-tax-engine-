@@ -195,12 +195,12 @@
     "wageBase": 14000,
     "wageBaseSource": "2026 taxable wage bases cross-checked against EY's published 2026 state-by-state table; where this file already carried a numeric wage base, the two agreed unless noted in wageBaseNote.",
     "newEmployerRate": 0.0305,
-    "newEmployerRateSource": "DOL Significant Provisions of State UI Laws, January 2026 https://oui.doleta.gov/unemploy/content/sigpros/2020-2029/January2026.pdf read directly 2026-11-07 lists a new-employer BASE rate of 2.50%. The 3.05% carried here is the secondary OnPay figure (0.55% above the base); DWD states the total is a basic rate plus a solvency rate and its 2026 schedule page could not be read on 2026-11-07, so the extra 0.55% is unconfirmed. Treat as an estimate; an employer should supply its assigned rate. Earlier source: OnPay's published 2026 state-by-state SUI table (secondary), used only where this file had no figure of its own. Cross-source tier, not primary.",
+    "newEmployerRateSource": "Wisconsin Department of Workforce Development, 2026 Tax Rates https://dwd.wisconsin.gov/ui/employers/prior/taxrates-2026.htm read directly 2026-11-07: 'New Employer Rate' basic 2.50 + solvency 0.55 = total 3.05 for payroll under $500,000; basic 2.50 + solvency 0.75 = 3.25 for payroll of $500,000 or more. 'New Employer Rates ... All others: 2026 3.05%' (payroll under $500,000) and '3.25%' (payroll of $500,000 or more); construction industry 2.50% / 2.70%. Taxable wage base $14,000. The engine carries the 3.05% for payroll under $500,000, non-construction; the other three rates are not modelled. Confirmed.",
     "experienceRange": {
       "min": 0,
       "max": 0.12
     },
     "employerSuppliedRateRequired": false,
-    "confidence": "cross_source_confirmed"
+    "confidence": "primary_source_confirmed"
   }
 }

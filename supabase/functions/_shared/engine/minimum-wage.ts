@@ -84,8 +84,13 @@ export interface MinimumWageQuery {
    * `tipped` is true and `region` names a New-York-shaped state. Omitted
    * with an ambiguous region, this defaults to 'food_service' — the larger
    * category — and the answer's trail says so rather than guessing silently.
+   *
+   * 'bartender' selects Connecticut's separate bartender cash wage (Conn. Gen. Stat. 31-60), which is
+   * higher than the hotel and restaurant staff tipped wage. It matters only when `tipped` is true and the
+   * state records a bartender variant; omitted there, the answer is the lower hotel and restaurant figure
+   * and the caveat says bartenders are owed more.
    */
-  occupation?: 'food_service' | 'service_employee';
+  occupation?: 'food_service' | 'service_employee' | 'bartender';
 }
 
 export interface MinimumWageCandidate {
@@ -388,9 +393,25 @@ export function minimumWage(query: MinimumWageQuery): MinimumWageAnswer {
       : 'State law allows no tip credit — the full state rate is owed in cash';
     let caveat: string | undefined;
     let regionMatched = false;
-    if (query.region) {
+    // Connecticut records bartenders separately: a higher cash wage than hotel and restaurant staff.
+    const bartenderVariant = (state.variants ?? []).find(
+      (v) => v.occupation === 'bartender' && !v.regionalOverrideOf && dateInRange(v, query.checkDate),
+    );
+    if (bartenderVariant && state.tipped.tipCreditAllowed) {
+      if (query.occupation === 'bartender') {
+        cents = toCents(bartenderVariant);
+        basis = 'State tipped cash wage, ' + (bartenderVariant.label ?? 'bartender');
+        regionMatched = true;
+      } else {
+        caveat =
+          state.jurisdiction.name + ' sets a higher tipped cash wage for bartenders ($' +
+          (toCents(bartenderVariant) / 100).toFixed(2) + "); pass occupation 'bartender' for that employee. " +
+          'The figure returned is for other tipped employees.';
+      }
+    }
+    if (query.region && !regionMatched) {
       const region = resolveRegion(
-        state.variants, 'tipped', query.region, query.occupation, query.checkDate,
+        state.variants, 'tipped', query.region, query.occupation as 'food_service' | 'service_employee' | undefined, query.checkDate,
       );
       if (region.amount) {
         regionMatched = true;

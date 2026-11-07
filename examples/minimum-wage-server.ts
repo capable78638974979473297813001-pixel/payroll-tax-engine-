@@ -92,7 +92,7 @@ interface LookupRequest {
   locality?: string;
   employeeCount?: number;
   tipped?: boolean;
-  occupation?: 'food_service' | 'service_employee';
+  occupation?: 'food_service' | 'service_employee' | 'bartender';
   checkDate?: string;
   hoursPerWeek?: number;
   /**

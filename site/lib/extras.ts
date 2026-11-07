@@ -27,7 +27,7 @@ export interface MinimumWageCheckInput {
   region?: string;
   /** American Samoa only: its employer's industry id (it has no single minimum wage). */
   industry?: string;
-  occupation?: 'food_service' | 'service_employee';
+  occupation?: 'food_service' | 'service_employee' | 'bartender';
 }
 
 export interface PaycheckExtras {
@@ -64,7 +64,7 @@ export interface MinimumWageOutput {
 export type ExtrasValidation = { ok: true; value: PaycheckExtras } | { ok: false; errors: FieldError[] };
 
 export const ORDER_TYPES = ['consumer_creditor', 'child_support', 'federal_student_loan_default'];
-export const OCCUPATIONS = ['food_service', 'service_employee'];
+export const OCCUPATIONS = ['food_service', 'service_employee', 'bartender'];
 export const MAX_ORDERS = 25;
 
 const isObject = (v: unknown): v is Record<string, unknown> => typeof v === 'object' && v !== null && !Array.isArray(v);
