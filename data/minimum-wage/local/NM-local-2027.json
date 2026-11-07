@@ -15,8 +15,8 @@
       "coverage": "All employers within the city limits. Santa Fe's 'Living Wage' adjusts on MARCH 1 -- a cycle shared with no other jurisdiction in this database. 2027: the $17.50 step takes effect January 1, 2027 (not March 1, 2027); annual adjustments by the new formula begin March 1, 2028.",
       "tipped": {
         "tipCreditAllowed": false,
-        "cashWage": 15.4,
-        "cashWageCents": 1540,
+        "cashWage": 17.5,
+        "cashWageCents": 1750,
         "note": "Santa Fe's own official 2025 living-wage notice (Municipal Code Sec. 28-1, fetched and text-extracted directly from the city's PDF this pass) states the tip-counting rule verbatim -- 'workers who customarily receive more than one hundred dollars ($100) per month in tips or commissions: any tips or commissions received and retained by a worker shall be counted as wages and credited towards satisfaction of the Living Wage' -- but publishes NO separate minimum CASH wage figure anywhere in that document. A secondary search result claimed a $3.00 base cash wage for Santa Fe; that figure appears nowhere in the city's own notice and is almost certainly that source conflating New Mexico's STATEWIDE $3.00 tipped cash wage with Santa Fe's own (cash-wage-silent) ordinance. Modelled here as no tip credit and a $15.40 floor, since that is what the primary document actually supports -- not the $3.00 figure, which was checked and rejected rather than incorporated."
       },
       "scheduledChanges": [],
