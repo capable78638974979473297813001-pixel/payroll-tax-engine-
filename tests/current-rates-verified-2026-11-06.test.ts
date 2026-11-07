@@ -102,3 +102,24 @@ describe('tipped queries in cities with employer-size tiers follow the tier (no 
     assert.equal(t('hayward', 12), 1690);
   });
 });
+
+describe('Connecticut tipped cash wages (Conn. Gen. Stat. 31-60(d)(3), read 2026-11-07: employer share $6.38 hotel and restaurant staff, $8.23 bartenders)', () => {
+  test('a tipped lookup returns $6.38 for hotel and restaurant staff and says bartenders are owed $8.23', () => {
+    const r = minimumWage({ checkDate: D, state: 'CT', tipped: true });
+    assert.equal(r.cents, 638);
+    const state = r.considered.find((c) => c.level === 'state')!;
+    assert.match(state.caveat ?? '', /bartenders \(\$8\.23\)/);
+  });
+  test("occupation 'bartender' returns $8.23, in 2026 and 2027, and is $74.00 more than $6.38 over 40 hours", () => {
+    for (const checkDate of ['2026-11-07', '2027-03-01']) {
+      const r = minimumWage({ checkDate, state: 'CT', tipped: true, occupation: 'bartender' });
+      assert.equal(r.cents, 823, checkDate);
+      assert.equal(r.bindingLevel, 'state');
+    }
+    assert.equal((823 - 638) * 40, 7400);
+  });
+  test("occupation 'bartender' does not change the standard answer or other states", () => {
+    assert.equal(minimumWage({ checkDate: D, state: 'CT', occupation: 'bartender' }).cents, 1694);
+    assert.equal(minimumWage({ checkDate: D, state: 'FL', tipped: true, occupation: 'bartender' }).cents, 1198);
+  });
+});

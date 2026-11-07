@@ -1362,8 +1362,8 @@ export interface MinimumWageAmount {
   regionalOverrideOf?: 'standard' | 'tipped';
   /** The region this tipped-rate variant belongs to, matched against MinimumWageQuery.region. */
   region?: string;
-  /** New York's own tipped-employee occupation split; matched against MinimumWageQuery.occupation. */
-  occupation?: 'food_service' | 'service_employee';
+  /** New York's own tipped-employee occupation split, and Connecticut's bartender rate; matched against MinimumWageQuery.occupation. */
+  occupation?: 'food_service' | 'service_employee' | 'bartender';
   /**
    * Marks this variant as the rate that was in effect BEFORE the headline
    * `standard`/`tipped` figure took over mid-YEAR — e.g. Alaska's $13.00

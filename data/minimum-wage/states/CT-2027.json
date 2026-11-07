@@ -28,6 +28,7 @@
       "hourly": 8.23,
       "hourlyCents": 823,
       "id": "tipped_bartender",
+      "occupation": "bartender",
       "label": "Bartender cash wage",
       "test": "An employee who customarily and regularly receives tips while working as a bartender.",
       "maxTipCredit": 9.25,
