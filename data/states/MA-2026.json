@@ -88,6 +88,8 @@
   ],
   "flatRateSurtaxCredit": {
     "rate": 0.05,
+    "annualizeMultiplier": {"daily": 365},
+    "$annualizeMultiplierNote": "Circular M's daily wage-bracket table and percentage method divide the annual figures by 365 (exemption factor $12 for one exemption, no-withholding floor $22, head-of-household credit $0.33, blind credit $0.30), not by this engine's 260 workdays. Read from the 2026 Circular M on 2026-11-07; every weekly, biweekly, semimonthly and monthly row of its tables was reproduced by the engine.",
     "surtaxRate": 0.04,
     "surtaxThreshold": 1107750,
     "exemptionTiers": {

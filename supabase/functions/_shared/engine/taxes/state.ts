@@ -6035,6 +6035,12 @@ interface FlatRateSurtaxCreditConfig {
    * annualized wages are below this owes no withholding at all.
    */
   noWithholdingBelowAnnualWithExemptions?: number;
+  /**
+   * Pay periods per year where Circular M differs from this engine's generic count: its daily
+   * table divides the annual figures by 365 (exemption $12, no-withholding floor $22, head-of-
+   * household credit $0.33, blind credit $0.30), not by the engine-wide 260 workdays.
+   */
+  annualizeMultiplier?: Partial<Record<string, number>>;
 }
 
 /** Employee-side FICA line ids (and their railroad Tier I renames). */
@@ -6132,7 +6138,7 @@ function flatRateSurtaxCredit(
   const cfg = rules.flatRateSurtaxCredit as FlatRateSurtaxCreditConfig;
   const exempt = (rules.exemptPretax ?? []) as PretaxCategory[];
   const taxableWages = ctx.taxableWagesFor(exempt);
-  const periodsPerYear = ctx.periodsPerYear;
+  const periodsPerYear = cfg.annualizeMultiplier?.[input.payFrequency] ?? ctx.periodsPerYear;
 
   const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
   // Form M-4's own left-margin instruction to the employee: "Otherwise,

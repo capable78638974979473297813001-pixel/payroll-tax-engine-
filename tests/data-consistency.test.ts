@@ -210,3 +210,29 @@ describe('Kentucky, Michigan and Vermont income tax withholding (agency document
     assert.deepEqual(rates.slice(1, 5), [0.0335, 0.066, 0.076, 0.0875]);
   });
 });
+
+describe('Massachusetts withholding against Circular M\'s own wage-bracket tables (effective 2026-01-01, read 2026-11-07)', () => {
+  const sit = async (freq: string, wages: number, k: number) => {
+    const { calculatePaycheck } = await import('../src/calculate.ts');
+    const cert = k === 0 ? {} : { personalExemptionCode: 1, spouseExemptionCode: 0, dependents: k - 1 };
+    const r = calculatePaycheck({
+      checkDate: '2026-06-15', payFrequency: freq as never, earnings: [{ code: 'REG', category: 'regular', amount: Math.round(wages * 100) }], deductions: [],
+      federalW4: { filingStatus: 'single', multipleJobs: false, dependentCredit: 0, otherIncome: 0, deductions: 0, extraWithholding: 0 },
+      ytd: { socialSecurity: 0, medicare: 0, futa: 0 }, workState: { code: 'MA', certificate: cert },
+    } as never);
+    return r.taxes.find((t: { id: string }) => t.id === 'MA_SIT')!.amount / 100;
+  };
+  test('weekly table rows, wages $205 and $305 (0, 1 and 2 exemptions)', async () => {
+    assert.deepEqual([await sit('weekly', 205, 0), await sit('weekly', 205, 1), await sit('weekly', 205, 2)], [9.47, 5.24, 4.27]);
+    assert.deepEqual([await sit('weekly', 305, 0), await sit('weekly', 305, 1), await sit('weekly', 305, 2)], [14.08, 9.85, 8.89]);
+  });
+  test('daily table rows use 365 days: wages $31 and $23 (the engine had used 260 and returned $0.59 and $0)', async () => {
+    assert.deepEqual([await sit('daily', 31, 0), await sit('daily', 31, 1), await sit('daily', 31, 2)], [1.43, 0.83, 0.69]);
+    assert.equal(await sit('daily', 23, 1), 0.46);
+  });
+  test('no withholding below the $22 daily and $154 weekly floors when an exemption is claimed', async () => {
+    assert.equal(await sit('daily', 21, 1), 0);
+    assert.equal(await sit('weekly', 150, 1), 0);
+    assert.equal(await sit('weekly', 155, 1), 2.93);
+  });
+});
