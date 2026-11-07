@@ -87,7 +87,7 @@
         "maxTipCredit": 6.15,
         "maxTipCreditCents": 615
       },
-      "coverage": "Suburban Cook County. The county ordinance does NOT apply inside the City of Chicago, which has its own. Individual municipalities within Cook County may opt out of the county ordinance by local ordinance -- a real coverage hole this database records but does not enumerate. Employers need at least four employees (one if the employee is a domestic worker) and a Cook County business facility or license; employees under a collective bargaining agreement, in subsidized youth or transitional programs, in their first 90 days or under 18 at the Illinois sub-minimum, camp counselors, impaired-capacity workers and licensed learners are excluded under the County's 2018 rules (Rule 3.05). The engine cannot see these facts, so the headline rate binds.",
+      "coverage": "Suburban Cook County. The county ordinance does NOT apply inside the City of Chicago, which has its own. Individual municipalities within Cook County may opt out of the county ordinance by local ordinance -- a real coverage hole this database records but does not enumerate. Employers need at least four employees (one if the employee is a domestic worker) and a Cook County business facility or license; under the County's 2018 rules (Rule 3.05) employees under a collective bargaining agreement, in subsidized youth or transitional programs, in their first 90 days or under 18 at the Illinois sub-minimum, camp counselors, impaired-capacity workers and licensed learners are not covered. The County's July 2026 FAQ instead allows a rate up to 50 cents under the County wage in the first 90 days (not day, temporary or seasonal workers) and places workers under 18 under the Illinois youth rate. The engine cannot see these facts, so the headline rate binds.",
       "variants": [
         {
           "id": "pre_2026_06_30",
@@ -108,6 +108,36 @@
           "effectiveFrom": "2025-01-01",
           "effectiveTo": "2026-06-30",
           "note": "60% of $15.00, matching the Illinois state tipped percentage, before the step to $9.25."
+        },
+        {
+          "id": "trainee_first_90_days",
+          "label": "New employee training period, first 90 days (not day, temporary or seasonal workers)",
+          "hourly": 14.9,
+          "hourlyCents": 1490,
+          "effectiveFrom": "2026-07-01",
+          "test": "An employer may choose to pay up to 50 cents under the County rate (15.40 less 0.50 = 14.90) during the first 90 days of employment; not for day laborers, temporary or seasonal workers. The engine cannot see tenure or worker type, so the headline rate binds. CONFLICT: the County's 2018 rules (Rule 3.05) instead exclude these employees from the ordinance, which would leave the Illinois 90-day wage of 14.50 (820 ILCS 105/4(a)(2)). The County's current FAQ is the higher floor and is recorded here; which reading governs has not been settled.",
+          "sources": [
+            {
+              "title": "Cook County minimum wage FAQ, question 11 (July 2026)",
+              "verifiedOn": "2026-11-07",
+              "verifiedBy": "Cook County minimum wage FAQ (July 2026), question 11 as supplied by the user on 2026-11-07 (not reloaded from the page by this session): 'Employers may choose to pay a reduced wage of no more than $.50 less than the County's minimum wage during the first 90 days of an employee's start date of employment (or new employee training period). After the 90-day period, however, employers are required to pay employees the County's full minimum wage. *Note that this exception does not apply to day laborers, temporary, or seasonal workers. These workers must be paid the County's minimum wage during the entire duration of employment.' Question 5, as relayed: workers under 18 are not covered by the County ordinance and fall under the Illinois youth rate of 13.00 dollars."
+            }
+          ]
+        },
+        {
+          "id": "under_18_illinois_rate",
+          "label": "Under 18: not covered by the County ordinance; Illinois youth rate applies",
+          "hourly": 13.0,
+          "hourlyCents": 1300,
+          "test": "Per the County FAQ (question 5, as relayed) workers under 18 are outside the County ordinance and paid the Illinois youth rate. 820 ILCS 105/4(a)(3) (read directly 2026-11-07): 13 dollars an hour until the employee has worked more than 650 hours for the employer in the calendar year, then the adult Illinois wage of 15.00. The engine cannot see age, so the headline rate binds.",
+          "sources": [
+            {
+              "title": "820 ILCS 105/4(a)(3)",
+              "url": "https://www.ilga.gov/legislation/ilcs/fulltext.asp?DocName=082001050K4",
+              "verifiedOn": "2026-11-07",
+              "verifiedBy": "Illinois Minimum Wage Law 820 ILCS 105/4 https://www.ilga.gov/legislation/ilcs/fulltext.asp?DocName=082001050K4 read directly 2026-11-07: (a)(2) an employer may pay an employee 18 or older, during the first 90 consecutive calendar days after initial employment, a wage not more than 50 cents less than the (a)(1) wage, except that a day or temporary laborer (the excerpt read ends the exception list after item (A)) must be paid the full wage; (a)(3) an employee under 18 who has not worked more than 650 hours for the employer in the calendar year is paid 13 dollars an hour on and after January 1, 2025, and more than 650 hours the (a)(1) adult wage."
+            }
+          ]
         }
       ],
       "sources": [

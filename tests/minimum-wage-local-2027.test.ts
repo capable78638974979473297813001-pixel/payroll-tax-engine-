@@ -139,3 +139,35 @@ describe('learner wages follow the ordinance rule (Petaluma 8.35.030(E), Sonoma 
     assert.equal(minimumWage({ checkDate: '2026-11-06', state: 'IL', locality: 'cook_county' }).cents, 1540);
   });
 });
+
+describe('Cook County trainee and youth provisions (County FAQ July 2026 Q11 and Q5 as supplied; 820 ILCS 105/4 read 2026-11-07)', () => {
+  const read = async (p: string) => {
+    const { readFileSync } = await import('node:fs');
+    return JSON.parse(readFileSync(new URL(`../data/minimum-wage/${p}.json`, import.meta.url), 'utf8'));
+  };
+  test('Illinois: 90-day new-employee wage $14.50 and under-18 wage $13.00 are recorded for 2026 and 2027', async () => {
+    for (const y of [2026, 2027]) {
+      const il = await read(`states/IL-${y}`);
+      const first90 = il.youthAndTraining.find((v: { id: string }) => v.id === 'il_first_90_days');
+      const under18 = il.youthAndTraining.find((v: { id: string }) => v.id === 'il_under_18');
+      assert.equal(first90.hourlyCents, il.standard.hourlyCents - 50);
+      assert.equal(first90.hourlyCents, 1450);
+      assert.equal(under18.hourlyCents, 1300);
+    }
+  });
+  test('Cook County: trainee floor is the County rate less 50 cents ($14.90), recorded as informational with the conflict noted', async () => {
+    for (const y of [2026, 2027]) {
+      const c = (await read(`local/IL-local-${y}`)).jurisdictions.find((j: { id: string }) => j.id === 'cook_county');
+      const t = c.variants.find((v: { id: string }) => v.id === 'trainee_first_90_days');
+      assert.equal(t.hourlyCents, c.hourlyCents - 50);
+      assert.equal(t.hourlyCents, 1490);
+      assert.match(t.test, /CONFLICT/);
+      assert.equal(c.variants.find((v: { id: string }) => v.id === 'under_18_illinois_rate').hourlyCents, 1300);
+    }
+  });
+  test('the headline Cook County rate and its tipped wage still bind, before and after July 1, 2026', () => {
+    assert.equal(minimumWage({ checkDate: '2026-11-06', state: 'IL', locality: 'cook_county' }).cents, 1540);
+    assert.equal(minimumWage({ checkDate: '2026-11-06', state: 'IL', locality: 'cook_county', tipped: true }).cents, 925);
+    assert.equal(minimumWage({ checkDate: '2026-06-30', state: 'IL', locality: 'cook_county' }).cents, 1500);
+  });
+});
