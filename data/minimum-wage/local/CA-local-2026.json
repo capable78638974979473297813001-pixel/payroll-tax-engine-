@@ -680,10 +680,10 @@
         {
           "id": "learner_14_17",
           "label": "Learner's wage, ages 14-17, first 160 hours (no previous similar or related experience)",
-          "hourly": 15.56,
-          "hourlyCents": 1556,
+          "hourly": 15.55,
+          "hourlyCents": 1555,
           "effectiveFrom": "2026-01-01",
-          "test": "Applies only to an employee aged 14 to 17 during the first 160 hours in an occupation with no previous similar or related experience. The engine cannot see age or hours of experience, so the headline rate binds. The city prints $15.56; 85% of $18.31 rounded to the nearest five cents would be $15.55, so the printed figure is recorded as published."
+          "test": "Applies only to an employee aged 14 to 17 during the first 160 hours of employment (and, in Petaluma, only in an occupation with no previous similar or related experience). The engine cannot see age or hours of experience, so the headline rate binds. Computed from the ordinance (85 percent of the 18.31 rate, rounded to the nearest five cents = 15.55). The city's web page prints 15.56 for 2026, which exceeds the ordinance figure by one cent; paying 15.56 also complies."
         }
       ],
       "sources": [
@@ -692,6 +692,12 @@
           "url": "https://cityofpetaluma.org/minimum-wage/",
           "verifiedOn": "2026-11-07",
           "verifiedBy": "City of Petaluma, Petaluma Minimum Wage https://cityofpetaluma.org/minimum-wage/ read directly 2026-11-07: 'The 2026 minimum wage in the Petaluma city limits is $18.31 per hour' and 'The Learner's Wage for 2026 is $15.56 per hour.'"
+        },
+        {
+          "title": "Petaluma Municipal Code ch. 8.35 (current through Ord. 2931 NCS, July 6, 2026)",
+          "url": "https://petaluma.municipal.codes/Code/8.35",
+          "verifiedOn": "2026-11-07",
+          "verifiedBy": "Petaluma Municipal Code 8.35.010 and 8.35.030, text supplied by the user from the code host on 2026-11-07: 'Learners means employees who are at least fourteen years of age but not more than seventeen years of age during their first one hundred sixty hours of employment in occupations in which they have no previous similar or related experience'; 8.35.030(E) 'Learners shall be paid not less than eighty-five percent of the minimum wage required in accordance with this section rounded to the nearest five cents'; 8.35.030(G) no deduction or credit for tips; 8.35.040 a bona fide collective bargaining agreement may waive the chapter in clear terms. 8.35.030(A)-(D): the 2020 two-tier wage ended on 2021-01-01, after which one CPI-W adjusted wage applies to all employers."
         }
       ]
     },
@@ -967,6 +973,22 @@
           "appliesWhen": {
             "employeeCountMax": 25
           }
+        },
+        {
+          "id": "learner_14_17_large",
+          "label": "Learner's wage, ages 14-17, first 160 hours, large employer (26 or more)",
+          "hourly": 15.7,
+          "hourlyCents": 1570,
+          "effectiveFrom": "2026-01-01",
+          "test": "Applies only to an employee aged 14 to 17 during the first 160 hours of employment (and, in Petaluma, only in an occupation with no previous similar or related experience). The engine cannot see age or hours of experience, so the headline rate binds. Computed from SMC 2.80.040(A): 85 percent of 18.47 rounded to the nearest nickel. The city's page prints no learner figure."
+        },
+        {
+          "id": "learner_14_17_small",
+          "label": "Learner's wage, ages 14-17, first 160 hours, small employer (25 or fewer)",
+          "hourly": 14.75,
+          "hourlyCents": 1475,
+          "effectiveFrom": "2026-01-01",
+          "test": "Applies only to an employee aged 14 to 17 during the first 160 hours of employment (and, in Petaluma, only in an occupation with no previous similar or related experience). The engine cannot see age or hours of experience, so the headline rate binds. Computed from SMC 2.80.040(A): 85 percent of 17.38 rounded to the nearest nickel. The city's page prints no learner figure."
         }
       ],
       "appliesWhen": {
@@ -978,6 +1000,12 @@
           "url": "https://www.sonomacity.org/wages/",
           "verifiedOn": "2026-11-07",
           "verifiedBy": "City of Sonoma, Sonoma Minimum Wage https://www.sonomacity.org/wages/ read directly 2026-11-07: '$18.47/hour for large employers (26 or more employees) and $17.38/hour for small employers (25 or fewer employees)'; 'A \"Learner\" may be paid not less than 85% of the local minimum wage (rounded to the nearest nickel) during his/her first 160 hours of employment' (age 14 to 17, per the page). The page prints no 2027 rate, so the 2026 figures carry forward."
+        },
+        {
+          "title": "Sonoma Municipal Code ch. 2.80 (current through Ord. 13-2025, Dec 3, 2025)",
+          "url": "https://sonoma.municipal.codes/SMC/2.80",
+          "verifiedOn": "2026-11-07",
+          "verifiedBy": "Sonoma Municipal Code 2.80.010, 2.80.030 and 2.80.040, text supplied by the user from the code host on 2026-11-07: large employer = normally 26 or more persons, small employer = normally 25 or fewer, counted across the enterprise including persons outside the city, and a franchisee is not small if its franchise network employs more than 25 in aggregate; 2.80.030(C)(1) annual increase of 3.5 percent or an index set by council resolution, whichever is less; 2.80.040(A) a learner aged 14 to 17 (California Wage Order 4-2001) is paid not less than 85 percent of the minimum wage rounded to the nearest nickel during the first 160 hours of employment; 2.80.040(B) no tip deduction or credit; 2.80.040(C) governmental agencies are exempt for governmental functions; 2.80.045 collective bargaining waiver."
         }
       ]
     },

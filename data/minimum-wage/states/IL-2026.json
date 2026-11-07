@@ -33,7 +33,24 @@
       "note": "820 ILCS 105/4(a)(2). A genuine hours-tracking obligation, not just an age test."
     }
   ],
-  "youthAndTraining": [],
+  "youthAndTraining": [
+    {
+      "id": "il_first_90_days",
+      "label": "New employee, first 90 consecutive calendar days (18 or older)",
+      "hourly": 14.5,
+      "hourlyCents": 1450,
+      "eligibility": "Employee 18 or older during the first 90 consecutive calendar days after initial employment by the employer; not available for day or temporary laborers. An option for the employer, not a requirement. 820 ILCS 105/4(a)(2).",
+      "source": "Illinois Minimum Wage Law 820 ILCS 105/4 https://www.ilga.gov/legislation/ilcs/fulltext.asp?DocName=082001050K4 read directly 2026-11-07: (a)(2) an employer may pay an employee 18 or older, during the first 90 consecutive calendar days after initial employment, a wage not more than 50 cents less than the (a)(1) wage, except that a day or temporary laborer (the excerpt read ends the exception list after item (A)) must be paid the full wage; (a)(3) an employee under 18 who has not worked more than 650 hours for the employer in the calendar year is paid 13 dollars an hour on and after January 1, 2025, and more than 650 hours the (a)(1) adult wage."
+    },
+    {
+      "id": "il_under_18",
+      "label": "Under 18, up to 650 hours in the calendar year",
+      "hourly": 13.0,
+      "hourlyCents": 1300,
+      "eligibility": "Employee under 18 who has not worked more than 650 hours for the employer in the calendar year; after 650 hours the adult wage applies. 820 ILCS 105/4(a)(3).",
+      "source": "Illinois Minimum Wage Law 820 ILCS 105/4 https://www.ilga.gov/legislation/ilcs/fulltext.asp?DocName=082001050K4 read directly 2026-11-07: (a)(2) an employer may pay an employee 18 or older, during the first 90 consecutive calendar days after initial employment, a wage not more than 50 cents less than the (a)(1) wage, except that a day or temporary laborer (the excerpt read ends the exception list after item (A)) must be paid the full wage; (a)(3) an employee under 18 who has not worked more than 650 hours for the employer in the calendar year is paid 13 dollars an hour on and after January 1, 2025, and more than 650 hours the (a)(1) adult wage."
+    }
+  ],
   "indexation": {
     "indexed": false
   },
