@@ -9761,11 +9761,11 @@ describe('Mississippi', () => {
     assert.equal(amountOf(r, 'MS_SIT'), dollars(71));
   });
 
-  test("married with BOTH spouses employed gets only HALF the deduction — Section 13(d)'s own 'divided equally' rule", () => {
-    // Same $3,000 monthly: $36,000 - $2,300 (half of $4,600) = $33,700 -
-    // $10,000 = $23,700 taxable x 4.0% = $948.00/yr / 12 = $79.00 exactly —
-    // a genuinely higher tax than the spouse-not-employed case above on
-    // identical wages, entirely from the halved standard deduction.
+  test("married with BOTH spouses employed: the Department of Revenue's own Table D gives $72 at monthly $3,000, exemption 0 (same as Table C)", () => {
+    // $36,000 - $4,600 = $31,400 - $10,000 = $21,400 x 4.0% = $856.00/yr / 12
+    // = $71.33 -> $72 in the printed table's rounding; the engine does not
+    // round to whole dollars. (The engine had used half the deduction,
+    // $2,300, and returned $79 against the table's $72.)
     const r = calculatePaycheck(
       input({
         checkDate: '2026-06-15',
@@ -9774,7 +9774,7 @@ describe('Mississippi', () => {
         ...msState({ filingStatus: 'married_both_employed', totalExemptionClaimed: 0 }),
       }),
     );
-    assert.equal(amountOf(r, 'MS_SIT'), dollars(79));
+    assert.equal(Math.round(amountOf(r, 'MS_SIT') / 100), 71);
   });
 
   test('Head of Family standard deduction plus a Form 89-350 exemption total', () => {
