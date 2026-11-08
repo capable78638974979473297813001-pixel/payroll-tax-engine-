@@ -61,6 +61,8 @@
     }
   ],
   "annualBracket": {
+    "annualizeMultiplier": { "daily": 365 },
+    "$annualizeMultiplierNote": "Booklet A (2026) Appendix Part 2 daily/miscellaneous formula: $3.13 allowance = $1,144/365 and $11.92 lump sum = $4,350/365, and the daily table's first single bracket (26) is $9,600/365. So daily pay annualizes at 365, not the generic 260-workday count; weekly/biweekly/semimonthly/monthly were table-checked at the generic counts.",
     "$comment": "Booklet A Appendix Part 1 'Annualized Income Tax Withholding', read directly. The Guide itself sanctions using only the annual table plus per-period division rather than transcribing all 8 of Part 2's separately-published per-period tables.",
     "allowanceAmountAnnual": 1144.0,
     "extraLumpSumAllowanceAnnual": 4350.0,

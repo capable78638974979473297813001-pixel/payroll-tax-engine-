@@ -2310,6 +2310,8 @@ interface WIStandardDeductionBand {
 }
 
 interface BracketPhaseoutConfig {
+  /** Pay periods per year to annualize with where Publication W-166's tables differ from the engine's generic count (daily is 365). */
+  annualizeMultiplier?: Partial<Record<string, number>>;
   brackets: WIBracket[];
   exemptionAmount: number; // dollars, flat per exemption claimed
   standardDeduction: {
@@ -2374,7 +2376,8 @@ function bracketPhaseoutDeduction(
   const fullBase = ctx.taxableWagesFor(exempt);
   const supplementalCash = supplementalEarnings(input.earnings);
   const taxableWages = atLeastZero(fullBase - supplementalCash);
-  const annualWages = taxableWages * ctx.periodsPerYear;
+  const periodsPerYear = cfg.annualizeMultiplier?.[input.payFrequency] ?? ctx.periodsPerYear;
+  const annualWages = taxableWages * periodsPerYear;
 
   const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
   const maritalStatus = resolveWIMaritalStatus(cert);
@@ -2401,19 +2404,19 @@ function bracketPhaseoutDeduction(
   const bracket = findWIBracket(cfg.brackets, annualNetWage);
   const excess = annualNetWage - dollars(bracket.from);
   const annualTax = dollars(bracket.base) + applyRate(excess, bracket.rate);
-  const amount = Math.round(annualTax / ctx.periodsPerYear);
+  const amount = Math.round(annualTax / periodsPerYear);
 
   const detail =
     `${fmt(annualWages)}/yr less ${fmt(deductionAmount)} standard deduction ` +
     `(${maritalStatus}) less ${fmt(exemptionAmount)} exemptions (${exemptions} × $${cfg.exemptionAmount}) ` +
-    `= ${fmt(annualNetWage)} net @ ${(bracket.rate * 100).toFixed(2)}% bracket, ÷ ${ctx.periodsPerYear}`;
+    `= ${fmt(annualNetWage)} net @ ${(bracket.rate * 100).toFixed(2)}% bracket, ÷ ${periodsPerYear}`;
 
   return {
     id: `${rules.code}_SIT`,
     name: `${rules.name} Income Tax`,
     payer: 'employee',
     jurisdiction: 'state',
-    taxableWages: Math.round(annualNetWage / ctx.periodsPerYear),
+    taxableWages: Math.round(annualNetWage / periodsPerYear),
     amount,
     detail,
   };
@@ -9999,6 +10002,8 @@ interface GATablePeriod {
 }
 
 interface GAConfig {
+  /** Pay periods per year to annualize with where the G-4 booklet differs from the engine's generic count (daily is 365, not 260). */
+  annualizeMultiplier?: Partial<Record<string, number>>;
   effectiveDateOfNewTable: string;
   beforeMay11_2026: GATablePeriod;
   fromMay11_2026: GATablePeriod;
@@ -10025,7 +10030,8 @@ function georgiaWithholding(
   const cfg = rules.georgiaStatusDeduction as GAConfig;
   const exempt = (rules.exemptPretax ?? []) as PretaxCategory[];
   const periodWages = ctx.taxableWagesFor(exempt);
-  const annualWages = periodWages * ctx.periodsPerYear;
+  const periodsPerYear = cfg.annualizeMultiplier?.[input.payFrequency] ?? ctx.periodsPerYear;
+  const annualWages = periodWages * periodsPerYear;
 
   const table = input.checkDate >= cfg.effectiveDateOfNewTable ? cfg.fromMay11_2026 : cfg.beforeMay11_2026;
 
@@ -10052,7 +10058,7 @@ function georgiaWithholding(
 
   const taxableIncome = atLeastZero(annualWages - standardDeduction - dependentAllowance);
   const annualTax = applyRate(taxableIncome, table.rate);
-  const amount = roundHalfUp(annualTax / ctx.periodsPerYear);
+  const amount = roundHalfUp(annualTax / periodsPerYear);
 
   return {
     id: `${rules.code}_SIT`,
@@ -10065,7 +10071,7 @@ function georgiaWithholding(
       `${fmt(annualWages)}/yr less ${fmt(standardDeduction)} standard deduction ` +
       `(${higherDeduction ? 'MFJ, one spouse working' : 'Single/HoH/MFS/MFJ-both-working'}) ` +
       `less ${fmt(dependentAllowance)} (${dependents} dependents) = ${fmt(taxableIncome)} taxable ` +
-      `@ ${(table.rate * 100).toFixed(2)}% = ${fmt(annualTax)}/yr ÷ ${ctx.periodsPerYear} ` +
+      `@ ${(table.rate * 100).toFixed(2)}% = ${fmt(annualTax)}/yr ÷ ${periodsPerYear} ` +
       `(${table === cfg.fromMay11_2026 ? 'post' : 'pre'}-${cfg.effectiveDateOfNewTable} table)`,
   };
 }
@@ -10368,6 +10374,8 @@ function newMexicoWithholding(
 }
 
 interface HIConfig {
+  /** Pay periods per year to annualize with, where Booklet A differs from the engine's generic count (daily is 365, not 260). */
+  annualizeMultiplier?: Partial<Record<string, number>>;
   allowanceAmountAnnual: number;
   extraLumpSumAllowanceAnnual: number;
   brackets: {
@@ -10420,7 +10428,8 @@ function hawaiiWithholding(
   const cfg = rules.annualBracket as HIConfig;
   const exempt = (rules.exemptPretax ?? []) as PretaxCategory[];
   const periodWages = ctx.taxableWagesFor(exempt);
-  const annualWages = periodWages * ctx.periodsPerYear;
+  const periodsPerYear = cfg.annualizeMultiplier?.[input.payFrequency] ?? ctx.periodsPerYear;
+  const annualWages = periodWages * periodsPerYear;
 
   const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
   const status = (cert.hawaiiMaritalStatus as string) ?? 'single';
@@ -10449,7 +10458,7 @@ function hawaiiWithholding(
   const bracket = findWIBracket(brackets, taxableIncome);
   const excess = taxableIncome - dollars(bracket.from);
   const annualTax = dollars(bracket.base) + applyRate(excess, bracket.rate);
-  const amount = roundHalfUp(annualTax / ctx.periodsPerYear);
+  const amount = roundHalfUp(annualTax / periodsPerYear);
 
   return {
     id: `${rules.code}_SIT`,
@@ -10463,7 +10472,7 @@ function hawaiiWithholding(
       `less ${fmt(lumpSumDeduction)} extra lump sum allowance = ${fmt(taxableIncome)} taxable ` +
       `(${status === 'married' ? 'Married' : 'Single incl. unmarried HoH'}), bracket ${fmt(dollars(bracket.from))}-` +
       `${bracket.to === null ? '∞' : fmt(dollars(bracket.to))}: ${fmt(dollars(bracket.base))} + ` +
-      `${(bracket.rate * 100).toFixed(2)}% × ${fmt(excess)} = ${fmt(annualTax)}/yr ÷ ${ctx.periodsPerYear}`,
+      `${(bracket.rate * 100).toFixed(2)}% × ${fmt(excess)} = ${fmt(annualTax)}/yr ÷ ${periodsPerYear}`,
   };
 }
 

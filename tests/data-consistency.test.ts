@@ -236,3 +236,30 @@ describe('Massachusetts withholding against Circular M\'s own wage-bracket table
     assert.equal(await sit('weekly', 155, 1), 2.93);
   });
 });
+
+describe('Daily pay is annualized at 365 days in Hawaii, Georgia and Wisconsin, as their own published daily tables require (read 2026-11-07)', () => {
+  const sit = async (st: string, freq: string, wages: number, cert: Record<string, unknown>) => {
+    const { calculatePaycheck } = await import('../src/calculate.ts');
+    const r = calculatePaycheck({
+      checkDate: '2026-11-07', payFrequency: freq as never, earnings: [{ code: 'REG', category: 'regular', amount: Math.round(wages * 100) }], deductions: [],
+      federalW4: { filingStatus: 'single', multipleJobs: false, dependentCredit: 0, otherIncome: 0, deductions: 0, extraWithholding: 0 },
+      ytd: { socialSecurity: 0, medicare: 0, futa: 0 }, workState: { code: st, certificate: cert },
+    } as never);
+    return r.taxes.find((t: { id: string }) => t.id === `${st}_SIT`)!.amount / 100;
+  };
+  test('Hawaii Booklet A daily table, single: $60-70 row 2/1, $90-100 row 4/3/3 (whole dollars); the engine had returned $0.88 for the first', async () => {
+    assert.equal(Math.round(await sit('HI', 'daily', 65, { hawaiiMaritalStatus: 'single', allowances: 0 })), 2);
+    assert.equal(Math.round(await sit('HI', 'daily', 95, { hawaiiMaritalStatus: 'single', allowances: 0 })), 4);
+    assert.equal(Math.round(await sit('HI', 'daily', 95, { hawaiiMaritalStatus: 'single', allowances: 2 })), 3);
+  });
+  test('Georgia G-4 Table A daily: $44 -> 0.14, $61 -> 0.99 with 0 dependents and 0.31 with 1', async () => {
+    assert.equal(await sit('GA', 'daily', 44, { georgiaMaritalStatus: 'A', dependents: 0 }), 0.14);
+    assert.equal(await sit('GA', 'daily', 61, { georgiaMaritalStatus: 'A', dependents: 0 }), 0.99);
+    assert.equal(await sit('GA', 'daily', 61, { georgiaMaritalStatus: 'A', dependents: 1 }), 0.31);
+  });
+  test('Wisconsin W-166 daily table, single: $59-64 row 1.70 and $94-99 row 3.60 / 3.50 (0 and 2 exemptions)', async () => {
+    assert.ok(Math.abs((await sit('WI', 'daily', 61.5, { maritalStatus: 'single', exemptions: 0 })) - 1.7) <= 0.011 + 0.0);
+    assert.ok(Math.abs((await sit('WI', 'daily', 96.5, { maritalStatus: 'single', exemptions: 0 })) - 3.6) <= 0.011);
+    assert.ok(Math.abs((await sit('WI', 'daily', 96.5, { maritalStatus: 'single', exemptions: 2 })) - 3.5) <= 0.011);
+  });
+});

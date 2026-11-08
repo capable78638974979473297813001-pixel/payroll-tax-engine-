@@ -43,6 +43,8 @@
     }
   ],
   "bracketPhaseoutDeduction": {
+    "annualizeMultiplier": { "daily": 365 },
+    "$annualizeMultiplierNote": "Publication W-166 daily/miscellaneous table (read 2026-11): its cents-precision rows are reproduced by annualizing daily pay at 365, not the generic 260-workday count (e.g. $61.50/day -> $1.70, $96.50/day -> $3.60). Weekly, biweekly, semimonthly and monthly rows were table-checked at the generic counts.",
     "brackets": [
       { "from": 0, "to": 12760, "base": 0, "rate": 0.0354 },
       { "from": 12760, "to": 25520, "base": 451.70, "rate": 0.0465 },
