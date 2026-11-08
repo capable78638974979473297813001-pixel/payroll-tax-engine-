@@ -366,6 +366,8 @@ interface FutaCreditReductionConfig {
   /** The date after which the year's determination is made (November 10 each year). */
   determinationDate?: string;
   priorYear?: { year: number; states: Record<string, number> };
+  /** DOL's published POTENTIAL list for the year (total additional rate by state). Informational only: never applied, because the final list is not determined until the determination date. */
+  potential?: { states: Record<string, number>; note?: string };
 }
 
 /**
@@ -436,7 +438,10 @@ export function futa(
           ? `${fmt(taxable)} @ ${(rate * 100).toFixed(1)}% — 0.6% net of the state credit PLUS a ${(extra * 100).toFixed(1)}% credit reduction, ${state} having not repaid its federal unemployment loans`
           : `${fmt(taxable)} @ 0.6% net of the 5.4% state credit` +
             (pending
-              ? `; no credit reduction is applied because this year's determination is made after ${reduction!.determinationDate} and had not been published when this ruleset was written — a reduction, if any, applies retroactively to the whole year`
+              ? `; no credit reduction is applied because this year's determination is made after ${reduction!.determinationDate} and had not been published when this ruleset was written — a reduction, if any, applies retroactively to the whole year` +
+                (state && reduction?.potential?.states?.[state] !== undefined
+                  ? `. DOL's potential list for this year shows an additional ${(reduction.potential.states[state]! * 100).toFixed(1)}% for ${state} if its advance is not repaid by ${reduction.determinationDate}`
+                  : '')
               : ''),
     },
   ];

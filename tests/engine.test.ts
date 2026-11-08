@@ -11949,6 +11949,16 @@ describe('FUTA credit reduction', () => {
     assert.match(line.detail ?? '', /determination is made after 2026-11-10/);
   });
 
+  test("an undetermined year mentions DOL's potential reduction for a listed state but still applies none", () => {
+    const rules = futaRules({}) as unknown as { futa: { creditReduction: Record<string, unknown> } };
+    rules.futa.creditReduction.potential = { states: { CA: 0.053 } };
+    const ca = futa(futaInput('CA'), ctx, rules as never)[0];
+    assert.equal(ca.amount, dollars(18.0));
+    assert.match(ca.detail ?? '', /potential list for this year shows an additional 5\.3% for CA/);
+    const oh = futa(futaInput('OH'), ctx, rules as never)[0];
+    assert.equal(/potential list/.test(oh.detail ?? ''), false);
+  });
+
   test("a reduced state pays more — California's 1.2% reduction makes it 1.8%", () => {
     const line = futa(futaInput('CA'), ctx, futaRules({ CA: 0.012 }))[0];
     assert.equal(line.amount, dollars(54.0));
