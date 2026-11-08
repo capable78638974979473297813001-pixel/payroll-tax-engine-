@@ -11959,6 +11959,15 @@ describe('FUTA credit reduction', () => {
     assert.equal(/potential list/.test(oh.detail ?? ''), false);
   });
 
+  test('after the determination date an empty map says the final list is overdue instead of implying it is still pending', () => {
+    const before = futa(futaInput('CA'), ctx, futaRules({}))[0];
+    assert.equal(/That date has passed/.test(before.detail ?? ''), false);
+    const lateInput = { ...futaInput('CA'), checkDate: '2026-11-20' } as never;
+    const after = futa(lateInput, ctx, futaRules({}))[0];
+    assert.equal(after.amount, dollars(18.0));
+    assert.match(after.detail ?? '', /That date has passed: DOL's final list/);
+  });
+
   test("a reduced state pays more — California's 1.2% reduction makes it 1.8%", () => {
     const line = futa(futaInput('CA'), ctx, futaRules({ CA: 0.012 }))[0];
     assert.equal(line.amount, dollars(54.0));

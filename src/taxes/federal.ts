@@ -439,6 +439,9 @@ export function futa(
           : `${fmt(taxable)} @ 0.6% net of the 5.4% state credit` +
             (pending
               ? `; no credit reduction is applied because this year's determination is made after ${reduction!.determinationDate} and had not been published when this ruleset was written — a reduction, if any, applies retroactively to the whole year` +
+                (reduction!.determinationDate !== undefined && input.checkDate > reduction!.determinationDate
+                  ? `. That date has passed: DOL's final list for this year should now be out (oui.doleta.gov/unemploy/futa_credit.asp), and this ruleset has not been updated with it, so the line is understated if ${state ?? 'the work state'} is on it`
+                  : '') +
                 (state && reduction?.potential?.states?.[state] !== undefined
                   ? `. DOL's potential list for this year shows an additional ${(reduction.potential.states[state]! * 100).toFixed(1)}% for ${state} if its advance is not repaid by ${reduction.determinationDate}`
                   : '')
