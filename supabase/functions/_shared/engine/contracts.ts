@@ -1,4 +1,5 @@
 import type { PaycheckInput } from './types.ts';
+import { hasStateRuleset, stateRuleset } from './registry.ts';
 
 /**
  * Inputs that are present but in a place, or a combination, the engine can't
@@ -57,3 +58,45 @@ export function inputContractWarnings(input: PaycheckInput): string[] {
 
   return warnings;
 }
+
+/**
+ * Employer facts the engine cannot see from one paycheck and therefore
+ * leaves out when the caller does not supply them. A missing employer-share
+ * line looks like a $0 tax, so each omission is named here instead.
+ */
+export function missingEmployerFactWarnings(input: PaycheckInput): string[] {
+  const warnings: string[] = [];
+  const code = input.workState?.code;
+  if (!code || !hasStateRuleset(code, input.checkDate)) return warnings;
+  const rules = stateRuleset(code, input.checkDate) as unknown as {
+    statePaidLeaveEmployer?: { employerSizeGated?: boolean; tiers?: Record<string, number>; defaultTier?: string; maxEmployeeShareFraction?: number; totalRate?: number };
+    statePaidLeaveEmployee?: unknown;
+    name?: string;
+  };
+  const cfg = rules.statePaidLeaveEmployer;
+  if (!cfg) return warnings;
+  const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
+  if (cert.paidLeaveExempt === true) return warnings;
+
+  if (cfg.tiers) {
+    const tier = input.employer?.paidLeaveTier?.[code] ?? cfg.defaultTier;
+    if (!tier) {
+      warnings.push(
+        `${code} paid leave was not computed: its premium depends on the employer's headcount, which the engine cannot see. ` +
+          `Send employer.paidLeaveTier.${code} (${Object.keys(cfg.tiers).join(', ')}) and, if the employer recovers part of the premium from employees, employer.paidLeaveEmployeeShareFraction.${code}.`,
+      );
+    } else if (cfg.maxEmployeeShareFraction !== undefined && !rules.statePaidLeaveEmployee && input.employer?.paidLeaveEmployeeShareFraction?.[code] === undefined) {
+      warnings.push(
+        `${code} paid leave: no employee share was withheld because the employer's election is not known (the state lets the employer recover up to ${Math.round(cfg.maxEmployeeShareFraction * 100)}% from the employee). ` +
+          `Send employer.paidLeaveEmployeeShareFraction.${code} if the employer charges employees.`,
+      );
+    }
+  } else if (cfg.employerSizeGated !== false && cert.employerLiableForPaidLeaveShare === undefined) {
+    warnings.push(
+      `${code} paid leave: the employer's share was not computed because the engine cannot see the employer's headcount. ` +
+        `Send workState.certificate.employerLiableForPaidLeaveShare (true if the employer meets ${code}'s size threshold) to add it. The employee's share, if any, is unaffected.`,
+    );
+  }
+  return warnings;
+}
+

@@ -295,3 +295,30 @@ describe('Cross-frequency and sanity sweep over every state (2026)', () => {
     assert.deepEqual(offenders, []);
   });
 });
+
+describe('A paid-leave line that depends on an employer fact is never left out silently', () => {
+  const run = async (st: string, certificate: Record<string, unknown>, employer?: Record<string, unknown>) => {
+    const { calculatePaycheck } = await import('../src/calculate.ts');
+    return calculatePaycheck({
+      checkDate: '2026-11-08', payFrequency: 'biweekly', earnings: [{ code: 'REG', category: 'regular', amount: 300000 }], deductions: [],
+      federalW4: { filingStatus: 'single', multipleJobs: false, dependentCredit: 0, otherIncome: 0, deductions: 0, extraWithholding: 0 },
+      ytd: { socialSecurity: 0, medicare: 0, futa: 0 }, workState: { code: st, certificate }, ...(employer ? { employer } : {}),
+    } as never);
+  };
+  test('Colorado, Maine and Washington say the employer share needs the headcount fact, and stop saying so once it is given', async () => {
+    for (const st of ['CO', 'ME', 'WA']) {
+      assert.match((await run(st, {})).warnings?.join(' ') ?? '', new RegExp(`${st} paid leave: the employer's share was not computed`));
+      assert.equal(((await run(st, { employerLiableForPaidLeaveShare: true })).warnings ?? []).some((w) => /paid leave/.test(w)), false);
+    }
+  });
+  test('Delaware says its paid leave needs the employer tier, then the employee-share election', async () => {
+    assert.match((await run('DE', {})).warnings?.join(' ') ?? '', /DE paid leave was not computed/);
+    const withTier = await run('DE', {}, { paidLeaveTier: { DE: 'full' } });
+    assert.match(withTier.warnings?.join(' ') ?? '', /no employee share was withheld/);
+    const full = await run('DE', {}, { paidLeaveTier: { DE: 'full' }, paidLeaveEmployeeShareFraction: { DE: 0.5 } });
+    assert.equal((full.warnings ?? []).some((w) => /paid leave/.test(w)), false);
+  });
+  test('states with a fixed employee rate and no size gate (New Jersey, Minnesota) add no such warning', async () => {
+    for (const st of ['NJ', 'MN']) assert.equal(((await run(st, {})).warnings ?? []).some((w) => /paid leave/.test(w)), false);
+  });
+});
