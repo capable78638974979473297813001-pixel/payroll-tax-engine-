@@ -2475,6 +2475,8 @@ function bracketSupplementalTax(
 }
 
 interface BracketFlatAllowanceConfig {
+  /** Pay periods per year to annualize with where the wh-inst tables differ from the engine's generic count (daily is 365). */
+  annualizeMultiplier?: Partial<Record<string, number>>;
   // Unlike Wisconsin (one shared bracket schedule regardless of marital
   // status — only its deduction phase-out differs by status), Minnesota
   // publishes genuinely DIFFERENT bracket thresholds/bases for single vs.
@@ -2568,7 +2570,8 @@ function bracketFlatAllowance(
       )
     : 0;
 
-  const annualWages = (taxableWages + nraAdjustment) * ctx.periodsPerYear;
+  const periodsPerYear = cfg.annualizeMultiplier?.[input.payFrequency] ?? ctx.periodsPerYear;
+  const annualWages = (taxableWages + nraAdjustment) * periodsPerYear;
 
   // wh-inst-26's tables only distinguish single vs. married — no separate
   // head-of-household schedule — so it maps to 'single' by convention, the
@@ -2583,7 +2586,7 @@ function bracketFlatAllowance(
   const bracket = findWIBracket(brackets, annualNetWage);
   const excess = annualNetWage - dollars(bracket.from);
   const annualTax = dollars(bracket.base) + applyRate(excess, bracket.rate);
-  const amount = Math.round(annualTax / ctx.periodsPerYear);
+  const amount = Math.round(annualTax / periodsPerYear);
 
   const detail =
     (nraAdjustment
@@ -2591,7 +2594,7 @@ function bracketFlatAllowance(
       : '') +
     `${fmt(annualWages)}/yr less ${fmt(annualAllowance)} allowances ` +
     `(${allowances} × $${cfg.allowanceAmount}, ${maritalStatus}) = ${fmt(annualNetWage)} net ` +
-    `@ ${(bracket.rate * 100).toFixed(2)}% bracket, ÷ ${ctx.periodsPerYear}`;
+    `@ ${(bracket.rate * 100).toFixed(2)}% bracket, ÷ ${periodsPerYear}`;
 
   return {
     id: `${rules.code}_SIT`,
@@ -2603,7 +2606,7 @@ function bracketFlatAllowance(
     // bracketPhaseoutDeduction() — not literal gross wages either way. When
     // an NRA adjustment applies, that derived figure legitimately includes
     // it, since the adjustment genuinely changed which bracket got selected.
-    taxableWages: Math.round(annualNetWage / ctx.periodsPerYear),
+    taxableWages: Math.round(annualNetWage / periodsPerYear),
     amount,
     detail,
   };

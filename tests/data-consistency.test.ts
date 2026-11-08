@@ -237,7 +237,7 @@ describe('Massachusetts withholding against Circular M\'s own wage-bracket table
   });
 });
 
-describe('Daily pay is annualized at 365 days in Hawaii, Georgia and Wisconsin, as their own published daily tables require (read 2026-11-07)', () => {
+describe('Daily pay is annualized at 365 days in Hawaii, Georgia, Minnesota and Wisconsin, as their own published daily tables require (read 2026-11-07)', () => {
   const sit = async (st: string, freq: string, wages: number, cert: Record<string, unknown>) => {
     const { calculatePaycheck } = await import('../src/calculate.ts');
     const r = calculatePaycheck({
@@ -261,5 +261,11 @@ describe('Daily pay is annualized at 365 days in Hawaii, Georgia and Wisconsin, 
     assert.ok(Math.abs((await sit('WI', 'daily', 61.5, { maritalStatus: 'single', exemptions: 0 })) - 1.7) <= 0.011 + 0.0);
     assert.ok(Math.abs((await sit('WI', 'daily', 96.5, { maritalStatus: 'single', exemptions: 0 })) - 3.6) <= 0.011);
     assert.ok(Math.abs((await sit('WI', 'daily', 96.5, { maritalStatus: 'single', exemptions: 2 })) - 3.5) <= 0.011);
+  });
+  test('Minnesota wh-inst daily table, single: $72-76 row (2 allowances) 2, $88-92 row 3 / 2 (2 and 3 allowances), $92-96 row (1 allowance) 4', async () => {
+    assert.equal(Math.round(await sit('MN', 'daily', 74, { maritalStatus: 'single', allowances: 2 })), 2);
+    assert.equal(Math.round(await sit('MN', 'daily', 90, { maritalStatus: 'single', allowances: 2 })), 3);
+    assert.equal(Math.round(await sit('MN', 'daily', 90, { maritalStatus: 'single', allowances: 3 })), 2);
+    assert.equal(Math.round(await sit('MN', 'daily', 94, { maritalStatus: 'single', allowances: 1 })), 4);
   });
 });

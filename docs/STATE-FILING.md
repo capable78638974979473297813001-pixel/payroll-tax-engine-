@@ -383,3 +383,35 @@ Most states' formulas were already proven against the agency's published worked 
 - **The six remaining differences are not defects.** They are the table rows that straddle the no-withholding floor ($333 semimonthly, $667 monthly): the table prints a figure for the whole row, while the percentage method (and the engine) withholds nothing below the floor.
 - **Table versus percentage method above about $500 a week.** The wage-bracket tables cap the FICA deduction at $2,000 divided by the pay periods in each paycheck, so for wages above that point they withhold slightly more than the percentage method, which caps the deduction at $2,000 cumulatively over the year. The engine follows the percentage method (Circular M step 1: "When, during the year, the total amount subtracted reaches the equivalent of the $2,000 maximum ... discontinue this step"), so it can differ from a table lookup by up to a few tens of cents on a single high-wage paycheck early in the year.
 - The surtax threshold ($1,107,750) and the step order of the percentage method also match the Circular.
+
+## Batch 23: engine compared cell by cell with the agencies' wage-bracket tables (2026-11-07 / 08)
+
+Each agency's own wage-bracket table was downloaded, parsed, and every cell compared with what the engine returns for the same wage, filing status and allowance count (wage taken at the middle of each row unless the table says otherwise). Differences of more than a dollar (cents for Georgia and Wisconsin) were investigated.
+
+**Defects found and fixed (all the same class: daily pay annualized at the generic 260 workdays, where the agency's daily table is built on 365 days; Massachusetts was fixed in Batch 22):**
+
+- **Hawaii (Booklet A):** the daily allowance ($3.13) and lump sum ($11.92) are $1,144 and $4,350 divided by 365. The engine returned $0.88 for a $65 daily wage at zero allowances; the table gives $2.
+- **Georgia (G-4 Tables E and F):** the $30,000 / $15,000 deductions are $82.19 / $41.10 a day. 776 daily cells were wrong.
+- **Wisconsin (W-166):** the daily table's cents-precision rows are reproduced only at 365 ($61.50 a day gives $1.70, $96.50 gives $3.60).
+- **Minnesota (withholding instructions):** the daily table is reproduced by 365 (692 of 748 cells exactly, the rest .5 rounding ties); 260 left 308 cells off.
+
+Each now carries an `annualizeMultiplier` of `{ "daily": 365 }` in its 2025, 2026 and 2027 files (the mechanism already used by Delaware, Louisiana, Massachusetts and others), with regression tests in `tests/data-consistency.test.ts`.
+
+**Compared with no difference:**
+
+| State | Cells compared | Result |
+| --- | --- | --- |
+| Hawaii | 41,987 (weekly, biweekly, semimonthly, monthly, daily; single and married; 0 to 10 allowances) | 0 differences after the fix |
+| Georgia | 14,300 (Tables A to D, five frequencies, 0 to 10 dependents) | 0 differences after the fix |
+| Wisconsin | 17,710 including the "excess over" formula rows | 0 differences after the fix |
+| North Carolina | 23,760 (NC-30 wage-bracket tables, single/married and head of household) | 0 differences |
+| North Dakota | 2,664 (2020-and-later W-4 tables, three statuses, five frequencies) | 0 differences |
+| Kansas | 11,440 (KW-100 tables) | 11,436 match; 4 cells are row-boundary cells where the engine's unrounded value is about $1 above a table 0. The tables count the first allowance as $9,160 (two for married) and each later one as $2,320, which is how the certificate fields map |
+| Utah | all 8 schedules, single and married | every base allowance and threshold in the data equals the Publication 14 figure |
+
+**Where the agency's own publications disagree with each other (engine follows the formula; not changed):**
+
+- **Montana:** the 2026 wage-bracket tables differ from the Guide's own formula by up to about $3 a period (for example, monthly $1,300 to $1,400: table $3, formula $0, and the table fits a zero point near $1,281 to $1,331 against the formula's $1,342). 750 of 1,440 cells differ. The engine implements the formula.
+- **Minnesota:** the printed "percent of the excess over" rows at high wages are linear approximations; with two or more allowances the engine's exact calculation differs from them by up to a few dollars (152 cells).
+
+**Not compared:** Alabama and Mississippi (table layouts that did not parse reliably), California Method A (the engine implements the exact method), Arkansas, Nebraska, Rhode Island and New York tables.

@@ -28,6 +28,8 @@
     }
   ],
   "bracketFlatAllowance": {
+    "annualizeMultiplier": { "daily": 365 },
+    "$annualizeMultiplierNote": "wh-inst daily table ('employees paid every day', read 2026-11): reproduced by annualizing daily pay at 365 (692 of 748 cells exactly, the rest are .5 rounding ties), not the generic 260-workday count (308 cells off). Weekly, biweekly, semimonthly and monthly rows were table-checked at the generic counts.",
     "brackets": {
       "single": [
         {
