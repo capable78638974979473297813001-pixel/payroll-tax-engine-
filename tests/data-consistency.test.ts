@@ -269,3 +269,29 @@ describe('Daily pay is annualized at 365 days in Hawaii, Georgia, Minnesota and 
     assert.equal(Math.round(await sit('MN', 'daily', 94, { maritalStatus: 'single', allowances: 1 })), 4);
   });
 });
+
+describe('Cross-frequency and sanity sweep over every state (2026)', () => {
+  const PERIODS: Record<string, number> = { weekly: 52, biweekly: 26, semimonthly: 24, monthly: 12 };
+  const codes = readdirSync(new URL('states/', root)).filter((f) => f.endsWith('-2026.json')).map((f) => f.slice(0, 2));
+  test('annualized state income tax is the same whichever of weekly/biweekly/semimonthly/monthly the pay is made in (Massachusetts excepted: Circular M deducts actual FICA against a year-to-date cap)', async () => {
+    const { calculatePaycheck } = await import('../src/calculate.ts');
+    const offenders: string[] = [];
+    for (const st of codes.filter((c) => c !== 'MA')) {
+      for (const annual of [18000, 36000, 60000, 100000, 200000]) {
+        const vals: number[] = [];
+        for (const [f, p] of Object.entries(PERIODS)) {
+          const r = calculatePaycheck({
+            checkDate: '2026-11-07', payFrequency: f as never, earnings: [{ code: 'REG', category: 'regular', amount: Math.round((annual / p) * 100) }], deductions: [],
+            federalW4: { filingStatus: 'single', multipleJobs: false, dependentCredit: 0, otherIncome: 0, deductions: 0, extraWithholding: 0 },
+            ytd: { socialSecurity: 0, medicare: 0, futa: 0 }, workState: { code: st, certificate: {} },
+          } as never);
+          const t = r.taxes.filter((x: { id: string; payer: string }) => x.payer === 'employee' && x.id.startsWith(st) && /_SIT$/.test(x.id)).reduce((a: number, x: { amount: number }) => a + x.amount, 0);
+          assert.ok(Number.isInteger(t) && t >= 0, `${st} ${f} ${annual}: ${t}`);
+          vals.push((t / 100) * p);
+        }
+        if (Math.max(...vals) - Math.min(...vals) > Math.max(60, 0.04 * Math.max(...vals))) offenders.push(`${st} ${annual}: ${vals.map(Math.round).join('/')}`);
+      }
+    }
+    assert.deepEqual(offenders, []);
+  });
+});
