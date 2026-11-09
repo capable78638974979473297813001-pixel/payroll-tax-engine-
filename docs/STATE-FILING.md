@@ -477,3 +477,21 @@ Each of Colorado, Missouri, New Jersey, Delaware, Washington, New York and Maryl
 ### Batch 26 addendum: New Jersey S.B. 4219 (2026-11-09)
 
 A law signed February 2026 and effective immediately (S.B. 4219, reported by EY on 2026-02-18 and by counsel on 2026-02-11; the bill text itself was not retrieved) exempts from Newark's and Jersey City's employer payroll tax the wages of a New Jersey resident employee who is already subject to an employer payroll tax in another state for services performed there. It also lets the cities keep up to 3% of collections and requires the state to share employer return data with them. Added `certificate.njOutOfStateEmployerPayrollTaxExempt` (the employer's own determination), which zeroes both cities' lines and says why. The rate, base and residency rules of both taxes are otherwise unchanged.
+
+## Batch 27: Oregon, West Virginia and Alabama local payroll taxes (2026-11-09)
+
+The three states that were curated by hand rather than built from an official list.
+
+**Oregon**
+- **Eugene, employer side added:** 0.21% of gross wages (the city's own return instructions, as quoted by its site; the reduced 0.15% rate for employers with two or fewer employees and the public-employer exemption are employer-wide and not applied). `OR_EUGENE_CSPT_ER`, secondary-source notice.
+- **Springfield, new, from 2027-01-01:** read directly from the City of Springfield's program overview (updated 2026-10-14), tax page and FAQ. The council adopted it 2026-06-01: 0.1% employee (withheld by the employer) and 0.1% employer, tied to the employer's taxable Springfield business location rather than where the employee lives or works, for pay periods *beginning* on or after 2027-01-01, W-2 locality code SPFLD. Added `OR_SPRINGFIELD_PT` and `OR_SPRINGFIELD_PT_ER` (certificate.locality `Springfield`) with an inferred-tier notice: the ordinance's list of excluded compensation was not read (gross wages are taxed), the engine keys the start to the check date, and an employer's election to pay the employee share is not modelled.
+- Nothing else found: the other Oregon payroll taxes are the statewide transit tax, the six transit districts, Metro, Multnomah County and Eugene, all already held.
+
+**West Virginia**
+- **Madison changed from $3.00 to $1.25 a week, flagged as conflicting.** The 2017 ordinance (read in full) schedules $3.00 from 2020, but Bloomberg Tax reported on 2020-01-09 that the council cancelled the increase, and later payroll guides list $1.25. The city's document index returned HTTP 503, so no post-2020 city document was read.
+- **Smithers added at $0.50 a week as a flagged estimate.** The city's own legal notice (2021-12-02) confirms the ordinance exists; the rate comes from two payroll vendors and conflicts with a third ($52 a year). Residency treatment is unconfirmed.
+- Both now carry a conflicting-sources notice on the line. This reverses the earlier decision to leave them as they were; the reason is that $0 for Smithers and a figure the city appears to have cancelled for Madison were the two errors most likely to reach a paycheck. Fourteen cities are now configured; the list is still not a certified register.
+
+**Alabama**
+- The data holds all 25 municipalities on the Alabama League of Municipalities' live occupational tax list plus the four towns the League never listed (Beaverton, Irondale, Notasulga, Tarrant), 29 in all, and Macon County and Jefferson County at county level. The Treasury's Appendix 2 list of local taxes with federal withholding agreements (Bessemer, Birmingham, Gadsden, Jefferson County, Macon County) is a subset of it. A web search for other Alabama towns with a new occupational wage tax found none. Press reports from 2022 say Alabama law froze the list at the taxes then in force, which would make it effectively closed; the statute was not read.
+- Still survey-only: Bear Creek, Brilliant, Lynn; Tuskegee's own form says 3% against the League's 2%.

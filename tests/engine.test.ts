@@ -8550,7 +8550,7 @@ describe('West Virginia', () => {
       assert.equal(r.taxes.some((t) => t.id === 'WV_LOCAL_FEE'), false);
     });
 
-    test('Madison, weekly pay: work-location-based like Wheeling, no residency exception ($3.00/wk)', () => {
+    test('Madison, weekly pay: work-location-based like Wheeling, no residency exception ($1.25/wk, the 2020 increase to $3.00 having been cancelled, with a conflicting-sources notice)', () => {
       const r = calculatePaycheck(
         input({
           payFrequency: 'weekly',
@@ -8558,7 +8558,20 @@ describe('West Virginia', () => {
           workState: { code: 'WV', certificate: { locality: 'Madison' } },
         }),
       );
-      assert.equal(amountOf(r, 'WV_LOCAL_FEE'), dollars(3.0));
+      assert.equal(amountOf(r, 'WV_LOCAL_FEE'), dollars(1.25));
+      assert.ok(r.notices?.some((n) => n.taxId === 'WV_LOCAL_FEE' && n.tier === 'conflicting_sources'));
+    });
+
+    test('Smithers, weekly pay: $0.50/wk estimate with a conflicting-sources notice', () => {
+      const r = calculatePaycheck(
+        input({
+          payFrequency: 'weekly',
+          earnings: [{ code: 'REG', category: 'regular', amount: dollars(800) }],
+          workState: { code: 'WV', certificate: { locality: 'Smithers' } },
+        }),
+      );
+      assert.equal(amountOf(r, 'WV_LOCAL_FEE'), dollars(0.5));
+      assert.ok(r.notices?.some((n) => n.taxId === 'WV_LOCAL_FEE' && n.tier === 'conflicting_sources'));
     });
 
     test('Fairmont, non-resident duty station: nonResidentOnly city still charges a nonresident ($2.00/wk)', () => {

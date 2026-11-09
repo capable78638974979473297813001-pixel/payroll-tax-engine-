@@ -55,7 +55,7 @@
       },
       {
         "q": "Which states and years does it cover?",
-        "a": "All 50 states and DC for 2025, 2026 and 2027 (2027 is provisional where a state has not yet published its tables), plus local taxes in 15 states covering 4,141 jurisdictions and 69 local minimum wage ordinances."
+        "a": "All 50 states and DC for 2025, 2026 and 2027 (2027 is provisional where a state has not yet published its tables), plus local taxes in 15 states covering 4,142 jurisdictions and 69 local minimum wage ordinances."
       }
     ],
     "breadcrumb": [
@@ -82,7 +82,7 @@
       },
       {
         "q": "Does Omnia.tax cover local payroll taxes?",
-        "a": "Yes: 4,141 local tax jurisdictions in the 15 states where we found local wage taxes, each listed by name on the coverage page, and chosen from the employee's work and home address by geocoding."
+        "a": "Yes: 4,142 local tax jurisdictions in the 15 states where we found local wage taxes, each listed by name on the coverage page, and chosen from the employee's work and home address by geocoding."
       },
       {
         "q": "Is the Omnia.tax API compatible with Symmetry's?",
@@ -117,7 +117,7 @@
       },
       {
         "q": "Which payroll tax engine has local tax coverage and address geocoding?",
-        "a": "Several do. Omnia.tax covers 4,141 local jurisdictions in 15 states and finds the right ones from the work and home address with geocoding, in a self-serve API. Symmetry describes local withholding from address coordinates, and Vertex describes geocode-based jurisdiction assignment, on their own sites."
+        "a": "Several do. Omnia.tax covers 4,142 local jurisdictions in 15 states and finds the right ones from the work and home address with geocoding, in a self-serve API. Symmetry describes local withholding from address coordinates, and Vertex describes geocode-based jurisdiction assignment, on their own sites."
       },
       {
         "q": "Should I build payroll tax calculation myself?",
@@ -2300,12 +2300,12 @@
     "path": "/local-payroll-tax-api",
     "file": "local-payroll-tax-api.html",
     "title": "Local payroll tax API: city, county, school district | Omnia.tax",
-    "description": "Local payroll tax in one call: 4,141 city, county and school district taxes in 15 states, found from the work and home address by geocoding.",
+    "description": "Local payroll tax in one call: 4,142 city, county and school district taxes in 15 states, found from the work and home address by geocoding.",
     "h1": "Local payroll tax API",
     "faq": [
       {
         "q": "Which states have local payroll taxes?",
-        "a": "Omnia.tax carries local taxes in 15 states, 4,141 jurisdictions in all, each listed by name on the coverage page. Pennsylvania and Ohio have the most; Kentucky, Indiana, Michigan, Alabama, Maryland and others have them too."
+        "a": "Omnia.tax carries local taxes in 15 states, 4,142 jurisdictions in all, each listed by name on the coverage page. Pennsylvania and Ohio have the most; Kentucky, Indiana, Michigan, Alabama, Maryland and others have them too."
       },
       {
         "q": "How does the API know which city tax applies?",

@@ -69,3 +69,7 @@ Smithers, Madison and Rivesville were searched again. None is settled.
 - **Rivesville.** No town ordinance or remittance form is reachable online. The $2 per week, nonresident-only fee stays on payroll-vendor sources.
 
 WV remains partial.
+
+## Update, November 9, 2026
+
+Smithers is now configured at $0.50 a week and Madison at $1.25 a week, each flagged `conflicting_sources` on the paycheck line. Madison: its 2017 ordinance schedules $3.00 from 2020, but Bloomberg Tax (2020-01-09) reported the increase was cancelled and payroll guides list $1.25; the city's current document could not be read (HTTP 503). Smithers: the city's own legal notice (2021-12-02) confirms the fee ordinance; $0.50 comes from Isolved and Vertex, against Sage's $52 a year. Replace both with the city's current ordinance or return when one can be read. Fourteen cities are configured; the list is still not a certified register.

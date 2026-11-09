@@ -340,3 +340,13 @@ describe('Maryland county withholding rates equal the Comptroller of Maryland\'s
     assert.deepEqual(c.Frederick.tiered.mfjHoh.map((b: { from: number }) => b.from), [0, 25000, 100000, 250000]);
   });
 });
+
+describe('Alabama: every municipality on the Alabama League of Municipalities\' occupational tax list (read 2026-11-09) is in the data', () => {
+  test('25 League entries plus the four towns the League never listed (Beaverton, Irondale, Notasulga, Tarrant)', () => {
+    const league = ['Attalla', 'Auburn', 'Bear Creek', 'Bessemer', 'Birmingham', 'Brilliant', 'Fairfield', 'Gadsden', 'Glencoe', 'Goodwater', 'Guin', 'Hacklebug', 'Haleyville', 'Hamilton', 'Leeds', 'Lynn', 'Midfield', 'Mosses', 'Opelika', 'Rainbow City', 'Red Bay', 'Shorter', 'Southside', 'Sulligent', 'Tuskegee'];
+    const m = read('local/AL-municipalities-2026.json').municipalities;
+    const names = (Array.isArray(m) ? m : Object.values(m)).map((x: { name: string }) => x.name);
+    for (const n of [...league, 'Beaverton', 'Irondale', 'Notasulga', 'Tarrant']) assert.ok(names.includes(n), n);
+    assert.equal(names.length, 29);
+  });
+});

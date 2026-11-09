@@ -389,6 +389,12 @@ export function stateIncomeTax(
   // the city limits. See eugeneCommunitySafetyPayrollTax().
   const eugeneCspt = eugeneCommunitySafetyPayrollTax(input, ctx, rules);
   if (eugeneCspt) lines.push(eugeneCspt);
+  const eugeneCsptEmployer = eugeneCommunitySafetyPayrollTaxEmployer(input, ctx, rules);
+  if (eugeneCsptEmployer) lines.push(eugeneCsptEmployer);
+
+  // Springfield (Oregon) payroll tax: 0.1% employee and 0.1% employer from
+  // 2027-01-01, dispatched off certificate.locality 'Springfield'.
+  lines.push(...springfieldPayrollTax(input, ctx, rules));
 
   // Pennsylvania's Act 32 local Earned Income Tax + Local Services Tax —
   // see pennsylvaniaLocalTax()'s own doc comment for the withholding rule
@@ -5497,6 +5503,8 @@ interface WVServiceFeeCityConfig {
   priorWeeklyRate?: number; // Weirton: the rate in effect before rateEffectiveDate — undefined for every city with no known rate history
   rateEffectiveDate?: string; // ISO yyyy-mm-dd the CURRENT weeklyRate took effect; a check date before this uses priorWeeklyRate instead
   minDaysBeforeAttaching?: number; // calendar-year workday threshold — see certificate.daysWorkedInLocality
+  /** A notice carried on the line when the rate rests on conflicting or secondary sources (Madison, Smithers). */
+  dataQuality?: DataQuality;
 }
 
 /**
@@ -5562,6 +5570,7 @@ function westVirginiaMunicipalServiceFee(
         ? `, annualized (×52) and divided across ${ctx.periodsPerYear} pay periods/yr, rounded down to the cent`
         : `, city-published ${input.payFrequency} payroll amount $${publishedAmount.toFixed(2)}`) +
       ` — certificate.locality = "${locality}"`,
+    ...(city.dataQuality ? { dataQuality: city.dataQuality } : {}),
   };
 }
 
@@ -7678,6 +7687,101 @@ function eugeneCommunitySafetyPayrollTax(
       note: "Eugene's own tax-rate chart (July 1, 2026 to June 30, 2027) could not be read by this project, so the threshold is the Oregon standard minimum wage x 2,080 hours ($32,344 for 2026-27), reported by the city's chart title and payroll-software release notes and consistent with the minimum wage, divided evenly by pay periods. The city's chart may round each period's figure.",
     },
   };
+}
+
+/**
+ * Eugene's Community Safety Payroll Tax, EMPLOYER side: 0.21% of total gross
+ * wages paid at a location inside the city limits (the city's own return
+ * instructions: "The Employer Payroll Tax rate is 0.0021 (or .21 percent). The
+ * reduced tax rate is applied only on 4th quarter or final returns"). An
+ * employer with two or fewer employees pays 0.15% on the first $100,000 of
+ * wages for the year, and public government employers are exempt; both are
+ * employer-wide facts this engine cannot see, so they are stated in the notice
+ * and not applied. Dispatched off certificate.locality 'Eugene'.
+ */
+function eugeneCommunitySafetyPayrollTaxEmployer(
+  input: PaycheckInput,
+  ctx: ComputeContext,
+  rules: StateRuleset,
+): TaxLine | null {
+  const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
+  if (!hasLocality(cert, 'Eugene')) return null;
+  const cfg = rules.eugeneCommunitySafetyPayrollTax as (EugeneCsptConfig & { employerRate?: number }) | undefined;
+  if (!cfg || cfg.employerRate === undefined) return null;
+  if (cfg.expires !== undefined && input.checkDate > cfg.expires) return null;
+
+  const exempt = (rules.exemptPretax ?? []) as PretaxCategory[];
+  const wages = ctx.taxableWagesFor(exempt);
+  return {
+    id: 'OR_EUGENE_CSPT_ER',
+    name: 'Eugene Community Safety Payroll Tax (Employer)',
+    payer: 'employer',
+    jurisdiction: 'local',
+    taxableWages: wages,
+    amount: applyRate(wages, cfg.employerRate),
+    detail: fmt(wages) + ' @ ' + (cfg.employerRate * 100).toFixed(2) + '% of gross wages paid at a Eugene location',
+    dataQuality: {
+      tier: 'secondary_source',
+      note: "Eugene's own return instructions give 0.21% for the employer tax; this engine cannot apply the reduced rate (0.15% on the first $100,000 for an employer with two or fewer employees, taken on the fourth-quarter or final return) or the public-employer exemption, which depend on the employer as a whole. Wage base taken as gross wages less the state's pretax exclusions, from the vendor description; the city's return instructions were not fully read.",
+    },
+  };
+}
+
+interface SpringfieldPayrollTaxConfig {
+  employeeRate: number;
+  employerRate: number;
+  effectiveFrom: string;
+}
+
+/**
+ * Springfield (Oregon) payroll tax, effective for pay periods BEGINNING on or
+ * after 2027-01-01 (Ordinance adopted 2026-06-01): 0.1% of applicable wages
+ * from the employee, withheld by the employer, and 0.1% from the employer, for
+ * wages associated with a taxable Springfield business location (not where the
+ * employee lives). Read from the city's own program overview and FAQ. Two
+ * things the engine cannot do: it selects the rate by CHECK date, where the
+ * city keys it to the pay period's start, and it takes gross wages as the
+ * base because the ordinance's list of excluded compensation was not read.
+ * An employer may elect to pay the employee share; that election is not
+ * modelled. Dispatched off certificate.locality 'Springfield'.
+ */
+function springfieldPayrollTax(
+  input: PaycheckInput,
+  ctx: ComputeContext,
+  rules: StateRuleset,
+): TaxLine[] {
+  const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
+  if (!hasLocality(cert, 'Springfield')) return [];
+  const cfg = rules.springfieldPayrollTax as SpringfieldPayrollTaxConfig | undefined;
+  if (!cfg || input.checkDate < cfg.effectiveFrom) return [];
+
+  const wages = ctx.taxableWagesFor([]);
+  const quality = {
+    tier: 'inferred' as const,
+    note: "Springfield's own FAQ and program overview give 0.1% employee and 0.1% employer for wages tied to a taxable Springfield business location, for pay periods beginning on or after 2027-01-01. The ordinance's list of excluded compensation was not read, so gross wages are taxed here; the city keys the start to the pay period's first day, this engine to the check date.",
+  };
+  return [
+    {
+      id: 'OR_SPRINGFIELD_PT',
+      name: 'Springfield Payroll Tax (Employee)',
+      payer: 'employee',
+      jurisdiction: 'local',
+      taxableWages: wages,
+      amount: applyRate(wages, cfg.employeeRate),
+      detail: fmt(wages) + ' @ ' + (cfg.employeeRate * 100).toFixed(2) + '%, withheld by the employer (W-2 locality code SPFLD)',
+      dataQuality: quality,
+    },
+    {
+      id: 'OR_SPRINGFIELD_PT_ER',
+      name: 'Springfield Payroll Tax (Employer)',
+      payer: 'employer',
+      jurisdiction: 'local',
+      taxableWages: wages,
+      amount: applyRate(wages, cfg.employerRate),
+      detail: fmt(wages) + ' @ ' + (cfg.employerRate * 100).toFixed(2) + '% on wages attributable to the Springfield location',
+      dataQuality: quality,
+    },
+  ];
 }
 
 interface CATwoBucketTable extends Partial<Record<string, number>> {}

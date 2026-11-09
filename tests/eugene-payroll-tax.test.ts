@@ -46,3 +46,22 @@ describe('Eugene Community Safety Payroll Tax (employee)', () => {
     assert.ok(r.notices?.some((n) => n.taxId === 'OR_EUGENE_CSPT' && n.tier === 'secondary_source'));
   });
 });
+
+describe('Eugene employer side and Springfield, Oregon', () => {
+  test('Eugene employer payroll tax is 0.21% of wages and never reduces net pay', () => {
+    const r = calculatePaycheck(or('2026-11-09', 100000));
+    const er = r.taxes.find((t) => t.id === 'OR_EUGENE_CSPT_ER');
+    assert.equal(er?.amount, 210);
+    assert.equal(er?.payer, 'employer');
+    assert.equal(r.netPay, calculatePaycheck(or('2026-11-09', 100000, {}, {})).netPay - 440);
+  });
+  test('Springfield: nothing before 2027, then 0.1% employee and 0.1% employer on the locality', () => {
+    const sp = (d: string) => calculatePaycheck(or(d, 100000, {}, { locality: 'Springfield' }));
+    assert.equal(sp('2026-12-31').taxes.some((t) => t.id.startsWith('OR_SPRINGFIELD')), false);
+    const r = sp('2027-01-15');
+    assert.equal(r.taxes.find((t) => t.id === 'OR_SPRINGFIELD_PT')?.amount, 100);
+    assert.equal(r.taxes.find((t) => t.id === 'OR_SPRINGFIELD_PT')?.payer, 'employee');
+    assert.equal(r.taxes.find((t) => t.id === 'OR_SPRINGFIELD_PT_ER')?.amount, 100);
+    assert.equal(calculatePaycheck(or('2027-01-15', 100000, {}, {})).taxes.some((t) => t.id.startsWith('OR_SPRINGFIELD')), false);
+  });
+});
