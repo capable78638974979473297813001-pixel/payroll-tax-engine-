@@ -44,4 +44,11 @@ describe('Jersey City payroll tax (employer)', () => {
     assert.equal(r.taxes.some((t) => t.id === 'NEWARK_PAYROLL_ER'), true);
     assert.equal(jc(r)?.amount, 1000);
   });
+  test('a New Jersey resident already taxed by another state\'s employer payroll tax is exempt from both cities (S.B. 4219, February 2026)', () => {
+    const both = { localities: ['Newark', 'Jersey City'], njOutOfStateEmployerPayrollTaxExempt: true };
+    const r = calculatePaycheck(nj(both));
+    assert.equal(jc(r)?.amount, 0);
+    assert.equal(r.taxes.find((t) => t.id === 'NEWARK_PAYROLL_ER')?.amount, 0);
+    assert.match(jc(r)?.detail ?? '', /S\.B\. 4219/);
+  });
 });

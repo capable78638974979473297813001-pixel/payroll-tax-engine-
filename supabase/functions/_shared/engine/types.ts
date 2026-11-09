@@ -340,6 +340,8 @@ export interface StateCertificate {
   newarkResidentApportionmentExcluded?: boolean;
   /** Jersey City payroll tax: this employee lives in Jersey City, so the employer owes no payroll tax on their wages (Ordinance 18-133 section 304-19(a)). */
   jerseyCityResident?: boolean;
+  /** Newark and Jersey City payroll taxes: a New Jersey resident employee who is already subject to an employer payroll tax in another state for services performed there is exempt from both cities' employer payroll tax (S.B. 4219, signed February 2026, effective immediately). The employer's own determination. */
+  njOutOfStateEmployerPayrollTaxExempt?: boolean;
   /** Pennsylvania LST: proof another employer already withheld it this year, so this employer doesn't withhold it again past the annual cap. */
   lstAlreadyWithheldElsewhere?: boolean;
 

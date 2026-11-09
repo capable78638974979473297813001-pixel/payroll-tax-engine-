@@ -4985,6 +4985,9 @@ function pickLocality(cert: Record<string, unknown>, known: (l: string) => boole
   return certLocalities(cert).find(known);
 }
 
+const NJ_MULTISTATE_EXEMPTION_DETAIL =
+  '$0: certificate.njOutOfStateEmployerPayrollTaxExempt. New Jersey S.B. 4219 (signed February 2026, effective immediately, as reported by EY and counsel; the bill text was not read) exempts the wages of a New Jersey resident who is already subject to an employer payroll tax in another state for services performed there from Newark and Jersey City employer payroll tax. The employer\'s own determination, not verified by this engine.';
+
 function newarkPayrollTaxEmployer(
   input: PaycheckInput,
   ctx: ComputeContext,
@@ -4998,6 +5001,18 @@ function newarkPayrollTaxEmployer(
 
   const exempt = federalRuleset(input.checkDate).incomeTax.exemptPretax as PretaxCategory[];
   const taxableWages = ctx.taxableWagesFor(exempt);
+
+  if (resolveCertBoolean(cert, 'njOutOfStateEmployerPayrollTaxExempt')) {
+    return {
+      id: 'NEWARK_PAYROLL_ER',
+      name: 'Newark Payroll Tax (Employer)',
+      payer: 'employer',
+      jurisdiction: 'local',
+      taxableWages: 0,
+      amount: 0,
+      detail: NJ_MULTISTATE_EXEMPTION_DETAIL,
+    };
+  }
 
   if (resolveCertBoolean(cert, 'newarkResidentApportionmentExcluded')) {
     return {
@@ -5066,6 +5081,18 @@ function jerseyCityPayrollTaxEmployer(
 
   const exempt = federalRuleset(input.checkDate).incomeTax.exemptPretax as PretaxCategory[];
   const taxableWages = ctx.taxableWagesFor(exempt);
+
+  if (resolveCertBoolean(cert, 'njOutOfStateEmployerPayrollTaxExempt')) {
+    return {
+      id: 'JERSEYCITY_PAYROLL_ER',
+      name: 'Jersey City Payroll Tax (Employer)',
+      payer: 'employer',
+      jurisdiction: 'local',
+      taxableWages: 0,
+      amount: 0,
+      detail: NJ_MULTISTATE_EXEMPTION_DETAIL,
+    };
+  }
 
   if (resolveCertBoolean(cert, 'jerseyCityResident')) {
     return {
