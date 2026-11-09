@@ -459,5 +459,41 @@
     "appliesWhen": "paid_separately",
     "election": "employer_option",
     "source": "Oregon's flat 8% — the same rate its no-certificate default uses — is documented in this file as the ALTERNATE method for supplemental wages paid separately from regular wages. An alternate is an employer choice, so it fires only on election."
+  },
+  "eugeneCommunitySafetyPayrollTax": {
+    "$comment": "Eugene Community Safety Payroll Tax, employee side (Ordinance 20616, effective 2021-01-01, sunsets 2028-12-31). Read 2026-11-09 from the City of Eugene's own payroll tax pages (eugene-or.gov/4281 and /4863): the Employee Payroll Tax exists, the employer withholds and remits it quarterly, it applies to employers with a physical location in the city limits (a remote worker who merely lives in Eugene is not covered), and the rates are 'based on the gross wages, less overtime wages, for the pay period' per its rate charts (a chart for July 1, 2026 - June 30, 2027 is titled on the city's site). The city's PDFs (rate chart, FAQ, return instructions) are not retrievable by this project, so the 0.44% rate and the annual threshold come from payroll-vendor release notes (NEOGOV, July 2025: 'Employees earning more than $31,304.00 ... 0.0044 (0.44%); employees earning $31,304.00 or less are exempt', the middle 0.30% tier removed 2025-07-01) and a colleague's reading of the 2026-27 chart ($32,344 = the Oregon standard minimum wage $15.55 x 2,080 hours, the same relationship as $31,304 = $15.05 x 2,080). Secondary-source tier on every line. The 0.21% employer payroll tax is NOT modelled.",
+    "employeeRate": 0.0044,
+    "thresholds": [
+      {
+        "from": "2025-07-01",
+        "annual": 31304
+      },
+      {
+        "from": "2026-07-01",
+        "annual": 32344
+      }
+    ],
+    "expires": "2028-12-31",
+    "thresholdBasis": "Oregon standard minimum wage x 2,080 hours, reset every July 1",
+    "certificate": "workState.certificate.locality (or localities) includes 'Eugene' when the employer's physical location is inside the Eugene city limits",
+    "confidence": "secondary_source",
+    "sources": [
+      {
+        "title": "City of Eugene -- Employee Payroll Tax",
+        "url": "https://www.eugene-or.gov/4863/Employee-Payroll-Tax",
+        "verifiedOn": "2026-11-09"
+      },
+      {
+        "title": "City of Eugene -- Tax Rate Charts for the Employee Payroll Tax, July 1, 2026 - June 30, 2027 (title only; the PDF was not retrievable)",
+        "url": "https://www.eugene-or.gov/DocumentCenter/View/83387/7126---63027-Employee-tax-rate-charts",
+        "verifiedOn": "2026-11-09"
+      },
+      {
+        "title": "NEOGOV Payroll Release Notes, July 24 2025 (Eugene CSPT thresholds and 0.44%)",
+        "url": "https://success.neogov.com/payroll-product-updates-115/july-24-2025-payroll-release-notes-16207",
+        "verifiedOn": "2026-11-09"
+      }
+    ],
+    "provisional": "The 2027-07-01 reset is not yet published; the 2026-07-01 threshold carries forward."
   }
 }

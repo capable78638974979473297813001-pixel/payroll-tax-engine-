@@ -376,6 +376,13 @@ export function stateIncomeTax(
   const portlandLocal = portlandAreaLocalTax(input, ctx, rules);
   lines.push(...portlandLocal);
 
+  // Eugene's Community Safety Payroll Tax, employee side (0.44% once pay
+  // passes the Oregon-minimum-wage-indexed threshold). Dispatched off
+  // certificate.locality 'Eugene' = the employer's physical location is in
+  // the city limits. See eugeneCommunitySafetyPayrollTax().
+  const eugeneCspt = eugeneCommunitySafetyPayrollTax(input, ctx, rules);
+  if (eugeneCspt) lines.push(eugeneCspt);
+
   // Pennsylvania's Act 32 local Earned Income Tax + Local Services Tax —
   // see pennsylvaniaLocalTax()'s own doc comment for the withholding rule
   // and the 2,627-jurisdiction data file it reads from.
@@ -7513,6 +7520,69 @@ function portlandAreaLocalTax(
   }
 
   return lines;
+}
+
+interface EugeneCsptConfig {
+  employeeRate: number;
+  /** Annual wage threshold in dollars by effective date (the Oregon standard minimum wage x 2,080 hours, reset every July 1). */
+  thresholds: { from: string; annual: number }[];
+  /** Last day the tax is levied (Ordinance 20616 sunsets it). */
+  expires?: string;
+}
+
+/**
+ * Eugene (Oregon) Community Safety Payroll Tax, EMPLOYEE side. The employer
+ * withholds 0.44% of an employee's wages for an employer whose physical
+ * location is inside the Eugene city limits (residence is irrelevant), but
+ * only for an employee paid more than the threshold: the Oregon standard
+ * minimum wage x 2,080 hours, reset every July 1 ($31,304 from 2025-07-01,
+ * $32,344 from 2026-07-01); at or below it the employee is exempt. The
+ * city's rate chart tests each pay period's gross wages LESS OVERTIME, so
+ * that is what is compared with the threshold divided by the periods in a
+ * year; the 0.44% is then taken on the period's whole subject wages. The
+ * chart's exact per-period figures could not be read, so the line carries a
+ * secondary-source notice. Dispatched off certificate.locality 'Eugene'.
+ * The 0.21% EMPLOYER payroll tax (reduced for two or fewer employees) is
+ * not modelled: it depends on headcount and total payroll.
+ */
+function eugeneCommunitySafetyPayrollTax(
+  input: PaycheckInput,
+  ctx: ComputeContext,
+  rules: StateRuleset,
+): TaxLine | null {
+  const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
+  if (!hasLocality(cert, 'Eugene')) return null;
+  const cfg = rules.eugeneCommunitySafetyPayrollTax as EugeneCsptConfig | undefined;
+  if (!cfg) return null;
+  if (cfg.expires !== undefined && input.checkDate > cfg.expires) return null;
+
+  const change = cfg.thresholds.filter((t) => t.from <= input.checkDate).sort((a, b) => a.from.localeCompare(b.from)).at(-1);
+  if (!change) return null;
+
+  const exempt = (rules.exemptPretax ?? []) as PretaxCategory[];
+  const subjectWages = ctx.taxableWagesFor(exempt);
+  const overtime = input.earnings.filter((e) => e.overtime).reduce((sum, e) => sum + e.amount, 0);
+  const testWages = atLeastZero(subjectWages - overtime);
+  const perPeriodThreshold = dollars(change.annual) / ctx.periodsPerYear;
+  const covered = testWages > perPeriodThreshold;
+  const amount = covered ? applyRate(subjectWages, cfg.employeeRate) : 0;
+  const annualText = '$' + change.annual.toLocaleString('en-US');
+
+  return {
+    id: 'OR_EUGENE_CSPT',
+    name: 'Eugene Community Safety Payroll Tax (Employee)',
+    payer: 'employee',
+    jurisdiction: 'local',
+    taxableWages: covered ? subjectWages : 0,
+    amount,
+    detail: covered
+      ? fmt(subjectWages) + ' @ ' + (cfg.employeeRate * 100).toFixed(2) + '%: wages less overtime ' + fmt(testWages) + ' exceed the ' + fmt(perPeriodThreshold) + ' per-period share of the ' + annualText + ' annual threshold'
+      : 'no tax: wages less overtime ' + fmt(testWages) + ' do not exceed the ' + fmt(perPeriodThreshold) + ' per-period share of the ' + annualText + ' annual threshold (Oregon minimum wage x 2,080 hours)',
+    dataQuality: {
+      tier: 'secondary_source',
+      note: "Eugene's own tax-rate chart (July 1, 2026 to June 30, 2027) could not be read by this project, so the threshold is the Oregon standard minimum wage x 2,080 hours ($32,344 for 2026-27), reported by the city's chart title and payroll-software release notes and consistent with the minimum wage, divided evenly by pay periods. The city's chart may round each period's figure.",
+    },
+  };
 }
 
 interface CATwoBucketTable extends Partial<Record<string, number>> {}

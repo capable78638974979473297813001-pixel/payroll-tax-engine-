@@ -3017,11 +3017,13 @@
         "name": "Salem",
         "category": "Payroll Tax and 1099s",
         "rate": "1% of all gross pay",
-        "wageRateDecimal": 0.01,
+        "wageRateDecimal": 0,
         "wageRateResidentDecimal": null,
         "wageRateNonresidentDecimal": null,
-        "wageRateStatus": "parsed_explicit_wage_figure",
-        "wageRateNote": "Extracted from the wage/payroll-labelled figure within the raw rate string."
+        "wageRateStatus": "confirmed_via_city_primary_source_2026_11_09",
+        "wageRateNote": "EFFECTIVE-DATED 2026-11-09: Salem's occupational license (payroll) tax is NEW. City Ordinance No. 2026-05 (read directly from the city's own site, cityofsalemky.gov/occu; Section Three A.1: 'The occupational license tax shall be 1.00% of all wages and compensation paid or payable in the City for work done or services performed or rendered in the City by every resident and nonresident who is an employee'; Section Fourteen: 'This ordinance and the new tax rate contained within, shall take effect on October 1, 2026, and apply to tax year 2026 and forward'; first reading 2026-06-16, adopted 2026-06-30, 4 of 5 commissioners voting yes) takes effect 2026-10-01, so no wage tax is withheld for check dates before that day. Bloomberg Tax (2026-10-30) independently reports Salem and one other Kentucky city 'introduced occupational license taxes effective Oct. 1'. A later amendment to the same ordinance only changes filing to quarterly (returns due 30 days after each quarter) and has independent contractors with a 1099 pay annually. The earlier file carried 1% for the whole year from a scraped statewide listing taken after the ordinance existed. Carried the wage rate only: the ordinance's net-profits and gross-receipts parts are not a withholding tax.",
+        "wageRateSource": [{"title": "City of Salem, Kentucky -- Ordinance No. 2026-05 (Occupational License Tax), with the amending ordinance", "url": "https://www.cityofsalemky.gov/occu", "says": "1.00% of all wages and compensation for work done in the City by every resident and nonresident employee; effective October 1, 2026", "fetchedOn": "2026-11-09"}],
+        "rateChanges": [{"on": "2026-10-01", "wageRateDecimal": 0.01}]
       },
       {
         "name": "Scott County",

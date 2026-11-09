@@ -3047,8 +3047,8 @@
         "wageRateDecimal": 0.01,
         "wageRateResidentDecimal": null,
         "wageRateNonresidentDecimal": null,
-        "wageRateStatus": "parsed_explicit_wage_figure",
-        "wageRateNote": "Extracted from the wage/payroll-labelled figure within the raw rate string."
+        "wageRateStatus": "confirmed_via_city_primary_source_2026_11_09",
+        "wageRateNote": "CONFIRMED 2026-11-09: City Ordinance No. 2026-05 (cityofsalemky.gov/occu) sets 1.00% of all wages for work done in the City by every resident and nonresident employee, effective 2026-10-01 and applying to tax year 2026 and forward. The tax is new, so 2026 check dates before 2026-10-01 carry none (see the 2026 file)."
       },
       {
         "name": "Scott County",
