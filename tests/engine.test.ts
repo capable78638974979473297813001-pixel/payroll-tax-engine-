@@ -8431,6 +8431,27 @@ describe('West Virginia', () => {
     assert.equal(amountOf(r, 'WV_SIT'), dollars(24));
   });
 
+  test('SB 392 tables start with checks dated 2026-06-12: $800 weekly is $25 the day before, $24 from then on', () => {
+    // WV Form IT-100.2A (March 2026) shows 2.11/2.81/3.16/4.22/4.58% for the
+    // two-earner table and applies from the SB 392 effective date, 2026-06-12.
+    // Before that the October 2024 tables (4.44% top bracket here) were still
+    // the ones West Virginia published: 16.81 + 4.44% x 184.54 = $25.00.
+    const at = (checkDate: string, certificate: Record<string, unknown> = { exemptions: 1 }) =>
+      calculatePaycheck(
+        input({
+          checkDate,
+          payFrequency: 'weekly',
+          earnings: [{ code: 'REG', category: 'regular', amount: dollars(800) }],
+          ...wvState(certificate),
+        }),
+      );
+    assert.equal(amountOf(at('2026-06-11'), 'WV_SIT'), dollars(25));
+    assert.equal(amountOf(at('2026-06-12'), 'WV_SIT'), dollars(24));
+    assert.equal(amountOf(at('2026-11-09'), 'WV_SIT'), dollars(24));
+    assert.equal(amountOf(at('2027-02-05'), 'WV_SIT'), dollars(24));
+    assert.equal(amountOf(at('2026-11-09', { exemptions: 1, oneEarnerElection: true }), 'WV_SIT'), dollars(21));
+  });
+
   test('weekly $800, 1 exemption, One Earner/One Job elected (IT-104 Line 5): $21', () => {
     // Same taxable $761.54, but the ONE-EARNER table's bracket [481-769,
     // base 12.17, 3.16%] applies instead: 12.17 + 3.16%x(761.54-481=280.54)
