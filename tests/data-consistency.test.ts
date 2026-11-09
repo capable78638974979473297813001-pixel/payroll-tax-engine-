@@ -322,3 +322,21 @@ describe('A paid-leave line that depends on an employer fact is never left out s
     for (const st of ['NJ', 'MN']) assert.equal(((await run(st, {})).warnings ?? []).some((w) => /paid leave/.test(w)), false);
   });
 });
+
+describe('Maryland county withholding rates equal the Comptroller of Maryland\'s 2026 memo (Central Payroll Bureau, dated 2026-02-04, Attachment 1)', () => {
+  const memo: Record<string, number> = {
+    Allegany: 0.032, BaltimoreCounty: 0.032, BaltimoreCity: 0.032, Calvert: 0.032, Caroline: 0.032, Carroll: 0.0303, Cecil: 0.0274,
+    Charles: 0.0303, Dorchester: 0.033, Garrett: 0.0265, Harford: 0.0306, Howard: 0.032, Kent: 0.033, Montgomery: 0.032, PrinceGeorges: 0.032,
+    QueenAnnes: 0.032, StMarys: 0.032, Somerset: 0.032, Talbot: 0.024, Washington: 0.0295, Wicomico: 0.032, Worcester: 0.0225,
+  };
+  test('22 flat counties and the two tiered ones (Anne Arundel 2.70/2.94/3.20, Frederick 2.25/2.75/2.96/3.20)', () => {
+    const c = read('states/MD-2026.json').countyRates;
+    for (const [k, v] of Object.entries(memo)) assert.equal(c[k].flat, v, k);
+    assert.deepEqual(c.AnneArundel.tiered.single.map((b: { rate: number }) => b.rate), [0.027, 0.0294, 0.032]);
+    assert.deepEqual(c.AnneArundel.tiered.single.map((b: { from: number }) => b.from), [0, 50000, 400000]);
+    assert.deepEqual(c.AnneArundel.tiered.mfjHoh.map((b: { from: number }) => b.from), [0, 75000, 480000]);
+    assert.deepEqual(c.Frederick.tiered.single.map((b: { rate: number }) => b.rate), [0.0225, 0.0275, 0.0296, 0.032]);
+    assert.deepEqual(c.Frederick.tiered.single.map((b: { from: number }) => b.from), [0, 25000, 50000, 150000]);
+    assert.deepEqual(c.Frederick.tiered.mfjHoh.map((b: { from: number }) => b.from), [0, 25000, 100000, 250000]);
+  });
+});

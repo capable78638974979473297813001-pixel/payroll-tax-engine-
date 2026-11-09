@@ -338,6 +338,8 @@ export interface StateCertificate {
   workCityIsPrincipalWorkplace?: boolean;
   /** Newark: this employee's wages are excluded from the employer's resident-apportionment calculation (the employer's own workforce-wide determination). */
   newarkResidentApportionmentExcluded?: boolean;
+  /** Jersey City payroll tax: this employee lives in Jersey City, so the employer owes no payroll tax on their wages (Ordinance 18-133 section 304-19(a)). */
+  jerseyCityResident?: boolean;
   /** Pennsylvania LST: proof another employer already withheld it this year, so this employer doesn't withhold it again past the annual cap. */
   lstAlreadyWithheldElsewhere?: boolean;
 

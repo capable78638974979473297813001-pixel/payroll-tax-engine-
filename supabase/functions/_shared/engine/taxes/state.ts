@@ -273,6 +273,13 @@ export function stateIncomeTax(
   const newark = newarkPayrollTaxEmployer(input, ctx, rules);
   if (newark) lines.push(newark);
 
+  // Jersey City's employer payroll tax (Ordinance 18-133, 1% of the payroll
+  // of non-Jersey-City-resident employees, for the city's schools) —
+  // employer-paid and never withheld (section 304-21), so it never touches
+  // net pay. Dispatched off certificate.locality 'Jersey City'.
+  const jerseyCity = jerseyCityPayrollTaxEmployer(input, ctx, rules);
+  if (jerseyCity) lines.push(jerseyCity);
+
   // Denver's Occupational Privilege Tax — see denverOccupationalPrivilegeTax()'s
   // own doc comment for the $500/month threshold and the caller-supplied
   // monthly-aggregation fields this genuinely different tax SHAPE requires.
@@ -5021,6 +5028,67 @@ function newarkPayrollTaxEmployer(
       `the employer's quarterly Newark payroll — the $${cfg.quarterlyThresholdDollars}/quarter ` +
       `minimum and the >50%-resident-workforce apportionment are EMPLOYER-AGGREGATE facts this ` +
       `engine cannot verify per paycheck (see newarkPayrollTaxEmployer()'s own doc comment).`,
+  };
+}
+
+interface JerseyCityPayrollTaxConfig {
+  rate: number;
+  /** Quarterly payroll under which an employer owes nothing (an employer-wide fact this engine cannot see). */
+  quarterlyThresholdDollars: number;
+  /** ISO date the ordinance took effect. */
+  effectiveFrom: string;
+}
+
+/**
+ * Jersey City's payroll tax: 1% of an employer's payroll for services
+ * performed in the city, or performed elsewhere but supervised from it,
+ * with Jersey City RESIDENTS' wages exempt (Ordinance 18-133, effective
+ * 2019-01-01; N.J.S.A. 40:48C-14 et seq.). Payroll is the remuneration
+ * subject to federal income tax withholding, so the federal pretax
+ * exclusions apply. The employer pays it and "shall [not] deduct or
+ * withhold any amount from the remuneration payable to an Employee because
+ * of the tax" (section 304-21), so it is an employer line only. An employer
+ * with $2,500 or less of payroll in a calendar quarter, and the public,
+ * interstate and charitable employers the ordinance lists, owe nothing;
+ * those are employer-wide facts, so, as with Newark, the quarterly minimum
+ * is stated in the line's detail rather than tested.
+ */
+function jerseyCityPayrollTaxEmployer(
+  input: PaycheckInput,
+  ctx: ComputeContext,
+  rules: StateRuleset,
+): TaxLine | null {
+  const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
+  if (!hasLocality(cert, 'Jersey City')) return null;
+  const cfg = rules.jerseyCityPayrollTax as JerseyCityPayrollTaxConfig | undefined;
+  if (!cfg) return null;
+  if (input.checkDate < cfg.effectiveFrom) return null;
+
+  const exempt = federalRuleset(input.checkDate).incomeTax.exemptPretax as PretaxCategory[];
+  const taxableWages = ctx.taxableWagesFor(exempt);
+
+  if (resolveCertBoolean(cert, 'jerseyCityResident')) {
+    return {
+      id: 'JERSEYCITY_PAYROLL_ER',
+      name: 'Jersey City Payroll Tax (Employer)',
+      payer: 'employer',
+      jurisdiction: 'local',
+      taxableWages: 0,
+      amount: 0,
+      detail: '$0: this employee lives in Jersey City, and the ordinance exempts the wages of Jersey City residents from the employer payroll tax.',
+    };
+  }
+
+  return {
+    id: 'JERSEYCITY_PAYROLL_ER',
+    name: 'Jersey City Payroll Tax (Employer)',
+    payer: 'employer',
+    jurisdiction: 'local',
+    taxableWages,
+    amount: applyRate(taxableWages, cfg.rate),
+    detail:
+      fmt(taxableWages) + ' @ ' + (cfg.rate * 100).toFixed(2) + '%, paid by the employer on a non-resident employee (never withheld). ' +
+      'The $' + cfg.quarterlyThresholdDollars + '-a-quarter payroll minimum and the exempt-employer list are employer-wide facts this engine cannot verify per paycheck.',
   };
 }
 

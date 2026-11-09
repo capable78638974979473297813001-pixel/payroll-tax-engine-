@@ -411,6 +411,7 @@ export interface ResolvedJurisdiction {
     newYorkCity: boolean;
     yonkers: boolean;
     newark: boolean;
+    jerseyCity: boolean;
     kansasCity: boolean;
     stLouis: boolean;
     multnomahCounty: boolean;
@@ -471,6 +472,7 @@ export function resolveJurisdiction(
       newYorkCity: false,
       yonkers: false,
       newark: false,
+      jerseyCity: false,
       kansasCity: false,
       stLouis: false,
       multnomahCounty: false,
@@ -509,6 +511,7 @@ export function resolveJurisdiction(
   }
   if (state === 'NJ') {
     result.flags.newark = placesInclude(geo.incorporatedPlaces, 'Newark');
+    result.flags.jerseyCity = placesInclude(geo.incorporatedPlaces, 'Jersey City');
   }
   if (state === 'MO') {
     result.flags.kansasCity = placesInclude(geo.incorporatedPlaces, 'Kansas City');
