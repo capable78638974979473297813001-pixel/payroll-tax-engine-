@@ -5877,6 +5877,10 @@ function kentuckyCityCountyTax(
 
   const periodWages = ctx.taxableWagesFor([]);
   const residenceCityName = typeof cert.residenceCity === 'string' ? cert.residenceCity : undefined;
+  // A city that taxes only the pay for work done inside it (Whitesville's Ordinance 25.07, Section 3):
+  // the caller gives the share of this period's compensation earned inside the city. Default all of it.
+  const rawShare = cert.workCityWageShare;
+  const cityShare = typeof rawShare === 'number' && Number.isFinite(rawShare) && rawShare >= 0 && rawShare <= 1 ? rawShare : 1;
 
   // Louisville/Jefferson County Metro: work anywhere in the county owes
   // Metro's tax, and a city inside it (Jeffersontown, Lyndon, ...) adds its
@@ -5931,7 +5935,11 @@ function kentuckyCityCountyTax(
   };
 
   // Annual caps: see kyCappedWages().
-  const taxableFor = (entry: KYJurisdictionEntry): number => kyCappedWages(entry, periodWages, input);
+  const taxableFor = (entry: KYJurisdictionEntry): number => {
+    const capped = kyCappedWages(entry, periodWages, input);
+    return entry === cityEntry && cityShare < 1 ? Math.round(capped * cityShare) : capped;
+  };
+  const shareNote = cityShare < 1 && cityEntry ? `; ${(cityShare * 100).toFixed(1)}% of the pay is for work done inside ${cityEntry.name}, which is all the city taxes` : '';
   const capNote = (entry: KYJurisdictionEntry, taxable: number): string =>
     entry.capAtSSWageBase
       ? ` (${fmt(taxable)} of ${fmt(periodWages)}, SS-wage-base-capped)`
@@ -5958,7 +5966,7 @@ function kentuckyCityCountyTax(
       taxableWages: periodWages,
       amount,
       detail:
-        `${fmt(cityTax)} to ${cityEntry.name} @ ${cityRate.note}${capNote(cityEntry, cityTaxableWages)}; ` +
+        `${fmt(cityTax)} to ${cityEntry.name} @ ${cityRate.note}${capNote(cityEntry, cityTaxableWages)}${shareNote}; ` +
         `${fmt(netCountyTax)} to ${countyEntry.name} @ ${countyRate.note}${capNote(countyEntry, countyTaxableWages)}, ` +
         `less a ${fmt(credit)} KRS 68.197(6)-(7) credit for the city fee already paid ` +
         `(assumes the 30,000-300,000-population county credit tier applies to ${countyEntry.name} — not ` +
@@ -5983,7 +5991,9 @@ function kentuckyCityCountyTax(
       ? `${fmt(taxableWages)} of ${fmt(periodWages)} (SS-wage-base-capped, KRS 68.197(10)(c)) @ ${r.note} to ${entry.name}`
       : entry.annualWageCap !== undefined
         ? `${fmt(taxableWages)} of ${fmt(periodWages)} @ ${r.note} to ${entry.name}; ${entry.name} taxes at most $${entry.annualWageCap.toLocaleString('en-US')} of wages a year (YTD from ytd.localIncomeTax['KY_LOCAL_${entry.name}'])`
-        : `${fmt(periodWages)} @ ${r.note} to ${entry.name}, full gross wages (KRS 67.750(2) adds back pretax deferrals)`,
+        : entry === cityEntry && cityShare < 1
+          ? `${fmt(taxableWages)} of ${fmt(periodWages)} @ ${r.note} to ${entry.name}${shareNote} (pretax deferrals are added back)`
+          : `${fmt(periodWages)} @ ${r.note} to ${entry.name}, full gross wages (KRS 67.750(2) adds back pretax deferrals)`,
     ...kyLineQuality([entry], input, ctx, periodWages),
   };
 }

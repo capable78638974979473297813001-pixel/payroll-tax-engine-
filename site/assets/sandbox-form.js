@@ -24,7 +24,7 @@ export const CERT_KEYS = new Set([
   'additionalWithholdingYonkers', 'metroDistrict', 'multnomahCounty', 'localMonthlyCompensation',
   'localOPTWithheldThisMonth', 'localOPTEmployeeWithheldByOtherEmployer', 'stateTaxWithheldThisMonth',
   'wvLocalFeeAlreadyWithheld', 'daysWorkedInLocality', 'daysWorkedInMunicipality',
-  'workCityIsPrincipalWorkplace', 'newarkResidentApportionmentExcluded', 'jerseyCityResident', 'njOutOfStateEmployerPayrollTaxExempt', 'lstAlreadyWithheldElsewhere',
+  'workCityIsPrincipalWorkplace', 'workCityWageShare', 'newarkResidentApportionmentExcluded', 'jerseyCityResident', 'njOutOfStateEmployerPayrollTaxExempt', 'lstAlreadyWithheldElsewhere',
   'dailyCommuter', 'nonresidentDeMinimisEligible', 'nonresidentCreditEligible', 'daysWorkedInStateThisYear',
   'nonresident', 'exempt', 'exemptReason', 'additionalWithholding', 'reducedWithholding',
   'nonresidentAlien', 'voluntaryWithholdingAgreement', 'allowances', 'regularAllowances',

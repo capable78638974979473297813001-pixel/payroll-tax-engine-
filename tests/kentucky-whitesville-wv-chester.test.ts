@@ -6,8 +6,8 @@ import type { PaycheckInput } from '../src/types.ts';
 
 /**
  * Two local jurisdictions the daily source watch (2026-10-25) found missing:
- * Whitesville KY (new 1.15% occupational tax from 2027-01-01, per the city's
- * Form E-1 / RU-1Q) and Chester WV ($2/week user fee on non-resident workers
+ * Whitesville KY (new 1.15% occupational tax from the first full pay period of
+ * 2026-10-01, per the city's signed Ordinance 25.07) and Chester WV ($2/week user fee on non-resident workers
  * employed 30+ days a year, per WVU Shared Services' ordinance list).
  */
 
@@ -22,15 +22,37 @@ const base = (checkDate: string, payFrequency: PaycheckInput['payFrequency'], am
 });
 
 describe('Whitesville, Kentucky (Daviess County)', () => {
-  const ky = (checkDate: string) => calculatePaycheck(base(checkDate, 'monthly', 300_000, { code: 'KY', certificate: { workCity: 'Whitesville' } } as PaycheckInput['workState']));
+  const ky = (checkDate: string, certificate: Record<string, unknown> = {}, amount = 300_000) =>
+    calculatePaycheck(base(checkDate, 'monthly', amount, { code: 'KY', certificate: { workCity: 'Whitesville', ...certificate } } as PaycheckInput['workState']));
   const local = (r: ReturnType<typeof calculatePaycheck>) => r.taxes.find((t) => t.id === 'KY_LOCAL');
 
-  test('no city occupational tax before 2027-01-01', () => {
-    assert.equal(local(ky('2026-12-15'))?.amount ?? 0, 0);
+  // Ordinance No. 25.07, adopted 2026-07-07: 1.15% of pay for work done in the city, effective commencing
+  // upon the first full pay period of October 1, 2026 (Section 14).
+  test('no city occupational tax before the ordinance starts on 2026-10-01', () => {
+    assert.equal(local(ky('2026-09-30'))?.amount ?? 0, 0);
   });
 
-  test('1.15% from 2027-01-01 ($34.50 on $3,000)', () => {
+  test('1.15% from 2026-10-01 ($34.50 on $3,000), and still in 2027', () => {
+    assert.equal(local(ky('2026-10-01'))?.amount, 3_450);
+    assert.equal(local(ky('2026-11-10'))?.amount, 3_450);
     assert.equal(local(ky('2027-01-15'))?.amount, 3_450);
+  });
+
+  test('pay for work done partly outside the city is taxed only on the in-city share (Section 3)', () => {
+    // 60% of $3,000 = $1,800 x 1.15% = $20.70
+    assert.equal(local(ky('2026-11-10', { workCityWageShare: 0.6 }))?.amount, 2_070);
+    assert.match(local(ky('2026-11-10', { workCityWageShare: 0.6 }))!.detail, /60\.0% of the pay is for work done inside Whitesville/);
+    assert.equal(local(ky('2026-11-10', { workCityWageShare: 0 }))?.amount, 0);
+    // an out-of-range share is ignored, not trusted
+    assert.equal(local(ky('2026-11-10', { workCityWageShare: 1.5 }))?.amount, 3_450);
+  });
+
+  test('pretax deferrals are added back: the 1.15% is on gross pay', () => {
+    const r = calculatePaycheck({
+      ...base('2026-11-10', 'monthly', 300_000, { code: 'KY', certificate: { workCity: 'Whitesville' } } as PaycheckInput['workState']),
+      deductions: [{ code: '401K', category: 'pretax_401k', amount: 30_000 }],
+    } as PaycheckInput);
+    assert.equal(local(r)?.amount, 3_450);
   });
 });
 

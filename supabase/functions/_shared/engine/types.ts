@@ -336,6 +336,8 @@ export interface StateCertificate {
   daysWorkedInMunicipality?: number;
   /** Default true — most employees have exactly one work municipality; set false only for a genuinely split work location. */
   workCityIsPrincipalWorkplace?: boolean;
+  /** Kentucky city occupational tax: the share (0 to 1) of this period's compensation paid for work done inside the work city. Default 1. A city whose ordinance apportions pay (Whitesville, Ordinance 25.07 Section 3) taxes only that share; the county tax is not apportioned by this field. */
+  workCityWageShare?: number;
   /** Newark: this employee's wages are excluded from the employer's resident-apportionment calculation (the employer's own workforce-wide determination). */
   newarkResidentApportionmentExcluded?: boolean;
   /** Jersey City payroll tax: this employee lives in Jersey City, so the employer owes no payroll tax on their wages (Ordinance 18-133 section 304-19(a)). */
