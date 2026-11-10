@@ -119,12 +119,14 @@ describe('new-employer rates against the Department of Labor January 2026 table'
     assert.equal(read('states/CO-2026.json').suiEmployer.confidence, 'primary_source_confirmed');
     assert.equal(read('states/WI-2026.json').suiEmployer.confidence, 'primary_source_confirmed');
   });
-  test('Maine carries a secondary all-in figure above the DOL base and says it is unconfirmed', () => {
+  test("Maine's all-in 2.54% is the DOL base 2.23% plus 0.14% CSSF and 0.17% UPAF, confirmed from Maine DOL's 2026 rate array", () => {
     const s = read('states/ME-2026.json').suiEmployer;
     assert.ok(s.newEmployerRate > dol.ME);
+    assert.equal(s.newEmployerRate, 0.0254);
+    assert.equal(Math.round((dol.ME + 0.0014 + 0.0017) * 10000), 254);
     assert.match(s.newEmployerRateSource, /January2026\.pdf/);
-    assert.match(s.newEmployerRateSource, /Treat as an estimate/);
-    assert.match(s.newEmployerRateSource, /stays unconfirmed/);
+    assert.match(s.newEmployerRateSource, /Combined Rate of 2\.54%/);
+    assert.match(s.newEmployerRateSource, /CONFIRMED from the agency's own document/);
   });
 });
 

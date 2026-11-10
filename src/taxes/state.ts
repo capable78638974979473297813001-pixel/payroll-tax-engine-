@@ -4992,7 +4992,7 @@ function pickLocality(cert: Record<string, unknown>, known: (l: string) => boole
 }
 
 const NJ_MULTISTATE_EXEMPTION_DETAIL =
-  '$0: certificate.njOutOfStateEmployerPayrollTaxExempt. New Jersey S.B. 4219 (signed February 2026, effective immediately, as reported by EY and counsel; the bill text was not read) exempts the wages of a New Jersey resident who is already subject to an employer payroll tax in another state for services performed there from Newark and Jersey City employer payroll tax. The employer\'s own determination, not verified by this engine.';
+  '$0: certificate.njOutOfStateEmployerPayrollTaxExempt. New Jersey P.L.2025, c.314 (S4219, approved 2026-01-20, effective immediately; new C.40:48C-18(b), text read 2026-11-10): if an out-of-state state, municipality or local entity imposes an employer payroll tax on an employee for service performed out of state, the Newark or Jersey City employer payroll tax does not apply to that employee, but only after the employer submits documentation, in the manner the municipality prescribes, of the employee\'s residency, the out-of-state services and the other tax. The employer\'s own determination and filing, not verified by this engine.';
 
 function newarkPayrollTaxEmployer(
   input: PaycheckInput,
@@ -7695,10 +7695,15 @@ function eugeneCommunitySafetyPayrollTax(
     detail: covered
       ? fmt(subjectWages) + ' @ ' + (cfg.employeeRate * 100).toFixed(2) + '%: wages less overtime ' + fmt(testWages) + ' exceed the ' + fmt(perPeriodThreshold) + ' pay-period cutoff for the ' + annualText + ' annual threshold'
       : 'no tax: wages less overtime ' + fmt(testWages) + ' do not exceed the ' + fmt(perPeriodThreshold) + ' pay-period cutoff for the ' + annualText + ' annual threshold (Oregon minimum wage x 2,080 hours)',
-    dataQuality: {
-      tier: 'secondary_source',
-      note: "Eugene's own tax-rate chart (July 1, 2026 to June 30, 2027) could not be read by this project, so the threshold is the Oregon standard minimum wage x 2,080 hours ($32,344 for 2026-27) and the pay-period cutoffs are the whole-dollar figures reported to this project from the city's chart (weekly $622, biweekly $1,244, twice-monthly $1,348, monthly $2,695, daily $124, twice-annual $16,172); a frequency the chart does not list uses the annual figure divided evenly.",
-    },
+    // The city's chart prints a cutoff for these frequencies (the owner read it on 2026-11-10); any other frequency is the annual figure divided evenly.
+    ...(chartCutoff !== undefined
+      ? {}
+      : {
+          dataQuality: {
+            tier: 'inferred' as const,
+            note: "Eugene's tax-rate chart for July 1, 2026 to June 30, 2027 has no row for this pay frequency (it lists weekly, biweekly, twice-monthly, monthly, daily and twice-annual), so the annual threshold of " + annualText + " is divided evenly by the pay periods.",
+          },
+        }),
   };
 }
 
@@ -7778,7 +7783,7 @@ function springfieldPayrollTax(
   const wages = ctx.taxableWagesFor([]);
   const quality = {
     tier: 'inferred' as const,
-    note: "Springfield's own FAQ and program overview give 0.1% employee and 0.1% employer for wages tied to a taxable Springfield business location, for pay periods beginning on or after 2027-01-01. The code's excluded remuneration (7.1202 'Wages') and its exclusion of hours worked at an employer location outside the city (7.1204(3)) are not applied, so gross wages are taxed here; the exhibit read is the version attached to the council's March 2026 materials, not the adopted ordinance; the city keys the start to the pay period's first day, this engine to the check date.",
+    note: "Springfield's own FAQ and program overview give 0.1% employee and 0.1% employer for wages tied to a taxable Springfield business location, for pay periods beginning on or after 2027-01-01. The code's excluded remuneration (7.1202 'Wages') and its exclusion of hours worked at an employer location outside the city (7.1204(3)) are not applied, so gross wages are taxed here; the exhibit read is the version attached to the council's March 2026 materials, not the adopted ordinance; the city says the date the tax becomes due is set by administrative rule and is no sooner than 2027-01-01 (its adopted-ordinance FAQ), so 2027-01-01 is the earliest possible date and not a confirmed one; the city keys the start to the pay period's first day, this engine to the check date.",
   };
   return [
     {

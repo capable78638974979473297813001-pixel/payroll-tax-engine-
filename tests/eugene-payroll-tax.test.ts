@@ -59,11 +59,11 @@ describe('Eugene Community Safety Payroll Tax (employee)', () => {
     const r2 = calculatePaycheck(or('2026-11-09', 0, { earnings: [{ code: 'REG', category: 'regular', amount: 70000 }, { code: 'OT', category: 'regular', amount: 30000, overtime: true }] }));
     assert.equal(eug(r2)?.amount, 440);
   });
-  test('only when the employer is in Eugene, always as an employee line with a secondary-source notice, ', () => {
+  test("only when the employer is in Eugene, always as an employee line, with no data notice now that the city's chart cutoffs are confirmed", () => {
     assert.equal(eug(calculatePaycheck(or('2026-11-09', 100000, {}, {}))), undefined);
     const r = calculatePaycheck(or('2026-11-09', 100000));
     assert.equal(eug(r)?.payer, 'employee');
-    assert.ok(r.notices?.some((n) => n.taxId === 'OR_EUGENE_CSPT' && n.tier === 'secondary_source'));
+    assert.ok(!r.notices?.some((n) => n.taxId === 'OR_EUGENE_CSPT'));
   });
 });
 
