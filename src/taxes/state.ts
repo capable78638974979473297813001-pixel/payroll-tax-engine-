@@ -7725,7 +7725,7 @@ function eugeneCommunitySafetyPayrollTaxEmployer(
     detail: fmt(wages) + ' @ ' + (cfg.employerRate * 100).toFixed(2) + '% of gross wages paid at a Eugene location',
     dataQuality: {
       tier: 'secondary_source',
-      note: "Eugene's own return instructions give 0.21% for the employer tax; this engine cannot apply the reduced rate (0.15% on the first $100,000 for an employer with two or fewer employees, taken on the fourth-quarter or final return) or the public-employer exemption, which depend on the employer as a whole. Wage base taken as gross wages less the state's pretax exclusions, from the vendor description; the city's return instructions were not fully read.",
+      note: "Eugene's own Employer Payroll Tax page gives 0.21% for the employer tax; this engine cannot apply the reduced rate (0.15% on the first $100,000 for an employer with two or fewer employees, taken on the fourth-quarter or final return) or the public-employer exemption, which depend on the employer as a whole. The 0.21% rate, the 0.15% reduced rate and the base of all subject wages paid to all employees (employees exempt from the employee tax included) are from the city's own Employer Payroll Tax page, read 2026-11-10; the page's definition of subject wages was not read, so gross wages less the state's pretax exclusions is taken.",
     },
   };
 }

@@ -43,12 +43,11 @@ describe('data-quality notices on the paycheck result', () => {
     assert.equal(r.notices, undefined);
   });
 
-  test("Tuskegee uses its own form's 3% and says the League's 2% disagrees", () => {
+  test("Tuskegee uses 3%, which the city's own form and brochure both state; the League's 2% survey figure is not used and raises no notice", () => {
     const r = calculatePaycheck(base('AL', { workCity: 'Tuskegee', exemptions: 'S', dependents: 0 }));
     const line = r.taxes.find((t) => t.id === 'AL_LOCAL')!;
     assert.equal(line.amount, 7500);
-    assert.equal(line.dataQuality?.tier, 'conflicting_sources');
-    assert.match(line.dataQuality!.note, /2%/);
+    assert.equal(line.dataQuality, undefined);
   });
 
   test('a Kentucky line with an inferred rate is marked inferred', () => {
