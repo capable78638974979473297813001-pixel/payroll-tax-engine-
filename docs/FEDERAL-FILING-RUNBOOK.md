@@ -47,7 +47,7 @@ a Saturday); **Nov 10, 2026** if every deposit for the quarter was made in full 
 
 ## Every year: Forms W-2 and W-3 (SSA)
 
-1. Register for **Business Services Online** (SSA.gov/bso) in the employer's name. Allow at least 2 weeks.
+1. Register for **Business Services Online** (SSA.gov/bso) in the employer's name. Allow at least 2 weeks. Since 2026-11-07 Electronic Wage Reporting has a new authorization process: if you filed through BSO before, re-register under Employers ("Sign in or create account for Electronic Wage Reporting") unless you already got a registration code by mail in the January 2026 limited release. Codes arrive by mail, so do this well before the January 31 deadline. SSNVS is not affected.
 2. `federal.w2EntrySheet({ year, employer, w2s, recipients })` produces what to type into BSO's online
    W-2 forms (up to 50 W-2s), checks each W-2 against the instructions, and totals the W-3. SSNs are
    masked unless you ask otherwise and are never stored.

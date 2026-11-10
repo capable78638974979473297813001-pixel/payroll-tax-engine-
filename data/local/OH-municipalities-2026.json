@@ -3226,8 +3226,8 @@
       "municode": "57792",
       "rate": 0.01,
       "effectiveFrom": "2003-01-01",
-      "administeredBy": "unknown_ambiguous_name",
-      "administeredByNote": "Ohio has 3 municipalities named Oakwood (Cuyahoga, Montgomery, Paulding counties); RITA and/or CCA list \"Oakwood\" without a county qualifier, so which one(s) are members could not be determined this session."
+      "administeredBy": "CCA",
+      "administeredByNote": "Resolved 2026-11-10: the Central Collection Agency's own member and tax-rate pages (ccaohio.gov/member-municipalities, /tax-rates) list 'Oakwood (Paulding County)' at 1.00%, matching this rate. The Cuyahoga and Montgomery Oakwoods remain unresolved."
     },
     {
       "name": "Oberlin",

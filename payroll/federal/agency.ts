@@ -117,6 +117,7 @@ export const FEDERAL_CHANNELS: readonly AgencyChannel[] = [
     forms: ['W-2', 'W-3', 'W-2c', 'W-3c'],
     enrollment: [
       'Business Services Online (BSO) registration at SSA.gov/bso; the W-2/W-3 instructions say to allow at least 2 weeks and that credentials not updated since March 25, 2023 must be renewed.',
+      'Since 2026-11-07 BSO Electronic Wage Reporting uses a new authorization process (SSA\'s BSO page, read 2026-11-10): organizations that used the earlier process must re-register under Employers, "Sign in or create account for Electronic Wage Reporting", unless they received a registration code by mail in the January 2026 limited release; registration codes are mailed, so register well before a filing deadline. It covers W-2 and W-2c Online, Wage File Upload, Submission Status, Employer Report Status, AccuWage Online and the wage-report name/SSN errors view; SSNVS is unaffected.',
       'For more than 50 W-2s (or 25 W-2c), the BSO "file upload" feature takes a wage file built to the EFW2 / EFW2C specification (SSA.gov/employer/EFW2&EFW2C.htm).',
       'For 50 or fewer W-2s, BSO\'s online forms need no wage file; they take the W-2 figures this module produces.',
     ],

@@ -34,6 +34,14 @@
    "revision": "Nevada entry updated 03/22/2025",
    "verifiedOn": "2026-11-06",
    "verifiedBy": "read from the federal matrix (layout text of the PDF fetched live 2026-11-06) the Nevada entry, 'Updated On: 03/22/2025': reporting timeframe 'Within 20 days of hire date'. This matrix is the Office of Child Support Services' consolidated list of each state directory's own timeframe, contact and website; the state's statute or directory page was not separately read."
+  },
+  {
+   "id": "S4",
+   "title": "Nevada Department of Taxation: Electronic Submission Requirement FAQs",
+   "url": "https://tax.nv.gov/faqs/electronic-submission-requirement-faqs/",
+   "revision": "page dated 2026-10-20, fetched live 2026-11-10",
+   "verifiedOn": "2026-11-10",
+   "verifiedBy": "fetched directly from tax.nv.gov on 2026-11-10 and read: most tax-related documents and payments (returns, payments, refund claims, license applications, registrations, permits) must be submitted electronically to the Department of Taxation starting December 7, 2026 unless a waiver or exception applies; a waiver request must be submitted at least 20 days before the first applicable document is due and may be granted for up to one year (no waiver for payments of $10,000 or more, NRS 353.1467); paper is allowed while a timely waiver request is pending and during a portal technical failure of more than four hours in a day."
   }
  ],
  "agencies": {
@@ -106,7 +114,8 @@
   }
  ],
  "notModelled": [
-  "Nevada has no state income tax on wages, so there is no state withholding."
+  "Nevada has no state income tax on wages, so there is no state withholding.",
+  "From 2026-12-07 the Department of Taxation (not the Employment Security Division) requires its returns, payments and registrations to be submitted electronically unless a waiver or exception applies (S4). This reaches the Modified Business Tax, which is a payroll-based tax the engine documents but does not calculate; it does not change the Employment Security Division's own e-filing rule (NAC 612.035) above. A waiver request is due at least 20 days before the first covered document is due, and payments of $10,000 or more cannot be waived."
  ],
  "newHire": {
   "form": "New-hire report (federal Form W-4 or an equivalent) to the Nevada State Directory of New Hires; within 20 days of hire date",
