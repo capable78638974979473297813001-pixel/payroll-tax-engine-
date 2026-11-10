@@ -7629,7 +7629,7 @@ function portlandAreaLocalTax(
 interface EugeneCsptConfig {
   employeeRate: number;
   /** Annual wage threshold in dollars by effective date (the Oregon standard minimum wage x 2,080 hours, reset every July 1). */
-  thresholds: { from: string; annual: number }[];
+  thresholds: { from: string; annual: number; perPeriod?: Partial<Record<string, number>> }[];
   /** Last day the tax is levied (Ordinance 20616 sunsets it). */
   expires?: string;
 }
@@ -7667,7 +7667,10 @@ function eugeneCommunitySafetyPayrollTax(
   const subjectWages = ctx.taxableWagesFor(exempt);
   const overtime = input.earnings.filter((e) => e.overtime).reduce((sum, e) => sum + e.amount, 0);
   const testWages = atLeastZero(subjectWages - overtime);
-  const perPeriodThreshold = dollars(change.annual) / ctx.periodsPerYear;
+  // The city's chart prints a whole-dollar cutoff per pay frequency (it rounds the
+  // annual figure divided by the periods); use it when the file carries it.
+  const chartCutoff = change.perPeriod?.[input.payFrequency];
+  const perPeriodThreshold = chartCutoff !== undefined ? dollars(chartCutoff) : dollars(change.annual) / ctx.periodsPerYear;
   const covered = testWages > perPeriodThreshold;
   const amount = covered ? applyRate(subjectWages, cfg.employeeRate) : 0;
   const annualText = '$' + change.annual.toLocaleString('en-US');
@@ -7680,11 +7683,11 @@ function eugeneCommunitySafetyPayrollTax(
     taxableWages: covered ? subjectWages : 0,
     amount,
     detail: covered
-      ? fmt(subjectWages) + ' @ ' + (cfg.employeeRate * 100).toFixed(2) + '%: wages less overtime ' + fmt(testWages) + ' exceed the ' + fmt(perPeriodThreshold) + ' per-period share of the ' + annualText + ' annual threshold'
-      : 'no tax: wages less overtime ' + fmt(testWages) + ' do not exceed the ' + fmt(perPeriodThreshold) + ' per-period share of the ' + annualText + ' annual threshold (Oregon minimum wage x 2,080 hours)',
+      ? fmt(subjectWages) + ' @ ' + (cfg.employeeRate * 100).toFixed(2) + '%: wages less overtime ' + fmt(testWages) + ' exceed the ' + fmt(perPeriodThreshold) + ' pay-period cutoff for the ' + annualText + ' annual threshold'
+      : 'no tax: wages less overtime ' + fmt(testWages) + ' do not exceed the ' + fmt(perPeriodThreshold) + ' pay-period cutoff for the ' + annualText + ' annual threshold (Oregon minimum wage x 2,080 hours)',
     dataQuality: {
       tier: 'secondary_source',
-      note: "Eugene's own tax-rate chart (July 1, 2026 to June 30, 2027) could not be read by this project, so the threshold is the Oregon standard minimum wage x 2,080 hours ($32,344 for 2026-27), reported by the city's chart title and payroll-software release notes and consistent with the minimum wage, divided evenly by pay periods. The city's chart may round each period's figure.",
+      note: "Eugene's own tax-rate chart (July 1, 2026 to June 30, 2027) could not be read by this project, so the threshold is the Oregon standard minimum wage x 2,080 hours ($32,344 for 2026-27) and the pay-period cutoffs are the whole-dollar figures reported to this project from the city's chart (weekly $622, biweekly $1,244, twice-monthly $1,348, monthly $2,695, daily $124, twice-annual $16,172); a frequency the chart does not list uses the annual figure divided evenly.",
     },
   };
 }
@@ -7738,12 +7741,19 @@ interface SpringfieldPayrollTaxConfig {
  * after 2027-01-01 (Ordinance adopted 2026-06-01): 0.1% of applicable wages
  * from the employee, withheld by the employer, and 0.1% from the employer, for
  * wages associated with a taxable Springfield business location (not where the
- * employee lives). Read from the city's own program overview and FAQ. Two
+ * employee lives). Read from the city's own program overview and FAQ and the
+ * code exhibit (Springfield Payroll Tax Code, Exhibit A, 7.1200-7.1216). Three
  * things the engine cannot do: it selects the rate by CHECK date, where the
- * city keys it to the pay period's start, and it takes gross wages as the
- * base because the ordinance's list of excluded compensation was not read.
- * An employer may elect to pay the employee share; that election is not
- * modelled. Dispatched off certificate.locality 'Springfield'.
+ * city keys it to the pay period's start; it takes gross wages as the base
+ * rather than removing the code's excluded remuneration (domestic service in a
+ * private home under $1,000 a year, casual labor outside the employer's trade
+ * or business, solely seasonal agricultural labor, seamen exempt from
+ * garnishment, temporary emergency firefighters, section 401 employees'
+ * trusts, and pay that is not wages under IRC 3121(a)(5)(I)), none of which
+ * it can see; and it cannot exclude hours an employee works at an employer
+ * location outside the city (7.1204(3)). An employer may elect to pay the
+ * employee share; that election is not modelled. Dispatched off
+ * certificate.locality 'Springfield'.
  */
 function springfieldPayrollTax(
   input: PaycheckInput,
@@ -7758,7 +7768,7 @@ function springfieldPayrollTax(
   const wages = ctx.taxableWagesFor([]);
   const quality = {
     tier: 'inferred' as const,
-    note: "Springfield's own FAQ and program overview give 0.1% employee and 0.1% employer for wages tied to a taxable Springfield business location, for pay periods beginning on or after 2027-01-01. The ordinance's list of excluded compensation was not read, so gross wages are taxed here; the city keys the start to the pay period's first day, this engine to the check date.",
+    note: "Springfield's own FAQ and program overview give 0.1% employee and 0.1% employer for wages tied to a taxable Springfield business location, for pay periods beginning on or after 2027-01-01. The code's excluded remuneration (7.1202 'Wages') and its exclusion of hours worked at an employer location outside the city (7.1204(3)) are not applied, so gross wages are taxed here; the exhibit read is the version attached to the council's March 2026 materials, not the adopted ordinance; the city keys the start to the pay period's first day, this engine to the check date.",
   };
   return [
     {

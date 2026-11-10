@@ -29,6 +29,26 @@ describe('Eugene Community Safety Payroll Tax (employee)', () => {
     assert.equal(eug(calculatePaycheck(or('2026-11-09', 62200)))?.amount, 0);
     assert.equal(eug(calculatePaycheck(or('2026-11-09', 62300)))?.amount, 274);
   });
+  test("the chart's whole-dollar pay-period cutoffs decide the boundary: 0% at the cutoff, tax one cent above", () => {
+    // 2026-27 chart: monthly $2,695, twice-monthly $1,348, biweekly $1,244, weekly $622, daily $124. (The chart's twice-annual
+    // $16,172 is in the data but cannot be exercised here: Oregon's own withholding formula has no semiannual multiplier.)
+    const cutoffs: [PaycheckInput['payFrequency'], number][] = [
+      ['monthly', 2695],
+      ['semimonthly', 1348],
+      ['biweekly', 1244],
+      ['weekly', 622],
+      ['daily', 124],
+    ];
+    for (const [payFrequency, dollarsCutoff] of cutoffs) {
+      const at = eug(calculatePaycheck(or('2026-11-09', dollarsCutoff * 100, { payFrequency })));
+      const above = eug(calculatePaycheck(or('2026-11-09', dollarsCutoff * 100 + 1, { payFrequency })));
+      assert.equal(at?.amount, 0, payFrequency + ' at the cutoff');
+      assert.ok((above?.amount ?? 0) > 0, payFrequency + ' one cent above the cutoff');
+    }
+  });
+  test('twice-monthly pay of $1,347.80 is below the chart cutoff of $1,348 (annualising would have taxed it)', () => {
+    assert.equal(eug(calculatePaycheck(or('2026-11-09', 134780, { payFrequency: 'semimonthly' })))?.amount, 0);
+  });
   test('the threshold resets on July 1: $31,304 / 52 = $602 a week before, $622 after', () => {
     assert.equal(eug(calculatePaycheck(or('2026-06-30', 61000)))?.amount, 268);
     assert.equal(eug(calculatePaycheck(or('2026-07-01', 61000)))?.amount, 0);

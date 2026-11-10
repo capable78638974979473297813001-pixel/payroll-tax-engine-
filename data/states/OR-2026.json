@@ -337,7 +337,16 @@
       },
       {
         "from": "2026-07-01",
-        "annual": 32344
+        "annual": 32344,
+        "perPeriod": {
+          "weekly": 622,
+          "biweekly": 1244,
+          "semimonthly": 1348,
+          "monthly": 2695,
+          "daily": 124,
+          "semiannual": 16172
+        },
+        "perPeriodSource": "Pay-period cutoffs on the City of Eugene's employee rate chart for July 1, 2026 to June 30, 2027 (updated 2026-10-27), as reported to this project by the owner's reviewer on 2026-11-10: twice-annual $16,172, monthly $2,695, twice-monthly $1,348, biweekly $1,244, weekly $622, daily $124; 0% at or below the cutoff, 0.44% of subject wages above it. The chart PDF itself (eugene-or.gov/DocumentCenter/View/83387) and Eugene Code 3.754 could not be retrieved by this project (unreachable and bot-blocked on 2026-11-10), so these were not read directly. They equal $32,344 divided by 2, 12, 24, 26, 52 and 260 and rounded to the nearest dollar, which is consistent with the annual figure. A frequency not listed (quarterly, annual) uses the annual threshold divided evenly."
       }
     ],
     "expires": "2028-12-31",
@@ -363,11 +372,11 @@
     ]
   },
   "springfieldPayrollTax": {
-    "$comment": "Springfield, Oregon payroll tax, read 2026-11-09 from the City of Springfield's own pages: the Payroll Tax Program Overview (updated 2026-10-14), the Springfield Payroll Tax page and the FAQ (springfield-or.gov/city/community-engagement/springfield-payroll-tax/). The City Council adopted the ordinance on 2026-06-01. 0.1% employer and 0.1% employee (the employer withholds it), 0.1% of net earnings from self-employment for sole proprietors; tied to the employer's taxable Springfield business location, not to where the employee lives. It applies to pay periods BEGINNING on or after 2027-01-01 (a period starting in December 2026 is not taxed even if paid in January). Employers file quarterly (first return due 2027-04-30), report locality code SPFLD in W-2 box 20, and may elect to pay the employee share. The ordinance text and its list of excluded compensation were not read; wages 'include certain noncash compensation and employee salary deferrals'.",
+    "$comment": "Springfield, Oregon payroll tax, read 2026-11-09 from the City of Springfield's own pages: the Payroll Tax Program Overview (updated 2026-10-14), the Springfield Payroll Tax page and the FAQ (springfield-or.gov/city/community-engagement/springfield-payroll-tax/). The City Council adopted the ordinance on 2026-06-01. 0.1% employer and 0.1% employee (the employer withholds it), 0.1% of net earnings from self-employment for sole proprietors; tied to the employer's taxable Springfield business location, not to where the employee lives. It applies to pay periods BEGINNING on or after 2027-01-01 (a period starting in December 2026 is not taxed even if paid in January). Employers file quarterly (first return due 2027-04-30), report locality code SPFLD in W-2 box 20, and may elect to pay the employee share. The code exhibit (Springfield Payroll Tax Code, Exhibit A, in the council's March 2026 materials; the adopted text was not seen) was read on 2026-11-10: 7.1204 taxes employers other than the federal government, the State of Oregon and its political subdivisions at 0.1% of wages and employees at 0.1%, owes no tax for hours worked at an employer location outside the city, has the employer withhold, and holds both rates for three years from when collection begins; 7.1202 'Wages' excludes remuneration for domestic service in a private home under $1,000 a year, casual labor not in the employer's trade or business, solely seasonal agricultural labor, seamen exempt from garnishment, temporary emergency firefighters not subject to ORS chapter 316 withholding, employees' trusts exempt under IRC 401 as of 1996-12-31, and pay that is not wages under IRC 3121(a)(5)(I) as of 1996-12-31. None of these exclusions is applied by the engine. A registration deadline of 2027-03-01 was reported to this project and not read.",
     "employeeRate": 0.001,
     "employerRate": 0.001,
     "effectiveFrom": "2027-01-01",
-    "confidence": "primary_source_confirmed_rates_ordinance_text_not_read",
+    "confidence": "primary_source_confirmed_exhibit_read_adopted_text_not_seen",
     "sources": [
       {
         "title": "City of Springfield, OR -- Payroll Tax Program Overview (updated 2026-10-14)",
