@@ -731,6 +731,12 @@ export interface PaycheckInput {
    * A recalculation of a prior period must reproduce that period's rules.
    */
   checkDate: string; // ISO yyyy-mm-dd
+  /**
+   * First day of the pay period this check pays for (ISO yyyy-mm-dd, on or before checkDate). Optional. Only a local tax whose ordinance starts
+   * with a pay PERIOD reads it (Whitesville KY: the first full pay period of 2026-10-01; Springfield OR: pay periods beginning on or after the
+   * start date the city sets); everything else keys to checkDate. Without it those two fall back to checkDate and say so.
+   */
+  payPeriodStart?: string;
   payFrequency: PayFrequency;
   earnings: Earning[];
   deductions: Deduction[];

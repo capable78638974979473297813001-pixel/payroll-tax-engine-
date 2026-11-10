@@ -46,6 +46,7 @@ function readMoneyRows(listId, mapRow) {
 
 function syncFromDom() {
   form.checkDate = $('checkDate').value;
+  form.payPeriodStart = $('payPeriodStart').value;
   form.payFrequency = $('payFrequency').value;
   form.grossPayMethod = $('grossPayMethod').value;
   form.grossPay = num('grossPay');
@@ -399,6 +400,7 @@ async function runLookup() {
         workAddress: work || undefined,
         residenceAddress: home || undefined,
         checkDate: $('checkDate').value || undefined,
+        payPeriodStart: ($('payPeriodStart') && $('payPeriodStart').value) || undefined,
       }),
     });
     const body = await res.json().catch(() => ({}));
@@ -588,6 +590,7 @@ function applyExample(id) {
 $('example').addEventListener('change', () => { applyExample($('example').value); });
 
 $('checkDate').value = form.checkDate;
+$('payPeriodStart').value = form.payPeriodStart || '';
 function paintPension() {
   const kind = $('pensionKind').value;
   $('pensionBox').hidden = !kind;

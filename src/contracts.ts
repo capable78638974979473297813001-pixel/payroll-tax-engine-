@@ -25,10 +25,29 @@ const LOCAL_FIELDS = [
   'localities',
 ] as const;
 
+
+/**
+ * The pay period's first day when the caller supplied a usable one: a real yyyy-mm-dd date on or before the check date.
+ * Anything else is undefined, and the caller's check date stands in.
+ */
+export function payPeriodStartOf(input: { checkDate: string; payPeriodStart?: string }): string | undefined {
+  const v = input.payPeriodStart;
+  if (typeof v !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(v)) return undefined;
+  const t = Date.parse(v + 'T00:00:00Z');
+  if (!Number.isFinite(t) || new Date(t).toISOString().slice(0, 10) !== v) return undefined;
+  return v <= input.checkDate ? v : undefined;
+}
 export function inputContractWarnings(input: PaycheckInput): string[] {
   const warnings: string[] = [];
   const work = (input.workState?.certificate ?? {}) as Record<string, unknown>;
   const residence = (input.residenceState?.certificate ?? {}) as Record<string, unknown>;
+
+  if (input.payPeriodStart !== undefined && payPeriodStartOf(input) === undefined) {
+    warnings.push(
+      `payPeriodStart '${String(input.payPeriodStart)}' was ignored: it must be a real date written yyyy-mm-dd and no later than checkDate (${input.checkDate}). ` +
+        'Local taxes that start with a pay period (Whitesville KY, Springfield OR) fell back to the check date.',
+    );
+  }
 
   // Local taxes are read from the WORK state's certificate, including the
   // residence-side fields (residencePSD, residenceCity, schoolDistrictCode).

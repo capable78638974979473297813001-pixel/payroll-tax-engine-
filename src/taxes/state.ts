@@ -48,6 +48,7 @@ import {
 import { federalIncomeTax, federalTaxes } from './federal.ts';
 import { cashEarnings, supplementalEarnings } from '../wages.ts';
 import { resolveCertBoolean } from '../validate.ts';
+import { payPeriodStartOf } from '../contracts.ts';
 import type {
   ComputeContext,
   DataQuality,
@@ -5870,7 +5871,26 @@ function kentuckyCityCountyTax(
   if (!workCityName && !workCountyName) return null;
 
   const notSchool = (e: KYJurisdictionEntry | undefined) => (e && !e.schoolDistrictTax ? e : undefined);
-  const cityEntry = workCityName ? notSchool(kyJurisdictionRuleset(workCityName, input.checkDate)) : undefined;
+  let cityEntry = workCityName ? notSchool(kyJurisdictionRuleset(workCityName, input.checkDate)) : undefined;
+  // An ordinance that starts a rate with a pay PERIOD (Whitesville, Ordinance 25.07 Section 14: the first full pay
+  // period of 2026-10-01) is keyed to the period's first day when the caller gives it, else to the check date.
+  const periodStart = payPeriodStartOf(input);
+  let periodKeyedNote: DataQuality | undefined;
+  if (cityEntry?.rateChangesKeyedTo === 'payPeriodStart') {
+    if (periodStart) {
+      cityEntry = workCityName ? notSchool(kyJurisdictionRuleset(workCityName, periodStart)) : undefined;
+    } else if (cityEntry.rateChangedOn) {
+      const days = (Date.parse(input.checkDate + 'T00:00:00Z') - Date.parse(cityEntry.rateChangedOn + 'T00:00:00Z')) / 86_400_000;
+      if (days < 35) {
+        periodKeyedNote = {
+          tier: 'inferred',
+          note: `${cityEntry.name}'s tax starts with the first full pay period beginning on or after ${cityEntry.rateChangedOn}. No payPeriodStart was supplied, so the check date stands in: a pay period that began before ${cityEntry.rateChangedOn} is taxed here but is not under the ordinance. Supply payPeriodStart.`,
+        };
+      }
+    }
+  }
+  const withPeriodNote = (q: { dataQuality?: DataQuality }): { dataQuality?: DataQuality } =>
+    q.dataQuality ? q : periodKeyedNote ? { dataQuality: periodKeyedNote } : q;
   const countyEntry = workCountyName
     ? notSchool(kyJurisdictionRuleset(workCountyName, input.checkDate))
     : undefined;
@@ -5971,7 +5991,7 @@ function kentuckyCityCountyTax(
         `less a ${fmt(credit)} KRS 68.197(6)-(7) credit for the city fee already paid ` +
         `(assumes the 30,000-300,000-population county credit tier applies to ${countyEntry.name} — not ` +
         `individually verified)`,
-      ...kyLineQuality([cityEntry, countyEntry], input, ctx, periodWages, countyEntry),
+      ...withPeriodNote(kyLineQuality([cityEntry, countyEntry], input, ctx, periodWages, countyEntry)),
     };
   }
 
@@ -5994,7 +6014,7 @@ function kentuckyCityCountyTax(
         : entry === cityEntry && cityShare < 1
           ? `${fmt(taxableWages)} of ${fmt(periodWages)} @ ${r.note} to ${entry.name}${shareNote} (pretax deferrals are added back)`
           : `${fmt(periodWages)} @ ${r.note} to ${entry.name}, full gross wages (KRS 67.750(2) adds back pretax deferrals)`,
-    ...kyLineQuality([entry], input, ctx, periodWages),
+    ...withPeriodNote(kyLineQuality([entry], input, ctx, periodWages)),
   };
 }
 
@@ -7740,7 +7760,7 @@ function eugeneCommunitySafetyPayrollTaxEmployer(
     detail: fmt(wages) + ' @ ' + (cfg.employerRate * 100).toFixed(2) + '% of gross wages paid at a Eugene location',
     dataQuality: {
       tier: 'secondary_source',
-      note: "Eugene's own Employer Payroll Tax page gives 0.21% for the employer tax; this engine cannot apply the reduced rate (0.15% on the first $100,000 for an employer with two or fewer employees, taken on the fourth-quarter or final return) or the public-employer exemption, which depend on the employer as a whole. The 0.21% rate, the 0.15% reduced rate and the base of all subject wages paid to all employees (employees exempt from the employee tax included) are from the city's own Employer Payroll Tax page, read 2026-11-10; the page's definition of subject wages was not read, so gross wages less the state's pretax exclusions is taken.",
+      note: "Eugene's own Employer Payroll Tax page gives 0.21% for the employer tax; this engine cannot apply the reduced rate (0.15% on the first $100,000 for an employer with two or fewer employees, taken on the fourth-quarter or final return) or the public-employer exemption, which depend on the employer as a whole. The 0.21% rate, the 0.15% reduced rate and the base of all subject wages paid to all employees (employees exempt from the employee tax included) are from the city's own Employer Payroll Tax page, read 2026-11-10. Subject wages are Oregon withholding wages after pretax deductions, per the city's employer guide as read by the owner (this project could not retrieve the guide), which is what is taken here.",
     },
   };
 }
@@ -7756,18 +7776,22 @@ interface SpringfieldPayrollTaxConfig {
  * after 2027-01-01 (Ordinance adopted 2026-06-01): 0.1% of applicable wages
  * from the employee, withheld by the employer, and 0.1% from the employer, for
  * wages associated with a taxable Springfield business location (not where the
- * employee lives). Read from the city's own program overview and FAQ and the
- * code exhibit (Springfield Payroll Tax Code, Exhibit A, 7.1200-7.1216). Three
- * things the engine cannot do: it selects the rate by CHECK date, where the
- * city keys it to the pay period's start; it takes gross wages as the base
- * rather than removing the code's excluded remuneration (domestic service in a
- * private home under $1,000 a year, casual labor outside the employer's trade
- * or business, solely seasonal agricultural labor, seamen exempt from
- * garnishment, temporary emergency firefighters, section 401 employees'
- * trusts, and pay that is not wages under IRC 3121(a)(5)(I)), none of which
- * it can see; and it cannot exclude hours an employee works at an employer
- * location outside the city (7.1204(3)). An employer may elect to pay the
- * employee share; that election is not modelled. Dispatched off
+ * employee lives). Read from Ordinance No. 6515 as adopted on 2026-06-01 (6 to 0;
+ * Springfield Payroll Tax Code 7.1200-7.1216) and the city's own program pages.
+ * Wages (7.1202) exclude cafeteria-plan benefits that the employee does not take
+ * in cash (Section 125: health premiums, HSA, FSAs, dependent care) and qualified
+ * transportation fringes, but INCLUDE employee deferrals into 401(k), 403(b),
+ * 457 and similar plans, so the base here is gross pay less those excluded
+ * pretax categories. Not modelled: the code's small-amount exclusions (domestic
+ * service under $1,000 a year, seasonal agricultural labor under $300, casual
+ * labor under $50, and the rest of 7.1202), and the exclusion of hours worked at
+ * an employer location outside the city (7.1204(4)), which are facts about the
+ * employer and employee the engine cannot see. The first date the tax is owed is
+ * set by the City Manager's administrative rule and is no sooner than
+ * 2027-01-01 (Ordinance Section 5), so 2027-01-01 is the earliest possible date,
+ * not a confirmed one. The ordinance keys to the pay period, so payPeriodStart
+ * is used when given and the check date otherwise. An employer may elect to pay
+ * the employee share; that election is not modelled. Dispatched off
  * certificate.locality 'Springfield'.
  */
 function springfieldPayrollTax(
@@ -7778,12 +7802,14 @@ function springfieldPayrollTax(
   const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
   if (!hasLocality(cert, 'Springfield')) return [];
   const cfg = rules.springfieldPayrollTax as SpringfieldPayrollTaxConfig | undefined;
-  if (!cfg || input.checkDate < cfg.effectiveFrom) return [];
+  const periodStartGiven = payPeriodStartOf(input);
+  if (!cfg || (periodStartGiven ?? input.checkDate) < cfg.effectiveFrom) return [];
 
-  const wages = ctx.taxableWagesFor([]);
+  // 7.1202 'Wages': Section 125 benefits and transportation fringes are out; 401(k)/403(b)/457 deferrals stay in.
+  const wages = ctx.taxableWagesFor(['section125', 'hsa', 'fsa', 'dependent_care', 'commuter']);
   const quality = {
     tier: 'inferred' as const,
-    note: "Springfield's own FAQ and program overview give 0.1% employee and 0.1% employer for wages tied to a taxable Springfield business location, for pay periods beginning on or after 2027-01-01. The code's excluded remuneration (7.1202 'Wages') and its exclusion of hours worked at an employer location outside the city (7.1204(3)) are not applied, so gross wages are taxed here; the exhibit read is the version attached to the council's March 2026 materials, not the adopted ordinance; the city says the date the tax becomes due is set by administrative rule and is no sooner than 2027-01-01 (its adopted-ordinance FAQ), so 2027-01-01 is the earliest possible date and not a confirmed one; the city keys the start to the pay period's first day, this engine to the check date.",
+    note: "Ordinance No. 6515 (adopted 2026-06-01, read) sets 0.1% employee and 0.1% employer on wages for services at a business location in the city, with Section 125 benefits and transportation fringes excluded and retirement deferrals included. The first date the tax is owed is set by the City Manager's administrative rule and is no sooner than 2027-01-01, so 2027-01-01 is assumed here and may be later. The code's small-amount wage exclusions and its exclusion of hours worked at an employer location outside the city are not applied. The city keys the start to the pay period's first day: supply payPeriodStart, or the check date is used.",
   };
   return [
     {

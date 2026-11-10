@@ -47,6 +47,29 @@ describe('Whitesville, Kentucky (Daviess County)', () => {
     assert.equal(local(ky('2026-11-10', { workCityWageShare: 1.5 }))?.amount, 3_450);
   });
 
+  test('a pay period that began before 2026-10-01 is not taxed even when paid after it (payPeriodStart)', () => {
+    const wk = (checkDate: string, payPeriodStart?: string) =>
+      calculatePaycheck({
+        ...base(checkDate, 'weekly', 100_000, { code: 'KY', certificate: { workCity: 'Whitesville' } } as PaycheckInput['workState']),
+        ...(payPeriodStart ? { payPeriodStart } : {}),
+      } as PaycheckInput);
+    // paid Fri 2026-10-02 for the week of Mon 2026-09-21 to Sun 2026-09-27: before the ordinance
+    assert.equal(local(wk('2026-10-02', '2026-09-21'))?.amount ?? 0, 0);
+    // the first period that begins on 2026-10-01 or later is taxed: 1.15% of $1,000 = $11.50
+    assert.equal(local(wk('2026-10-09', '2026-10-01'))?.amount, 1_150);
+    assert.equal(local(wk('2026-10-16', '2026-10-05'))?.amount, 1_150);
+    // an ignored (later-than-check) start falls back to the check date and warns
+    const bad = wk('2026-10-09', '2026-10-20');
+    assert.equal(local(bad)?.amount, 1_150);
+    assert.ok(bad.warnings?.some((w) => /payPeriodStart/.test(w)));
+  });
+
+  test('without payPeriodStart, a check dated within 35 days of the start carries an inferred notice; later ones do not', () => {
+    const early = ky('2026-10-09');
+    assert.ok(early.notices?.some((n) => n.taxId === 'KY_LOCAL' && n.tier === 'inferred' && /payPeriodStart/.test(n.note)));
+    assert.ok(!ky('2026-12-15').notices?.some((n) => n.taxId === 'KY_LOCAL'));
+  });
+
   test('pretax deferrals are added back: the 1.15% is on gross pay', () => {
     const r = calculatePaycheck({
       ...base('2026-11-10', 'monthly', 300_000, { code: 'KY', certificate: { workCity: 'Whitesville' } } as PaycheckInput['workState']),

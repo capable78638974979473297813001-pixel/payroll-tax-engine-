@@ -75,6 +75,20 @@ describe('Eugene employer side and Springfield, Oregon', () => {
     assert.equal(er?.payer, 'employer');
     assert.equal(r.netPay, calculatePaycheck(or('2026-11-09', 100000, {}, {})).netPay - 440);
   });
+  test('Springfield wage base (Ordinance 6515, 7.1202): Section 125 benefits are out, 401(k) deferrals stay in', () => {
+    const w = (deductions: PaycheckInput['deductions']) =>
+      calculatePaycheck(or('2027-01-15', 100000, { deductions }, { locality: 'Springfield' })).taxes.find((t) => t.id === 'OR_SPRINGFIELD_PT');
+    assert.equal(w([])?.amount, 100);
+    assert.equal(w([{ code: 'MED', category: 'section125', amount: 20000, preTax: true } as never])?.amount, 80);
+    assert.equal(w([{ code: '401K', category: 'deferral_401k', amount: 20000, preTax: true } as never])?.amount, 100);
+  });
+  test('Springfield keys to the pay period when given: a period starting before the date set by rule is not taxed', () => {
+    const sp = (checkDate: string, payPeriodStart?: string) =>
+      calculatePaycheck(or(checkDate, 100000, payPeriodStart ? { payPeriodStart } : {}, { locality: 'Springfield' })).taxes.some((t) => t.id.startsWith('OR_SPRINGFIELD'));
+    assert.equal(sp('2027-01-05', '2026-12-28'), false);
+    assert.equal(sp('2027-01-12', '2027-01-04'), true);
+    assert.equal(sp('2027-01-05'), true);
+  });
   test('Springfield: nothing before 2027, then 0.1% employee and 0.1% employer on the locality', () => {
     const sp = (d: string) => calculatePaycheck(or(d, 100000, {}, { locality: 'Springfield' }));
     assert.equal(sp('2026-12-31').taxes.some((t) => t.id.startsWith('OR_SPRINGFIELD')), false);
