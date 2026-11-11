@@ -8571,7 +8571,7 @@ describe('West Virginia', () => {
       assert.equal(r.taxes.some((t) => t.id === 'WV_LOCAL_FEE'), false);
     });
 
-    test('Madison, weekly pay: work-location-based like Wheeling, no residency exception ($1.25/wk, the 2020 increase to $3.00 having been cancelled, with a conflicting-sources notice)', () => {
+    test('Madison, weekly pay: work-location-based like Wheeling, no residency exception ($1.25/wk, the 2020 increase to $3.00 having been cancelled, confirmed by the owner 2026-11-11, so no notice)', () => {
       const r = calculatePaycheck(
         input({
           payFrequency: 'weekly',
@@ -8580,7 +8580,7 @@ describe('West Virginia', () => {
         }),
       );
       assert.equal(amountOf(r, 'WV_LOCAL_FEE'), dollars(1.25));
-      assert.ok(r.notices?.some((n) => n.taxId === 'WV_LOCAL_FEE' && n.tier === 'conflicting_sources'));
+      assert.ok(!r.notices?.some((n) => n.taxId === 'WV_LOCAL_FEE'));
     });
 
     test('Smithers, weekly pay: $0.50/wk estimate with a conflicting-sources notice', () => {
