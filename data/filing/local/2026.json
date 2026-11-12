@@ -1291,5 +1291,28 @@
       "https://www.eugene-or.gov/DocumentCenter/View/81430/2026-EUG-ED---Instructions-to-Employee-Detail-Return"
     ],
     "verifiedOn": "2026-11-12"
+  },
+  "OH-COLUMBUS": {
+    "collector": "City of Columbus Income Tax Division",
+    "registration": "Open an employer withholding account through CRISP at https://crisp.columbus.gov when you hire employees subject to city withholding.",
+    "returns": [
+      [
+        "IT-11",
+        "File quarterly, including temporary periods without payroll while the account is active. The 2026 quarterly deadlines are April 30, July 31, November 2 and February 1, 2027."
+      ],
+      [
+        "IT-13",
+        "File the annual reconciliation with W-2 information by March 1, 2027. Include employees subject to Columbus withholding and those with courtesy withholding."
+      ]
+    ],
+    "filing": "File through CRISP or use the city paper forms. For IT-13, upload W-2 images or a city-format fixed-width text file through CRISP, or submit paper wage detail per the instructions.",
+    "payment": "Federal next-day depositors remit electronically on the federal schedule. Otherwise remit semimonthly within three banking days after midmonth and month-end if prior-year withholding exceeded $11,999 total or $1,000 in any month. Otherwise remit monthly within 15 days after month-end if withholding exceeded $2,399 last year or $200 in any month of the prior quarter. Monthly depositors may remit the third month with IT-11. Remaining employers pay quarterly with IT-11. Pay via CRISP or, where permitted, by check with IT-11 or WH-PV. Send any balance separately from IT-13.",
+    "sources": [
+      "https://www.columbus.gov/Government/City-Auditor/Income-Tax-Division/Tax-Forms/Employer-Tax-Forms",
+      "https://www.columbus.gov/files/sharedassets/city/v/1/city-auditor/tax-forms/individuals/2026-filing-and-payment-information.pdf",
+      "https://www.columbus.gov/files/sharedassets/city/v/3/city-auditor/tax-forms/employers/2026-it-13-instructions.pdf",
+      "https://www.columbus.gov/Government/City-Auditor/Income-Tax-Division/General-Income-Tax-Information"
+    ],
+    "verifiedOn": "2026-11-12"
   }
 }

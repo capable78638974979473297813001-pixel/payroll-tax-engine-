@@ -143,6 +143,6 @@ export function localWithholdingGuide(kind, code, year) {
       administrationStartedOn: membership.administrationStartedOn,
       filingNote: 'Collector changed during 2026. Confirm transition instructions for earlier periods and amendments.',
     }),
-    ...(membership && { membershipSources: [...membership.sources], membershipVerifiedOn: ohioRouting.verifiedOn }),
+    ...(membership && { membershipSources: [...membership.sources], membershipVerifiedOn: membership.verifiedOn ?? ohioRouting.verifiedOn }),
   };
 }

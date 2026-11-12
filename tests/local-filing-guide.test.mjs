@@ -28,7 +28,9 @@ test('regional Ohio collectors use the registry; residual and ambiguous cities r
       continue;
     }
     assert.equal(result.jurisdiction, row.name);
-    if (row.municode === '21616') {
+    if (row.municode === '18000') {
+      assert.equal(result.agency, 'OH-COLUMBUS');
+    } else if (row.municode === '21616') {
       assert.equal(result.agency, 'OH-DELTA');
     } else if (row.municode === '71983') {
       assert.equal(result.status, 'collector-unverified');
@@ -361,4 +363,13 @@ test('Eugene city payroll returns are separate from Lane transit reporting', () 
   assert.match(city.guide.payment, /separate check/);
   assert.equal(localWithholdingGuide('OR-city', 'LTD', 2026).status, 'unknown-code');
   assert.equal(localWithholdingGuide('OR-transit-district', 'Eugene', 2026).status, 'unknown-code');
+});
+
+test('Columbus city code routes to its own quarterly and annual forms', () => {
+  const result = localWithholdingGuide('OH-municipality', '18000', 2026);
+  assert.equal(result.membershipVerifiedOn, '2026-11-12');
+  assert.deepEqual(result.guide.returns.map(([form]) => form), ['IT-11', 'IT-13']);
+  assert.match(result.guide.returns[0][1], /February 1, 2027/);
+  assert.match(result.guide.returns[1][1], /March 1, 2027/);
+  assert.notEqual(localWithholdingGuide('OH-municipality', '18014', 2026).agency, result.agency);
 });

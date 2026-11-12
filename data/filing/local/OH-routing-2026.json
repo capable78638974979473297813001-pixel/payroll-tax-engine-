@@ -1,6 +1,13 @@
 {
   "verifiedOn": "2026-11-11",
   "municipalities": {
+    "18000": {
+      "agency": "OH-COLUMBUS",
+      "verifiedOn": "2026-11-12",
+      "sources": [
+        "https://www.columbus.gov/Government/City-Auditor/Income-Tax-Division/Tax-Forms/Employer-Tax-Forms"
+      ]
+    },
     "21378": {
       "agency": "OH-RITA",
       "sources": [
