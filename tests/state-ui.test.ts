@@ -77,15 +77,27 @@ describe('unemployment sections added for the withholding states (batch 8)', () 
   const ANCHORS = ['2026-02-10', '2026-05-10', '2026-08-10', '2026-11-10'];
   const dates = (st: string) => { const p = loadProfile(st); return ANCHORS.map((d) => resolveDue(p.ui!.returns[0].due, d, p).dueDate); };
 
-  test('every one has an unemployment section, one quarterly return, and Kansas, whose contributing-employer due date could not be read, has none', () => {
+  test('every one has an unemployment section and one quarterly return', () => {
     for (const st of BATCH) {
       const ui = loadProfile(st).ui;
       assert.ok(ui, st);
       assert.equal(ui!.returns.length, 1, st);
       assert.equal(ui!.returns[0].frequency, 'quarterly', st);
     }
-    assert.equal(loadProfile('KS').ui, undefined);
-    assert.match(loadProfile('KS').notModelled.join(' '), /Unemployment: NOT MODELLED/);
+  });
+
+  test('Kansas: quarterly return due the last day of the month after the quarter (K.S.A. 44-717), $15,100 base, 25-employee e-file rule, KS_SUI_ER', () => {
+    const ks = loadProfile('KS');
+    assert.ok(ks.ui);
+    assert.equal(ks.ui!.wageBase, 1_510_000);
+    assert.equal(ks.ui!.employerTaxLineId, 'KS_SUI_ER');
+    assert.equal(ks.ui!.weekendRuleStated, true);
+    assert.deepEqual(ks.ui!.returns[0].due, { kind: 'last_day_of_month_after_quarter' });
+    const text = ks.ui!.returns[0].contents.join(' ');
+    assert.match(text, /25 or more employees/);
+    assert.match(text, /\$25 and at most \$200/);
+    assert.match(text, /1% a month/);
+    assert.ok(!loadProfile('KS').notModelled.join(' ').includes('Unemployment: NOT MODELLED'));
   });
 
   test('the last day of the month after the quarter, rolled past weekends (Oct 31, 2026 is a Saturday; Jan 31, 2027 a Sunday)', () => {
