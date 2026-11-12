@@ -292,3 +292,14 @@ test('Owensboro and Daviess use one periodic return and jurisdiction-specific re
   assert.match(annual[1], /separate reconciliations/);
   assert.match(guide.payment, /PO Box 10008/);
 });
+
+test('Kentucky annual employer reconciliations apply the statutory Sunday rule to 2026 wages', () => {
+  const agencies = ['KY-LFUCG', 'KY-KENTON', 'KY-COVINGTON', 'KY-BOWLING-GREEN', 'KY-OWENSBORO-DAVIESS'];
+  for (const agency of agencies) {
+    const guide = localAgencyGuide(agency, 2026);
+    const annual = guide.returns.at(-1)[1];
+    assert.match(annual, /March 1, 2027/, agency);
+    assert.ok(guide.sources.some(url => url.endsWith('id=19391')), agency);
+  }
+  assert.match(localAgencyGuide('KY-BOWLING-GREEN', 2026).filing, /special taxing districts/);
+});
