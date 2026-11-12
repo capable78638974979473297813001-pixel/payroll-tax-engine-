@@ -44,3 +44,13 @@ test('unknown codes and unsupported years never return filing instructions', () 
   assert.equal(localAgencyGuide('toString', 2026), null);
   assert.equal(localAgencyGuide('OH-RITA', 2027), null);
 });
+
+test('Pennsylvania tax collection districts preserve the Allegheny split and Philadelphia exception', () => {
+  const guide = code => localWithholdingGuide('PA-EIT-district', code, 2026);
+  assert.equal(guide('01').guide.collector, 'York Adams Tax Bureau');
+  assert.match(guide('70').guide.collector, /Jordan/);
+  assert.match(guide('71').guide.collector, /Keystone/);
+  assert.match(guide('51').guide.returns[0][0], /Wage Tax/);
+  assert.equal(guide('02').status, 'unknown-code');
+  assert.equal(guide('constructor').status, 'unknown-code');
+});
