@@ -167,3 +167,20 @@ test('all Act 32 districts return collector filing channels and preserve local r
   assert.equal(lookup('28').returns[1][0], '541');
   assert.match(lookup('51').returns[0][0], /Wage Tax/);
 });
+
+test('Michigan city guides distinguish state and municipal filing offices', () => {
+  const lookup = city => localWithholdingGuide('MI-city', city, 2026);
+  assert.equal(lookup('Detroit').agency, 'MI-DETROIT');
+  assert.deepEqual(lookup('Detroit').guide.returns.map(([form]) => form), ['5323', '5321']);
+  assert.match(lookup('Grand Rapids').guide.registration, /SS-4/);
+  assert.equal(lookup('Lansing').guide.returns[0][0], 'L-941');
+  assert.equal(lookup('  east lansing ').guide.returns[0][0], 'EL-501');
+  assert.equal(lookup('Lansing Township').status, 'unknown-code');
+  assert.equal(localWithholdingGuide('MI-city', 'Detroit', 2027).status, 'unsupported-year');
+  for (const row of rows('MI-cities', 'cities')) {
+    const result = lookup(row.name);
+    assert.equal(result.jurisdiction, row.name);
+    if (result.status === 'guide') assert.ok(result.guide.sources.length);
+    else assert.equal(result.status, 'collector-unverified');
+  }
+});

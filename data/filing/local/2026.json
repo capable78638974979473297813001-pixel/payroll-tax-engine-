@@ -174,5 +174,97 @@
       "https://www.hab-inc.com/local-services-tax-employer-lst-1-faq/"
     ],
     "verifiedOn": "2026-11-11"
+  },
+  "MI-DETROIT": {
+    "collector": "Michigan Department of Treasury, City Tax Administration",
+    "registration": "Register for Michigan withholding and use the employer FEIN for Detroit. A business already registered for Michigan withholding uses that registration.",
+    "returns": [
+      [
+        "5323",
+        "File every month, including zero-liability months. Return and payment are due on the 15th of the following month."
+      ],
+      [
+        "5321",
+        "File the annual reconciliation with employee W-2 information by the last day of February. The next-business-day rule moves the 2026 deadline to March 1, 2027. On discontinuance, file by the final withholding payment deadline."
+      ]
+    ],
+    "filing": "File Detroit returns with Michigan Treasury. The city withholding e-file program accepts returns through supported tax software. Follow the 5321 instructions for W-2 submission.",
+    "payment": "Remit monthly withholding electronically using Treasury EFT debit or credit. For debit enrollment or an account update, use Form 5473.",
+    "sources": [
+      "https://www.michigan.gov/taxes/citytax/detroit/business/withholding",
+      "https://www.michigan.gov/taxes/citytax/detroit/forms/2026/2026-employer-withholding-tax",
+      "https://www.michigan.gov/taxes/-/media/Project/Websites/taxes/Forms/City-Withholding/TY2026/5469_ty2026.pdf"
+    ],
+    "verifiedOn": "2026-11-12"
+  },
+  "MI-GRAND-RAPIDS": {
+    "collector": "City of Grand Rapids Income Tax Department",
+    "registration": "Submit the city’s SS-4 Withholding Registration. Obtain your employer’s customized withholding booklet from the city or its online service.",
+    "returns": [
+      [
+        "Withholding return / deposit",
+        "File quarterly by the last day of the following month. If withholding exceeds $100 in the first or second month of a quarter, deposit that month’s withholding by the end of the next month."
+      ],
+      [
+        "GR-W-3",
+        "Reconcile annually by February 28 and attach W-2 detail and any balance due."
+      ]
+    ],
+    "filing": "Use the File or Pay Employer Withholding link on the city website or mail the city forms to Grand Rapids City Income Tax, PO Box 347, Grand Rapids, MI 49501.",
+    "payment": "Pay through the city’s employer withholding service or include payment with the mailed return.",
+    "sources": [
+      "https://www.grandrapidsmi.gov/departments/fiscal-services/income-tax/employers-and-withholders/income-tax-guide-for-withholders/",
+      "https://www.grandrapidsmi.gov/files/assets/public/v/1/departments/income-tax/files/withholder/2021-cf-w-3.pdf",
+      "https://legislature.mi.gov/Laws/MCL?objectName=mcl-141-760"
+    ],
+    "verifiedOn": "2026-11-12"
+  },
+  "MI-LANSING": {
+    "collector": "City of Lansing Income Tax Department",
+    "registration": "Complete Lansing’s L-SS-4 employer withholding registration with your FEIN and worksite details.",
+    "returns": [
+      [
+        "L-941",
+        "File quarterly by the end of the following month. Deposit earlier when withholding exceeds $100 in the first or second month of the quarter, by the end of the next month."
+      ],
+      [
+        "LW-3",
+        "Submit the annual reconciliation with employee W-2s by February 28."
+      ]
+    ],
+    "filing": "Use Lansing’s employer withholding service or submit the L-941 voucher with the remittance to the City of Lansing Treasurer, PO Box 19219, Lansing, MI 48901.",
+    "payment": "Pay online by ACH debit or mail a check or money order with the L-941 voucher.",
+    "sources": [
+      "https://www.lansingmi.gov/employer-withholding",
+      "https://content.civicplus.com/api/assets/mi-lansing/069f9792-d5a6-47e1-a55b-cad2a6b006ab?cache=1800",
+      "https://edocs.lansingmi.gov/documents/Lansing_Retention_Schedule_Revised_Feb_2023.pdf",
+      "https://legislature.mi.gov/Laws/MCL?objectName=mcl-141-760"
+    ],
+    "verifiedOn": "2026-11-12"
+  },
+  "MI-EAST-LANSING": {
+    "collector": "City of East Lansing Income Tax Department",
+    "registration": "Submit EL-SS-4, then set up the employer account in East Lansing’s Employer Withholding Tool.",
+    "returns": [
+      [
+        "EL-501",
+        "For the first and second months of each quarter, deposit the month’s withholding if it exceeds $100. Use the monthly due dates in the 2026 employer packet."
+      ],
+      [
+        "EL-941",
+        "Report all quarterly withholding and remit the undeposited balance. For 2026 the quarterly due dates are April 30, July 31, November 2 and February 1, 2027."
+      ],
+      [
+        "EL-W-3",
+        "File the annual reconciliation and W-2s by the last day of February following the tax year. Identify East Lansing in W-2 box 20."
+      ]
+    ],
+    "filing": "File through East Lansing’s Employer Withholding Tool or use the forms and instructions in its 2026 packet.",
+    "payment": "Use the city’s online employer withholding payment service or remit with the appropriate EL-501 or EL-941 voucher.",
+    "sources": [
+      "https://www.cityofeastlansing.com/1915/Income-Tax-Forms",
+      "https://www.cityofeastlansing.com/DocumentCenter/View/16965/2026-Employer-Withholding-Packet-PDF"
+    ],
+    "verifiedOn": "2026-11-12"
   }
 }

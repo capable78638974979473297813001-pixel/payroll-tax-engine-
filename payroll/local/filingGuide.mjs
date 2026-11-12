@@ -6,6 +6,7 @@ function readData(path) {
 
 const pennsylvania = readData('filing/local/PA-districts-2026.json');
 const profiles = readData('filing/local/2026.json');
+const michiganCities = readData('local/MI-cities-2026.json').cities;
 const counties = readData('local/IN-counties-2026.json').counties;
 const districts = readData('local/OH-school-districts-2026.json').districts;
 const municipalities = readData('local/OH-municipalities-2026.json').municipalities;
@@ -61,6 +62,13 @@ export function localWithholdingGuide(kind, code, year) {
           sources: [pennsylvania.source, ...instructions.sources, ...(collectorInstructions?.sources ?? [])],
         },
       };
+    }
+    case 'MI-city': {
+      row = michiganCities.find(city => city.name.toLowerCase() === code.trim().toLowerCase());
+      if (!row) return { status: 'unknown-code' };
+      const cityAgency = 'MI-' + row.name.toUpperCase().replaceAll(' ', '-');
+      if (Object.hasOwn(profiles, cityAgency)) agency = cityAgency;
+      break;
     }
     case 'IN-county':
       row = counties.find(county => county.countyCode === code);
