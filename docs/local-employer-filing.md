@@ -4,6 +4,7 @@ Use `localWithholdingGuide(kind, code, 2026)` from `payroll/local/filingGuide.mj
 
 | Kind | Code | Example |
 | --- | --- | --- |
+| AL-city | Alabama city name with a verified occupational tax guide | `Birmingham` or `Gadsden` |
 | CO-city | Colorado city name with a verified OPT guide | `Denver` |
 | DE-city | Delaware wage tax city name | `Wilmington` |
 | MO-city | Missouri earnings tax city name | `St. Louis` |

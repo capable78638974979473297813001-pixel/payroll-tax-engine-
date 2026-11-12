@@ -1109,5 +1109,50 @@
       "https://apps.legislature.ky.gov/law/Statutes/statute.aspx?id=19391"
     ],
     "verifiedOn": "2026-11-12"
+  },
+  "AL-BIRMINGHAM": {
+    "collector": "City of Birmingham Finance Department, Tax and License Division",
+    "registration": "Register with the city for a taxpayer identification number. Use the Business License Application/Change Form to add an occupational tax account.",
+    "returns": [
+      [
+        "Occupational Tax Return",
+        "File monthly by the 20th of the next month, including zero returns. If monthly withholding averaged less than $50 during the preceding calendar year, the employer may elect quarterly filing with the division. The due date is then the 20th following the quarter."
+      ],
+      [
+        "Annual Occupational Tax Reconciliation",
+        "City code section 3A-2-5(c) specifies January 31. Report each employee’s gross compensation, occupational tax withheld and remitted, and last known address. Confirm the annual filing date with the division for Sunday, January 31, 2027."
+      ]
+    ],
+    "filing": "File periodic returns through Birmingham’s HdL Taxes Portal. The portal provides the annual reconciliation form.",
+    "payment": "Remit periodic withholding with the return through the city’s HdL Taxes Portal. The portal moves periodic weekend and holiday deadlines to the next business day.",
+    "sources": [
+      "https://www.birminghamal.gov/government/city-departments/finance/tax-license-division",
+      "https://birminghamal.hdlgov.com/Home/Home/Taxes",
+      "https://bhamal.granicus.com/DocumentViewer.php?file=bhamal_dbd4ef9021476fee1cd03515333fae1f.pdf&view=1"
+    ],
+    "verifiedOn": "2026-11-12"
+  },
+  "AL-GADSDEN": {
+    "collector": "City of Gadsden Revenue Department",
+    "registration": "Submit the city business license application to Revenue and request the occupational withholding account.",
+    "returns": [
+      [
+        "Occupational License Fee Return",
+        "Report and remit monthly withholding by the 20th of the following month."
+      ],
+      [
+        "G-3",
+        "Reconcile withholding and remittances for the calendar year by January 31. Include employee withholding statements, a listing or W-2s and explain any discrepancy. Confirm the annual filing date with Revenue for Sunday, January 31, 2027."
+      ]
+    ],
+    "filing": "File periodic occupational license fee returns through the TekConnectGov link on the city Revenue page. Mail the original annual G-3 and employee detail to City of Gadsden Revenue Department, PO Box 267, Gadsden, AL 35902.",
+    "payment": "Pay periodic withholding through Gadsden’s TekConnectGov portal. Enclose any additional amount due with the G-3 reconciliation.",
+    "sources": [
+      "https://www.cityofgadsden.com/175/Revenue",
+      "https://www.cityofgadsden.com/176/Licenses",
+      "https://www.cityofgadsden.com/ArchiveCenter/ViewFile/Item/548",
+      "https://www.cityofgadsden.com/DocumentCenter/View/5067/Form-G-3-OLF-Reconciliation"
+    ],
+    "verifiedOn": "2026-11-12"
   }
 }

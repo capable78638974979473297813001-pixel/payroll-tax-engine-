@@ -303,3 +303,15 @@ test('Kentucky annual employer reconciliations apply the statutory Sunday rule t
   }
   assert.match(localAgencyGuide('KY-BOWLING-GREEN', 2026).filing, /special taxing districts/);
 });
+
+test('Alabama employer filings use the correct city portal and reporting frequency', () => {
+  const lookup = city => localWithholdingGuide('AL-city', city, 2026);
+  const birmingham = lookup(' birmingham ').guide;
+  assert.match(birmingham.returns[0][1], /averaged less than \$50/);
+  assert.match(birmingham.payment, /HdL/);
+  const gadsden = lookup('Gadsden').guide;
+  assert.equal(gadsden.returns[1][0], 'G-3');
+  assert.match(gadsden.filing, /TekConnectGov/);
+  assert.equal(lookup('Denver').status, 'unknown-code');
+  assert.equal(localWithholdingGuide('CO-city', 'Birmingham', 2026).status, 'unknown-code');
+});
