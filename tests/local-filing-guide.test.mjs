@@ -147,3 +147,23 @@ test('PA LST uses a separately identified collector and its own form and remitta
   assert.equal(localWithholdingGuide('PA-LST-district', '71', 2026).status, 'unsupported-jurisdiction-type');
   assert.equal(localAgencyGuide('PA-KEYSTONE-LST', 2025), null);
 });
+
+test('all Act 32 districts return collector filing channels and preserve local requirements', () => {
+  const directory = JSON.parse(readFileSync(new URL('../data/filing/local/PA-districts-2026.json', import.meta.url)));
+  const lookup = code => localWithholdingGuide('PA-EIT-district', code, 2026).guide;
+  for (const [code, district] of Object.entries(directory.districts)) {
+    if (code === '51') continue;
+    const guide = lookup(code);
+    assert.ok(directory.collectorInstructions[district.collector]);
+    assert.notEqual(guide.filing, directory.act32.filing);
+    assert.notEqual(guide.payment, directory.act32.payment);
+    assert.match(guide.returns[0][1], /last day of the month|February 1, 2027/);
+  }
+  assert.match(lookup('31').filing, /26 or more employees must/);
+  assert.match(lookup('21').filing, /20 or more employees must/);
+  assert.match(lookup('26').filing, /requests electronic detail/);
+  assert.match(lookup('73').filing, /require electronic returns/);
+  assert.match(lookup('36').returns[1][1], /Confirm with the bureau/);
+  assert.equal(lookup('28').returns[1][0], '541');
+  assert.match(lookup('51').returns[0][0], /Wage Tax/);
+});

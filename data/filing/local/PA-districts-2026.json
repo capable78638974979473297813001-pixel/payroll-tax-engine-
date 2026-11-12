@@ -358,7 +358,7 @@
     "returns": [
       [
         "Employer Quarterly Return",
-        "File and remit within 30 days after each calendar quarter. For an eligible multi-district employer electing central filing, remit electronically monthly to the elected collector."
+        "File and pay by the last day of the month after quarter end. An eligible employer electing combined filing reports and pays electronically each month."
       ],
       [
         "W2-R",
@@ -375,7 +375,8 @@
       "https://dced.pa.gov/local-government/local-income-tax-information/instructions-employers/",
       "https://dced.pa.gov/local-government/local-income-tax-information/local-withholding-tax-faqs/",
       "https://dced.pa.gov/local-government/local-income-tax-information/act32-faq/",
-      "https://dced.pa.gov/download/act-32-of-2008-procedure-manual/?wpdmdl=56767"
+      "https://dced.pa.gov/download/act-32-of-2008-procedure-manual/?wpdmdl=56767",
+      "https://www.legis.state.pa.us/WU01/LI/LI/US/HTM/1965/0/0511..HTM"
     ]
   },
   "philadelphia": {
@@ -399,7 +400,7 @@
       "returns": [
         [
           "Employer Quarterly Return",
-          "File and remit within 30 days after quarter end. Eligible combined filers may report and remit electronically each month after arranging central filing."
+          "Section 512 sets the deadline at the last day of the month after quarter end. The collector also publishes a 30-day schedule. Confirm the assigned date before relying on a later statutory date. Eligible combined filers may report and remit electronically each month after arranging central filing."
         ],
         [
           "W2-R",
@@ -423,7 +424,7 @@
       "returns": [
         [
           "E1",
-          "File and remit within 30 days after quarter end. For combined monthly filing, submit a notice of intent and obtain approval before filing."
+          "Section 512 sets the deadline at the last day of the month after quarter end. The collector also publishes a 30-day schedule. Confirm the assigned date before relying on a later statutory date. For combined monthly filing, submit a notice of intent and obtain approval before filing."
         ],
         [
           "W-2 Annual Reconciliation",
@@ -440,6 +441,185 @@
       "verifiedOn": "2026-11-11",
       "gaps": [
         "Verify the separate LST collector for the physical worksite."
+      ]
+    },
+    "York Adams Tax Bureau": {
+      "registration": "Complete the Business Entity Questionnaire and the Online Filing Questionnaire to activate the employer FEIN in PALite.",
+      "filing": "File quarterly employer EIT detail through PALite. The bureau publishes a quarterly return and W2-R. Upload formats include Excel and EFW2.",
+      "payment": "For ACH credit, arrange the bureau’s CCD+ TXP format with your bank and initiate payment two business days before the due date.",
+      "sources": [
+        "https://yatb.com/new-businesses",
+        "https://yatb.com/for-employers/",
+        "https://yatb.com/filing-online%2Felectronic"
+      ],
+      "verifiedOn": "2026-11-11",
+      "gaps": [
+        "Confirm the LST collector separately for each worksite."
+      ]
+    },
+    "Capital Tax Collection Bureau": {
+      "registration": "Submit the Capital Tax Collection Bureau Employer Registration Form for each new employer account.",
+      "filing": "Use Capital’s Employer Online Filing system for quarterly detail. Employers with 26 or more employees must file online. The bureau publishes quarterly and W-2 reconciliation forms.",
+      "payment": "Pay the quarterly withholding by ACH through Capital’s employer filing system.",
+      "sources": [
+        "https://captax.com/employers/",
+        "https://captax.com/wp-content/uploads/2024/12/act-32-faq.pdf"
+      ],
+      "verifiedOn": "2026-11-11",
+      "gaps": [
+        "Confirm the LST collector separately for each worksite."
+      ]
+    },
+    "Jordan Tax Service, Inc.": {
+      "registration": "Register each work location in Jordan Tax Service’s Act 32 employer system. Request approval before starting a combined monthly return.",
+      "filing": "Enter details online or bulk upload. Allegheny Central and Southwest require electronic returns from employers with 10 or more employees.",
+      "payment": "Use the JTS electronic check (ACH debit) option. Confirm other payment channels with JTS for the filing period.",
+      "sources": [
+        "https://www.jordantax.com/images/EmployerRequestForPermissionToFileCombinedReturns.pdf",
+        "https://www.jordantax.com/Forms/JTS%20Act%2032%20Presentation.pdf"
+      ],
+      "verifiedOn": "2026-11-11",
+      "gaps": [
+        "Confirm the LST collector separately for each worksite."
+      ]
+    },
+    "Centre Tax Agency": {
+      "registration": "Complete Centre Tax Agency’s Business/Employer Registration Form and enroll separately in eReporting for online filing.",
+      "filing": "Submit through eReporting. Quarterly filers can use the agency’s paper return. Combined filers must file monthly online.",
+      "payment": "Remit electronically through eReporting. Combined monthly filers must remit electronically.",
+      "sources": [
+        "https://www.statecollegepa.us/employer-tax-forms",
+        "https://statecollegepa.us/filing-options"
+      ],
+      "verifiedOn": "2026-11-11",
+      "gaps": [
+        "Confirm the LST collector separately for each worksite."
+      ]
+    },
+    "Cumberland County Tax Bureau": {
+      "registration": "Send Cumberland’s Employer Registration form with the physical worksite address by mail, email or fax. The bureau sends a verification letter with the account number.",
+      "filing": "Use the Online Employer Filing System. Employers with 20 or more employees must file online. Combined monthly filers must submit detail electronically.",
+      "payment": "Pay through the bureau’s online employer filing system.",
+      "sources": [
+        "https://cumberlandtax.org/about/faqs",
+        "https://www.cumberlandtax.org/"
+      ],
+      "verifiedOn": "2026-11-11",
+      "gaps": [
+        "Confirm the LST collector separately for each worksite."
+      ]
+    },
+    "Southwest Regional Tax Bureau": {
+      "registration": "Register in Southwest Regional Tax Bureau’s eReporting system even if a payroll service handles filing.",
+      "filing": "Submit through eReporting. The bureau requests electronic detail for 10 or more employees. Use the Employer EIT Quarterly Tax Form and Employer EIT Annual Summary Report. Continue filing zero periods until the account is closed.",
+      "payment": "Pay by ACH debit in eReporting. Quarterly filers paying by check should enclose the quarterly form or the eReporting payment voucher.",
+      "sources": [
+        "https://www.swrtb.org/?page_id=24",
+        "https://www.swrtb.org/?page_id=18"
+      ],
+      "verifiedOn": "2026-11-11",
+      "gaps": [
+        "Confirm the LST collector separately for each worksite.",
+        "The bureau also publishes a 30-day schedule. Confirm the assigned due date if it differs from section 512."
+      ]
+    },
+    "Franklin County Area Tax Bureau": {
+      "registration": "Submit Franklin’s New Employer Registration form. Complete the separate Employer Electronic Filing Registration form for access to e-file.",
+      "filing": "Use Franklin’s Employer Portal to submit withholding detail. Report on Form 511 and reconcile on Form 541.",
+      "payment": "Pay by ACH debit. For ordinary quarterly filings, Franklin also accepts a check with the printed e-file voucher.",
+      "sources": [
+        "https://www.fcatb.org/index.php/employer-tax-forms/",
+        "https://www.fcatb.org/Efile%20Registration.pdf"
+      ],
+      "verifiedOn": "2026-11-11",
+      "gaps": [
+        "Confirm the LST collector separately for each worksite."
+      ],
+      "returns": [
+        [
+          "511",
+          "File and pay by the last day of the month after quarter end. An eligible employer electing combined filing reports and pays electronically each month."
+        ],
+        [
+          "541",
+          "Annual employer reconciliation, generally due the last day of February. Consult the assigned collector for year-end and cessation instructions."
+        ]
+      ]
+    },
+    "Lancaster County Tax Collection Bureau": {
+      "registration": "Employers filing directly register in Lancaster eReporting with their physical Lancaster worksite and PSD code. If a payroll provider files and pays, contact the bureau’s employer department to register the business.",
+      "filing": "Submit monthly, quarterly and year-end detail electronically using the bureau’s EFW2 or Excel layout.",
+      "payment": "Pay in employer eReporting or follow the bureau’s ACH credit instructions.",
+      "sources": [
+        "https://www.lctcb.org/?page_id=70",
+        "https://www.lctcb.org/wp-content/uploads/Employer-Due-Dates-for-2026.pdf"
+      ],
+      "verifiedOn": "2026-11-11",
+      "gaps": [
+        "Confirm the LST collector separately for each worksite."
+      ],
+      "returns": [
+        [
+          "Employer EIT withholding",
+          "For 2026 quarters the bureau lists April 30, July 31, November 2 and February 1, 2027. Consult its monthly calendar for combined returns."
+        ],
+        [
+          "Annual employer reconciliation",
+          "The bureau’s calendar lists March 2, 2027. Its stated next-business-day rule points to March 1. Confirm with the bureau before relying on March 2."
+        ]
+      ]
+    },
+    "Danville Area Earned Income Tax Office": {
+      "registration": "Submit the Danville employer registration form. Contact the office to activate the PALite employer account.",
+      "filing": "Use the employer link on Danville’s website for PALite. The office also publishes the Employer Quarterly Return and W2-R.",
+      "payment": "The office directs checks to be payable to DAEITO. Combined monthly filers must arrange electronic remittance.",
+      "sources": [
+        "https://danveito.com/",
+        "https://employer.palite.org/EmployerOnlineV2/"
+      ],
+      "verifiedOn": "2026-11-11",
+      "gaps": [
+        "Confirm the LST collector separately for each worksite."
+      ]
+    },
+    "Berks Earned Income Tax Bureau": {
+      "registration": "Register the organization and worksites in Berks eReporting before submitting detail or a payment.",
+      "filing": "All employers must submit monthly, quarterly and year-end EIT detail electronically in eReporting. Enter detail directly or upload a supported file.",
+      "payment": "Pay through eReporting. To remit by ACH credit, first arrange it with the bureau. The bureau also lists a fee-based card option.",
+      "sources": [
+        "https://www.berkseit.com/employers/",
+        "https://www.berkseit.com/employers/reporting/",
+        "https://www.berkseit.com/employers/payment-options-other-than-via-ereporting/",
+        "https://www.berkseit.com/employers/due-dates-see-lctcb-print-out/"
+      ],
+      "verifiedOn": "2026-11-11",
+      "gaps": [
+        "Confirm the LST collector separately for each worksite."
+      ],
+      "returns": [
+        [
+          "Employer EIT withholding",
+          "For 2026 quarters the bureau lists April 30, July 31, November 2 and February 1, 2027. Consult its monthly calendar for combined returns."
+        ],
+        [
+          "Annual employer reconciliation",
+          "The bureau lists March 1, 2027 for 2026 year-end detail."
+        ]
+      ]
+    },
+    "Blair County Tax Collection Bureau": {
+      "registration": "Submit the bureau’s employer registration and complete its Employer Online Filing Questionnaire for PALite access.",
+      "filing": "Submit quarterly EIT detail and year-end W-2 detail through PALite. Use the bureau’s W-2R annual reconciliation instructions.",
+      "payment": "Use ACH debit through PALite to remit withholding.",
+      "sources": [
+        "https://blairtax.org/for-employers",
+        "https://blairtax.org/faqs",
+        "https://employer.palite.org/EmployerOnlineV2/"
+      ],
+      "verifiedOn": "2026-11-11",
+      "gaps": [
+        "Confirm the LST collector separately for each worksite.",
+        "The bureau also publishes a 30-day schedule. Confirm the assigned due date if it differs from section 512."
       ]
     }
   }
