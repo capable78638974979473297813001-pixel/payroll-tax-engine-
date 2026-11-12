@@ -840,5 +840,59 @@
       "https://www.denvergov.org/files/assets/public/v/1/finance/documents/treasury/tax-guides/tax-update-2025/taxguidetopic30_filingperiods.pdf"
     ],
     "verifiedOn": "2026-11-12"
+  },
+  "CO-GLENDALE": {
+    "collector": "City of Glendale Tax Department",
+    "registration": "Register the business in Glendale MUNIRevs.",
+    "returns": [
+      [
+        "Occupational Privilege Tax return",
+        "File and pay by the 20th of the month after the assigned reporting period, including zero returns. The code specifies monthly filing above $60 per month and quarterly below $100 per quarter. Confirm the assigned period where neither condition applies. Annual filing requires Tax Inspector approval."
+      ]
+    ],
+    "filing": "Submit the city OPT return through Glendale MUNIRevs.",
+    "payment": "Pay the employee and employer portions through Glendale MUNIRevs.",
+    "sources": [
+      "https://www.glendale.co.us/355/Occupational-Privilege-Tax",
+      "https://glendale.co.us/407/MUNIRevs",
+      "https://ecode360.com/47868045"
+    ],
+    "verifiedOn": "2026-11-12"
+  },
+  "CO-GREENWOOD-VILLAGE": {
+    "collector": "City of Greenwood Village Taxpayer Services",
+    "registration": "Apply online for an OPT license. Businesses using a PEO must obtain their own license and disclose the PEO.",
+    "returns": [
+      [
+        "Occupational Privilege Tax return",
+        "File monthly by the last day of the next month. The Finance Director may permit less frequent employee withholding returns for employers whose monthly employee tax due is below $40. Confirm the schedule assigned to the account."
+      ]
+    ],
+    "filing": "Report both portions online through the Village tax payment portal, Xpress Bill Pay.",
+    "payment": "Remit both portions through Xpress Bill Pay.",
+    "sources": [
+      "https://greenwoodvillage.com/1220/Occupational-Privilege-Tax-OPT",
+      "https://greenwoodvillage.com/FormCenter/Finance-19/Business-License-Application-2026-125",
+      "https://library.municode.com/co/greenwood_village/codes/municipal_code?nodeId=CH4REFI_ART7EMOCPRTA_S4-7-20DE"
+    ],
+    "verifiedOn": "2026-11-12"
+  },
+  "CO-SHERIDAN": {
+    "collector": "City of Sheridan Finance Department",
+    "registration": "Register through Sheridan Business Licenses and confirm the OPT account with Finance at 303-762-2200.",
+    "returns": [
+      [
+        "Occupational Privilege Tax return",
+        "File monthly by the last day of the following month, including zero returns. Employers with fewer than 10 employees may file quarterly. Confirm the quarterly due date on the city account."
+      ]
+    ],
+    "filing": "Use Sheridan MuniRevs for the city's OPT return.",
+    "payment": "Remit employee withholding and the employer match to Sheridan via MuniRevs.",
+    "sources": [
+      "https://ci.sheridan.co.us/89/Business-Licenses",
+      "https://ci.sheridan.co.us/288/Occupational-Privilege-Tax",
+      "https://library.municode.com/co/sheridan/codes/code_of_ordinances?nodeId=PTIICOOR_CH62REFI_ARTVIOCPRTA_S62-244EXREDE"
+    ],
+    "verifiedOn": "2026-11-12"
   }
 }

@@ -37,3 +37,5 @@ Ohio municipal filing lookups use dated collector evidence. Delta uses the villa
 Michigan lookups accept the names in the 2026 city registry. All 24 registered cities return employer guides. Each guide lists its registration route, periodic and annual returns, filing channel, payment instructions and sources. Ionia’s 2026 annual form prints a deadline before the end of the reporting year, and Lapeer’s published Q2 example differs from its month-end rule. Those entries flag the dates for confirmation. Resolve the worksite or residence jurisdiction before looking up a city by name.
 
 Use `localWithholdingGuide('DE-city', 'Wilmington', 2026)` for Wilmington employer wage withholding, intermediate payments and annual W-2 reporting.
+
+Colorado OPT guides cover Denver, Glendale, Greenwood Village and Sheridan. Aurora repealed both portions effective January 1, 2025. Its [repeal notice](https://www.auroragov.org/business_services/taxes/occupational_privilege_tax) explains how employers can address earlier periods.

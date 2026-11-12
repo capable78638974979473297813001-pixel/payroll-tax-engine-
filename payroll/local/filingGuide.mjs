@@ -63,12 +63,16 @@ export function localWithholdingGuide(kind, code, year) {
         },
       };
     }
-    case 'CO-city':
-      if (code.trim().toLowerCase() === 'denver') {
-        row = { name: 'Denver' };
-        agency = 'CO-DENVER';
+    case 'CO-city': {
+      const cities = ['Denver', 'Glendale', 'Greenwood Village', 'Sheridan'];
+      const locality = code.trim().toLowerCase();
+      const city = cities.find(name => name.toLowerCase() === locality);
+      if (city) {
+        row = { name: city };
+        agency = 'CO-' + city.toUpperCase().replaceAll(' ', '-');
       }
       break;
+    }
     case 'DE-city':
       if (code.trim().toLowerCase() === 'wilmington') {
         row = { name: 'Wilmington' };

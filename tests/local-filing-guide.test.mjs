@@ -233,3 +233,16 @@ test('Denver routes occupational privilege tax to Treasury and preserves the mon
   assert.match(result.guide.payment, /Denver eBiz/);
   assert.equal(localWithholdingGuide('CO-city', 'Denver metro', 2026).status, 'unknown-code');
 });
+
+test('Colorado cities use their own OPT deadlines and payment portals', () => {
+  const lookup = city => localWithholdingGuide('CO-city', city, 2026);
+  const glendale = lookup('Glendale').guide;
+  assert.match(glendale.returns[0][1], /20th of the month/);
+  assert.match(glendale.payment, /Glendale MUNIRevs/);
+  const village = lookup(' GREENWOOD VILLAGE ').guide;
+  assert.match(village.payment, /Xpress Bill Pay/);
+  assert.match(village.registration, /PEO/);
+  assert.match(lookup('Sheridan').guide.returns[0][1], /fewer than 10 employees/);
+  assert.equal(lookup('Aurora').status, 'unknown-code');
+  assert.equal(lookup('Sheridan Lake').status, 'unknown-code');
+});
