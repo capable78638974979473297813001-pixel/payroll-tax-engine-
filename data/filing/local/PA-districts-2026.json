@@ -392,5 +392,55 @@
       "https://www.phila.gov/services/business-self-employment/business-taxes/wage-tax-employers/",
       "https://www.phila.gov/documents/wage-tax-due-dates/"
     ]
+  },
+  "collectorInstructions": {
+    "Keystone Collections Group": {
+      "registration": "Create an account at https://business.keystonecollects.com and register the employer using its FEIN and worksite information. Record each worksite PSD code and retain an employee residency certification.",
+      "returns": [
+        [
+          "Employer Quarterly Return",
+          "File and remit within 30 days after quarter end. Eligible combined filers may report and remit electronically each month after arranging central filing."
+        ],
+        [
+          "W2-R",
+          "File the annual reconciliation with employee W-2 detail by the last day of February following the tax year."
+        ]
+      ],
+      "filing": "For tax year 2026, submit quarterly EIT returns in the Business Portal by manual entry, CSV upload or PA Standard File Format. Submit W2-R through the portal.",
+      "payment": "Pay 2026 quarterly EIT electronically in the Business Portal under Keystone’s December 16, 2025 employer notice.",
+      "sources": [
+        "https://keystonecollects.com/mandatory-electronic-filing-for-employers/",
+        "https://keystonecollects.com/businesses/payroll-withholding/",
+        "https://keystonecollects.com/download/E102.pdf"
+      ],
+      "verifiedOn": "2026-11-11",
+      "gaps": [
+        "Verify the separate LST collector for the physical worksite."
+      ]
+    },
+    "Berkheimer Tax Administrator": {
+      "registration": "Use Berkheimer Employer Registration to obtain the HAB employer account number, or look up an existing account. Register for e-file to submit online. Record each worksite PSD code and retain an employee residency certification.",
+      "returns": [
+        [
+          "E1",
+          "File and remit within 30 days after quarter end. For combined monthly filing, submit a notice of intent and obtain approval before filing."
+        ],
+        [
+          "W-2 Annual Reconciliation",
+          "File the annual reconciliation with employee W-2 detail by the last day of February following the tax year."
+        ]
+      ],
+      "filing": "Quarterly employers can enter data online, upload a file or mail the E1. Approved combined monthly filers must use electronic file upload. The annual reconciliation supports online entry or upload and has a printable form.",
+      "payment": "Online E1 filings require ACH debit at submission. Quarterly paper filers can send payment with E1 to Berkheimer Earned Income Tax Administrator, PO Box 25132, Lehigh Valley, PA 18002.",
+      "sources": [
+        "https://www.hab-inc.com/eit-forms-employers/",
+        "https://www.hab-inc.com/electronic-services/businessesandpayrollcompanies/file-and-pay/",
+        "https://www.hab-inc.com/faqs-employer-earned-income-tax-faq/"
+      ],
+      "verifiedOn": "2026-11-11",
+      "gaps": [
+        "Verify the separate LST collector for the physical worksite."
+      ]
+    }
   }
 }

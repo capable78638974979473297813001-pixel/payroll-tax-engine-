@@ -47,16 +47,18 @@ export function localWithholdingGuide(kind, code, year) {
       if (!Object.hasOwn(pennsylvania.districts, code)) return { status: 'unknown-code' };
       const district = pennsylvania.districts[code];
       const instructions = code === '51' ? pennsylvania.philadelphia : pennsylvania.act32;
+      const collectorInstructions = pennsylvania.collectorInstructions[district.collector];
       return {
         status: 'guide',
         jurisdiction: district.district,
         code,
         guide: {
           ...structuredClone(instructions),
+          ...structuredClone(collectorInstructions),
           collector: district.collector,
           website: district.website,
-          verifiedOn: pennsylvania.verifiedOn,
-          sources: [pennsylvania.source, ...instructions.sources],
+          verifiedOn: collectorInstructions?.verifiedOn ?? pennsylvania.verifiedOn,
+          sources: [pennsylvania.source, ...instructions.sources, ...(collectorInstructions?.sources ?? [])],
         },
       };
     }

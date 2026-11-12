@@ -118,3 +118,32 @@ test('municipal filing routes preserve transitions and distinguish the two Shawn
     assert.match(lookup(code).filingNote, /earlier periods/);
   }
 });
+
+test('PA EIT instructions follow the appointed collector across the district directory', () => {
+  const directory = JSON.parse(readFileSync(new URL('../data/filing/local/PA-districts-2026.json', import.meta.url)));
+  for (const [code, district] of Object.entries(directory.districts)) {
+    const { guide } = localWithholdingGuide('PA-EIT-district', code, 2026);
+    if (district.collector === 'Keystone Collections Group') {
+      assert.match(guide.payment, /electronically/);
+      assert.ok(guide.sources.includes('https://keystonecollects.com/mandatory-electronic-filing-for-employers/'));
+    } else if (district.collector === 'Berkheimer Tax Administrator') {
+      assert.equal(guide.returns[0][0], 'E1');
+      assert.match(guide.payment, /ACH debit/);
+      assert.match(guide.filing, /combined monthly filers must use electronic file upload/i);
+    } else {
+      assert.doesNotMatch(guide.payment, /Keystone|Berkheimer/);
+    }
+    assert.ok(guide.sources.includes(directory.source));
+  }
+});
+
+test('PA LST uses a separately identified collector and its own form and remittance instructions', () => {
+  const hab = localAgencyGuide('PA-BERKHEIMER-LST', 2026);
+  assert.equal(hab.returns[0][0], 'LST-1');
+  assert.match(hab.filing, /25156/);
+  const keystone = localAgencyGuide('PA-KEYSTONE-LST', 2026);
+  assert.match(keystone.returns[0][1], /zero-filing/);
+  assert.match(keystone.payment, /electronically/);
+  assert.equal(localWithholdingGuide('PA-LST-district', '71', 2026).status, 'unsupported-jurisdiction-type');
+  assert.equal(localAgencyGuide('PA-KEYSTONE-LST', 2025), null);
+});

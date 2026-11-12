@@ -137,5 +137,42 @@
       "https://www.ritaohio.com/Municipalities/Home/MemberPage?id=258"
     ],
     "verifiedOn": "2026-11-11"
+  },
+  "PA-KEYSTONE-LST": {
+    "collector": "Keystone Collections Group",
+    "registration": "Confirm the worksite LST collector in Pennsylvania DCED’s address search. Create an account at https://business.keystonecollects.com and register the employer using its FEIN and worksite information.",
+    "returns": [
+      [
+        "Quarterly Return for Employer – Local Services Tax",
+        "File and remit within 30 days after quarter end. Use the zero-filing option if all employees are exempt."
+      ]
+    ],
+    "filing": "Select Local Services Tax in the Business Portal. Keystone directs 2026 LST employers to use its electronic filing process.",
+    "payment": "Submit the LST payment electronically through the Business Portal.",
+    "sources": [
+      "https://dced.pa.gov/local-government/local-income-tax-information/instructions-employers/",
+      "https://keystonecollects.com/mandatory-electronic-filing-for-employers/",
+      "https://keystonecollects.com/form/quarterly-return-for-employer-lst/",
+      "https://keystonecollects.com/faq/employees-exempt-local-services-tax-required-return-quarter-employees/"
+    ],
+    "verifiedOn": "2026-11-11"
+  },
+  "PA-BERKHEIMER-LST": {
+    "collector": "Berkheimer Tax Administrator",
+    "registration": "Confirm the worksite LST collector in Pennsylvania DCED’s address search. Use Berkheimer Employer Registration to obtain the HAB employer account number, or look up an existing account. Register for e-file to submit online.",
+    "returns": [
+      [
+        "LST-1",
+        "File and remit within 30 days after quarter end. Include the required employee list with the return."
+      ]
+    ],
+    "filing": "File LST-1 through Berkheimer employer e-file by online entry or supported file upload, or send the paper form to HAB-LST, PO Box 25156, Lehigh Valley, PA 18002.",
+    "payment": "Pay online when filing online, or include the remittance with a mailed LST-1.",
+    "sources": [
+      "https://dced.pa.gov/local-government/local-income-tax-information/instructions-employers/",
+      "https://www.hab-inc.com/electronic-services/businessesandpayrollcompanies/file-and-pay/",
+      "https://www.hab-inc.com/local-services-tax-employer-lst-1-faq/"
+    ],
+    "verifiedOn": "2026-11-11"
   }
 }
