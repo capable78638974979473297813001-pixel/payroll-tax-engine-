@@ -71,7 +71,7 @@
    "id": "H1",
    "title": "State of Kansas designated holidays: Governor's memorandum 'Designated Holidays for 2026' (2025-08-20, Kansas Department of Administration) and, for 2027, Kansas State University's announcement of the state-designated holiday schedule",
    "url": "https://admin.ks.gov/media/cms/holidays2026_2aae3ebfd972c.pdf",
-   "revision": "2026: memorandum dated 2025-08-20, a scanned image read visually. 2027: https://www.k-state.edu/news/articles/2026/11/university-holiday-schedule-announced.html (2026-11-09); the Governor's 2027 memorandum could not be retrieved (the Department of Administration's 2027 page links no memorandum).",
+   "revision": "2026: memorandum dated 2025-08-20, a scanned image read visually. 2027: https://www.k-state.edu/news/articles/2026/11/university-holiday-schedule-announced.html (2026-11-09); the Governor's 2027 memorandum could not be retrieved (the Department of Administration's 2027 page links no memorandum). 2027 list confirmed a second time by Kansas State University's own memorandum of 2026-11-09 (k-state.edu/hr/benefits/leave-and-holidays/holidays/2026-2027-Holiday-Memo.pdf, read as an image), which lists the same ten 2027 dates; the Governor's 2027 memorandum itself is not posted where it could be found.",
    "verifiedOn": "2026-11-12",
    "verifiedBy": "2026, read from the memorandum: New Year's Day Thursday 2026-01-01; Martin Luther King Jr. Day Monday 2026-01-19; Memorial Day Monday 2026-05-25; Juneteenth Friday 2026-06-19; Independence Day observed Friday 2026-07-03 (legal holiday Saturday July 4); Labor Day Monday 2026-09-07; Veterans Day Wednesday 2026-11-11; Thanksgiving Thursday 2026-11-26 and Friday 2026-11-27; Christmas Eve Thursday 2026-12-24; Christmas Friday 2026-12-25. 2027, as relayed by the university for the state: New Year's Day Friday 2027-01-01; Martin Luther King Jr. Day Monday 2027-01-18; Memorial Day Monday 2027-05-31; Juneteenth Friday 2027-06-18; Independence Day Monday 2027-07-05; Labor Day Monday 2027-09-06; Veterans Day Thursday 2027-11-11; Thanksgiving Thursday 2027-11-25 and Friday 2027-11-26; Christmas observed Friday 2027-12-24; New Year's Day 2028 observed Friday 2027-12-31. Presidents Day is not a state holiday in either year."
   },
@@ -98,6 +98,22 @@
    "revision": "K-2MT (Rev. 10-25), 3 pages, read in full through a page-extraction service on 2026-11-12",
    "verifiedOn": "2026-11-12",
    "verifiedBy": "read in full: Kansas follows the Social Security Administration's EFW2 format for every record except the Code RS (state) record; the RS record is 512 bytes, every field required (blank or zero filled), and must carry Kansas wages only; Code RA, RE, RW, RS, RT and RF are required, RO, RU and RV optional; the RS fields include state code 20 (positions 3-4), SSN (10-18), names (19-68), address (73-140), ZIP (141-149), the employer's Kansas withholding account number (248-267, form 036#######F##), state code (274-275), state taxable wages (276-286), state income tax withheld (287-297), other state data (298-307), local taxable wages and local tax withheld (309-330), state control number (331-337) and the employee's contribution to KPERS, KP&F and Judges (338-348); entities reporting for 51 or more employees or payees must file electronically; magnetic media is not accepted; 'All Tax Year 2025 W-2s must be filed by January 31, 2026'; mailing address KDOR - Electronic Services, PO Box 3506, Topeka, KS 66625-3506; Customer Relations 785-368-8222 or KDOR_tac@ks.gov."
+  },
+  {
+   "id": "R1",
+   "title": "Kansas Administrative Regulations 1-9-2, Holidays (state service)",
+   "url": "https://www.law.cornell.edu/regulations/kansas/K-A-R-1-9-2",
+   "revision": "regulation effective June 5, 2005, text as published by Cornell LII",
+   "verifiedOn": "2026-11-12",
+   "verifiedBy": "fetched and read in full: '(a) The following days shall be legal holidays for the state service: New Year's Day, Memorial Day, Independence Day, Labor Day, Veterans' Day, Thanksgiving Day, and Christmas Day. When one of these legal holidays falls on a Saturday, the preceding Friday shall be the officially observed holiday for state employees. When one of these legal holidays falls on a Sunday, the following Monday shall be the officially observed holiday'; '(b)(1) The governor may designate, in a particular year, additional days on which state offices are to be closed in observance of a holiday or a holiday season. For the purpose of this regulation, such a day shall be deemed a legal holiday.' K.A.R. 50-2-3(f) says 'legal holiday' without defining it."
+  },
+  {
+   "id": "S4",
+   "title": "Kansas Department of Revenue, KW-2CSV (W-2 CSV format) and KW-3E CSV (KW-3/KW-3E) specifications for electronic filing, Rev. 10-25, and the Electronic Withholding Requirements page",
+   "url": "https://ksrevenue.gov/pdf/KW-2CSV.pdf",
+   "revision": "KW-2CSV and KW-3E_CSV (Rev. 10-25) and ksrevenue.gov/eservw2.html, read in full on 2026-11-12",
+   "verifiedOn": "2026-11-12",
+   "verifiedBy": "read: KW-2CSV is a 35-column CSV for filers that cannot meet the SSA EFW2 layout (Form_Type 'W2'; employer EIN, name and address; employee SSN, name and address; a control number up to 50 characters; box 1 wages, box 2 federal tax and box 3 Social Security wages in ###.## form; two state blocks each with 'KS', the employer ID 036#########F##, state wages and state income tax); KW-3E CSV is a 24-column file of 'KW3' records (Kansas withholding tax number, EIN, year ending yyyy, business name and address, account-closed date mmddyyyy, return indicator '0' original, '1' amended, '2' additional, total tax withheld, payments, overpayment, penalty, interest, total, number of W-2s, change-of-address flag, then repeated Period_End_Dt mmddyyyy and Amt pairs), and bulk filers may upload several KW-3s in it; all 2025 W-2s and KW-3Es are due January 31, 2026; 51 or more employees or payees must file electronically; magnetic media is not accepted; CD-ROM is accepted only with the Department's approval when the web application is not feasible; bulk filers must contact the Department for approval first; the Department offers a KW-3 bulk upload Excel template and an online test page that checks file structure but not data."
   }
  ],
  "agencies": {
@@ -284,8 +300,8 @@
   ],
   "notModelled": [
    "The meaning of 'banking days' for quad-monthly filers: KW-100 says reports are due 'within three banking days' of the 7th, 15th, 21st and last day of the month and does not define it.",
-   "KCSC registration steps beyond the filing-frequency item, and the KW-2CSV and KW-3E CSV file specifications.",
-   "The Department's power to require more frequent payment."
+   "The Department's power to require more frequent payment.",
+   "KCSC registration steps beyond the filing-frequency item."
   ]
  },
  "channels": [
@@ -297,7 +313,7 @@
     "Apply for a Kansas withholding account (Business Tax Application) giving the estimated annual withholding; the Department assigns the filing frequency and prints it on the Withholding Registration Certificate.",
     "Register a KCSC login and add the withholding account with its access code (first-time users obtain the code from the Taxpayer Assistance Center)."
    ],
-   "specs": "W-2 files follow the SSA EFW2/EFW2C layout for every record except the Kansas Code RS record, which is 512 bytes with every field required and Kansas wages only (K-2MT, Rev. 10-25, read: state code 20, SSN 10-18, names 19-68, address 73-140, employer's Kansas withholding account number 248-267 as 036#######F##, state taxable wages 276-286, state income tax withheld 287-297, other state data 298-307, local wages and tax 309-330, state control number 331-337, KPERS/KP&F/Judges contribution 338-348). Entities reporting 51 or more employees or payees must file electronically; magnetic media is not accepted; W-2s for a tax year are due January 31 of the next year. The Department also publishes CSV specifications (KW-2CSV for W-2s, KW-3E for the KW-3), which were not read.",
+   "specs": "W-2 files follow the SSA EFW2/EFW2C layout for every record except the Kansas Code RS record, which is 512 bytes with every field required and Kansas wages only (K-2MT, Rev. 10-25, read: state code 20, SSN 10-18, names 19-68, address 73-140, employer's Kansas withholding account number 248-267 as 036#######F##, state taxable wages 276-286, state income tax withheld 287-297, other state data 298-307, local wages and tax 309-330, state control number 331-337, KPERS/KP&F/Judges contribution 338-348). Entities reporting 51 or more employees or payees must file electronically; magnetic media is not accepted; W-2s for a tax year are due January 31 of the next year. The Department also publishes CSV specifications (KW-2CSV for W-2s, KW-3E for the KW-3), which were not read. CSV alternatives (S4): KW-2CSV for W-2s (35 columns, Form_Type W2) and KW-3E CSV for KW-3s (24 columns, Form_Type KW3, Return_Indicator 0 original, 1 amended, 2 additional, repeated Period_End_Dt and Amt pairs); both due January 31 for the prior year. Bulk filers need the Department's approval first; the online test page checks structure only; CD-ROM only with approval.",
    "source": "S3"
   },
   {
@@ -309,12 +325,12 @@
     "An accountant or TPA files an Employer Representation Authorization (K-CNS 032) for each client.",
     "A professional employer organization registers with the Secretary of State first, then files an Employer Status Report (K-CNS 010) for its parent account and a Client Status Report (K-CNS 015) for each client; each client files its own quarterly return."
    ],
-   "specs": "NASWA wage file (ASCII .txt, 275-character records, Codes A, B, E and S) and payment file (381-character records, at most 5 MB); the field-by-field layouts were not in the text read (U5).",
+   "specs": "NASWA wage file (ASCII .txt, 275-character records, Codes A, B, E and S) and payment file (381-character records, at most 5 MB); the Department's page says its field layout is 'defined below' but the layout tables are not in the readable page content (the live page and an archived copy return the same text), so the field-by-field layouts are not available here (U5).",
    "source": "U5"
   }
  ],
  "notModelled": [
-  "Kansas legal holidays: K.A.R. 50-2-3(f) moves a payment day on a Saturday, Sunday or legal holiday to the first regular business day after but lists no holidays, and neither the Department of Labor nor the Department of Revenue pages read publish a list. The Governor's designated state holidays (a state employee schedule) are applied instead, on the owner's instruction of 2026-11-12, for 2026 and 2027. If either agency observes a different day, a due date could land a day off. The 2027 dates come from a state university's announcement of the state schedule because the Governor's 2027 memorandum was not retrievable; years after 2027 skip weekends only and carry the warning."
+  "Kansas legal holidays are applied from the Governor's designated state holidays for 2026 and 2027 on the owner's instruction. K.A.R. 50-2-3(f) says only 'legal holiday'; K.A.R. 1-9-2 (read) defines the legal holidays for the state service as New Year's Day, Memorial Day, Independence Day, Labor Day, Veterans' Day, Thanksgiving Day and Christmas Day (a Saturday holiday observed the Friday before, a Sunday holiday the Monday after) and deems any additional day the Governor closes state offices a legal holiday, so every date applied is a legal holiday by that regulation; the Governor's additional closure days (Martin Luther King Jr. Day, Juneteenth, the Friday after Thanksgiving, Christmas Eve 2026) come from the Governor's 2026 memorandum and, for 2027, from two Kansas State University announcements of the state schedule. Whether the Department of Labor and the Department of Revenue apply K.A.R. 1-9-2 to K.A.R. 50-2-3(f) is not stated. Years after 2027 skip weekends only and carry the warning."
  ],
  "newHire": {
   "form": "New-hire report (K-CNS 436, federal Form W-4 or an equivalent) to the Kansas State Directory of New Hires; within 20 days of hire date",
@@ -352,7 +368,7 @@
   "notModelled": [
    "K.A.R. 50-2-3 states the 25th-day date only for a newly liable employer's first payment; the last-day-of-the-month date for a contributing employer's quarterly wage report, return and payment comes from K.S.A. 44-717(a)(1), which sets when the penalty and interest begin, not from a sentence that says 'due'.",
    "The Department's FAQ (quoted from a search result of its own page) says 26 or more employees must file online while K.S.A. 44-717(k)(4) says 25 or more; the statute is used. The Department's new Wage & Tax Reporting System login page was not read.",
-   "The field-by-field layouts of the NASWA wage file and the payment file: the Department's page states the file requirements, but the page returns 403 to a direct request and the field tables were not in the text its page reader extracted. The new Wage & Tax Reporting System's login pages were not read."
+   "The field-by-field layouts of the NASWA wage file and the payment file are not published in readable text: the Department's Unemployment Tax page says the layout is 'defined below' but the live page and an archived copy of it end after the file-rejection rules, so the tables are likely images or attachments. The Wage & Tax Reporting System at kansaslabor.gov requires a login, so its pages were not read (no credentials were used)."
   ]
  },
  "registration": {
