@@ -734,5 +734,61 @@
       "https://legislature.mi.gov/Laws/MCL?objectName=mcl-141-761"
     ],
     "verifiedOn": "2026-11-12"
+  },
+  "MO-KANSAS-CITY": {
+    "collector": "City of Kansas City, Missouri, Revenue Division",
+    "registration": "Complete the city registration application (RD-100) and establish the employer withholding account with the Revenue Division. Use Quick Tax for online filing.",
+    "returns": [
+      [
+        "RD-110",
+        "File every quarter, including a zero-withholding quarter, by the last day of the following month. If that date is a weekend or legal holiday, file the next business day. Report gross compensation and withholding and settle any remaining quarterly balance."
+      ],
+      [
+        "RD-130M / RD-130QM",
+        "Follow the state withholding remittance frequency assigned to the employer. Monthly remittances are due on the 15th of the following month except for the quarter’s final month, due at the following month end. Quarter-monthly periods end on the 7th, 15th, 22nd and last day of each month, with payment due three banking days later."
+      ],
+      [
+        "RD-113",
+        "Reconcile annually by January 31 following the tax year. Submit W-2 detail for employees whose Kansas City earnings tax was withheld."
+      ]
+    ],
+    "filing": "File RD-110 and RD-113 electronically in Kansas City Quick Tax. Payroll providers may use the city’s bulk filing program.",
+    "payment": "Pay electronically in Quick Tax. Apply interim remittances to the correct withholding period and report the remaining balance with RD-110.",
+    "sources": [
+      "https://www.kcmo.gov/city-hall/departments/finance/tax-home/tax-faqs",
+      "https://www.kcmo.gov/city-hall/departments/finance/tax-home/tax-forms",
+      "https://www.kcmo.gov/city-hall/departments/finance/tax-home/tax-guide-for-restaurants",
+      "https://clerk.kcmo.gov/View.ashx?GUID=C226752C-F4E5-4E3D-8D36-F4192EA58369&ID=11488107&M=F",
+      "https://www.kcmo.gov/home/showpublisheddocument/7787/637788897040130000",
+      "https://www.kcmo.gov/home/showpublisheddocument/7785/637805345097170000"
+    ],
+    "verifiedOn": "2026-11-12"
+  },
+  "MO-ST-LOUIS": {
+    "collector": "City of St. Louis Collector of Revenue",
+    "registration": "Before beginning business in the city, submit Form E-9 to the Earnings Tax Department by mail, fax or email. The employer’s FEIN is its earnings tax account number.",
+    "returns": [
+      [
+        "W-10",
+        "Report employee earnings tax withheld each quarter. The city lists April 30, July 31, October 31 and January 31 as the quarterly due dates."
+      ],
+      [
+        "P-10",
+        "Report employer payroll expense tax with the W-10 for the same quarter when applicable. The city lists exemptions, including qualifying nonprofits and businesses operating only at Lambert Airport. Confirm any exemption with the Collector."
+      ],
+      [
+        "W-3",
+        "Reconcile W-10 withholding to employee W-2s by January 31 following the tax year. Employers with 25 or more employees in the city must use the Collector’s electronic W-2 media specifications."
+      ]
+    ],
+    "filing": "Submit the quarterly returns to the Collector by mail, fax or email. File W-3 with W-2 detail. Send electronic W-2 media (CD or flash drive in the prescribed record format) to the Earnings Tax Division, City Hall Room 410, 1200 Market Street, St. Louis, MO 63103.",
+    "payment": "Pay online and send the quarterly returns separately, or mail the returns with a check, cashier’s check or money order to the Payroll Expense Tax Department, PO Box 66966, St. Louis, MO 63166-6966.",
+    "sources": [
+      "https://www.stlouis-mo.gov/government/departments/collector/earnings-tax/open-account.cfm",
+      "https://www.stlouis-mo.gov/government/departments/collector/earnings-tax/payroll-tax-info.cfm",
+      "https://www.stlouis-mo.gov/government/departments/collector/earnings-tax/w2-specifications.cfm",
+      "https://www.stlouis-mo.gov/government/departments/collector/earnings-tax/documents/w-3-form.cfm"
+    ],
+    "verifiedOn": "2026-11-12"
   }
 }

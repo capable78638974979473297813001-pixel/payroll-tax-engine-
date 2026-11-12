@@ -199,3 +199,18 @@ test('Michigan employer guides preserve city-specific filing and remittance inst
   assert.notEqual(guide('Muskegon').collector, guide('Muskegon Heights').collector);
   assert.match(guide('Ionia').returns[1][1], /Confirm/);
 });
+
+test('Missouri city routes distinguish quarterly, annual and employer-only filings', () => {
+  const lookup = city => localWithholdingGuide('MO-city', city, 2026);
+  const kc = lookup(' Kansas City ');
+  assert.equal(kc.agency, 'MO-KANSAS-CITY');
+  assert.deepEqual(kc.guide.returns.map(([form]) => form), ['RD-110', 'RD-130M / RD-130QM', 'RD-113']);
+  for (const city of ['St. Louis', 'St Louis', 'Saint Louis']) {
+    const result = lookup(city);
+    assert.equal(result.jurisdiction, 'St. Louis');
+    assert.deepEqual(result.guide.returns.map(([form]) => form), ['W-10', 'P-10', 'W-3']);
+  }
+  assert.equal(lookup('St. Louis County').status, 'unknown-code');
+  assert.equal(lookup('North Kansas City').status, 'unknown-code');
+  assert.equal(localWithholdingGuide('MO-city', 'Kansas City', 2027).status, 'unsupported-year');
+});

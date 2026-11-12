@@ -4,6 +4,7 @@ Use `localWithholdingGuide(kind, code, 2026)` from `payroll/local/filingGuide.mj
 
 | Kind | Code | Example |
 | --- | --- | --- |
+| MO-city | Missouri earnings tax city name | `St. Louis` |
 | MI-city | Michigan taxing city name | `East Lansing` |
 | IN-county | Two-digit Indiana county code | `01` |
 | OH-school-district | Four-digit school district number, distinct from the IRN | `0203` |

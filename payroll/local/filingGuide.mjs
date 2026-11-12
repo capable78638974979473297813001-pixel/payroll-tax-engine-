@@ -63,6 +63,17 @@ export function localWithholdingGuide(kind, code, year) {
         },
       };
     }
+    case 'MO-city': {
+      const locality = code.trim().toLowerCase();
+      if (locality === 'kansas city') {
+        row = { name: 'Kansas City' };
+        agency = 'MO-KANSAS-CITY';
+      } else if (['st. louis', 'st louis', 'saint louis'].includes(locality)) {
+        row = { name: 'St. Louis' };
+        agency = 'MO-ST-LOUIS';
+      }
+      break;
+    }
     case 'MI-city': {
       row = michiganCities.find(city => city.name.toLowerCase() === code.trim().toLowerCase());
       if (!row) return { status: 'unknown-code' };
