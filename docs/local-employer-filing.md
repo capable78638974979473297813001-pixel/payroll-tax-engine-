@@ -39,3 +39,5 @@ Michigan lookups accept the names in the 2026 city registry. All 24 registered c
 Use `localWithholdingGuide('DE-city', 'Wilmington', 2026)` for Wilmington employer wage withholding, intermediate payments and annual W-2 reporting.
 
 Colorado OPT guides cover Denver, Glendale, Greenwood Village and Sheridan. Aurora repealed both portions effective January 1, 2025. Its [repeal notice](https://www.auroragov.org/business_services/taxes/occupational_privilege_tax) explains how employers can address earlier periods.
+
+For Kentucky, look up the applicable collector with `localAgencyGuide(agencyId, 2026)`. Use `KY-LMRC` for Louisville Metro occupational withholding and `KY-LFUCG` for Lexington-Fayette urban county withholding. Fayette County Public Schools has a separate account and filing obligation for county residents working in the county. Look up `KY-FCPS` when that school tax applies.

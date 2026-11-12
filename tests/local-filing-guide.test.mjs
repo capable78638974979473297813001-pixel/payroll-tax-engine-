@@ -246,3 +246,15 @@ test('Colorado cities use their own OPT deadlines and payment portals', () => {
   assert.equal(lookup('Aurora').status, 'unknown-code');
   assert.equal(lookup('Sheridan Lake').status, 'unknown-code');
 });
+
+test('Kentucky metro and school collectors have distinct filing requirements', () => {
+  const louisville = localAgencyGuide('KY-LMRC', 2026);
+  const lexington = localAgencyGuide('KY-LFUCG', 2026);
+  const schools = localAgencyGuide('KY-FCPS', 2026);
+  assert.deepEqual(louisville.returns.map(([form]) => form), ['W-1', 'W-1D', 'W-3']);
+  assert.match(louisville.returns[1][1], /exceeds \$3,000/);
+  assert.match(lexington.returns[0][1], /exceeds \$300/);
+  assert.deepEqual(schools.returns.map(([form]) => form), ['220-221-S', '222-S']);
+  assert.match(schools.payment, /Send the return separately/);
+  assert.equal(localAgencyGuide('KY-FCPS', 2025), null);
+});

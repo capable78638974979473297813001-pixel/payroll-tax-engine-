@@ -894,5 +894,75 @@
       "https://library.municode.com/co/sheridan/codes/code_of_ordinances?nodeId=PTIICOOR_CH62REFI_ARTVIOCPRTA_S62-244EXREDE"
     ],
     "verifiedOn": "2026-11-12"
+  },
+  "KY-LMRC": {
+    "collector": "Louisville Metro Revenue Commission",
+    "registration": "Use EMINTS to register for a Louisville/Jefferson County tax account.",
+    "returns": [
+      [
+        "W-1",
+        "Report quarterly withholding by the last day of the following month, including when monthly deposits are required."
+      ],
+      [
+        "W-1D",
+        "If withholding exceeds $3,000 in any quarter, deposit each month for the next four quarters. Deposits are due on the 15th of the following month."
+      ],
+      [
+        "W-3",
+        "Reconcile 2026 withholding and submit W-2 detail. February 28 falls on Sunday in 2027, so the next business day, March 1, is timely."
+      ]
+    ],
+    "filing": "File through EMINTS. Electronic W-1, W-2 and W-3 filing is mandatory for taxpayers filing more than 25 returns, forms or reports per year and preparers filing or expecting to file at least 10 per year.",
+    "payment": "Pay LMRC through EMINTS and apply each deposit to its withholding period.",
+    "sources": [
+      "https://louisvilleky.gov/government/revenue-commission/forms-and-publications",
+      "https://louisvilleky.gov/government/revenue-commission/electronic-filing-requirements",
+      "https://louisvilleky.gov/government/revenue-commission/tax-calendar"
+    ],
+    "verifiedOn": "2026-11-12"
+  },
+  "KY-LFUCG": {
+    "collector": "Lexington-Fayette Urban County Government, Division of Revenue",
+    "registration": "Apply for an occupational license before starting business using Form 228 IP.",
+    "returns": [
+      [
+        "220-221",
+        "File quarterly by the end of the following month. If quarterly withholding exceeds $300, monthly returns are required. Use the monthly deadline on the assigned return."
+      ],
+      [
+        "222",
+        "Reconcile annually. KRS 67.783 sets February 28 as the statutory deadline. Confirm the 2026 form and weekend filing date with Revenue."
+      ]
+    ],
+    "filing": "File payroll withholding online using the tax ID and LFUCG business number. Paper filers use the original periodic forms mailed to registered businesses.",
+    "payment": "Pay online by card or send ACH from your bank. Request banking instructions from Revenue and allow time for receipt by the due date.",
+    "sources": [
+      "https://www.lexingtonky.gov/working/business-licensing-taxes/occupational-license-fee-minimum-license-filing-requirements",
+      "https://www.lexingtonky.gov/working/business-licensing-taxes/occupational-license-fee-rates-current-forms",
+      "https://www.lexingtonky.gov/working/business-licensing-taxes/file-payroll-withholding-returns-online",
+      "https://apps.legislature.ky.gov/law/statutes/statute.aspx?id=23794"
+    ],
+    "verifiedOn": "2026-11-12"
+  },
+  "KY-FCPS": {
+    "collector": "Fayette County Public Schools Tax Collection Office",
+    "registration": "Use the district's questionnaire and initial reporting form to obtain the FCPS account number.",
+    "returns": [
+      [
+        "220-221-S",
+        "Report withholding quarterly for Fayette County residents working in Fayette County. Use the district's 2026 quarterly form for each period."
+      ],
+      [
+        "222-S",
+        "File the annual school reconciliation and employee W-2 detail. Confirm the 2026 form and deadline with the school Tax Collection Office."
+      ]
+    ],
+    "filing": "Send the return to the school Tax Collection Office, PO Box 55570, Lexington, KY 40555-5570. After an online card payment, the district also accepts the return by fax at 859-422-9888.",
+    "payment": "Pay payroll withholding through the district's card payment service using the FCPS account number. Send the return separately so the office can credit the payment.",
+    "sources": [
+      "https://www.fcps.net/community/tax-collection-office",
+      "https://www.fcps.net/community/tax-collection-office/tax-forms"
+    ],
+    "verifiedOn": "2026-11-12"
   }
 }
