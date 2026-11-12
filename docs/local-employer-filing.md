@@ -45,3 +45,5 @@ For Kentucky, look up the applicable collector with `localAgencyGuide(agencyId, 
 For Covington worksites, look up both `KY-KENTON` and `KY-COVINGTON`. Kenton County accepts county withholding and the city lines listed on QCC1. Covington collects its own city withholding. Its quarterly return and ordinance publish different deadlines for three quarters. The city guide identifies both before employers choose a filing date.
 
 In Bowling Green, use `KY-BOWLING-GREEN` for city withholding and `KY-WARREN` for county withholding. Use `KY-WARREN-SCHOOLS` for wages earned in Warren County by a resident of the Warren County School District. Verify the employee’s home school district before selecting the school guide.
+
+Use `KY-OWENSBORO-DAVIESS` for the common administrator. The standard E-1 has separate columns for work inside and outside Owensboro. Employers with wages in both jurisdictions file a separate annual REC for each.

@@ -1079,5 +1079,29 @@
       "https://www.warrencountyschools.org/fs/resource-manager/view/6fa2c8c0-3330-4675-9a75-e6f0c81c8a4a"
     ],
     "verifiedOn": "2026-11-12"
+  },
+  "KY-OWENSBORO-DAVIESS": {
+    "collector": "City of Owensboro Occupational Tax Administrator, also administering Daviess County Fiscal Court withholding",
+    "registration": "Obtain an occupational license before starting business. Use the business license application linked by Daviess County and contact Owensboro Finance for the withholding account and filing frequency.",
+    "returns": [
+      [
+        "E-1",
+        "On the standard return, report wages earned inside Owensboro in column A and wages earned elsewhere in Daviess County in column B. Quarterly returns are due at the end of the next month. Monthly returns are due on the 15th of the next month except December, which is due January 31. For county withholding of $300 or more per quarter, switch to monthly filing upon notice from Finance."
+      ],
+      [
+        "REC",
+        "File by February 28 following the tax year. Complete separate reconciliations for city and county wages when both apply. Attach W-2s and W-3 or an equivalent employee listing showing wages and withholding by jurisdiction. The county moves weekend and legal holiday deadlines to the next business day. Confirm the city’s weekend date with Finance."
+      ]
+    ],
+    "filing": "Submit the signed E-1 with the combined amount due to the Occupational Tax Administrator. For a worksite assigned to a tax increment financing district, obtain the applicable district form from Finance.",
+    "payment": "Make the E-1 check payable to Occupational Tax Administrator and mail it with the return to PO Box 10008, Owensboro, KY 42302-9008.",
+    "sources": [
+      "https://www.daviessky.org/departments/finance/occupational-taxbusiness-license/",
+      "https://cms2.revize.com/revize/owensboroky/Documents/Departments/Finance/Occupational%20Net%20Profit%20License%20Fee%20Forms/E-1_Employer_Return_of_License_Fee_Withheld_2022.pdf",
+      "https://cms2.revize.com/revize/owensboroky/Documents/Departments/Finance/Occupational%20Net%20Profit%20License%20Fee%20Forms/Reconciliation_Instructions_2022.pdf",
+      "https://codelibrary.amlegal.com/codes/daviesscountyky/latest/daviesscounty_ky/0-0-0-2073",
+      "https://cms2.revize.com/revize/owensboroky/Documents/Departments/Finance/Tax%20Incremental%20Financing/TIFE122.pdf"
+    ],
+    "verifiedOn": "2026-11-12"
   }
 }

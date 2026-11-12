@@ -281,3 +281,14 @@ test('Bowling Green, Warren County and the school district have separate filing 
   assert.match(school.filing, /PO Box 51530/);
   assert.equal(localAgencyGuide('KY-WARREN-SCHOOLS', 2027), null);
 });
+
+test('Owensboro and Daviess use one periodic return and jurisdiction-specific reconciliations', () => {
+  const guide = localAgencyGuide('KY-OWENSBORO-DAVIESS', 2026);
+  const [periodic, annual] = guide.returns;
+  assert.equal(periodic[0], 'E-1');
+  assert.match(periodic[1], /inside Owensboro in column A and wages earned elsewhere in Daviess County in column B/);
+  assert.match(periodic[1], /December, which is due January 31/);
+  assert.equal(annual[0], 'REC');
+  assert.match(annual[1], /separate reconciliations/);
+  assert.match(guide.payment, /PO Box 10008/);
+});
