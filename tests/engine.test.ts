@@ -1156,8 +1156,9 @@ describe('Indiana', () => {
     assert.equal(amountOf(r, 'IN_SIT'), dollars(13.96));
     assert.equal(amountOf(r, 'IN_COUNTY'), dollars(4.73));
     const baseOf = (id: string) => r.taxes.find((t) => t.id === id)!.taxableWages;
-    assert.equal(baseOf('IN_SIT'), dollars(473.08));
-    assert.equal(baseOf('IN_COUNTY'), dollars(473.08)); // same shared base
+    // The line reports the wages; the exemptions come off inside the tax.
+    assert.equal(baseOf('IN_SIT'), dollars(800));
+    assert.equal(baseOf('IN_COUNTY'), dollars(800)); // same shared base
   });
 
   test('zero exemptions taxes the full wage; state and county share one base', () => {
@@ -1271,7 +1272,7 @@ describe('Illinois', () => {
     const r = calculatePaycheck(input(ilState({ basicAllowances: 1 })));
     assert.equal(amountOf(r, 'IL_SIT'), dollars(142.93));
     const baseOf = (id: string) => r.taxes.find((t) => t.id === id)!.taxableWages;
-    assert.equal(baseOf('IL_SIT'), dollars(2887.5));
+    assert.equal(baseOf('IL_SIT'), dollars(3000)); // wages, before the allowance
   });
 
   test('zero allowances taxes the full wage', () => {
@@ -10731,10 +10732,13 @@ describe('state unemployment insurance, employer side (XX_SUI_ER)', () => {
     assert.equal(amountOf(r, 'OH_SUI_ER'), dollars(0));
   });
 
-  test('a state with no single published new-employer rate produces NO line rather than a guess', () => {
+  test('a state with no single published new-employer rate says the tax was not computed rather than guess a rate or drop the line', () => {
     // Washington assigns rates by schedule, not a flat new-employer figure.
     const r = calculatePaycheck(suiInput({ workState: { code: 'WA', certificate: {} } }));
-    assert.equal(r.taxes.some((t) => t.id === 'WA_SUI_ER'), false);
+    const sui = r.taxes.find((t) => t.id === 'WA_SUI_ER');
+    assert.equal(sui?.amount, 0);
+    assert.match(sui?.detail ?? '', /Not computed/);
+    assert.ok(r.notices?.some((n) => n.taxId === 'WA_SUI_ER'));
   });
 
   test('...and computes normally once that employer supplies its own rate', () => {

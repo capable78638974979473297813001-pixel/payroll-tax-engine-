@@ -212,6 +212,7 @@ export function stateIncomeTax(
   const suiAssessment = stateUnemploymentAssessmentTax(input, ctx, rules);
   if (suiAssessment) lines.push(suiAssessment);
   lines.push(...stateEmployerAssessments(input, ctx, rules));
+  lines.push(...stateEmployerPayrollTax(input, ctx, rules));
 
   const paidLeave = statePaidLeaveEmployeeTax(input, ctx, rules);
   if (paidLeave) lines.push(paidLeave);
@@ -446,7 +447,7 @@ export function stateIncomeTax(
   // the residence state's withholding (Kansas): that line is the residence
   // tax net of what this state withheld, so adding the full residence tax as
   // well would withhold it twice.
-  if (!residentCredit) lines.push(...residenceStateWithholdingLine(input, ctx, rules, reciprocityReason));
+  if (!residentCredit) lines.push(...residenceStateWithholdingLine(input, ctx, rules, reciprocityReason, lines));
 
   return lines;
 }
@@ -581,6 +582,7 @@ function residenceStateWithholdingLine(
   ctx: ComputeContext,
   work: StateRuleset,
   reciprocityReason: string | null,
+  workStateLines: readonly TaxLine[],
 ): TaxLine[] {
   if (reciprocityReason) return [];
 
@@ -600,9 +602,23 @@ function residenceStateWithholdingLine(
     workState: { code: residence.code, certificate: residence.certificate },
   };
   const residenceLines = residenceIncomeLines(virtualInput, ctx, residenceRules);
-  const residenceTax = residenceLines
+  const fullResidenceTax = residenceLines
     .filter((l) => l.id === `${residence.code}_SIT`)
     .reduce((sum, l) => sum + l.amount, 0);
+
+  // Several states tell an employer to withhold for a resident working in
+  // another state only the amount by which their own withholding exceeds
+  // what the work state requires (California's DE 44, Connecticut's
+  // Circular CT, New Jersey's NJ-WT, Massachusetts's 830 CMR 62B.2.1(9)).
+  // Opt-in per residence state, by its own published rule; a state without
+  // the flag is withheld in full, as before.
+  const netRule = residenceRules.residentWithholdingNetOfWorkState as { source?: string } | undefined;
+  const workStateTax = netRule
+    ? workStateLines
+        .filter((l) => l.payer === 'employee' && new RegExp(`^${work.code}_SIT(_SUPP(_BONUS|_OTHER)?)?$`).test(l.id))
+        .reduce((sum, l) => sum + l.amount, 0)
+    : 0;
+  const residenceTax = atLeastZero(fullResidenceTax - workStateTax);
 
   const basis = nexus
     ? `the employer is registered/has nexus in ${residence.code} (input.residenceStateWithholding.nexus)`
@@ -616,10 +632,13 @@ function residenceStateWithholdingLine(
     jurisdiction: 'state',
     taxableWages: residenceLines.find((l) => l.id === `${residence.code}_SIT`)?.taxableWages ?? residenceLines[0]?.taxableWages ?? 0,
     amount: residenceTax,
-    detail:
-      `${fmt(residenceTax)} — ${basis}. Separate from any ${work.code} withholding above; whether this ` +
-      `also earns the employee a credit on their ${work.code} return (or vice versa) is a filing-time ` +
-      `question this engine does not resolve.`,
+    detail: netRule
+      ? `${fmt(fullResidenceTax)} ${residence.code} withholding on these wages, less ${fmt(workStateTax)} withheld for ${work.code} = ` +
+        `${fmt(residenceTax)} — ${basis}. ${residenceRules.name} has an employer withhold for a resident working in another ` +
+        `state only the amount by which its own withholding exceeds the work state's.`
+      : `${fmt(residenceTax)} — ${basis}. Separate from any ${work.code} withholding above; whether this ` +
+        `also earns the employee a credit on their ${work.code} return (or vice versa) is a filing-time ` +
+        `question this engine does not resolve.`,
   };
 
   const extras = residenceLines
@@ -1744,7 +1763,38 @@ function stateUnemploymentEmployerTax(
   const industry = input.employer?.suiIndustry?.[rules.code];
   const industryRate = industry === undefined ? undefined : cfg.industryNewEmployerRates?.[industry];
   const rate = supplied ?? industryRate ?? cfg.newEmployerRate;
-  if (rate === null || rate === undefined) return null;
+  if (rate === null || rate === undefined) {
+    // The state publishes no single new-employer rate (it assigns one by
+    // industry or by notice), so there is nothing to fall back on. The tax is
+    // still owed: say it was not computed rather than leave the line out, and
+    // keep counting wages toward the wage base.
+    const exemptNoRate = unemploymentExemptPretax(cfg.exemptPretax);
+    const wagesNoRate = ctx.taxableWagesFor(exemptNoRate);
+    const baseNoRate = resolveSUIWageBase(cfg.wageBase, rules.code, input.employer);
+    const taxableNoRate =
+      baseNoRate === null
+        ? wagesNoRate
+        : underCap(wagesNoRate, input.ytd.stateUnemployment?.[rules.code] ?? 0, dollars(baseNoRate));
+    const range = cfg.experienceRange;
+    return {
+      id: `${rules.code}_SUI_ER`,
+      name: `${rules.name} Unemployment Insurance (Employer)`,
+      payer: 'employer',
+      jurisdiction: 'state',
+      taxableWages: taxableNoRate,
+      amount: 0,
+      detail:
+        `Not computed: ${rules.name} assigns each employer its own unemployment rate and publishes no single new-employer rate, ` +
+        `and input.employer.stateUnemploymentRate.${rules.code} was not supplied. ${fmt(taxableNoRate)} of this check is taxable.`,
+      dataQuality: {
+        tier: 'not_modelled',
+        note:
+          `${rules.name} unemployment tax is owed on ${fmt(taxableNoRate)} of this check but was not computed, because the employer's rate was not supplied` +
+          (range ? ` (published range ${(range.min * 100).toFixed(2)}% to ${(range.max * 100).toFixed(2)}%)` : '') +
+          `. Supply the rate from the state's rate notice as input.employer.stateUnemploymentRate.${rules.code}.`,
+      },
+    };
+  }
   // experienceRange is the state's published range. A supplied rate well
   // outside it is most often a percent typed as a decimal (3.1 for 3.1%) or
   // another state's rate; it is used as given, but flagged.
@@ -1835,6 +1885,82 @@ function stateUnemploymentEmployerTax(
             ? { dataQuality: { tier: 'not_modelled' as const, note: cfg.automationFeeNotice } }
             : {}),
   };
+}
+
+interface EmployerPayrollTaxConfig {
+  idSuffix: string;
+  name: string;
+  /** Total rate on wages, e.g. 0.0044. */
+  rate: number;
+  effectiveFrom?: string;
+  /** The most of the tax an employer may take from the employee's pay, as a fraction of the tax (0.25 = a quarter). */
+  employeeShareMaxFraction?: number;
+  exemptPretax?: string[];
+}
+
+/**
+ * A payroll tax the EMPLOYER owes on wages, with no wage cap, of which the
+ * law lets the employer take part from the employee's pay if it chooses.
+ * Vermont's Child Care Contribution is the one user: 0.44% of wages, up to a
+ * quarter of it (0.11% of wages) deductible from the employee.
+ *
+ * The employer owes the whole tax either way, so with no election the whole
+ * amount is the employer's line and nothing is withheld. The election is the
+ * employer's (input.employer.payrollTaxEmployeeShareFraction), never assumed.
+ */
+function stateEmployerPayrollTax(
+  input: PaycheckInput,
+  ctx: ComputeContext,
+  rules: StateRuleset,
+): TaxLine[] {
+  const cfg = rules.employerPayrollTax as EmployerPayrollTaxConfig | undefined;
+  if (!cfg) return [];
+  if (cfg.effectiveFrom && input.checkDate < cfg.effectiveFrom) return [];
+
+  const exempt = (cfg.exemptPretax ?? rules.exemptPretax ?? []) as PretaxCategory[];
+  const wages = ctx.taxableWagesFor(exempt);
+  const total = applyRate(wages, cfg.rate);
+
+  const max = cfg.employeeShareMaxFraction ?? 0;
+  const elected = input.employer?.payrollTaxEmployeeShareFraction?.[rules.code];
+  if (elected !== undefined && (!Number.isFinite(elected) || elected < 0 || elected > max)) {
+    throw new Error(
+      `input.employer.payrollTaxEmployeeShareFraction.${rules.code} must be between 0 and ${max} ` +
+        `(${rules.name} lets an employer take at most ${(max * 100).toFixed(0)}% of its ${cfg.name} from an employee's pay), got ${JSON.stringify(elected)}.`,
+    );
+  }
+  const employeeShare = elected ? applyRate(total, elected) : 0;
+  const pct = (cfg.rate * 100).toFixed(2);
+
+  const lines: TaxLine[] = [
+    {
+      id: `${rules.code}_${cfg.idSuffix}_ER`,
+      name: `${rules.name} ${cfg.name} (Employer)`,
+      payer: 'employer',
+      jurisdiction: 'state',
+      taxableWages: wages,
+      amount: total - employeeShare,
+      detail:
+        `${fmt(wages)} @ ${pct}% = ${fmt(total)}, no wage cap` +
+        (employeeShare > 0
+          ? `, less ${fmt(employeeShare)} taken from the employee's pay`
+          : max > 0
+            ? `; the employer may take up to ${(max * 100).toFixed(0)}% of it from the employee's pay (input.employer.payrollTaxEmployeeShareFraction.${rules.code}), and has not`
+            : ''),
+    },
+  ];
+  if (employeeShare > 0) {
+    lines.push({
+      id: `${rules.code}_${cfg.idSuffix}_EE`,
+      name: `${rules.name} ${cfg.name}`,
+      payer: 'employee',
+      jurisdiction: 'state',
+      taxableWages: wages,
+      amount: employeeShare,
+      detail: `${(elected! * 100).toFixed(0)}% of the employer's ${fmt(total)} ${cfg.name} (${pct}% of ${fmt(wages)}), by the employer's election`,
+    });
+  }
+  return lines;
 }
 
 /**
@@ -2175,14 +2301,14 @@ function flatRateMultiExemption(
     name: `${rules.name} Income Tax`,
     payer: 'employee',
     jurisdiction: 'state',
-    taxableWages: periodTaxable,
+    taxableWages,
     amount: stateAmount,
     detail: periodAllowance
       ? `${fmt(taxableWages)} less ${fmt(periodAllowance)} exemptions @ ${(cfg.rate * 100).toFixed(2)}%`
       : `${fmt(taxableWages)} @ ${(cfg.rate * 100).toFixed(2)}%`,
   };
 
-  return [stateLine, countyAddOnLine(input, rules, periodTaxable)];
+  return [stateLine, countyAddOnLine(input, rules, periodTaxable, taxableWages)];
 }
 
 /**
@@ -2197,6 +2323,7 @@ function countyAddOnLine(
   input: PaycheckInput,
   rules: StateRuleset,
   periodTaxable: number,
+  periodWages: number,
 ): TaxLine {
   const state = rules.code;
   const notModelled = (detail: string): TaxLine => ({
@@ -2230,7 +2357,7 @@ function countyAddOnLine(
     name: `${county.name} County Income Tax`,
     payer: 'employee',
     jurisdiction: 'local',
-    taxableWages: periodTaxable,
+    taxableWages: periodWages,
     amount: applyRate(periodTaxable, county.rate),
     detail: `${fmt(periodTaxable)} @ ${(county.rate * 100).toFixed(4)}% (${county.name} County)`,
   };
@@ -2284,7 +2411,7 @@ function flatRateTwoTierExemption(
     name: `${rules.name} Income Tax`,
     payer: 'employee',
     jurisdiction: 'state',
-    taxableWages: periodTaxable,
+    taxableWages,
     amount,
     detail: periodAllowance
       ? `${fmt(taxableWages)} less ${fmt(periodAllowance)} allowances @ ${(cfg.rate * 100).toFixed(2)}%`
@@ -2413,7 +2540,7 @@ function bracketPhaseoutDeduction(
     name: `${rules.name} Income Tax`,
     payer: 'employee',
     jurisdiction: 'state',
-    taxableWages: Math.round(annualNetWage / ctx.periodsPerYear),
+    taxableWages,
     amount,
     detail,
   };
@@ -2600,7 +2727,7 @@ function bracketFlatAllowance(
     // bracketPhaseoutDeduction() — not literal gross wages either way. When
     // an NRA adjustment applies, that derived figure legitimately includes
     // it, since the adjustment genuinely changed which bracket got selected.
-    taxableWages: Math.round(annualNetWage / ctx.periodsPerYear),
+    taxableWages,
     amount,
     detail,
   };
@@ -3446,7 +3573,7 @@ function bracketPerPeriodNet(
     name: `${rules.name} Income Tax`,
     payer: 'employee',
     jurisdiction: 'state',
-    taxableWages: result.netWages,
+    taxableWages: result.grossWages,
     amount: result.amount,
     detail: result.detail,
   };
@@ -3617,7 +3744,7 @@ function bracketPerPeriodRateTable(
     name: `${rules.name} Income Tax`,
     payer: 'employee',
     jurisdiction: 'state',
-    taxableWages: netWages,
+    taxableWages: grossWages,
     amount,
     detail:
       `${fmt(grossWages)} gross less ${fmt(allowance)} allowance (${exemptions} × $${allowancePerExemption}) ` +
@@ -3805,7 +3932,7 @@ function nycLocalTax(
     name: 'New York City Income Tax',
     payer: 'employee',
     jurisdiction: 'local',
-    taxableWages: netWages,
+    taxableWages: grossWages,
     amount,
     detail:
       `${fmt(grossWages)} gross less ${fmt(allowance)} allowance = ${fmt(netWages)} net ` +
@@ -3949,13 +4076,11 @@ function yonkersLocalTax(
       id: `${rules.code}_YONKERS_SIT`,
       name: 'Yonkers Resident Income Tax Surcharge',
       payer: 'employee',
-      // taxableWages reports the underlying NYS-style NET WAGES the
-      // surcharge is indirectly based on (via that calculation's own tax
-      // amount) — the most honest "wage base" figure available, since this
-      // tax's literal base is a dollar amount of TAX, not wages, which the
-      // detail string spells out explicitly.
+      // taxableWages reports the wages the underlying NYS-style calculation
+      // starts from. The surcharge's literal base is a dollar amount of TAX,
+      // which the detail string spells out.
       jurisdiction: 'local',
-      taxableWages: base.netWages,
+      taxableWages: base.grossWages,
       amount,
       detail:
         `${(cfg.residentSurcharge.rate * 100).toFixed(2)}% of ${fmt(base.amount)} NYS-style base tax (${base.detail}) = ${fmt(baseAmount)}` +
@@ -3984,7 +4109,7 @@ function yonkersLocalTax(
         name: 'Yonkers Nonresident Earnings Tax',
         payer: 'employee',
         jurisdiction: 'local',
-        taxableWages: 0,
+        taxableWages: grossWages,
         amount: extra,
         detail:
           `$0 — ${fmt(grossWages)} gross wages are below Yonkers' no-withholding threshold for this pay period.` +
@@ -4001,7 +4126,7 @@ function yonkersLocalTax(
       name: 'Yonkers Nonresident Earnings Tax',
       payer: 'employee',
       jurisdiction: 'local',
-      taxableWages: taxable,
+      taxableWages: grossWages,
       amount,
       detail:
         `${fmt(grossWages)} gross less ${fmt(dollars(tier.exemption))} wage-level exemption ` +
@@ -4741,7 +4866,7 @@ function bracketPerPeriodAllowance(
     name: `${rules.name} Income Tax`,
     payer: 'employee',
     jurisdiction: 'state',
-    taxableWages: netWages,
+    taxableWages: grossWages,
     amount,
     detail:
       `${fmt(grossWages)} gross less ${fmt(allowance)} allowance (${allowances} × $${allowancePerUnit}) ` +
@@ -4871,7 +4996,7 @@ function bracketPerPeriodKansas(
     name: `${rules.name} Income Tax`,
     payer: 'employee',
     jurisdiction: 'state',
-    taxableWages: netWages,
+    taxableWages: grossWages,
     amount,
     detail:
       `${fmt(grossWages)} gross less ${fmt(roundHalfUp(allowance))} allowance ($${annualExemption}/yr ÷ ` +
@@ -5092,6 +5217,13 @@ function seattlePayrollExpenseTax(
     ?.seattlePayrollExpenseTax;
   if (!cfg) return null;
 
+  // Both Seattle taxes band by the year's running compensation and emit no
+  // line until a threshold is passed, so every Seattle check reports what
+  // it adds to ytd.seattleCompensation, taxed or not.
+  if (ctx.ytdAccruals) {
+    ctx.ytdAccruals.seattleCompensation = ctx.taxableWagesFor((rules.exemptPretax ?? []) as PretaxCategory[]);
+  }
+
   const priorYearPayroll = input.employer?.seattlePriorYearPayrollExpense;
   if (priorYearPayroll === undefined) {
     // Which band applies (and whether the employer owes at all) depends on
@@ -5181,6 +5313,9 @@ function seattleSocialHousingTax(
   if (!cfg) return null;
 
   const thisCheque = ctx.taxableWagesFor([]);
+  if (ctx.ytdAccruals && ctx.ytdAccruals.seattleCompensation === undefined) {
+    ctx.ytdAccruals.seattleCompensation = thisCheque;
+  }
   const already = input.ytd.seattleCompensation ?? 0;
   const threshold = dollars(cfg.compensationThreshold);
   const taxableWages = atLeastZero(already + thisCheque - Math.max(already, threshold));
@@ -5701,7 +5836,7 @@ function kentuckySchoolDistrictTax(input: PaycheckInput, ctx: ComputeContext): T
     const blended = resident.schoolDistrictTax!.blendedInto;
     // Already inside the consolidated government's resident rate (Lexington-Fayette's 2.75%).
     if (blended && same(str(cert.workCity), blended) && same(str(cert.residenceCity), blended)) return null;
-    const wages = kyCappedWages(resident, ctx.taxableWagesFor([]), input);
+    const wages = kyCappedWages(resident, ctx.taxableWagesFor([]), input, ctx);
     const rate = resident.wageRateDecimal!;
     return {
       id: 'KY_LOCAL',
@@ -5779,7 +5914,7 @@ function kentuckyCityCountyTax(
     const metroRate = resident ? metro.residentRate : metro.nonresidentRate;
     const metroTax = applyRate(periodWages, metroRate);
     const ownCity = metroCity && cityEntry && cityEntry.wageRateDecimal !== null ? cityEntry : undefined;
-    const cityWages = ownCity ? kyCappedWages(ownCity, periodWages, input) : 0;
+    const cityWages = ownCity ? kyCappedWages(ownCity, periodWages, input, ctx) : 0;
     const cityTax = ownCity ? applyRate(cityWages, ownCity.wageRateDecimal!) : 0;
     return {
       id: 'KY_LOCAL',
@@ -5814,7 +5949,7 @@ function kentuckyCityCountyTax(
   };
 
   // Annual caps: see kyCappedWages().
-  const taxableFor = (entry: KYJurisdictionEntry): number => kyCappedWages(entry, periodWages, input);
+  const taxableFor = (entry: KYJurisdictionEntry): number => kyCappedWages(entry, periodWages, input, ctx);
   const capNote = (entry: KYJurisdictionEntry, taxable: number): string =>
     entry.capAtSSWageBase
       ? ` (${fmt(taxable)} of ${fmt(periodWages)}, SS-wage-base-capped)`
@@ -5881,14 +6016,19 @@ function kentuckyCityCountyTax(
  * so it can't drift (this project's data once carried $84,500 for the
  * real $184,500).
  */
-function kyCappedWages(entry: KYJurisdictionEntry, periodWages: number, input: PaycheckInput): number {
+function kyCappedWages(entry: KYJurisdictionEntry, periodWages: number, input: PaycheckInput, ctx: ComputeContext): number {
   const cap = entry.capAtSSWageBase
     ? dollars(federalRuleset(input.checkDate).socialSecurity.wageBase)
     : entry.annualWageCap !== undefined
       ? dollars(entry.annualWageCap)
       : null;
   if (cap === null) return periodWages;
-  return underCap(periodWages, input.ytd.localIncomeTax?.[`KY_LOCAL_${entry.name}`] ?? 0, cap);
+  const key = `KY_LOCAL_${entry.name}`;
+  const taxable = underCap(periodWages, input.ytd.localIncomeTax?.[key] ?? 0, cap);
+  // The KY_LOCAL line reports the uncapped period wages, so the wages
+  // counted toward this jurisdiction's cap are reported separately.
+  accrueLocalYtd(ctx, key, taxable);
+  return taxable;
 }
 
 /**
@@ -6178,7 +6318,7 @@ function flatRateSurtaxCredit(
       name: `${rules.name} Income Tax`,
       payer: 'employee',
       jurisdiction: 'state',
-      taxableWages: 0,
+      taxableWages,
       amount: 0,
       detail:
         `$0 — annualized wages ${fmt(roundHalfUp(taxableWages * periodsPerYear))} are under ` +
@@ -6218,7 +6358,7 @@ function flatRateSurtaxCredit(
     name: `${rules.name} Income Tax`,
     payer: 'employee',
     jurisdiction: 'state',
-    taxableWages: netWagesRounded,
+    taxableWages,
     amount,
     detail:
       `${fmt(taxableWages)}` +
@@ -6472,7 +6612,7 @@ function ohioWithholding(
     name: `${rules.name} Income Tax`,
     payer: 'employee',
     jurisdiction: 'state',
-    taxableWages: netWages,
+    taxableWages,
     amount,
     detail:
       `${fmt(taxableWages)} less ${fmt(exemptionAmount)} exemptions (${exemptions} × $${table.exemptionPerPeriod}) ` +
@@ -6969,6 +7109,21 @@ function oregonWithholding(
   const exempt = (rules.exemptPretax ?? []) as PretaxCategory[];
   const periodWages = ctx.taxableWagesFor(exempt);
 
+  // Oregon's formula starts from a constant ($263 a year for 2026) in its
+  // lowest bracket, so it returns a few dollars even on wages of zero. There
+  // is no pay to withhold from: a check with no taxable wages owes nothing.
+  if (periodWages === 0) {
+    return {
+      id: `${rules.code}_SIT`,
+      name: `${rules.name} Income Tax`,
+      payer: 'employee',
+      jurisdiction: 'state',
+      taxableWages: 0,
+      amount: 0,
+      detail: '$0 — no taxable wages on this check',
+    };
+  }
+
   if (!input.workState?.certificate) {
     const phaseout = rules.bracketFederalSubtractionPhaseout as { noCertificateDefaultRate?: number } | undefined;
     const noCertRate = phaseout?.noCertificateDefaultRate;
@@ -7413,6 +7568,17 @@ interface PortlandLocalTaxConfig {
 }
 
 /**
+ * Record what this check adds to ytd.localIncomeTax[key] (see
+ * PaycheckResult.ytdAccruals). The tax lines cannot carry it: Portland's
+ * lines report only the wages above the trigger, and Kentucky's report the
+ * uncapped period wages.
+ */
+function accrueLocalYtd(ctx: ComputeContext, key: string, wages: Cents): void {
+  if (!ctx.ytdAccruals) return;
+  (ctx.ytdAccruals.localIncomeTax ??= {})[key] = wages;
+}
+
+/**
  * Portland-area local personal income taxes — Metro Supportive Housing
  * Services (1%) and Multnomah County Preschool For All (1.5% + an
  * ADDITIONAL 1.5% above a second threshold). Genuinely different shape
@@ -7467,6 +7633,7 @@ function portlandAreaLocalTax(
 
   if (resolveCertBoolean(cert, 'metroDistrict')) {
     const ytd = input.ytd.localIncomeTax?.['OR_METRO'] ?? 0;
+    accrueLocalYtd(ctx, 'OR_METRO', currentWages);
     const threshold = dollars(cfg.metroSHS.threshold);
     const taxableExcess = overThreshold(currentWages, ytd, threshold);
     const amount = applyRate(taxableExcess, cfg.metroSHS.rate);
@@ -7486,6 +7653,7 @@ function portlandAreaLocalTax(
 
   if (resolveCertBoolean(cert, 'multnomahCounty')) {
     const ytd = input.ytd.localIncomeTax?.['OR_MULTNOMAH'] ?? 0;
+    accrueLocalYtd(ctx, 'OR_MULTNOMAH', currentWages);
     const tier1Threshold = dollars(cfg.multnomahPFA.tier1Threshold);
     const tier2Threshold = dollars(cfg.multnomahPFA.tier2Threshold);
     const above1 = overThreshold(currentWages, ytd, tier1Threshold);
@@ -7797,7 +7965,7 @@ function californiaWithholding(
       name: `${rules.name} Income Tax`,
       payer: 'employee',
       jurisdiction: 'state',
-      taxableWages: 0,
+      taxableWages: periodWages,
       amount: 0,
       detail: `${fmt(periodWages)} at or below the $${lowIncomeThreshold} Low Income Exemption threshold (${status}) — $0, no further steps computed.`,
     };
@@ -7842,7 +8010,7 @@ function californiaWithholding(
     name: `${rules.name} Income Tax`,
     payer: 'employee',
     jurisdiction: 'state',
-    taxableWages: taxableIncome,
+    taxableWages: periodWages,
     amount,
     detail:
       `${fmt(periodWages)} gross` +
@@ -8318,7 +8486,7 @@ function rhodeIslandWithholding(
     name: `${rules.name} Income Tax`,
     payer: 'employee',
     jurisdiction: 'state',
-    taxableWages: netWages,
+    taxableWages: periodWages,
     amount,
     detail:
       `${fmt(periodWages)} less ${fmt(exemption)} exemption (${exemptions} × $${exemptionPerUnit}` +
@@ -9134,6 +9302,7 @@ function ohioJEDDTax(
     ? underCap(periodWages, input.ytd.localIncomeTax?.[capKey] ?? 0, dollars(entry.annualWageCap!))
     : periodWages;
   const amount = applyRate(taxableWages, entry.rate);
+  if (capApplies) accrueLocalYtd(ctx, capKey, taxableWages);
 
   const staleCap = entry.annualWageCap !== undefined && entry.annualWageCapYear !== ctx.year;
   const capYtdMissing =

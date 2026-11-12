@@ -625,7 +625,7 @@ function studentLoanCap(
     detail:
       `federal student-loan default cap (34 CFR 34.19): lesser of 15% of ${fmt(disposable)} disposable ` +
       `and disposable over ${rule.minimumWageWeeklyMultiplier}x $${fed.federalMinimumHourlyWage}/hr federal min wage (${fmt(floor)}), ` +
-      `also bound by the paycheck's aggregate CCPA ceiling`,
+      `also bound by the 25% general CCPA limit less anything already garnished from this paycheck`,
   };
 }
 
@@ -726,7 +726,14 @@ export function calculateGarnishments(input: GarnishmentInput): GarnishmentResul
   }
 
   const supportWithheld = lines.reduce((s, l) => s + l.withheld, 0);
-  let room = atLeastZero(aggregateCeiling - supportWithheld);
+  // The 50-65% ceiling is for support alone (15 U.S.C. 1673(b)). Every other
+  // order, a federal student loan default included, shares the general 25%
+  // limit with whatever support already took: support at 25% or more leaves
+  // nothing, and a student loan's 15% counts against a creditor queued
+  // behind it. Taking room from the support ceiling instead let a student
+  // loan add 15% on top of 30% of support.
+  const generalCeiling = applyRate(disposable, fed.ordinaryGarnishment.maxDisposableEarningsFraction);
+  let room = atLeastZero(Math.min(aggregateCeiling, generalCeiling) - supportWithheld);
   // What ordinary (consumer-debt) orders have taken so far. The CCPA's ordinary
   // limit (25%, or the excess over 30x minimum wage) is a limit on everything
   // garnished from the paycheck "regardless of the number of garnishment

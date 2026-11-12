@@ -94,5 +94,15 @@
     "confidence": "cross_source_confirmed, strengthened 2026-09-05",
     "experienceRangeSource": "DOL Significant Provisions, January 2025 (informational)"
   },
-  "$yearNote": "2025 ruleset: 5% flat with the 4% surtax above $1,083,150 (2026: $1,107,750). Exemption and credit amounts, and the PFML contribution (0.88% total, 0.46% from the employee for 25+ employee employers), were unchanged between 2025 and 2026."
+  "$yearNote": "2025 ruleset: 5% flat with the 4% surtax above $1,083,150 (2026: $1,107,750). Exemption and credit amounts, and the PFML contribution (0.88% total, 0.46% from the employee for 25+ employee employers), were unchanged between 2025 and 2026.",
+  "residentWithholdingNetOfWorkState": {
+    "$comment": "For a resident working in another state that also withholds, an employer required to withhold here (input.residenceStateWithholding) withholds only the excess of this state's withholding over the work state's. Read by residenceStateWithholdingLine().",
+    "source": {
+      "title": "830 CMR 62B.2.1(9); DOR Directive 91-4, Multiple State Withholding Requirements",
+      "url": "https://www.mass.gov/directive/directive-91-4-multiple-state-withholding-requirements",
+      "says": "Withhold the Massachusetts amount less the amount required to be withheld for the other state; if the other state's withholding equals or exceeds it, withhold no Massachusetts tax.",
+      "verifiedOn": "2026-11-12",
+      "readVia": "search summary of the agency's own page, not a direct fetch"
+    }
+  }
 }

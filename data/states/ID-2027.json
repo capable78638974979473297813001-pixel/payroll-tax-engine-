@@ -268,6 +268,8 @@
     "childTaxCreditAllowance": null
   },
   "reciprocity": {
+    "nonresidentDeMinimisThreshold": 1000,
+    "nonresidentDeMinimisSource": {"title": "Idaho Code 63-3036; Idaho State Tax Commission, income you don't withhold on", "url": "https://tax.idaho.gov/taxes/income-tax/withholding/income-dont-withhold-on/", "verifiedOn": "2026-11-12", "says": "No Idaho withholding is required when the employee is not an Idaho resident and earns less than $1,000 in Idaho in a calendar year. Applied the way Minnesota's threshold is: on the year's wages estimated from this check."},
     "reciprocalStates": [],
     "note": "Idaho has no income-tax reciprocity agreement with any other state (cross-source confirmed) — the reciprocity mechanism is present in the ruleset shape for consistency with other states but reciprocalStates is deliberately empty, not omitted, to make the 'checked, found none' state explicit rather than indistinguishable from 'not yet researched.'"
   },

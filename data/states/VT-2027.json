@@ -544,5 +544,19 @@
     "basis": "hours_in_state",
     "form": "GB-1210 nonresident allocation",
     "$comment": "GB-1210-2026 describes the allocation as hours worked in Vermont over total hours in the pay period, with a worked example. Same arithmetic as Connecticut's, a different definition of the fraction — which is why the basis is recorded rather than the two being treated as one rule."
+  },
+  "employerPayrollTax": {
+    "idSuffix": "CCC",
+    "name": "Child Care Contribution",
+    "rate": 0.0044,
+    "effectiveFrom": "2024-07-01",
+    "employeeShareMaxFraction": 0.25,
+    "$comment": "Act 76 of 2023: a 0.44% payroll tax the EMPLOYER owes on wages subject to Vermont withholding, no wage cap, from 2024-07-01. The employer may take up to 25% of it (0.11% of wages) from the employee's pay; that is the employer's choice, so nothing is withheld unless input.employer.payrollTaxEmployeeShareFraction.VT says so. The 0.11% self-employment contribution is on the individual's return, not payroll.",
+    "source": {
+      "title": "Vermont Department of Taxes, Child Care Contribution; GB-1210 ('Employers must pay a 0.44% payroll tax')",
+      "url": "https://tax.vermont.gov/business/child-care-contribution",
+      "verifiedOn": "2026-11-12",
+      "verifiedBy": "Rate and base carried from this file's own GB-1210 reading; the employer's option to deduct up to 25% from wages read from the Department's page via search summary, not a direct fetch."
+    }
   }
 }

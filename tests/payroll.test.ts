@@ -211,18 +211,21 @@ describe('YTD accumulation across pay periods (payroll/ytd.ts)', () => {
     assert.equal(ytd.stateDisabilityEmployee?.WA, undefined, 'must not cross-pollinate between states');
   });
 
-  test("Oregon's Portland-area local triggers key on their own short name, not the full TaxLine id", () => {
+  test("Oregon's Portland-area triggers count the wages the engine reports, not the taxed excess on the line", () => {
     let ytd = freshYearToDate();
     ytd = accumulateYtd(ytd, {
       checkDate: '2026-01-15',
       grossPay: dollars(5_000),
+      // Below the trigger both lines carry $0 of taxable wages; the running
+      // total still has to grow by the check's wages or it never gets there.
       taxLines: [
-        { id: 'OR_METRO_SHS', taxableWages: dollars(1_000) },
-        { id: 'OR_MULTNOMAH_PFA', taxableWages: dollars(500) },
+        { id: 'OR_METRO_SHS', taxableWages: 0 },
+        { id: 'OR_MULTNOMAH_PFA', taxableWages: 0 },
       ],
+      ytdAccruals: { localIncomeTax: { OR_METRO: dollars(5_000), OR_MULTNOMAH: dollars(5_000) } },
     });
-    assert.equal(ytd.localIncomeTax?.OR_METRO, dollars(1_000));
-    assert.equal(ytd.localIncomeTax?.OR_MULTNOMAH, dollars(500));
+    assert.equal(ytd.localIncomeTax?.OR_METRO, dollars(5_000));
+    assert.equal(ytd.localIncomeTax?.OR_MULTNOMAH, dollars(5_000));
   });
 
   test('categoryCashWages accumulates from grossPay for household/agricultural/election-worker categories, and crossing the threshold does not retroactively tax the earlier period', () => {

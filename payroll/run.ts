@@ -28,7 +28,16 @@ export function activeEmployeesFor(company: Company, employees: readonly Employe
 /** The YTD an employee's paycheck should start from for `checkDate` — their own stored YTD if it already reflects this calendar year, or a fresh zeroed one if this check crosses into a new year (see ExtendedYearToDate's own doc comment — the same "one calendar year, then start over" rule the tax engine's jurisdiction files assume). */
 export function ytdForCheckDate(employee: Employee, checkDate: string): ExtendedYearToDate {
   const year = Number(checkDate.slice(0, 4));
-  return employee.ytdYear === year ? employee.ytd : freshYearToDate();
+  if (employee.ytdYear !== year) return freshYearToDate();
+  // Railroad unemployment caps by the MONTH. A check in a new month must
+  // start that tracker at zero BEFORE it is calculated; resetting only when
+  // the check is rolled in afterwards left the first check of every month
+  // looking at last month's total, already at the cap, and untaxed.
+  const { ytd } = employee;
+  if (ytd.railroadMonthlyCompensation && ytd.railroadMonthlyCompensationMonth !== checkDate.slice(0, 7)) {
+    return { ...ytd, railroadMonthlyCompensation: 0, railroadMonthlyCompensationMonth: checkDate.slice(0, 7) };
+  }
+  return ytd;
 }
 
 export function draftPayRun(
@@ -109,6 +118,7 @@ export function approvePayRun(run: PayRun, employees: readonly Employee[]): Appr
       grossPay: line.grossPay,
       taxLines: line.taxLines,
       electiveDeferrals: line.electiveDeferrals,
+      ytdAccruals: line.ytdAccruals,
     });
 
     updatedEmployees.push({ ...employee, ytd: nextYtd, ytdYear: Number(run.checkDate.slice(0, 4)) });

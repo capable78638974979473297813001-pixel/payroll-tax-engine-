@@ -3152,5 +3152,15 @@
     "supported": true,
     "source": "Circular CT's Examples 8-12 make aggregation the ONLY supplemental-wage method Connecticut publishes: a bonus paid separately is combined with the last regular pay period's wages, tax is computed on the total, and the tax already withheld from that regular payment is subtracted.",
     "engineNote": "Wired via aggregateWithPriorRegularPayment(): the caller supplies input.priorRegularPayment (that cheque's taxable wages and the state tax withheld from it), and a bonus paid on its own cheque is taxed on the combined figure less what was already withheld, floored at zero. Nothing changes when the caller omits it."
+  },
+  "residentWithholdingNetOfWorkState": {
+    "$comment": "For a resident working in another state that also withholds, an employer required to withhold here (input.residenceStateWithholding) withholds only the excess of this state's withholding over the work state's. Read by residenceStateWithholdingLine().",
+    "source": {
+      "title": "Connecticut DRS, Resident Working in Another State; Circular CT",
+      "url": "https://portal.ct.gov/DRS/Individuals/Individual-Tax-Page/Resident-Working-in-Another-State",
+      "says": "Connecticut income tax must be withheld by the employer, but only to the extent that Connecticut income tax withholding exceeds the amount required to be withheld for the state in which the services are performed.",
+      "verifiedOn": "2026-11-12",
+      "readVia": "search summary of the agency's own page, not a direct fetch"
+    }
   }
 }
