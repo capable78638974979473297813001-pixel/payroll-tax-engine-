@@ -266,5 +266,473 @@
       "https://www.cityofeastlansing.com/DocumentCenter/View/16965/2026-Employer-Withholding-Packet-PDF"
     ],
     "verifiedOn": "2026-11-12"
+  },
+  "MI-ALBION": {
+    "collector": "City of Albion Income Tax Department",
+    "registration": "Submit the City of Albion Employer Registration Packet and complete the EFT enrollment for the payment method selected.",
+    "returns": [
+      [
+        "AL-941 M / Q",
+        "Use the city’s monthly or quarterly voucher for the assigned period. Remit by the end of the following month."
+      ],
+      [
+        "AL-W3",
+        "Reconcile the year’s withholding with employee wage statements by the last day of February following the tax year."
+      ]
+    ],
+    "filing": "Use the assigned monthly or quarterly AL-941. Employers remitting by EFT can omit the periodic paper return. The annual AL-W3 is filed on paper.",
+    "payment": "Use the enrolled ACH method. For ACH credit, send the test transaction required by the city. Pay any balance on the annual paper reconciliation by check or money order.",
+    "sources": [
+      "https://cms1files.revize.com/albion/document_center/City_of_Albion_Employer_Registration_Packet.pdf",
+      "https://cms1files.revize.com/cityofalbion/document_center/Forms/Fillable%20forms/%281%29%20AL_W3_Withholding_Annual_Return.pdf",
+      "https://legislature.mi.gov/Laws/MCL?objectName=mcl-141-760",
+      "https://legislature.mi.gov/Laws/MCL?objectName=mcl-141-761"
+    ],
+    "verifiedOn": "2026-11-12"
+  },
+  "MI-BATTLE-CREEK": {
+    "collector": "City of Battle Creek Income Tax Department",
+    "registration": "Contact Battle Creek Income Tax with the employer FEIN and worksite details to establish the account and obtain the appropriate BC-941 series.",
+    "returns": [
+      [
+        "BC-941",
+        "Use the city’s monthly or quarterly voucher for the assigned period. Remit by the end of the following month."
+      ],
+      [
+        "BC W-3",
+        "Reconcile the year’s withholding with employee wage statements by the last day of February following the tax year."
+      ]
+    ],
+    "filing": "Send the signed monthly or quarterly BC-941 to Battle Creek Income Tax, PO Box 1657, Battle Creek, MI 49016-1657. Include W-2s with the annual reconciliation.",
+    "payment": "Include a check or money order payable to the City of Battle Creek.",
+    "sources": [
+      "https://www.battlecreekmi.gov/206/Income-Tax",
+      "https://www.battlecreekmi.gov/DocumentCenter/View/2649/BC-941-Quarterly-PDF",
+      "https://www.battlecreekmi.gov/DocumentCenter/View/5490/W-3-Reconciliation-of-Battle-Creek-Income-Tax-Withheld-Fillable-PDF",
+      "https://legislature.mi.gov/Laws/MCL?objectName=mcl-141-760",
+      "https://legislature.mi.gov/Laws/MCL?objectName=mcl-141-761"
+    ],
+    "verifiedOn": "2026-11-12"
+  },
+  "MI-BENTON-HARBOR": {
+    "collector": "City of Benton Harbor Income Tax Department",
+    "registration": "Complete the COBH Employer Registration Form on the city’s income tax forms page.",
+    "returns": [
+      [
+        "Monthly deposit / quarterly return",
+        "Quarterly returns and any remaining balance are due by the last day of the following month. When withholding exceeds $100 in either of the first two months of a quarter, deposit that month’s amount by the end of the following month."
+      ],
+      [
+        "CF-W3",
+        "Reconcile the year’s withholding with employee wage statements by the last day of February following the tax year."
+      ]
+    ],
+    "filing": "Use the vouchers in Benton Harbor’s 2026 withholding booklet and its separate 2026 CF-W3.",
+    "payment": "Make remittance payable to the City of Benton Harbor and send it to the address on the applicable voucher.",
+    "sources": [
+      "https://www.bhcity.us/pview.aspx?catid=0&id=55136",
+      "https://www.bhcity.us/files/documents/2025WithholdingBooklet1747095655012825AM.pdf",
+      "https://legislature.mi.gov/Laws/MCL?objectName=mcl-141-760",
+      "https://legislature.mi.gov/Laws/MCL?objectName=mcl-141-761"
+    ],
+    "verifiedOn": "2026-11-12"
+  },
+  "MI-BIG-RAPIDS": {
+    "collector": "City of Big Rapids Income Tax Department",
+    "registration": "Return the city’s Employer Registration form to the Big Rapids Income Tax Office with employer identification and the date taxable wages were first paid.",
+    "returns": [
+      [
+        "BR-941",
+        "Quarterly returns and any remaining balance are due by the last day of the following month. When withholding exceeds $100 in either of the first two months of a quarter, deposit that month’s amount by the end of the following month."
+      ],
+      [
+        "BRW-3",
+        "Reconcile the year’s withholding with employee wage statements by the last day of February following the tax year."
+      ]
+    ],
+    "filing": "Send BR-941 with the employer ID to the city Income Tax Office at 226 North Michigan Avenue, Big Rapids, MI 49307. File a quarterly return even for a zero quarter.",
+    "payment": "Make remittance payable to the City of Big Rapids.",
+    "sources": [
+      "https://cms6.revize.com/revize/bigrapids/Document%20Center/Departments/Income%20Tax/Forms/Big%20Rapids%20Tax%20Forms/Miscellaneous%20Tax%20Forms/INCOME%20TAX%20EMPLOYER%20REGISTRATION%20FORM.pdf",
+      "https://cms6.revize.com/revize/bigrapidsmi/document_center/Income%20Tax%20Forms/2024/2024%20BR%20941%20Fillable.pdf",
+      "https://cms6.revize.com/revize/bigrapids/Document%20Center/Departments/Income%20Tax/Forms/Big%20Rapids%20Tax%20Forms/2025/2025%20BRW-3%20Employer%27s%20Annual%20Reconciliation%20of%20Income%20Tax%20Withheld.pdf",
+      "https://legislature.mi.gov/Laws/MCL?objectName=mcl-141-760",
+      "https://legislature.mi.gov/Laws/MCL?objectName=mcl-141-761"
+    ],
+    "verifiedOn": "2026-11-12"
+  },
+  "MI-FLINT": {
+    "collector": "City of Flint Income Tax Department",
+    "registration": "Register with F-SS-4 before activating Flint’s withholding tool with the assigned account number.",
+    "returns": [
+      [
+        "F-501 / F-941",
+        "Quarterly returns and any remaining balance are due by the last day of the following month. When withholding exceeds $100 in either of the first two months of a quarter, deposit that month’s amount by the end of the following month."
+      ],
+      [
+        "FW3",
+        "Reconcile the year’s withholding with employee wage statements by the last day of February following the tax year."
+      ]
+    ],
+    "filing": "Use Flint’s withholding service or the vouchers in the city’s 2026 employer packet.",
+    "payment": "Pay through Flint’s employer withholding site or mail the payment and voucher as directed in the packet.",
+    "sources": [
+      "https://www.cityofflint.com/wp-content/uploads/2026/01/2025-City-of-Flint-Employers-Withholding-Forms-and-Instruction-Booklet.pdf",
+      "https://www.cityofflint.com/online-service/employer-withholding-payments/",
+      "https://www.cityofflint.com/income-tax-division/",
+      "https://legislature.mi.gov/Laws/MCL?objectName=mcl-141-760",
+      "https://legislature.mi.gov/Laws/MCL?objectName=mcl-141-761"
+    ],
+    "verifiedOn": "2026-11-12"
+  },
+  "MI-GRAYLING": {
+    "collector": "City of Grayling Income Tax Department",
+    "registration": "Submit Grayling’s GR-SS-4 employer registration form.",
+    "returns": [
+      [
+        "GR-941",
+        "The city instructs quarterly filing by the end of the next month, including zero periods, and offers monthly reporting on request. Confirm deposit frequency with the city if withholding exceeds the statutory $100 threshold."
+      ],
+      [
+        "GRW-3",
+        "Reconcile the year’s withholding with employee wage statements by the last day of February following the tax year."
+      ]
+    ],
+    "filing": "File paper GR-941 returns with the City of Grayling Income Tax Division, PO Box 549, Grayling, MI 49738. Use that address for current and past periods administered by the city.",
+    "payment": "Include a check payable to the City of Grayling.",
+    "sources": [
+      "https://www.cityofgrayling.org/downloads/grss4_employer_withholding_registration.pdf",
+      "https://www.cityofgrayling.org/incometax",
+      "https://www.cityofgrayling.org/downloads/2024_employer_withholding_booklet_2.pdf",
+      "https://legislature.mi.gov/Laws/MCL?objectName=mcl-141-760",
+      "https://legislature.mi.gov/Laws/MCL?objectName=mcl-141-761"
+    ],
+    "verifiedOn": "2026-11-12"
+  },
+  "MI-HAMTRAMCK": {
+    "collector": "City of Hamtramck Income Tax Department",
+    "registration": "Submit Hamtramck’s H-SS-4 employer registration.",
+    "returns": [
+      [
+        "H-941",
+        "Use the city’s monthly or quarterly voucher for the assigned period. Remit by the end of the following month."
+      ],
+      [
+        "HW-3",
+        "Reconcile the year’s withholding with employee wage statements by the last day of February following the tax year."
+      ]
+    ],
+    "filing": "Use the appropriate 2026 Hamtramck voucher packet and send the signed periodic voucher to its withholding lockbox, PO Box 209, Eaton Rapids, MI 48827.",
+    "payment": "Make the remittance payable to the Treasurer, City of Hamtramck.",
+    "sources": [
+      "https://hamtramckcity.gov/departments/income-tax/",
+      "https://hamtramckcity.gov/wp-content/uploads/2026/01/H-941-501-With-HW3-MONTHLY-Employer-Withholding-Vouchers-For-2026-Copy.pdf",
+      "https://hamtramckcity.gov/wp-content/uploads/2024/06/H-SS-4-Hamtramck-New-Business-Withholding-Registration-Form-and-Instructions-1-1.pdf",
+      "https://legislature.mi.gov/Laws/MCL?objectName=mcl-141-760",
+      "https://legislature.mi.gov/Laws/MCL?objectName=mcl-141-761"
+    ],
+    "verifiedOn": "2026-11-12"
+  },
+  "MI-HIGHLAND-PARK": {
+    "collector": "City of Highland Park Income Tax Department",
+    "registration": "Submit Highland Park’s HP-SS-4 business and withholding registration.",
+    "returns": [
+      [
+        "HP-941",
+        "Use the city’s monthly or quarterly voucher for the assigned period. Remit by the end of the following month."
+      ],
+      [
+        "HPW-3",
+        "Reconcile the year’s withholding with employee wage statements by the last day of February following the tax year."
+      ]
+    ],
+    "filing": "Use Highland Park’s 2026 vouchers. The periodic withholding payment lockbox is PO Box 239, Eaton Rapids, MI 48827.",
+    "payment": "Make the remittance payable to the Treasurer, City of Highland Park.",
+    "sources": [
+      "https://www.highlandparkmi.gov/incometax/",
+      "https://www.highlandparkmi.gov/media/didbybsb/hp-941-501-hpw3-monthly-employer-withholding-vouchers-2026.pdf",
+      "https://legislature.mi.gov/Laws/MCL?objectName=mcl-141-760",
+      "https://legislature.mi.gov/Laws/MCL?objectName=mcl-141-761"
+    ],
+    "verifiedOn": "2026-11-12"
+  },
+  "MI-HUDSON": {
+    "collector": "City of Hudson Income Tax Department",
+    "registration": "Contact Hudson’s Income Tax Office at 517-448-8983 for employer account setup and the HU-941.",
+    "returns": [
+      [
+        "HU-941",
+        "Use the city’s monthly or quarterly voucher for the assigned period. Remit by the end of the following month."
+      ],
+      [
+        "HUW-3",
+        "Reconcile the year’s withholding with employee wage statements by the last day of February following the tax year."
+      ]
+    ],
+    "filing": "Submit HU-941 for the assigned monthly or quarterly period and HUW-3 with employee W-2s at year end.",
+    "payment": "Send payment with HU-941 using the instructions provided by the city Income Tax Office.",
+    "sources": [
+      "https://www.ci.hudson.mi.us/_files/ugd/6c24f6_9dee134a5bb24cecbee1a773aaf17560.pdf",
+      "https://www.ci.hudson.mi.us/copy-of-codes-forms-and-permits-1",
+      "https://legislature.mi.gov/Laws/MCL?objectName=mcl-141-760",
+      "https://legislature.mi.gov/Laws/MCL?objectName=mcl-141-761"
+    ],
+    "verifiedOn": "2026-11-12"
+  },
+  "MI-IONIA": {
+    "collector": "City of Ionia Income Tax Department",
+    "registration": "Submit Ionia’s Business Withholding Registration Form.",
+    "returns": [
+      [
+        "I-501 / I-941",
+        "Quarterly returns and any remaining balance are due by the last day of the following month. When withholding exceeds $100 in either of the first two months of a quarter, deposit that month’s amount by the end of the following month."
+      ],
+      [
+        "IW-3",
+        "Reconcile the year’s withholding with employee wage statements by the last day of February following the tax year. The 2026 booklet introduction prints a date before year end. Confirm the year-specific IW-3 deadline with Ionia."
+      ]
+    ],
+    "filing": "Use I-501 for interim deposits and I-941 for quarterly reporting. Use MI-ION in W-2 box 20. The city accepts W-2 data on CD-ROM or USB under its specifications.",
+    "payment": "Make the voucher remittance payable to the City of Ionia.",
+    "sources": [
+      "https://www.cityofionia.org/229/City-Income-Tax",
+      "https://ci.ionia.mi.us/DocumentCenter/View/2311/Employer-Withholding-Tax-Forms-and-Instructions-2026-PDF",
+      "https://legislature.mi.gov/Laws/MCL?objectName=mcl-141-760",
+      "https://legislature.mi.gov/Laws/MCL?objectName=mcl-141-761"
+    ],
+    "verifiedOn": "2026-11-12"
+  },
+  "MI-JACKSON": {
+    "collector": "City of Jackson Income Tax Department",
+    "registration": "Register with the Jackson Income Tax Office using its Employer Withholding Registration form and FEIN. Payroll providers should request a portal invitation.",
+    "returns": [
+      [
+        "J-941",
+        "Use the city’s monthly or quarterly voucher for the assigned period. Remit by the end of the following month."
+      ],
+      [
+        "W-3",
+        "Reconcile the year’s withholding with employee wage statements by the last day of February following the tax year."
+      ]
+    ],
+    "filing": "Use Jackson’s employer site for annual W-3 e-filing and monthly or quarterly remittances. J-941 vouchers are also published for 2026.",
+    "payment": "Pay online through the employer account or send a check with J-941 to the Treasurer, City of Jackson.",
+    "sources": [
+      "https://www.cityofjackson.org/DocumentCenter/View/10874/Employer-Registration",
+      "https://www.cityofjackson.org/224/Income-Tax-Division",
+      "https://www.cityofjackson.org/DocumentCenter/View/14238/2026-J-941-Quarterly-Withholding-Instructions-and-Vouchers-2026?bidId=",
+      "https://legislature.mi.gov/Laws/MCL?objectName=mcl-141-760",
+      "https://legislature.mi.gov/Laws/MCL?objectName=mcl-141-761"
+    ],
+    "verifiedOn": "2026-11-12"
+  },
+  "MI-LAPEER": {
+    "collector": "City of Lapeer Income Tax Department",
+    "registration": "Register the employer with Lapeer’s L-SS-4.",
+    "returns": [
+      [
+        "L-941",
+        "Quarterly returns and any remaining balance are due by the last day of the following month. When withholding exceeds $100 in either of the first two months of a quarter, deposit that month’s amount by the end of the following month. Lapeer’s guide lists July 30 alongside a month-end rule. Confirm the Q2 date before relying on July 31."
+      ],
+      [
+        "LW-3",
+        "Reconcile the year’s withholding with employee wage statements by the last day of February following the tax year."
+      ]
+    ],
+    "filing": "Use the city withholding service for L-941 and LW-3. File L-941 for every active quarter, including quarters with no withholding.",
+    "payment": "Use the withholding payment option on Lapeer’s tax site or remit with the city voucher.",
+    "sources": [
+      "https://cms4files.revize.com/lapeermi/Forms%20-%20Income%20Tax/City%20of%20Lapeer%20SS-01-13-2025.pdf",
+      "https://michigan-lapeer.insourcetax.com/",
+      "https://cms4files.revize.com/lapeermi/Forms-IT/Withholding%20Tax%20Guide%2012-2019.pdf",
+      "https://legislature.mi.gov/Laws/MCL?objectName=mcl-141-760",
+      "https://legislature.mi.gov/Laws/MCL?objectName=mcl-141-761"
+    ],
+    "verifiedOn": "2026-11-12"
+  },
+  "MI-MUSKEGON": {
+    "collector": "City of Muskegon Income Tax Department",
+    "registration": "Register with the Muskegon Income Tax Department using M-SS-4 and activate the employer withholding account.",
+    "returns": [
+      [
+        "Withholding voucher",
+        "Quarterly returns and any remaining balance are due by the last day of the following month. When withholding exceeds $100 in either of the first two months of a quarter, deposit that month’s amount by the end of the following month."
+      ],
+      [
+        "MW-3",
+        "Reconcile the year’s withholding with employee wage statements by the last day of February following the tax year."
+      ]
+    ],
+    "filing": "Complete MW-3 through Muskegon’s eWithholding service. If mailing a periodic payment, print the voucher from that service.",
+    "payment": "Pay through eWithholding or mail payment with the printed voucher. The city directs employers paying online to omit the duplicate mailed voucher.",
+    "sources": [
+      "https://muskegon-mi.gov/city-services/finance-administrative/income-tax/income-tax-forms/employer-income-tax-information/",
+      "https://www.muskegon-mi.gov/cresources/eWithhold-Instructions.pdf",
+      "https://www.muskegon-mi.gov/cresources/Registration-M-SS-42011.pdf",
+      "https://legislature.mi.gov/Laws/MCL?objectName=mcl-141-760",
+      "https://legislature.mi.gov/Laws/MCL?objectName=mcl-141-761"
+    ],
+    "verifiedOn": "2026-11-12"
+  },
+  "MI-MUSKEGON-HEIGHTS": {
+    "collector": "City of Muskegon Heights Income Tax Department",
+    "registration": "Register through the employer registration link on the City of Muskegon Heights tax site using the business FEIN.",
+    "returns": [
+      [
+        "Employer withholding payment",
+        "Quarterly returns and any remaining balance are due by the last day of the following month. When withholding exceeds $100 in either of the first two months of a quarter, deposit that month’s amount by the end of the following month."
+      ],
+      [
+        "Employer’s annual reconciliation",
+        "Reconcile the year’s withholding with employee wage statements by the last day of February following the tax year. The city page shows an inconsistent prior-year example. Confirm the 2026 filing date in the employer account."
+      ]
+    ],
+    "filing": "Manage withholding and complete the annual reconciliation on the Muskegon Heights withholding website.",
+    "payment": "The city directs employers to make all withholding payments online.",
+    "sources": [
+      "https://muskegonheights.us/income-tax/",
+      "https://legislature.mi.gov/Laws/MCL?objectName=mcl-141-760",
+      "https://legislature.mi.gov/Laws/MCL?objectName=mcl-141-761"
+    ],
+    "verifiedOn": "2026-11-12"
+  },
+  "MI-PONTIAC": {
+    "collector": "City of Pontiac Income Tax Department",
+    "registration": "Register the employer FEIN on Pontiac P-SS-4. The city advises that it does not issue a registration confirmation.",
+    "returns": [
+      [
+        "P-941",
+        "Use the city’s monthly or quarterly voucher for the assigned period. Remit by the end of the following month."
+      ],
+      [
+        "PW-3",
+        "Reconcile the year’s withholding with employee wage statements by the last day of February following the tax year."
+      ]
+    ],
+    "filing": "Mail P-941 and remittance to City of Pontiac Income Tax Division, PO Box 530, Eaton Rapids, MI 48827-0530.",
+    "payment": "Make the check payable to Treasurer, City of Pontiac and include the FEIN.",
+    "sources": [
+      "https://www.pontiac.mi.us/Document%20Center/Departments/Finance/Income%20Tax/Tax%20Forms/P-SS-4%20revised%202023-12-12.pdf",
+      "https://www.pontiac.mi.us/Document%20Center/Departments/Finance/withholdingguide.pdf",
+      "https://legislature.mi.gov/Laws/MCL?objectName=mcl-141-760",
+      "https://legislature.mi.gov/Laws/MCL?objectName=mcl-141-761"
+    ],
+    "verifiedOn": "2026-11-12"
+  },
+  "MI-PORT-HURON": {
+    "collector": "City of Port Huron Income Tax Department",
+    "registration": "Register with the City of Port Huron using PH-2.",
+    "returns": [
+      [
+        "PH-941",
+        "PH-941 and payment are due by the end of the month after each quarter. The city permits a monthly election and asks for 30 days’ notice to switch back. Confirm the deposit schedule with the office if withholding exceeds $100."
+      ],
+      [
+        "PH-W3",
+        "Reconcile the year’s withholding with employee wage statements by the last day of February following the tax year."
+      ]
+    ],
+    "filing": "Submit PH-941 to the city. Include W-2 information with PH-W3. Employers with 100 or more employees must use electronic media for W-2s.",
+    "payment": "Send a check payable to Treasurer, City of Port Huron with the periodic voucher.",
+    "sources": [
+      "https://cms9files.revize.com/porthuronmi/Finance/Income%20Tax/Employer%20Information%20and%20Tax%20Forms/Withholding%20Guide%20and%20Tables/Withholding%20Guide%202.pdf",
+      "https://cms9files.revize.com/porthuronminw/Documents/Government/Departments/Finance/Income%20Tax/Employer%20Information%20and%20Income%20Tax%20Forms/Return%20of%20Tax%20Withheld%20%28PH-941%29.pdf",
+      "https://cms9files.revize.com/porthuronminw/Documents/Residents/Support%20For%20Residents/Online%20Services/Forms%20Online/W2Filing.pdf",
+      "https://legislature.mi.gov/Laws/MCL?objectName=mcl-141-760",
+      "https://legislature.mi.gov/Laws/MCL?objectName=mcl-141-761"
+    ],
+    "verifiedOn": "2026-11-12"
+  },
+  "MI-PORTLAND": {
+    "collector": "City of Portland Income Tax Department",
+    "registration": "Register the FEIN with Portland using P-SS-4.",
+    "returns": [
+      [
+        "P-941",
+        "Quarterly returns and any remaining balance are due by the last day of the following month. When withholding exceeds $100 in either of the first two months of a quarter, deposit that month’s amount by the end of the following month."
+      ],
+      [
+        "PW-3",
+        "Reconcile the year’s withholding with employee wage statements by the last day of February following the tax year."
+      ]
+    ],
+    "filing": "Submit P-941 with the applicable withholding payment. File PW-3 with copies of employee W-2s.",
+    "payment": "Mail a check or money order payable to the City of Portland with the voucher.",
+    "sources": [
+      "https://portland-michigan.org/153/Income-Tax-Office",
+      "https://www.portland-michigan.org/DocumentCenter/View/5434/2026-Monthly-Withholding-Coupons-and-Reconciliation-PDF?bidId=",
+      "https://legislature.mi.gov/Laws/MCL?objectName=mcl-141-760",
+      "https://legislature.mi.gov/Laws/MCL?objectName=mcl-141-761"
+    ],
+    "verifiedOn": "2026-11-12"
+  },
+  "MI-SAGINAW": {
+    "collector": "City of Saginaw Income Tax Department",
+    "registration": "Register with Saginaw on S-SS-4 and obtain a PIN for the city withholding website.",
+    "returns": [
+      [
+        "S-501 / S-941",
+        "Quarterly returns and any remaining balance are due by the last day of the following month. When withholding exceeds $100 in either of the first two months of a quarter, deposit that month’s amount by the end of the following month."
+      ],
+      [
+        "SW-3",
+        "Reconcile the year’s withholding with employee wage statements by the last day of February following the tax year."
+      ]
+    ],
+    "filing": "Complete S-501, S-941 and SW-3 in the city’s online preparation tool. A quarterly S-941 is required even for zero withholding.",
+    "payment": "Follow the city’s deposit instructions. Mailed checks are payable to Saginaw City Treasurer.",
+    "sources": [
+      "https://cityofsaginawmi.gov/418/Employer-Withholding",
+      "https://www.saginaw-mi.com/DocumentCenter/View/711/2020-Withholding-Tax-Guide-PDF",
+      "https://legislature.mi.gov/Laws/MCL?objectName=mcl-141-760",
+      "https://legislature.mi.gov/Laws/MCL?objectName=mcl-141-761"
+    ],
+    "verifiedOn": "2026-11-12"
+  },
+  "MI-SPRINGFIELD": {
+    "collector": "City of Springfield Income Tax Department",
+    "registration": "Contact Springfield’s Income Tax Department to establish the withholding account. Include the FEIN and the business start date on the first SF-941.",
+    "returns": [
+      [
+        "SF-941",
+        "Springfield’s instructions call for monthly deposits when withholding is $100 or more in a month, due at the end of the next month. Otherwise deposit quarterly by the end of the next month. This includes exactly $100 under the city’s instructions."
+      ],
+      [
+        "SF W-3",
+        "Reconcile the year’s withholding with employee wage statements by the last day of February following the tax year."
+      ]
+    ],
+    "filing": "Send SF-941 to City of Springfield Income Tax Department, 601 Avenue A, Springfield, MI 49037-7774.",
+    "payment": "Include full remittance payable to the City of Springfield with the deposit voucher.",
+    "sources": [
+      "https://cms8.revize.com/revize/springfieldmi/Document_Center/Department/Document/Income%20Tax%20%28Employers%29/Instructions_for_Form_SF_941.pdf",
+      "https://cms8.revize.com/revize/springfieldmi/Document_Center/Department/Document/Income%20Tax%20%28Employers%29/W3_Annual_Emp_Recon.pdf",
+      "https://legislature.mi.gov/Laws/MCL?objectName=mcl-141-760",
+      "https://legislature.mi.gov/Laws/MCL?objectName=mcl-141-761"
+    ],
+    "verifiedOn": "2026-11-12"
+  },
+  "MI-WALKER": {
+    "collector": "City of Walker Income Tax Department",
+    "registration": "Register in Walker’s Employer Withholding Tool.",
+    "returns": [
+      [
+        "W-501 / W-941",
+        "Quarterly returns and any remaining balance are due by the last day of the following month. When withholding exceeds $100 in either of the first two months of a quarter, deposit that month’s amount by the end of the following month."
+      ],
+      [
+        "WW-3",
+        "Reconcile the year’s withholding with employee wage statements by the last day of February following the tax year."
+      ]
+    ],
+    "filing": "Use the city tool for periodic vouchers and W-2s. Upload W-2s before submitting WW-3 electronically.",
+    "payment": "Pay electronically in the tool or print the city voucher and remit to the Walker City Treasurer.",
+    "sources": [
+      "https://www.walkermi.gov/316/Employer-Withholding",
+      "https://www.walkermi.gov/DocumentCenter/View/997/Employer-Withholding-Tax-Guide-PDF",
+      "https://legislature.mi.gov/Laws/MCL?objectName=mcl-141-760",
+      "https://legislature.mi.gov/Laws/MCL?objectName=mcl-141-761"
+    ],
+    "verifiedOn": "2026-11-12"
   }
 }

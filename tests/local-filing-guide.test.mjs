@@ -180,7 +180,22 @@ test('Michigan city guides distinguish state and municipal filing offices', () =
   for (const row of rows('MI-cities', 'cities')) {
     const result = lookup(row.name);
     assert.equal(result.jurisdiction, row.name);
-    if (result.status === 'guide') assert.ok(result.guide.sources.length);
-    else assert.equal(result.status, 'collector-unverified');
+    assert.equal(result.status, 'guide');
+    assert.ok(result.guide.sources.length);
+    for (const field of ['registration', 'returns', 'filing', 'payment']) {
+      assert.ok(result.guide[field].length, row.name + ' lacks ' + field);
+    }
   }
+});
+
+test('Michigan employer guides preserve city-specific filing and remittance instructions', () => {
+  const guide = city => localWithholdingGuide('MI-city', city, 2026).guide;
+  assert.match(guide('Grayling').filing, /PO Box 549, Grayling/);
+  assert.match(guide('Hamtramck').filing, /PO Box 209/);
+  assert.match(guide('Highland Park').filing, /PO Box 239/);
+  assert.match(guide('Port Huron').filing, /100 or more employees/);
+  assert.match(guide('Springfield').returns[0][1], /\$100 or more/);
+  assert.match(guide('Walker').filing, /Upload W-2s before/);
+  assert.notEqual(guide('Muskegon').collector, guide('Muskegon Heights').collector);
+  assert.match(guide('Ionia').returns[1][1], /Confirm/);
 });
