@@ -4,6 +4,8 @@ Use `localWithholdingGuide(kind, code, 2026)` from `payroll/local/filingGuide.mj
 
 | Kind | Code | Example |
 | --- | --- | --- |
+| CO-city | Colorado city name with a verified OPT guide | `Denver` |
+| DE-city | Delaware wage tax city name | `Wilmington` |
 | MO-city | Missouri earnings tax city name | `St. Louis` |
 | MI-city | Michigan taxing city name | `East Lansing` |
 | IN-county | Two-digit Indiana county code | `01` |

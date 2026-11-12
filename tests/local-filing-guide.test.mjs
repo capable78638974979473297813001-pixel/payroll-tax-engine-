@@ -223,3 +223,13 @@ test('Wilmington routes city withholding and preserves the intermediate and W-2 
   assert.match(result.guide.filing, /RS record in the EFW2 file/);
   assert.equal(localWithholdingGuide('DE-city', 'Wilmington Manor', 2026).status, 'unknown-code');
 });
+
+test('Denver routes occupational privilege tax to Treasury and preserves the monthly filing threshold', () => {
+  const result = localWithholdingGuide('CO-city', ' DENVER ', 2026);
+  assert.equal(result.agency, 'CO-DENVER');
+  assert.match(result.guide.returns[0][1], /taxable employees, owners and partners/);
+  assert.match(result.guide.returns[0][1], /reaches 10 in a month/);
+  assert.match(result.guide.returns[1][1], /no employees liable during the year/);
+  assert.match(result.guide.payment, /Denver eBiz/);
+  assert.equal(localWithholdingGuide('CO-city', 'Denver metro', 2026).status, 'unknown-code');
+});

@@ -63,6 +63,12 @@ export function localWithholdingGuide(kind, code, year) {
         },
       };
     }
+    case 'CO-city':
+      if (code.trim().toLowerCase() === 'denver') {
+        row = { name: 'Denver' };
+        agency = 'CO-DENVER';
+      }
+      break;
     case 'DE-city':
       if (code.trim().toLowerCase() === 'wilmington') {
         row = { name: 'Wilmington' };

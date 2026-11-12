@@ -817,5 +817,28 @@
       "https://www.wilmingtonde.gov/home/showpublisheddocument/12252/638507503828470000"
     ],
     "verifiedOn": "2026-11-12"
+  },
+  "CO-DENVER": {
+    "collector": "City and County of Denver, Department of Finance, Treasury Division",
+    "registration": "Register for Denver Occupational Privilege Tax (OPT) through Denver eBiz.",
+    "returns": [
+      [
+        "Occupational Privilege Tax return",
+        "Report employee OPT withheld and business OPT owed by the employer. Rule 004 counts taxable employees, owners and partners. File monthly if the count reaches 10 in a month. Quarterly filing is available if the count stays below 10 each month. File and pay by the last day of the following month after each reporting period. Weekend and holiday deadlines move to the next business day."
+      ],
+      [
+        "Annual OPT return",
+        "Owner- or partner-only businesses with no employees liable during the year may file annually. Rule 004 gives January 31 following the tax year. The city FAQ also describes an advance-payment option. Check the period assigned to your account before paying."
+      ]
+    ],
+    "filing": "File the Denver OPT return through Denver eBiz for the period assigned by Treasury.",
+    "payment": "Remit the employee and business portions through Denver eBiz with the return.",
+    "sources": [
+      "https://denvergov.org/Government/Agencies-Departments-Offices/Agencies-Departments-Offices-Directory/Department-of-Finance/Our-Divisions/Treasury/Business-Tax-Information",
+      "https://denvergov.org/Government/Agencies-Departments-Offices/Agencies-Departments-Offices-Directory/Department-of-Finance/Our-Divisions/Treasury/Business-Tax-Information/Business-Tax-FAQ",
+      "https://www.denvergov.org/files/assets/public/v/1/finance/documents/treasury/tax-guides/tax-update-2025/treasurytaxrule004_rulesrelatingtothefrequencyof.taxreturns.pdf",
+      "https://www.denvergov.org/files/assets/public/v/1/finance/documents/treasury/tax-guides/tax-update-2025/taxguidetopic30_filingperiods.pdf"
+    ],
+    "verifiedOn": "2026-11-12"
   }
 }
