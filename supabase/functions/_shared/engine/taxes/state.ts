@@ -7787,10 +7787,11 @@ interface SpringfieldPayrollTaxConfig {
  * labor under $50, and the rest of 7.1202), and the exclusion of hours worked at
  * an employer location outside the city (7.1204(4)), which are facts about the
  * employer and employee the engine cannot see. The first date the tax is owed is
- * set by the City Manager's administrative rule and is no sooner than
- * 2027-01-01 (Ordinance Section 5), so 2027-01-01 is the earliest possible date,
- * not a confirmed one. The ordinance keys to the pay period, so payPeriodStart
- * is used when given and the check date otherwise. An employer may elect to pay
+ * set by the City Manager's administrative rule (Ordinance Section 5); the
+ * city's own FAQ (read 2026-11-12) says it begins 2027-01-01 for pay periods
+ * beginning on or after that date, and the rule itself is not yet posted. The
+ * ordinance keys to the pay period, so payPeriodStart is used when given and
+ * the check date otherwise. An employer may elect to pay
  * the employee share; that election is not modelled. Dispatched off
  * certificate.locality 'Springfield'.
  */
@@ -7809,7 +7810,7 @@ function springfieldPayrollTax(
   const wages = ctx.taxableWagesFor(['section125', 'hsa', 'fsa', 'dependent_care', 'commuter']);
   const quality = {
     tier: 'inferred' as const,
-    note: "Ordinance No. 6515 (adopted 2026-06-01, read) sets 0.1% employee and 0.1% employer on wages for services at a business location in the city, with Section 125 benefits and transportation fringes excluded and retirement deferrals included. The first date the tax is owed is set by the City Manager's administrative rule and is no sooner than 2027-01-01, so 2027-01-01 is assumed here and may be later. The code's small-amount wage exclusions and its exclusion of hours worked at an employer location outside the city are not applied. The city keys the start to the pay period's first day: supply payPeriodStart, or the check date is used.",
+    note: "Ordinance No. 6515 (adopted 2026-06-01, read) sets 0.1% employee and 0.1% employer on wages for services at a business location in the city, with Section 125 benefits and transportation fringes excluded and retirement deferrals included. The city's own FAQ (read 2026-11-12) says the tax begins 2027-01-01 and employers withhold for pay periods beginning on or after that date; the ordinance leaves the exact date to the City Manager's administrative rule, which the city has not yet posted. The code's small-amount wage exclusions and its exclusion of hours worked at an employer location outside the city are not applied. The city keys the start to the pay period's first day: supply payPeriodStart, or the check date is used.",
   };
   return [
     {

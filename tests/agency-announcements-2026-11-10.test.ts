@@ -15,7 +15,7 @@ describe('agency announcements read on 2026-11-10', () => {
     assert.equal(json('data/states/CT-2027.json').statePaidLeaveEmployee.rate, 0.005);
   });
 
-  test('Oakwood (Paulding) is CCA at 1.00% and Oakwood (Cuyahoga) is RITA at 2.5% in every year file; the Montgomery Oakwood stays unresolved', () => {
+  test('Oakwood (Paulding) is CCA at 1.00% and Oakwood (Cuyahoga) is RITA at 2.5% in every year file; the Montgomery Oakwood is city-collected', () => {
     for (const y of [2025, 2026, 2027]) {
       const rows = json(`data/local/OH-municipalities-${y}.json`).municipalities as { name: string; rate: number; administeredBy: string }[];
       const by = (n: string) => rows.find((r) => r.name === n)!;
@@ -24,7 +24,7 @@ describe('agency announcements read on 2026-11-10', () => {
       assert.equal(by('Oakwood (Cuyahoga)').administeredBy, 'RITA'); // RITA's own member page, read 2026-11-10
       assert.equal(by('Oakwood (Cuyahoga)').rate, 0.025);
       assert.equal(by('Waynesfield').administeredBy, 'RITA');
-      assert.equal(by('Oakwood (Montgomery)').administeredBy, 'unknown_ambiguous_name');
+      assert.equal(by('Oakwood (Montgomery)').administeredBy, 'self_or_other'); // the city's own site, read 2026-11-12
     }
   });
 });

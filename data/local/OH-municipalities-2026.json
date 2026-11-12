@@ -3211,15 +3211,15 @@
       "rate": 0.025,
       "effectiveFrom": "2010-07-01",
       "administeredBy": "RITA",
-      "administeredByNote": "Resolved 2026-11-10: the Regional Income Tax Agency's own member page for Oakwood, Cuyahoga County (ritaohio.com/municipalities/Home/MemberPage?id=580, read directly) lists it as a RITA member since 01/01/1972 at 2.500% with a 100% credit. CCA's only Oakwood is the Paulding County one. The Montgomery Oakwood is on neither agency's list read, so who collects there is unconfirmed."
+      "administeredByNote": "Resolved 2026-11-10: the Regional Income Tax Agency's own member page for Oakwood, Cuyahoga County (ritaohio.com/municipalities/Home/MemberPage?id=580, read directly) lists it as a RITA member since 01/01/1972 at 2.500% with a 100% credit. CCA's only Oakwood is the Paulding County one. The Montgomery Oakwood is city-collected (see its own entry)."
     },
     {
       "name": "Oakwood (Montgomery)",
       "municode": "57764",
       "rate": 0.025,
       "effectiveFrom": "2003-01-01",
-      "administeredBy": "unknown_ambiguous_name",
-      "administeredByNote": "Ohio has 3 municipalities named Oakwood (Cuyahoga, Montgomery, Paulding counties); RITA and/or CCA list \"Oakwood\" without a county qualifier, so which one(s) are members could not be determined this session."
+      "administeredBy": "self_or_other",
+      "administeredByNote": "Resolved 2026-11-12: the City of Oakwood's own site (oakwoodohio.gov/employer-withholding, read directly) shows the City of Oakwood Income Tax Department, 30 Park Avenue, collects, at 2.50%, with monthly remittance when prior-year withholding exceeded $2,399 or any month of the preceding quarter exceeded $200 (otherwise quarterly), and an annual reconciliation due February 28. Its individual-forms page shows an income tax processing address at PO Box 269, Eaton Rapids, MI 48827, and the owner reports CityTax has administered filing and payments for the city since 2026-01-01 (not read). Neither RITA nor CCA lists this Oakwood, so it is tagged self_or_other."
     },
     {
       "name": "Oakwood (Paulding)",
@@ -3227,7 +3227,7 @@
       "rate": 0.01,
       "effectiveFrom": "2003-01-01",
       "administeredBy": "CCA",
-      "administeredByNote": "Resolved 2026-11-10: the Central Collection Agency's own member and tax-rate pages (ccaohio.gov/member-municipalities, /tax-rates) list 'Oakwood (Paulding County)' at 1.00%, matching this rate. The Cuyahoga and Montgomery Oakwoods remain unresolved."
+      "administeredByNote": "Resolved 2026-11-10: the Central Collection Agency's own member and tax-rate pages (ccaohio.gov/member-municipalities, /tax-rates) list 'Oakwood (Paulding County)' at 1.00%, matching this rate. The Cuyahoga Oakwood is RITA and the Montgomery Oakwood is city-collected."
     },
     {
       "name": "Oberlin",
