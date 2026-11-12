@@ -1245,5 +1245,28 @@
       "https://www.leedsalabama.gov/DocumentCenter/View/1033/Annual-Occupational-Reconciliation-Withholding-Form"
     ],
     "verifiedOn": "2026-11-12"
+  },
+  "OR-DOR-TRANSIT": {
+    "collector": "Oregon Department of Revenue",
+    "registration": "Before issuing paychecks, register for an Oregon business identification number (BIN) through Revenue Online or Combined Employer’s Registration. An existing employer entering a transit district reports the effective date on the Business Change in Status form.",
+    "returns": [
+      [
+        "Form OQ",
+        "Report employer-paid district tax on the Oregon combined quarterly return. Allocate taxable wages by where services were performed, including remote work. Enter each district’s wages under its own designation (TM for TriMet, LTD for Lane). The statewide transit withholding tax has a separate entry."
+      ],
+      [
+        "2026 quarterly deadlines",
+        "File and pay by April 30 and July 31, 2026 for Q1 and Q2, November 2, 2026 for Q3, and February 1, 2027 for Q4."
+      ]
+    ],
+    "filing": "File the combined report through Frances Online or use paper Form OQ. Check the district boundary for each work location and the 2026 instructions for exemptions before reporting wages.",
+    "payment": "Remit the employer tax to Oregon Department of Revenue by electronic funds transfer or use payment voucher OR-OTC-V with the combined payroll payment. Identify the district amounts and the payroll quarter.",
+    "sources": [
+      "https://www.oregon.gov/dor/programs/businesses/pages/trimet-transit.aspx",
+      "https://www.oregon.gov/dor/programs/businesses/pages/lane-county-transit-district-payroll-tax.aspx",
+      "https://www.oregon.gov/dor/programs/businesses/Pages/Withholding-and-Payroll-tax.aspx",
+      "https://www.oregon.gov/dor/forms/FormsPubs/combined-payroll_211-155-2_2026.pdf"
+    ],
+    "verifiedOn": "2026-11-12"
   }
 }

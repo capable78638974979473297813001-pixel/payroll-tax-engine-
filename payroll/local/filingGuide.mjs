@@ -63,6 +63,11 @@ export function localWithholdingGuide(kind, code, year) {
         },
       };
     }
+    case 'OR-transit-district':
+      if (code === 'TM') row = { name: 'TriMet Transit District' };
+      if (code === 'LTD') row = { name: 'Lane Transit District' };
+      agency = 'OR-DOR-TRANSIT';
+      break;
     case 'AL-city':
     case 'CO-city': {
       const cities = kind === 'AL-city' ? ['Auburn', 'Bessemer', 'Birmingham', 'Gadsden', 'Leeds', 'Opelika'] : ['Denver', 'Glendale', 'Greenwood Village', 'Sheridan'];

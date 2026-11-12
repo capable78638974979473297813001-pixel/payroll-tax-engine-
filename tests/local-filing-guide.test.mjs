@@ -338,3 +338,17 @@ test('Bessemer collects quarterly and Leeds uses its monthly Avenu jurisdiction 
   assert.match(leeds.returns[0][1], /code 9401/);
   assert.match(leeds.payment, /Tax Trust Account/);
 });
+
+test('Oregon employer transit district codes share Form OQ and exclude statewide withholding', () => {
+  const lookup = code => localWithholdingGuide('OR-transit-district', code, 2026);
+  for (const [code, name] of [['TM', 'TriMet Transit District'], ['LTD', 'Lane Transit District']]) {
+    const result = lookup(code);
+    assert.equal(result.jurisdiction, name);
+    assert.equal(result.agency, 'OR-DOR-TRANSIT');
+    assert.equal(result.guide.returns[0][0], 'Form OQ');
+    assert.match(result.guide.returns[1][1], /February 1, 2027/);
+    assert.match(result.guide.filing, /Frances Online/);
+  }
+  assert.equal(lookup('STT').status, 'unknown-code');
+  assert.equal(lookup('Lane County').status, 'unknown-code');
+});
