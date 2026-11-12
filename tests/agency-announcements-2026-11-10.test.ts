@@ -27,4 +27,21 @@ describe('agency announcements read on 2026-11-10', () => {
       assert.equal(by('Oakwood (Montgomery)').administeredBy, 'self_or_other'); // the city's own site, read 2026-11-12
     }
   });
+
+  test('Alabama: only Bear Creek, Brilliant and Lynn rest on the League survey alone, in every year file, and 2025 and 2027 carry the same rates and sources as 2026', () => {
+    type M = { name: string; rate: number; confirmation?: { tier: string } };
+    const file = (y: number) => (json(`data/local/AL-municipalities-${y}.json`).municipalities as M[]);
+    for (const y of [2025, 2026, 2027]) {
+      const only = file(y).filter((m) => m.confirmation?.tier === 'league_survey_only').map((m) => m.name).sort();
+      assert.deepEqual(only, ['Bear Creek', 'Brilliant', 'Lynn'], String(y));
+    }
+    const base = new Map(file(2026).map((m) => [m.name, m]));
+    for (const y of [2025, 2027]) {
+      for (const m of file(y)) {
+        const b = base.get(m.name)!;
+        assert.equal(m.rate, b.rate, `${y} ${m.name} rate`);
+        assert.deepEqual(m.confirmation, b.confirmation, `${y} ${m.name} confirmation`);
+      }
+    }
+  });
 });
