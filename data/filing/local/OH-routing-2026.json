@@ -1,6 +1,13 @@
 {
   "verifiedOn": "2026-11-11",
   "municipalities": {
+    "77000": {
+      "agency": "OH-TOLEDO",
+      "verifiedOn": "2026-11-12",
+      "sources": [
+        "https://cdn.toledo.oh.gov/uploads/documents/Finance/Taxation-and-Treasury/2026-Quarterly-Withholding-Packet-fillable.pdf"
+      ]
+    },
     "15000": {
       "agency": "OH-CINCINNATI",
       "verifiedOn": "2026-11-12",

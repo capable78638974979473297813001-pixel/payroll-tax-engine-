@@ -1342,5 +1342,29 @@
       "https://codes.ohio.gov/ohio-revised-code/section-1.14"
     ],
     "verifiedOn": "2026-11-12"
+  },
+  "OH-TOLEDO": {
+    "collector": "City of Toledo Division of Taxation",
+    "registration": "Complete the New Business Registration Form on the city income tax page to establish employer withholding.",
+    "returns": [
+      [
+        "M-1 through M-12 / Q-1 through Q-4",
+        "Use monthly coupons when Toledo withholding or required withholding exceeded $2,399 last calendar year or $200 in any month of the previous quarter. Monthly deposits are due by the 15th of the next month. Otherwise use quarterly coupons, due by the end of the following month. The 2026 Q-4 coupon specifies February 1, 2027. The commissioner may assign semimonthly payments when last year exceeded $11,999 in total or $1,000 in any month. If assigned, remit by the third banking day after the 15th and after month-end."
+      ],
+      [
+        "W-3",
+        "Submit the annual reconciliation with W-2 information by March 1, 2027. Identify other municipalities and their withholding amounts on each W-2 or an attachment."
+      ]
+    ],
+    "filing": "File the periodic coupon for the assigned period. Upload annual wage data in EFW2 text format through the city website. Where paper filing is permitted, mail W-3 and the supporting W-2s to the Division of Taxation at the address printed on W-3.",
+    "payment": "Federal electronic depositors must follow the city electronic filing and payment requirements. Use Ohio Business Gateway or ACH credit. A required electronic payment counts when credited to the designated account. For permitted paper deposits, use the coupon address for payments and make the check or money order payable to Commissioner of Taxation.",
+    "sources": [
+      "https://toledo.oh.gov/pay-taxes",
+      "https://cdn.toledo.oh.gov/uploads/documents/Finance/Taxation-and-Treasury/2026-Quarterly-Withholding-Packet-fillable.pdf",
+      "https://cdn.toledo.oh.gov/uploads/documents/Finance/Taxation-and-Treasury/2026-Monthly-Withholding-Packet-fillable.pdf",
+      "https://codelibrary.amlegal.com/codes/toledo/latest/toledo_oh/0-0-0-115215",
+      "https://toledo.oh.gov/pay-taxes/faq"
+    ],
+    "verifiedOn": "2026-11-12"
   }
 }

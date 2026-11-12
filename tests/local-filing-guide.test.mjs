@@ -34,6 +34,8 @@ test('regional Ohio collectors use the registry; residual and ambiguous cities r
       assert.equal(result.agency, 'OH-COLUMBUS');
     } else if (row.municode === '21616') {
       assert.equal(result.agency, 'OH-DELTA');
+    } else if (row.municode === '77000') {
+      assert.equal(result.agency, 'OH-TOLEDO');
     } else if (row.municode === '71983') {
       assert.equal(result.status, 'collector-unverified');
     } else if (['RITA', 'CCA'].includes(row.administeredBy)) {
@@ -383,4 +385,14 @@ test('Cincinnati routes its own employer coupons and W-3 reconciliation', () => 
   assert.equal(result.guide.returns[1][0], 'W-3');
   assert.match(result.guide.returns[1][1], /March 1, 2027/);
   assert.match(result.guide.payment, /when the federal deposit is due/);
+});
+
+test('Toledo city coupons and W-3 use the 2026 packet deadlines', () => {
+  const result = localWithholdingGuide('OH-municipality', '77000', 2026);
+  assert.equal(result.jurisdiction, 'Toledo');
+  assert.equal(result.membershipVerifiedOn, '2026-11-12');
+  assert.match(result.guide.returns[0][1], /February 1, 2027/);
+  assert.equal(result.guide.returns[1][0], 'W-3');
+  assert.match(result.guide.returns[1][1], /March 1, 2027/);
+  assert.notEqual(localWithholdingGuide('OH-jedd-jedz', '9065', 2026).agency, result.agency);
 });
