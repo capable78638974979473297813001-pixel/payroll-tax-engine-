@@ -9,6 +9,11 @@ import type { PaycheckResult, StateCertificate } from '../src/types.ts';
 import { approvePayRun, draftPayRun } from '../payroll/run.ts';
 import type { Company, Employee } from '../payroll/types.ts';
 import { freshYearToDate } from '../payroll/ytd.ts';
+import { computeW2FromEmployee } from '../payroll/filings.ts';
+import { buildStateLedger } from '../payroll/state/ledger.ts';
+import { loadProfile } from '../payroll/state/profile.ts';
+import type { PayRun, TimeEntry } from '../payroll/types.ts';
+import { readdirSync } from 'node:fs';
 
 // A whole year of pay runs through the real draft -> approve path, so the
 // year-to-date roll-up is what feeds each next check. A tax with an annual
@@ -175,5 +180,83 @@ describe('garnishment: orders other than support share the general 25% limit', (
     const r = garnish([support(dollars(900)), loan]);
     assert.equal(withheld(r, 'S'), dollars(600));
     assert.equal(withheld(r, 'L'), 0);
+  });
+});
+
+describe('year-end forms tie back to the paychecks', () => {
+  const co = company('WI', 'biweekly');
+
+  /** A year of approved runs for one employee, with an optional bonus on the tenth check. */
+  function approvedYear(start: Employee, bonus = 0): { runs: PayRun[]; employee: Employee } {
+    let employee = start;
+    const runs: PayRun[] = [];
+    BIWEEKLY_2026.forEach((checkDate, i) => {
+      const entries: TimeEntry[] =
+        bonus && i === 9
+          ? [{ employeeId: employee.id, regularHours: 0, overtimeHours: 0, extraEarnings: [{ category: 'supplemental', code: 'BONUS', amount: bonus }] }]
+          : [];
+      const approved = approvePayRun(draftPayRun(co, [employee], checkDate, checkDate, checkDate, entries), [employee]);
+      runs.push(approved.run);
+      employee = approved.updatedEmployees[0];
+    });
+    return { runs, employee };
+  }
+  const withheld = (runs: readonly PayRun[], id: string) =>
+    runs.reduce((s, r) => s + (r.lines[0].taxLines.find((t) => t.id === id)?.amount ?? 0), 0);
+
+  test("a bonus taxed at the state's flat rate is on the W-2 and in the state's deposits", () => {
+    const { runs, employee } = approvedYear(salaried('WI', dollars(90_000), {}), dollars(10_000));
+    const supp = withheld(runs, 'WI_SIT_SUPP');
+    assert.ok(supp > 0, 'Wisconsin taxes a bonus on its own line');
+    const w2 = computeW2FromEmployee(employee, 2026, runs);
+    const wi = w2.box15to17_state.find((s) => s.state === 'WI')!;
+    assert.equal(wi.incomeTaxWithheld, withheld(runs, 'WI_SIT') + supp);
+    // No pretax deductions, so state wages are the federal wages.
+    assert.equal(wi.wages, w2.box1_wages);
+    const ledger = buildStateLedger(loadProfile('WI'), co.id, runs, { start: '2026-01-01', end: '2026-12-31' });
+    assert.equal(ledger.reduce((s, d) => s + d.withholding, 0), wi.incomeTaxWithheld);
+  });
+
+  test("home-state tax withheld under Pennsylvania's reciprocity is reported to the home state", () => {
+    const start = salaried('PA', dollars(80_000), {}, { residenceState: { code: 'NJ', certificate: {} } });
+    const { runs, employee } = approvedYear(start);
+    const swap = withheld(runs, 'NJ_SIT_RECIPROCITY_SWAP');
+    assert.ok(swap > 0);
+    const nj = computeW2FromEmployee(employee, 2026, runs).box15to17_state.find((s) => s.state === 'NJ');
+    assert.equal(nj?.incomeTaxWithheld, swap);
+    assert.equal(nj?.wages, Math.round(dollars(80_000) / 26) * 26);
+    const ledger = buildStateLedger(loadProfile('NJ'), co.id, runs, { start: '2026-01-01', end: '2026-12-31' });
+    assert.equal(ledger.reduce((s, d) => s + d.withholding, 0), swap);
+  });
+
+  test('W-2 box 12 stops at the 401(k) limit, as the paychecks did', () => {
+    const start = salaried('WI', dollars(500_000), {}, {
+      deductionPlans: [{ id: 'k', code: '401K', category: 'deferral_401k', amount: { kind: 'percentOfGross', percent: 20 }, active: true }],
+    });
+    const { runs, employee } = approvedYear(start);
+    const w2 = computeW2FromEmployee(employee, 2026, runs);
+    assert.deepEqual(w2.box12, [{ code: 'D', amount: dollars(24_500) }]);
+    assert.equal(w2.box1_wages, Math.round(dollars(500_000) / 26) * 26 - dollars(24_500));
+  });
+
+  test("every state's income tax lines report the wages, not wages less the state's own allowances", () => {
+    const states = [...new Set(readdirSync(new URL('../data/states', import.meta.url)).map((f) => f.slice(0, 2)))];
+    for (const state of states) {
+      for (const bonus of [0, dollars(1_000)]) {
+        const gross = dollars(1_440);
+        const r = calculatePaycheck({
+          checkDate: '2026-09-15',
+          payFrequency: 'biweekly',
+          earnings: [{ code: 'REG', category: 'regular', amount: gross }, ...(bonus ? [{ code: 'B', category: 'supplemental' as const, amount: bonus }] : [])],
+          deductions: [],
+          federalW4: { ...W4 },
+          ytd: freshYearToDate(),
+          workState: { code: state, certificate: {} },
+        });
+        const lines = r.taxes.filter((t) => /^[A-Z]{2}_SIT/.test(t.id));
+        if (lines.length === 0) continue;
+        assert.equal(lines.reduce((s, t) => s + t.taxableWages, 0), gross + bonus, `${state}${bonus ? ' with a bonus' : ''}`);
+      }
+    }
   });
 });

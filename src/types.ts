@@ -811,7 +811,13 @@ export interface TaxLine {
   /** Who pays: withheld from employee, or employer-borne. */
   payer: 'employee' | 'employer';
   jurisdiction: 'federal' | 'state' | 'local';
-  /** The base this tax was actually computed on, after its own exemptions. */
+  /**
+   * The wages this tax applies to: after the pretax deductions it excludes
+   * and any wage-base cap or threshold, but BEFORE the tax's own allowances,
+   * exemptions or standard deduction. It is the figure a W-2 or a wage
+   * report shows for this tax, so an income tax line carries the wages even
+   * when allowances bring the tax itself to zero.
+   */
   taxableWages: Cents;
   amount: Cents;
   /** Human-readable trace of how the number was reached. */

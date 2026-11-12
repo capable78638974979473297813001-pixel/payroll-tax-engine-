@@ -1156,8 +1156,9 @@ describe('Indiana', () => {
     assert.equal(amountOf(r, 'IN_SIT'), dollars(13.96));
     assert.equal(amountOf(r, 'IN_COUNTY'), dollars(4.73));
     const baseOf = (id: string) => r.taxes.find((t) => t.id === id)!.taxableWages;
-    assert.equal(baseOf('IN_SIT'), dollars(473.08));
-    assert.equal(baseOf('IN_COUNTY'), dollars(473.08)); // same shared base
+    // The line reports the wages; the exemptions come off inside the tax.
+    assert.equal(baseOf('IN_SIT'), dollars(800));
+    assert.equal(baseOf('IN_COUNTY'), dollars(800)); // same shared base
   });
 
   test('zero exemptions taxes the full wage; state and county share one base', () => {
@@ -1271,7 +1272,7 @@ describe('Illinois', () => {
     const r = calculatePaycheck(input(ilState({ basicAllowances: 1 })));
     assert.equal(amountOf(r, 'IL_SIT'), dollars(142.93));
     const baseOf = (id: string) => r.taxes.find((t) => t.id === id)!.taxableWages;
-    assert.equal(baseOf('IL_SIT'), dollars(2887.5));
+    assert.equal(baseOf('IL_SIT'), dollars(3000)); // wages, before the allowance
   });
 
   test('zero allowances taxes the full wage', () => {

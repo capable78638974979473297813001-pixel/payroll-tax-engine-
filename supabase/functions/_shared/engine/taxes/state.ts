@@ -2175,14 +2175,14 @@ function flatRateMultiExemption(
     name: `${rules.name} Income Tax`,
     payer: 'employee',
     jurisdiction: 'state',
-    taxableWages: periodTaxable,
+    taxableWages,
     amount: stateAmount,
     detail: periodAllowance
       ? `${fmt(taxableWages)} less ${fmt(periodAllowance)} exemptions @ ${(cfg.rate * 100).toFixed(2)}%`
       : `${fmt(taxableWages)} @ ${(cfg.rate * 100).toFixed(2)}%`,
   };
 
-  return [stateLine, countyAddOnLine(input, rules, periodTaxable)];
+  return [stateLine, countyAddOnLine(input, rules, periodTaxable, taxableWages)];
 }
 
 /**
@@ -2197,6 +2197,7 @@ function countyAddOnLine(
   input: PaycheckInput,
   rules: StateRuleset,
   periodTaxable: number,
+  periodWages: number,
 ): TaxLine {
   const state = rules.code;
   const notModelled = (detail: string): TaxLine => ({
@@ -2230,7 +2231,7 @@ function countyAddOnLine(
     name: `${county.name} County Income Tax`,
     payer: 'employee',
     jurisdiction: 'local',
-    taxableWages: periodTaxable,
+    taxableWages: periodWages,
     amount: applyRate(periodTaxable, county.rate),
     detail: `${fmt(periodTaxable)} @ ${(county.rate * 100).toFixed(4)}% (${county.name} County)`,
   };
@@ -2284,7 +2285,7 @@ function flatRateTwoTierExemption(
     name: `${rules.name} Income Tax`,
     payer: 'employee',
     jurisdiction: 'state',
-    taxableWages: periodTaxable,
+    taxableWages,
     amount,
     detail: periodAllowance
       ? `${fmt(taxableWages)} less ${fmt(periodAllowance)} allowances @ ${(cfg.rate * 100).toFixed(2)}%`
@@ -2413,7 +2414,7 @@ function bracketPhaseoutDeduction(
     name: `${rules.name} Income Tax`,
     payer: 'employee',
     jurisdiction: 'state',
-    taxableWages: Math.round(annualNetWage / ctx.periodsPerYear),
+    taxableWages,
     amount,
     detail,
   };
@@ -2600,7 +2601,7 @@ function bracketFlatAllowance(
     // bracketPhaseoutDeduction() — not literal gross wages either way. When
     // an NRA adjustment applies, that derived figure legitimately includes
     // it, since the adjustment genuinely changed which bracket got selected.
-    taxableWages: Math.round(annualNetWage / ctx.periodsPerYear),
+    taxableWages,
     amount,
     detail,
   };
@@ -3446,7 +3447,7 @@ function bracketPerPeriodNet(
     name: `${rules.name} Income Tax`,
     payer: 'employee',
     jurisdiction: 'state',
-    taxableWages: result.netWages,
+    taxableWages: result.grossWages,
     amount: result.amount,
     detail: result.detail,
   };
@@ -3617,7 +3618,7 @@ function bracketPerPeriodRateTable(
     name: `${rules.name} Income Tax`,
     payer: 'employee',
     jurisdiction: 'state',
-    taxableWages: netWages,
+    taxableWages: grossWages,
     amount,
     detail:
       `${fmt(grossWages)} gross less ${fmt(allowance)} allowance (${exemptions} × $${allowancePerExemption}) ` +
@@ -3805,7 +3806,7 @@ function nycLocalTax(
     name: 'New York City Income Tax',
     payer: 'employee',
     jurisdiction: 'local',
-    taxableWages: netWages,
+    taxableWages: grossWages,
     amount,
     detail:
       `${fmt(grossWages)} gross less ${fmt(allowance)} allowance = ${fmt(netWages)} net ` +
@@ -3949,13 +3950,11 @@ function yonkersLocalTax(
       id: `${rules.code}_YONKERS_SIT`,
       name: 'Yonkers Resident Income Tax Surcharge',
       payer: 'employee',
-      // taxableWages reports the underlying NYS-style NET WAGES the
-      // surcharge is indirectly based on (via that calculation's own tax
-      // amount) — the most honest "wage base" figure available, since this
-      // tax's literal base is a dollar amount of TAX, not wages, which the
-      // detail string spells out explicitly.
+      // taxableWages reports the wages the underlying NYS-style calculation
+      // starts from. The surcharge's literal base is a dollar amount of TAX,
+      // which the detail string spells out.
       jurisdiction: 'local',
-      taxableWages: base.netWages,
+      taxableWages: base.grossWages,
       amount,
       detail:
         `${(cfg.residentSurcharge.rate * 100).toFixed(2)}% of ${fmt(base.amount)} NYS-style base tax (${base.detail}) = ${fmt(baseAmount)}` +
@@ -3984,7 +3983,7 @@ function yonkersLocalTax(
         name: 'Yonkers Nonresident Earnings Tax',
         payer: 'employee',
         jurisdiction: 'local',
-        taxableWages: 0,
+        taxableWages: grossWages,
         amount: extra,
         detail:
           `$0 — ${fmt(grossWages)} gross wages are below Yonkers' no-withholding threshold for this pay period.` +
@@ -4001,7 +4000,7 @@ function yonkersLocalTax(
       name: 'Yonkers Nonresident Earnings Tax',
       payer: 'employee',
       jurisdiction: 'local',
-      taxableWages: taxable,
+      taxableWages: grossWages,
       amount,
       detail:
         `${fmt(grossWages)} gross less ${fmt(dollars(tier.exemption))} wage-level exemption ` +
@@ -4741,7 +4740,7 @@ function bracketPerPeriodAllowance(
     name: `${rules.name} Income Tax`,
     payer: 'employee',
     jurisdiction: 'state',
-    taxableWages: netWages,
+    taxableWages: grossWages,
     amount,
     detail:
       `${fmt(grossWages)} gross less ${fmt(allowance)} allowance (${allowances} × $${allowancePerUnit}) ` +
@@ -4871,7 +4870,7 @@ function bracketPerPeriodKansas(
     name: `${rules.name} Income Tax`,
     payer: 'employee',
     jurisdiction: 'state',
-    taxableWages: netWages,
+    taxableWages: grossWages,
     amount,
     detail:
       `${fmt(grossWages)} gross less ${fmt(roundHalfUp(allowance))} allowance ($${annualExemption}/yr ÷ ` +
@@ -6193,7 +6192,7 @@ function flatRateSurtaxCredit(
       name: `${rules.name} Income Tax`,
       payer: 'employee',
       jurisdiction: 'state',
-      taxableWages: 0,
+      taxableWages,
       amount: 0,
       detail:
         `$0 — annualized wages ${fmt(roundHalfUp(taxableWages * periodsPerYear))} are under ` +
@@ -6233,7 +6232,7 @@ function flatRateSurtaxCredit(
     name: `${rules.name} Income Tax`,
     payer: 'employee',
     jurisdiction: 'state',
-    taxableWages: netWagesRounded,
+    taxableWages,
     amount,
     detail:
       `${fmt(taxableWages)}` +
@@ -6487,7 +6486,7 @@ function ohioWithholding(
     name: `${rules.name} Income Tax`,
     payer: 'employee',
     jurisdiction: 'state',
-    taxableWages: netWages,
+    taxableWages,
     amount,
     detail:
       `${fmt(taxableWages)} less ${fmt(exemptionAmount)} exemptions (${exemptions} × $${table.exemptionPerPeriod}) ` +
@@ -7825,7 +7824,7 @@ function californiaWithholding(
       name: `${rules.name} Income Tax`,
       payer: 'employee',
       jurisdiction: 'state',
-      taxableWages: 0,
+      taxableWages: periodWages,
       amount: 0,
       detail: `${fmt(periodWages)} at or below the $${lowIncomeThreshold} Low Income Exemption threshold (${status}) — $0, no further steps computed.`,
     };
@@ -7870,7 +7869,7 @@ function californiaWithholding(
     name: `${rules.name} Income Tax`,
     payer: 'employee',
     jurisdiction: 'state',
-    taxableWages: taxableIncome,
+    taxableWages: periodWages,
     amount,
     detail:
       `${fmt(periodWages)} gross` +
@@ -8346,7 +8345,7 @@ function rhodeIslandWithholding(
     name: `${rules.name} Income Tax`,
     payer: 'employee',
     jurisdiction: 'state',
-    taxableWages: netWages,
+    taxableWages: periodWages,
     amount,
     detail:
       `${fmt(periodWages)} less ${fmt(exemption)} exemption (${exemptions} × $${exemptionPerUnit}` +
