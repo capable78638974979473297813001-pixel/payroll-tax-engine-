@@ -13,6 +13,22 @@ const municipalities = readData('local/OH-municipalities-2026.json').municipalit
 const ohioRouting = readData('filing/local/OH-routing-2026.json');
 const zones = readData('local/OH-jedd-jedz-2026.json').zones;
 
+function ohioMembership(group, code) {
+  const exceptions = ohioRouting[group];
+  const specific = Object.hasOwn(exceptions, code) ? exceptions[code] : undefined;
+  for (const [agency, roster] of Object.entries(ohioRouting.rosters)) {
+    if (Object.hasOwn(roster[group], code)) {
+      return {
+        ...specific,
+        agency,
+        collectorCode: roster[group][code],
+        sources: [...new Set([roster.source, ...(specific?.sources ?? [])])],
+      };
+    }
+  }
+  return specific;
+}
+
 /** Instructions for a known collector; callers retain responsibility for confirming the filing period. */
 export function localAgencyGuide(agencyId, year) {
   if (year !== 2026 || !Object.hasOwn(profiles, agencyId)) return null;
@@ -54,13 +70,11 @@ export function localWithholdingGuide(kind, code, year) {
       break;
     case 'OH-jedd-jedz':
       row = zones.find(zone => zone.jeddId === code);
-      membership = Object.hasOwn(ohioRouting.zones, code) && ohioRouting.zones[code];
+      membership = ohioMembership('zones', code);
       break;
     case 'OH-municipality':
-      membership = Object.hasOwn(ohioRouting.municipalities, code) && ohioRouting.municipalities[code];
+      membership = ohioMembership('municipalities', code);
       row = municipalities.find(city => city.municode === code) ?? (membership?.name ? membership : undefined);
-      if (row?.administeredBy === 'RITA') agency = 'OH-RITA';
-      if (row?.administeredBy === 'CCA') agency = 'OH-CCA';
       break;
     default:
       return { status: 'unsupported-jurisdiction-type' };
@@ -75,6 +89,11 @@ export function localWithholdingGuide(kind, code, year) {
     agency,
     guide: localAgencyGuide(agency, year),
     confirmMembershipForPeriod: kind === 'OH-municipality' || kind === 'OH-jedd-jedz',
+    ...(membership?.collectorCode && { collectorCode: membership.collectorCode }),
+    ...(membership?.administrationStartedOn && {
+      administrationStartedOn: membership.administrationStartedOn,
+      filingNote: 'Collector changed during 2026. Confirm transition instructions for earlier periods and amendments.',
+    }),
     ...(membership && { membershipSources: [...membership.sources], membershipVerifiedOn: ohioRouting.verifiedOn }),
   };
 }

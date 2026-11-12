@@ -28,7 +28,12 @@ test('regional Ohio collectors use the registry; residual and ambiguous cities r
       continue;
     }
     assert.equal(result.jurisdiction, row.name);
-    if (['RITA', 'CCA'].includes(row.administeredBy)) {
+    if (row.municode === '21616') {
+      assert.equal(result.agency, 'OH-DELTA');
+    } else if (row.municode === '71983') {
+      assert.equal(result.status, 'collector-unverified');
+    } else if (['RITA', 'CCA'].includes(row.administeredBy)) {
+      assert.ok(result.membershipSources.length);
       assert.equal(result.agency, 'OH-' + row.administeredBy);
       assert.equal(result.confirmMembershipForPeriod, true);
     } else if (!['57750', '57764', '57792', '21378'].includes(row.municode)) {
@@ -79,9 +84,37 @@ test('Ohio zones resolve by Finder zone ID, with explicit gaps', () => {
   for (const zone of rows('OH-jedd-jedz', 'zones')) {
     const result = localWithholdingGuide('OH-jedd-jedz', zone.jeddId, 2026);
     assert.equal(result.jurisdiction, zone.name);
-    if (zone.jeddId === '9055') assert.equal(result.agency, 'OH-CCA');
-    else if (zone.jeddId === '9003') assert.equal(result.agency, 'OH-RITA');
-    else assert.equal(result.status, 'collector-unverified');
+    if (result.status === 'guide') {
+      assert.match(result.collectorCode, /^\d{3}$/);
+      assert.ok(result.membershipSources.length);
+    } else {
+      assert.equal(result.status, 'collector-unverified');
+    }
   }
   assert.equal(localWithholdingGuide('OH-jedd-jedz', '981', 2026).status, 'unknown-code');
+});
+
+test('collector filing codes preserve leading zeroes and district subdivisions', () => {
+  for (const [code, agency, collectorCode] of [
+    ['9143', 'OH-RITA', '047'], ['9142', 'OH-RITA', '247'],
+    ['9003', 'OH-RITA', '037'], ['9055', 'OH-CCA', '981'],
+    ['9115', 'OH-RITA', '145'], ['9118', 'OH-RITA', '144'],
+    ['9132', 'OH-CCA', '982'], ['9072', 'OH-CCA', '990'],
+  ]) {
+    const result = localWithholdingGuide('OH-jedd-jedz', code, 2026);
+    assert.equal(result.agency, agency);
+    assert.equal(result.collectorCode, collectorCode);
+  }
+  assert.equal(localWithholdingGuide('OH-jedd-jedz', '9156', 2026).status, 'collector-unverified');
+});
+
+test('municipal filing routes preserve transitions and distinguish the two Shawnee Hills', () => {
+  const lookup = code => localWithholdingGuide('OH-municipality', code, 2026);
+  assert.equal(lookup('21616').agency, 'OH-DELTA');
+  assert.equal(lookup('71976').agency, 'OH-RITA');
+  assert.equal(lookup('71983').status, 'collector-unverified');
+  for (const code of ['54866', '52682', '61504', '45094']) {
+    assert.equal(lookup(code).administrationStartedOn, code === '45094' ? '2026-10-01' : '2026-07-01');
+    assert.match(lookup(code).filingNote, /earlier periods/);
+  }
 });

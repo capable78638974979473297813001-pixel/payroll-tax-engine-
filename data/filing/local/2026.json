@@ -114,5 +114,28 @@
       "https://storage.googleapis.com/proudcity/oakwoodoh/2025/01/2024-Employers-Reconciliation-of-Tax-Withheld-Form-OW-3.pdf"
     ],
     "verifiedOn": "2026-11-11"
+  },
+  "OH-DELTA": {
+    "collector": "Village of Delta Income Tax Department",
+    "registration": "Submit the village business income tax questionnaire. Confirm the employer account and filing schedule with the income tax administrator at 419-822-3190 ext. 102.",
+    "returns": [
+      [
+        "W-1",
+        "Report withholding for the assigned period. The village publishes a quarterly W-1. Confirm the applicable deadline and frequency with the village."
+      ],
+      [
+        "W-3",
+        "Annual withholding reconciliation. Contact the village about 2026 year-end submissions due after the January 1, 2027 RITA transition."
+      ]
+    ],
+    "filing": "For village-administered filings, mail signed forms to 401 Main Street, Delta, OH 43515.",
+    "payment": "Remit withheld tax to the village with W-1. Confirm the recipient before paying after the transition.",
+    "sources": [
+      "https://villageofdelta.org/1209/Income-Tax",
+      "https://www.villageofdelta.org/DocumentCenter/View/256/W1-Tax-Form-PDF",
+      "https://www.villageofdelta.org/DocumentCenter/View/268/Business-Income-Tax-Questionaire-PDF",
+      "https://www.ritaohio.com/Municipalities/Home/MemberPage?id=258"
+    ],
+    "verifiedOn": "2026-11-11"
   }
 }

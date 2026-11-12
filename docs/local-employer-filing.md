@@ -26,4 +26,6 @@ Open work includes Ohio independent municipal collectors, the remaining JEDD/JED
 
 Run `node --test tests/local-filing-guide.test.mjs` from the repository root.
 
-The 2026 Ohio filing directory supplements three missing municipal codes using Census place identifiers for Germantown (29932), North Hampton (56588) and Stockport (74748). The calculation registry is separate. Confirm the assigned filing period with the collector. Seville uses CCA for 2026 and RITA lists a January 1, 2027 start. All 157 zone IDs are recognized. Prairie Obetz and Bainbridge-Solon have verified collectors. Other zones return `collector-unverified`.
+The 2026 Ohio filing directory supplements three missing municipal codes using Census place identifiers for Germantown (29932), North Hampton (56588) and Stockport (74748). The calculation registry is separate. Confirm the assigned filing period with the collector. Seville uses CCA for 2026 and RITA lists a January 1, 2027 start. All 157 zone IDs are recognized. The 2026 RITA table and CCA withholding form identify collectors for 59 zones. The other 98 return `collector-unverified`. Where available, `collectorCode` is the separate three-digit identifier used on that agency’s forms.
+
+Ohio municipal filing lookups use dated collector evidence. Delta uses the village for filings before its January 2027 handoff. Only the Delaware County Shawnee Hills is a verified RITA member. Midyear handoffs include the date administration started and a filing note for prior periods and amendments.
