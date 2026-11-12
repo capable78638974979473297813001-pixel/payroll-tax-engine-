@@ -1,0 +1,75 @@
+{
+  "verifiedOn": "2026-11-11",
+  "municipalities": {
+    "21378": {
+      "agency": "OH-RITA",
+      "sources": [
+        "https://www.ritaohio.com/Municipalities/Home/MemberPage?id=249"
+      ]
+    },
+    "29932": {
+      "agency": "OH-RITA",
+      "sources": [
+        "https://tigerweb.geo.census.gov/tigerwebmain/Files/acs26/tigerweb_acs26_incplace_oh.html",
+        "https://www.ritaohio.com/Municipalities/Home/MemberPage?id=353"
+      ],
+      "name": "Germantown"
+    },
+    "56588": {
+      "agency": "OH-RITA",
+      "sources": [
+        "https://tigerweb.geo.census.gov/tigerwebmain/Files/acs26/tigerweb_acs26_incplace_oh.html",
+        "https://www.ritaohio.com/Municipalities/Home/MemberPage?id=695"
+      ],
+      "name": "North Hampton"
+    },
+    "57750": {
+      "agency": "OH-RITA",
+      "sources": [
+        "https://www.ritaohio.com/Municipalities/Home/MemberPage?id=580"
+      ]
+    },
+    "57764": {
+      "agency": "OH-OAKWOOD-MONTGOMERY",
+      "sources": [
+        "https://storage.googleapis.com/proudcity/oakwoodoh/2026/01/eacb2fdf-2026-withholding.pdf"
+      ]
+    },
+    "57792": {
+      "agency": "OH-CCA",
+      "sources": [
+        "https://www.ccaohio.gov/sites/default/files/2025-12/2026%20Withholding%20Form-i.pdf",
+        "https://municipalities.columbus.gov/PrintAllMunis.aspx"
+      ]
+    },
+    "71486": {
+      "agency": "OH-CCA",
+      "sources": [
+        "https://www.ccaohio.gov/sites/default/files/2025-12/2026%20Withholding%20Form-i.pdf",
+        "https://www.ritaohio.com/Municipalities/Home/MemberPage?id=722"
+      ]
+    },
+    "74748": {
+      "agency": "OH-RITA",
+      "sources": [
+        "https://tigerweb.geo.census.gov/tigerwebmain/Files/acs26/tigerweb_acs26_incplace_oh.html",
+        "https://www.ritaohio.com/Municipalities/Home/MemberPage?id=719"
+      ],
+      "name": "Stockport"
+    }
+  },
+  "zones": {
+    "9003": {
+      "agency": "OH-RITA",
+      "sources": [
+        "https://www.ritaohio.com/Municipalities/Home/MemberPage?id=037"
+      ]
+    },
+    "9055": {
+      "agency": "OH-CCA",
+      "sources": [
+        "https://www.ccaohio.gov/sites/default/files/2025-12/2026%20Withholding%20Form-i.pdf"
+      ]
+    }
+  }
+}

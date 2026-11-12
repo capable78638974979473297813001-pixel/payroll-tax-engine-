@@ -31,7 +31,7 @@ test('regional Ohio collectors use the registry; residual and ambiguous cities r
     if (['RITA', 'CCA'].includes(row.administeredBy)) {
       assert.equal(result.agency, 'OH-' + row.administeredBy);
       assert.equal(result.confirmMembershipForPeriod, true);
-    } else {
+    } else if (!['57750', '57764', '57792', '21378'].includes(row.municode)) {
       assert.equal(result.status, 'collector-unverified');
     }
   }
@@ -53,4 +53,35 @@ test('Pennsylvania tax collection districts preserve the Allegheny split and Phi
   assert.match(guide('51').guide.returns[0][0], /Wage Tax/);
   assert.equal(guide('02').status, 'unknown-code');
   assert.equal(guide('constructor').status, 'unknown-code');
+});
+
+test('2026 municipal filing routes use county-specific and dated sources', () => {
+  for (const [code, agency] of Object.entries({
+    '57750': 'OH-RITA', '57764': 'OH-OAKWOOD-MONTGOMERY', '57792': 'OH-CCA',
+    '21378': 'OH-RITA', '71486': 'OH-CCA',
+  })) {
+    const result = localWithholdingGuide('OH-municipality', code, 2026);
+    assert.equal(result.agency, agency);
+    assert.ok(result.membershipSources.length);
+    assert.equal(localWithholdingGuide('OH-municipality', code, 2027).status, 'unsupported-year');
+  }
+  for (const [code, name] of Object.entries({
+    '29932': 'Germantown', '56588': 'North Hampton', '74748': 'Stockport',
+  })) {
+    const result = localWithholdingGuide('OH-municipality', code, 2026);
+    assert.equal(result.jurisdiction, name);
+    assert.equal(result.agency, 'OH-RITA');
+  }
+  assert.equal(localWithholdingGuide('OH-municipality', '', 2026).status, 'unknown-code');
+});
+
+test('Ohio zones resolve by Finder zone ID, with explicit gaps', () => {
+  for (const zone of rows('OH-jedd-jedz', 'zones')) {
+    const result = localWithholdingGuide('OH-jedd-jedz', zone.jeddId, 2026);
+    assert.equal(result.jurisdiction, zone.name);
+    if (zone.jeddId === '9055') assert.equal(result.agency, 'OH-CCA');
+    else if (zone.jeddId === '9003') assert.equal(result.agency, 'OH-RITA');
+    else assert.equal(result.status, 'collector-unverified');
+  }
+  assert.equal(localWithholdingGuide('OH-jedd-jedz', '981', 2026).status, 'unknown-code');
 });

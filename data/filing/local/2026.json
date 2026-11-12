@@ -5,7 +5,7 @@
     "returns": [
       [
         "WH-1",
-        "Report county amounts by county code on the state withholding return. Annual filers are due January 30. Monthly filers are due 30 days after month end and early monthly filers 20 days after month end. Use the frequency assigned by DOR."
+        "Report county amounts by county code on the state withholding return. For annual filers the DOR handbook lists January 30 and the DOR filing calendar lists January 31. Confirm the assigned deadline in INTIME or with DOR. Monthly filers are due 30 days after month end and early monthly filers 20 days after month end. Use the frequency assigned by DOR."
       ],
       [
         "WH-3",
@@ -17,7 +17,8 @@
     "sources": [
       "https://www.in.gov/dor/i-am-a/business-corp/withholding/",
       "https://www.in.gov/dor/i-am-a/business-corp/withholding/filing-a-wh-1/",
-      "https://www.in.gov/dor/files/new-small-business-handbook.pdf"
+      "https://www.in.gov/dor/files/new-small-business-handbook.pdf",
+      "https://www.in.gov/dor/i-am-a/individual/tax-filing-deadlines"
     ],
     "verifiedOn": "2026-11-11"
   },
@@ -90,6 +91,27 @@
       "https://www.ccaohio.gov/faq/business",
       "https://efile2.ccatax.ci.cleveland.oh.us/faq",
       "https://www.ccaohio.gov/sites/default/files/2025-12/2026%20Withholding%20Form.pdf"
+    ],
+    "verifiedOn": "2026-11-11"
+  },
+  "OH-OAKWOOD-MONTGOMERY": {
+    "collector": "City of Oakwood Income Tax Department (Montgomery County)",
+    "registration": "Contact the department at 937-298-0531 to obtain the employer withholding account number used with the FEIN on OW-1.",
+    "returns": [
+      [
+        "OW-1",
+        "Monthly if prior calendar year withholding exceeded $2,399 or any month in the preceding quarter exceeded $200. Monthly returns are due 15 days after month end. Quarterly due dates for 2026 wages are April 30, July 31, November 2 and February 1, 2027."
+      ],
+      [
+        "OW-3",
+        "Annual reconciliation with W-2s. The city's standing instructions specify February 28. Confirm the 2026 year-end form and actual filing date with the department."
+      ]
+    ],
+    "filing": "Mail the 2026 OW-1 to City of Oakwood, Income Tax Department, PO Box 269, Eaton Rapids, MI 48827.",
+    "payment": "Enclose remittance with OW-1 using the department's lockbox address.",
+    "sources": [
+      "https://storage.googleapis.com/proudcity/oakwoodoh/2026/01/eacb2fdf-2026-withholding.pdf",
+      "https://storage.googleapis.com/proudcity/oakwoodoh/2025/01/2024-Employers-Reconciliation-of-Tax-Withheld-Form-OW-3.pdf"
     ],
     "verifiedOn": "2026-11-11"
   }

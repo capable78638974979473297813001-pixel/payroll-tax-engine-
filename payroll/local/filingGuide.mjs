@@ -10,6 +10,9 @@ const counties = readData('local/IN-counties-2026.json').counties;
 const districts = readData('local/OH-school-districts-2026.json').districts;
 const municipalities = readData('local/OH-municipalities-2026.json').municipalities;
 
+const ohioRouting = readData('filing/local/OH-routing-2026.json');
+const zones = readData('local/OH-jedd-jedz-2026.json').zones;
+
 /** Instructions for a known collector; callers retain responsibility for confirming the filing period. */
 export function localAgencyGuide(agencyId, year) {
   if (year !== 2026 || !Object.hasOwn(profiles, agencyId)) return null;
@@ -22,6 +25,7 @@ export function localWithholdingGuide(kind, code, year) {
   if (typeof code !== 'string' || code.trim() === '') return { status: 'unknown-code' };
   let agency;
   let row;
+  let membership;
   switch (kind) {
     case 'PA-EIT-district': {
       if (!Object.hasOwn(pennsylvania.districts, code)) return { status: 'unknown-code' };
@@ -48,8 +52,13 @@ export function localWithholdingGuide(kind, code, year) {
       row = districts.find(district => district.sdNumber === code);
       agency = 'OH-SDIT';
       break;
+    case 'OH-jedd-jedz':
+      row = zones.find(zone => zone.jeddId === code);
+      membership = Object.hasOwn(ohioRouting.zones, code) && ohioRouting.zones[code];
+      break;
     case 'OH-municipality':
-      row = municipalities.find(city => city.municode === code);
+      membership = Object.hasOwn(ohioRouting.municipalities, code) && ohioRouting.municipalities[code];
+      row = municipalities.find(city => city.municode === code) ?? (membership?.name ? membership : undefined);
       if (row?.administeredBy === 'RITA') agency = 'OH-RITA';
       if (row?.administeredBy === 'CCA') agency = 'OH-CCA';
       break;
@@ -57,6 +66,7 @@ export function localWithholdingGuide(kind, code, year) {
       return { status: 'unsupported-jurisdiction-type' };
   }
   if (!row) return { status: 'unknown-code' };
+  if (membership) agency = membership.agency;
   if (!agency) return { status: 'collector-unverified', jurisdiction: row.name, code };
   return {
     status: 'guide',
@@ -64,6 +74,7 @@ export function localWithholdingGuide(kind, code, year) {
     code,
     agency,
     guide: localAgencyGuide(agency, year),
-    confirmMembershipForPeriod: kind === 'OH-municipality',
+    confirmMembershipForPeriod: kind === 'OH-municipality' || kind === 'OH-jedd-jedz',
+    ...(membership && { membershipSources: [...membership.sources], membershipVerifiedOn: ohioRouting.verifiedOn }),
   };
 }
