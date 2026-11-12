@@ -201,6 +201,8 @@ export interface PayRunLine {
   }[];
   /** Retirement deferrals that stayed pretax on this check, so an approved run can add them to the employee's year-to-date and the annual limits bind on later checks. */
   electiveDeferrals?: { section402gAggregate?: Cents; deferral457?: Cents; simple?: Cents };
+  /** What this check adds to the local trackers no tax line carries (Portland's trigger wages, capped Kentucky/Ohio district wages, Seattle compensation), so an approved run can roll them into year-to-date. See PaycheckResult.ytdAccruals. */
+  ytdAccruals?: { localIncomeTax?: Record<string, Cents>; seattleCompensation?: Cents };
   garnishmentLines: { orderId: string; withheld: Cents; detail: string }[];
   depositAllocations: { accountId: string; amount: Cents }[];
 }

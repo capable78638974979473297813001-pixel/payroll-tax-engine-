@@ -1,6 +1,8 @@
+import { atLeastZero } from '../src/money.ts';
 import type { Cents } from '../src/money.ts';
 import type { PretaxCategory } from '../src/types.ts';
 import type { Company, DeductionPlan, Employee, PayRun, PayRunLine } from './types.ts';
+import { stateOfIncomeTaxLine } from './taxLineIds.ts';
 
 /**
  * Turns a quarter's or a year's worth of APPROVED pay runs into the actual
@@ -168,7 +170,6 @@ export interface W2Summary {
   box18to20_local: W2LocalWages[];
 }
 
-const STATE_INCOME_TAX_ID = /^([A-Z]{2})_SIT$/;
 
 export function computeW2(employeeId: string, year: number, approvedRuns: readonly PayRun[]): W2Summary {
   const runsForYear = approvedRuns.filter((r) => r.status === 'approved' && r.checkDate.startsWith(String(year)));
@@ -195,9 +196,10 @@ export function computeW2(employeeId: string, year: number, approvedRuns: readon
 
     for (const t of line.taxLines) {
       if (t.payer !== 'employee') continue;
-      const sitMatch = STATE_INCOME_TAX_ID.exec(t.id);
-      if (sitMatch) {
-        const state = sitMatch[1];
+      // Every line that is this state's income tax: the bonus line and the
+      // home-state lines too, not `XX_SIT` alone (see taxLineIds.ts).
+      const state = stateOfIncomeTaxLine(t.id);
+      if (state) {
         const existing = stateWages.get(state) ?? { state, wages: 0, incomeTaxWithheld: 0 };
         existing.wages += t.taxableWages;
         existing.incomeTaxWithheld += t.amount;
@@ -262,18 +264,42 @@ export function computeW2FromEmployee(employee: Employee, year: number, approved
 
   let dependentCare = 0;
   const box12 = new Map<string, Cents>();
-
-  for (const plan of employee.deductionPlans) {
-    if (!plan.active) continue;
-    const annual = linesForEmployee.reduce((sum, line) => sum + deductionPlanAmountForPeriod(plan, line.grossPay), 0);
-    if (plan.category === 'dependent_care') {
-      dependentCare += annual;
-      continue;
+  const add = (code: string, amount: Cents): void => {
+    if (amount > 0) box12.set(code, (box12.get(code) ?? 0) + amount);
+  };
+  const plans = employee.deductionPlans.filter((p) => p.active);
+  const SHARED_402G: readonly (PretaxCategory | null)[] = ['deferral_401k', 'deferral_403b'];
+  for (const line of linesForEmployee) {
+    // A retirement deferral counts only as far as it stayed pretax. Past the
+    // annual limit the engine takes the rest after tax, and the line records
+    // what was left in each limit's bucket; the plan's own election would
+    // put the whole amount in box 12.
+    const kept = line.electiveDeferrals ?? {};
+    let simpleRoom = kept.simple ?? 0;
+    let sharedRoom = atLeastZero((kept.section402gAggregate ?? 0) - simpleRoom);
+    let room457 = kept.deferral457 ?? 0;
+    for (const plan of plans) {
+      const elected = deductionPlanAmountForPeriod(plan, line.grossPay);
+      if (plan.category === 'dependent_care') {
+        dependentCare += elected;
+        continue;
+      }
+      const code = plan.category ? BOX12_CODE_BY_PRETAX_CATEGORY[plan.category] : undefined;
+      if (!code) continue;
+      let amount = elected;
+      if (plan.category === 'deferral_simple') {
+        amount = Math.min(elected, simpleRoom);
+        simpleRoom -= amount;
+      } else if (SHARED_402G.includes(plan.category)) {
+        amount = Math.min(elected, sharedRoom);
+        sharedRoom -= amount;
+      } else if (plan.category === 'deferral_457') {
+        amount = Math.min(elected, room457);
+        room457 -= amount;
+      }
+      add(code, amount);
     }
-    const code = plan.category ? BOX12_CODE_BY_PRETAX_CATEGORY[plan.category] : undefined;
-    if (code) box12.set(code, (box12.get(code) ?? 0) + annual);
   }
-
   return {
     ...base,
     box10_dependentCareBenefits: dependentCare,

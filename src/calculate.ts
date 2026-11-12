@@ -85,6 +85,7 @@ export function calculatePaycheck(input: PaycheckInput): PaycheckResult {
   const ctx: ComputeContext = {
     year: yearOf(input.checkDate),
     periodsPerYear,
+    ytdAccruals: {},
     taxableWagesFor: makeTaxableWagesFn(input.earnings, effectiveDeductions, {
       // A designated housing allowance leaves the tax base only for a
       // minister — see EarningCategory's own doc comment.
@@ -166,6 +167,7 @@ export function calculatePaycheck(input: PaycheckInput): PaycheckResult {
     netPay,
     ...noticesFor(taxes),
     ...(warnings.length ? { warnings } : {}),
+    ...(ctx.ytdAccruals && Object.keys(ctx.ytdAccruals).length ? { ytdAccruals: ctx.ytdAccruals } : {}),
   };
 }
 

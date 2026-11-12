@@ -1,0 +1,626 @@
+{
+  "verifiedOn": "2026-11-11",
+  "source": "https://dced.pa.gov/local-government/local-income-tax-information/local-income-tax-collector/",
+  "districts": {
+    "10": {
+      "district": "BUTLER TAX COLLECTION DISTRICT",
+      "collector": "Berkheimer Tax Administrator",
+      "website": "www.hab-inc.com"
+    },
+    "11": {
+      "district": "CAMBRIA TAX COLLECTION DISTRICT",
+      "collector": "Berkheimer Tax Administrator",
+      "website": "www.hab-inc.com"
+    },
+    "12": {
+      "district": "CAMERON TAX COLLECTION DISTRICT",
+      "collector": "Keystone Collections Group",
+      "website": "www.keystonecollects.com"
+    },
+    "13": {
+      "district": "CARBON TAX COLLECTION DISTRICT",
+      "collector": "Berkheimer Tax Administrator",
+      "website": "www.hab-inc.com"
+    },
+    "14": {
+      "district": "CENTRE TAX COLLECTION DISTRICT",
+      "collector": "Centre Tax Agency",
+      "website": "www.statecollegepa.us"
+    },
+    "15": {
+      "district": "CHESTER TAX COLLECTION DISTRICT",
+      "collector": "Keystone Collections Group",
+      "website": "www.keystonecollects.com"
+    },
+    "16": {
+      "district": "CLARION TAX COLLECTION DISTRICT",
+      "collector": "Keystone Collections Group",
+      "website": "www.keystonecollects.com"
+    },
+    "17": {
+      "district": "CLEARFIELD TAX COLLECTION DISTRICT",
+      "collector": "Keystone Collections Group",
+      "website": "www.keystonecollects.com"
+    },
+    "18": {
+      "district": "CLINTON TAX COLLECTION DISTRICT",
+      "collector": "Berkheimer Tax Administrator",
+      "website": "www.hab-inc.com"
+    },
+    "19": {
+      "district": "COLUMBIA TAX COLLECTION DISTRICT",
+      "collector": "Berkheimer Tax Administrator",
+      "website": "www.hab-inc.com"
+    },
+    "20": {
+      "district": "CRAWFORD TAX COLLECTION DISTRICT",
+      "collector": "Berkheimer Tax Administrator",
+      "website": "www.hab-inc.com"
+    },
+    "21": {
+      "district": "CUMBERLAND TAX COLLECTION DISTRICT",
+      "collector": "Cumberland County Tax Bureau",
+      "website": "www.cumberlandtax.org"
+    },
+    "22": {
+      "district": "DAUPHIN TAX COLLECTION DISTRICT",
+      "collector": "Keystone Collections Group",
+      "website": "www.keystonecollects.com"
+    },
+    "23": {
+      "district": "DELAWARE TAX COLLECTION DISTRICT",
+      "collector": "Keystone Collections Group",
+      "website": "www.keystonecollects.com"
+    },
+    "24": {
+      "district": "ELK TAX COLLECTION DISTRICT",
+      "collector": "Berkheimer Tax Administrator",
+      "website": "www.hab-inc.com"
+    },
+    "25": {
+      "district": "ERIE TAX COLLECTION DISTRICT",
+      "collector": "Berkheimer Tax Administrator",
+      "website": "www.hab-inc.com"
+    },
+    "26": {
+      "district": "FAYETTE TAX COLLECTION DISTRICT",
+      "collector": "Southwest Regional Tax Bureau",
+      "website": "www.swrtb.org"
+    },
+    "27": {
+      "district": "FOREST TAX COLLECTION DISTRICT",
+      "collector": "Keystone Collections Group",
+      "website": "www.keystonecollects.com"
+    },
+    "28": {
+      "district": "FRANKLIN TAX COLLECTION DISTRICT",
+      "collector": "Franklin County Area Tax Bureau",
+      "website": "www.fcatb.org"
+    },
+    "29": {
+      "district": "FULTON TAX COLLECTION DISTRICT",
+      "collector": "Keystone Collections Group",
+      "website": "www.keystonecollects.com"
+    },
+    "30": {
+      "district": "GREENE TAX COLLECTION DISTRICT",
+      "collector": "Keystone Collections Group",
+      "website": "www.keystonecollects.com"
+    },
+    "31": {
+      "district": "HUNTINGDON TAX COLLECTION DISTRICT",
+      "collector": "Capital Tax Collection Bureau",
+      "website": "www.captax.com"
+    },
+    "32": {
+      "district": "INDIANA TAX COLLECTION DISTRICT",
+      "collector": "Berkheimer Tax Administrator",
+      "website": "www.hab-inc.com"
+    },
+    "33": {
+      "district": "JEFFERSON TAX COLLECTION DISTRICT",
+      "collector": "Berkheimer Tax Administrator",
+      "website": "www.hab-inc.com"
+    },
+    "34": {
+      "district": "JUNIATA TAX COLLECTION DISTRICT",
+      "collector": "Capital Tax Collection Bureau",
+      "website": "www.captax.com"
+    },
+    "35": {
+      "district": "LACKAWANNA TAX COLLECTION DISTRICT",
+      "collector": "Berkheimer Tax Administrator",
+      "website": "www.hab-inc.com"
+    },
+    "36": {
+      "district": "LANCASTER TAX COLLECTION DISTRICT",
+      "collector": "Lancaster County Tax Collection Bureau",
+      "website": "www.lctcb.org"
+    },
+    "37": {
+      "district": "LAWRENCE TAX COLLECTION DISTRICT",
+      "collector": "Berkheimer Tax Administrator",
+      "website": "www.hab-inc.com"
+    },
+    "38": {
+      "district": "LEBANON TAX COLLECTION DISTRICT",
+      "collector": "Keystone Collections Group",
+      "website": "www.keystonecollects.com"
+    },
+    "39": {
+      "district": "LEHIGH TAX COLLECTION DISTRICT",
+      "collector": "Berkheimer Tax Administrator",
+      "website": "www.hab-inc.com"
+    },
+    "40": {
+      "district": "LUZERNE TAX COLLECTION DISTRICT",
+      "collector": "Berkheimer Tax Administrator",
+      "website": "www.hab-inc.com"
+    },
+    "41": {
+      "district": "LYCOMING TAX COLLECTION DISTRICT",
+      "collector": "Keystone Collections Group",
+      "website": "www.keystonecollects.com"
+    },
+    "42": {
+      "district": "MCKEAN TAX COLLECTION DISTRICT",
+      "collector": "Berkheimer Tax Administrator",
+      "website": "www.hab-inc.com"
+    },
+    "43": {
+      "district": "MERCER TAX COLLECTION DISTRICT",
+      "collector": "Berkheimer Tax Administrator",
+      "website": "www.hab-inc.com"
+    },
+    "44": {
+      "district": "MIFFLIN TAX COLLECTION DISTRICT",
+      "collector": "Keystone Collections Group",
+      "website": "www.keystonecollects.com"
+    },
+    "45": {
+      "district": "MONROE TAX COLLECTION DISTRICT",
+      "collector": "Berkheimer Tax Administrator",
+      "website": "www.hab-inc.com"
+    },
+    "46": {
+      "district": "MONTGOMERY TAX COLLECTION DISTRICT",
+      "collector": "Berkheimer Tax Administrator",
+      "website": "www.hab-inc.com"
+    },
+    "47": {
+      "district": "MONTOUR TAX COLLECTION DISTRICT",
+      "collector": "Danville Area Earned Income Tax Office",
+      "website": "www.danveito.com"
+    },
+    "48": {
+      "district": "NORTHAMPTON TAX COLLECTION DISTRICT",
+      "collector": "Keystone Collections Group",
+      "website": "www.keystonecollects.com"
+    },
+    "49": {
+      "district": "NORTHUMBERLAND TAX COLLECTION DISTRICT",
+      "collector": "Keystone Collections Group",
+      "website": "www.keystonecollects.com"
+    },
+    "50": {
+      "district": "PERRY TAX COLLECTION DISTRICT",
+      "collector": "Capital Tax Collection Bureau",
+      "website": "www.captax.com"
+    },
+    "51": {
+      "district": "PHILADELPHIA CITY *",
+      "collector": "Philadelphia Department of Revenue",
+      "website": "www.phila.gov/revenue"
+    },
+    "52": {
+      "district": "PIKE TAX COLLECTION DISTRICT",
+      "collector": "Berkheimer Tax Administrator",
+      "website": "www.hab-inc.com"
+    },
+    "53": {
+      "district": "POTTER TAX COLLECTION DISTRICT",
+      "collector": "Berkheimer Tax Administrator",
+      "website": "www.hab-inc.com"
+    },
+    "54": {
+      "district": "SCHUYLKILL TAX COLLECTION DISTRICT",
+      "collector": "Berkheimer Tax Administrator",
+      "website": "www.hab-inc.com"
+    },
+    "55": {
+      "district": "SNYDER TAX COLLECTION DISTRICT",
+      "collector": "Berkheimer Tax Administrator",
+      "website": "www.hab-inc.com"
+    },
+    "56": {
+      "district": "SOMERSET TAX COLLECTION DISTRICT",
+      "collector": "Keystone Collections Group",
+      "website": "www.keystonecollects.com"
+    },
+    "57": {
+      "district": "SULLIVAN TAX COLLECTION DISTRICT",
+      "collector": "Berkheimer Tax Administrator",
+      "website": "www.hab-inc.com"
+    },
+    "58": {
+      "district": "SUSQUEHANNA TAX COLLECTION DISTRICT",
+      "collector": "Berkheimer Tax Administrator",
+      "website": "www.hab-inc.com"
+    },
+    "59": {
+      "district": "TIOGA TAX COLLECTION DISTRICT",
+      "collector": "Keystone Collections Group",
+      "website": "www.keystonecollects.com"
+    },
+    "60": {
+      "district": "UNION TAX COLLECTION DISTRICT",
+      "collector": "Berkheimer Tax Administrator",
+      "website": "www.hab-inc.com"
+    },
+    "61": {
+      "district": "VENANGO TAX COLLECTION DISTRICT",
+      "collector": "Berkheimer Tax Administrator",
+      "website": "www.hab-inc.com"
+    },
+    "62": {
+      "district": "WARREN TAX COLLECTION DISTRICT",
+      "collector": "Berkheimer Tax Administrator",
+      "website": "www.hab-inc.com"
+    },
+    "63": {
+      "district": "WASHINGTON TAX COLLECTION DISTRICT",
+      "collector": "Keystone Collections Group",
+      "website": "www.keystonecollects.com"
+    },
+    "64": {
+      "district": "WAYNE TAX COLLECTION DISTRICT",
+      "collector": "Berkheimer Tax Administrator",
+      "website": "www.hab-inc.com"
+    },
+    "65": {
+      "district": "WESTMORELAND TAX COLLECTION DISTRICT",
+      "collector": "Berkheimer Tax Administrator",
+      "website": "www.hab-inc.com"
+    },
+    "66": {
+      "district": "WYOMING TAX COLLECTION DISTRICT",
+      "collector": "Berkheimer Tax Administrator",
+      "website": "www.hab-inc.com"
+    },
+    "67": {
+      "district": "YORK TAX COLLECTION DISTRICT",
+      "collector": "York Adams Tax Bureau",
+      "website": "www.yatb.com"
+    },
+    "70": {
+      "district": "ALLEGHENY CENTRAL TAX COLLECTION DISTRICT",
+      "collector": "Jordan Tax Service, Inc.",
+      "website": "www.jordantax.com"
+    },
+    "71": {
+      "district": "ALLEGHENY NORTH TAX COLLECTION DISTRICT",
+      "collector": "Keystone Collections Group",
+      "website": "www.keystonecollects.com"
+    },
+    "72": {
+      "district": "ALLEGHENY SOUTHEAST TAX COLLECTION DISTRICT",
+      "collector": "Keystone Collections Group",
+      "website": "www.keystonecollects.com"
+    },
+    "73": {
+      "district": "ALLEGHENY SOUTHWEST TAX COLLECTION DISTRICT",
+      "collector": "Jordan Tax Service, Inc.",
+      "website": "www.jordantax.com"
+    },
+    "01": {
+      "district": "ADAMS TAX COLLECTION DISTRICT",
+      "collector": "York Adams Tax Bureau",
+      "website": "www.yatb.com"
+    },
+    "03": {
+      "district": "ARMSTRONG TAX COLLECTION DISTRICT",
+      "collector": "Berkheimer Tax Administrator",
+      "website": "www.hab-inc.com"
+    },
+    "04": {
+      "district": "BEAVER TAX COLLECTION DISTRICT",
+      "collector": "Berkheimer Tax Administrator",
+      "website": "www.hab-inc.com"
+    },
+    "05": {
+      "district": "BEDFORD TAX COLLECTION DISTRICT",
+      "collector": "Keystone Collections Group",
+      "website": "www.keystonecollects.com"
+    },
+    "06": {
+      "district": "BERKS TAX COLLECTION DISTRICT",
+      "collector": "Berks Earned Income Tax Bureau",
+      "website": "www.berkseit.com"
+    },
+    "07": {
+      "district": "BLAIR TAX COLLECTION DISTRICT",
+      "collector": "Blair County Tax Collection Bureau",
+      "website": "www.blairtax.org"
+    },
+    "08": {
+      "district": "BRADFORD TAX COLLECTION DISTRICT",
+      "collector": "Berkheimer Tax Administrator",
+      "website": "www.hab-inc.com"
+    },
+    "09": {
+      "district": "BUCKS TAX COLLECTION DISTRICT",
+      "collector": "Keystone Collections Group",
+      "website": "www.keystonecollects.com"
+    }
+  },
+  "act32": {
+    "registration": "Register each worksite with the designated local collector. Obtain residency certification and worksite and residence PSD codes.",
+    "returns": [
+      [
+        "Employer Quarterly Return",
+        "File and pay by the last day of the month after quarter end. An eligible employer electing combined filing reports and pays electronically each month."
+      ],
+      [
+        "W2-R",
+        "Annual employer reconciliation, generally due the last day of February. Consult the assigned collector for year-end and cessation instructions."
+      ]
+    ],
+    "filing": "Use the designated collector’s employer service for forms and submission instructions. The central-filing election requires electronic wage detail and remittance.",
+    "payment": "Pay the appointed collector. Confirm its accepted payment methods and employer account before remitting.",
+    "gaps": [
+      "Collector-specific payment instruments, e-file mandates and mailing addresses require individual verification.",
+      "LST can have a different collector and is outside this EIT directory."
+    ],
+    "sources": [
+      "https://dced.pa.gov/local-government/local-income-tax-information/instructions-employers/",
+      "https://dced.pa.gov/local-government/local-income-tax-information/local-withholding-tax-faqs/",
+      "https://dced.pa.gov/local-government/local-income-tax-information/act32-faq/",
+      "https://dced.pa.gov/download/act-32-of-2008-procedure-manual/?wpdmdl=56767",
+      "https://www.legis.state.pa.us/WU01/LI/LI/US/HTM/1965/0/0511..HTM"
+    ]
+  },
+  "philadelphia": {
+    "registration": "Register a Philadelphia Wage Tax account in the Philadelphia Tax Center.",
+    "returns": [
+      [
+        "Wage Tax return",
+        "File quarterly online. Use the 2026 city calendar for exact payment dates according to the assigned quarterly, monthly, semimonthly or weekly schedule."
+      ]
+    ],
+    "filing": "Submit returns in the Philadelphia Tax Center.",
+    "payment": "Pay electronically through the Philadelphia Tax Center according to the employer payment schedule.",
+    "sources": [
+      "https://www.phila.gov/services/business-self-employment/business-taxes/wage-tax-employers/",
+      "https://www.phila.gov/documents/wage-tax-due-dates/"
+    ]
+  },
+  "collectorInstructions": {
+    "Keystone Collections Group": {
+      "registration": "Create an account at https://business.keystonecollects.com and register the employer using its FEIN and worksite information. Record each worksite PSD code and retain an employee residency certification.",
+      "returns": [
+        [
+          "Employer Quarterly Return",
+          "Section 512 sets the deadline at the last day of the month after quarter end. The collector also publishes a 30-day schedule. Confirm the assigned date before relying on a later statutory date. Eligible combined filers may report and remit electronically each month after arranging central filing."
+        ],
+        [
+          "W2-R",
+          "File the annual reconciliation with employee W-2 detail by the last day of February following the tax year."
+        ]
+      ],
+      "filing": "For tax year 2026, submit quarterly EIT returns in the Business Portal by manual entry, CSV upload or PA Standard File Format. Submit W2-R through the portal.",
+      "payment": "Pay 2026 quarterly EIT electronically in the Business Portal under Keystone’s December 16, 2025 employer notice.",
+      "sources": [
+        "https://keystonecollects.com/mandatory-electronic-filing-for-employers/",
+        "https://keystonecollects.com/businesses/payroll-withholding/",
+        "https://keystonecollects.com/download/E102.pdf"
+      ],
+      "verifiedOn": "2026-11-11",
+      "gaps": [
+        "Verify the separate LST collector for the physical worksite."
+      ]
+    },
+    "Berkheimer Tax Administrator": {
+      "registration": "Use Berkheimer Employer Registration to obtain the HAB employer account number, or look up an existing account. Register for e-file to submit online. Record each worksite PSD code and retain an employee residency certification.",
+      "returns": [
+        [
+          "E1",
+          "Section 512 sets the deadline at the last day of the month after quarter end. The collector also publishes a 30-day schedule. Confirm the assigned date before relying on a later statutory date. For combined monthly filing, submit a notice of intent and obtain approval before filing."
+        ],
+        [
+          "W-2 Annual Reconciliation",
+          "File the annual reconciliation with employee W-2 detail by the last day of February following the tax year."
+        ]
+      ],
+      "filing": "Quarterly employers can enter data online, upload a file or mail the E1. Approved combined monthly filers must use electronic file upload. The annual reconciliation supports online entry or upload and has a printable form.",
+      "payment": "Online E1 filings require ACH debit at submission. Quarterly paper filers can send payment with E1 to Berkheimer Earned Income Tax Administrator, PO Box 25132, Lehigh Valley, PA 18002.",
+      "sources": [
+        "https://www.hab-inc.com/eit-forms-employers/",
+        "https://www.hab-inc.com/electronic-services/businessesandpayrollcompanies/file-and-pay/",
+        "https://www.hab-inc.com/faqs-employer-earned-income-tax-faq/"
+      ],
+      "verifiedOn": "2026-11-11",
+      "gaps": [
+        "Verify the separate LST collector for the physical worksite."
+      ]
+    },
+    "York Adams Tax Bureau": {
+      "registration": "Complete the Business Entity Questionnaire and the Online Filing Questionnaire to activate the employer FEIN in PALite.",
+      "filing": "File quarterly employer EIT detail through PALite. The bureau publishes a quarterly return and W2-R. Upload formats include Excel and EFW2.",
+      "payment": "For ACH credit, arrange the bureau’s CCD+ TXP format with your bank and initiate payment two business days before the due date.",
+      "sources": [
+        "https://yatb.com/new-businesses",
+        "https://yatb.com/for-employers/",
+        "https://yatb.com/filing-online%2Felectronic"
+      ],
+      "verifiedOn": "2026-11-11",
+      "gaps": [
+        "Confirm the LST collector separately for each worksite."
+      ]
+    },
+    "Capital Tax Collection Bureau": {
+      "registration": "Submit the Capital Tax Collection Bureau Employer Registration Form for each new employer account.",
+      "filing": "Use Capital’s Employer Online Filing system for quarterly detail. Employers with 26 or more employees must file online. The bureau publishes quarterly and W-2 reconciliation forms.",
+      "payment": "Pay the quarterly withholding by ACH through Capital’s employer filing system.",
+      "sources": [
+        "https://captax.com/employers/",
+        "https://captax.com/wp-content/uploads/2024/12/act-32-faq.pdf"
+      ],
+      "verifiedOn": "2026-11-11",
+      "gaps": [
+        "Confirm the LST collector separately for each worksite."
+      ]
+    },
+    "Jordan Tax Service, Inc.": {
+      "registration": "Register each work location in Jordan Tax Service’s Act 32 employer system. Request approval before starting a combined monthly return.",
+      "filing": "Enter details online or bulk upload. Allegheny Central and Southwest require electronic returns from employers with 10 or more employees.",
+      "payment": "Use the JTS electronic check (ACH debit) option. Confirm other payment channels with JTS for the filing period.",
+      "sources": [
+        "https://www.jordantax.com/images/EmployerRequestForPermissionToFileCombinedReturns.pdf",
+        "https://www.jordantax.com/Forms/JTS%20Act%2032%20Presentation.pdf"
+      ],
+      "verifiedOn": "2026-11-11",
+      "gaps": [
+        "Confirm the LST collector separately for each worksite."
+      ]
+    },
+    "Centre Tax Agency": {
+      "registration": "Complete Centre Tax Agency’s Business/Employer Registration Form and enroll separately in eReporting for online filing.",
+      "filing": "Submit through eReporting. Quarterly filers can use the agency’s paper return. Combined filers must file monthly online.",
+      "payment": "Remit electronically through eReporting. Combined monthly filers must remit electronically.",
+      "sources": [
+        "https://www.statecollegepa.us/employer-tax-forms",
+        "https://statecollegepa.us/filing-options"
+      ],
+      "verifiedOn": "2026-11-11",
+      "gaps": [
+        "Confirm the LST collector separately for each worksite."
+      ]
+    },
+    "Cumberland County Tax Bureau": {
+      "registration": "Send Cumberland’s Employer Registration form with the physical worksite address by mail, email or fax. The bureau sends a verification letter with the account number.",
+      "filing": "Use the Online Employer Filing System. Employers with 20 or more employees must file online. Combined monthly filers must submit detail electronically.",
+      "payment": "Pay through the bureau’s online employer filing system.",
+      "sources": [
+        "https://cumberlandtax.org/about/faqs",
+        "https://www.cumberlandtax.org/"
+      ],
+      "verifiedOn": "2026-11-11",
+      "gaps": [
+        "Confirm the LST collector separately for each worksite."
+      ]
+    },
+    "Southwest Regional Tax Bureau": {
+      "registration": "Register in Southwest Regional Tax Bureau’s eReporting system even if a payroll service handles filing.",
+      "filing": "Submit through eReporting. The bureau requests electronic detail for 10 or more employees. Use the Employer EIT Quarterly Tax Form and Employer EIT Annual Summary Report. Continue filing zero periods until the account is closed.",
+      "payment": "Pay by ACH debit in eReporting. Quarterly filers paying by check should enclose the quarterly form or the eReporting payment voucher.",
+      "sources": [
+        "https://www.swrtb.org/?page_id=24",
+        "https://www.swrtb.org/?page_id=18"
+      ],
+      "verifiedOn": "2026-11-11",
+      "gaps": [
+        "Confirm the LST collector separately for each worksite.",
+        "The bureau also publishes a 30-day schedule. Confirm the assigned due date if it differs from section 512."
+      ]
+    },
+    "Franklin County Area Tax Bureau": {
+      "registration": "Submit Franklin’s New Employer Registration form. Complete the separate Employer Electronic Filing Registration form for access to e-file.",
+      "filing": "Use Franklin’s Employer Portal to submit withholding detail. Report on Form 511 and reconcile on Form 541.",
+      "payment": "Pay by ACH debit. For ordinary quarterly filings, Franklin also accepts a check with the printed e-file voucher.",
+      "sources": [
+        "https://www.fcatb.org/index.php/employer-tax-forms/",
+        "https://www.fcatb.org/Efile%20Registration.pdf"
+      ],
+      "verifiedOn": "2026-11-11",
+      "gaps": [
+        "Confirm the LST collector separately for each worksite."
+      ],
+      "returns": [
+        [
+          "511",
+          "File and pay by the last day of the month after quarter end. An eligible employer electing combined filing reports and pays electronically each month."
+        ],
+        [
+          "541",
+          "Annual employer reconciliation, generally due the last day of February. Consult the assigned collector for year-end and cessation instructions."
+        ]
+      ]
+    },
+    "Lancaster County Tax Collection Bureau": {
+      "registration": "Employers filing directly register in Lancaster eReporting with their physical Lancaster worksite and PSD code. If a payroll provider files and pays, contact the bureau’s employer department to register the business.",
+      "filing": "Submit monthly, quarterly and year-end detail electronically using the bureau’s EFW2 or Excel layout.",
+      "payment": "Pay in employer eReporting or follow the bureau’s ACH credit instructions.",
+      "sources": [
+        "https://www.lctcb.org/?page_id=70",
+        "https://www.lctcb.org/wp-content/uploads/Employer-Due-Dates-for-2026.pdf"
+      ],
+      "verifiedOn": "2026-11-11",
+      "gaps": [
+        "Confirm the LST collector separately for each worksite."
+      ],
+      "returns": [
+        [
+          "Employer EIT withholding",
+          "For 2026 quarters the bureau lists April 30, July 31, November 2 and February 1, 2027. Consult its monthly calendar for combined returns."
+        ],
+        [
+          "Annual employer reconciliation",
+          "The bureau’s calendar lists March 2, 2027. Its stated next-business-day rule points to March 1. Confirm with the bureau before relying on March 2."
+        ]
+      ]
+    },
+    "Danville Area Earned Income Tax Office": {
+      "registration": "Submit the Danville employer registration form. Contact the office to activate the PALite employer account.",
+      "filing": "Use the employer link on Danville’s website for PALite. The office also publishes the Employer Quarterly Return and W2-R.",
+      "payment": "The office directs checks to be payable to DAEITO. Combined monthly filers must arrange electronic remittance.",
+      "sources": [
+        "https://danveito.com/",
+        "https://employer.palite.org/EmployerOnlineV2/"
+      ],
+      "verifiedOn": "2026-11-11",
+      "gaps": [
+        "Confirm the LST collector separately for each worksite."
+      ]
+    },
+    "Berks Earned Income Tax Bureau": {
+      "registration": "Register the organization and worksites in Berks eReporting before submitting detail or a payment.",
+      "filing": "All employers must submit monthly, quarterly and year-end EIT detail electronically in eReporting. Enter detail directly or upload a supported file.",
+      "payment": "Pay through eReporting. To remit by ACH credit, first arrange it with the bureau. The bureau also lists a fee-based card option.",
+      "sources": [
+        "https://www.berkseit.com/employers/",
+        "https://www.berkseit.com/employers/reporting/",
+        "https://www.berkseit.com/employers/payment-options-other-than-via-ereporting/",
+        "https://www.berkseit.com/employers/due-dates-see-lctcb-print-out/"
+      ],
+      "verifiedOn": "2026-11-11",
+      "gaps": [
+        "Confirm the LST collector separately for each worksite."
+      ],
+      "returns": [
+        [
+          "Employer EIT withholding",
+          "For 2026 quarters the bureau lists April 30, July 31, November 2 and February 1, 2027. Consult its monthly calendar for combined returns."
+        ],
+        [
+          "Annual employer reconciliation",
+          "The bureau lists March 1, 2027 for 2026 year-end detail."
+        ]
+      ]
+    },
+    "Blair County Tax Collection Bureau": {
+      "registration": "Submit the bureau’s employer registration and complete its Employer Online Filing Questionnaire for PALite access.",
+      "filing": "Submit quarterly EIT detail and year-end W-2 detail through PALite. Use the bureau’s W-2R annual reconciliation instructions.",
+      "payment": "Use ACH debit through PALite to remit withholding.",
+      "sources": [
+        "https://blairtax.org/for-employers",
+        "https://blairtax.org/faqs",
+        "https://employer.palite.org/EmployerOnlineV2/"
+      ],
+      "verifiedOn": "2026-11-11",
+      "gaps": [
+        "Confirm the LST collector separately for each worksite.",
+        "The bureau also publishes a 30-day schedule. Confirm the assigned due date if it differs from section 512."
+      ]
+    }
+  }
+}

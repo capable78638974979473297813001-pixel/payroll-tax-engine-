@@ -1904,5 +1904,15 @@
   "supplementalAggregation": {
     "supported": true,
     "source": "DE 44's own Option 1: \"Compute the amount of PIT to withhold from the supplemental wage based on the combined regular wages and the supplemental wage... From that amount, subtract the PIT you withheld from the regular wages. The difference is the PIT amount you should withhold from the supplemental wages.\" Wired via this project's existing aggregateWithPriorRegularPayment() mechanism — the same shape Connecticut/Idaho/Kentucky/Maine/Missouri/Montana/Nebraska/New York already use — reading input.priorRegularPayment for the prior/current regular cheque's taxable wages and tax withheld. DE 44 says 'the current regular gross wage payment,' not the prior one; the same caller-supplied-history boundary applies regardless, since a single calculatePaycheck() call cannot see any cheque but its own."
+  },
+  "residentWithholdingNetOfWorkState": {
+    "$comment": "For a resident working in another state that also withholds, an employer required to withhold here (input.residenceStateWithholding) withholds only the excess of this state's withholding over the work state's. Read by residenceStateWithholdingLine().",
+    "source": {
+      "title": "EDD California Employer's Guide (DE 44), residents working in another state",
+      "url": "https://edd.ca.gov/siteassets/files/pdf_pub_ctr/de44.pdf",
+      "says": "Make the withholding required by the other jurisdiction, and for California withhold the amount by which the California withholding exceeds the withholding for the other jurisdiction; withhold no California PIT if the other jurisdiction's amount is equal or greater.",
+      "verifiedOn": "2026-11-12",
+      "readVia": "search summary of the agency's own page, not a direct fetch"
+    }
   }
 }

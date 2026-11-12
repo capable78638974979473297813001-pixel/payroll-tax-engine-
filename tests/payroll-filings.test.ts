@@ -279,8 +279,8 @@ describe('W-2 box 10/12 from deduction plans, replayed against each period\'s re
       { id: 'p1', code: '401K', category: 'deferral_401k', amount: { kind: 'flat', cents: dollars(200) }, active: true },
     ]);
     const runs: PayRun[] = [
-      run({ id: 'r1', checkDate: '2026-01-15', lines: [line({ employeeId: 'e1', grossPay: dollars(3_000) })] }),
-      run({ id: 'r2', checkDate: '2026-02-15', lines: [line({ employeeId: 'e1', grossPay: dollars(3_000) })] }),
+      run({ id: 'r1', checkDate: '2026-01-15', lines: [line({ employeeId: 'e1', grossPay: dollars(3_000), electiveDeferrals: { section402gAggregate: dollars(200) } })] }),
+      run({ id: 'r2', checkDate: '2026-02-15', lines: [line({ employeeId: 'e1', grossPay: dollars(3_000), electiveDeferrals: { section402gAggregate: dollars(200) } })] }),
     ];
     const w2 = computeW2FromEmployee(employee, 2026, runs);
     assert.deepEqual(w2.box12, [{ code: 'D', amount: dollars(400) }]);
@@ -294,8 +294,8 @@ describe('W-2 box 10/12 from deduction plans, replayed against each period\'s re
     // flawed average-based estimate would get this wrong; replaying each
     // period's real gross must not.
     const runs: PayRun[] = [
-      run({ id: 'r1', checkDate: '2026-01-15', lines: [line({ employeeId: 'e1', grossPay: dollars(3_000) })] }),
-      run({ id: 'r2', checkDate: '2026-02-15', lines: [line({ employeeId: 'e1', grossPay: dollars(4_000) })] }),
+      run({ id: 'r1', checkDate: '2026-01-15', lines: [line({ employeeId: 'e1', grossPay: dollars(3_000), electiveDeferrals: { section402gAggregate: dollars(300) } })] }),
+      run({ id: 'r2', checkDate: '2026-02-15', lines: [line({ employeeId: 'e1', grossPay: dollars(4_000), electiveDeferrals: { section402gAggregate: dollars(400) } })] }),
     ];
     const w2 = computeW2FromEmployee(employee, 2026, runs);
     assert.deepEqual(w2.box12, [{ code: 'D', amount: dollars(300) + dollars(400) }]);

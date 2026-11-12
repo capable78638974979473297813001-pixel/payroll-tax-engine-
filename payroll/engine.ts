@@ -172,6 +172,7 @@ export function computeEmployeePaycheck(
       amount: t.amount,
     })),
     ...(result.electiveDeferrals ? { electiveDeferrals: result.electiveDeferrals } : {}),
+    ...(result.ytdAccruals ? { ytdAccruals: result.ytdAccruals } : {}),
     garnishmentLines: garnishment?.lines.map((g) => ({ orderId: g.orderId, withheld: g.withheld, detail: g.detail })) ?? [],
     depositAllocations,
   };

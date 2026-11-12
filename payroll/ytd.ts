@@ -20,6 +20,12 @@ export interface YtdAccumulatorInput {
   taxLines: readonly { id: string; taxableWages: Cents }[];
   /** Retirement deferrals that stayed pretax on this paycheck; adds to ytd.electiveDeferrals so the annual limits bind on later checks. */
   electiveDeferrals?: { section402gAggregate?: Cents; deferral457?: Cents; simple?: Cents };
+  /**
+   * The paycheck's own PaycheckResult.ytdAccruals: wages for the local
+   * trackers no tax line carries (Portland's trigger wages, capped
+   * Kentucky/Ohio district wages, Seattle compensation).
+   */
+  ytdAccruals?: { localIncomeTax?: Record<string, Cents>; seattleCompensation?: Cents };
 }
 
 /**
@@ -118,12 +124,6 @@ const KEYED_ID_SUFFIX_TO_BUCKET: ReadonlyArray<{ suffix: string; bucket: KeyedBu
   { suffix: '_LTC_EE', bucket: 'stateLongTermCare', role: 'employee' },
 ];
 
-/** Ids whose YTD key is NOT the state code the id starts with — Oregon's own two Portland-area local triggers key their tracker on a shorter district name than the TaxLine id itself carries (OR_METRO_SHS -> 'OR_METRO', OR_MULTNOMAH_PFA -> 'OR_MULTNOMAH'; see taxes/state.ts's portlandAreaLocalTax()). */
-const LOCAL_INCOME_TAX_TRIGGER_ID_TO_KEY: Readonly<Record<string, string>> = {
-  OR_METRO_SHS: 'OR_METRO',
-  OR_MULTNOMAH_PFA: 'OR_MULTNOMAH',
-};
-
 const STATE_PREFIXED_KEYED_ID = /^([A-Z]{2})(_[A-Z_]+)$/;
 
 function checkDateMonth(checkDate: string): string {
@@ -155,7 +155,6 @@ export function accumulateYtd(ytd: ExtendedYearToDate, paycheck: YtdAccumulatorI
   // seen this paycheck, tracked SEPARATELY rather than merged as they
   // arrive — see resolveKeyed()'s own doc comment for why.
   const keyedSeen: Partial<Record<KeyedBucket, Record<string, { employee?: number; employer?: number }>>> = {};
-  const localTriggerAdd: Record<string, number> = {};
 
   const record = (line: { id: string; taxableWages: Cents }): void => {
     const simpleBucket = SIMPLE_ID_TO_BUCKET[line.id];
@@ -169,12 +168,6 @@ export function accumulateYtd(ytd: ExtendedYearToDate, paycheck: YtdAccumulatorI
       // railroadUnemployment()), not two independently-configured taxes —
       // unlike the KEYED buckets below, which can be.
       simpleAdd[simpleBucket] = line.taxableWages;
-      return;
-    }
-
-    const localKey = LOCAL_INCOME_TAX_TRIGGER_ID_TO_KEY[line.id];
-    if (localKey) {
-      localTriggerAdd[localKey] = line.taxableWages;
       return;
     }
 
@@ -246,8 +239,16 @@ export function accumulateYtd(ytd: ExtendedYearToDate, paycheck: YtdAccumulatorI
     }
     next[b] = target;
   }
-  for (const [key, amount] of Object.entries(localTriggerAdd)) {
+  // Local trackers come from the engine's own ytdAccruals, never from a tax
+  // line: Portland's lines carry only the wages ABOVE the trigger (adding
+  // those left the running total at zero, so the trigger was never reached
+  // and the tax never withheld), Kentucky's carry uncapped wages, and
+  // Seattle's employer taxes have no line at all below their thresholds.
+  for (const [key, amount] of Object.entries(paycheck.ytdAccruals?.localIncomeTax ?? {})) {
     next.localIncomeTax![key] = (next.localIncomeTax![key] ?? 0) + amount;
+  }
+  if (paycheck.ytdAccruals?.seattleCompensation) {
+    next.seattleCompensation = (next.seattleCompensation ?? 0) + paycheck.ytdAccruals.seattleCompensation;
   }
 
   // categoryCashWages: driven by the paycheck's own cash gross, not by any

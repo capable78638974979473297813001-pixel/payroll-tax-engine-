@@ -1,5 +1,6 @@
 import type { Cents } from '../../src/money.ts';
 import type { PayRun, PayRunLine } from '../types.ts';
+import { stateOfIncomeTaxLine } from '../taxLineIds.ts';
 import type { StateProfile } from './profile.ts';
 
 /**
@@ -26,6 +27,25 @@ export interface StateDay {
 const amt = (l: PayRunLine, id: string): Cents => l.taxLines.find((t) => t.id === id)?.amount ?? 0;
 const wag = (l: PayRunLine, id: string): Cents => l.taxLines.find((t) => t.id === id)?.taxableWages ?? 0;
 
+/**
+ * This state's income tax withheld on one check, and the wages it was on.
+ * Summed over every line that is the state's withholding, not `XX_SIT`
+ * alone: a bonus taxed at the flat rate and tax withheld for an employee
+ * who lives here and works elsewhere are owed to the same agency.
+ */
+function stateWithholding(l: PayRunLine, withholdingId: string): { amount: Cents; wages: Cents } {
+  const state = stateOfIncomeTaxLine(withholdingId);
+  if (!state) return { amount: amt(l, withholdingId), wages: wag(l, withholdingId) };
+  let amount = 0;
+  let wages = 0;
+  for (const t of l.taxLines) {
+    if (t.payer !== 'employee' || stateOfIncomeTaxLine(t.id) !== state) continue;
+    amount += t.amount;
+    wages += t.taxableWages;
+  }
+  return { amount, wages };
+}
+
 export function buildStateLedger(
   profile: StateProfile,
   companyId: string,
@@ -42,8 +62,9 @@ export function buildStateLedger(
     for (const line of run.lines) {
       let touched = false;
       if (ids) {
-        day.withholding += amt(line, ids.withholding);
-        day.withholdingWages += wag(line, ids.withholding);
+        const w = stateWithholding(line, ids.withholding);
+        day.withholding += w.amount;
+        day.withholdingWages += w.wages;
         for (const ins of ids.employeeInsurance) day.employeeInsurance += amt(line, ins);
         touched = true;
       }
@@ -86,8 +107,9 @@ export function employeeQuarterWages(
       r.grossWages += line.grossPay;
       if (uiId) r.uiTaxableWages += wag(line, uiId);
       if (ids) {
-        r.withholdingWages += wag(line, ids.withholding);
-        r.withheld += amt(line, ids.withholding);
+        const w = stateWithholding(line, ids.withholding);
+        r.withholdingWages += w.wages;
+        r.withheld += w.amount;
       }
       rows.set(line.employeeId, r);
     }

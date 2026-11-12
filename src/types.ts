@@ -590,6 +590,13 @@ export interface EmployerContext {
    * never guessed from anything else in the paycheck.
    */
   suiIndustry?: Record<string, string>;
+  /**
+   * The part of an employer payroll tax the employer has chosen to take from
+   * employees' pay, keyed by state code, as a fraction of the tax. Vermont's
+   * Child Care Contribution allows up to 0.25 (a quarter of the 0.44%, so
+   * 0.11% of wages). Absent means the employer pays all of it.
+   */
+  payrollTaxEmployeeShareFraction?: Record<string, number>;
 }
 
 /**
@@ -823,7 +830,13 @@ export interface TaxLine {
   /** Who pays: withheld from employee, or employer-borne. */
   payer: 'employee' | 'employer';
   jurisdiction: 'federal' | 'state' | 'local';
-  /** The base this tax was actually computed on, after its own exemptions. */
+  /**
+   * The wages this tax applies to: after the pretax deductions it excludes
+   * and any wage-base cap or threshold, but BEFORE the tax's own allowances,
+   * exemptions or standard deduction. It is the figure a W-2 or a wage
+   * report shows for this tax, so an income tax line carries the wages even
+   * when allowances bring the tax itself to zero.
+   */
   taxableWages: Cents;
   amount: Cents;
   /** Human-readable trace of how the number was reached. */
@@ -895,6 +908,25 @@ export interface PaycheckResult {
    * what; the engine does not silently drop a withholding).
    */
   warnings?: string[];
+  /**
+   * What this check adds to the caller-kept local trackers whose running
+   * total is NOT a tax line's taxableWages, so no caller can rebuild it from
+   * the lines: ytd.localIncomeTax (Portland's Metro and Multnomah taxes count
+   * every dollar of wages toward their trigger, not just the taxed excess;
+   * Kentucky's capped cities and Ohio's capped JEDDs count the wages taxed
+   * there) and ytd.seattleCompensation (Seattle's employer taxes emit no line
+   * at all until the threshold is passed). Add each figure to the matching
+   * ytd field before the next check; payroll/ytd.ts does. Present only when
+   * the check touched one of these taxes.
+   */
+  ytdAccruals?: YtdAccruals;
+}
+
+export interface YtdAccruals {
+  /** Wages to add to ytd.localIncomeTax, by the same key the tax reads. */
+  localIncomeTax?: Record<string, Cents>;
+  /** Compensation to add to ytd.seattleCompensation. */
+  seattleCompensation?: Cents;
 }
 
 /**
@@ -914,4 +946,10 @@ export interface ComputeContext {
   periodsPerYear: number;
   /** Resolve the taxable base for a given tax's exemption profile. */
   taxableWagesFor(exempt: readonly PretaxCategory[]): Cents;
+  /**
+   * Where a rule records what this check adds to a caller-kept tracker (see
+   * PaycheckResult.ytdAccruals). Set, not added: a rule that runs twice for
+   * the same key (a residence-state pass) records the same figure once.
+   */
+  ytdAccruals?: YtdAccruals;
 }
