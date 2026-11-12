@@ -18,6 +18,7 @@ export function localAgencyGuide(agencyId, year) {
 /** Use jurisdiction codes as printed, including leading zeroes. Never infer a collector from a name. */
 export function localWithholdingGuide(kind, code, year) {
   if (year !== 2026) return { status: 'unsupported-year' };
+  if (typeof code !== 'string' || code.trim() === '') return { status: 'unknown-code' };
   let agency;
   let row;
   switch (kind) {
