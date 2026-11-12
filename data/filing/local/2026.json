@@ -964,5 +964,51 @@
       "https://www.fcps.net/community/tax-collection-office/tax-forms"
     ],
     "verifiedOn": "2026-11-12"
+  },
+  "KY-KENTON": {
+    "collector": "Kenton County Fiscal Court, Business Services",
+    "registration": "Apply to Kenton County Business Services for an occupational license account. Confirm the worksite jurisdictions before preparing the county and participating city lines.",
+    "returns": [
+      [
+        "QCC1",
+        "File by the last day of the month after each quarter. Report the county and each applicable city listed on the return. Include the employee detail required by the county. File the Covington city portion separately with Covington Finance."
+      ],
+      [
+        "KC-AR",
+        "Reconcile annually by February 28, even if payroll ceased during the year. Send W-2 copies with the reconciliation separately from the fourth-quarter return."
+      ]
+    ],
+    "filing": "Use the 2026 QCC1. Mail a quarterly return without payment to Kenton County Fiscal Court, PO Box 792, Covington, KY 41012. Use the mailing instructions on KC-AR for the annual reconciliation.",
+    "payment": "For a quarterly return with payment, remit to Kenton County Fiscal Court, PO Box 706237, Cincinnati, OH 45270.",
+    "sources": [
+      "https://www.kentoncounty.org/DocumentCenter/View/3321/Kenton-County-and-Cities-Occupational-Business-License-Guide",
+      "https://www.kentoncounty.org/DocumentCenter/View/4157/New-Quarterly-Return-Form-2026-Interactive",
+      "https://www.kentoncounty.org/DocumentCenter/View/363/Annual-Reconciliation-of-Payroll-Withholding-PDF"
+    ],
+    "verifiedOn": "2026-11-12"
+  },
+  "KY-COVINGTON": {
+    "collector": "City of Covington Finance Department",
+    "registration": "Obtain a city occupational license and reporting number. Businesses physically located in Covington must first obtain zoning approval.",
+    "returns": [
+      [
+        "Employer’s Return of License Fee Withheld",
+        "File monthly by the 15th of the next month if withholding exceeded $450 in any of the preceding four quarters. Otherwise file quarterly. Section 110.06(D) specifies the 30th of January, April, July and October. The quarterly form lists the last day of those months. Confirm with Finance before relying on a 31st deadline. Sign and return the form even for periods with no wages."
+      ],
+      [
+        "Employers’ Annual Reconciliation of License Fee Withheld",
+        "File by February 28 with federal W-2s and W-3 or an equivalent detailed employee listing. PEOs must supply a separate annual report for each client."
+      ]
+    ],
+    "filing": "Submit the signed city return to Covington Finance using the instructions on the city form. Employers operating in Covington also file with Kenton County.",
+    "payment": "Remit the city withholding to the City of Covington with its return. The annual form directs remittances to 20 West Pike Street, Covington, KY 41011.",
+    "sources": [
+      "https://www.covingtonky.gov/government/departments/finance/taxes",
+      "https://codelibrary.amlegal.com/codes/covington/latest/covington_ky/0-0-0-22463",
+      "https://www.covingtonky.gov/Portals/covingtonky/230523%20Employers%20License%20Fee%20Withheld%20%28payroll%20tax%29_1.pdf",
+      "https://www.covingtonky.gov/Portals/covingtonky/260121_finance_employersannualreconciliationoflicensefeeswithheld_application_2013.pdf",
+      "https://www.kentoncounty.org/DocumentCenter/View/3321/Kenton-County-and-Cities-Occupational-Business-License-Guide"
+    ],
+    "verifiedOn": "2026-11-12"
   }
 }

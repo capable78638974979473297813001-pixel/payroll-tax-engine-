@@ -258,3 +258,14 @@ test('Kentucky metro and school collectors have distinct filing requirements', (
   assert.match(schools.payment, /Send the return separately/);
   assert.equal(localAgencyGuide('KY-FCPS', 2025), null);
 });
+
+test('Kenton and Covington have separate collectors and remittance instructions', () => {
+  const county = localAgencyGuide('KY-KENTON', 2026);
+  const city = localAgencyGuide('KY-COVINGTON', 2026);
+  assert.deepEqual(county.returns.map(([form]) => form), ['QCC1', 'KC-AR']);
+  assert.match(county.filing, /without payment.*PO Box 792/);
+  assert.match(county.payment, /with payment.*PO Box 706237/);
+  assert.match(city.returns[0][1], /exceeded \$450 in any of the preceding four quarters/);
+  assert.match(city.returns[0][1], /Confirm with Finance before relying on a 31st deadline/);
+  assert.match(city.filing, /also file with Kenton County/);
+});

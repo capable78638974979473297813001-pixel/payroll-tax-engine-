@@ -41,3 +41,5 @@ Use `localWithholdingGuide('DE-city', 'Wilmington', 2026)` for Wilmington employ
 Colorado OPT guides cover Denver, Glendale, Greenwood Village and Sheridan. Aurora repealed both portions effective January 1, 2025. Its [repeal notice](https://www.auroragov.org/business_services/taxes/occupational_privilege_tax) explains how employers can address earlier periods.
 
 For Kentucky, look up the applicable collector with `localAgencyGuide(agencyId, 2026)`. Use `KY-LMRC` for Louisville Metro occupational withholding and `KY-LFUCG` for Lexington-Fayette urban county withholding. Fayette County Public Schools has a separate account and filing obligation for county residents working in the county. Look up `KY-FCPS` when that school tax applies.
+
+For Covington worksites, look up both `KY-KENTON` and `KY-COVINGTON`. Kenton County accepts county withholding and the city lines listed on QCC1. Covington collects its own city withholding. Its quarterly return and ordinance publish different deadlines for three quarters. The city guide identifies both before employers choose a filing date.
