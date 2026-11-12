@@ -1200,5 +1200,50 @@
       "https://www.opelika-al.gov/DocumentCenter/View/291/Occupational-Tax-Year-End-Reconciliation-PDF"
     ],
     "verifiedOn": "2026-11-12"
+  },
+  "AL-BESSEMER": {
+    "collector": "City of Bessemer Revenue Department",
+    "registration": "Use the city business license application and obtain the Bessemer taxpayer ID required on both returns.",
+    "returns": [
+      [
+        "Occupational Tax Form",
+        "File quarterly and pay by the 20th of the month after quarter-end. File a zero return with an explanation when no wages were paid. Attach an explanation for wages excluded for services outside Bessemer."
+      ],
+      [
+        "Annual Occupational Tax Reconciliation Form",
+        "File the original by January 31 of the following year. List employee pay and withholding and the four quarterly remittances. Attach a statement explaining any difference."
+      ]
+    ],
+    "filing": "Submit the city forms to Bessemer Revenue Department, 1700 3rd Avenue North, Bessemer, AL 35020. Confirm weekend filing arrangements for the 2026 annual reconciliation.",
+    "payment": "Send the quarterly return with a check or money order payable to City of Bessemer.",
+    "sources": [
+      "https://bessemeral.org/business/business-licenses-forms",
+      "https://cdn.prod.website-files.com/68ecf5da428edc78da18d9bb/697bd7feb67c8066653208d3_Occupational-Tax-Quarterly.pdf",
+      "https://cdn.prod.website-files.com/68ecf5da428edc78da18d9bb/697bd7d271ffc94d5faa7d54_Occupational-Tax-Annual-Recon.pdf"
+    ],
+    "verifiedOn": "2026-11-12"
+  },
+  "AL-LEEDS": {
+    "collector": "City of Leeds through Avenu Insights & Analytics",
+    "registration": "Contact Leeds Revenue or Avenu to establish the employer’s occupational withholding account. Use the assigned Avenu account number on the return.",
+    "returns": [
+      [
+        "Occupational Tax Return",
+        "Report monthly withholding by the 20th of the next month. Use jurisdiction code 9401 for Leeds on the Avenu return."
+      ],
+      [
+        "Occupational Withholding Tax Annual Reconciliation Report",
+        "File by January 31 of the following year with W-2s, W-3 and the annual withholding summary. Attach an explanation of any difference between withholding and payments."
+      ]
+    ],
+    "filing": "File periodic returns through the Avenu Taxpayer Portal or mail them to Avenu Tax Remittance Department. Use the separate Avenu annual form linked by Leeds. Confirm weekend filing arrangements for the 2026 reconciliation.",
+    "payment": "Remit monthly withholding through Avenu or with the mailed return. For a balance on the annual report, make the check payable to Tax Trust Account and send it with the signed form to PO Box 830725, Birmingham, AL 35283-0725.",
+    "sources": [
+      "https://www.leedsalabama.gov/471/Occupational-Tax",
+      "https://www.leedsalabama.gov/DocumentCenter/View/1035/Employers-Withholding-Guide",
+      "https://www.leedsalabama.gov/DocumentCenter/View/1031/Occupational-Tax-Return",
+      "https://www.leedsalabama.gov/DocumentCenter/View/1033/Annual-Occupational-Reconciliation-Withholding-Form"
+    ],
+    "verifiedOn": "2026-11-12"
   }
 }

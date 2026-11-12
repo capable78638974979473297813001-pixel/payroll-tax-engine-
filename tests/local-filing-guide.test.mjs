@@ -327,3 +327,14 @@ test('Auburn and Opelika distinguish due dates, delinquency and receipt', () => 
   assert.match(opelika.returns[1][1], /1% effective April 1, 2025/);
   assert.equal(lookup('Auburn Hills').status, 'unknown-code');
 });
+
+test('Bessemer collects quarterly and Leeds uses its monthly Avenu jurisdiction code', () => {
+  const lookup = city => localWithholdingGuide('AL-city', city, 2026).guide;
+  const bessemer = lookup('Bessemer');
+  assert.match(bessemer.returns[0][1], /20th of the month after quarter-end/);
+  assert.match(bessemer.filing, /1700 3rd Avenue North/);
+  const leeds = lookup(' leeds ');
+  assert.match(leeds.returns[0][1], /monthly withholding/);
+  assert.match(leeds.returns[0][1], /code 9401/);
+  assert.match(leeds.payment, /Tax Trust Account/);
+});

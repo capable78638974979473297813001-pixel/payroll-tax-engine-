@@ -65,7 +65,7 @@ export function localWithholdingGuide(kind, code, year) {
     }
     case 'AL-city':
     case 'CO-city': {
-      const cities = kind === 'AL-city' ? ['Auburn', 'Birmingham', 'Gadsden', 'Opelika'] : ['Denver', 'Glendale', 'Greenwood Village', 'Sheridan'];
+      const cities = kind === 'AL-city' ? ['Auburn', 'Bessemer', 'Birmingham', 'Gadsden', 'Leeds', 'Opelika'] : ['Denver', 'Glendale', 'Greenwood Village', 'Sheridan'];
       const locality = code.trim().toLowerCase();
       const city = cities.find(name => name.toLowerCase() === locality);
       if (city) {
