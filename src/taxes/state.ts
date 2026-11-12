@@ -5092,6 +5092,13 @@ function seattlePayrollExpenseTax(
     ?.seattlePayrollExpenseTax;
   if (!cfg) return null;
 
+  // Both Seattle taxes band by the year's running compensation and emit no
+  // line until a threshold is passed, so every Seattle check reports what
+  // it adds to ytd.seattleCompensation, taxed or not.
+  if (ctx.ytdAccruals) {
+    ctx.ytdAccruals.seattleCompensation = ctx.taxableWagesFor((rules.exemptPretax ?? []) as PretaxCategory[]);
+  }
+
   const priorYearPayroll = input.employer?.seattlePriorYearPayrollExpense;
   if (priorYearPayroll === undefined) {
     // Which band applies (and whether the employer owes at all) depends on
@@ -5181,6 +5188,9 @@ function seattleSocialHousingTax(
   if (!cfg) return null;
 
   const thisCheque = ctx.taxableWagesFor([]);
+  if (ctx.ytdAccruals && ctx.ytdAccruals.seattleCompensation === undefined) {
+    ctx.ytdAccruals.seattleCompensation = thisCheque;
+  }
   const already = input.ytd.seattleCompensation ?? 0;
   const threshold = dollars(cfg.compensationThreshold);
   const taxableWages = atLeastZero(already + thisCheque - Math.max(already, threshold));
@@ -5701,7 +5711,7 @@ function kentuckySchoolDistrictTax(input: PaycheckInput, ctx: ComputeContext): T
     const blended = resident.schoolDistrictTax!.blendedInto;
     // Already inside the consolidated government's resident rate (Lexington-Fayette's 2.75%).
     if (blended && same(str(cert.workCity), blended) && same(str(cert.residenceCity), blended)) return null;
-    const wages = kyCappedWages(resident, ctx.taxableWagesFor([]), input);
+    const wages = kyCappedWages(resident, ctx.taxableWagesFor([]), input, ctx);
     const rate = resident.wageRateDecimal!;
     return {
       id: 'KY_LOCAL',
@@ -5779,7 +5789,7 @@ function kentuckyCityCountyTax(
     const metroRate = resident ? metro.residentRate : metro.nonresidentRate;
     const metroTax = applyRate(periodWages, metroRate);
     const ownCity = metroCity && cityEntry && cityEntry.wageRateDecimal !== null ? cityEntry : undefined;
-    const cityWages = ownCity ? kyCappedWages(ownCity, periodWages, input) : 0;
+    const cityWages = ownCity ? kyCappedWages(ownCity, periodWages, input, ctx) : 0;
     const cityTax = ownCity ? applyRate(cityWages, ownCity.wageRateDecimal!) : 0;
     return {
       id: 'KY_LOCAL',
@@ -5814,7 +5824,7 @@ function kentuckyCityCountyTax(
   };
 
   // Annual caps: see kyCappedWages().
-  const taxableFor = (entry: KYJurisdictionEntry): number => kyCappedWages(entry, periodWages, input);
+  const taxableFor = (entry: KYJurisdictionEntry): number => kyCappedWages(entry, periodWages, input, ctx);
   const capNote = (entry: KYJurisdictionEntry, taxable: number): string =>
     entry.capAtSSWageBase
       ? ` (${fmt(taxable)} of ${fmt(periodWages)}, SS-wage-base-capped)`
@@ -5881,14 +5891,19 @@ function kentuckyCityCountyTax(
  * so it can't drift (this project's data once carried $84,500 for the
  * real $184,500).
  */
-function kyCappedWages(entry: KYJurisdictionEntry, periodWages: number, input: PaycheckInput): number {
+function kyCappedWages(entry: KYJurisdictionEntry, periodWages: number, input: PaycheckInput, ctx: ComputeContext): number {
   const cap = entry.capAtSSWageBase
     ? dollars(federalRuleset(input.checkDate).socialSecurity.wageBase)
     : entry.annualWageCap !== undefined
       ? dollars(entry.annualWageCap)
       : null;
   if (cap === null) return periodWages;
-  return underCap(periodWages, input.ytd.localIncomeTax?.[`KY_LOCAL_${entry.name}`] ?? 0, cap);
+  const key = `KY_LOCAL_${entry.name}`;
+  const taxable = underCap(periodWages, input.ytd.localIncomeTax?.[key] ?? 0, cap);
+  // The KY_LOCAL line reports the uncapped period wages, so the wages
+  // counted toward this jurisdiction's cap are reported separately.
+  accrueLocalYtd(ctx, key, taxable);
+  return taxable;
 }
 
 /**
@@ -7413,6 +7428,17 @@ interface PortlandLocalTaxConfig {
 }
 
 /**
+ * Record what this check adds to ytd.localIncomeTax[key] (see
+ * PaycheckResult.ytdAccruals). The tax lines cannot carry it: Portland's
+ * lines report only the wages above the trigger, and Kentucky's report the
+ * uncapped period wages.
+ */
+function accrueLocalYtd(ctx: ComputeContext, key: string, wages: Cents): void {
+  if (!ctx.ytdAccruals) return;
+  (ctx.ytdAccruals.localIncomeTax ??= {})[key] = wages;
+}
+
+/**
  * Portland-area local personal income taxes — Metro Supportive Housing
  * Services (1%) and Multnomah County Preschool For All (1.5% + an
  * ADDITIONAL 1.5% above a second threshold). Genuinely different shape
@@ -7467,6 +7493,7 @@ function portlandAreaLocalTax(
 
   if (resolveCertBoolean(cert, 'metroDistrict')) {
     const ytd = input.ytd.localIncomeTax?.['OR_METRO'] ?? 0;
+    accrueLocalYtd(ctx, 'OR_METRO', currentWages);
     const threshold = dollars(cfg.metroSHS.threshold);
     const taxableExcess = overThreshold(currentWages, ytd, threshold);
     const amount = applyRate(taxableExcess, cfg.metroSHS.rate);
@@ -7486,6 +7513,7 @@ function portlandAreaLocalTax(
 
   if (resolveCertBoolean(cert, 'multnomahCounty')) {
     const ytd = input.ytd.localIncomeTax?.['OR_MULTNOMAH'] ?? 0;
+    accrueLocalYtd(ctx, 'OR_MULTNOMAH', currentWages);
     const tier1Threshold = dollars(cfg.multnomahPFA.tier1Threshold);
     const tier2Threshold = dollars(cfg.multnomahPFA.tier2Threshold);
     const above1 = overThreshold(currentWages, ytd, tier1Threshold);
@@ -9134,6 +9162,7 @@ function ohioJEDDTax(
     ? underCap(periodWages, input.ytd.localIncomeTax?.[capKey] ?? 0, dollars(entry.annualWageCap!))
     : periodWages;
   const amount = applyRate(taxableWages, entry.rate);
+  if (capApplies) accrueLocalYtd(ctx, capKey, taxableWages);
 
   const staleCap = entry.annualWageCap !== undefined && entry.annualWageCapYear !== ctx.year;
   const capYtdMissing =
