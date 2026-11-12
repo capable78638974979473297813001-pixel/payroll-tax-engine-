@@ -155,5 +155,15 @@
     "industryNewEmployerRatesSource": "mass.gov/info-details/employer-contributions-to-unemployment (2026-10-06): 'New construction industry employers: 6.08%'. Selected by input.employer.suiIndustry['MA'] === 'construction'.",
     "employerSuppliedRateRequired": false,
     "confidence": "cross_source_confirmed, strengthened 2026-09-05"
+  },
+  "residentWithholdingNetOfWorkState": {
+    "$comment": "For a resident working in another state that also withholds, an employer required to withhold here (input.residenceStateWithholding) withholds only the excess of this state's withholding over the work state's. Read by residenceStateWithholdingLine().",
+    "source": {
+      "title": "830 CMR 62B.2.1(9); DOR Directive 91-4, Multiple State Withholding Requirements",
+      "url": "https://www.mass.gov/directive/directive-91-4-multiple-state-withholding-requirements",
+      "says": "Withhold the Massachusetts amount less the amount required to be withheld for the other state; if the other state's withholding equals or exceeds it, withhold no Massachusetts tax.",
+      "verifiedOn": "2026-11-12",
+      "readVia": "search summary of the agency's own page, not a direct fetch"
+    }
   }
 }

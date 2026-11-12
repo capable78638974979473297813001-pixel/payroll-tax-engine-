@@ -584,6 +584,13 @@ export interface EmployerContext {
    * never guessed from anything else in the paycheck.
    */
   suiIndustry?: Record<string, string>;
+  /**
+   * The part of an employer payroll tax the employer has chosen to take from
+   * employees' pay, keyed by state code, as a fraction of the tax. Vermont's
+   * Child Care Contribution allows up to 0.25 (a quarter of the 0.44%, so
+   * 0.11% of wages). Absent means the employer pays all of it.
+   */
+  payrollTaxEmployeeShareFraction?: Record<string, number>;
 }
 
 /**

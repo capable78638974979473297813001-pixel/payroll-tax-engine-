@@ -260,3 +260,88 @@ describe('year-end forms tie back to the paychecks', () => {
     }
   });
 });
+
+describe('rules added 2026-11-12', () => {
+  const check = (state: string, gross: number, extra: Record<string, unknown> = {}): PaycheckResult =>
+    calculatePaycheck({
+      checkDate: '2026-09-15',
+      payFrequency: 'biweekly',
+      earnings: [{ code: 'REG', category: 'regular', amount: gross }],
+      deductions: [],
+      federalW4: { ...W4 },
+      ytd: freshYearToDate(),
+      workState: { code: state, certificate: {} },
+      ...extra,
+    });
+  const line = (r: PaycheckResult, id: string) => r.taxes.find((t) => t.id === id);
+
+  test('a state that publishes no new-employer unemployment rate says the tax was not computed', () => {
+    for (const state of ['LA', 'MD', 'MN', 'MT', 'UT', 'WA', 'WY']) {
+      const r = check(state, dollars(4_000));
+      const sui = line(r, `${state}_SUI_ER`);
+      assert.ok(sui, `${state}: the employer unemployment line must not be left out`);
+      assert.equal(sui.amount, 0);
+      assert.equal(sui.taxableWages, dollars(4_000));
+      assert.ok(r.notices?.some((n) => n.taxId === `${state}_SUI_ER` && n.tier === 'not_modelled'), `${state}: notice`);
+      // 2% of $4,000, by hand.
+      const withRate = check(state, dollars(4_000), { employer: { stateUnemploymentRate: { [state]: 0.02 } } });
+      assert.equal(line(withRate, `${state}_SUI_ER`)!.amount, dollars(80));
+    }
+  });
+
+  test("Vermont's Child Care Contribution: 0.44% from the employer, up to a quarter of it from the employee", () => {
+    // 0.44% of $4,000 = $17.60.
+    const r = check('VT', dollars(4_000));
+    assert.equal(line(r, 'VT_CCC_ER')!.amount, dollars(17.6));
+    assert.equal(line(r, 'VT_CCC_EE'), undefined);
+    // A quarter of $17.60 = $4.40 from the employee, $13.20 left with the employer.
+    const shared = check('VT', dollars(4_000), { employer: { payrollTaxEmployeeShareFraction: { VT: 0.25 } } });
+    assert.equal(line(shared, 'VT_CCC_EE')!.amount, dollars(4.4));
+    assert.equal(line(shared, 'VT_CCC_ER')!.amount, dollars(13.2));
+    assert.equal(shared.netPay, r.netPay - dollars(4.4));
+    assert.throws(() => check('VT', dollars(4_000), { employer: { payrollTaxEmployeeShareFraction: { VT: 0.5 } } }), /between 0 and 0.25/);
+  });
+
+  test('Oregon withholds nothing from a check with no wages', () => {
+    const r = check('OR', 0);
+    assert.equal(line(r, 'OR_SIT')!.amount, 0);
+    assert.ok(check('OR', dollars(1_000)).taxes.find((t) => t.id === 'OR_SIT')!.amount > 0);
+  });
+
+  test('Utah: no withholding for a nonresident in the state 20 days or fewer who meets the conditions', () => {
+    const utah = (days: number, eligible: boolean) =>
+      check('UT', dollars(4_000), {
+        workState: { code: 'UT', certificate: { daysWorkedInStateThisYear: days, ...(eligible ? { nonresidentDeMinimisEligible: true } : {}) } },
+        residenceState: { code: 'NV', certificate: {} },
+      });
+    const full = line(check('UT', dollars(4_000)), 'UT_SIT')!.amount;
+    assert.ok(full > 0);
+    assert.equal(line(utah(20, true), 'UT_SIT')!.amount, 0);
+    assert.equal(line(utah(21, true), 'UT_SIT')!.amount, full);
+    assert.equal(line(utah(5, false), 'UT_SIT')!.amount, full, 'the conditions must be asserted, not assumed');
+  });
+
+  test('Idaho: no withholding for a nonresident expected to earn under $1,000 there in the year', () => {
+    const idaho = (gross: number) => check('ID', gross, { payFrequency: 'annual', residenceState: { code: 'WA', certificate: {} } });
+    assert.equal(line(idaho(dollars(999)), 'ID_SIT')!.amount, 0);
+    assert.match(line(idaho(dollars(999)), 'ID_SIT')!.detail!, /de minimis/);
+    assert.doesNotMatch(line(idaho(dollars(60_000)), 'ID_SIT')!.detail!, /de minimis/);
+    assert.ok(line(idaho(dollars(60_000)), 'ID_SIT')!.amount > 0);
+  });
+
+  test('a resident of California, Connecticut, New Jersey or Massachusetts working elsewhere is withheld only the excess over the work state', () => {
+    const sit = (r: PaycheckResult, id: string) => line(r, id)?.amount ?? 0;
+    for (const home of ['CA', 'CT', 'NJ', 'MA']) {
+      for (const work of ['AL', 'OR']) {
+        const workOnly = sit(check(work, dollars(3_000)), `${work}_SIT`);
+        const homeOnly = sit(check(home, dollars(3_000)), `${home}_SIT`);
+        const r = check(work, dollars(3_000), { residenceState: { code: home, certificate: {} }, residenceStateWithholding: { nexus: true } });
+        assert.equal(sit(r, `${work}_SIT`), workOnly, `${home} resident in ${work}: work-state tax unchanged`);
+        assert.equal(sit(r, `${home}_SIT_RESIDENCE`), Math.max(0, homeOnly - workOnly), `${home} resident in ${work}`);
+      }
+    }
+    // A state with no such rule on file is still withheld in full.
+    const ga = check('AL', dollars(3_000), { residenceState: { code: 'GA', certificate: {} }, residenceStateWithholding: { nexus: true } });
+    assert.equal(sit(ga, 'GA_SIT_RESIDENCE'), sit(check('GA', dollars(3_000)), 'GA_SIT'));
+  });
+});

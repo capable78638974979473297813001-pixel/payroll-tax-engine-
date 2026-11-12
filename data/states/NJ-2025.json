@@ -1965,5 +1965,15 @@
       }
     }
   ],
-  "$yearNote": "2025 ruleset: New Jersey withholding rate tables are the percentage-method tables in effect since October 1, 2020 (unchanged). 2025 worker contributions: UI + WF/SWF 0.425% on $43,300; TDI 0.23% and FLI 0.33% on $165,400 (NJDOL). Newark's 1% employer payroll tax unchanged."
+  "$yearNote": "2025 ruleset: New Jersey withholding rate tables are the percentage-method tables in effect since October 1, 2020 (unchanged). 2025 worker contributions: UI + WF/SWF 0.425% on $43,300; TDI 0.23% and FLI 0.33% on $165,400 (NJDOL). Newark's 1% employer payroll tax unchanged.",
+  "residentWithholdingNetOfWorkState": {
+    "$comment": "For a resident working in another state that also withholds, an employer required to withhold here (input.residenceStateWithholding) withholds only the excess of this state's withholding over the work state's. Read by residenceStateWithholdingLine().",
+    "source": {
+      "title": "NJ-WT, New Jersey Income Tax Withholding Instructions",
+      "url": "https://www.nj.gov/treasury/taxation/pdf/current/njwt.pdf",
+      "says": "The amount of New Jersey Income Tax you withhold should be reduced by the amount of Income Tax you withhold for other states, their political subdivisions, or the District of Columbia. Only the other STATE's income tax is netted here; a local tax withheld there is not.",
+      "verifiedOn": "2026-11-12",
+      "readVia": "search summary of the agency's own page, not a direct fetch"
+    }
+  }
 }

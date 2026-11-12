@@ -147,6 +147,9 @@
     "note": "HB 106 (2025) cut the rate from 4.55% to 4.5% retroactive to 1 January 2025; Publication 14 Rev. 4/25 put the new tables into withholding for pay periods beginning on or after 1 June 2025. The engine's key names (beforeJune2026/fromJune2026) are shared with the 2026 file; here they hold the before- and after-1-June-2025 tables."
   },
   "reciprocity": {
+    "exemptWhenDaysWorkedAtMost": 20,
+    "dayCountRequiresCallerEligibility": true,
+    "dayCountSource": {"title": "Utah Code 59-10-117.5 and 59-10-402 (SB 39, 2022); Utah Publication 14", "url": "https://tax.utah.gov/form-pubs/pub-14", "verifiedOn": "2026-11-12", "says": "Do not withhold Utah tax from a nonresident employee who has no other Utah-source income, is in Utah to perform employment duties for 20 days or fewer in the calendar year, and is a resident of a state that has no income tax or gives Utah residents a substantially similar exclusion. Not for professional athletes, entertainers or persons of prominence paid per event. The caller asserts those conditions with certificate.nonresidentDeMinimisEligible and supplies certificate.daysWorkedInStateThisYear. Past 20 days the employer owes the tax for the whole year, which this engine does not reach back to collect.", "readVia": "search summary of the Rev. 04/25 guide and the statute, not a direct fetch"},
     "rule": "NONE. Utah has no reciprocal withholding agreements with any state -- cross-source confirmed by TWO independent search passes on separate sessions, no contradictions found either time."
   },
   "localIncomeTax": {
