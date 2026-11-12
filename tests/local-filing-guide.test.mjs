@@ -23,6 +23,10 @@ test('every registered Indiana county and taxing Ohio school district routes to 
 test('regional Ohio collectors use the registry; residual and ambiguous cities remain unresolved', () => {
   for (const row of rows('OH-municipalities', 'municipalities')) {
     const result = localWithholdingGuide('OH-municipality', row.municode, 2026);
+    if (!row.municode) {
+      assert.equal(result.status, 'unknown-code');
+      continue;
+    }
     assert.equal(result.jurisdiction, row.name);
     if (['RITA', 'CCA'].includes(row.administeredBy)) {
       assert.equal(result.agency, 'OH-' + row.administeredBy);
