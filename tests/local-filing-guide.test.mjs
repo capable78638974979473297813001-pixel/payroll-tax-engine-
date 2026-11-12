@@ -352,3 +352,13 @@ test('Oregon employer transit district codes share Form OQ and exclude statewide
   assert.equal(lookup('STT').status, 'unknown-code');
   assert.equal(lookup('Lane County').status, 'unknown-code');
 });
+
+test('Eugene city payroll returns are separate from Lane transit reporting', () => {
+  const city = localWithholdingGuide('OR-city', ' eugene ', 2026);
+  assert.equal(city.agency, 'OR-EUGENE');
+  assert.deepEqual(city.guide.returns.map(([form]) => form), ['EUG-PY-1', 'EUG-PY-2']);
+  assert.match(city.guide.returns[1][1], /EUG-ED/);
+  assert.match(city.guide.payment, /separate check/);
+  assert.equal(localWithholdingGuide('OR-city', 'LTD', 2026).status, 'unknown-code');
+  assert.equal(localWithholdingGuide('OR-transit-district', 'Eugene', 2026).status, 'unknown-code');
+});

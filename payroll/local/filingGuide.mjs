@@ -63,6 +63,12 @@ export function localWithholdingGuide(kind, code, year) {
         },
       };
     }
+    case 'OR-city':
+      if (code.trim().toLowerCase() === 'eugene') {
+        row = { name: 'Eugene' };
+        agency = 'OR-EUGENE';
+      }
+      break;
     case 'OR-transit-district':
       if (code === 'TM') row = { name: 'TriMet Transit District' };
       if (code === 'LTD') row = { name: 'Lane Transit District' };

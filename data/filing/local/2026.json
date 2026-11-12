@@ -1268,5 +1268,28 @@
       "https://www.oregon.gov/dor/forms/FormsPubs/combined-payroll_211-155-2_2026.pdf"
     ],
     "verifiedOn": "2026-11-12"
+  },
+  "OR-EUGENE": {
+    "collector": "City of Eugene, Community Safety Payroll Tax",
+    "registration": "Verify the employer’s physical business location using Eugene’s city limits address lookup. An employee working remotely from a Eugene home does not by itself establish a filing obligation for an employer with no business location in the city. Register through Eugene MUNIRevs and use the account number on paper returns.",
+    "returns": [
+      [
+        "EUG-PY-1",
+        "File the employer payroll tax return quarterly. Include subject wages even when an employee is exempt from employee withholding. Eligible small employers may claim the reduced rate using EUG-RTR with the fourth-quarter or final return."
+      ],
+      [
+        "EUG-PY-2",
+        "File the employee withholding return quarterly, including when all employees are exempt. Submit EUG-ED employee detail with this return."
+      ]
+    ],
+    "filing": "Submit both quarterly returns to Eugene through MUNIRevs or use the city’s 2026 paper forms. The filing and payment deadlines are April 30, July 31 and November 2, 2026, and February 1, 2027, under the city’s next-business-day rule.",
+    "payment": "Use online check or card in Eugene MUNIRevs. For paper filings, send the city voucher and a separate check or money order for each tax form to the address on that form.",
+    "sources": [
+      "https://www.eugene-or.gov/4864/Employer-Payroll-Tax",
+      "https://www.eugene-or.gov/4863/Employee-Payroll-Tax",
+      "https://www.eugene-or.gov/4866/Tax-Document-Library",
+      "https://www.eugene-or.gov/DocumentCenter/View/81430/2026-EUG-ED---Instructions-to-Employee-Detail-Return"
+    ],
+    "verifiedOn": "2026-11-12"
   }
 }

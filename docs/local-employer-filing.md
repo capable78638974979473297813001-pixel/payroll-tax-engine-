@@ -4,6 +4,7 @@ Use `localWithholdingGuide(kind, code, 2026)` from `payroll/local/filingGuide.mj
 
 | Kind | Code | Example |
 | --- | --- | --- |
+| OR-city | Oregon city with a verified Community Safety Payroll Tax guide | `Eugene` |
 | OR-transit-district | Oregon employer transit district code on Form OQ | `TM` or `LTD` |
 | AL-city | Alabama city name with a verified occupational tax guide | `Auburn`, `Bessemer`, `Birmingham`, `Gadsden`, `Leeds` or `Opelika` |
 | CO-city | Colorado city name with a verified OPT guide | `Denver` |
