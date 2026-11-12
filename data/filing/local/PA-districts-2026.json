@@ -1,0 +1,396 @@
+{
+  "verifiedOn": "2026-11-11",
+  "source": "https://dced.pa.gov/local-government/local-income-tax-information/local-income-tax-collector/",
+  "districts": {
+    "10": {
+      "district": "BUTLER TAX COLLECTION DISTRICT",
+      "collector": "Berkheimer Tax Administrator",
+      "website": "www.hab-inc.com"
+    },
+    "11": {
+      "district": "CAMBRIA TAX COLLECTION DISTRICT",
+      "collector": "Berkheimer Tax Administrator",
+      "website": "www.hab-inc.com"
+    },
+    "12": {
+      "district": "CAMERON TAX COLLECTION DISTRICT",
+      "collector": "Keystone Collections Group",
+      "website": "www.keystonecollects.com"
+    },
+    "13": {
+      "district": "CARBON TAX COLLECTION DISTRICT",
+      "collector": "Berkheimer Tax Administrator",
+      "website": "www.hab-inc.com"
+    },
+    "14": {
+      "district": "CENTRE TAX COLLECTION DISTRICT",
+      "collector": "Centre Tax Agency",
+      "website": "www.statecollegepa.us"
+    },
+    "15": {
+      "district": "CHESTER TAX COLLECTION DISTRICT",
+      "collector": "Keystone Collections Group",
+      "website": "www.keystonecollects.com"
+    },
+    "16": {
+      "district": "CLARION TAX COLLECTION DISTRICT",
+      "collector": "Keystone Collections Group",
+      "website": "www.keystonecollects.com"
+    },
+    "17": {
+      "district": "CLEARFIELD TAX COLLECTION DISTRICT",
+      "collector": "Keystone Collections Group",
+      "website": "www.keystonecollects.com"
+    },
+    "18": {
+      "district": "CLINTON TAX COLLECTION DISTRICT",
+      "collector": "Berkheimer Tax Administrator",
+      "website": "www.hab-inc.com"
+    },
+    "19": {
+      "district": "COLUMBIA TAX COLLECTION DISTRICT",
+      "collector": "Berkheimer Tax Administrator",
+      "website": "www.hab-inc.com"
+    },
+    "20": {
+      "district": "CRAWFORD TAX COLLECTION DISTRICT",
+      "collector": "Berkheimer Tax Administrator",
+      "website": "www.hab-inc.com"
+    },
+    "21": {
+      "district": "CUMBERLAND TAX COLLECTION DISTRICT",
+      "collector": "Cumberland County Tax Bureau",
+      "website": "www.cumberlandtax.org"
+    },
+    "22": {
+      "district": "DAUPHIN TAX COLLECTION DISTRICT",
+      "collector": "Keystone Collections Group",
+      "website": "www.keystonecollects.com"
+    },
+    "23": {
+      "district": "DELAWARE TAX COLLECTION DISTRICT",
+      "collector": "Keystone Collections Group",
+      "website": "www.keystonecollects.com"
+    },
+    "24": {
+      "district": "ELK TAX COLLECTION DISTRICT",
+      "collector": "Berkheimer Tax Administrator",
+      "website": "www.hab-inc.com"
+    },
+    "25": {
+      "district": "ERIE TAX COLLECTION DISTRICT",
+      "collector": "Berkheimer Tax Administrator",
+      "website": "www.hab-inc.com"
+    },
+    "26": {
+      "district": "FAYETTE TAX COLLECTION DISTRICT",
+      "collector": "Southwest Regional Tax Bureau",
+      "website": "www.swrtb.org"
+    },
+    "27": {
+      "district": "FOREST TAX COLLECTION DISTRICT",
+      "collector": "Keystone Collections Group",
+      "website": "www.keystonecollects.com"
+    },
+    "28": {
+      "district": "FRANKLIN TAX COLLECTION DISTRICT",
+      "collector": "Franklin County Area Tax Bureau",
+      "website": "www.fcatb.org"
+    },
+    "29": {
+      "district": "FULTON TAX COLLECTION DISTRICT",
+      "collector": "Keystone Collections Group",
+      "website": "www.keystonecollects.com"
+    },
+    "30": {
+      "district": "GREENE TAX COLLECTION DISTRICT",
+      "collector": "Keystone Collections Group",
+      "website": "www.keystonecollects.com"
+    },
+    "31": {
+      "district": "HUNTINGDON TAX COLLECTION DISTRICT",
+      "collector": "Capital Tax Collection Bureau",
+      "website": "www.captax.com"
+    },
+    "32": {
+      "district": "INDIANA TAX COLLECTION DISTRICT",
+      "collector": "Berkheimer Tax Administrator",
+      "website": "www.hab-inc.com"
+    },
+    "33": {
+      "district": "JEFFERSON TAX COLLECTION DISTRICT",
+      "collector": "Berkheimer Tax Administrator",
+      "website": "www.hab-inc.com"
+    },
+    "34": {
+      "district": "JUNIATA TAX COLLECTION DISTRICT",
+      "collector": "Capital Tax Collection Bureau",
+      "website": "www.captax.com"
+    },
+    "35": {
+      "district": "LACKAWANNA TAX COLLECTION DISTRICT",
+      "collector": "Berkheimer Tax Administrator",
+      "website": "www.hab-inc.com"
+    },
+    "36": {
+      "district": "LANCASTER TAX COLLECTION DISTRICT",
+      "collector": "Lancaster County Tax Collection Bureau",
+      "website": "www.lctcb.org"
+    },
+    "37": {
+      "district": "LAWRENCE TAX COLLECTION DISTRICT",
+      "collector": "Berkheimer Tax Administrator",
+      "website": "www.hab-inc.com"
+    },
+    "38": {
+      "district": "LEBANON TAX COLLECTION DISTRICT",
+      "collector": "Keystone Collections Group",
+      "website": "www.keystonecollects.com"
+    },
+    "39": {
+      "district": "LEHIGH TAX COLLECTION DISTRICT",
+      "collector": "Berkheimer Tax Administrator",
+      "website": "www.hab-inc.com"
+    },
+    "40": {
+      "district": "LUZERNE TAX COLLECTION DISTRICT",
+      "collector": "Berkheimer Tax Administrator",
+      "website": "www.hab-inc.com"
+    },
+    "41": {
+      "district": "LYCOMING TAX COLLECTION DISTRICT",
+      "collector": "Keystone Collections Group",
+      "website": "www.keystonecollects.com"
+    },
+    "42": {
+      "district": "MCKEAN TAX COLLECTION DISTRICT",
+      "collector": "Berkheimer Tax Administrator",
+      "website": "www.hab-inc.com"
+    },
+    "43": {
+      "district": "MERCER TAX COLLECTION DISTRICT",
+      "collector": "Berkheimer Tax Administrator",
+      "website": "www.hab-inc.com"
+    },
+    "44": {
+      "district": "MIFFLIN TAX COLLECTION DISTRICT",
+      "collector": "Keystone Collections Group",
+      "website": "www.keystonecollects.com"
+    },
+    "45": {
+      "district": "MONROE TAX COLLECTION DISTRICT",
+      "collector": "Berkheimer Tax Administrator",
+      "website": "www.hab-inc.com"
+    },
+    "46": {
+      "district": "MONTGOMERY TAX COLLECTION DISTRICT",
+      "collector": "Berkheimer Tax Administrator",
+      "website": "www.hab-inc.com"
+    },
+    "47": {
+      "district": "MONTOUR TAX COLLECTION DISTRICT",
+      "collector": "Danville Area Earned Income Tax Office",
+      "website": "www.danveito.com"
+    },
+    "48": {
+      "district": "NORTHAMPTON TAX COLLECTION DISTRICT",
+      "collector": "Keystone Collections Group",
+      "website": "www.keystonecollects.com"
+    },
+    "49": {
+      "district": "NORTHUMBERLAND TAX COLLECTION DISTRICT",
+      "collector": "Keystone Collections Group",
+      "website": "www.keystonecollects.com"
+    },
+    "50": {
+      "district": "PERRY TAX COLLECTION DISTRICT",
+      "collector": "Capital Tax Collection Bureau",
+      "website": "www.captax.com"
+    },
+    "51": {
+      "district": "PHILADELPHIA CITY *",
+      "collector": "Philadelphia Department of Revenue",
+      "website": "www.phila.gov/revenue"
+    },
+    "52": {
+      "district": "PIKE TAX COLLECTION DISTRICT",
+      "collector": "Berkheimer Tax Administrator",
+      "website": "www.hab-inc.com"
+    },
+    "53": {
+      "district": "POTTER TAX COLLECTION DISTRICT",
+      "collector": "Berkheimer Tax Administrator",
+      "website": "www.hab-inc.com"
+    },
+    "54": {
+      "district": "SCHUYLKILL TAX COLLECTION DISTRICT",
+      "collector": "Berkheimer Tax Administrator",
+      "website": "www.hab-inc.com"
+    },
+    "55": {
+      "district": "SNYDER TAX COLLECTION DISTRICT",
+      "collector": "Berkheimer Tax Administrator",
+      "website": "www.hab-inc.com"
+    },
+    "56": {
+      "district": "SOMERSET TAX COLLECTION DISTRICT",
+      "collector": "Keystone Collections Group",
+      "website": "www.keystonecollects.com"
+    },
+    "57": {
+      "district": "SULLIVAN TAX COLLECTION DISTRICT",
+      "collector": "Berkheimer Tax Administrator",
+      "website": "www.hab-inc.com"
+    },
+    "58": {
+      "district": "SUSQUEHANNA TAX COLLECTION DISTRICT",
+      "collector": "Berkheimer Tax Administrator",
+      "website": "www.hab-inc.com"
+    },
+    "59": {
+      "district": "TIOGA TAX COLLECTION DISTRICT",
+      "collector": "Keystone Collections Group",
+      "website": "www.keystonecollects.com"
+    },
+    "60": {
+      "district": "UNION TAX COLLECTION DISTRICT",
+      "collector": "Berkheimer Tax Administrator",
+      "website": "www.hab-inc.com"
+    },
+    "61": {
+      "district": "VENANGO TAX COLLECTION DISTRICT",
+      "collector": "Berkheimer Tax Administrator",
+      "website": "www.hab-inc.com"
+    },
+    "62": {
+      "district": "WARREN TAX COLLECTION DISTRICT",
+      "collector": "Berkheimer Tax Administrator",
+      "website": "www.hab-inc.com"
+    },
+    "63": {
+      "district": "WASHINGTON TAX COLLECTION DISTRICT",
+      "collector": "Keystone Collections Group",
+      "website": "www.keystonecollects.com"
+    },
+    "64": {
+      "district": "WAYNE TAX COLLECTION DISTRICT",
+      "collector": "Berkheimer Tax Administrator",
+      "website": "www.hab-inc.com"
+    },
+    "65": {
+      "district": "WESTMORELAND TAX COLLECTION DISTRICT",
+      "collector": "Berkheimer Tax Administrator",
+      "website": "www.hab-inc.com"
+    },
+    "66": {
+      "district": "WYOMING TAX COLLECTION DISTRICT",
+      "collector": "Berkheimer Tax Administrator",
+      "website": "www.hab-inc.com"
+    },
+    "67": {
+      "district": "YORK TAX COLLECTION DISTRICT",
+      "collector": "York Adams Tax Bureau",
+      "website": "www.yatb.com"
+    },
+    "70": {
+      "district": "ALLEGHENY CENTRAL TAX COLLECTION DISTRICT",
+      "collector": "Jordan Tax Service, Inc.",
+      "website": "www.jordantax.com"
+    },
+    "71": {
+      "district": "ALLEGHENY NORTH TAX COLLECTION DISTRICT",
+      "collector": "Keystone Collections Group",
+      "website": "www.keystonecollects.com"
+    },
+    "72": {
+      "district": "ALLEGHENY SOUTHEAST TAX COLLECTION DISTRICT",
+      "collector": "Keystone Collections Group",
+      "website": "www.keystonecollects.com"
+    },
+    "73": {
+      "district": "ALLEGHENY SOUTHWEST TAX COLLECTION DISTRICT",
+      "collector": "Jordan Tax Service, Inc.",
+      "website": "www.jordantax.com"
+    },
+    "01": {
+      "district": "ADAMS TAX COLLECTION DISTRICT",
+      "collector": "York Adams Tax Bureau",
+      "website": "www.yatb.com"
+    },
+    "03": {
+      "district": "ARMSTRONG TAX COLLECTION DISTRICT",
+      "collector": "Berkheimer Tax Administrator",
+      "website": "www.hab-inc.com"
+    },
+    "04": {
+      "district": "BEAVER TAX COLLECTION DISTRICT",
+      "collector": "Berkheimer Tax Administrator",
+      "website": "www.hab-inc.com"
+    },
+    "05": {
+      "district": "BEDFORD TAX COLLECTION DISTRICT",
+      "collector": "Keystone Collections Group",
+      "website": "www.keystonecollects.com"
+    },
+    "06": {
+      "district": "BERKS TAX COLLECTION DISTRICT",
+      "collector": "Berks Earned Income Tax Bureau",
+      "website": "www.berkseit.com"
+    },
+    "07": {
+      "district": "BLAIR TAX COLLECTION DISTRICT",
+      "collector": "Blair County Tax Collection Bureau",
+      "website": "www.blairtax.org"
+    },
+    "08": {
+      "district": "BRADFORD TAX COLLECTION DISTRICT",
+      "collector": "Berkheimer Tax Administrator",
+      "website": "www.hab-inc.com"
+    },
+    "09": {
+      "district": "BUCKS TAX COLLECTION DISTRICT",
+      "collector": "Keystone Collections Group",
+      "website": "www.keystonecollects.com"
+    }
+  },
+  "act32": {
+    "registration": "Register each worksite with the designated local collector. Obtain residency certification and worksite and residence PSD codes.",
+    "returns": [
+      [
+        "Employer Quarterly Return",
+        "File and remit within 30 days after each calendar quarter. For an eligible multi-district employer electing central filing, remit electronically monthly to the elected collector."
+      ],
+      [
+        "W2-R",
+        "Annual employer reconciliation, generally due the last day of February. Consult the assigned collector for year-end and cessation instructions."
+      ]
+    ],
+    "filing": "Use the designated collector’s employer service for forms and submission instructions. The central-filing election requires electronic wage detail and remittance.",
+    "payment": "Pay the appointed collector. Confirm its accepted payment methods and employer account before remitting.",
+    "gaps": [
+      "Collector-specific payment instruments, e-file mandates and mailing addresses require individual verification.",
+      "LST can have a different collector and is outside this EIT directory."
+    ],
+    "sources": [
+      "https://dced.pa.gov/local-government/local-income-tax-information/instructions-employers/",
+      "https://dced.pa.gov/local-government/local-income-tax-information/local-withholding-tax-faqs/",
+      "https://dced.pa.gov/local-government/local-income-tax-information/act32-faq/",
+      "https://dced.pa.gov/download/act-32-of-2008-procedure-manual/?wpdmdl=56767"
+    ]
+  },
+  "philadelphia": {
+    "registration": "Register a Philadelphia Wage Tax account in the Philadelphia Tax Center.",
+    "returns": [
+      [
+        "Wage Tax return",
+        "File quarterly online. Use the 2026 city calendar for exact payment dates according to the assigned quarterly, monthly, semimonthly or weekly schedule."
+      ]
+    ],
+    "filing": "Submit returns in the Philadelphia Tax Center.",
+    "payment": "Pay electronically through the Philadelphia Tax Center according to the employer payment schedule.",
+    "sources": [
+      "https://www.phila.gov/services/business-self-employment/business-taxes/wage-tax-employers/",
+      "https://www.phila.gov/documents/wage-tax-due-dates/"
+    ]
+  }
+}
