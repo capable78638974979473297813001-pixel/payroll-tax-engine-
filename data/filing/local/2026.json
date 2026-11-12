@@ -1,0 +1,96 @@
+{
+  "IN-DOR": {
+    "collector": "Indiana Department of Revenue",
+    "registration": "Register the employer for withholding through INBiz with its EIN. Use INTIME to manage the account.",
+    "returns": [
+      [
+        "WH-1",
+        "Report county amounts by county code on the state withholding return. Annual filers are due January 30. Monthly filers are due 30 days after month end and early monthly filers 20 days after month end. Use the frequency assigned by DOR."
+      ],
+      [
+        "WH-3",
+        "Reconcile annually by January 31, with the wage statements. Continue required returns for zero periods while registered."
+      ]
+    ],
+    "filing": "File electronically through INTIME. Registered bulk filers can use SFTP under DOR specifications.",
+    "payment": "Pay electronically through INTIME. An electronic filing exemption must be resolved with DOR before relying on paper.",
+    "sources": [
+      "https://www.in.gov/dor/i-am-a/business-corp/withholding/",
+      "https://www.in.gov/dor/i-am-a/business-corp/withholding/filing-a-wh-1/",
+      "https://www.in.gov/dor/files/new-small-business-handbook.pdf"
+    ],
+    "verifiedOn": "2026-11-11"
+  },
+  "OH-SDIT": {
+    "collector": "Ohio Department of Taxation",
+    "registration": "Register when an employee lives in a taxing school district. Use the existing Ohio employer withholding account if already registered.",
+    "returns": [
+      [
+        "SD 101",
+        "Report school district withholding by district. Quarterly remittances are due at the end of the next month. Monthly remittances are due on the 15th of the next month. Use the school district frequency assigned to the account."
+      ],
+      [
+        "SD 141",
+        "Reconcile each district by January 31 of the next year, or within 15 days after discontinuing business."
+      ]
+    ],
+    "filing": "File electronically through OH|TAX eServices. Preserve four-digit school district numbers including leading zeros.",
+    "payment": "Remit electronically through the state withholding service. The state partial-weekly rule is for state withholding.",
+    "sources": [
+      "https://tax.ohio.gov/business/employer-withholding",
+      "https://tax.ohio.gov/help-center/resources/duedates",
+      "https://tax.ohio.gov/help-center/faqs/employer-withholding-filing-requirements/"
+    ],
+    "verifiedOn": "2026-11-11"
+  },
+  "OH-RITA": {
+    "collector": "Regional Income Tax Agency",
+    "registration": "Register the business and its municipality through MyAccount, online registration, or paper Form 48.",
+    "returns": [
+      [
+        "11",
+        "Quarterly due at the end of the next month. Monthly due on the 15th of the next month. If the municipality requires semimonthly remittance, due three banking days after the 15th and month end. Consult the municipality-specific frequency and threshold rules."
+      ],
+      [
+        "17",
+        "Annual reconciliation and wage statement transmittal due by the last day of February."
+      ],
+      [
+        "11A",
+        "Use to adjust an earlier employer statement."
+      ]
+    ],
+    "filing": "Use MyAccount for electronic filing and W-2 upload. Paper form downloads and form-specific mailing addresses are published separately.",
+    "payment": "Remit through MyAccount or mail a check with the appropriate payment remittance when permitted.",
+    "sources": [
+      "https://www.ritaohio.com/Businesses/Home/FormDueDates",
+      "https://www.ritaohio.com/Businesses/Home/FormDownloads",
+      "https://www.ritaohio.com/Businesses/Faqs?questionID=2&subcategory=General",
+      "https://www.ritaohio.com/Businesses/Home/FormMailingAddresses",
+      "https://www.ritaohio.com/Businesses/Home/SemiMonthlyFilers"
+    ],
+    "verifiedOn": "2026-11-11"
+  },
+  "OH-CCA": {
+    "collector": "City of Cleveland, Central Collection Agency",
+    "registration": "Complete CCA online business registration before signing in to eFile.",
+    "returns": [
+      [
+        "Employer’s Return of Income Tax Withheld",
+        "Quarterly due at the end of the following month. Monthly due on the 15th of the following month. Semimonthly due three banking days after the 15th and month end for applicable municipalities and accounts."
+      ],
+      [
+        "W-3",
+        "Submit written annual reconciliation and W-2 information by the last day of February. CCA requires electronic media for 10 or more W-2s."
+      ]
+    ],
+    "filing": "Use CCA eFile for monthly or quarterly returns. Report employment and residence cities separately. Use CCA’s published employer form for paper filing.",
+    "payment": "Use the payment step in eFile, or send a check payable to CCA with the paper return.",
+    "sources": [
+      "https://www.ccaohio.gov/faq/business",
+      "https://efile2.ccatax.ci.cleveland.oh.us/faq",
+      "https://www.ccaohio.gov/sites/default/files/2025-12/2026%20Withholding%20Form.pdf"
+    ],
+    "verifiedOn": "2026-11-11"
+  }
+}
