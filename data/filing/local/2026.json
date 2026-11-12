@@ -1010,5 +1010,74 @@
       "https://www.kentoncounty.org/DocumentCenter/View/3321/Kenton-County-and-Cities-Occupational-Business-License-Guide"
     ],
     "verifiedOn": "2026-11-12"
+  },
+  "KY-BOWLING-GREEN": {
+    "collector": "City of Bowling Green, Office of Occupational License",
+    "registration": "Submit a city business registration before starting work inside Bowling Green.",
+    "returns": [
+      [
+        "City Employee Withholding Tax",
+        "File quarterly by the last day of the following month. If a quarterly payment exceeds $2,500, the city may assign monthly filing. Use the conversion date in the city notice. Monthly returns are due by the 15th of the next month."
+      ],
+      [
+        "Annual Reconciliation",
+        "File by February 28 with W-2s, W-3 and annual payroll register totals including deferred compensation. Confirm the 2026 weekend deadline with the city."
+      ]
+    ],
+    "filing": "Use the city account number. Mail periodic returns to the Cincinnati lockbox. Send the annual reconciliation to the address on the annual form.",
+    "payment": "Include the payment with the return and make checks payable to City of Bowling Green. The periodic withholding lockbox is PO Box 643791, Cincinnati, OH 45264-3791.",
+    "sources": [
+      "https://www.bgky.org/finance/license",
+      "https://www.bgky.org/files/RupkcqVV.pdf",
+      "https://www.bgky.org/files/AUCWw6OE.pdf",
+      "https://www.bgky.org/files/EHNoVhAM.pdf"
+    ],
+    "verifiedOn": "2026-11-12"
+  },
+  "KY-WARREN": {
+    "collector": "Warren County Treasurer",
+    "registration": "Apply for the county account using the Treasurer’s Occupational Business License Application.",
+    "returns": [
+      [
+        "Quarterly Occupational Tax Return",
+        "File by the end of the month after each quarter. Sign and return the form even when no wages were paid. Weekend and legal holiday deadlines move to the next business day."
+      ],
+      [
+        "Annual Reconciliation Occupational Tax Return",
+        "Reconcile all four quarters and pay any balance. The February 28 deadline for 2026 wages falls on Sunday, so the county return is due March 1, 2027. Include W-2 and W-3 copies or equivalent employee detail accepted by the Treasurer."
+      ]
+    ],
+    "filing": "File the county forms with the Treasurer. The Treasurer’s website provides a link to send completed forms and a separate link for payments.",
+    "payment": "Use Occupational Tax Online Payments or mail the signed return and payment to the Treasurer at the address printed on the county form.",
+    "sources": [
+      "https://www.warrencountyky.gov/departments/treasurer/",
+      "https://www.warrencountyky.gov/wp-content/uploads/2025/12/2026-Quarterly-Withholding-Occ-Tax-Form.pdf",
+      "https://www.warrencountyky.gov/wp-content/uploads/2025/12/2026-Occupational-Tax-Reconciliation-Form.pdf",
+      "https://www.warrencountyky.gov/wp-content/uploads/2023/06/fc-ordinance-occupational-tax-ordinance.pdf"
+    ],
+    "verifiedOn": "2026-11-12"
+  },
+  "KY-WARREN-SCHOOLS": {
+    "collector": "Warren County Public Schools Occupational Tax Office",
+    "registration": "Submit the district’s Occupational License Tax Application. Use its residency certification or call the school tax office to verify the employee’s home school district.",
+    "returns": [
+      [
+        "Quarterly Occupational Tax Return",
+        "School withholding applies to residents of the Warren County School District on wages earned in Warren County, including Bowling Green. File a signed quarterly return even for zero wages. The form lists January 31 for the fourth quarter."
+      ],
+      [
+        "Employers’ Annual Reconciliation of License Fee/Tax Withheld",
+        "File by February 28 with W-2s and W-3 or equivalent detail for all employees. Confirm weekend dates for 2026 filings with the district."
+      ]
+    ],
+    "filing": "Mail the signed school return to Warren County Public Schools, PO Box 51530, Bowling Green, KY 42102-5830. City and county returns are separate.",
+    "payment": "Enclose school withholding with the signed return. Contact the school office for card or ACH instructions.",
+    "sources": [
+      "https://www.warrencountyschools.org/departments/occupational-tax-office-1",
+      "https://www.warrencountyschools.org/fs/resource-manager/view/3a473c3c-62d0-4c1d-9f74-b6aa3a328f11",
+      "https://www.warrencountyschools.org/fs/resource-manager/view/894a7c9b-99c5-4acf-9fea-287d25193fcd",
+      "https://www.warrencountyschools.org/fs/resource-manager/view/6fa2c8c0-3330-4675-9a75-e6f0c81c8a4a"
+    ],
+    "verifiedOn": "2026-11-12"
   }
 }

@@ -43,3 +43,5 @@ Colorado OPT guides cover Denver, Glendale, Greenwood Village and Sheridan. Auro
 For Kentucky, look up the applicable collector with `localAgencyGuide(agencyId, 2026)`. Use `KY-LMRC` for Louisville Metro occupational withholding and `KY-LFUCG` for Lexington-Fayette urban county withholding. Fayette County Public Schools has a separate account and filing obligation for county residents working in the county. Look up `KY-FCPS` when that school tax applies.
 
 For Covington worksites, look up both `KY-KENTON` and `KY-COVINGTON`. Kenton County accepts county withholding and the city lines listed on QCC1. Covington collects its own city withholding. Its quarterly return and ordinance publish different deadlines for three quarters. The city guide identifies both before employers choose a filing date.
+
+In Bowling Green, use `KY-BOWLING-GREEN` for city withholding and `KY-WARREN` for county withholding. Use `KY-WARREN-SCHOOLS` for wages earned in Warren County by a resident of the Warren County School District. Verify the employee’s home school district before selecting the school guide.

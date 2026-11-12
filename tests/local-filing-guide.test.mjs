@@ -269,3 +269,15 @@ test('Kenton and Covington have separate collectors and remittance instructions'
   assert.match(city.returns[0][1], /Confirm with Finance before relying on a 31st deadline/);
   assert.match(city.filing, /also file with Kenton County/);
 });
+
+test('Bowling Green, Warren County and the school district have separate filing instructions', () => {
+  const city = localAgencyGuide('KY-BOWLING-GREEN', 2026);
+  const county = localAgencyGuide('KY-WARREN', 2026);
+  const school = localAgencyGuide('KY-WARREN-SCHOOLS', 2026);
+  assert.match(city.returns[0][1], /conversion date in the city notice/);
+  assert.match(city.payment, /PO Box 643791/);
+  assert.match(county.returns[1][1], /March 1, 2027/);
+  assert.match(school.returns[0][1], /residents of the Warren County School District/);
+  assert.match(school.filing, /PO Box 51530/);
+  assert.equal(localAgencyGuide('KY-WARREN-SCHOOLS', 2027), null);
+});
