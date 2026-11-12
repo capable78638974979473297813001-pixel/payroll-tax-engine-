@@ -82,6 +82,22 @@
    "revision": "page fetched live 2026-11-12 through a page-extraction service; the FAQ sentence is from the Department's Unemployment Tax page as quoted in a search result",
    "verifiedOn": "2026-11-12",
    "verifiedBy": "read: Status Report (K-CNS 010) - 'Every employing unit for which services are performed in employment shall file a report to determine status within 15 days after such first employment' (registered electronically); Quarterly Wage Report and Unemployment Tax Report (K-CNS 100), filed online with electronic payment, remittance for the full amount due with the report, certain employers required to file electronically; Adjustment to Employer's Wage Report (K-CNS 111); Employer Account Record Change (K-CNS 0103); Employer Representation Authorization (K-CNS 032, one per client for an accountant or TPA); New Hire Report (K-CNS 436, within 20 days of hiring); Notice of Benefit Charges (K-CNS 403, mailed each January, April, July and October) and Experience Rating Notice (K-CNS 404, mailed each year). The Unemployment Tax page's FAQ is quoted in a search result as: 'Employers with 26 or more employees must file online at KansasLabor.gov. Employers with 25 or less employees can download form K-CNS-100 and mail to Kansas Department of Labor, P.O. Box 400, Topeka, KS 66601-0400.' A search result titled 'Unemployment Services Login' (kansaslabor.gov, dated 2026-10-19) describes Kansas's new Wage & Tax Reporting System with new-employer registration; that page requires a login and was not read."
+  },
+  {
+   "id": "U7",
+   "title": "Kansas Statutes 44-710d (governmental entities; election, mode of payment; rated governmental employer; rate computation; notice)",
+   "url": "https://www.ksrevisor.gov/statutes/chapters/ch44/044_007_0010d.html",
+   "revision": "K.S.A. 44-710d as published by the Kansas Revisor of Statutes (L. 1981, ch. 206)",
+   "verifiedOn": "2026-11-12",
+   "verifiedBy": "fetched and read in full: a governmental entity may finance benefits as a contributing employer, a reimbursing employer or a rated governmental employer; electing to be rated lasts at least four complete calendar years and is made by written notice within 30 days after January 1 (or after the determination of subjectivity); a rated governmental employer reports total wages and makes quarterly benefit cost payments equal to total wages times its benefit cost rate, the rate never below .1%, and a quarter's payment under $1 is not required; the secretary notifies each such employer of its rate, which becomes final unless redetermination is applied for."
+  },
+  {
+   "id": "S3",
+   "title": "Kansas Department of Revenue, K-2MT 2025 W-2 Specifications for Electronic Filing, EFW2 Format (Rev. 10-25)",
+   "url": "https://www.ksrevenue.gov/pdf/k-2mt.pdf",
+   "revision": "K-2MT (Rev. 10-25), 3 pages, read in full through a page-extraction service on 2026-11-12",
+   "verifiedOn": "2026-11-12",
+   "verifiedBy": "read in full: Kansas follows the Social Security Administration's EFW2 format for every record except the Code RS (state) record; the RS record is 512 bytes, every field required (blank or zero filled), and must carry Kansas wages only; Code RA, RE, RW, RS, RT and RF are required, RO, RU and RV optional; the RS fields include state code 20 (positions 3-4), SSN (10-18), names (19-68), address (73-140), ZIP (141-149), the employer's Kansas withholding account number (248-267, form 036#######F##), state code (274-275), state taxable wages (276-286), state income tax withheld (287-297), other state data (298-307), local taxable wages and local tax withheld (309-330), state control number (331-337) and the employee's contribution to KPERS, KP&F and Judges (338-348); entities reporting for 51 or more employees or payees must file electronically; magnetic media is not accepted; 'All Tax Year 2025 W-2s must be filed by January 31, 2026'; mailing address KDOR - Electronic Services, PO Box 3506, Topeka, KS 66625-3506; Customer Relations 785-368-8222 or KDOR_tac@ks.gov."
   }
  ],
  "agencies": {
@@ -268,7 +284,7 @@
   ],
   "notModelled": [
    "The meaning of 'banking days' for quad-monthly filers: KW-100 says reports are due 'within three banking days' of the 7th, 15th, 21st and last day of the month and does not define it.",
-   "The Department's K-2MT Kansas W-2 Specifications for the Code RS (state) record, and the KCSC registration steps beyond the filing-frequency item.",
+   "KCSC registration steps beyond the filing-frequency item, and the KW-2CSV and KW-3E CSV file specifications.",
    "The Department's power to require more frequent payment."
   ]
  },
@@ -281,8 +297,8 @@
     "Apply for a Kansas withholding account (Business Tax Application) giving the estimated annual withholding; the Department assigns the filing frequency and prints it on the Withholding Registration Certificate.",
     "Register a KCSC login and add the withholding account with its access code (first-time users obtain the code from the Taxpayer Assistance Center)."
    ],
-   "specs": "W-2 and 1099 files follow the Social Security Administration's EFW2/EFW2C specification for every record except the Code RS (state) record, which follows the Department's K-2MT Kansas W-2 Specifications (not read) (KW-100).",
-   "source": "S2"
+   "specs": "W-2 files follow the SSA EFW2/EFW2C layout for every record except the Kansas Code RS record, which is 512 bytes with every field required and Kansas wages only (K-2MT, Rev. 10-25, read: state code 20, SSN 10-18, names 19-68, address 73-140, employer's Kansas withholding account number 248-267 as 036#######F##, state taxable wages 276-286, state income tax withheld 287-297, other state data 298-307, local wages and tax 309-330, state control number 331-337, KPERS/KP&F/Judges contribution 338-348). Entities reporting 51 or more employees or payees must file electronically; magnetic media is not accepted; W-2s for a tax year are due January 31 of the next year. The Department also publishes CSV specifications (KW-2CSV for W-2s, KW-3E for the KW-3), which were not read.",
+   "source": "S3"
   },
   {
    "id": "state:KS:kdol-ess",
@@ -325,7 +341,9 @@
      "Taxable wage base $15,100 for 2026 ($15,700 for 2027); new employer rate 1.75% (5.55% for new construction employers); the rate range is 0% to 6.95% (HB 2570 Schedule C). Contributions are the employer's own and are not deducted from wages (K.S.A. 44-710(a)); a quarter's contributions under $5 need not be paid.",
      "Late filing: .05% of the quarter's total wages for each month or fraction of a month, at least $25 and at most $200 per report. Late payment: interest of 1% a month or fraction; interest under $5 is waived (K.S.A. 44-717(a)(1)). A cash deposit or bond may be required after two delinquent quarters in four, and failing it adds a 2.0% surcharge (K.S.A. 44-717(i)).",
      "Reimbursing employers file quarterly wage reports by the last day of the month following the quarter (K.S.A. 44-710).",
-     "An adjustment to a filed wage report uses form K-CNS 111. The Department mails a Notice of Benefit Charges (K-CNS 403) each January, April, July and October and an Experience Rating Notice (K-CNS 404) each year; the experience rating notice carries the employer's assigned rate."
+     "An adjustment to a filed wage report uses form K-CNS 111. The Department mails a Notice of Benefit Charges (K-CNS 403) each January, April, July and October and an Experience Rating Notice (K-CNS 404) each year; the experience rating notice carries the employer's assigned rate.",
+     "Rated governmental employers (K.S.A. 44-710d) elect that status for at least four complete calendar years by written notice within 30 days after January 1, report total wages each quarter and make quarterly benefit cost payments equal to total wages times the benefit cost rate the Department assigns (never below .1%; the Department's table shows 0.10% for 2025 to 2027); a quarter's payment under $1 is not required.",
+     "Reimbursing employers (K.S.A. 44-710) file the wage report by the last day of the month after the quarter and are billed for benefits charged; the bill is conclusive unless the employer applies for redetermination within 15 days after it was mailed, and payments in lieu unpaid 30 days after the mailing of the statement of benefit charges bear interest at 1% a month (K.S.A. 44-717(a)(1))."
     ],
     "source": "U1"
    }
@@ -334,7 +352,7 @@
   "notModelled": [
    "K.A.R. 50-2-3 states the 25th-day date only for a newly liable employer's first payment; the last-day-of-the-month date for a contributing employer's quarterly wage report, return and payment comes from K.S.A. 44-717(a)(1), which sets when the penalty and interest begin, not from a sentence that says 'due'.",
    "The Department's FAQ (quoted from a search result of its own page) says 26 or more employees must file online while K.S.A. 44-717(k)(4) says 25 or more; the statute is used. The Department's new Wage & Tax Reporting System login page was not read.",
-   "Rated governmental employers' benefit cost payments (K.S.A. 44-710d), reimbursing employers' bills, and the field-by-field layouts of the NASWA wage and payment files were not transcribed."
+   "The field-by-field layouts of the NASWA wage file and the payment file: the Department's page states the file requirements, but the page returns 403 to a direct request and the field tables were not in the text its page reader extracted. The new Wage & Tax Reporting System's login pages were not read."
   ]
  },
  "registration": {
