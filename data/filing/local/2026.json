@@ -1154,5 +1154,51 @@
       "https://www.cityofgadsden.com/DocumentCenter/View/5067/Form-G-3-OLF-Reconciliation"
     ],
     "verifiedOn": "2026-11-12"
+  },
+  "AL-AUBURN": {
+    "collector": "City of Auburn Revenue Department",
+    "registration": "Use the city Tax Registration Form to establish the account and confirm its assigned filing frequency with Revenue.",
+    "returns": [
+      [
+        "Employer’s Quarterly Return of Occupation License Fee",
+        "File for each assigned period, including zero wages. Quarterly returns are due on the first day of the month after quarter-end. The form allows filing through the last day of that month before delinquency."
+      ],
+      [
+        "Reconciliation of Occupational License Fee Withheld",
+        "The annual form lists January 1 as the due date and January 31 as the delinquent date. Attach Form W-3. If the employer paid the fee on employees’ behalf without withholding, include the employee detail requested on the form."
+      ]
+    ],
+    "filing": "Submit the signed quarterly return with the city account number. Use the separate annual reconciliation to explain any difference in reported fees.",
+    "payment": "Make the quarterly check payable to City of Auburn and send it with the return to 144 Tichenor Avenue, Suite 6, Auburn, AL 36830.",
+    "sources": [
+      "https://www.auburnal.gov/revenue/business-licenses/",
+      "https://www.auburnal.gov/revenue/tax-information/occupational-license-fee/",
+      "https://static.auburnalabama.org/media/apps/www/finance/business-and-licensing-forms/employers%20quarterly%20return%20of%20occupation%20license%20fee.pdf",
+      "https://static.auburnalabama.org/media/apps/www/finance/business-and-licensing-forms/Reconciliation-of-Occupational-License-Fee-Form-2025.pdf"
+    ],
+    "verifiedOn": "2026-11-12"
+  },
+  "AL-OPELIKA": {
+    "collector": "City of Opelika Revenue Department",
+    "registration": "Apply for the city occupational license account using Opelika’s business license application.",
+    "returns": [
+      [
+        "0-1",
+        "File quarterly even for zero wages. The city must receive the return and payment by the last day of the month after quarter-end. A postmark does not establish timely receipt."
+      ],
+      [
+        "0-3",
+        "File the original annual reconciliation by January 31 with employee statements, an equivalent listing or W-2 copies. Explain discrepancies in an attachment. The older 0-3 still prints 1.5%. The current quarterly form specifies 1% effective April 1, 2025. Use actual 2026 withholding when reconciling."
+      ]
+    ],
+    "filing": "Submit the quarterly return and separate annual reconciliation to City of Opelika Revenue Department, PO Box 390, Opelika, AL 36803. Confirm holiday or weekend receipt arrangements with Revenue before mailing.",
+    "payment": "Make the quarterly check payable to City of Opelika and include it with the return.",
+    "sources": [
+      "https://www.opelika-al.gov/692/Business-License-Instructions",
+      "https://www.opelika-al.gov/338/Occupation-License",
+      "https://www.opelika-al.gov/DocumentCenter/View/290/Occupational-Quarterly-Return-PDF",
+      "https://www.opelika-al.gov/DocumentCenter/View/291/Occupational-Tax-Year-End-Reconciliation-PDF"
+    ],
+    "verifiedOn": "2026-11-12"
   }
 }

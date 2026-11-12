@@ -315,3 +315,15 @@ test('Alabama employer filings use the correct city portal and reporting frequen
   assert.equal(lookup('Denver').status, 'unknown-code');
   assert.equal(localWithholdingGuide('CO-city', 'Birmingham', 2026).status, 'unknown-code');
 });
+
+test('Auburn and Opelika distinguish due dates, delinquency and receipt', () => {
+  const lookup = city => localWithholdingGuide('AL-city', city, 2026);
+  const auburn = lookup(' Auburn ').guide;
+  assert.match(auburn.returns[0][1], /first day of the month after quarter-end/);
+  assert.match(auburn.returns[1][1], /Attach Form W-3/);
+  const opelika = lookup('opelika').guide;
+  assert.deepEqual(opelika.returns.map(([form]) => form), ['0-1', '0-3']);
+  assert.match(opelika.returns[0][1], /postmark does not establish timely receipt/);
+  assert.match(opelika.returns[1][1], /1% effective April 1, 2025/);
+  assert.equal(lookup('Auburn Hills').status, 'unknown-code');
+});
