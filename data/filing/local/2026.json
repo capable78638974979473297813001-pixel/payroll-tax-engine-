@@ -790,5 +790,32 @@
       "https://www.stlouis-mo.gov/government/departments/collector/earnings-tax/documents/w-3-form.cfm"
     ],
     "verifiedOn": "2026-11-12"
+  },
+  "DE-WILMINGTON": {
+    "collector": "City of Wilmington Department of Finance, Earned Income Tax Division",
+    "registration": "Request an employer account using the City's Earned Income Taxpayer Account Application.",
+    "returns": [
+      [
+        "Quarterly withholding return",
+        "Report each calendar quarter by April 15, July 15, October 15 or January 15. Credit intermediate payments against the quarterly balance."
+      ],
+      [
+        "Intermediate withholding return",
+        "If withholding exceeds $50 in the first or second month of a quarter, report and remit that month's withholding by the 15th of the following month."
+      ],
+      [
+        "Annual reconciliation and W-2s",
+        "The city lists January 31 for paper W-2s and the end of February for electronic W-2s following the tax year. Confirm weekend deadlines with the Division."
+      ]
+    ],
+    "filing": "Obtain periodic returns from the Division and submit them to City Finance. Employers with 50 or more city-taxable employees must file W-2 detail electronically. Use the secure upload linked in the City's W-2 instructions and include the RS record in the EFW2 file.",
+    "payment": "Pay the city by phone at (302) 576-2415 or (302) 576-2418, or in person at 800 N. French Street, 8th Floor, Wilmington, DE 19801.",
+    "sources": [
+      "https://www.wilmingtonde.gov/residents/earned-income-tax-and-net-profits-tax",
+      "https://www.wilmingtonde.gov/home/showpublisheddocument/462/638206223264700000",
+      "https://www.wilmingtonde.gov/home/showpublisheddocument/450/637475081576300000",
+      "https://www.wilmingtonde.gov/home/showpublisheddocument/12252/638507503828470000"
+    ],
+    "verifiedOn": "2026-11-12"
   }
 }

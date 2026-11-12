@@ -214,3 +214,12 @@ test('Missouri city routes distinguish quarterly, annual and employer-only filin
   assert.equal(lookup('North Kansas City').status, 'unknown-code');
   assert.equal(localWithholdingGuide('MO-city', 'Kansas City', 2027).status, 'unsupported-year');
 });
+
+test('Wilmington routes city withholding and preserves the intermediate and W-2 thresholds', () => {
+  const result = localWithholdingGuide('DE-city', ' wilMington ', 2026);
+  assert.equal(result.agency, 'DE-WILMINGTON');
+  assert.match(result.guide.returns[1][1], /exceeds \$50 in the first or second month/);
+  assert.match(result.guide.filing, /50 or more city-taxable employees/);
+  assert.match(result.guide.filing, /RS record in the EFW2 file/);
+  assert.equal(localWithholdingGuide('DE-city', 'Wilmington Manor', 2026).status, 'unknown-code');
+});

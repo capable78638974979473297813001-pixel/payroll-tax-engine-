@@ -63,6 +63,12 @@ export function localWithholdingGuide(kind, code, year) {
         },
       };
     }
+    case 'DE-city':
+      if (code.trim().toLowerCase() === 'wilmington') {
+        row = { name: 'Wilmington' };
+        agency = 'DE-WILMINGTON';
+      }
+      break;
     case 'MO-city': {
       const locality = code.trim().toLowerCase();
       if (locality === 'kansas city') {

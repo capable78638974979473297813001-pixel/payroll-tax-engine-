@@ -33,3 +33,5 @@ The 2026 Ohio filing directory supplements three missing municipal codes using C
 Ohio municipal filing lookups use dated collector evidence. Delta uses the village for filings before its January 2027 handoff. Only the Delaware County Shawnee Hills is a verified RITA member. Midyear handoffs include the date administration started and a filing note for prior periods and amendments.
 
 Michigan lookups accept the names in the 2026 city registry. All 24 registered cities return employer guides. Each guide lists its registration route, periodic and annual returns, filing channel, payment instructions and sources. Ionia’s 2026 annual form prints a deadline before the end of the reporting year, and Lapeer’s published Q2 example differs from its month-end rule. Those entries flag the dates for confirmation. Resolve the worksite or residence jurisdiction before looking up a city by name.
+
+Use `localWithholdingGuide('DE-city', 'Wilmington', 2026)` for Wilmington employer wage withholding, intermediate payments and annual W-2 reporting.
