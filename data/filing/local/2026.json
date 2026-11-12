@@ -1314,5 +1314,33 @@
       "https://www.columbus.gov/Government/City-Auditor/Income-Tax-Division/General-Income-Tax-Information"
     ],
     "verifiedOn": "2026-11-12"
+  },
+  "OH-CINCINNATI": {
+    "collector": "City of Cincinnati Income Tax Division",
+    "registration": "Verify the Cincinnati location against the city street guide. Open a Payroll Withholding account at https://web2.civicacmi.com/Cincinnati or send the New Account Application to the Income Tax Division using the email or fax printed on the form.",
+    "returns": [
+      [
+        "Employer withholding coupons",
+        "Use the 2026 coupons for the applicable frequency. Remit semimonthly if prior-year withholding exceeded $11,999 in total or $1,000 in any month of that year. Payment is due on the third banking day after the 15th and after month-end. Otherwise remit monthly by the 15th of the next month if prior-year withholding exceeded $2,399 or any month of the preceding quarter exceeded $200. Other employers remit quarterly by the last day of the following month. See the electronic payment rule below."
+      ],
+      [
+        "W-3",
+        "Reconcile annual withholding and submit W-2 information. For 2026 wages the statutory February deadline falls on Sunday, so the reconciliation is due Monday, March 1, 2027 under Ohio Revised Code sections 718.03(H) and 1.14."
+      ]
+    ],
+    "filing": "Use Cincinnati E-File for the reconciliation and W-2 submission. Employers required to submit federal W-2s electronically must submit Cincinnati wage information electronically. Use the city’s EFW2 instructions for file uploads.",
+    "payment": "City ordinance section 311-23(b)(iv) requires employers subject to federal electronic withholding deposits to remit accrued city withholding electronically when the federal deposit is due, unless granted a hardship exemption. Pay by ACH debit through Cincinnati E-File or enroll with the city for ACH credit. Where paper payment is permitted, mail a check payable to City of Cincinnati with the city coupon.",
+    "sources": [
+      "https://www.cincinnati-oh.gov/finance/income-taxes/new-account-application-form1/",
+      "https://www.cincinnati-oh.gov/finance/income-taxes/2026-tax-forms111111/",
+      "https://www.cincinnati-oh.gov/finance/income-taxes/due-dates/",
+      "https://www.cincinnati-oh.gov/finance/income-taxes/resources-references/income-tax-ordinance/",
+      "https://www.cincinnati-oh.gov/finance/income-taxes/e-filing/",
+      "https://www.cincinnati-oh.gov/finance/income-taxes/ach-credit-electronic-filing/",
+      "https://www.cincinnati-oh.gov/finance/income-taxes/electronic-form-w-2-wage-reconciliation/",
+      "https://codes.ohio.gov/ohio-revised-code/section-718.03",
+      "https://codes.ohio.gov/ohio-revised-code/section-1.14"
+    ],
+    "verifiedOn": "2026-11-12"
   }
 }

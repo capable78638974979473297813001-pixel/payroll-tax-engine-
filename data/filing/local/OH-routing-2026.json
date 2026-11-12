@@ -1,6 +1,13 @@
 {
   "verifiedOn": "2026-11-11",
   "municipalities": {
+    "15000": {
+      "agency": "OH-CINCINNATI",
+      "verifiedOn": "2026-11-12",
+      "sources": [
+        "https://www.cincinnati-oh.gov/finance/income-taxes/2026-tax-forms111111/"
+      ]
+    },
     "18000": {
       "agency": "OH-COLUMBUS",
       "verifiedOn": "2026-11-12",

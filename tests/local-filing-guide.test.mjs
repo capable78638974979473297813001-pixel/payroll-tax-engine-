@@ -28,7 +28,9 @@ test('regional Ohio collectors use the registry; residual and ambiguous cities r
       continue;
     }
     assert.equal(result.jurisdiction, row.name);
-    if (row.municode === '18000') {
+    if (row.municode === '15000') {
+      assert.equal(result.agency, 'OH-CINCINNATI');
+    } else if (row.municode === '18000') {
       assert.equal(result.agency, 'OH-COLUMBUS');
     } else if (row.municode === '21616') {
       assert.equal(result.agency, 'OH-DELTA');
@@ -372,4 +374,13 @@ test('Columbus city code routes to its own quarterly and annual forms', () => {
   assert.match(result.guide.returns[0][1], /February 1, 2027/);
   assert.match(result.guide.returns[1][1], /March 1, 2027/);
   assert.notEqual(localWithholdingGuide('OH-municipality', '18014', 2026).agency, result.agency);
+});
+
+test('Cincinnati routes its own employer coupons and W-3 reconciliation', () => {
+  const result = localWithholdingGuide('OH-municipality', '15000', 2026);
+  assert.equal(result.jurisdiction, 'Cincinnati');
+  assert.equal(result.membershipVerifiedOn, '2026-11-12');
+  assert.equal(result.guide.returns[1][0], 'W-3');
+  assert.match(result.guide.returns[1][1], /March 1, 2027/);
+  assert.match(result.guide.payment, /when the federal deposit is due/);
 });
