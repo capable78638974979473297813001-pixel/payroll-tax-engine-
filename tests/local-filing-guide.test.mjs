@@ -650,3 +650,17 @@ test('Harpersfield–Geneva districts use the JEDD voucher, payee and Form 38', 
     assert.match(guide.payment, /payable to Harpersfield\/Geneva JEDD/);
   }
 });
+
+test('Fairfield selects separate township registration and withholding packets by worksite', () => {
+  for (const [id, district, worksite, registration] of [
+    ['9137', 'Fairfield Township JEDD', 'Seward Road', 'FF JEDD Business Registration'],
+    ['9044', 'West Chester JEDD', 'Aviation Way', 'WC JEDD1 Business Registration'],
+  ]) {
+    const { guide } = localWithholdingGuide('OH-jedd-jedz', id, 2026);
+    assert.ok(guide.registration.includes(worksite));
+    assert.ok(guide.registration.includes(registration));
+    assert.equal(guide.returns[0][0], district + ' Return of Income Tax Withheld');
+    assert.equal(guide.returns[1][0], district + ' Annual Reconciliation');
+    assert.match(guide.payment, /postmarked by the due date/);
+  }
+});

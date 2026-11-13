@@ -606,6 +606,22 @@
         "https://genevaohio.gov/wp-content/uploads/2023/05/Harpersfield-Geneva-Jedd-Tax-Return-1.pdf",
         "https://genevaohio.gov/wp-content/uploads/2023/05/JEDD-Year-End-Reconciliation.pdf"
       ]
+    },
+    "9137": {
+      "agency": "OH-FAIRFIELD-TOWNSHIP-JEDD",
+      "sources": [
+        "https://www.fairfield-city.org/270/Joint-Economic-Development-Districts-JED",
+        "https://www.fairfield-city.org/DocumentCenter/View/17053/2026-FF-JEDD-Quarterly-Withholding"
+      ],
+      "verifiedOn": "2026-11-13"
+    },
+    "9044": {
+      "agency": "OH-WEST-CHESTER-JEDD",
+      "sources": [
+        "https://www.fairfield-city.org/270/Joint-Economic-Development-Districts-JED",
+        "https://www.fairfield-city.org/DocumentCenter/View/17044/2026-WC-JEDD-Quarterly-Withholding"
+      ],
+      "verifiedOn": "2026-11-13"
     }
   },
   "rosters": {

@@ -1906,5 +1906,51 @@
       "https://codes.ohio.gov/ohio-revised-code/section-1.14"
     ],
     "verifiedOn": "2026-11-13"
+  },
+  "OH-FAIRFIELD-TOWNSHIP-JEDD": {
+    "collector": "City of Fairfield Income Tax Division for Fairfield Township JEDD",
+    "registration": "Check the district worksite list (7950, 8200 and 8210 Seward Road). Complete FF JEDD Business Registration from the city’s district forms directory and submit it to 701 Wessel Drive, Fairfield, OH 45014.",
+    "returns": [
+      [
+        "Fairfield Township JEDD Return of Income Tax Withheld",
+        "Use the semimonthly coupon if prior-year remittances exceeded $11,999 or any month in the previous quarter exceeded $1,000. Payment is due the third banking day after each half-month. Otherwise use the monthly coupon if prior-year remittances exceeded $2,399 or any month in the previous quarter exceeded $200. Monthly payments are due the following 15th. Quarterly payments are due at the end of the month following the quarter."
+      ],
+      [
+        "Fairfield Township JEDD Annual Reconciliation",
+        "Fairfield lists February 28, 2027 for the 2026 reconciliation. Submit the district reconciliation with W-2s showing wages and tax by municipality. For electronic W-2 specifications see the city’s Business Tax Forms page."
+      ]
+    ],
+    "filing": "Use the 2026 FF JEDD coupon for the assigned frequency. Enter the FEIN, employer contact, district wages, withholding and employee count. Report zero when there are no qualifying wages. Mail the signed coupon and annual reconciliation to Fairfield Township JEDD, 701 Wessel Drive, Fairfield, OH 45014.",
+    "payment": "Mail a check with the Fairfield Township JEDD withholding coupon to the district at 701 Wessel Drive. The 2026 instructions require the payment to be postmarked by the due date.",
+    "sources": [
+      "https://www.fairfield-city.org/270/Joint-Economic-Development-Districts-JED",
+      "https://www.fairfield-city.org/DocumentCenter/View/17053/2026-FF-JEDD-Quarterly-Withholding",
+      "https://www.fairfield-city.org/895/Tax-Due-Dates",
+      "https://www.fairfield-city.org/254/Business-Tax-Forms"
+    ],
+    "verifiedOn": "2026-11-13"
+  },
+  "OH-WEST-CHESTER-JEDD": {
+    "collector": "City of Fairfield Income Tax Division for West Chester JEDD",
+    "registration": "Check the district worksite list (6380 and 6440 Aviation Way). Complete WC JEDD1 Business Registration from the city’s district forms directory and submit it to 701 Wessel Drive, Fairfield, OH 45014.",
+    "returns": [
+      [
+        "West Chester JEDD Return of Income Tax Withheld",
+        "Use the semimonthly coupon if prior-year remittances exceeded $11,999 or any month in the previous quarter exceeded $1,000. Payment is due the third banking day after each half-month. Otherwise use the monthly coupon if prior-year remittances exceeded $2,399 or any month in the previous quarter exceeded $200. Monthly payments are due the following 15th. Quarterly payments are due at the end of the month following the quarter."
+      ],
+      [
+        "West Chester JEDD Annual Reconciliation",
+        "Fairfield lists February 28, 2027 for the 2026 reconciliation. Submit the district reconciliation with W-2s showing wages and tax by municipality. For electronic W-2 specifications see the city’s Business Tax Forms page."
+      ]
+    ],
+    "filing": "Use the 2026 WC JEDD coupon for the assigned frequency. Enter the FEIN, employer contact, district wages, withholding and employee count. Report zero when there are no qualifying wages. Mail the signed coupon and annual reconciliation to West Chester JEDD, 701 Wessel Drive, Fairfield, OH 45014.",
+    "payment": "Mail a check with the West Chester JEDD withholding coupon to the district at 701 Wessel Drive. The 2026 instructions require the payment to be postmarked by the due date.",
+    "sources": [
+      "https://www.fairfield-city.org/270/Joint-Economic-Development-Districts-JED",
+      "https://www.fairfield-city.org/DocumentCenter/View/17044/2026-WC-JEDD-Quarterly-Withholding",
+      "https://www.fairfield-city.org/895/Tax-Due-Dates",
+      "https://www.fairfield-city.org/254/Business-Tax-Forms"
+    ],
+    "verifiedOn": "2026-11-13"
   }
 }
