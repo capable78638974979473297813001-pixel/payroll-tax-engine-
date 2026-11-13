@@ -1714,5 +1714,30 @@
       "https://www.newarkohio.gov/wp-content/uploads/26MZN-Paper.pdf"
     ],
     "verifiedOn": "2026-11-13"
+  },
+  "OH-MMT-JEDZ": {
+    "collector": "City of Maumee Division of Taxation for the Monclova-Maumee-Toledo JEDZ",
+    "registration": "Return the MMT JEDZ Business and Professional Questionnaire to Maumee by mail, fax or email. Include the FEIN, zone worksite and payroll contact. Confirm the assigned remittance frequency with the division at 419-897-7120.",
+    "returns": [
+      [
+        "MMT-W-1",
+        "Under district resolution 101.051(B), use semimonthly deposits if withholding or required withholding exceeded $35,999 last year or $3,000 in any month last year. Deposits must arrive by the third banking day after each half-month. Otherwise use monthly deposits when last year exceeded $3,599 or any month of the previous quarter exceeded $300. Pay by the 15th of the following month. Other accounts pay quarterly by the end of the following month. The coupon and registration form summarize the thresholds differently at exactly $300 and $3,000. Ohio Revised Code 718.03 also publishes different thresholds. Confirm the assigned schedule before the earliest potential due date."
+      ],
+      [
+        "Withholding Reconciliation Return",
+        "Report employee qualifying wages, district withholding and other municipal withholding on the annual reconciliation. The February month-end deadline for 2026 moves to March 1, 2027 under Ohio’s Sunday rule. Obtain the district W-2 submission instructions from Maumee."
+      ]
+    ],
+    "filing": "File the MMT-W-1 for district payroll. Return the form with NONE and an explanation for a quarter with no wages. The district form requires receipt by the due date.",
+    "payment": "Third-party payroll agents must use district-prescribed EFT unless the tax administrator grants an exemption. For permitted paper payments, make the check or money order payable to Commissioner of Taxation and mail it with the district return to MMT JEDZ, Division of Taxation, 400 Conant St, Maumee, OH 43537-3300.",
+    "sources": [
+      "https://www.maumee.org/221/Income-Tax",
+      "https://www.maumee.org/DocumentCenter/View/1967",
+      "https://www.maumee.org/DocumentCenter/View/952/MMT-JEDZ-Employer-Return-of-Tax-Withheld--2019-and-After-PDF",
+      "https://www.maumee.org/DocumentCenter/View/973/Income-Tax-Resolution-for-the-Toledo-Maumee-Monclova-Joint-Economic-Development-Zone-Board-PDF",
+      "https://codes.ohio.gov/ohio-revised-code/section-718.03",
+      "https://codes.ohio.gov/ohio-revised-code/section-1.14"
+    ],
+    "verifiedOn": "2026-11-13"
   }
 }

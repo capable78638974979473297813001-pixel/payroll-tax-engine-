@@ -572,3 +572,12 @@ test('Newark-administered districts select their own withholding packets and mai
     assert.match(guide.payment, /enroll separately/);
   }
 });
+
+test('Monclova-Maumee-Toledo selects its zone return and payroll-agent EFT rule', () => {
+  const district = localWithholdingGuide('OH-jedd-jedz', '9053', 2026);
+  assert.equal(district.agency, 'OH-MMT-JEDZ');
+  assert.equal(district.guide.returns[0][0], 'MMT-W-1');
+  assert.match(district.guide.payment, /EFT unless the tax administrator grants an exemption/);
+  assert.match(district.guide.returns[1][1], /March 1, 2027/);
+  assert.notEqual(localWithholdingGuide('OH-jedd-jedz', '9065', 2026).agency, district.agency);
+});
