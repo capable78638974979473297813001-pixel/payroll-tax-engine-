@@ -1,0 +1,1442 @@
+{
+  "checkDate": "2026-10-01",
+  "seed": 30,
+  "toleranceCents": 100,
+  "summary": {
+    "total": 30,
+    "exact": 21,
+    "withinTolerance": 9,
+    "differs": 0,
+    "errors": 0
+  },
+  "cases": [
+    {
+      "n": 1,
+      "stateCode": "OH",
+      "slug": "ohio",
+      "annualGross": 265000,
+      "freq": {
+        "ours": "biweekly",
+        "pcc": "BI_WEEKLY"
+      },
+      "filing": {
+        "ours": "head_of_household",
+        "pcc": "HEAD_OF_HOUSEHOLD"
+      },
+      "dependentsAnnual": 0,
+      "pccParms": {},
+      "ours": {
+        "gross": 1019231,
+        "federal": 198919,
+        "socialSecurity": 63192,
+        "medicare": 14779,
+        "state": 31684,
+        "other": 0,
+        "net": 710657,
+        "otherLines": []
+      },
+      "pcc": {
+        "Gross Pay": 1019231,
+        "Federal Withholding": 198919,
+        "Social Security": 63192,
+        "Medicare": 14779,
+        "State Tax Withholding": 31684,
+        "Take home pay (net pay)": 710657
+      },
+      "diffCents": {
+        "gross": 0,
+        "federal": 0,
+        "socialSecurity": 0,
+        "medicare": 0,
+        "state": 0,
+        "net": 0
+      },
+      "verdict": "exact"
+    },
+    {
+      "n": 2,
+      "stateCode": "PA",
+      "slug": "pennsylvania",
+      "annualGross": 146100,
+      "freq": {
+        "ours": "monthly",
+        "pcc": "MONTHLY"
+      },
+      "filing": {
+        "ours": "single",
+        "pcc": "SINGLE"
+      },
+      "dependentsAnnual": 2000,
+      "pccParms": {},
+      "ours": {
+        "gross": 1217500,
+        "federal": 181650,
+        "socialSecurity": 75485,
+        "medicare": 17654,
+        "state": 37377,
+        "other": 852,
+        "net": 904482,
+        "otherLines": [
+          {
+            "name": "Pennsylvania Unemployment Compensation (Employee)",
+            "amount": 852
+          },
+          {
+            "name": "PA Local Earned Income Tax",
+            "amount": 0
+          }
+        ]
+      },
+      "pcc": {
+        "Gross Pay": 1217500,
+        "Federal Withholding": 181650,
+        "Social Security": 75485,
+        "Medicare": 17654,
+        "State Tax Withholding": 37377,
+        "State Unemployment Insurance (SUI)": 852,
+        "Take home pay (net pay)": 904482
+      },
+      "diffCents": {
+        "gross": 0,
+        "federal": 0,
+        "socialSecurity": 0,
+        "medicare": 0,
+        "state": 0,
+        "net": 0
+      },
+      "verdict": "exact"
+    },
+    {
+      "n": 3,
+      "stateCode": "KY",
+      "slug": "kentucky",
+      "annualGross": 128500,
+      "freq": {
+        "ours": "monthly",
+        "pcc": "MONTHLY"
+      },
+      "filing": {
+        "ours": "head_of_household",
+        "pcc": "HEAD_OF_HOUSEHOLD"
+      },
+      "dependentsAnnual": 2000,
+      "pccParms": {},
+      "ours": {
+        "gross": 1070833,
+        "federal": 115483,
+        "socialSecurity": 66392,
+        "medicare": 15527,
+        "state": 36499,
+        "other": 0,
+        "net": 836932,
+        "otherLines": []
+      },
+      "pcc": {
+        "Gross Pay": 1070833,
+        "Federal Withholding": 115483,
+        "Social Security": 66392,
+        "Medicare": 15527,
+        "State Tax Withholding": 36499,
+        "Take home pay (net pay)": 836932
+      },
+      "diffCents": {
+        "gross": 0,
+        "federal": 0,
+        "socialSecurity": 0,
+        "medicare": 0,
+        "state": 0,
+        "net": 0
+      },
+      "verdict": "exact"
+    },
+    {
+      "n": 4,
+      "stateCode": "NY",
+      "slug": "new-york",
+      "annualGross": 227000,
+      "freq": {
+        "ours": "monthly",
+        "pcc": "MONTHLY"
+      },
+      "filing": {
+        "ours": "head_of_household",
+        "pcc": "HEAD_OF_HOUSEHOLD"
+      },
+      "dependentsAnnual": 6000,
+      "pccParms": {
+        "FILINGSTATUS": "MH"
+      },
+      "ours": {
+        "gross": 1891667,
+        "federal": 279658,
+        "socialSecurity": 117283,
+        "medicare": 27429,
+        "state": 115412,
+        "other": 8432,
+        "net": 1343453,
+        "otherLines": [
+          {
+            "name": "New York Paid Leave (Employee)",
+            "amount": 8172
+          },
+          {
+            "name": "New York Disability Benefits (Employee)",
+            "amount": 260
+          }
+        ]
+      },
+      "pcc": {
+        "Gross Pay": 1891667,
+        "Federal Withholding": 279658,
+        "Social Security": 117283,
+        "Medicare": 27429,
+        "State Tax Withholding": 115412,
+        "Family Leave Insurance (FLI)": 8172,
+        "State Disability Insurance (SDI)": 260,
+        "Take home pay (net pay)": 1343453
+      },
+      "diffCents": {
+        "gross": 0,
+        "federal": 0,
+        "socialSecurity": 0,
+        "medicare": 0,
+        "state": 0,
+        "net": 0
+      },
+      "verdict": "exact"
+    },
+    {
+      "n": 5,
+      "stateCode": "MI",
+      "slug": "michigan",
+      "annualGross": 160500,
+      "freq": {
+        "ours": "semimonthly",
+        "pcc": "SEMI_MONTHLY"
+      },
+      "filing": {
+        "ours": "married_joint",
+        "pcc": "MARRIED"
+      },
+      "dependentsAnnual": 0,
+      "pccParms": {},
+      "ours": {
+        "gross": 668750,
+        "federal": 73542,
+        "socialSecurity": 41463,
+        "medicare": 9697,
+        "state": 28422,
+        "other": 0,
+        "net": 515626,
+        "otherLines": []
+      },
+      "pcc": {
+        "Gross Pay": 668750,
+        "Federal Withholding": 73542,
+        "Social Security": 41463,
+        "Medicare": 9697,
+        "State Tax Withholding": 28422,
+        "Take home pay (net pay)": 515626
+      },
+      "diffCents": {
+        "gross": 0,
+        "federal": 0,
+        "socialSecurity": 0,
+        "medicare": 0,
+        "state": 0,
+        "net": 0
+      },
+      "verdict": "exact"
+    },
+    {
+      "n": 6,
+      "stateCode": "OH",
+      "slug": "ohio",
+      "annualGross": 282300,
+      "freq": {
+        "ours": "weekly",
+        "pcc": "WEEKLY"
+      },
+      "filing": {
+        "ours": "single",
+        "pcc": "SINGLE"
+      },
+      "dependentsAnnual": 6000,
+      "pccParms": {},
+      "ours": {
+        "gross": 542885,
+        "federal": 107576,
+        "socialSecurity": 33659,
+        "medicare": 7872,
+        "state": 16974,
+        "other": 0,
+        "net": 376804,
+        "otherLines": []
+      },
+      "pcc": {
+        "Gross Pay": 542885,
+        "Federal Withholding": 107576,
+        "Social Security": 33659,
+        "Medicare": 7872,
+        "State Tax Withholding": 16973,
+        "Take home pay (net pay)": 376805
+      },
+      "diffCents": {
+        "gross": 0,
+        "federal": 0,
+        "socialSecurity": 0,
+        "medicare": 0,
+        "state": 1,
+        "net": -1
+      },
+      "verdict": "within-tolerance"
+    },
+    {
+      "n": 7,
+      "stateCode": "PA",
+      "slug": "pennsylvania",
+      "annualGross": 110900,
+      "freq": {
+        "ours": "semimonthly",
+        "pcc": "SEMI_MONTHLY"
+      },
+      "filing": {
+        "ours": "married_joint",
+        "pcc": "MARRIED"
+      },
+      "dependentsAnnual": 6000,
+      "pccParms": {},
+      "ours": {
+        "gross": 462083,
+        "federal": 12283,
+        "socialSecurity": 28649,
+        "medicare": 6700,
+        "state": 14186,
+        "other": 323,
+        "net": 399942,
+        "otherLines": [
+          {
+            "name": "Pennsylvania Unemployment Compensation (Employee)",
+            "amount": 323
+          },
+          {
+            "name": "PA Local Earned Income Tax",
+            "amount": 0
+          }
+        ]
+      },
+      "pcc": {
+        "Gross Pay": 462083,
+        "Federal Withholding": 12283,
+        "Social Security": 28649,
+        "Medicare": 6700,
+        "State Tax Withholding": 14186,
+        "State Unemployment Insurance (SUI)": 323,
+        "Take home pay (net pay)": 399942
+      },
+      "diffCents": {
+        "gross": 0,
+        "federal": 0,
+        "socialSecurity": 0,
+        "medicare": 0,
+        "state": 0,
+        "net": 0
+      },
+      "verdict": "exact"
+    },
+    {
+      "n": 8,
+      "stateCode": "KY",
+      "slug": "kentucky",
+      "annualGross": 77900,
+      "freq": {
+        "ours": "monthly",
+        "pcc": "MONTHLY"
+      },
+      "filing": {
+        "ours": "married_joint",
+        "pcc": "MARRIED"
+      },
+      "dependentsAnnual": 4000,
+      "pccParms": {},
+      "ours": {
+        "gross": 649167,
+        "federal": 8234,
+        "socialSecurity": 40248,
+        "medicare": 9413,
+        "state": 21741,
+        "other": 0,
+        "net": 569531,
+        "otherLines": []
+      },
+      "pcc": {
+        "Gross Pay": 649167,
+        "Federal Withholding": 8233,
+        "Social Security": 40248,
+        "Medicare": 9413,
+        "State Tax Withholding": 21741,
+        "Take home pay (net pay)": 569532
+      },
+      "diffCents": {
+        "gross": 0,
+        "federal": 1,
+        "socialSecurity": 0,
+        "medicare": 0,
+        "state": 0,
+        "net": -1
+      },
+      "verdict": "within-tolerance"
+    },
+    {
+      "n": 9,
+      "stateCode": "NY",
+      "slug": "new-york",
+      "annualGross": 294400,
+      "freq": {
+        "ours": "semimonthly",
+        "pcc": "SEMI_MONTHLY"
+      },
+      "filing": {
+        "ours": "head_of_household",
+        "pcc": "HEAD_OF_HOUSEHOLD"
+      },
+      "dependentsAnnual": 0,
+      "pccParms": {
+        "FILINGSTATUS": "MH"
+      },
+      "ours": {
+        "gross": 1226667,
+        "federal": 256452,
+        "socialSecurity": 76053,
+        "medicare": 17787,
+        "state": 86163,
+        "other": 5429,
+        "net": 784783,
+        "otherLines": [
+          {
+            "name": "New York Paid Leave (Employee)",
+            "amount": 5299
+          },
+          {
+            "name": "New York Disability Benefits (Employee)",
+            "amount": 130
+          }
+        ]
+      },
+      "pcc": {
+        "Gross Pay": 1226667,
+        "Federal Withholding": 256452,
+        "Social Security": 76053,
+        "Medicare": 17787,
+        "State Tax Withholding": 86161,
+        "Family Leave Insurance (FLI)": 5299,
+        "State Disability Insurance (SDI)": 130,
+        "Take home pay (net pay)": 784785
+      },
+      "diffCents": {
+        "gross": 0,
+        "federal": 0,
+        "socialSecurity": 0,
+        "medicare": 0,
+        "state": 2,
+        "net": -2
+      },
+      "verdict": "within-tolerance"
+    },
+    {
+      "n": 10,
+      "stateCode": "MI",
+      "slug": "michigan",
+      "annualGross": 263700,
+      "freq": {
+        "ours": "semimonthly",
+        "pcc": "SEMI_MONTHLY"
+      },
+      "filing": {
+        "ours": "married_joint",
+        "pcc": "MARRIED"
+      },
+      "dependentsAnnual": 0,
+      "pccParms": {},
+      "ours": {
+        "gross": 1098750,
+        "federal": 169817,
+        "socialSecurity": 68123,
+        "medicare": 15932,
+        "state": 46697,
+        "other": 0,
+        "net": 798181,
+        "otherLines": []
+      },
+      "pcc": {
+        "Gross Pay": 1098750,
+        "Federal Withholding": 169817,
+        "Social Security": 68123,
+        "Medicare": 15932,
+        "State Tax Withholding": 46697,
+        "Take home pay (net pay)": 798181
+      },
+      "diffCents": {
+        "gross": 0,
+        "federal": 0,
+        "socialSecurity": 0,
+        "medicare": 0,
+        "state": 0,
+        "net": 0
+      },
+      "verdict": "exact"
+    },
+    {
+      "n": 11,
+      "stateCode": "OH",
+      "slug": "ohio",
+      "annualGross": 46500,
+      "freq": {
+        "ours": "weekly",
+        "pcc": "WEEKLY"
+      },
+      "filing": {
+        "ours": "head_of_household",
+        "pcc": "HEAD_OF_HOUSEHOLD"
+      },
+      "dependentsAnnual": 2000,
+      "pccParms": {},
+      "ours": {
+        "gross": 89423,
+        "federal": 631,
+        "socialSecurity": 5544,
+        "medicare": 1297,
+        "state": 1978,
+        "other": 0,
+        "net": 79973,
+        "otherLines": []
+      },
+      "pcc": {
+        "Gross Pay": 89423,
+        "Federal Withholding": 631,
+        "Social Security": 5544,
+        "Medicare": 1297,
+        "State Tax Withholding": 1977,
+        "Take home pay (net pay)": 79974
+      },
+      "diffCents": {
+        "gross": 0,
+        "federal": 0,
+        "socialSecurity": 0,
+        "medicare": 0,
+        "state": 1,
+        "net": -1
+      },
+      "verdict": "within-tolerance"
+    },
+    {
+      "n": 12,
+      "stateCode": "PA",
+      "slug": "pennsylvania",
+      "annualGross": 90000,
+      "freq": {
+        "ours": "semimonthly",
+        "pcc": "SEMI_MONTHLY"
+      },
+      "filing": {
+        "ours": "married_joint",
+        "pcc": "MARRIED"
+      },
+      "dependentsAnnual": 0,
+      "pccParms": {},
+      "ours": {
+        "gross": 375000,
+        "federal": 26833,
+        "socialSecurity": 23250,
+        "medicare": 5438,
+        "state": 11513,
+        "other": 263,
+        "net": 307703,
+        "otherLines": [
+          {
+            "name": "Pennsylvania Unemployment Compensation (Employee)",
+            "amount": 263
+          },
+          {
+            "name": "PA Local Earned Income Tax",
+            "amount": 0
+          }
+        ]
+      },
+      "pcc": {
+        "Gross Pay": 375000,
+        "Federal Withholding": 26833,
+        "Social Security": 23250,
+        "Medicare": 5438,
+        "State Tax Withholding": 11513,
+        "State Unemployment Insurance (SUI)": 263,
+        "Take home pay (net pay)": 307703
+      },
+      "diffCents": {
+        "gross": 0,
+        "federal": 0,
+        "socialSecurity": 0,
+        "medicare": 0,
+        "state": 0,
+        "net": 0
+      },
+      "verdict": "exact"
+    },
+    {
+      "n": 13,
+      "stateCode": "KY",
+      "slug": "kentucky",
+      "annualGross": 29700,
+      "freq": {
+        "ours": "monthly",
+        "pcc": "MONTHLY"
+      },
+      "filing": {
+        "ours": "married_joint",
+        "pcc": "MARRIED"
+      },
+      "dependentsAnnual": 4000,
+      "pccParms": {},
+      "ours": {
+        "gross": 247500,
+        "federal": 0,
+        "socialSecurity": 15345,
+        "medicare": 3589,
+        "state": 7683,
+        "other": 0,
+        "net": 220883,
+        "otherLines": []
+      },
+      "pcc": {
+        "Gross Pay": 247500,
+        "Federal Withholding": 0,
+        "Social Security": 15345,
+        "Medicare": 3589,
+        "State Tax Withholding": 7683,
+        "Take home pay (net pay)": 220883
+      },
+      "diffCents": {
+        "gross": 0,
+        "federal": 0,
+        "socialSecurity": 0,
+        "medicare": 0,
+        "state": 0,
+        "net": 0
+      },
+      "verdict": "exact"
+    },
+    {
+      "n": 14,
+      "stateCode": "NY",
+      "slug": "new-york",
+      "annualGross": 292700,
+      "freq": {
+        "ours": "semimonthly",
+        "pcc": "SEMI_MONTHLY"
+      },
+      "filing": {
+        "ours": "head_of_household",
+        "pcc": "HEAD_OF_HOUSEHOLD"
+      },
+      "dependentsAnnual": 2000,
+      "pccParms": {
+        "FILINGSTATUS": "MH"
+      },
+      "ours": {
+        "gross": 1219583,
+        "federal": 245640,
+        "socialSecurity": 75614,
+        "medicare": 17684,
+        "state": 85643,
+        "other": 5399,
+        "net": 789603,
+        "otherLines": [
+          {
+            "name": "New York Paid Leave (Employee)",
+            "amount": 5269
+          },
+          {
+            "name": "New York Disability Benefits (Employee)",
+            "amount": 130
+          }
+        ]
+      },
+      "pcc": {
+        "Gross Pay": 1219583,
+        "Federal Withholding": 245639,
+        "Social Security": 75614,
+        "Medicare": 17684,
+        "State Tax Withholding": 85640,
+        "Family Leave Insurance (FLI)": 5269,
+        "State Disability Insurance (SDI)": 130,
+        "Take home pay (net pay)": 789607
+      },
+      "diffCents": {
+        "gross": 0,
+        "federal": 1,
+        "socialSecurity": 0,
+        "medicare": 0,
+        "state": 3,
+        "net": -4
+      },
+      "verdict": "within-tolerance"
+    },
+    {
+      "n": 15,
+      "stateCode": "MI",
+      "slug": "michigan",
+      "annualGross": 53300,
+      "freq": {
+        "ours": "monthly",
+        "pcc": "MONTHLY"
+      },
+      "filing": {
+        "ours": "married_joint",
+        "pcc": "MARRIED"
+      },
+      "dependentsAnnual": 0,
+      "pccParms": {},
+      "ours": {
+        "gross": 444167,
+        "federal": 17583,
+        "socialSecurity": 27538,
+        "medicare": 6440,
+        "state": 18877,
+        "other": 0,
+        "net": 373729,
+        "otherLines": []
+      },
+      "pcc": {
+        "Gross Pay": 444167,
+        "Federal Withholding": 17583,
+        "Social Security": 27538,
+        "Medicare": 6440,
+        "State Tax Withholding": 18877,
+        "Take home pay (net pay)": 373729
+      },
+      "diffCents": {
+        "gross": 0,
+        "federal": 0,
+        "socialSecurity": 0,
+        "medicare": 0,
+        "state": 0,
+        "net": 0
+      },
+      "verdict": "exact"
+    },
+    {
+      "n": 16,
+      "stateCode": "OH",
+      "slug": "ohio",
+      "annualGross": 120400,
+      "freq": {
+        "ours": "weekly",
+        "pcc": "WEEKLY"
+      },
+      "filing": {
+        "ours": "head_of_household",
+        "pcc": "HEAD_OF_HOUSEHOLD"
+      },
+      "dependentsAnnual": 2000,
+      "pccParms": {},
+      "ours": {
+        "gross": 231538,
+        "federal": 23223,
+        "socialSecurity": 14355,
+        "medicare": 3357,
+        "state": 6388,
+        "other": 0,
+        "net": 184215,
+        "otherLines": []
+      },
+      "pcc": {
+        "Gross Pay": 231538,
+        "Federal Withholding": 23223,
+        "Social Security": 14355,
+        "Medicare": 3357,
+        "State Tax Withholding": 6388,
+        "Take home pay (net pay)": 184215
+      },
+      "diffCents": {
+        "gross": 0,
+        "federal": 0,
+        "socialSecurity": 0,
+        "medicare": 0,
+        "state": 0,
+        "net": 0
+      },
+      "verdict": "exact"
+    },
+    {
+      "n": 17,
+      "stateCode": "PA",
+      "slug": "pennsylvania",
+      "annualGross": 160900,
+      "freq": {
+        "ours": "monthly",
+        "pcc": "MONTHLY"
+      },
+      "filing": {
+        "ours": "married_joint",
+        "pcc": "MARRIED"
+      },
+      "dependentsAnnual": 2000,
+      "pccParms": {},
+      "ours": {
+        "gross": 1340833,
+        "federal": 131150,
+        "socialSecurity": 83132,
+        "medicare": 19442,
+        "state": 41164,
+        "other": 939,
+        "net": 1065006,
+        "otherLines": [
+          {
+            "name": "Pennsylvania Unemployment Compensation (Employee)",
+            "amount": 939
+          },
+          {
+            "name": "PA Local Earned Income Tax",
+            "amount": 0
+          }
+        ]
+      },
+      "pcc": {
+        "Gross Pay": 1340833,
+        "Federal Withholding": 131150,
+        "Social Security": 83132,
+        "Medicare": 19442,
+        "State Tax Withholding": 41164,
+        "State Unemployment Insurance (SUI)": 939,
+        "Take home pay (net pay)": 1065006
+      },
+      "diffCents": {
+        "gross": 0,
+        "federal": 0,
+        "socialSecurity": 0,
+        "medicare": 0,
+        "state": 0,
+        "net": 0
+      },
+      "verdict": "exact"
+    },
+    {
+      "n": 18,
+      "stateCode": "KY",
+      "slug": "kentucky",
+      "annualGross": 173600,
+      "freq": {
+        "ours": "monthly",
+        "pcc": "MONTHLY"
+      },
+      "filing": {
+        "ours": "head_of_household",
+        "pcc": "HEAD_OF_HOUSEHOLD"
+      },
+      "dependentsAnnual": 6000,
+      "pccParms": {},
+      "ours": {
+        "gross": 1446667,
+        "federal": 172125,
+        "socialSecurity": 89693,
+        "medicare": 20977,
+        "state": 49653,
+        "other": 0,
+        "net": 1114219,
+        "otherLines": []
+      },
+      "pcc": {
+        "Gross Pay": 1446667,
+        "Federal Withholding": 172125,
+        "Social Security": 89693,
+        "Medicare": 20977,
+        "State Tax Withholding": 49653,
+        "Take home pay (net pay)": 1114219
+      },
+      "diffCents": {
+        "gross": 0,
+        "federal": 0,
+        "socialSecurity": 0,
+        "medicare": 0,
+        "state": 0,
+        "net": 0
+      },
+      "verdict": "exact"
+    },
+    {
+      "n": 19,
+      "stateCode": "NY",
+      "slug": "new-york",
+      "annualGross": 182700,
+      "freq": {
+        "ours": "weekly",
+        "pcc": "WEEKLY"
+      },
+      "filing": {
+        "ours": "single",
+        "pcc": "SINGLE"
+      },
+      "dependentsAnnual": 2000,
+      "pccParms": {
+        "FILINGSTATUS": "S"
+      },
+      "ours": {
+        "gross": 351346,
+        "federal": 58812,
+        "socialSecurity": 21783,
+        "medicare": 5095,
+        "state": 20773,
+        "other": 1578,
+        "net": 243305,
+        "otherLines": [
+          {
+            "name": "New York Paid Leave (Employee)",
+            "amount": 1518
+          },
+          {
+            "name": "New York Disability Benefits (Employee)",
+            "amount": 60
+          }
+        ]
+      },
+      "pcc": {
+        "Gross Pay": 351346,
+        "Federal Withholding": 58812,
+        "Social Security": 21783,
+        "Medicare": 5095,
+        "State Tax Withholding": 20774,
+        "Family Leave Insurance (FLI)": 1518,
+        "State Disability Insurance (SDI)": 60,
+        "Take home pay (net pay)": 243304
+      },
+      "diffCents": {
+        "gross": 0,
+        "federal": 0,
+        "socialSecurity": 0,
+        "medicare": 0,
+        "state": -1,
+        "net": 1
+      },
+      "verdict": "within-tolerance"
+    },
+    {
+      "n": 20,
+      "stateCode": "MI",
+      "slug": "michigan",
+      "annualGross": 289800,
+      "freq": {
+        "ours": "biweekly",
+        "pcc": "BI_WEEKLY"
+      },
+      "filing": {
+        "ours": "married_joint",
+        "pcc": "MARRIED"
+      },
+      "dependentsAnnual": 2000,
+      "pccParms": {},
+      "ours": {
+        "gross": 1114615,
+        "federal": 173154,
+        "socialSecurity": 69106,
+        "medicare": 16162,
+        "state": 47371,
+        "other": 0,
+        "net": 808822,
+        "otherLines": []
+      },
+      "pcc": {
+        "Gross Pay": 1114615,
+        "Federal Withholding": 173154,
+        "Social Security": 69106,
+        "Medicare": 16162,
+        "State Tax Withholding": 47371,
+        "Take home pay (net pay)": 808822
+      },
+      "diffCents": {
+        "gross": 0,
+        "federal": 0,
+        "socialSecurity": 0,
+        "medicare": 0,
+        "state": 0,
+        "net": 0
+      },
+      "verdict": "exact"
+    },
+    {
+      "n": 21,
+      "stateCode": "OH",
+      "slug": "ohio",
+      "annualGross": 125600,
+      "freq": {
+        "ours": "monthly",
+        "pcc": "MONTHLY"
+      },
+      "filing": {
+        "ours": "married_joint",
+        "pcc": "MARRIED"
+      },
+      "dependentsAnnual": 2000,
+      "pccParms": {},
+      "ours": {
+        "gross": 1046667,
+        "federal": 72600,
+        "socialSecurity": 64893,
+        "medicare": 15177,
+        "state": 29152,
+        "other": 0,
+        "net": 864845,
+        "otherLines": []
+      },
+      "pcc": {
+        "Gross Pay": 1046667,
+        "Federal Withholding": 72600,
+        "Social Security": 64893,
+        "Medicare": 15177,
+        "State Tax Withholding": 29153,
+        "Take home pay (net pay)": 864844
+      },
+      "diffCents": {
+        "gross": 0,
+        "federal": 0,
+        "socialSecurity": 0,
+        "medicare": 0,
+        "state": -1,
+        "net": 1
+      },
+      "verdict": "within-tolerance"
+    },
+    {
+      "n": 22,
+      "stateCode": "PA",
+      "slug": "pennsylvania",
+      "annualGross": 114800,
+      "freq": {
+        "ours": "weekly",
+        "pcc": "WEEKLY"
+      },
+      "filing": {
+        "ours": "head_of_household",
+        "pcc": "HEAD_OF_HOUSEHOLD"
+      },
+      "dependentsAnnual": 0,
+      "pccParms": {},
+      "ours": {
+        "gross": 220769,
+        "federal": 24700,
+        "socialSecurity": 13688,
+        "medicare": 3201,
+        "state": 6778,
+        "other": 155,
+        "net": 172247,
+        "otherLines": [
+          {
+            "name": "Pennsylvania Unemployment Compensation (Employee)",
+            "amount": 155
+          },
+          {
+            "name": "PA Local Earned Income Tax",
+            "amount": 0
+          }
+        ]
+      },
+      "pcc": {
+        "Gross Pay": 220769,
+        "Federal Withholding": 24700,
+        "Social Security": 13688,
+        "Medicare": 3201,
+        "State Tax Withholding": 6778,
+        "State Unemployment Insurance (SUI)": 155,
+        "Take home pay (net pay)": 172247
+      },
+      "diffCents": {
+        "gross": 0,
+        "federal": 0,
+        "socialSecurity": 0,
+        "medicare": 0,
+        "state": 0,
+        "net": 0
+      },
+      "verdict": "exact"
+    },
+    {
+      "n": 23,
+      "stateCode": "KY",
+      "slug": "kentucky",
+      "annualGross": 241900,
+      "freq": {
+        "ours": "semimonthly",
+        "pcc": "SEMI_MONTHLY"
+      },
+      "filing": {
+        "ours": "married_joint",
+        "pcc": "MARRIED"
+      },
+      "dependentsAnnual": 2000,
+      "pccParms": {},
+      "ours": {
+        "gross": 1007917,
+        "federal": 139825,
+        "socialSecurity": 62491,
+        "medicare": 14615,
+        "state": 34787,
+        "other": 0,
+        "net": 756199,
+        "otherLines": []
+      },
+      "pcc": {
+        "Gross Pay": 1007917,
+        "Federal Withholding": 139825,
+        "Social Security": 62491,
+        "Medicare": 14615,
+        "State Tax Withholding": 34787,
+        "Take home pay (net pay)": 756199
+      },
+      "diffCents": {
+        "gross": 0,
+        "federal": 0,
+        "socialSecurity": 0,
+        "medicare": 0,
+        "state": 0,
+        "net": 0
+      },
+      "verdict": "exact"
+    },
+    {
+      "n": 24,
+      "stateCode": "NY",
+      "slug": "new-york",
+      "annualGross": 145300,
+      "freq": {
+        "ours": "semimonthly",
+        "pcc": "SEMI_MONTHLY"
+      },
+      "filing": {
+        "ours": "single",
+        "pcc": "SINGLE"
+      },
+      "dependentsAnnual": 2000,
+      "pccParms": {
+        "FILINGSTATUS": "S"
+      },
+      "ours": {
+        "gross": 605417,
+        "federal": 90025,
+        "socialSecurity": 37536,
+        "medicare": 8779,
+        "state": 34102,
+        "other": 2745,
+        "net": 432230,
+        "otherLines": [
+          {
+            "name": "New York Paid Leave (Employee)",
+            "amount": 2615
+          },
+          {
+            "name": "New York Disability Benefits (Employee)",
+            "amount": 130
+          }
+        ]
+      },
+      "pcc": {
+        "Gross Pay": 605417,
+        "Federal Withholding": 90025,
+        "Social Security": 37536,
+        "Medicare": 8779,
+        "State Tax Withholding": 34099,
+        "Family Leave Insurance (FLI)": 2615,
+        "State Disability Insurance (SDI)": 130,
+        "Take home pay (net pay)": 432233
+      },
+      "diffCents": {
+        "gross": 0,
+        "federal": 0,
+        "socialSecurity": 0,
+        "medicare": 0,
+        "state": 3,
+        "net": -3
+      },
+      "verdict": "within-tolerance"
+    },
+    {
+      "n": 25,
+      "stateCode": "MI",
+      "slug": "michigan",
+      "annualGross": 167200,
+      "freq": {
+        "ours": "semimonthly",
+        "pcc": "SEMI_MONTHLY"
+      },
+      "filing": {
+        "ours": "head_of_household",
+        "pcc": "HEAD_OF_HOUSEHOLD"
+      },
+      "dependentsAnnual": 0,
+      "pccParms": {},
+      "ours": {
+        "gross": 696667,
+        "federal": 104663,
+        "socialSecurity": 43193,
+        "medicare": 10102,
+        "state": 29608,
+        "other": 0,
+        "net": 509101,
+        "otherLines": []
+      },
+      "pcc": {
+        "Gross Pay": 696667,
+        "Federal Withholding": 104663,
+        "Social Security": 43193,
+        "Medicare": 10102,
+        "State Tax Withholding": 29608,
+        "Take home pay (net pay)": 509101
+      },
+      "diffCents": {
+        "gross": 0,
+        "federal": 0,
+        "socialSecurity": 0,
+        "medicare": 0,
+        "state": 0,
+        "net": 0
+      },
+      "verdict": "exact"
+    },
+    {
+      "n": 26,
+      "stateCode": "OH",
+      "slug": "ohio",
+      "annualGross": 182800,
+      "freq": {
+        "ours": "semimonthly",
+        "pcc": "SEMI_MONTHLY"
+      },
+      "filing": {
+        "ours": "head_of_household",
+        "pcc": "HEAD_OF_HOUSEHOLD"
+      },
+      "dependentsAnnual": 6000,
+      "pccParms": {},
+      "ours": {
+        "gross": 761667,
+        "federal": 95263,
+        "socialSecurity": 47223,
+        "medicare": 11044,
+        "state": 22680,
+        "other": 0,
+        "net": 585457,
+        "otherLines": []
+      },
+      "pcc": {
+        "Gross Pay": 761667,
+        "Federal Withholding": 95263,
+        "Social Security": 47223,
+        "Medicare": 11044,
+        "State Tax Withholding": 22680,
+        "Take home pay (net pay)": 585457
+      },
+      "diffCents": {
+        "gross": 0,
+        "federal": 0,
+        "socialSecurity": 0,
+        "medicare": 0,
+        "state": 0,
+        "net": 0
+      },
+      "verdict": "exact"
+    },
+    {
+      "n": 27,
+      "stateCode": "PA",
+      "slug": "pennsylvania",
+      "annualGross": 70200,
+      "freq": {
+        "ours": "biweekly",
+        "pcc": "BI_WEEKLY"
+      },
+      "filing": {
+        "ours": "head_of_household",
+        "pcc": "HEAD_OF_HOUSEHOLD"
+      },
+      "dependentsAnnual": 6000,
+      "pccParms": {},
+      "ours": {
+        "gross": 270000,
+        "federal": 0,
+        "socialSecurity": 16740,
+        "medicare": 3915,
+        "state": 8289,
+        "other": 189,
+        "net": 240867,
+        "otherLines": [
+          {
+            "name": "Pennsylvania Unemployment Compensation (Employee)",
+            "amount": 189
+          },
+          {
+            "name": "PA Local Earned Income Tax",
+            "amount": 0
+          }
+        ]
+      },
+      "pcc": {
+        "Gross Pay": 270000,
+        "Federal Withholding": 0,
+        "Social Security": 16740,
+        "Medicare": 3915,
+        "State Tax Withholding": 8289,
+        "State Unemployment Insurance (SUI)": 189,
+        "Take home pay (net pay)": 240867
+      },
+      "diffCents": {
+        "gross": 0,
+        "federal": 0,
+        "socialSecurity": 0,
+        "medicare": 0,
+        "state": 0,
+        "net": 0
+      },
+      "verdict": "exact"
+    },
+    {
+      "n": 28,
+      "stateCode": "KY",
+      "slug": "kentucky",
+      "annualGross": 143100,
+      "freq": {
+        "ours": "semimonthly",
+        "pcc": "SEMI_MONTHLY"
+      },
+      "filing": {
+        "ours": "head_of_household",
+        "pcc": "HEAD_OF_HOUSEHOLD"
+      },
+      "dependentsAnnual": 6000,
+      "pccParms": {},
+      "ours": {
+        "gross": 596250,
+        "federal": 55563,
+        "socialSecurity": 36968,
+        "medicare": 8646,
+        "state": 20379,
+        "other": 0,
+        "net": 474694,
+        "otherLines": []
+      },
+      "pcc": {
+        "Gross Pay": 596250,
+        "Federal Withholding": 55563,
+        "Social Security": 36968,
+        "Medicare": 8646,
+        "State Tax Withholding": 20379,
+        "Take home pay (net pay)": 474694
+      },
+      "diffCents": {
+        "gross": 0,
+        "federal": 0,
+        "socialSecurity": 0,
+        "medicare": 0,
+        "state": 0,
+        "net": 0
+      },
+      "verdict": "exact"
+    },
+    {
+      "n": 29,
+      "stateCode": "NY",
+      "slug": "new-york",
+      "annualGross": 273400,
+      "freq": {
+        "ours": "weekly",
+        "pcc": "WEEKLY"
+      },
+      "filing": {
+        "ours": "single",
+        "pcc": "SINGLE"
+      },
+      "dependentsAnnual": 2000,
+      "pccParms": {
+        "FILINGSTATUS": "S"
+      },
+      "ours": {
+        "gross": 525769,
+        "federal": 109277,
+        "socialSecurity": 32598,
+        "medicare": 7624,
+        "state": 36797,
+        "other": 2331,
+        "net": 337142,
+        "otherLines": [
+          {
+            "name": "New York Paid Leave (Employee)",
+            "amount": 2271
+          },
+          {
+            "name": "New York Disability Benefits (Employee)",
+            "amount": 60
+          }
+        ]
+      },
+      "pcc": {
+        "Gross Pay": 525769,
+        "Federal Withholding": 109277,
+        "Social Security": 32598,
+        "Medicare": 7624,
+        "State Tax Withholding": 36798,
+        "Family Leave Insurance (FLI)": 2271,
+        "State Disability Insurance (SDI)": 60,
+        "Take home pay (net pay)": 337141
+      },
+      "diffCents": {
+        "gross": 0,
+        "federal": 0,
+        "socialSecurity": 0,
+        "medicare": 0,
+        "state": -1,
+        "net": 1
+      },
+      "verdict": "within-tolerance"
+    },
+    {
+      "n": 30,
+      "stateCode": "MI",
+      "slug": "michigan",
+      "annualGross": 70400,
+      "freq": {
+        "ours": "weekly",
+        "pcc": "WEEKLY"
+      },
+      "filing": {
+        "ours": "head_of_household",
+        "pcc": "HEAD_OF_HOUSEHOLD"
+      },
+      "dependentsAnnual": 4000,
+      "pccParms": {},
+      "ours": {
+        "gross": 135385,
+        "federal": 2300,
+        "socialSecurity": 8394,
+        "medicare": 1963,
+        "state": 5754,
+        "other": 0,
+        "net": 116974,
+        "otherLines": []
+      },
+      "pcc": {
+        "Gross Pay": 135385,
+        "Federal Withholding": 2300,
+        "Social Security": 8394,
+        "Medicare": 1963,
+        "State Tax Withholding": 5754,
+        "Take home pay (net pay)": 116974
+      },
+      "diffCents": {
+        "gross": 0,
+        "federal": 0,
+        "socialSecurity": 0,
+        "medicare": 0,
+        "state": 0,
+        "net": 0
+      },
+      "verdict": "exact"
+    }
+  ]
+}
