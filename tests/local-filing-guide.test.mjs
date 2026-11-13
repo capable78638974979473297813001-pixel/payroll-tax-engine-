@@ -28,7 +28,9 @@ test('regional Ohio collectors use the registry; residual and ambiguous cities r
       continue;
     }
     assert.equal(result.jurisdiction, row.name);
-    if (row.municode === '15000') {
+    if (row.municode === '12000') {
+      assert.equal(result.agency, 'OH-CANTON');
+    } else if (row.municode === '15000') {
       assert.equal(result.agency, 'OH-CINCINNATI');
     } else if (row.municode === '18000') {
       assert.equal(result.agency, 'OH-COLUMBUS');
@@ -407,4 +409,14 @@ test('Dayton city withholding and the two township JEDDs use distinct routes', (
   for (const district of ['9080', '9081']) {
     assert.notEqual(localWithholdingGuide('OH-jedd-jedz', district, 2026).agency, result.agency);
   }
+});
+
+test('Canton city withholding is distinct from North Canton and the Jackson Township JEDD', () => {
+  const city = localWithholdingGuide('OH-municipality', '12000', 2026);
+  assert.equal(city.agency, 'OH-CANTON');
+  assert.equal(city.jurisdiction, 'Canton');
+  assert.match(city.guide.returns[0][1], /preceding quarter/);
+  assert.match(city.guide.returns[1][1], /March 1, 2027/);
+  assert.notEqual(localWithholdingGuide('OH-municipality', '56294', 2026).agency, city.agency);
+  assert.notEqual(localWithholdingGuide('OH-jedd-jedz', '9105', 2026).agency, city.agency);
 });

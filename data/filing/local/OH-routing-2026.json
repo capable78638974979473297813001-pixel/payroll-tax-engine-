@@ -127,6 +127,13 @@
       "sources": [
         "https://www.daytonohio.gov/DocumentCenter/View/2427/City-of-Dayton-DW-1---12-2016"
       ]
+    },
+    "12000": {
+      "agency": "OH-CANTON",
+      "verifiedOn": "2026-11-12",
+      "sources": [
+        "https://www.cantonohio.gov/DocumentCenter/View/8562/2025-Withholding-Booklet-PDF"
+      ]
     }
   },
   "zones": {

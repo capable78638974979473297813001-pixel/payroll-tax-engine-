@@ -1392,5 +1392,30 @@
       "https://codes.ohio.gov/ohio-revised-code/section-1.14"
     ],
     "verifiedOn": "2026-11-12"
+  },
+  "OH-CANTON": {
+    "collector": "City of Canton Income Tax Department",
+    "registration": "Complete the Business & Corporation Information Sheet. Select City of Canton and provide the FEIN, employee count, payroll and any third-party filer information.",
+    "returns": [
+      [
+        "Return of Income Tax Withheld",
+        "Quarterly payments are due at the end of the following month. Canton's 2026 booklet specifies monthly payments by the 15th of the following month at $200 or more in any month or above $2,399 the prior year. It specifies semimonthly payments at $1,000 or more in any month or above $11,999 the prior year. For each half-month, pay by the third banking day after it ends. Ohio Revised Code 718.03 uses strictly above $200 in any month of the preceding quarter and above $1,000 in any month of the preceding year. Confirm the assigned frequency with Canton if the tests differ."
+      ],
+      [
+        "W-3",
+        "File the annual reconciliation with employee W-2 information by March 1, 2027 under Ohio's Sunday rule. Canton's forms directory currently lists the 2025 W-3. Obtain the 2026 version or instructions from the department."
+      ]
+    ],
+    "filing": "Use the city's annual reconciliation upload portal for electronic wage reporting. For permitted paper periodic returns, sign and mail the dated coupon to the Income Tax Department. Indicate periods with no employees and submit supporting documentation.",
+    "payment": "Federal electronic depositors must remit electronically. Canton accepts ACH debit, ACH credit using specifications from the department, and Ohio Business Gateway. Make permitted paper payments payable to City of Canton.",
+    "sources": [
+      "https://www.cantonohio.gov/DocumentCenter/View/8562/2025-Withholding-Booklet-PDF",
+      "https://www.cantonohio.gov/DocumentCenter/View/9290/Bus-Corp-Info",
+      "https://www.cantonohio.gov/773/Yearly-Forms",
+      "https://www.cantonohio.gov/740/Income-Tax",
+      "https://codes.ohio.gov/ohio-revised-code/section-718.03",
+      "https://codes.ohio.gov/ohio-revised-code/section-1.14"
+    ],
+    "verifiedOn": "2026-11-12"
   }
 }
