@@ -28,8 +28,20 @@ test('regional Ohio collectors use the registry; residual and ambiguous cities r
       continue;
     }
     assert.equal(result.jurisdiction, row.name);
-    if (row.municode === '21616') {
+    if (row.municode === '12000') {
+      assert.equal(result.agency, 'OH-CANTON');
+    } else if (row.municode === '15000') {
+      assert.equal(result.agency, 'OH-CINCINNATI');
+    } else if (row.municode === '18000') {
+      assert.equal(result.agency, 'OH-COLUMBUS');
+    } else if (row.municode === '21000') {
+      assert.equal(result.agency, 'OH-DAYTON');
+    } else if (row.municode === '21616') {
       assert.equal(result.agency, 'OH-DELTA');
+    } else if (row.municode === '01000') {
+      assert.equal(result.agency, 'OH-AKRON');
+    } else if (row.municode === '77000') {
+      assert.equal(result.agency, 'OH-TOLEDO');
     } else if (row.municode === '71983') {
       assert.equal(result.status, 'collector-unverified');
     } else if (['RITA', 'CCA'].includes(row.administeredBy)) {
@@ -361,4 +373,63 @@ test('Eugene city payroll returns are separate from Lane transit reporting', () 
   assert.match(city.guide.payment, /separate check/);
   assert.equal(localWithholdingGuide('OR-city', 'LTD', 2026).status, 'unknown-code');
   assert.equal(localWithholdingGuide('OR-transit-district', 'Eugene', 2026).status, 'unknown-code');
+});
+
+test('Columbus city code routes to its own quarterly and annual forms', () => {
+  const result = localWithholdingGuide('OH-municipality', '18000', 2026);
+  assert.equal(result.membershipVerifiedOn, '2026-11-12');
+  assert.deepEqual(result.guide.returns.map(([form]) => form), ['IT-11', 'IT-13']);
+  assert.match(result.guide.returns[0][1], /February 1, 2027/);
+  assert.match(result.guide.returns[1][1], /March 1, 2027/);
+  assert.notEqual(localWithholdingGuide('OH-municipality', '18014', 2026).agency, result.agency);
+});
+
+test('Cincinnati routes its own employer coupons and W-3 reconciliation', () => {
+  const result = localWithholdingGuide('OH-municipality', '15000', 2026);
+  assert.equal(result.jurisdiction, 'Cincinnati');
+  assert.equal(result.membershipVerifiedOn, '2026-11-12');
+  assert.equal(result.guide.returns[1][0], 'W-3');
+  assert.match(result.guide.returns[1][1], /March 1, 2027/);
+  assert.match(result.guide.payment, /when the federal deposit is due/);
+});
+
+test('Toledo city coupons and W-3 use the 2026 packet deadlines', () => {
+  const result = localWithholdingGuide('OH-municipality', '77000', 2026);
+  assert.equal(result.jurisdiction, 'Toledo');
+  assert.equal(result.membershipVerifiedOn, '2026-11-12');
+  assert.match(result.guide.returns[0][1], /February 1, 2027/);
+  assert.equal(result.guide.returns[1][0], 'W-3');
+  assert.match(result.guide.returns[1][1], /March 1, 2027/);
+  assert.notEqual(localWithholdingGuide('OH-jedd-jedz', '9065', 2026).agency, result.agency);
+});
+
+test('Dayton city withholding and the two township JEDDs use distinct routes', () => {
+  const result = localWithholdingGuide('OH-municipality', '21000', 2026);
+  assert.equal(result.jurisdiction, 'Dayton');
+  assert.equal(result.guide.returns[0][0], 'DW-1');
+  assert.match(result.guide.returns[1][1], /March 1, 2027/);
+  for (const district of ['9080', '9081']) {
+    assert.notEqual(localWithholdingGuide('OH-jedd-jedz', district, 2026).agency, result.agency);
+  }
+});
+
+test('Canton city withholding is distinct from North Canton and the Jackson Township JEDD', () => {
+  const city = localWithholdingGuide('OH-municipality', '12000', 2026);
+  assert.equal(city.agency, 'OH-CANTON');
+  assert.equal(city.jurisdiction, 'Canton');
+  assert.match(city.guide.returns[0][1], /preceding quarter/);
+  assert.match(city.guide.returns[1][1], /March 1, 2027/);
+  assert.notEqual(localWithholdingGuide('OH-municipality', '56294', 2026).agency, city.agency);
+  assert.notEqual(localWithholdingGuide('OH-jedd-jedz', '9105', 2026).agency, city.agency);
+});
+
+test('Akron city withholding has its own deadlines and excludes its four JEDDs', () => {
+  const city = localWithholdingGuide('OH-municipality', '01000', 2026);
+  assert.equal(city.agency, 'OH-AKRON');
+  assert.match(city.guide.returns[0][1], /February 1, 2027/);
+  assert.equal(city.guide.returns[1][0], 'AW-3');
+  assert.match(city.guide.returns[1][1], /March 1, 2027/);
+  for (const district of ['9004', '9014', '9015', '9042']) {
+    assert.notEqual(localWithholdingGuide('OH-jedd-jedz', district, 2026).agency, city.agency);
+  }
 });

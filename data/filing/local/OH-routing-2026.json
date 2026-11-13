@@ -1,6 +1,27 @@
 {
   "verifiedOn": "2026-11-11",
   "municipalities": {
+    "77000": {
+      "agency": "OH-TOLEDO",
+      "verifiedOn": "2026-11-12",
+      "sources": [
+        "https://cdn.toledo.oh.gov/uploads/documents/Finance/Taxation-and-Treasury/2026-Quarterly-Withholding-Packet-fillable.pdf"
+      ]
+    },
+    "15000": {
+      "agency": "OH-CINCINNATI",
+      "verifiedOn": "2026-11-12",
+      "sources": [
+        "https://www.cincinnati-oh.gov/finance/income-taxes/2026-tax-forms111111/"
+      ]
+    },
+    "18000": {
+      "agency": "OH-COLUMBUS",
+      "verifiedOn": "2026-11-12",
+      "sources": [
+        "https://www.columbus.gov/Government/City-Auditor/Income-Tax-Division/Tax-Forms/Employer-Tax-Forms"
+      ]
+    },
     "21378": {
       "agency": "OH-RITA",
       "sources": [
@@ -98,6 +119,28 @@
       "sources": [
         "https://www.ritaohio.com/Municipalities/Home/MemberPage?id=258",
         "https://villageofdelta.org/1209/Income-Tax"
+      ]
+    },
+    "21000": {
+      "agency": "OH-DAYTON",
+      "verifiedOn": "2026-11-12",
+      "sources": [
+        "https://www.daytonohio.gov/DocumentCenter/View/2427/City-of-Dayton-DW-1---12-2016"
+      ]
+    },
+    "12000": {
+      "agency": "OH-CANTON",
+      "verifiedOn": "2026-11-12",
+      "sources": [
+        "https://www.cantonohio.gov/DocumentCenter/View/8562/2025-Withholding-Booklet-PDF"
+      ]
+    },
+    "01000": {
+      "agency": "OH-AKRON",
+      "verifiedOn": "2026-11-12",
+      "sources": [
+        "https://www.akronohio.gov/Documents/Departments/Finance/Income%20Tax/Business/Business%20Registration.pdf",
+        "https://www.akronohio.gov/Documents/Departments/Finance/Income%20Tax/Business/akron_eft_worksheet.pdf"
       ]
     }
   },
