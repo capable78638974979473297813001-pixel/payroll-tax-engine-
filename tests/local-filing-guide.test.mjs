@@ -664,3 +664,13 @@ test('Fairfield selects separate township registration and withholding packets b
     assert.match(guide.payment, /postmarked by the due date/);
   }
 });
+
+test('Monroe collects for the Raceway and 2022 JEDDs and directs employers to confirm district coupons', () => {
+  for (const id of ['9096', '9136']) {
+    const { agency, guide } = localWithholdingGuide('OH-jedd-jedz', id, 2026);
+    assert.equal(agency, 'OH-TURTLECREEK-MONROE-JEDD');
+    assert.match(guide.registration, /513-539-7374, option 3/);
+    assert.match(guide.payment, /confirm the district payee/);
+  }
+  assert.notEqual(localWithholdingGuide('OH-jedd-jedz', '9093', 2026).agency, 'OH-TURTLECREEK-MONROE-JEDD');
+});

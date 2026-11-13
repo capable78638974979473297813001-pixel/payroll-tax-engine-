@@ -1952,5 +1952,28 @@
       "https://www.fairfield-city.org/254/Business-Tax-Forms"
     ],
     "verifiedOn": "2026-11-13"
+  },
+  "OH-TURTLECREEK-MONROE-JEDD": {
+    "collector": "City of Monroe Income Tax Division for the Turtlecreek–Monroe Raceway and Turtlecreek–Monroe 2022 JEDDs",
+    "registration": "Call 513-539-7374, option 3, with the worksite address and FEIN. Specify the Raceway JEDD or the 2022 JEDD and request employer registration for that district.",
+    "returns": [
+      [
+        "District employer withholding return",
+        "Ask Monroe to confirm the assigned frequency. Under Ohio’s standard schedule, remit monthly by the following 15th when prior-year district withholding exceeded $2,399 or any month of the preceding quarter exceeded $200. Otherwise remit quarterly by the last day of the following month."
+      ],
+      [
+        "District employer withholding reconciliation",
+        "Ohio requires annual reconciliation by the last day of February. Report district wages and withholding by employee. Obtain the district’s instructions for submitting W-2 information."
+      ]
+    ],
+    "filing": "Monroe publishes city W-1 and W-3 forms. Confirm the district account, coupon and submission address with the Income Tax Division before filing for either JEDD.",
+    "payment": "The published city W-1 accepts checks and money orders. Ask the Income Tax Division to confirm the district payee, payment method and account reference before remitting district withholding.",
+    "sources": [
+      "https://www.monroeohio.org/214/Income-Tax",
+      "https://www.monroeohio.org/219/Tax-Forms",
+      "https://codes.ohio.gov/ohio-revised-code/section-718.03",
+      "https://www.monroeohio.org/DocumentCenter/View/3076/2026-Form-W1-Withholding-Tax-Forms-Quarterly"
+    ],
+    "verifiedOn": "2026-11-13"
   }
 }

@@ -622,6 +622,22 @@
         "https://www.fairfield-city.org/DocumentCenter/View/17044/2026-WC-JEDD-Quarterly-Withholding"
       ],
       "verifiedOn": "2026-11-13"
+    },
+    "9096": {
+      "agency": "OH-TURTLECREEK-MONROE-JEDD",
+      "verifiedOn": "2026-11-13",
+      "sources": [
+        "https://www.monroeohio.org/214/Income-Tax",
+        "https://monroeohio.org/DocumentCenter/View/2861/Final-2024-ACFR"
+      ]
+    },
+    "9136": {
+      "agency": "OH-TURTLECREEK-MONROE-JEDD",
+      "verifiedOn": "2026-11-13",
+      "sources": [
+        "https://www.monroeohio.org/214/Income-Tax",
+        "https://monroeohio.org/DocumentCenter/View/2861/Final-2024-ACFR"
+      ]
     }
   },
   "rosters": {
