@@ -592,3 +592,13 @@ test('Toledo Express Airport and Troy Township use distinct JEDD accounts and W-
   }
   assert.equal(localWithholdingGuide('OH-municipality', '77000', 2026).agency, 'OH-TOLEDO');
 });
+
+test('Columbus JEDD accounts select IT-11J district lines and annual IT-13J', () => {
+  for (const [finder, line] of [['9031', '20'], ['9036', '22'], ['9077', '24']]) {
+    const district = localWithholdingGuide('OH-jedd-jedz', finder, 2026);
+    assert.equal(district.collectorCode, line);
+    assert.equal(district.agency, 'OH-COLUMBUS-JEDD');
+    assert.deepEqual(district.guide.returns.map(([form]) => form), ['IT-11J', 'IT-13J']);
+  }
+  assert.equal(localWithholdingGuide('OH-municipality', '18000', 2026).agency, 'OH-COLUMBUS');
+});

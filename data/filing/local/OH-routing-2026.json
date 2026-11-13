@@ -411,6 +411,33 @@
         "https://toledo.oh.gov/pay-taxes/joint-economic-development-district-jedd",
         "https://cdn.toledo.oh.gov/uploads/documents/Finance/Taxation-and-Treasury/JEDD/2026-TROY-Quarterly-Withholding-Packet-fillable.pdf"
       ]
+    },
+    "9031": {
+      "agency": "OH-COLUMBUS-JEDD",
+      "collectorCode": "20",
+      "verifiedOn": "2026-11-13",
+      "sources": [
+        "https://www.columbus.gov/Government/City-Auditor/Income-Tax-Division/Tax-Forms/JEDD-JEDZ-Tax-Forms",
+        "https://www.columbus.gov/files/sharedassets/city/v/1/city-auditor/tax-forms/jedd/2026-it-11j_readerext.pdf"
+      ]
+    },
+    "9036": {
+      "agency": "OH-COLUMBUS-JEDD",
+      "collectorCode": "22",
+      "verifiedOn": "2026-11-13",
+      "sources": [
+        "https://www.columbus.gov/Government/City-Auditor/Income-Tax-Division/Tax-Forms/JEDD-JEDZ-Tax-Forms",
+        "https://www.columbus.gov/files/sharedassets/city/v/1/city-auditor/tax-forms/jedd/2026-it-11j_readerext.pdf"
+      ]
+    },
+    "9077": {
+      "agency": "OH-COLUMBUS-JEDD",
+      "collectorCode": "24",
+      "verifiedOn": "2026-11-13",
+      "sources": [
+        "https://www.columbus.gov/Government/City-Auditor/Income-Tax-Division/Tax-Forms/JEDD-JEDZ-Tax-Forms",
+        "https://www.columbus.gov/files/sharedassets/city/v/1/city-auditor/tax-forms/jedd/2026-it-11j_readerext.pdf"
+      ]
     }
   },
   "rosters": {

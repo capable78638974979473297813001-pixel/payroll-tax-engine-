@@ -1783,5 +1783,29 @@
       "https://cdn.toledo.oh.gov/uploads/documents/Finance/Taxation-and-Treasury/JEDD/New-Business-Registration-Form-REVISED-11-2023.pdf"
     ],
     "verifiedOn": "2026-11-13"
+  },
+  "OH-COLUMBUS-JEDD": {
+    "collector": "City of Columbus Income Tax Division for the North Pickaway County, Prairie Township and Madison Township JEDDs",
+    "registration": "Register for employer withholding through CRISP at crisp.columbus.gov. Confirm the JEDD withholding account beginning with WTJ before submitting district payroll.",
+    "returns": [
+      [
+        "IT-11J",
+        "File quarterly, including quarters with no wages while the account is active. Complete the payroll schedule and allocate wages to district lines 20 (North Pickaway County), 22 (Prairie Township) and 24 (Madison Township). The 2026 quarterly deadlines are April 30, July 31, November 2 and February 1, 2027."
+      ],
+      [
+        "IT-13J",
+        "Reconcile 2026 district withholding and W-2 information by March 1, 2027. Submit the reconciliation in addition to every required quarterly IT-11J. Correct quarterly liabilities on an amended IT-11J."
+      ]
+    ],
+    "filing": "File IT-11J and IT-13J through CRISP. Upload the W-2 copies or fixed-width wage file with the annual reconciliation. Paper forms and their mailing instructions are available on the Columbus JEDD forms page.",
+    "payment": "Pay through CRISP using the WTJ account. Follow the assigned deposit schedule even though the return is quarterly. Quarterly deposits are due at month-end after the quarter, monthly deposits by the 15th of the following month, and semimonthly deposits by the third banking day after each half-month. Federal next-day depositors must remit electronically on the federal schedule.",
+    "sources": [
+      "https://www.columbus.gov/Government/City-Auditor/Income-Tax-Division/Tax-Forms/JEDD-JEDZ-Tax-Forms",
+      "https://www.columbus.gov/files/sharedassets/city/v/1/city-auditor/tax-forms/jedd/2026-it-11j_readerext.pdf",
+      "https://www.columbus.gov/files/sharedassets/city/v/3/city-auditor/tax-forms/jedd/2026-it-13j-instructions.pdf",
+      "https://www.columbus.gov/files/sharedassets/city/v/4/city-auditor/tax-forms/individuals/2026-filing-and-payment-information.pdf",
+      "https://www.columbus.gov/Government/City-Auditor/Income-Tax-Division/Filing-Payment-Information/Filing-Season-Information"
+    ],
+    "verifiedOn": "2026-11-13"
   }
 }
