@@ -433,3 +433,14 @@ test('Akron city withholding has its own deadlines and excludes its four JEDDs',
     assert.notEqual(localWithholdingGuide('OH-jedd-jedz', district, 2026).agency, city.agency);
   }
 });
+
+test('Springfield city and its airport district use separate RITA filing codes', () => {
+  const airport = localWithholdingGuide('OH-jedd-jedz', '9041', 2026);
+  const city = localWithholdingGuide('OH-municipality', '74118', 2026);
+  assert.equal(airport.agency, 'OH-RITA');
+  assert.equal(airport.collectorCode, '872');
+  assert.equal(airport.membershipVerifiedOn, '2026-11-12');
+  assert.deepEqual(airport.guide.returns.slice(0, 2).map(([form]) => form), ['11', '17']);
+  assert.equal(city.collectorCode, '773');
+  assert.equal(localWithholdingGuide('OH-jedd-jedz', '872', 2026).status, 'unknown-code');
+});

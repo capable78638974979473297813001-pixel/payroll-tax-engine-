@@ -145,6 +145,13 @@
     }
   },
   "zones": {
+    "9041": {
+      "agency": "OH-RITA",
+      "verifiedOn": "2026-11-12",
+      "sources": [
+        "https://www.ritaohio.com/municipalities/Home/MemberPage?id=872"
+      ]
+    },
     "9003": {
       "agency": "OH-RITA",
       "sources": [
@@ -575,6 +582,7 @@
         "9008": "117",
         "9010": "137",
         "9012": "151",
+        "9041": "872",
         "9047": "293",
         "9033": "581",
         "9086": "135",
