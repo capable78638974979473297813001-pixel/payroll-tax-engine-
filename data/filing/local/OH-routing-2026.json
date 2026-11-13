@@ -252,6 +252,37 @@
         "https://www.ritaohio.com/Municipalities/Home/MemberPage?id=913",
         "https://www.ritaohio.com/Media/703129/2026%20FORM%2011%20INSTRL..pdf"
       ]
+    },
+    "9009": {
+      "agency": "OH-RITA",
+      "verifiedOn": "2026-11-13",
+      "administrationStartedOn": "2026-07-01",
+      "collectorCodeStatus": "unverified",
+      "filingNote": "RITA took over July 1, 2026. Confirm earlier periods and amendments with Kent at 330-678-8103. Select the district by name. File monthly by the 15th of the following month if prior-year withholding was at least $2,400 or any month in the preceding quarter exceeded $200. Otherwise file quarterly by the last day of the following month.",
+      "sources": [
+        "https://www.kentohio.gov/living-here/taxes/",
+        "https://ritaohio.com/Municipalities/Home/MemberPage?id=314"
+      ]
+    },
+    "9021": {
+      "agency": "OH-RITA",
+      "verifiedOn": "2026-11-13",
+      "administrationStartedOn": "2026-07-01",
+      "collectorCodeStatus": "unverified",
+      "filingNote": "RITA took over July 1, 2026. Confirm earlier periods and amendments with Kent at 330-678-8103. Select the district by name. File monthly by the 15th of the following month if prior-year withholding was at least $2,400 or any month in the preceding quarter exceeded $200. Otherwise file quarterly by the last day of the following month.",
+      "sources": [
+        "https://www.kentohio.gov/living-here/taxes/",
+        "https://ritaohio.com/Municipalities/Home/MemberPage?id=416"
+      ]
+    },
+    "9097": {
+      "agency": "OH-RITA",
+      "collectorCode": "859",
+      "verifiedOn": "2026-11-13",
+      "sources": [
+        "https://www.ritaohio.com/Municipalities/Home/MemberPage?id=859",
+        "https://service.ritaohio.com/Business/Tax%20Rates%20Table.pdf"
+      ]
     }
   },
   "rosters": {

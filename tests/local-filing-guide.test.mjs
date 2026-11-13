@@ -493,3 +493,22 @@ test('Jersey-New Albany districts have separate RITA memberships beginning in Ma
   }
   assert.equal(localWithholdingGuide('OH-municipality', '53970', 2026).collectorCode, '535');
 });
+
+test('Kent district lookups retain the July 2026 collection handoff', () => {
+  for (const id of ['9009', '9021']) {
+    const district = localWithholdingGuide('OH-jedd-jedz', id, 2026);
+    assert.equal(district.agency, 'OH-RITA');
+    assert.equal(district.administrationStartedOn, '2026-07-01');
+    assert.match(district.filingNote, /earlier periods and amendments with Kent/);
+    assert.equal(district.collectorCodeStatus, 'unverified');
+    assert.equal(district.collectorCode, undefined);
+  }
+  assert.equal(localWithholdingGuide('OH-municipality', '39872', 2026).collectorCode, '392');
+});
+
+test('Xenia district withholding uses its own RITA code', () => {
+  const district = localWithholdingGuide('OH-jedd-jedz', '9097', 2026);
+  assert.equal(district.agency, 'OH-RITA');
+  assert.equal(district.collectorCode, '859');
+  assert.equal(localWithholdingGuide('OH-municipality', '86772', 2026).collectorCode, '905');
+});
