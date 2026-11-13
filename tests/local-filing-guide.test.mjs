@@ -523,3 +523,13 @@ test('Beachwood East, West and city preserve three distinct RITA filing codes', 
   }
   assert.equal(localWithholdingGuide('OH-municipality', '04500', 2026).collectorCode, '050');
 });
+
+test('Eaton and Elyria township districts route separately from Elyria city', () => {
+  for (const [finder, code] of [['9016', '292'], ['9017', '282']]) {
+    const district = localWithholdingGuide('OH-jedd-jedz', finder, 2026);
+    assert.equal(district.agency, 'OH-RITA');
+    assert.equal(district.collectorCode, code);
+    assert.deepEqual(district.guide.returns.slice(0, 2).map(([form]) => form), ['11', '17']);
+  }
+  assert.equal(localWithholdingGuide('OH-municipality', '25256', 2026).collectorCode, '277');
+});
