@@ -97,7 +97,9 @@ test('Ohio zones resolve by Finder zone ID, with explicit gaps', () => {
     const result = localWithholdingGuide('OH-jedd-jedz', zone.jeddId, 2026);
     assert.equal(result.jurisdiction, zone.name);
     if (result.status === 'guide') {
-      if (['OH-RITA', 'OH-CCA'].includes(result.agency)) {
+      if (result.collectorCodeStatus === 'unverified') {
+        assert.equal(result.collectorCode, undefined);
+      } else if (['OH-RITA', 'OH-CCA'].includes(result.agency)) {
         assert.match(result.collectorCode, /^\d{3}$/);
       }
       assert.ok(result.membershipSources.length);
@@ -477,4 +479,17 @@ test('Jefferson Township-Washington Court House uses district W1 coupons and a d
   assert.match(result.guide.returns[1][1], /March 1, 2027/);
   assert.match(result.guide.payment, /payable to Jefferson Township-Washington Court House JEDD/);
   assert.notEqual(localWithholdingGuide('OH-jedd-jedz', '9123', 2026).agency, result.agency);
+});
+
+test('Jersey-New Albany districts have separate RITA memberships beginning in May 2026', () => {
+  for (const [finder, memberPage] of [['9158', '910'], ['9159', '911'], ['9160', '913']]) {
+    const district = localWithholdingGuide('OH-jedd-jedz', finder, 2026);
+    assert.equal(district.agency, 'OH-RITA');
+    assert.equal(district.administrationStartedOn, '2026-05-01');
+    assert.ok(district.membershipSources.some(url => url.endsWith('id=' + memberPage)));
+    assert.match(district.filingNote, /separately on Form 11/);
+    assert.equal(district.collectorCodeStatus, 'unverified');
+    assert.equal(district.collectorCode, undefined);
+  }
+  assert.equal(localWithholdingGuide('OH-municipality', '53970', 2026).collectorCode, '535');
 });

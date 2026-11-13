@@ -139,9 +139,10 @@ export function localWithholdingGuide(kind, code, year) {
     guide: localAgencyGuide(agency, year),
     confirmMembershipForPeriod: kind === 'OH-municipality' || kind === 'OH-jedd-jedz',
     ...(membership?.collectorCode && { collectorCode: membership.collectorCode }),
+    ...(membership?.collectorCodeStatus && { collectorCodeStatus: membership.collectorCodeStatus }),
     ...(membership?.administrationStartedOn && {
       administrationStartedOn: membership.administrationStartedOn,
-      filingNote: 'Collector changed during 2026. Confirm transition instructions for earlier periods and amendments.',
+      filingNote: membership.filingNote ?? 'Collector changed during 2026. Confirm transition instructions for earlier periods and amendments.',
     }),
     ...(membership && { membershipSources: [...membership.sources], membershipVerifiedOn: membership.verifiedOn ?? ohioRouting.verifiedOn }),
   };

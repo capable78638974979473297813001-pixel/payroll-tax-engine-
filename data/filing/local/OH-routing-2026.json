@@ -219,6 +219,39 @@
         "https://www.cityofwch.com/183/Tax-Department",
         "https://www.cityofwch.com/DocumentCenter/View/2062/2026-JEDD-Employers-Withholding-Quarterly"
       ]
+    },
+    "9158": {
+      "agency": "OH-RITA",
+      "verifiedOn": "2026-11-13",
+      "administrationStartedOn": "2026-05-01",
+      "collectorCodeStatus": "unverified",
+      "filingNote": "RITA began administering this district on May 1, 2026. Report its withholding separately on Form 11. Select the district by name in MyAccount and confirm its boundary before allocating wages.",
+      "sources": [
+        "https://www.ritaohio.com/Municipalities/Home/MemberPage?id=910",
+        "https://www.ritaohio.com/Media/703129/2026%20FORM%2011%20INSTRL..pdf"
+      ]
+    },
+    "9159": {
+      "agency": "OH-RITA",
+      "verifiedOn": "2026-11-13",
+      "administrationStartedOn": "2026-05-01",
+      "collectorCodeStatus": "unverified",
+      "filingNote": "RITA began administering this district on May 1, 2026. Report its withholding separately on Form 11. Select the district by name in MyAccount and confirm its boundary before allocating wages.",
+      "sources": [
+        "https://www.ritaohio.com/Municipalities/Home/MemberPage?id=911",
+        "https://www.ritaohio.com/Media/703129/2026%20FORM%2011%20INSTRL..pdf"
+      ]
+    },
+    "9160": {
+      "agency": "OH-RITA",
+      "verifiedOn": "2026-11-13",
+      "administrationStartedOn": "2026-05-01",
+      "collectorCodeStatus": "unverified",
+      "filingNote": "RITA began administering this district on May 1, 2026. Report its withholding separately on Form 11. Select the district by name in MyAccount and confirm its boundary before allocating wages.",
+      "sources": [
+        "https://www.ritaohio.com/Municipalities/Home/MemberPage?id=913",
+        "https://www.ritaohio.com/Media/703129/2026%20FORM%2011%20INSTRL..pdf"
+      ]
     }
   },
   "rosters": {
