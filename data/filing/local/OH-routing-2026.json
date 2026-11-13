@@ -195,6 +195,22 @@
         "https://cms2.revize.com/revize/akronoh/Documents/Departments/Finance/Income%20Tax/JEDD/JEDD%20Business%20Registration.pdf",
         "https://online.akronohio.gov/"
       ]
+    },
+    "9080": {
+      "agency": "OH-DAYTON-MIAMI-JEDD",
+      "verifiedOn": "2026-11-13",
+      "sources": [
+        "https://www.daytonohio.gov/261/Joint-Economic-Development-District",
+        "https://www.daytonohio.gov/DocumentCenter/View/2428/MT-DAYTON-JEDD-DW-1---12-2025"
+      ]
+    },
+    "9081": {
+      "agency": "OH-DAYTON-BUTLER-JEDD",
+      "verifiedOn": "2026-11-13",
+      "sources": [
+        "https://www.daytonohio.gov/261/Joint-Economic-Development-District",
+        "https://www.daytonohio.gov/DocumentCenter/View/2429/BT-DAYTON-JEDD-DW-1---9-2016"
+      ]
     }
   },
   "rosters": {

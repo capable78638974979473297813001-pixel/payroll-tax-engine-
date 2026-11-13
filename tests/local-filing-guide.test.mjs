@@ -457,3 +457,14 @@ test('Akron district accounts use JW-3 while the city uses AW-3', () => {
   }
   assert.equal(localWithholdingGuide('OH-municipality', '01000', 2026).guide.returns[1][0], 'AW-3');
 });
+
+test('Dayton township districts select the matching DW-1 and flag the city-only DW-3 lines', () => {
+  for (const [id, name, coupon] of [['9080', 'Miami', 'MT-DAY'], ['9081', 'Butler', 'BT-DAY']]) {
+    const result = localWithholdingGuide('OH-jedd-jedz', id, 2026);
+    assert.equal(result.agency, 'OH-DAYTON-' + name.toUpperCase() + '-JEDD');
+    assert.equal(result.guide.returns[0][0], 'DW-1 ' + coupon + ' JEDD');
+    assert.match(result.guide.returns[1][1], /Ask Dayton how to report district wages/);
+    assert.match(result.guide.payment, /643700/);
+  }
+  assert.match(localAgencyGuide('OH-DAYTON', 2026).filing, /100 or more employee records/);
+});

@@ -1380,7 +1380,7 @@
         "Reconcile 2026 withholding by March 1, 2027 under the Ohio Sunday rule. Include W-2s or an equivalent listing and applicable 1099-MISC and 1099-NEC copies. Pay any balance separately."
       ]
     ],
-    "filing": "Use the city DW-1 for Dayton wages. Submit zero returns through the city zero-withholding portal. Mail DW-3 to the address on the form. For more than 100 employees, confirm the 2026 electronic media specifications with Dayton because its forms page currently lists 2025 specifications.",
+    "filing": "Use the city DW-1 for Dayton wages. Submit zero returns through the city zero-withholding portal. Mail DW-3 to the address on the form. The DW-3 requires electronic media for 100 or more employee records. Confirm the 2026 electronic media specifications with Dayton because its forms page currently lists 2025 specifications.",
     "payment": "Use eBill, bank-initiated ACH or Ohio Business Gateway. The city payment portal excludes paper checks and credit cards.",
     "sources": [
       "https://daytonohio.gov/279/Tax-Forms",
@@ -1391,7 +1391,7 @@
       "https://codes.ohio.gov/ohio-revised-code/section-718.03",
       "https://codes.ohio.gov/ohio-revised-code/section-1.14"
     ],
-    "verifiedOn": "2026-11-12"
+    "verifiedOn": "2026-11-13"
   },
   "OH-CANTON": {
     "collector": "City of Canton Income Tax Department",
@@ -1467,5 +1467,55 @@
       "https://codes.ohio.gov/ohio-revised-code/section-1.14"
     ],
     "verifiedOn": "2026-11-12"
+  },
+  "OH-DAYTON-MIAMI-JEDD": {
+    "collector": "City of Dayton Finance Department for the Miami Township-Dayton JEDD",
+    "registration": "Send the New Business Questionnaire by mail or fax. Select Employee Withholding and provide the FEIN and worksite address. The district names do not appear among the location boxes. Confirm the correct selection with Dayton at 937-333-3500.",
+    "returns": [
+      [
+        "DW-1 MT-DAY JEDD",
+        "Monthly returns and payments are due on the 15th of the following month. Quarterly returns and payments are due by the last day of the following month. Dayton lists monthly filing above $2,399 last year or $600 last quarter. Ohio law also requires monthly remittance if withholding or required withholding exceeded $200 in any month of the preceding quarter, even if the quarter totaled $600 or less. Confirm the account schedule with Dayton if these tests differ."
+      ],
+      [
+        "DW-3",
+        "Reconcile 2026 withholding by March 1, 2027. The district coupon refers employers to DW-3 for W-2 reporting. The published DW-3 shows Dayton city payroll and its city rate. Ask Dayton how to report district wages and deposits before completing those lines."
+      ]
+    ],
+    "filing": "Sign the MT-DAY JEDD coupon for the period and report only payroll and withholding for the Miami Township-Dayton district. Keep Dayton city withholding separate.",
+    "payment": "Mail the district coupon with a check or money order payable to City of Dayton to PO Box 643700, Cincinnati, OH 45264-3700. Pay previously reported balances separately.",
+    "sources": [
+      "https://www.daytonohio.gov/261/Joint-Economic-Development-District",
+      "https://www.daytonohio.gov/DocumentCenter/View/2428/MT-DAYTON-JEDD-DW-1---12-2025",
+      "https://www.daytonohio.gov/DocumentCenter/View/2432/New-Business-Questionnaire-Rev-2-2016",
+      "https://www.daytonohio.gov/DocumentCenter/View/615/DW-3-Annual-Reconciliation-PDF",
+      "https://codes.ohio.gov/ohio-revised-code/section-718.03",
+      "https://codes.ohio.gov/ohio-revised-code/section-1.14"
+    ],
+    "verifiedOn": "2026-11-13"
+  },
+  "OH-DAYTON-BUTLER-JEDD": {
+    "collector": "City of Dayton Finance Department for the Butler Township-Dayton JEDD",
+    "registration": "Send the New Business Questionnaire by mail or fax. Select Employee Withholding and provide the FEIN and worksite address. The district names do not appear among the location boxes. Confirm the correct selection with Dayton at 937-333-3500.",
+    "returns": [
+      [
+        "DW-1 BT-DAY JEDD",
+        "Monthly returns and payments are due on the 15th of the following month. Quarterly returns and payments are due by the last day of the following month. Dayton lists monthly filing above $2,399 last year or $600 last quarter. Ohio law also requires monthly remittance if withholding or required withholding exceeded $200 in any month of the preceding quarter, even if the quarter totaled $600 or less. Confirm the account schedule with Dayton if these tests differ."
+      ],
+      [
+        "DW-3",
+        "Reconcile 2026 withholding by March 1, 2027. The district coupon refers employers to DW-3 for W-2 reporting. The published DW-3 shows Dayton city payroll and its city rate. Ask Dayton how to report district wages and deposits before completing those lines."
+      ]
+    ],
+    "filing": "Sign the BT-DAY JEDD coupon for the period and report only payroll and withholding for the Butler Township-Dayton district. Keep Dayton city withholding separate.",
+    "payment": "Mail the district coupon with a check or money order payable to City of Dayton to PO Box 643700, Cincinnati, OH 45264-3700. Pay previously reported balances separately.",
+    "sources": [
+      "https://www.daytonohio.gov/261/Joint-Economic-Development-District",
+      "https://www.daytonohio.gov/DocumentCenter/View/2429/BT-DAYTON-JEDD-DW-1---9-2016",
+      "https://www.daytonohio.gov/DocumentCenter/View/2432/New-Business-Questionnaire-Rev-2-2016",
+      "https://www.daytonohio.gov/DocumentCenter/View/615/DW-3-Annual-Reconciliation-PDF",
+      "https://codes.ohio.gov/ohio-revised-code/section-718.03",
+      "https://codes.ohio.gov/ohio-revised-code/section-1.14"
+    ],
+    "verifiedOn": "2026-11-13"
   }
 }
