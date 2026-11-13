@@ -42,6 +42,14 @@
    "revision": "Idaho entry updated 03/22/2025",
    "verifiedOn": "2026-11-06",
    "verifiedBy": "read from the federal matrix (layout text of the PDF fetched live 2026-11-06) the Idaho entry, 'Updated On: 03/22/2025': reporting timeframe 'Within 20 days of start date'. This matrix is the Office of Child Support Services' consolidated list of each state directory's own timeframe, contact and website; the state's statute or directory page was not separately read."
+  },
+  {
+   "id": "S3",
+   "title": "Idaho State Tax Commission: 1099 e-filing update for employers and payroll providers (news release, 2026-11-05)",
+   "url": "https://tax.idaho.gov/pressrelease/1099-e-filing-update-for-employers-and-payroll-providers/",
+   "revision": "news release dated 2026-11-05, fetched live 2026-11-10",
+   "verifiedOn": "2026-11-10",
+   "verifiedBy": "fetched directly from tax.idaho.gov on 2026-11-10 and read: the TXT option for e-filing Idaho 1099s will no longer be available; Idaho uses the same XML and CSV upload templates as the IRS (IRIS), so a file that works with the IRS works for Idaho; employers e-file Idaho 1099s in TAP with one of those templates starting in 2027, after getting an IRS IRIS Transmitter Control Code; filers in the Combined Federal/State Filing program see no change but must file Form 967 if there is Idaho withholding; a 1099 e-filing guide is promised. The Withholding Filing page (read 2026-11-10) still describes TAP as the filing channel; https://tap.tax.idaho.gov loads as 'Idaho TAP - Home' (the same Taxpayer Access Point), and the owner read the Commission's own TAP Help page on 2026-11-10 as linking to tap.tax.idaho.gov, so that address is the state's own portal; no page read states that TAP moved there from another address."
   }
  ],
  "agencies": {
@@ -179,16 +187,18 @@
   {
    "id": "state:ID:tap",
    "function": "withholding returns (Form 910, 967), W-2/1099 filing, substitute forms",
-   "description": "Idaho TaxAccess Point (TAP); the Commission publishes Substitute Forms Specifications so software can produce approved substitute withholding forms",
+   "description": "Idaho TaxAccess Point (TAP); the Commission publishes Substitute Forms Specifications so software can produce approved substitute withholding forms; reached at https://tap.tax.idaho.gov (S3)",
    "enrollment": [
     "Register for an Idaho withholding account (steps not read) and use TAP.",
     "To produce substitute withholding forms from software, follow the Commission's Substitute Forms Specifications and contact its Substitute Forms Help Desk for approval."
    ],
-   "specs": "Substitute Forms Specifications: named on the page, not read.",
+   "specs": "Substitute Forms Specifications: named on the page, not read. Idaho 1099 e-filing moves to the IRS IRIS XML and CSV upload templates from 2027 and the TXT upload is withdrawn (S3); the 1099 e-filing guide was not yet published.",
    "source": "S1"
   }
  ],
- "notModelled": [],
+ "notModelled": [
+  "Idaho's 1099 e-file format change for 2027 (IRS IRIS XML or CSV template uploaded in TAP, no TXT) is recorded in the channel; the Commission's promised 1099 e-filing guide had not been published when this was read (S3)."
+ ],
  "ui": {
   "wageBase": 5830000,
   "wageBaseYear": 2026,

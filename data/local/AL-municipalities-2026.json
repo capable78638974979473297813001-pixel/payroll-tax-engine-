@@ -17,7 +17,7 @@
     "$comment": "Lookup is by name, so a name the caller spells the way the WORLD spells it must still resolve. ALM's own page prints \"Hacklebug\", which is not a place: the Marion County town is HACKLEBURG (population ~1,500, the one flattened by the 2011 tornado), and it sits among the other Marion/Winston County towns on ALM's own list -- Bear Creek, Brilliant, Guin, Hamilton, Lynn -- which is exactly where a Hackleburg entry belongs. Rather than silently correct a source this project quotes, the entry keeps ALM's spelling as its canonical name and gains an alias, so both spellings resolve to the same 1% and the discrepancy stays visible instead of being tidied away. If ALM's spelling turns out to be right and some other 'Hacklebug' exists, nothing has been lost -- the alias simply never matches.",
     "aliasesAreMatchedBy": "alMunicipalityRuleset() in src/registry.ts, case-insensitively, against name and every alias."
   },
-  "confidence": "Per entry -- see each entry's confirmation.tier. primary_source: the levying body's own ordinance, form or page, or the collecting agent's current return (Neumo 01/2026), or statute. league_survey_only: only the Alabama League of Municipalities' survey; these lines carry a secondary_source notice. conflicting_sources: Tuskegee, whose own form (3%) disagrees with the League (2%). As of 2026-09-28: 20 municipalities + Macon County primary, 8 league-survey-only (Bear Creek, Brilliant, Gadsden, Glencoe, Goodwater, Haleyville, Lynn, Red Bay), 1 conflicting (Tuskegee).",
+  "confidence": "Per entry -- see each entry's confirmation.tier. primary_source: the levying body's own ordinance, form or page, or the collecting agent's current return (Neumo 01/2026), or statute. league_survey_only: only the Alabama League of Municipalities' survey; these lines carry a secondary_source notice. conflicting_sources: none now (Tuskegee's own form and brochure both say 3%; only the League survey says 2%). As of 2026-09-28: Recounted 2026-11-12 from the entries' own tiers: 26 municipalities + Macon County primary (the city's own ordinance, form or page, or the collecting agent's return), 3 league-survey-only (Bear Creek, Brilliant, Lynn), none conflicting.",
   "municipalityCount": 29,
   "municipalities": [
     {
@@ -539,7 +539,7 @@
       "name": "Tuskegee",
       "rate": 0.03,
       "confirmation": {
-        "tier": "conflicting_sources",
+        "tier": "primary_source",
         "sources": [
           {
             "title": "City of Tuskegee -- Occupational Tax Reporting form",
@@ -549,8 +549,8 @@
           },
           {
             "title": "City of Tuskegee -- business information brochure",
-            "url": "https://www.tuskegeealabama.gov/sites/g/files/vyhlif3946/f/uploads/infobrochure_word.pdf",
-            "says": "readable fragment: \"to 3% of\" in the occupational license section",
+            "url": "https://www.tuskegeealabama.gov/1237/Business-License-Tax-Information-Brochur",
+            "says": "Occupation License section, read in full 2026-11-10: \"The fee amounts to 3% of the gross wages earned within the City of Tuskegee. Wages earned outside of the City of Tuskegee are not subject to the city's occupation license fee.\" Due the last day of the month after the quarter (the 25th of the following month for monthly remitters).",
             "fetchedOn": "2026-09-28"
           },
           {
@@ -560,7 +560,7 @@
             "note": "Still no ordinance text: Tuskegee's code is not on Municode or American Legal. The city's own current return says 3%."
           }
         ],
-        "conflict": "The Alabama League of Municipalities survey (and this file until 2026-09-28) says 2%. Tuskegee's own current return form computes the tax at 3%, and the city is the levying body, so 3% is used. The ordinance itself was not found online. The 2016 ADOR notice about a 2% Tuskegee levy is a SALES tax extension and says nothing about the occupational rate. Confirm with Tuskegee's Finance Department (334-720-0500) before relying on either figure."
+        "leagueSurveyNote": "RESOLVED 2026-11-10: two documents published by the City of Tuskegee agree on 3% of gross wages earned in the city: its Occupational Tax Reporting form ('TOTAL TAX DUE (3% OF LINE 2)') and its business license and tax brochure (read in full). The Alabama League of Municipalities' 2% comes from a survey the League says 'should be verified with the appropriate entity', and the Gadsden Times item repeats it, so 3% is used. The ordinance text itself was not found online (Tuskegee's code is not on Municode or American Legal). The 2016 ADOR notice about a 2% Tuskegee levy is a sales tax extension and says nothing about the occupational rate."
       },
       "$correctionNote": "CORRECTED 2026-09-28: was 0.02 from the League survey; Tuskegee's own form says 3%. See confirmation.conflict."
     }

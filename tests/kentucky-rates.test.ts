@@ -155,3 +155,16 @@ describe('Louisville/Jefferson County Metro and the cities inside it', () => {
     assert.equal(local(calculatePaycheck(ky('2026-06-15', { workCity: 'Augusta' })))?.amount, 2600);
   });
 });
+
+describe('Salem, Kentucky: a new 1% wage tax from 2026-10-01 (Ordinance 2026-05)', () => {
+  test('no wage tax on check dates before October 1, 1% from then on', () => {
+    assert.equal(local(calculatePaycheck(ky('2026-01-15', { workCity: 'Salem' }))), undefined);
+    assert.equal(local(calculatePaycheck(ky('2026-09-30', { workCity: 'Salem' }))), undefined);
+    assert.equal(local(calculatePaycheck(ky('2026-10-01', { workCity: 'Salem' })))?.amount, 2000);
+    assert.equal(local(calculatePaycheck(ky('2026-11-09', { workCity: 'Salem' })))?.amount, 2000);
+  });
+  test('the 2025 file carries none and the 2027 file carries 1%', () => {
+    assert.equal(local(calculatePaycheck(ky('2025-06-15', { workCity: 'Salem' }))), undefined);
+    assert.equal(local(calculatePaycheck(ky('2027-02-15', { workCity: 'Salem' })))?.amount, 2000);
+  });
+});

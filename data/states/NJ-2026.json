@@ -2005,6 +2005,25 @@
     "employerSuppliedRateRequired": false,
     "confidence": "cross_source_confirmed"
   },
+  "jerseyCityPayrollTax": {
+    "$comment": "Jersey City payroll tax, read 2026-11-09 from the city's own ordinance (Ordinance 18-133, adopted 2018-11-20 by 9-0, effective 2019-01-01, repealing and replacing the 1995 payroll tax that the NJ Supreme Court voided in Hudson County v. Jersey City, 153 N.J. 254) and the city's payroll tax page (jerseycitynj.gov/cityhall/finance/taxes/payrolltaxfaq). 304-19: 'a tax equal to 1% of the Employers' Payroll'; Payroll is remuneration subject to federal income tax withholding for services performed in Jersey City, or performed elsewhere but supervised from it; 304-19(a): 'An Employer shall incur no payroll tax relative to its Jersey City-resident Employees'; Employer excludes any employer with $2,500 or less of payroll in a calendar quarter and the federal, state, county, municipal, school, interstate-agency, foreign-insurer and charitable employers listed; 304-21: 'No Employer shall deduct or withhold any amount from the remuneration payable to an Employee because of the tax imposed by this article', so it is employer-paid only. Authorised by N.J.S.A. 40:48C-14 et seq. for municipalities over 200,000 residents. Dispatched off certificate.locality 'Jersey City'; certificate.jerseyCityResident exempts a Jersey City resident's wages. The $2,500 quarterly minimum and the exempt-employer list are employer-wide facts the engine cannot see.",
+    "rate": 0.01,
+    "quarterlyThresholdDollars": 2500,
+    "effectiveFrom": "2019-01-01",
+    "confidence": "primary_source_confirmed",
+    "sources": [
+      {
+        "title": "Jersey City Ordinance 18-133 (2018 Payroll Tax)",
+        "url": "https://mcclibraryfunctions.azurewebsites.us/api/ordinanceDownload/16093/948567/pdf",
+        "verifiedOn": "2026-11-09"
+      },
+      {
+        "title": "City of Jersey City -- Payroll Tax",
+        "url": "https://www.jerseycitynj.gov/cityhall/finance/taxes/payrolltaxfaq",
+        "verifiedOn": "2026-11-09"
+      }
+    ]
+  },
   "residentWithholdingNetOfWorkState": {
     "$comment": "For a resident working in another state that also withholds, an employer required to withhold here (input.residenceStateWithholding) withholds only the excess of this state's withholding over the work state's. Read by residenceStateWithholdingLine().",
     "source": {

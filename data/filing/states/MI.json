@@ -34,6 +34,14 @@
    "revision": "Michigan entry updated 05/28/2026",
    "verifiedOn": "2026-11-06",
    "verifiedBy": "read from the federal matrix (layout text of the PDF fetched live 2026-11-06) the Michigan entry, 'Updated On: 05/28/2026': reporting timeframe 'Within 20 calendar days after the date of hire or re-hire'. This matrix is the Office of Child Support Services' consolidated list of each state directory's own timeframe, contact and website; the state's statute or directory page was not separately read."
+  },
+  {
+   "id": "U3",
+   "title": "Michigan Unemployment Insurance Agency home page (MiUI)",
+   "url": "https://www.michigan.gov/leo/bureaus-agencies/uia",
+   "revision": "page fetched live 2026-11-10",
+   "verifiedOn": "2026-11-10",
+   "verifiedBy": "fetched directly from michigan.gov on 2026-11-10 and read: the page headlines 'Say HELLO to MiUI!', says account and claim information is now found in UIA's new system, MiUI, reached with a State of Michigan MiLogin account through the Pure Michigan Talent Connect site, and describes MiUI University as resources 'to prepare for the transition from MiWAM to MiUI'. The Department of Labor and Economic Opportunity's news release of 2026-11-09 (michigan.gov/leo/news/2026/11/09, read directly 2026-11-10) says 'The Michigan Unemployment Insurance Agency (UIA) today fully launches its MiUI platform' and that the new system replaces the 14-year-old MiWAM, 'which is now permanently offline'; it also says MiUI is where employers pay unemployment taxes, and that Current and historical account information was transferred from MiWAM."
   }
  ],
  "agencies": {
@@ -177,7 +185,7 @@
   ],
   "notModelled": [
    "Michigan's taxable wage base is $9,500 for most employers; the data file carries a lower $9,000 figure for a qualified-employer case. The profile uses $9,500 and the DOL compilation lists '$9,000 or $9,500'; which applies depends on a rate-notice classification not modelled.",
-   "The UIA's own April 2026 notice that the MiWAM Form 1028 upload format is no longer accepted was found in a search summary and not read; accepted formats are not scheduled here.",
+   "MiUI replaced MiWAM as the UIA's employer system on 2026-11-09 and MiWAM is permanently offline (U3). The UIA's own April 2026 notice that the MiWAM Form 1028 upload format is no longer accepted was found in a search summary and not read, and what formats MiUI accepts for quarterly wage reports was not read, so no accepted format is scheduled here.",
    "The $55 non-reporting penalty appears in a search summary of the FAQ and was not read.",
    "The agency's file format specifications, penalties not quoted above and portal enrollment steps were not read."
   ]

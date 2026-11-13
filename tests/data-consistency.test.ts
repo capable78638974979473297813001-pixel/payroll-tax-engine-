@@ -119,12 +119,14 @@ describe('new-employer rates against the Department of Labor January 2026 table'
     assert.equal(read('states/CO-2026.json').suiEmployer.confidence, 'primary_source_confirmed');
     assert.equal(read('states/WI-2026.json').suiEmployer.confidence, 'primary_source_confirmed');
   });
-  test('Maine carries a secondary all-in figure above the DOL base and says it is unconfirmed', () => {
+  test("Maine's all-in 2.54% is the DOL base 2.23% plus 0.14% CSSF and 0.17% UPAF, confirmed from Maine DOL's 2026 rate array", () => {
     const s = read('states/ME-2026.json').suiEmployer;
     assert.ok(s.newEmployerRate > dol.ME);
+    assert.equal(s.newEmployerRate, 0.0254);
+    assert.equal(Math.round((dol.ME + 0.0014 + 0.0017) * 10000), 254);
     assert.match(s.newEmployerRateSource, /January2026\.pdf/);
-    assert.match(s.newEmployerRateSource, /Treat as an estimate/);
-    assert.match(s.newEmployerRateSource, /stays unconfirmed/);
+    assert.match(s.newEmployerRateSource, /Combined Rate of 2\.54%/);
+    assert.match(s.newEmployerRateSource, /CONFIRMED from the agency's own document/);
   });
 });
 
@@ -234,5 +236,119 @@ describe('Massachusetts withholding against Circular M\'s own wage-bracket table
     assert.equal(await sit('daily', 21, 1), 0);
     assert.equal(await sit('weekly', 150, 1), 0);
     assert.equal(await sit('weekly', 155, 1), 2.93);
+  });
+});
+
+describe('Daily pay is annualized at 365 days in Hawaii, Georgia, Minnesota and Wisconsin, as their own published daily tables require (read 2026-11-07)', () => {
+  const sit = async (st: string, freq: string, wages: number, cert: Record<string, unknown>) => {
+    const { calculatePaycheck } = await import('../src/calculate.ts');
+    const r = calculatePaycheck({
+      checkDate: '2026-11-07', payFrequency: freq as never, earnings: [{ code: 'REG', category: 'regular', amount: Math.round(wages * 100) }], deductions: [],
+      federalW4: { filingStatus: 'single', multipleJobs: false, dependentCredit: 0, otherIncome: 0, deductions: 0, extraWithholding: 0 },
+      ytd: { socialSecurity: 0, medicare: 0, futa: 0 }, workState: { code: st, certificate: cert },
+    } as never);
+    return r.taxes.find((t: { id: string }) => t.id === `${st}_SIT`)!.amount / 100;
+  };
+  test('Hawaii Booklet A daily table, single: $60-70 row 2/1, $90-100 row 4/3/3 (whole dollars); the engine had returned $0.88 for the first', async () => {
+    assert.equal(Math.round(await sit('HI', 'daily', 65, { hawaiiMaritalStatus: 'single', allowances: 0 })), 2);
+    assert.equal(Math.round(await sit('HI', 'daily', 95, { hawaiiMaritalStatus: 'single', allowances: 0 })), 4);
+    assert.equal(Math.round(await sit('HI', 'daily', 95, { hawaiiMaritalStatus: 'single', allowances: 2 })), 3);
+  });
+  test('Georgia G-4 Table A daily: $44 -> 0.14, $61 -> 0.99 with 0 dependents and 0.31 with 1', async () => {
+    assert.equal(await sit('GA', 'daily', 44, { georgiaMaritalStatus: 'A', dependents: 0 }), 0.14);
+    assert.equal(await sit('GA', 'daily', 61, { georgiaMaritalStatus: 'A', dependents: 0 }), 0.99);
+    assert.equal(await sit('GA', 'daily', 61, { georgiaMaritalStatus: 'A', dependents: 1 }), 0.31);
+  });
+  test('Wisconsin W-166 daily table, single: $59-64 row 1.70 and $94-99 row 3.60 / 3.50 (0 and 2 exemptions)', async () => {
+    assert.ok(Math.abs((await sit('WI', 'daily', 61.5, { maritalStatus: 'single', exemptions: 0 })) - 1.7) <= 0.011 + 0.0);
+    assert.ok(Math.abs((await sit('WI', 'daily', 96.5, { maritalStatus: 'single', exemptions: 0 })) - 3.6) <= 0.011);
+    assert.ok(Math.abs((await sit('WI', 'daily', 96.5, { maritalStatus: 'single', exemptions: 2 })) - 3.5) <= 0.011);
+  });
+  test('Minnesota wh-inst daily table, single: $72-76 row (2 allowances) 2, $88-92 row 3 / 2 (2 and 3 allowances), $92-96 row (1 allowance) 4', async () => {
+    assert.equal(Math.round(await sit('MN', 'daily', 74, { maritalStatus: 'single', allowances: 2 })), 2);
+    assert.equal(Math.round(await sit('MN', 'daily', 90, { maritalStatus: 'single', allowances: 2 })), 3);
+    assert.equal(Math.round(await sit('MN', 'daily', 90, { maritalStatus: 'single', allowances: 3 })), 2);
+    assert.equal(Math.round(await sit('MN', 'daily', 94, { maritalStatus: 'single', allowances: 1 })), 4);
+  });
+});
+
+describe('Cross-frequency and sanity sweep over every state (2026)', () => {
+  const PERIODS: Record<string, number> = { weekly: 52, biweekly: 26, semimonthly: 24, monthly: 12 };
+  const codes = readdirSync(new URL('states/', root)).filter((f) => f.endsWith('-2026.json')).map((f) => f.slice(0, 2));
+  test('annualized state income tax is the same whichever of weekly/biweekly/semimonthly/monthly the pay is made in (Massachusetts excepted: Circular M deducts actual FICA against a year-to-date cap)', async () => {
+    const { calculatePaycheck } = await import('../src/calculate.ts');
+    const offenders: string[] = [];
+    for (const st of codes.filter((c) => c !== 'MA')) {
+      for (const annual of [18000, 36000, 60000, 100000, 200000]) {
+        const vals: number[] = [];
+        for (const [f, p] of Object.entries(PERIODS)) {
+          const r = calculatePaycheck({
+            checkDate: '2026-11-07', payFrequency: f as never, earnings: [{ code: 'REG', category: 'regular', amount: Math.round((annual / p) * 100) }], deductions: [],
+            federalW4: { filingStatus: 'single', multipleJobs: false, dependentCredit: 0, otherIncome: 0, deductions: 0, extraWithholding: 0 },
+            ytd: { socialSecurity: 0, medicare: 0, futa: 0 }, workState: { code: st, certificate: {} },
+          } as never);
+          const t = r.taxes.filter((x: { id: string; payer: string }) => x.payer === 'employee' && x.id.startsWith(st) && /_SIT$/.test(x.id)).reduce((a: number, x: { amount: number }) => a + x.amount, 0);
+          assert.ok(Number.isInteger(t) && t >= 0, `${st} ${f} ${annual}: ${t}`);
+          vals.push((t / 100) * p);
+        }
+        if (Math.max(...vals) - Math.min(...vals) > Math.max(60, 0.04 * Math.max(...vals))) offenders.push(`${st} ${annual}: ${vals.map(Math.round).join('/')}`);
+      }
+    }
+    assert.deepEqual(offenders, []);
+  });
+});
+
+describe('A paid-leave line that depends on an employer fact is never left out silently', () => {
+  const run = async (st: string, certificate: Record<string, unknown>, employer?: Record<string, unknown>) => {
+    const { calculatePaycheck } = await import('../src/calculate.ts');
+    return calculatePaycheck({
+      checkDate: '2026-11-08', payFrequency: 'biweekly', earnings: [{ code: 'REG', category: 'regular', amount: 300000 }], deductions: [],
+      federalW4: { filingStatus: 'single', multipleJobs: false, dependentCredit: 0, otherIncome: 0, deductions: 0, extraWithholding: 0 },
+      ytd: { socialSecurity: 0, medicare: 0, futa: 0 }, workState: { code: st, certificate }, ...(employer ? { employer } : {}),
+    } as never);
+  };
+  test('Colorado, Maine and Washington say the employer share needs the headcount fact, and stop saying so once it is given', async () => {
+    for (const st of ['CO', 'ME', 'WA']) {
+      assert.match((await run(st, {})).warnings?.join(' ') ?? '', new RegExp(`${st} paid leave: the employer's share was not computed`));
+      assert.equal(((await run(st, { employerLiableForPaidLeaveShare: true })).warnings ?? []).some((w) => /paid leave/.test(w)), false);
+    }
+  });
+  test('Delaware says its paid leave needs the employer tier, then the employee-share election', async () => {
+    assert.match((await run('DE', {})).warnings?.join(' ') ?? '', /DE paid leave was not computed/);
+    const withTier = await run('DE', {}, { paidLeaveTier: { DE: 'full' } });
+    assert.match(withTier.warnings?.join(' ') ?? '', /no employee share was withheld/);
+    const full = await run('DE', {}, { paidLeaveTier: { DE: 'full' }, paidLeaveEmployeeShareFraction: { DE: 0.5 } });
+    assert.equal((full.warnings ?? []).some((w) => /paid leave/.test(w)), false);
+  });
+  test('states with a fixed employee rate and no size gate (New Jersey, Minnesota) add no such warning', async () => {
+    for (const st of ['NJ', 'MN']) assert.equal(((await run(st, {})).warnings ?? []).some((w) => /paid leave/.test(w)), false);
+  });
+});
+
+describe('Maryland county withholding rates equal the Comptroller of Maryland\'s 2026 memo (Central Payroll Bureau, dated 2026-02-04, Attachment 1)', () => {
+  const memo: Record<string, number> = {
+    Allegany: 0.032, BaltimoreCounty: 0.032, BaltimoreCity: 0.032, Calvert: 0.032, Caroline: 0.032, Carroll: 0.0303, Cecil: 0.0274,
+    Charles: 0.0303, Dorchester: 0.033, Garrett: 0.0265, Harford: 0.0306, Howard: 0.032, Kent: 0.033, Montgomery: 0.032, PrinceGeorges: 0.032,
+    QueenAnnes: 0.032, StMarys: 0.032, Somerset: 0.032, Talbot: 0.024, Washington: 0.0295, Wicomico: 0.032, Worcester: 0.0225,
+  };
+  test('22 flat counties and the two tiered ones (Anne Arundel 2.70/2.94/3.20, Frederick 2.25/2.75/2.96/3.20)', () => {
+    const c = read('states/MD-2026.json').countyRates;
+    for (const [k, v] of Object.entries(memo)) assert.equal(c[k].flat, v, k);
+    assert.deepEqual(c.AnneArundel.tiered.single.map((b: { rate: number }) => b.rate), [0.027, 0.0294, 0.032]);
+    assert.deepEqual(c.AnneArundel.tiered.single.map((b: { from: number }) => b.from), [0, 50000, 400000]);
+    assert.deepEqual(c.AnneArundel.tiered.mfjHoh.map((b: { from: number }) => b.from), [0, 75000, 480000]);
+    assert.deepEqual(c.Frederick.tiered.single.map((b: { rate: number }) => b.rate), [0.0225, 0.0275, 0.0296, 0.032]);
+    assert.deepEqual(c.Frederick.tiered.single.map((b: { from: number }) => b.from), [0, 25000, 50000, 150000]);
+    assert.deepEqual(c.Frederick.tiered.mfjHoh.map((b: { from: number }) => b.from), [0, 25000, 100000, 250000]);
+  });
+});
+
+describe('Alabama: every municipality on the Alabama League of Municipalities\' occupational tax list (read 2026-11-09) is in the data', () => {
+  test('25 League entries plus the four towns the League never listed (Beaverton, Irondale, Notasulga, Tarrant)', () => {
+    const league = ['Attalla', 'Auburn', 'Bear Creek', 'Bessemer', 'Birmingham', 'Brilliant', 'Fairfield', 'Gadsden', 'Glencoe', 'Goodwater', 'Guin', 'Hacklebug', 'Haleyville', 'Hamilton', 'Leeds', 'Lynn', 'Midfield', 'Mosses', 'Opelika', 'Rainbow City', 'Red Bay', 'Shorter', 'Southside', 'Sulligent', 'Tuskegee'];
+    const m = read('local/AL-municipalities-2026.json').municipalities;
+    const names = (Array.isArray(m) ? m : Object.values(m)).map((x: { name: string }) => x.name);
+    for (const n of [...league, 'Beaverton', 'Irondale', 'Notasulga', 'Tarrant']) assert.ok(names.includes(n), n);
+    assert.equal(names.length, 29);
   });
 });

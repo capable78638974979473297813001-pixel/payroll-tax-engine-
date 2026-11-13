@@ -34,6 +34,14 @@
    "revision": "Ohio entry updated 04/08/2026",
    "verifiedOn": "2026-11-06",
    "verifiedBy": "read from the federal matrix (layout text of the PDF fetched live 2026-11-06) the Ohio entry, 'Updated On: 04/08/2026': reporting timeframe 'Within 20 days of hire date'. This matrix is the Office of Child Support Services' consolidated list of each state directory's own timeframe, contact and website; the state's statute or directory page was not separately read."
+  },
+  {
+   "id": "M1",
+   "title": "Central Collection Agency (CCA): Layout of W-2 Information and 1099 data fields, tax year 2026",
+   "url": "https://ccaohioprod.prod.acquia-sites.com/sites/default/files/2026-11/dfdict2026.pdf",
+   "revision": "'2026 - Layout of W2 Data Field Dictionary', posted 2026-11, fetched 2026-11-10",
+   "verifiedOn": "2026-11-10",
+   "verifiedBy": "fetched directly and read in full: CCA takes W-2s in the IRS EFW2 layout with RA, RE, RS, RW, RT and RF records and 1099-MISC/NEC in the IRS 1220 layout with T, A, B, C and F records; the RS record carries the CCA designation 'CC' and 3-digit city code, a tax type code of R (residence) or C (employment) in position 308, local taxable wages and local tax withheld; an employer reporting any CCA local W-2 data for an employee must report all local city W-2 information for that employee; employment and residence tax go in separate RS records; unlisted cities use code 887 with the municipality name; CCA will not accept media with more than one W-2 or 1099 file."
   }
  ],
  "agencies": {
@@ -793,7 +801,8 @@
   }
  ],
  "notModelled": [
-  "Ohio municipal taxes: not read."
+  "Ohio municipal taxes: not read.",
+  "CCA (Cleveland Central Collection Agency) municipal W-2 and 1099 file layout for tax year 2026 is read (M1) but is not encoded as a schedule or generator. Its own list of member communities in that document (Appendix A) differs from the member list on its website: the document omits Seville and Shreve and includes Waynesfield, while the website lists Seville and Shreve and not Waynesfield; the website list was used (Oakwood (Paulding) is on it, shown there as 'Oakwood (Paulding County)')."
  ],
  "ui": {
   "wageBase": 900000,

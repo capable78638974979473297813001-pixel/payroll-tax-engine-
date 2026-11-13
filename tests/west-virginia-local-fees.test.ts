@@ -63,8 +63,8 @@ for (const year of [2025, 2026, 2027]) {
   test(`${year}: every configured fee city resolves from an incorporated place and carries residency`, () => {
     const rules = JSON.parse(readFileSync(new URL(`../data/states/WV-${year}.json`, import.meta.url), 'utf8'));
     const cities = Object.keys(rules.localIncomeTax.serviceFeeCities);
-    assert.equal(cities.length, 13);
-    assert.ok(!cities.includes('Smithers'), 'do not invent a rate while sources conflict');
+    assert.equal(cities.length, 14);
+    assert.ok(cities.includes('Smithers'), 'Smithers is configured as a flagged estimate');
     for (const city of cities) {
       const resolved = resolveJurisdiction({ state: 'WV', incorporatedPlaces: [`${city} ${city === 'Rivesville' ? 'town' : 'city'}`], countySubdivisions: [], counties: [] }, date);
       assert.equal(resolved.wvServiceFeeCity, city);
@@ -83,6 +83,6 @@ for (const year of [2025, 2026, 2027]) {
 test('WV coverage remains partial and calls out unresolved rates and secondary sourcing', () => {
   const row = coverage().states.find(s => s.code === 'WV')!;
   assert.equal(row.localStatus, 'partial');
-  assert.equal(row.localCount, 13);
+  assert.equal(row.localCount, 14);
   for (const city of ['Smithers', 'Madison', 'Rivesville']) assert.match(row.localNote, new RegExp(city));
 });

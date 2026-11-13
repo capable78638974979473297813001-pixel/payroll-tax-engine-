@@ -336,6 +336,18 @@ describe('resolve.ts — real captured Census geographies', () => {
     assert.equal(resolved.flags.newark, true);
   });
 
+  test('Jersey City, NJ: sets the jerseyCity flag and not the newark flag', () => {
+    const geo: CensusGeographies = {
+      state: 'NJ',
+      incorporatedPlaces: ['Jersey City city'],
+      countySubdivisions: [],
+      counties: ['Hudson County'],
+    };
+    const resolved = resolveJurisdiction(geo, CHECK_DATE);
+    assert.equal(resolved.flags.jerseyCity, true);
+    assert.equal(resolved.flags.newark, false);
+  });
+
   test('downtown Portland, OR: sets multnomahCounty from the Counties layer', () => {
     const geo: CensusGeographies = {
       state: 'OR',

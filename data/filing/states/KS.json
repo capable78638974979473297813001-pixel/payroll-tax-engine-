@@ -1,7 +1,7 @@
 {
  "state": "KS",
  "name": "Kansas",
- "verifiedOn": "2026-11-04",
+ "verifiedOn": "2026-11-12",
  "sources": [
   {
    "id": "S1",
@@ -18,6 +18,102 @@
    "revision": "Kansas entry updated 03/22/2025",
    "verifiedOn": "2026-11-06",
    "verifiedBy": "read from the federal matrix (layout text of the PDF fetched live 2026-11-06) the Kansas entry, 'Updated On: 03/22/2025': reporting timeframe 'Within 20 days of hire date'. This matrix is the Office of Child Support Services' consolidated list of each state directory's own timeframe, contact and website; the state's statute or directory page was not separately read."
+  },
+  {
+   "id": "S2",
+   "title": "Kansas Department of Revenue, KW-100 Withholding Tax Guide (live PDF, Rev. 10-24)",
+   "url": "https://www.ksrevenue.gov/pdf/kw100.pdf",
+   "revision": "KW-100 (Rev. 10-24), read in full through a page-extraction service on 2026-11-12",
+   "verifiedOn": "2026-11-12",
+   "verifiedBy": "read the filing-the-state-copy-of-the-W-2 section ('Employers submitting more than 50 W-2 records must file electronically ... Employers reporting less than 51 records can file on paper'), that the KW-3 must be filed electronically with the W-2s and 1099s, that filers follow the Social Security Administration's EFW2/EFW2C specification for every record except the Code RS (state) record, whose layout is in the Department's K-2MT Kansas W-2 Specifications, and the quad-monthly due rule ('within three banking days of the 7th, 15th, 21st and the last day of the month'); the guide does not define 'banking days'."
+  },
+  {
+   "id": "U1",
+   "title": "Kansas Statutes 44-717 (collection of employer payments; penalties and interest on past-due reports and payments; electronic filing of wage reports, contribution returns and payments)",
+   "url": "https://ksrevisor.gov/statutes/chapters/ch44/044_007_0017.html",
+   "revision": "K.S.A. 44-717 as published by the Kansas Revisor of Statutes (history through L. 2024, ch. 83, section 9)",
+   "verifiedOn": "2026-11-12",
+   "verifiedBy": "fetched and read in full on 2026-11-12: (a)(1) an employer that fails to file a wage report or contribution return by the last day of the month following the close of the calendar quarter pays a penalty of .05% of the total wages paid in the quarter for each month or fraction of a month until it is received, never less than $25 nor more than $200 per report; contributions unpaid by the last day of the month following the quarter bear interest at 1% a month or fraction; interest under $5 is waived; a report, return or payment is deemed filed or paid on the date placed in the U.S. mail; a newly subject employer owes no penalty or interest if it files and pays within 10 days of the Department's notice; (i) a cash deposit or bond may be required after two delinquent quarters in four, and failing it adds a 2.0% surcharge; (k)(4) wage reports, contribution returns and payments due after June 30, 2024 must be filed and paid electronically by employers (and third-party administrators) with 25 or more employees, and the secretary may waive it for hardship."
+  },
+  {
+   "id": "U2",
+   "title": "Kansas Administrative Regulations 50-2-3, Payment of contributions and benefit cost payments",
+   "url": "https://rules.ks.gov/browse/collections/0ae1e448-f5a1-4e09-9d6d-a488ac7c284a/policies/5d9b10ab-db2d-41dc-a7c6-abaecc5c9bf1",
+   "revision": "authenticated regulation, amended Feb. 16, 2001",
+   "verifiedOn": "2026-11-12",
+   "verifiedBy": "fetched and read in full on 2026-11-12: (a) contributions are payable for each calendar quarter on wages paid in it; (b) a newly liable employer's first payment is due on or before the 25th day after the close of the quarter in which it becomes an employer; (f) when the regular payment day falls on a Saturday, Sunday or legal holiday the payment is due the first regular business day after; (g) mail is deemed made on the postmark date; (i) late payments are subject to K.S.A. 44-717."
+  },
+  {
+   "id": "U3",
+   "title": "Kansas Statutes 44-710 (employer contributions, payment; rates; reimbursing employers' reports and payments)",
+   "url": "https://www.ksrevisor.gov/statutes/chapters/ch44/044_007_0010.html",
+   "revision": "K.S.A. 44-710 as published by the Kansas Revisor of Statutes",
+   "verifiedOn": "2026-11-12",
+   "verifiedBy": "fetched and read on 2026-11-12: (a) contributions are paid under the secretary's rules and are not deducted from employees' wages; no payment is required for a quarter's contributions under $5; reimbursing employers file quarterly wage reports by the last day of the month following the quarter, deemed filed when mailed."
+  },
+  {
+   "id": "U4",
+   "title": "Kansas Department of Labor, Employer Services (dol.ks.gov/employers and kansasemployer.gov)",
+   "url": "https://www.dol.ks.gov/employers",
+   "revision": "pages fetched live 2026-11-12 through a page-extraction service (the Department's site answers 403 to direct automated requests)",
+   "verifiedOn": "2026-11-12",
+   "verifiedBy": "read in full: the Employer Self Service Portal is where employers register, maintain the unemployment insurance account, submit quarterly unemployment wage and tax returns and make unemployment tax payments (UI Tax/Employer Division, 785-296-5027, KDOL.UITax@ks.gov); the rate table (HB 2570 Schedule C: minimum 0%, maximum 6.95%, taxable wage base $15,100 for 2026 and $15,700 for 2027, new employer rate 1.75%, new construction industry employer rate 5.55%, rated governmental employers 0.10%); new-hire reporting within 20 days under K.S.A. 75-5743; Kansas is a client-reporting state for professional employer organizations (the PEO files a parent account and a separate return for each client)."
+  },
+  {
+   "id": "U5",
+   "title": "Kansas Department of Labor, Unemployment Tax (NASWA wage-file and payment-file specifications)",
+   "url": "https://www.dol.ks.gov/employers/employer-services/unemployment-tax",
+   "revision": "page fetched live 2026-11-12",
+   "verifiedOn": "2026-11-12",
+   "verifiedBy": "read: KDOL accepts the NASWA (ICESA) wage file as an ASCII .txt file of 275-character records, each line ended CR LF, with one Code A, one Code B, one or more Code E and one or more Code S records, a file name under 75 characters, and rejects an employer submitted twice in a quarter, future-quarter wage detail, an inactive account, total excess wages above total wages, or more than 99 employee records without an SSN; the payment file is ASCII of 381-character records in a zip, gz, bz2, txt or dat file of at most 5 MB (100 MB a day per organization). The field-by-field layouts were not in the text extracted."
+  },
+  {
+   "id": "H1",
+   "title": "State of Kansas designated holidays: Governor's memorandum 'Designated Holidays for 2026' (2025-08-20, Kansas Department of Administration) and, for 2027, Kansas State University's announcement of the state-designated holiday schedule",
+   "url": "https://admin.ks.gov/media/cms/holidays2026_2aae3ebfd972c.pdf",
+   "revision": "2026: memorandum dated 2025-08-20, a scanned image read visually. 2027: https://www.k-state.edu/news/articles/2026/11/university-holiday-schedule-announced.html (2026-11-09); the Governor's 2027 memorandum could not be retrieved (the Department of Administration's 2027 page links no memorandum). 2027 list confirmed a second time by Kansas State University's own memorandum of 2026-11-09 (k-state.edu/hr/benefits/leave-and-holidays/holidays/2026-2027-Holiday-Memo.pdf, read as an image), which lists the same ten 2027 dates; the Governor's 2027 memorandum itself is not posted where it could be found.",
+   "verifiedOn": "2026-11-12",
+   "verifiedBy": "2026, read from the memorandum: New Year's Day Thursday 2026-01-01; Martin Luther King Jr. Day Monday 2026-01-19; Memorial Day Monday 2026-05-25; Juneteenth Friday 2026-06-19; Independence Day observed Friday 2026-07-03 (legal holiday Saturday July 4); Labor Day Monday 2026-09-07; Veterans Day Wednesday 2026-11-11; Thanksgiving Thursday 2026-11-26 and Friday 2026-11-27; Christmas Eve Thursday 2026-12-24; Christmas Friday 2026-12-25. 2027, as relayed by the university for the state: New Year's Day Friday 2027-01-01; Martin Luther King Jr. Day Monday 2027-01-18; Memorial Day Monday 2027-05-31; Juneteenth Friday 2027-06-18; Independence Day Monday 2027-07-05; Labor Day Monday 2027-09-06; Veterans Day Thursday 2027-11-11; Thanksgiving Thursday 2027-11-25 and Friday 2027-11-26; Christmas observed Friday 2027-12-24; New Year's Day 2028 observed Friday 2027-12-31. Presidents Day is not a state holiday in either year."
+  },
+  {
+   "id": "U6",
+   "title": "Kansas Department of Labor, Employer Forms (dol.ks.gov/employers/employer-services/forms) and the Unemployment Tax page's FAQ",
+   "url": "https://www.dol.ks.gov/employers/employer-services/forms",
+   "revision": "page fetched live 2026-11-12 through a page-extraction service; the FAQ sentence is from the Department's Unemployment Tax page as quoted in a search result",
+   "verifiedOn": "2026-11-12",
+   "verifiedBy": "read: Status Report (K-CNS 010) - 'Every employing unit for which services are performed in employment shall file a report to determine status within 15 days after such first employment' (registered electronically); Quarterly Wage Report and Unemployment Tax Report (K-CNS 100), filed online with electronic payment, remittance for the full amount due with the report, certain employers required to file electronically; Adjustment to Employer's Wage Report (K-CNS 111); Employer Account Record Change (K-CNS 0103); Employer Representation Authorization (K-CNS 032, one per client for an accountant or TPA); New Hire Report (K-CNS 436, within 20 days of hiring); Notice of Benefit Charges (K-CNS 403, mailed each January, April, July and October) and Experience Rating Notice (K-CNS 404, mailed each year). The Unemployment Tax page's FAQ is quoted in a search result as: 'Employers with 26 or more employees must file online at KansasLabor.gov. Employers with 25 or less employees can download form K-CNS-100 and mail to Kansas Department of Labor, P.O. Box 400, Topeka, KS 66601-0400.' A search result titled 'Unemployment Services Login' (kansaslabor.gov, dated 2026-10-19) describes Kansas's new Wage & Tax Reporting System with new-employer registration; that page requires a login and was not read."
+  },
+  {
+   "id": "U7",
+   "title": "Kansas Statutes 44-710d (governmental entities; election, mode of payment; rated governmental employer; rate computation; notice)",
+   "url": "https://www.ksrevisor.gov/statutes/chapters/ch44/044_007_0010d.html",
+   "revision": "K.S.A. 44-710d as published by the Kansas Revisor of Statutes (L. 1981, ch. 206)",
+   "verifiedOn": "2026-11-12",
+   "verifiedBy": "fetched and read in full: a governmental entity may finance benefits as a contributing employer, a reimbursing employer or a rated governmental employer; electing to be rated lasts at least four complete calendar years and is made by written notice within 30 days after January 1 (or after the determination of subjectivity); a rated governmental employer reports total wages and makes quarterly benefit cost payments equal to total wages times its benefit cost rate, the rate never below .1%, and a quarter's payment under $1 is not required; the secretary notifies each such employer of its rate, which becomes final unless redetermination is applied for."
+  },
+  {
+   "id": "S3",
+   "title": "Kansas Department of Revenue, K-2MT 2025 W-2 Specifications for Electronic Filing, EFW2 Format (Rev. 10-25)",
+   "url": "https://www.ksrevenue.gov/pdf/k-2mt.pdf",
+   "revision": "K-2MT (Rev. 10-25), 3 pages, read in full through a page-extraction service on 2026-11-12",
+   "verifiedOn": "2026-11-12",
+   "verifiedBy": "read in full: Kansas follows the Social Security Administration's EFW2 format for every record except the Code RS (state) record; the RS record is 512 bytes, every field required (blank or zero filled), and must carry Kansas wages only; Code RA, RE, RW, RS, RT and RF are required, RO, RU and RV optional; the RS fields include state code 20 (positions 3-4), SSN (10-18), names (19-68), address (73-140), ZIP (141-149), the employer's Kansas withholding account number (248-267, form 036#######F##), state code (274-275), state taxable wages (276-286), state income tax withheld (287-297), other state data (298-307), local taxable wages and local tax withheld (309-330), state control number (331-337) and the employee's contribution to KPERS, KP&F and Judges (338-348); entities reporting for 51 or more employees or payees must file electronically; magnetic media is not accepted; 'All Tax Year 2025 W-2s must be filed by January 31, 2026'; mailing address KDOR - Electronic Services, PO Box 3506, Topeka, KS 66625-3506; Customer Relations 785-368-8222 or KDOR_tac@ks.gov."
+  },
+  {
+   "id": "R1",
+   "title": "Kansas Administrative Regulations 1-9-2, Holidays (state service)",
+   "url": "https://www.law.cornell.edu/regulations/kansas/K-A-R-1-9-2",
+   "revision": "regulation effective June 5, 2005, text as published by Cornell LII",
+   "verifiedOn": "2026-11-12",
+   "verifiedBy": "fetched and read in full: '(a) The following days shall be legal holidays for the state service: New Year's Day, Memorial Day, Independence Day, Labor Day, Veterans' Day, Thanksgiving Day, and Christmas Day. When one of these legal holidays falls on a Saturday, the preceding Friday shall be the officially observed holiday for state employees. When one of these legal holidays falls on a Sunday, the following Monday shall be the officially observed holiday'; '(b)(1) The governor may designate, in a particular year, additional days on which state offices are to be closed in observance of a holiday or a holiday season. For the purpose of this regulation, such a day shall be deemed a legal holiday.' K.A.R. 50-2-3(f) says 'legal holiday' without defining it."
+  },
+  {
+   "id": "S4",
+   "title": "Kansas Department of Revenue, KW-2CSV (W-2 CSV format) and KW-3E CSV (KW-3/KW-3E) specifications for electronic filing, Rev. 10-25, and the Electronic Withholding Requirements page",
+   "url": "https://ksrevenue.gov/pdf/KW-2CSV.pdf",
+   "revision": "KW-2CSV and KW-3E_CSV (Rev. 10-25) and ksrevenue.gov/eservw2.html, read in full on 2026-11-12",
+   "verifiedOn": "2026-11-12",
+   "verifiedBy": "read: KW-2CSV is a 35-column CSV for filers that cannot meet the SSA EFW2 layout (Form_Type 'W2'; employer EIN, name and address; employee SSN, name and address; a control number up to 50 characters; box 1 wages, box 2 federal tax and box 3 Social Security wages in ###.## form; two state blocks each with 'KS', the employer ID 036#########F##, state wages and state income tax); KW-3E CSV is a 24-column file of 'KW3' records (Kansas withholding tax number, EIN, year ending yyyy, business name and address, account-closed date mmddyyyy, return indicator '0' original, '1' amended, '2' additional, total tax withheld, payments, overpayment, penalty, interest, total, number of W-2s, change-of-address flag, then repeated Period_End_Dt mmddyyyy and Amt pairs), and bulk filers may upload several KW-3s in it; all 2025 W-2s and KW-3Es are due January 31, 2026; 51 or more employees or payees must file electronically; magnetic media is not accepted; CD-ROM is accepted only with the Department's approval when the web application is not feasible; bulk filers must contact the Department for approval first; the Department offers a KW-3 bulk upload Excel template and an online test page that checks file structure but not data."
   }
  ],
  "agencies": {
@@ -29,12 +125,46 @@
   "newHire": {
    "name": "Kansas State Directory of New Hires",
    "source": "N1"
+  },
+  "ui": {
+   "name": "Kansas Department of Labor, UI Tax/Employer Division",
+   "portalUrl": "https://kansaslabor.gov/",
+   "source": "U6"
   }
  },
  "calendar": {
   "weekendsRoll": true,
   "holidays": {
-   "verified": false
+   "verified": false,
+   "dates": [
+    "2026-01-01",
+    "2026-01-19",
+    "2026-05-25",
+    "2026-06-19",
+    "2026-07-03",
+    "2026-09-07",
+    "2026-11-11",
+    "2026-11-26",
+    "2026-11-27",
+    "2026-12-24",
+    "2026-12-25",
+    "2027-01-01",
+    "2027-01-18",
+    "2027-05-31",
+    "2027-06-18",
+    "2027-07-05",
+    "2027-09-06",
+    "2027-11-11",
+    "2027-11-25",
+    "2027-11-26",
+    "2027-12-24",
+    "2027-12-31"
+   ],
+   "years": [
+    2026,
+    2027
+   ],
+   "source": "H1"
   },
   "source": "S1"
  },
@@ -163,15 +293,15 @@
     "contents": [
      "Due by January 31 with the W-2s and 1099s that show Kansas withholding; must be filed electronically.",
      "Reports the total Kansas tax withheld on W-2s and 1099s, credits, and the number of forms; all KW-5 payments for the year are entered.",
-     "Employers with more than a stated number of W-2s must file them electronically (the number was not isolated)."
+     "Employers submitting more than 50 W-2 records must file them electronically; employers with fewer than 51 may send paper Copy 1 W-2s in Social Security number or alphabetical order with a copy of the electronic KW-3 submission (KW-100)."
     ],
-    "source": "S1"
+    "source": "S2"
    }
   ],
   "notModelled": [
-   "The meaning of 'banking days' for quad-monthly filers.",
-   "The KCSC file layouts for bulk W-2 and 1099 upload; registration steps beyond the filing-frequency item.",
-   "The Department's power to require more frequent payment."
+   "The meaning of 'banking days' for quad-monthly filers: KW-100 says reports are due 'within three banking days' of the 7th, 15th, 21st and last day of the month and does not define it.",
+   "The Department's power to require more frequent payment.",
+   "KCSC registration steps beyond the filing-frequency item."
   ]
  },
  "channels": [
@@ -183,16 +313,67 @@
     "Apply for a Kansas withholding account (Business Tax Application) giving the estimated annual withholding; the Department assigns the filing frequency and prints it on the Withholding Registration Certificate.",
     "Register a KCSC login and add the withholding account with its access code (first-time users obtain the code from the Taxpayer Assistance Center)."
    ],
-   "specs": "Bulk upload layouts for W-2s and 1099s: not read.",
-   "source": "S1"
+   "specs": "W-2 files follow the SSA EFW2/EFW2C layout for every record except the Kansas Code RS record, which is 512 bytes with every field required and Kansas wages only (K-2MT, Rev. 10-25, read: state code 20, SSN 10-18, names 19-68, address 73-140, employer's Kansas withholding account number 248-267 as 036#######F##, state taxable wages 276-286, state income tax withheld 287-297, other state data 298-307, local wages and tax 309-330, state control number 331-337, KPERS/KP&F/Judges contribution 338-348). Entities reporting 51 or more employees or payees must file electronically; magnetic media is not accepted; W-2s for a tax year are due January 31 of the next year. The Department also publishes CSV specifications (KW-2CSV for W-2s, KW-3E for the KW-3), which were not read. CSV alternatives (S4): KW-2CSV for W-2s (35 columns, Form_Type W2) and KW-3E CSV for KW-3s (24 columns, Form_Type KW3, Return_Indicator 0 original, 1 amended, 2 additional, repeated Period_End_Dt and Amt pairs); both due January 31 for the prior year. Bulk filers need the Department's approval first; the online test page checks structure only; CD-ROM only with approval.",
+   "source": "S3"
+  },
+  {
+   "id": "state:KS:kdol-ess",
+   "function": "quarterly wage report and unemployment tax return, unemployment tax payment, new-employer registration",
+   "description": "Kansas Department of Labor Wage & Tax Reporting System (kansaslabor.gov; the Employer Self Service Portal) for the quarterly wage report and unemployment tax return and payment; electronic filing and payment are required for employers and third-party administrators with 25 or more employees under K.S.A. 44-717(k), and the Department's FAQ says 26 or more must file online while smaller employers may mail form K-CNS-100 to P.O. Box 400, Topeka, KS 66601-0400; the Department also accepts a NASWA wage file and a payment file",
+   "enrollment": [
+    "File a Status Report (K-CNS 010) electronically within 15 days after first employment; the Department then determines liability. Existing employers with an Employer Account Number and no user ID register for a login in the new Wage & Tax Reporting System (login page not read).",
+    "An accountant or TPA files an Employer Representation Authorization (K-CNS 032) for each client.",
+    "A professional employer organization registers with the Secretary of State first, then files an Employer Status Report (K-CNS 010) for its parent account and a Client Status Report (K-CNS 015) for each client; each client files its own quarterly return."
+   ],
+   "specs": "NASWA wage file (ASCII .txt, 275-character records, Codes A, B, E and S) and payment file (381-character records, at most 5 MB); the Department's page says its field layout is 'defined below' but the layout tables are not in the readable page content (the live page and an archived copy return the same text), so the field-by-field layouts are not available here (U5).",
+   "source": "U5"
   }
  ],
  "notModelled": [
-  "Unemployment: NOT MODELLED. The Department of Labor's pages (dol.ks.gov, kansasemployer.gov) answer 403 to automated requests. Read elsewhere: K.S.A. 44-710 (reimbursing employers file quarterly wage reports by the last day of the month following the quarter; reports are deemed filed when mailed) and K.A.R. 50-2-3(f) (a payment day on a Saturday, Sunday or holiday moves to the first regular business day), but neither states the regular due date for contributing employers (K.A.R. 50-2-3(b) gives a 25th-day rule only for a newly liable employer's first payment). The wage base ($15,100, U.S. Department of Labor, January 2026) and the electronic-filing threshold were not recorded in the profile."
+  "Kansas legal holidays are applied from the Governor's designated state holidays for 2026 and 2027 on the owner's instruction. K.A.R. 50-2-3(f) says only 'legal holiday'; K.A.R. 1-9-2 (read) defines the legal holidays for the state service as New Year's Day, Memorial Day, Independence Day, Labor Day, Veterans' Day, Thanksgiving Day and Christmas Day (a Saturday holiday observed the Friday before, a Sunday holiday the Monday after) and deems any additional day the Governor closes state offices a legal holiday, so every date applied is a legal holiday by that regulation; the Governor's additional closure days (Martin Luther King Jr. Day, Juneteenth, the Friday after Thanksgiving, Christmas Eve 2026) come from the Governor's 2026 memorandum and, for 2027, from two Kansas State University announcements of the state schedule. Whether the Department of Labor and the Department of Revenue apply K.A.R. 1-9-2 to K.A.R. 50-2-3(f) is not stated. Years after 2027 skip weekends only and carry the warning."
  ],
  "newHire": {
-  "form": "New-hire report (federal Form W-4 or an equivalent) to the Kansas State Directory of New Hires; within 20 days of hire date",
+  "form": "New-hire report (K-CNS 436, federal Form W-4 or an equivalent) to the Kansas State Directory of New Hires; within 20 days of hire date",
   "daysFromStart": 20,
   "source": "N1"
+ },
+ "ui": {
+  "wageBase": 1510000,
+  "wageBaseYear": 2026,
+  "employerTaxLineId": "KS_SUI_ER",
+  "returns": [
+   {
+    "id": "quarterly-wage-and-contribution",
+    "name": "Quarterly Wage Report and Unemployment Tax Report (K-CNS 100)",
+    "frequency": "quarterly",
+    "due": {
+     "kind": "last_day_of_month_after_quarter"
+    },
+    "contents": [
+     "Wage reports, contribution returns and contributions are due by the last day of the month following the quarter: April 30, July 31, October 31 and January 31. K.S.A. 44-717(a)(1) puts the penalty on a report or return not filed, and interest on contributions not paid, by that day.",
+     "A due date falling on a Saturday, Sunday or legal holiday moves to the first regular business day after (K.A.R. 50-2-3(f)); a report or payment is deemed made on the postmark date (K.A.R. 50-2-3(g), K.S.A. 44-717(a)(1)).",
+     "A newly liable employer's first payment is due on or before the 25th day after the close of the quarter in which it became an employer (K.A.R. 50-2-3(b)); it owes no penalty or interest if it files and pays within 10 days of the Department's notice that it is subject.",
+     "Employers and third-party administrators with 25 or more employees must file and pay electronically (K.S.A. 44-717(k)(4)), with a hardship waiver. The Department's own FAQ is worded differently: 26 or more must file online, and smaller employers may mail form K-CNS-100 to P.O. Box 400, Topeka, KS 66601-0400. The two differ only at exactly 25 employees; the statute is used here.",
+     "Taxable wage base $15,100 for 2026 ($15,700 for 2027); new employer rate 1.75% (5.55% for new construction employers); the rate range is 0% to 6.95% (HB 2570 Schedule C). Contributions are the employer's own and are not deducted from wages (K.S.A. 44-710(a)); a quarter's contributions under $5 need not be paid.",
+     "Late filing: .05% of the quarter's total wages for each month or fraction of a month, at least $25 and at most $200 per report. Late payment: interest of 1% a month or fraction; interest under $5 is waived (K.S.A. 44-717(a)(1)). A cash deposit or bond may be required after two delinquent quarters in four, and failing it adds a 2.0% surcharge (K.S.A. 44-717(i)).",
+     "Reimbursing employers file quarterly wage reports by the last day of the month following the quarter (K.S.A. 44-710).",
+     "An adjustment to a filed wage report uses form K-CNS 111. The Department mails a Notice of Benefit Charges (K-CNS 403) each January, April, July and October and an Experience Rating Notice (K-CNS 404) each year; the experience rating notice carries the employer's assigned rate.",
+     "Rated governmental employers (K.S.A. 44-710d) elect that status for at least four complete calendar years by written notice within 30 days after January 1, report total wages each quarter and make quarterly benefit cost payments equal to total wages times the benefit cost rate the Department assigns (never below .1%; the Department's table shows 0.10% for 2025 to 2027); a quarter's payment under $1 is not required.",
+     "Reimbursing employers (K.S.A. 44-710) file the wage report by the last day of the month after the quarter and are billed for benefits charged; the bill is conclusive unless the employer applies for redetermination within 15 days after it was mailed, and payments in lieu unpaid 30 days after the mailing of the statement of benefit charges bear interest at 1% a month (K.S.A. 44-717(a)(1))."
+    ],
+    "source": "U1"
+   }
+  ],
+  "weekendRuleStated": true,
+  "notModelled": [
+   "K.A.R. 50-2-3 states the 25th-day date only for a newly liable employer's first payment; the last-day-of-the-month date for a contributing employer's quarterly wage report, return and payment comes from K.S.A. 44-717(a)(1), which sets when the penalty and interest begin, not from a sentence that says 'due'.",
+   "The Department's FAQ (quoted from a search result of its own page) says 26 or more employees must file online while K.S.A. 44-717(k)(4) says 25 or more; the statute is used. The Department's new Wage & Tax Reporting System login page was not read.",
+   "The field-by-field layouts of the NASWA wage file and the payment file are not published in readable text: the Department's Unemployment Tax page says the layout is 'defined below' but the live page and an archived copy of it end after the file-rejection rules, so the tables are likely images or attachments. The Wage & Tax Reporting System at kansaslabor.gov requires a login, so its pages were not read (no credentials were used)."
+  ]
+ },
+ "registration": {
+  "daysAfterTrigger": 15,
+  "trigger": "first employment (Status Report, K-CNS 010, to the Department of Labor)",
+  "source": "U6"
  }
 }

@@ -6,7 +6,8 @@ import { loadProfile, modelledStates, holidayFinding, isStateBusinessDay, onOrNe
 /**
  * Legal-holiday lists. Only an agency's own list counts: California's EDD publishes its observed legal holidays
  * and the next business day for each (2026 only); Delaware's Division of Revenue publishes a holiday table for
- * 2026-2029. Every other state still skips weekends only and says so. A state employee holiday schedule is NOT
+ * 2026-2029. Kansas applies the Governor's designated state holidays for 2026-2027 on the owner's instruction (neither Kansas agency
+ * publishes a list; K.A.R. 50-2-3(f) says only 'legal holiday'). Every other state still skips weekends only and says so. A state employee holiday schedule is NOT
  * used in place of the agency's list, because applying a holiday the agency does not observe could push a computed
  * due date later than the real one.
  */
@@ -58,9 +59,27 @@ describe('Minnesota (Department of Revenue withholding holiday schedule, 2026)',
   });
 });
 
+describe('Kansas (the Governor\'s designated state holidays, 2026-2027, applied on the owner\'s instruction)', () => {
+  const KS = loadProfile('KS');
+  test('Christmas, Thanksgiving and the Friday after, and the observed Independence Day are closed; Presidents Day is not', () => {
+    for (const d of ['2026-12-25', '2026-11-26', '2026-11-27', '2026-07-03', '2026-12-24', '2027-12-24', '2027-12-31', '2027-07-05']) assert.equal(isStateBusinessDay(d, KS), false, d);
+    for (const d of ['2026-02-16', '2027-02-15', '2026-07-06']) assert.equal(isStateBusinessDay(d, KS), true, d);
+  });
+  test('a withholding or unemployment due date on a holiday moves to the next business day', () => {
+    assert.equal(onOrNextStateBusinessDay('2026-12-25', KS), '2026-12-28'); // semi-monthly KW-5 due the 25th
+    assert.equal(onOrNextStateBusinessDay('2026-11-26', KS), '2026-11-30');
+    assert.equal(onOrNextStateBusinessDay('2027-12-31', KS), '2028-01-03');
+  });
+  test('2026 and 2027 only, so the warning stays for other years', () => {
+    assert.deepEqual(KS.calendar.holidays.years, [2026, 2027]);
+    assert.equal(KS.calendar.holidays.verified, false);
+    assert.match(holidayFinding(KS)!.message, /2026/);
+  });
+});
+
 describe('every other state still says its list was not read', () => {
   test('weekends only, with the warning', () => {
-    for (const st of modelledStates().filter((s) => s !== 'CA' && s !== 'DE' && s !== 'MN')) {
+    for (const st of modelledStates().filter((s) => s !== 'CA' && s !== 'DE' && s !== 'MN' && s !== 'KS')) {
       const p = loadProfile(st);
       assert.equal(p.calendar.holidays.verified, false, st);
       assert.equal(p.calendar.holidays.dates, undefined, st);

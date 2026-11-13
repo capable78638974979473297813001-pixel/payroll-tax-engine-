@@ -296,7 +296,8 @@
     "The phase-out-cap schedule's INTERMEDIATE tiers (the $7,000/$5,250/$3,500/$1,750 steps between the full-cap and zero-cap extremes) have not been individually exercised by a fixture — only the two extremes have.",
     "CLOSED 2026-09-02: the $263-vs-$256 personal exemption credit question is resolved -- see personalExemptionCredit.possibleInconsistencyInSource for the full primary-sourced explanation ($256 is simply the 2025 document's own figure, left unrevised in one 2026 worked-example line; $263 is correct and was already what this file modelled).",
     "Alternative supplemental-wage flat 8% method computed by flatRateSupplementalFromConfig() only on employer election (input.employer.supplementalFlatRateElection); without one the engine aggregates instead.",
-    "Nonresident allocation, statewide transit tax self-employment provisions, and OR-40N/OR-40P return-level mechanics are out of scope — payroll withholding only."
+    "Nonresident allocation, statewide transit tax self-employment provisions, and OR-40N/OR-40P return-level mechanics are out of scope — payroll withholding only.",
+    "Eugene Community Safety Payroll Tax, 2026-11-09: the employee side is modelled (OR_EUGENE_CSPT, secondary-source tier because the city's rate chart PDF could not be read); the 0.21% EMPLOYER payroll tax (0.15% on the first $100,000 for employers with two or fewer employees) and the self-employment tax are not, and the address resolver does not set certificate.locality Eugene, so the caller must."
   ],
   "suiVerification": {
     "checkedOn": "2026-10-18",
@@ -323,5 +324,75 @@
     "appliesWhen": "paid_separately",
     "election": "employer_option",
     "source": "Oregon's flat 8% — the same rate its no-certificate default uses — is documented in this file as the ALTERNATE method for supplemental wages paid separately from regular wages. An alternate is an employer choice, so it fires only on election."
+  },
+  "eugeneCommunitySafetyPayrollTax": {
+    "$comment": "Eugene Community Safety Payroll Tax, employee side (Ordinance 20616, effective 2021-01-01, sunsets 2028-12-31). Read 2026-11-09 from the City of Eugene's own payroll tax pages (eugene-or.gov/4281 and /4863): the Employee Payroll Tax exists, the employer withholds and remits it quarterly, it applies to employers with a physical location in the city limits (a remote worker who merely lives in Eugene is not covered), and the rates are 'based on the gross wages, less overtime wages, for the pay period' per its rate charts (a chart for July 1, 2026 - June 30, 2027 is titled on the city's site). The city's PDFs (rate chart, FAQ, return instructions) are not retrievable by this project, so the 0.44% rate and the annual threshold come from payroll-vendor release notes (NEOGOV, July 2025: 'Employees earning more than $31,304.00 ... 0.0044 (0.44%); employees earning $31,304.00 or less are exempt', the middle 0.30% tier removed 2025-07-01) and a colleague's reading of the 2026-27 chart ($32,344 = the Oregon standard minimum wage $15.55 x 2,080 hours, the same relationship as $31,304 = $15.05 x 2,080). Secondary-source tier on every line. The 0.21% employer payroll tax is NOT modelled.",
+    "employeeRate": 0.0044,
+    "employerRate": 0.0021,
+    "employerRateNote": "Employer payroll tax 0.21% of gross wages (the City of Eugene's own return instructions, EUG-PY-1, as quoted by the city's site search result: 'The Employer Payroll Tax rate is 0.0021 (or .21 percent). The reduced tax rate is applied only on 4th quarter or final returns'; Paylocity 2020 adds 0.15% on the first $100,000 for an employer with two or fewer employees; public government employers are exempt, 501(c)(3) nonprofits are not). The reduced rate and the exemption are employer-wide and not applied. CONFIRMED 2026-11-10 on the City of Eugene's own Employer Payroll Tax page (eugene-or.gov/4864, read directly): the rate is 0.0021 for all employers subject to the tax, applied to total subject wages paid to all employees, including employees who are exempt from the employee tax; employers with two or fewer average annual employees may claim 0.0015 on the first $100,000 of payroll, claimed on the fourth-quarter or final return; a business is subject once it has a physical location inside the Eugene city limits, and an employer with no Eugene location is not subject for a remote worker who lives in Eugene. Subject wages are Oregon withholding wages after pretax deductions, per the city's employer guide (eugene-or.gov/DocumentCenter/View/77196) as read by the owner on 2026-11-10; this project could not retrieve the guide, and the owner reports Eugene Code 3.754 (eugene.municipal.codes, read 2026-11-11) matches the engine's rates and cutoffs: 0.0044 employee, 0.0021 employer, 0.0015 on the first $100,000 for two or fewer employees, hours at locations outside the city not taxed, Ordinance 20616.",
+    "thresholds": [
+      {
+        "from": "2025-07-01",
+        "annual": 31304
+      },
+      {
+        "from": "2026-07-01",
+        "annual": 32344,
+        "perPeriod": {
+          "weekly": 622,
+          "biweekly": 1244,
+          "semimonthly": 1348,
+          "monthly": 2695,
+          "daily": 124,
+          "semiannual": 16172
+        },
+        "perPeriodSource": "Pay-period cutoffs on the City of Eugene's employee rate chart for July 1, 2026 to June 30, 2027 (updated 2026-10-27), as read from the city's chart by the owner on 2026-11-10 (CONFIRMED: every cutoff below, 'Exempt' at or below a cutoff, 0.0044 above it, overtime left out only when choosing the rate, no quarterly row): twice-annual $16,172, monthly $2,695, twice-monthly $1,348, biweekly $1,244, weekly $622, daily $124; 0% at or below the cutoff, 0.44% of subject wages above it. This project's own automated reads of the chart (eugene-or.gov/DocumentCenter/View/83387) and of Eugene Code 3.754 are still blocked, so it relies on the owner's reading, which also covers Code 3.754 (matches the engine). They equal $32,344 divided by 2, 12, 24, 26, 52 and 260 and rounded to the nearest dollar, which is consistent with the annual figure. A frequency not listed (quarterly, annual) uses the annual threshold divided evenly."
+      }
+    ],
+    "expires": "2028-12-31",
+    "thresholdBasis": "Oregon standard minimum wage x 2,080 hours, reset every July 1",
+    "certificate": "workState.certificate.locality (or localities) includes 'Eugene' when the employer's physical location is inside the Eugene city limits",
+    "confidence": "secondary_source",
+    "sources": [
+      {
+        "title": "City of Eugene -- Employee Payroll Tax",
+        "url": "https://www.eugene-or.gov/4863/Employee-Payroll-Tax",
+        "verifiedOn": "2026-11-09"
+      },
+      {
+        "title": "City of Eugene -- Tax Rate Charts for the Employee Payroll Tax, July 1, 2026 - June 30, 2027 (title only; the PDF was not retrievable)",
+        "url": "https://www.eugene-or.gov/DocumentCenter/View/83387/7126---63027-Employee-tax-rate-charts",
+        "verifiedOn": "2026-11-09"
+      },
+      {
+        "title": "NEOGOV Payroll Release Notes, July 24 2025 (Eugene CSPT thresholds and 0.44%)",
+        "url": "https://success.neogov.com/payroll-product-updates-115/july-24-2025-payroll-release-notes-16207",
+        "verifiedOn": "2026-11-09"
+      }
+    ]
+  },
+  "springfieldPayrollTax": {
+    "$comment": "Springfield, Oregon payroll tax, read 2026-11-09 from the City of Springfield's own pages: the Payroll Tax Program Overview (updated 2026-10-14), the Springfield Payroll Tax page and the FAQ (springfield-or.gov/city/community-engagement/springfield-payroll-tax/). The City Council adopted the ordinance on 2026-06-01. 0.1% employer and 0.1% employee (the employer withholds it), 0.1% of net earnings from self-employment for sole proprietors; tied to the employer's taxable Springfield business location, not to where the employee lives. It applies to pay periods BEGINNING on or after 2027-01-01 (a period starting in December 2026 is not taxed even if paid in January). Employers file quarterly (first return due 2027-04-30), report locality code SPFLD in W-2 box 20, and may elect to pay the employee share. Ordinance No. 6515 as adopted on 2026-06-01 by 6 to 0 (ecode360.com/SP5045/laws/LF2878733.pdf, read directly 2026-11-10) supersedes the draft exhibit read earlier. Its adopted wage definition (7.1202) INCLUDES employee deferrals into 401(k), 403(b), 457 and similar plans, and excludes benefits under a Section 125 plan that the employee does not take in cash, qualified fringe benefits (sections 79, 105, 106, 127, 129, 132 and others), employer retirement contributions, accountable-plan reimbursements, and small amounts (domestic service under $1,000 a year, seasonal agricultural labor under $300, casual labor under $50). Section 5 has the City Manager set the first date the tax is owed by administrative rule, no sooner than 2027-01-01. 7.1204(1) taxes employers except the federal government, the State of Oregon and its political subdivisions; 7.1204(2) taxes every employee who performs services at an employer's business location in the city; 7.1204(4) excludes services attributable to locations outside the city; 7.1204(5), read literally, has the employer withhold both rates, and the city's FAQ and the owner's guidance are that only the employee's 0.1% is withheld, which is what the engine does. The earlier draft exhibit said: 7.1204 taxes employers other than the federal government, the State of Oregon and its political subdivisions at 0.1% of wages and employees at 0.1%, owes no tax for hours worked at an employer location outside the city, has the employer withhold, and holds both rates for three years from when collection begins; 7.1202 'Wages' excludes remuneration for domestic service in a private home under $1,000 a year, casual labor not in the employer's trade or business, solely seasonal agricultural labor, seamen exempt from garnishment, temporary emergency firefighters not subject to ORS chapter 316 withholding, employees' trusts exempt under IRC 401 as of 1996-12-31, and pay that is not wages under IRC 3121(a)(5)(I) as of 1996-12-31 (superseded by the adopted text above). The engine applies the Section 125 and transportation-fringe exclusions and none of the small-amount ones. The city's adopted-ordinance FAQ (springfield-or.gov, 2026-06-03, read directly 2026-11-10) says the ordinance (No. 6515, as reported) is effective 30 days after adoption and approval, that the date the tax becomes due will be set by administrative rule of the City Manager and will be no sooner than 2027-01-01, that wages for work outside the city limits are not taxed, and that the code lists categories of remuneration that are not taxable wages. The city's FAQ (springfield-or.gov/city/community-engagement/springfield-payroll-tax/payroll-tax-faqs, read directly 2026-11-12) confirms: the tax begins 2027-01-01 for pay periods beginning on or after that date (a period starting in December 2026 is not taxed even if paid in January); employer registration opens 2027-03-01; the first quarterly return, for 2027-01-01 to 2027-03-31, is due 2027-04-30; W-2 box 20 locality code SPFLD; the employer may elect to pay the employee portion. The administrative rule setting the date and the allocation rules are 'coming soon' and were not read.",
+    "employeeRate": 0.001,
+    "employerRate": 0.001,
+    "effectiveFrom": "2027-01-01",
+    "confidence": "primary_source_confirmed_adopted_ordinance_read_start_date_set_by_rule",
+    "sources": [
+      {
+        "title": "City of Springfield, OR -- Payroll Tax Program Overview (updated 2026-10-14)",
+        "url": "https://springfield-or.gov/wp-content/uploads/2026/10/Payroll_Tax_Program_Overview_FINAL.pdf",
+        "verifiedOn": "2026-11-09"
+      },
+      {
+        "title": "City of Springfield, OR -- Springfield Payroll Tax",
+        "url": "https://springfield-or.gov/city/community-engagement/springfield-payroll-tax/",
+        "verifiedOn": "2026-11-09"
+      },
+      {
+        "title": "City of Springfield, OR -- Payroll Tax FAQs",
+        "url": "https://springfield-or.gov/city/community-engagement/springfield-payroll-tax/payroll-tax-faqs/",
+        "verifiedOn": "2026-11-09"
+      }
+    ]
   }
 }

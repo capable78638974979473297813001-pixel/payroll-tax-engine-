@@ -8432,6 +8432,27 @@ describe('West Virginia', () => {
     assert.equal(amountOf(r, 'WV_SIT'), dollars(24));
   });
 
+  test('SB 392 tables start with checks dated 2026-06-12: $800 weekly is $25 the day before, $24 from then on', () => {
+    // WV Form IT-100.2A (March 2026) shows 2.11/2.81/3.16/4.22/4.58% for the
+    // two-earner table and applies from the SB 392 effective date, 2026-06-12.
+    // Before that the October 2024 tables (4.44% top bracket here) were still
+    // the ones West Virginia published: 16.81 + 4.44% x 184.54 = $25.00.
+    const at = (checkDate: string, certificate: Record<string, unknown> = { exemptions: 1 }) =>
+      calculatePaycheck(
+        input({
+          checkDate,
+          payFrequency: 'weekly',
+          earnings: [{ code: 'REG', category: 'regular', amount: dollars(800) }],
+          ...wvState(certificate),
+        }),
+      );
+    assert.equal(amountOf(at('2026-06-11'), 'WV_SIT'), dollars(25));
+    assert.equal(amountOf(at('2026-06-12'), 'WV_SIT'), dollars(24));
+    assert.equal(amountOf(at('2026-11-09'), 'WV_SIT'), dollars(24));
+    assert.equal(amountOf(at('2027-02-05'), 'WV_SIT'), dollars(24));
+    assert.equal(amountOf(at('2026-11-09', { exemptions: 1, oneEarnerElection: true }), 'WV_SIT'), dollars(21));
+  });
+
   test('weekly $800, 1 exemption, One Earner/One Job elected (IT-104 Line 5): $21', () => {
     // Same taxable $761.54, but the ONE-EARNER table's bracket [481-769,
     // base 12.17, 3.16%] applies instead: 12.17 + 3.16%x(761.54-481=280.54)
@@ -8551,7 +8572,7 @@ describe('West Virginia', () => {
       assert.equal(r.taxes.some((t) => t.id === 'WV_LOCAL_FEE'), false);
     });
 
-    test('Madison, weekly pay: work-location-based like Wheeling, no residency exception ($3.00/wk)', () => {
+    test('Madison, weekly pay: work-location-based like Wheeling, no residency exception ($1.25/wk, the 2020 increase to $3.00 having been cancelled, confirmed by the owner 2026-11-11, so no notice)', () => {
       const r = calculatePaycheck(
         input({
           payFrequency: 'weekly',
@@ -8559,7 +8580,20 @@ describe('West Virginia', () => {
           workState: { code: 'WV', certificate: { locality: 'Madison' } },
         }),
       );
-      assert.equal(amountOf(r, 'WV_LOCAL_FEE'), dollars(3.0));
+      assert.equal(amountOf(r, 'WV_LOCAL_FEE'), dollars(1.25));
+      assert.ok(!r.notices?.some((n) => n.taxId === 'WV_LOCAL_FEE'));
+    });
+
+    test('Smithers, weekly pay: $0.50/wk estimate with a conflicting-sources notice', () => {
+      const r = calculatePaycheck(
+        input({
+          payFrequency: 'weekly',
+          earnings: [{ code: 'REG', category: 'regular', amount: dollars(800) }],
+          workState: { code: 'WV', certificate: { locality: 'Smithers' } },
+        }),
+      );
+      assert.equal(amountOf(r, 'WV_LOCAL_FEE'), dollars(0.5));
+      assert.ok(r.notices?.some((n) => n.taxId === 'WV_LOCAL_FEE' && n.tier === 'conflicting_sources'));
     });
 
     test('Fairmont, non-resident duty station: nonResidentOnly city still charges a nonresident ($2.00/wk)', () => {
@@ -9762,11 +9796,11 @@ describe('Mississippi', () => {
     assert.equal(amountOf(r, 'MS_SIT'), dollars(71));
   });
 
-  test("married with BOTH spouses employed gets only HALF the deduction — Section 13(d)'s own 'divided equally' rule", () => {
-    // Same $3,000 monthly: $36,000 - $2,300 (half of $4,600) = $33,700 -
-    // $10,000 = $23,700 taxable x 4.0% = $948.00/yr / 12 = $79.00 exactly —
-    // a genuinely higher tax than the spouse-not-employed case above on
-    // identical wages, entirely from the halved standard deduction.
+  test("married with BOTH spouses employed: the Department of Revenue's own Table D gives $72 at monthly $3,000, exemption 0 (same as Table C)", () => {
+    // $36,000 - $4,600 = $31,400 - $10,000 = $21,400 x 4.0% = $856.00/yr / 12
+    // = $71.33 -> $72 in the printed table's rounding; the engine does not
+    // round to whole dollars. (The engine had used half the deduction,
+    // $2,300, and returned $79 against the table's $72.)
     const r = calculatePaycheck(
       input({
         checkDate: '2026-06-15',
@@ -9775,7 +9809,7 @@ describe('Mississippi', () => {
         ...msState({ filingStatus: 'married_both_employed', totalExemptionClaimed: 0 }),
       }),
     );
-    assert.equal(amountOf(r, 'MS_SIT'), dollars(79));
+    assert.equal(Math.round(amountOf(r, 'MS_SIT') / 100), 71);
   });
 
   test('Head of Family standard deduction plus a Form 89-350 exemption total', () => {
@@ -11951,6 +11985,25 @@ describe('FUTA credit reduction', () => {
     const line = futa(futaInput('OH'), ctx, futaRules({}))[0];
     assert.equal(line.amount, dollars(18.0));
     assert.match(line.detail ?? '', /determination is made after 2026-11-10/);
+  });
+
+  test("an undetermined year mentions DOL's potential reduction for a listed state but still applies none", () => {
+    const rules = futaRules({}) as unknown as { futa: { creditReduction: Record<string, unknown> } };
+    rules.futa.creditReduction.potential = { states: { CA: 0.053 } };
+    const ca = futa(futaInput('CA'), ctx, rules as never)[0];
+    assert.equal(ca.amount, dollars(18.0));
+    assert.match(ca.detail ?? '', /potential list for this year shows an additional 5\.3% for CA/);
+    const oh = futa(futaInput('OH'), ctx, rules as never)[0];
+    assert.equal(/potential list/.test(oh.detail ?? ''), false);
+  });
+
+  test('after the determination date an empty map says the final list is overdue instead of implying it is still pending', () => {
+    const before = futa(futaInput('CA'), ctx, futaRules({}))[0];
+    assert.equal(/That date has passed/.test(before.detail ?? ''), false);
+    const lateInput = { ...futaInput('CA'), checkDate: '2026-11-20' } as never;
+    const after = futa(lateInput, ctx, futaRules({}))[0];
+    assert.equal(after.amount, dollars(18.0));
+    assert.match(after.detail ?? '', /That date has passed: DOL's final list/);
   });
 
   test("a reduced state pays more — California's 1.2% reduction makes it 1.8%", () => {

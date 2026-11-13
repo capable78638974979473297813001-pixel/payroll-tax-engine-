@@ -4,7 +4,7 @@ _Generated from `data/filing/` by `scripts/state-coverage.ts`; `tests/state-cove
 
 **53 jurisdictions** (the 53 unemployment-tax agencies the US Department of Labor lists: 50 states, DC, Puerto Rico, US Virgin Islands). **53 have a state profile** (AK, AL, AR, AZ, CA, CO, CT, DC, DE, FL, GA, HI, IA, ID, IL, IN, KS, KY, LA, MA, MD, ME, MI, MN, MO, MS, MT, NC, ND, NE, NH, NJ, NM, NV, NY, OH, OK, OR, PA, PR, RI, SC, SD, TN, TX, UT, VA, VI, VT, WA, WI, WV, WY). The rest are **NOT MODELLED**: their own documents have not been read, and nothing is assumed about what they require. A row saying NOT MODELLED does not mean nothing is owed.
 
-Unemployment reporting modelled for 52 of 53. Withholding deposits modelled for 42, partly for 2. New-hire reporting modelled for 51.
+Unemployment reporting modelled for 53 of 53. Withholding deposits modelled for 42, partly for 2. New-hire reporting modelled for 51.
 
 **Nothing is transmitted to any state.** No state transport is connected; the sandbox rehearses and says so, and live transports refuse with the enrollment steps each profile records.
 
@@ -26,7 +26,7 @@ Unemployment reporting modelled for 52 of 53. Withholding deposits modelled for 
 | IL | Illinois | Department of Employment Security, 33 South State St, Chicago, IL 60603 | modelled | modelled | modelled |
 | IN | Indiana | Department of Workforce Development, 10 North Senate Ave, Room SE 106, Indianapolis, IN 46204-2277 | modelled | modelled | modelled |
 | IA | Iowa | Workforce Development, 1000 East Grand Avenue, Des Moines, IA 50319-0209 | modelled | modelled | modelled |
-| KS | Kansas | Department of Labor, 401 SW Topeka Blvd, Topeka, KS 66603-3182 | modelled | NOT MODELLED | modelled |
+| KS | Kansas | Department of Labor, 401 SW Topeka Blvd, Topeka, KS 66603-3182 | modelled | modelled | modelled |
 | KY | Kentucky | Department for Employment Services, P. O. Box 948, Frankfort, KY 40602-0948 | modelled | modelled | modelled |
 | LA | Louisiana | Louisiana Workforce Commission, PO Box 94094, Baton Rouge, LA 70804 | modelled | modelled | modelled |
 | ME | Maine | Department of Labor, PO Box 259, Augusta, ME 04332-0259 | modelled | modelled | modelled |

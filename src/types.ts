@@ -336,8 +336,14 @@ export interface StateCertificate {
   daysWorkedInMunicipality?: number;
   /** Default true — most employees have exactly one work municipality; set false only for a genuinely split work location. */
   workCityIsPrincipalWorkplace?: boolean;
+  /** Kentucky city occupational tax: the share (0 to 1) of this period's compensation paid for work done inside the work city. Default 1. A city whose ordinance apportions pay (Whitesville, Ordinance 25.07 Section 3) taxes only that share; the county tax is not apportioned by this field. */
+  workCityWageShare?: number;
   /** Newark: this employee's wages are excluded from the employer's resident-apportionment calculation (the employer's own workforce-wide determination). */
   newarkResidentApportionmentExcluded?: boolean;
+  /** Jersey City payroll tax: this employee lives in Jersey City, so the employer owes no payroll tax on their wages (Ordinance 18-133 section 304-19(a)). */
+  jerseyCityResident?: boolean;
+  /** Newark and Jersey City payroll taxes: an employee for whom an out-of-state state, municipality or local entity imposes an employer payroll tax on pay for services performed out of state is exempt from both cities' employer payroll tax (P.L.2025, c.314, C.40:48C-18(b), approved 2026-01-20, effective immediately), once the employer has given the city documentation of the employee's residency, the out-of-state services and the other tax. The employer's own determination and filing. */
+  njOutOfStateEmployerPayrollTaxExempt?: boolean;
   /** Pennsylvania LST: proof another employer already withheld it this year, so this employer doesn't withhold it again past the annual cap. */
   lstAlreadyWithheldElsewhere?: boolean;
 
@@ -732,6 +738,12 @@ export interface PaycheckInput {
    * A recalculation of a prior period must reproduce that period's rules.
    */
   checkDate: string; // ISO yyyy-mm-dd
+  /**
+   * First day of the pay period this check pays for (ISO yyyy-mm-dd, on or before checkDate). Optional. Only a local tax whose ordinance starts
+   * with a pay PERIOD reads it (Whitesville KY: the first full pay period of 2026-10-01; Springfield OR: pay periods beginning on or after the
+   * start date the city sets); everything else keys to checkDate. Without it those two fall back to checkDate and say so.
+   */
+  payPeriodStart?: string;
   payFrequency: PayFrequency;
   earnings: Earning[];
   deductions: Deduction[];

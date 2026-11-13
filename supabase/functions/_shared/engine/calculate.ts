@@ -35,7 +35,7 @@ import { assertTaxYearCovered, CannotComputeError, federalRuleset, provisionalYe
 import { federalTaxes } from './taxes/federal.ts';
 import { calculatePension } from './taxes/pension.ts';
 import { stateIncomeTax } from './taxes/state.ts';
-import { inputContractWarnings } from './contracts.ts';
+import { inputContractWarnings, missingEmployerFactWarnings } from './contracts.ts';
 import { assertEmploymentCategory } from './validate.ts';
 import {
   capElectiveDeferrals,
@@ -125,6 +125,7 @@ export function calculatePaycheck(input: PaycheckInput): PaycheckResult {
   const netPay = gross - pretax - posttax - employeeTaxTotal;
   const warnings: string[] = [
     ...inputContractWarnings(input),
+    ...missingEmployerFactWarnings(input),
     ...provisionalYearWarnings(input.checkDate, [input.workState?.code, input.residenceState?.code]),
   ];
   if (cappedDeferral && age === undefined) {

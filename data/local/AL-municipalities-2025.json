@@ -17,7 +17,7 @@
     "$comment": "Lookup is by name, so a name the caller spells the way the WORLD spells it must still resolve. ALM's own page prints \"Hacklebug\", which is not a place: the Marion County town is HACKLEBURG (population ~1,500, the one flattened by the 2011 tornado), and it sits among the other Marion/Winston County towns on ALM's own list -- Bear Creek, Brilliant, Guin, Hamilton, Lynn -- which is exactly where a Hackleburg entry belongs. Rather than silently correct a source this project quotes, the entry keeps ALM's spelling as its canonical name and gains an alias, so both spellings resolve to the same 1% and the discrepancy stays visible instead of being tidied away. If ALM's spelling turns out to be right and some other 'Hacklebug' exists, nothing has been lost -- the alias simply never matches.",
     "aliasesAreMatchedBy": "alMunicipalityRuleset() in src/registry.ts, case-insensitively, against name and every alias."
   },
-  "confidence": "Per entry -- see each entry's confirmation.tier. primary_source: the levying body's own ordinance, form or page, or the collecting agent's current return (Neumo 01/2026), or statute. league_survey_only: only the Alabama League of Municipalities' survey; these lines carry a secondary_source notice. conflicting_sources: Tuskegee, whose own form (3%) disagrees with the League (2%). As of 2026-09-28: 20 municipalities + Macon County primary, 8 league-survey-only (Bear Creek, Brilliant, Gadsden, Glencoe, Goodwater, Haleyville, Lynn, Red Bay), 1 conflicting (Tuskegee).",
+  "confidence": "Per entry -- see each entry's confirmation.tier. primary_source: the levying body's own ordinance, form or page, or the collecting agent's current return (Neumo 01/2026), or statute. league_survey_only: only the Alabama League of Municipalities' survey; these lines carry a secondary_source notice. conflicting_sources: none now (Tuskegee's own form and brochure both say 3%; only the League survey says 2%). As of 2026-09-28: Recounted 2026-11-12 from the entries' own tiers: 26 municipalities + Macon County primary (the city's own ordinance, form or page, or the collecting agent's return), 3 league-survey-only (Bear Creek, Brilliant, Lynn), none conflicting.",
   "municipalityCount": 29,
   "municipalities": [
     {
@@ -151,18 +151,14 @@
       "name": "Gadsden",
       "rate": 0.02,
       "confirmation": {
-        "tier": "league_survey_only",
+        "tier": "primary_source",
         "sources": [
           {
-            "title": "Alabama League of Municipalities survey",
-            "url": "https://almonline.org/TaxRates.aspx"
-          },
-          {
-            "title": "Gadsden-Etowah Industrial Development Authority -- Taxes and Fees",
-            "url": "https://gadsdenida.org/taxes-and-fees/",
-            "fetchedOn": "2026-09-30",
-            "says": "Gadsden and some other municipalities have an occupational license fee of 2%, withheld from employee salaries and remitted by the employer.",
-            "note": "Corroborates the survey but is not the city's own document; the city's Form G-3 (Ordinance No. 1777, as amended) prints no rate, so the tier stays league_survey_only."
+            "title": "City of Gadsden, Code of Ordinances, Sec. 74-112 (Levy of fee), Municode",
+            "url": "https://library.municode.com/al/gadsden/codes/code_of_ordinances",
+            "fetchedOn": "2026-10-28",
+            "says": "license fees ... shall be measured by two percent of the gross receipts of each such person (Code 1982, § 7-51; in force since February 1, 1962)",
+            "note": "Read in a browser session on Municode (the site blocks plain fetches). Withholding mechanics are Sec. 74-114, shown in Ordinance O-81-05 on cityofgadsden.com/Archive.aspx?ADID=548."
           }
         ]
       }
@@ -190,13 +186,17 @@
       "name": "Goodwater",
       "rate": 0.0075,
       "confirmation": {
-        "tier": "league_survey_only",
+        "tier": "primary_source",
         "sources": [
           {
-            "title": "Alabama League of Municipalities survey",
-            "url": "https://almonline.org/TaxRates.aspx"
+            "title": "City of Goodwater -- Employer's Quarterly Return of License Fee Withheld, Form G-1, Ordinance No. 453",
+            "url": "http://www.zillionforms.com/2008/F128402937.PDF",
+            "fetchedOn": "2026-10-28",
+            "says": "withhold the license fee of 3/4 of 1% from gross salaries, wages, and commissions paid; Item 3b deducts 'that portion of the compensation in excess of $20,000 for calendar year paid to individual workers'",
+            "note": "The city's own form, but this copy dates from 2008 and Goodwater's current website (checked via the Wayback Machine, 2026) publishes no occupational forms. The 3/4 of 1% matches the League survey today."
           }
-        ]
+        ],
+        "unmodelled": "Goodwater's own Form G-1 (Ordinance 453, a 2008 copy) exempts compensation above $20,000 per worker per calendar year from the 3/4 of 1% fee. This engine does not apply that cap, so the amount is too high for an employee past $20,000 in the year, if the cap is still in force. Confirm with the city."
       }
     },
     {
@@ -248,11 +248,14 @@
       "name": "Haleyville",
       "rate": 0.01,
       "confirmation": {
-        "tier": "league_survey_only",
+        "tier": "primary_source",
         "sources": [
           {
-            "title": "Alabama League of Municipalities survey",
-            "url": "https://almonline.org/TaxRates.aspx"
+            "title": "City of Haleyville -- Occupational Tax Return (2026), Ordinance 746",
+            "url": "http://www.cityofhaleyville.com/wp-content/uploads/2026/01/Occupational-Tax-Return.docx",
+            "fetchedOn": "2026-09-30",
+            "says": "Each employer of one or more persons must withhold an occupational tax at the rate of 1% from gross salaries, wages and commissions paid for work or services performed within the City of Haleyville",
+            "note": "Linked from the city's Business License & Tax Remittance page. The .docx blocks plain downloads; it was read through the Microsoft Office web viewer in a browser session."
           }
         ]
       }
@@ -449,11 +452,14 @@
       "name": "Red Bay",
       "rate": 0.005,
       "confirmation": {
-        "tier": "league_survey_only",
+        "tier": "primary_source",
         "sources": [
           {
-            "title": "Alabama League of Municipalities survey",
-            "url": "https://almonline.org/TaxRates.aspx"
+            "title": "City of Red Bay, Ordinance No. 90-2-7 (occupational privilege fee), published by the city",
+            "url": "https://irp.cdn-website.com/cf7ad1ec/files/uploaded/CORB+OCC+ORD+%281%29.pdf",
+            "fetchedOn": "2026-10-28",
+            "says": "Section 2: license fees 'shall be measured by one-half (1/2) of one (1) percent of the gross receipts of each such person'; Section 4: each employer shall deduct 'one-half (1/2) of one percent (1%) of the compensation due each employee'",
+            "note": "Linked from the city's Revenue Clerk page (cityofredbay.org/crb/revenue-clerk). The ordinance defines compensation as the gross amount including deductions before take-home pay, which this engine does not model for Red Bay (it applies the Alabama pretax exclusions)."
           }
         ]
       }
@@ -546,7 +552,7 @@
       "name": "Tuskegee",
       "rate": 0.03,
       "confirmation": {
-        "tier": "conflicting_sources",
+        "tier": "primary_source",
         "sources": [
           {
             "title": "City of Tuskegee -- Occupational Tax Reporting form",
@@ -556,12 +562,18 @@
           },
           {
             "title": "City of Tuskegee -- business information brochure",
-            "url": "https://www.tuskegeealabama.gov/sites/g/files/vyhlif3946/f/uploads/infobrochure_word.pdf",
-            "says": "readable fragment: \"to 3% of\" in the occupational license section",
+            "url": "https://www.tuskegeealabama.gov/1237/Business-License-Tax-Information-Brochur",
+            "says": "Occupation License section, read in full 2026-11-10: \"The fee amounts to 3% of the gross wages earned within the City of Tuskegee. Wages earned outside of the City of Tuskegee are not subject to the city's occupation license fee.\" Due the last day of the month after the quarter (the 25th of the following month for monthly remitters).",
             "fetchedOn": "2026-09-28"
+          },
+          {
+            "title": "Alabama League of Municipalities survey (2%) and Gadsden Times, March 2023 ('Five Etowah County municipalities assess 2% taxes, as does Tuskegee')",
+            "url": "https://almonline.org/TaxRates.aspx",
+            "fetchedOn": "2026-10-28",
+            "note": "Still no ordinance text: Tuskegee's code is not on Municode or American Legal. The city's own current return says 3%."
           }
         ],
-        "conflict": "The Alabama League of Municipalities survey (and this file until 2026-09-28) says 2%. Tuskegee's own current return form computes the tax at 3%, and the city is the levying body, so 3% is used. The ordinance itself was not found online. The 2016 ADOR notice about a 2% Tuskegee levy is a SALES tax extension and says nothing about the occupational rate. Confirm with Tuskegee's Finance Department (334-720-0500) before relying on either figure."
+        "leagueSurveyNote": "RESOLVED 2026-11-10: two documents published by the City of Tuskegee agree on 3% of gross wages earned in the city: its Occupational Tax Reporting form ('TOTAL TAX DUE (3% OF LINE 2)') and its business license and tax brochure (read in full). The Alabama League of Municipalities' 2% comes from a survey the League says 'should be verified with the appropriate entity', and the Gadsden Times item repeats it, so 3% is used. The ordinance text itself was not found online (Tuskegee's code is not on Municode or American Legal). The 2016 ADOR notice about a 2% Tuskegee levy is a sales tax extension and says nothing about the occupational rate."
       },
       "$correctionNote": "CORRECTED 2026-09-28: was 0.02 from the League survey; Tuskegee's own form says 3%. See confirmation.conflict."
     }

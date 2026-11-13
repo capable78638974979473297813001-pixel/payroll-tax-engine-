@@ -933,6 +933,7 @@ export interface LocalityResolution {
 /** Which state each caller-resolved locality tax belongs to, and which of them exclude each other (an address is in at most one WV fee city, one CO OPT city, one OR transit district). */
 const LOCALITY_STATE: Record<string, { state: string; group?: string }> = {
   Newark: { state: 'NJ' },
+  'Jersey City': { state: 'NJ' },
   'Kansas City': { state: 'MO' },
   'St. Louis': { state: 'MO' },
   Wilmington: { state: 'DE' },
@@ -1116,6 +1117,8 @@ export async function resolveEmployee(
   // src/taxes/state.ts's own local-tax dispatch uses throughout.
   const localityCandidates = new Set<string>();
   if (workFlags?.newark) localityCandidates.add('Newark');
+  if (workFlags?.jerseyCity) localityCandidates.add('Jersey City');
+  if (residenceFlags?.jerseyCity) fields.jerseyCityResident = true;
   if (workFlags?.kansasCity || residenceFlags?.kansasCity) localityCandidates.add('Kansas City');
   if (workFlags?.stLouis || residenceFlags?.stLouis) localityCandidates.add('St. Louis');
   if (workFlags?.wilmington || residenceFlags?.wilmington) localityCandidates.add('Wilmington');

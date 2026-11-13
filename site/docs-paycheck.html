@@ -43,6 +43,7 @@
     <div class="table-wrap"><table>
       <tbody>
         <tr><td class="mono">checkDate <span class="fine">string</span></td><td>required</td><td>Pay date, YYYY-MM-DD. Picks the tax year.</td></tr>
+        <tr><td class="mono">payPeriodStart <span class="fine">string</span></td><td></td><td>First day of the pay period, YYYY-MM-DD, on or before checkDate. Only local taxes whose ordinance starts with a pay period read it (Whitesville KY, Springfield OR); everything else keys to checkDate.</td></tr>
         <tr><td class="mono">payFrequency <span class="fine">string</span></td><td>required</td><td>One of weekly, biweekly, semimonthly, monthly, quarterly, semiannual, annual or daily.</td></tr>
         <tr><td class="mono">earnings <span class="fine">array</span></td><td>required</td><td>{ code, category, amount } per earning line. amount is cents.</td></tr>
         <tr><td class="mono">deductions <span class="fine">array</span></td><td>required</td><td>Pretax and posttax deductions, amounts in cents. Send <code>[]</code> when there are none.</td></tr>

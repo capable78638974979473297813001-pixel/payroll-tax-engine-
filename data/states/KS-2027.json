@@ -6,7 +6,15 @@
     "status": "carry-forward-from-2026",
     "createdOn": "2026-10-13",
     "basedOn": "data/states/KS-2026.json",
-    "note": "Carried forward from the 2026 file on 2026-10-13. Not yet checked against the 2027 official source: every figure is 2026's unless listed in updatedFor2027. Remove this block only after each figure has been re-verified against its 2027 source."
+    "note": "Carried forward from the 2026 file on 2026-10-13. Not yet checked against the 2027 official source: every figure is 2026's unless listed in updatedFor2027. Remove this block only after each figure has been re-verified against its 2027 source.",
+    "updatedFor2027": [
+      {
+        "path": "suiEmployer.wageBase",
+        "from": 15100,
+        "to": 15700,
+        "source": "Kansas Department of Labor, Employer Services (kansasemployer.gov), rate table: 'Taxable Wage Base | $15,700 | $15,100' for rate years 2027 and 2026, read 2026-11-12"
+      }
+    ]
   },
   "method": "bracket_per_period_kansas",
   "$scopeNote": "STATE income tax only. Kansas has no local wage-income tax anywhere -- Kansas's local 'intangibles tax' (Form 200, filed with the county clerk) applies only to INTEREST AND DIVIDEND income, not wages, and is a RETURN-level filing, not employer-withheld -- context-only, same disclosed-scope convention as Iowa's school district surtax and Connecticut's out-of-state credit. Kansas has no FORMAL bilateral reciprocity agreement with any state (no 'resident of state X owes $0 KS tax' exemption the way Michigan/Ohio/Indiana/Kentucky/New Jersey/Iowa's own reciprocity blocks work) -- but KW-100 DOES describe a real, different, WITHHOLDING-LEVEL mechanism for the opposite direction (a KANSAS resident working OUTSIDE Kansas): withhold the Kansas tax otherwise due, LESS whatever the other state withheld, floored at $0. NOW MODELLED: residentWorkingElsewhereCreditLine() in src/taxes/state.ts computes this generically off input.residenceState -- the first state in this project to need a SECOND state's tax computed as a residence-state credit within one calculatePaycheck() call, gated by this file's own residentWorkingElsewhereCredit flag so no other state's behavior changes. No employee-paid unemployment, disability, or paid-leave program exists in Kansas.",
@@ -400,10 +408,10 @@
   ],
   "suiEmployer": {
     "$comment": "Normalized employer-side unemployment parameters — the shape src/taxes/state.ts reads. The detailed unemploymentInsurance block above stays the record of research; this exists because that block's shape varies too much between states to compute from directly (wage bases as objects, industry-keyed rate maps, differently-named keys).",
-    "wageBase": 15100,
-    "wageBaseSource": "2026 taxable wage bases cross-checked against EY's published 2026 state-by-state table; where this file already carried a numeric wage base, the two agreed unless noted in wageBaseNote.",
+    "wageBase": 15700,
+    "wageBaseSource": "2026 taxable wage bases cross-checked against EY's published 2026 state-by-state table; where this file already carried a numeric wage base, the two agreed unless noted in wageBaseNote. UPDATED for 2027 on 2026-11-12: the Kansas Department of Labor's own kansasemployer.gov page lists the 2027 taxable wage base as $15,700 (2026: $15,100).",
     "newEmployerRate": 0.0175,
-    "newEmployerRateSource": "RE-VERIFIED 2026-09-05: dol.ks.gov itself remains confirmed HTTP 403 on every attempt (see this file's own manualOnly entry in harvester/sources.json), but a materially stronger secondary source was found this pass — the Kansas Legislative Research Department's own published briefing (klrd.gov/2026/08/25/kansas-unemployment-insurance-trust-fund/), a state legislative research office rather than a payroll-industry aggregator, fetched and read directly this pass: 'New employers with fewer than 24 months of payroll experience have a contribution rate of 1.75 percent... For 2026, the taxable wage base is $15,100.' Agrees exactly with the OnPay figure this file already carried.",
+    "newEmployerRateSource": "RE-VERIFIED 2026-09-05: dol.ks.gov itself remains confirmed HTTP 403 on every attempt (see this file's own manualOnly entry in harvester/sources.json), but a materially stronger secondary source was found this pass — the Kansas Legislative Research Department's own published briefing (klrd.gov/2026/08/25/kansas-unemployment-insurance-trust-fund/), a state legislative research office rather than a payroll-industry aggregator, fetched and read directly this pass: 'New employers with fewer than 24 months of payroll experience have a contribution rate of 1.75 percent... For 2026, the taxable wage base is $15,100.' Agrees exactly with the OnPay figure this file already carried. CONFIRMED 2026-11-12 on the Kansas Department of Labor's own Employer Services pages (dol.ks.gov/employers and kansasemployer.gov, read through a page-extraction service because the site answers 403 to direct automated requests): HB 2570 Schedule C, new employer rate 1.75%, new construction industry employer rate 5.55%, minimum rate 0%, maximum rate 6.95%, taxable wage base $15,100 for 2026 and $15,700 for 2027.",
     "industryNewEmployerRates": {
       "construction": 0.0555
     },
@@ -413,7 +421,7 @@
       "max": 0.0695
     },
     "employerSuppliedRateRequired": false,
-    "confidence": "cross_source_confirmed"
+    "confidence": "primary_source_confirmed"
   },
   "supplementalWages": {
     "": "KW-100's own rule, quoted verbatim in this file's sources[] entry above, is genuinely simpler to wire than most states': it doesn't describe an independent Kansas-specific election at all, just an instruction to MIRROR whichever method was used for FEDERAL withholding on the same payment. This engine already has only ONE federal method for a supplemental-categorized earning -- federalSupplementalTax() in src/taxes/federal.ts ALWAYS carves supplemental cash out and taxes it at the flat 22%/37% rate, with no aggregate-federal alternative modelled -- so the federal side of the mirror is always already the flat-rate case, and Kansas following it is unconditional (no employer election field, unlike California/Maryland/Alabama). appliesWhen is still \"paid_separately\", not \"always\": KW-100's own alternate branch (adding regular and supplemental together) is exactly what already happens by default when they ARE combined on one cheque, and the generic flatRateSupplementalFromConfig() mechanism already handles that split -- no bespoke function needed for this state, unlike CA/MD.",

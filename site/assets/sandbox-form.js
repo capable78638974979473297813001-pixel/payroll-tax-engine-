@@ -24,7 +24,7 @@ export const CERT_KEYS = new Set([
   'additionalWithholdingYonkers', 'metroDistrict', 'multnomahCounty', 'localMonthlyCompensation',
   'localOPTWithheldThisMonth', 'localOPTEmployeeWithheldByOtherEmployer', 'stateTaxWithheldThisMonth',
   'wvLocalFeeAlreadyWithheld', 'daysWorkedInLocality', 'daysWorkedInMunicipality',
-  'workCityIsPrincipalWorkplace', 'newarkResidentApportionmentExcluded', 'lstAlreadyWithheldElsewhere',
+  'workCityIsPrincipalWorkplace', 'workCityWageShare', 'newarkResidentApportionmentExcluded', 'jerseyCityResident', 'njOutOfStateEmployerPayrollTaxExempt', 'lstAlreadyWithheldElsewhere',
   'dailyCommuter', 'nonresidentDeMinimisEligible', 'nonresidentCreditEligible', 'daysWorkedInStateThisYear',
   'nonresident', 'exempt', 'exemptReason', 'additionalWithholding', 'reducedWithholding',
   'nonresidentAlien', 'voluntaryWithholdingAgreement', 'allowances', 'regularAllowances',
@@ -132,7 +132,7 @@ export function stepForPath(path) {
   if (p.startsWith('residenceStateWithholding') || p.startsWith('residenceState')) return 4;
   if (p.includes('workCityIsPrincipalWorkplace') || p.includes('daysWorked')) return 2;
   if (p.startsWith('workState')) return 4;
-  if (p === 'checkDate' || p === 'payFrequency' || p === 'employmentCategory' || p === 'roundToWholeDollars') return 1;
+  if (p === 'checkDate' || p === 'payPeriodStart' || p === 'payFrequency' || p === 'employmentCategory' || p === 'roundToWholeDollars') return 1;
   return 1;
 }
 
@@ -143,6 +143,7 @@ function blankEarning() {
 export function createModel() {
   return {
     checkDate: '2026-09-15',
+    payPeriodStart: '',
     payFrequency: 'weekly',
     homeAddress: '',
     workAddress: '',
@@ -224,6 +225,7 @@ function putDays(cert, key, raw) {
 export function loadRequest(model, request) {
   const req = clone(request) || {};
   model.checkDate = typeof req.checkDate === 'string' ? req.checkDate : '';
+  model.payPeriodStart = typeof req.payPeriodStart === 'string' ? req.payPeriodStart : '';
   model.payFrequency = typeof req.payFrequency === 'string' ? req.payFrequency : 'weekly';
   model.homeAddress = '';
   model.workAddress = '';
@@ -407,6 +409,7 @@ export function serialize(model) {
     checkDate: model.checkDate,
     payFrequency: model.payFrequency,
   };
+  if (/^\d{4}-\d{2}-\d{2}$/.test(model.payPeriodStart || '')) out.payPeriodStart = model.payPeriodStart;
   if (model.hoursWorked !== '' && model.hoursWorked != null) {
     const h = Number(model.hoursWorked);
     if (Number.isFinite(h)) out.hoursWorked = h;
@@ -475,7 +478,7 @@ export function stepSlice(full, step) {
     for (const k of keys) if (full[k] !== undefined) o[k] = full[k];
     return o;
   };
-  if (step === 1) return pick(['checkDate', 'payFrequency', 'employmentCategory', 'roundToWholeDollars']);
+  if (step === 1) return pick(['checkDate', 'payPeriodStart', 'payFrequency', 'employmentCategory', 'roundToWholeDollars']);
   if (step === 2) return pick(['workState']);
   if (step === 3) return pick(['federalW4']);
   if (step === 4) return pick(['workState', 'residenceState', 'residenceStateWithholding']);
@@ -495,6 +498,7 @@ export function validateStep(model, step, ctx) {
   const years = (ctx && ctx.supportedYears) || [2025, 2026, 2027];
   if (step === 1) {
     if (!/^\d{4}-\d{2}-\d{2}$/.test(model.checkDate || '')) bad('checkDate', 'Enter a check date.');
+    if (model.payPeriodStart && (!/^\d{4}-\d{2}-\d{2}$/.test(model.payPeriodStart) || model.payPeriodStart > (model.checkDate || ''))) bad('payPeriodStart', 'The pay period start must be a date on or before the check date.');
     else {
       const y = Number(model.checkDate.slice(0, 4));
       if (!years.includes(y)) {

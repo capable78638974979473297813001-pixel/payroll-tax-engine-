@@ -580,6 +580,10 @@ export interface KYJurisdictionEntry {
    * location, never looked up as workCity/workCounty.
    */
   schoolDistrictTax?: KYSchoolDistrictTax;
+  /** 'payPeriodStart' when the ordinance starts a rate with a pay PERIOD (Whitesville): the rate change then keys to the period's first day, not the check date. */
+  rateChangesKeyedTo?: 'payPeriodStart';
+  /** The date of the rate change in force on the check date, when the entry is keyed to the pay period's start. */
+  rateChangedOn?: string;
 }
 
 export interface KYSchoolDistrictTax {
@@ -615,6 +619,7 @@ interface KYOccupationalRegistryFile {
         schoolDistrictTax?: KYSchoolDistrictTax;
         /** Mid-year rate changes: from `on` (a check date, inclusive) the flat rate is `wageRateDecimal`. A rate of 0 means no wage tax yet. */
         rateChanges?: { on: string; wageRateDecimal: number }[];
+        rateChangesKeyedTo?: 'payPeriodStart';
       }
     >;
     louisvilleMetro: { residentRate: number; nonresidentRate: number; citiesWithinMetro?: string[] };
@@ -673,6 +678,7 @@ export function allKYJurisdictions(checkDate: string): KYJurisdictionEntry[] {
       ...(raw.annualWageCap !== undefined ? { annualWageCap: raw.annualWageCap } : {}),
       ...(raw.wageRateStatus ? { wageRateStatus: raw.wageRateStatus } : {}),
       ...(raw.schoolDistrictTax ? { schoolDistrictTax: raw.schoolDistrictTax } : {}),
+      ...(raw.rateChangesKeyedTo ? { rateChangesKeyedTo: raw.rateChangesKeyedTo, ...(change ? { rateChangedOn: change.on } : {}) } : {}),
     });
   }
 

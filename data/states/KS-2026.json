@@ -412,7 +412,7 @@
     "wageBase": 15100,
     "wageBaseSource": "2026 taxable wage bases cross-checked against EY's published 2026 state-by-state table; where this file already carried a numeric wage base, the two agreed unless noted in wageBaseNote.",
     "newEmployerRate": 0.0175,
-    "newEmployerRateSource": "RE-VERIFIED 2026-09-05: dol.ks.gov itself remains confirmed HTTP 403 on every attempt (see this file's own manualOnly entry in harvester/sources.json), but a materially stronger secondary source was found this pass — the Kansas Legislative Research Department's own published briefing (klrd.gov/2026/08/25/kansas-unemployment-insurance-trust-fund/), a state legislative research office rather than a payroll-industry aggregator, fetched and read directly this pass: 'New employers with fewer than 24 months of payroll experience have a contribution rate of 1.75 percent... For 2026, the taxable wage base is $15,100.' Agrees exactly with the OnPay figure this file already carried.",
+    "newEmployerRateSource": "RE-VERIFIED 2026-09-05: dol.ks.gov itself remains confirmed HTTP 403 on every attempt (see this file's own manualOnly entry in harvester/sources.json), but a materially stronger secondary source was found this pass — the Kansas Legislative Research Department's own published briefing (klrd.gov/2026/08/25/kansas-unemployment-insurance-trust-fund/), a state legislative research office rather than a payroll-industry aggregator, fetched and read directly this pass: 'New employers with fewer than 24 months of payroll experience have a contribution rate of 1.75 percent... For 2026, the taxable wage base is $15,100.' Agrees exactly with the OnPay figure this file already carried. CONFIRMED 2026-11-12 on the Kansas Department of Labor's own Employer Services pages (dol.ks.gov/employers and kansasemployer.gov, read through a page-extraction service because the site answers 403 to direct automated requests): HB 2570 Schedule C, new employer rate 1.75%, new construction industry employer rate 5.55%, minimum rate 0%, maximum rate 6.95%, taxable wage base $15,100 for 2026 and $15,700 for 2027.",
     "industryNewEmployerRates": {
       "construction": 0.0555
     },
@@ -422,7 +422,7 @@
       "max": 0.0695
     },
     "employerSuppliedRateRequired": false,
-    "confidence": "cross_source_confirmed"
+    "confidence": "primary_source_confirmed"
   },
   "supplementalWages": {
     "": "KW-100's own rule, quoted verbatim in this file's sources[] entry above, is genuinely simpler to wire than most states': it doesn't describe an independent Kansas-specific election at all, just an instruction to MIRROR whichever method was used for FEDERAL withholding on the same payment. This engine already has only ONE federal method for a supplemental-categorized earning -- federalSupplementalTax() in src/taxes/federal.ts ALWAYS carves supplemental cash out and taxes it at the flat 22%/37% rate, with no aggregate-federal alternative modelled -- so the federal side of the mirror is always already the flat-rate case, and Kansas following it is unconditional (no employer election field, unlike California/Maryland/Alabama). appliesWhen is still \"paid_separately\", not \"always\": KW-100's own alternate branch (adding regular and supplemental together) is exactly what already happens by default when they ARE combined on one cheque, and the generic flatRateSupplementalFromConfig() mechanism already handles that split -- no bespoke function needed for this state, unlike CA/MD.",

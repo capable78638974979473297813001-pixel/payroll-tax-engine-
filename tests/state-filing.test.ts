@@ -81,9 +81,9 @@ describe('coverage: every jurisdiction is accounted for', () => {
     assert.equal(by.CO.ui, 'modelled'); // CDLE's premium-and-wage-report FAQ
     assert.equal(by.CT.withholding, 'modelled');
     assert.equal(by.CT.ui, 'modelled'); // the Department of Labor's own due-date article
-    // Every modelled jurisdiction has an unemployment section except Kansas, whose due date for contributing employers is in a page that could not be read.
+    // Every modelled jurisdiction has an unemployment section, Kansas included (K.S.A. 44-717, K.A.R. 50-2-3 and the Department of Labor's own pages, read 2026-11-12).
     const uiGaps = modelledStates().filter((code) => by[code].ui !== 'modelled');
-    assert.deepEqual(uiGaps, ['KS']);
+    assert.deepEqual(uiGaps, []);
   });
   test('an unmodelled state throws NOT MODELLED instead of returning an empty profile', () => {
     assert.equal(hasProfile('ZZ'), false);

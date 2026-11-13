@@ -3045,11 +3045,12 @@
         "name": "Salem",
         "category": "Payroll Tax and 1099s",
         "rate": "1% of all gross pay",
-        "wageRateDecimal": 0.01,
+        "wageRateDecimal": 0,
         "wageRateResidentDecimal": null,
         "wageRateNonresidentDecimal": null,
-        "wageRateStatus": "parsed_explicit_wage_figure",
-        "wageRateNote": "Extracted from the wage/payroll-labelled figure within the raw rate string."
+        "wageRateStatus": "confirmed_via_city_primary_source_2026_11_09",
+        "wageRateNote": "CORRECTED 2026-11-09 from 1%: Salem's occupational license (payroll) tax was created by Ordinance No. 2026-05, effective 2026-10-01 (see the 2026 file); there is no wage tax on 2025 check dates.",
+        "wageRateSource": [{"title": "City of Salem, Kentucky -- Ordinance No. 2026-05 (Occupational License Tax), with the amending ordinance", "url": "https://www.cityofsalemky.gov/occu", "says": "1.00% of all wages and compensation for work done in the City by every resident and nonresident employee; effective October 1, 2026", "fetchedOn": "2026-11-09"}]
       },
       {
         "name": "Scott County",

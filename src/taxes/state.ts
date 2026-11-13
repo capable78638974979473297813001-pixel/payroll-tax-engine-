@@ -48,6 +48,7 @@ import {
 import { federalIncomeTax, federalTaxes } from './federal.ts';
 import { cashEarnings, supplementalEarnings } from '../wages.ts';
 import { resolveCertBoolean } from '../validate.ts';
+import { payPeriodStartOf } from '../contracts.ts';
 import type {
   ComputeContext,
   DataQuality,
@@ -274,6 +275,13 @@ export function stateIncomeTax(
   const newark = newarkPayrollTaxEmployer(input, ctx, rules);
   if (newark) lines.push(newark);
 
+  // Jersey City's employer payroll tax (Ordinance 18-133, 1% of the payroll
+  // of non-Jersey-City-resident employees, for the city's schools) —
+  // employer-paid and never withheld (section 304-21), so it never touches
+  // net pay. Dispatched off certificate.locality 'Jersey City'.
+  const jerseyCity = jerseyCityPayrollTaxEmployer(input, ctx, rules);
+  if (jerseyCity) lines.push(jerseyCity);
+
   // Denver's Occupational Privilege Tax — see denverOccupationalPrivilegeTax()'s
   // own doc comment for the $500/month threshold and the caller-supplied
   // monthly-aggregation fields this genuinely different tax SHAPE requires.
@@ -376,6 +384,19 @@ export function stateIncomeTax(
   // (an employee can be in one, both, or neither).
   const portlandLocal = portlandAreaLocalTax(input, ctx, rules);
   lines.push(...portlandLocal);
+
+  // Eugene's Community Safety Payroll Tax, employee side (0.44% once pay
+  // passes the Oregon-minimum-wage-indexed threshold). Dispatched off
+  // certificate.locality 'Eugene' = the employer's physical location is in
+  // the city limits. See eugeneCommunitySafetyPayrollTax().
+  const eugeneCspt = eugeneCommunitySafetyPayrollTax(input, ctx, rules);
+  if (eugeneCspt) lines.push(eugeneCspt);
+  const eugeneCsptEmployer = eugeneCommunitySafetyPayrollTaxEmployer(input, ctx, rules);
+  if (eugeneCsptEmployer) lines.push(eugeneCsptEmployer);
+
+  // Springfield (Oregon) payroll tax: 0.1% employee and 0.1% employer from
+  // 2027-01-01, dispatched off certificate.locality 'Springfield'.
+  lines.push(...springfieldPayrollTax(input, ctx, rules));
 
   // Pennsylvania's Act 32 local Earned Income Tax + Local Services Tax —
   // see pennsylvaniaLocalTax()'s own doc comment for the withholding rule
@@ -2437,6 +2458,8 @@ interface WIStandardDeductionBand {
 }
 
 interface BracketPhaseoutConfig {
+  /** Pay periods per year to annualize with where Publication W-166's tables differ from the engine's generic count (daily is 365). */
+  annualizeMultiplier?: Partial<Record<string, number>>;
   brackets: WIBracket[];
   exemptionAmount: number; // dollars, flat per exemption claimed
   standardDeduction: {
@@ -2501,7 +2524,8 @@ function bracketPhaseoutDeduction(
   const fullBase = ctx.taxableWagesFor(exempt);
   const supplementalCash = supplementalEarnings(input.earnings);
   const taxableWages = atLeastZero(fullBase - supplementalCash);
-  const annualWages = taxableWages * ctx.periodsPerYear;
+  const periodsPerYear = cfg.annualizeMultiplier?.[input.payFrequency] ?? ctx.periodsPerYear;
+  const annualWages = taxableWages * periodsPerYear;
 
   const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
   const maritalStatus = resolveWIMaritalStatus(cert);
@@ -2528,12 +2552,12 @@ function bracketPhaseoutDeduction(
   const bracket = findWIBracket(cfg.brackets, annualNetWage);
   const excess = annualNetWage - dollars(bracket.from);
   const annualTax = dollars(bracket.base) + applyRate(excess, bracket.rate);
-  const amount = Math.round(annualTax / ctx.periodsPerYear);
+  const amount = Math.round(annualTax / periodsPerYear);
 
   const detail =
     `${fmt(annualWages)}/yr less ${fmt(deductionAmount)} standard deduction ` +
     `(${maritalStatus}) less ${fmt(exemptionAmount)} exemptions (${exemptions} × $${cfg.exemptionAmount}) ` +
-    `= ${fmt(annualNetWage)} net @ ${(bracket.rate * 100).toFixed(2)}% bracket, ÷ ${ctx.periodsPerYear}`;
+    `= ${fmt(annualNetWage)} net @ ${(bracket.rate * 100).toFixed(2)}% bracket, ÷ ${periodsPerYear}`;
 
   return {
     id: `${rules.code}_SIT`,
@@ -2599,6 +2623,8 @@ function bracketSupplementalTax(
 }
 
 interface BracketFlatAllowanceConfig {
+  /** Pay periods per year to annualize with where the wh-inst tables differ from the engine's generic count (daily is 365). */
+  annualizeMultiplier?: Partial<Record<string, number>>;
   // Unlike Wisconsin (one shared bracket schedule regardless of marital
   // status — only its deduction phase-out differs by status), Minnesota
   // publishes genuinely DIFFERENT bracket thresholds/bases for single vs.
@@ -2692,7 +2718,8 @@ function bracketFlatAllowance(
       )
     : 0;
 
-  const annualWages = (taxableWages + nraAdjustment) * ctx.periodsPerYear;
+  const periodsPerYear = cfg.annualizeMultiplier?.[input.payFrequency] ?? ctx.periodsPerYear;
+  const annualWages = (taxableWages + nraAdjustment) * periodsPerYear;
 
   // wh-inst-26's tables only distinguish single vs. married — no separate
   // head-of-household schedule — so it maps to 'single' by convention, the
@@ -2707,7 +2734,7 @@ function bracketFlatAllowance(
   const bracket = findWIBracket(brackets, annualNetWage);
   const excess = annualNetWage - dollars(bracket.from);
   const annualTax = dollars(bracket.base) + applyRate(excess, bracket.rate);
-  const amount = Math.round(annualTax / ctx.periodsPerYear);
+  const amount = Math.round(annualTax / periodsPerYear);
 
   const detail =
     (nraAdjustment
@@ -2715,7 +2742,7 @@ function bracketFlatAllowance(
       : '') +
     `${fmt(annualWages)}/yr less ${fmt(annualAllowance)} allowances ` +
     `(${allowances} × $${cfg.allowanceAmount}, ${maritalStatus}) = ${fmt(annualNetWage)} net ` +
-    `@ ${(bracket.rate * 100).toFixed(2)}% bracket, ÷ ${ctx.periodsPerYear}`;
+    `@ ${(bracket.rate * 100).toFixed(2)}% bracket, ÷ ${periodsPerYear}`;
 
   return {
     id: `${rules.code}_SIT`,
@@ -5090,6 +5117,9 @@ function pickLocality(cert: Record<string, unknown>, known: (l: string) => boole
   return certLocalities(cert).find(known);
 }
 
+const NJ_MULTISTATE_EXEMPTION_DETAIL =
+  '$0: certificate.njOutOfStateEmployerPayrollTaxExempt. New Jersey P.L.2025, c.314 (S4219, approved 2026-01-20, effective immediately; new C.40:48C-18(b), text read 2026-11-10): if an out-of-state state, municipality or local entity imposes an employer payroll tax on an employee for service performed out of state, the Newark or Jersey City employer payroll tax does not apply to that employee, but only after the employer submits documentation, in the manner the municipality prescribes, of the employee\'s residency, the out-of-state services and the other tax. The employer\'s own determination and filing, not verified by this engine.';
+
 function newarkPayrollTaxEmployer(
   input: PaycheckInput,
   ctx: ComputeContext,
@@ -5103,6 +5133,18 @@ function newarkPayrollTaxEmployer(
 
   const exempt = federalRuleset(input.checkDate).incomeTax.exemptPretax as PretaxCategory[];
   const taxableWages = ctx.taxableWagesFor(exempt);
+
+  if (resolveCertBoolean(cert, 'njOutOfStateEmployerPayrollTaxExempt')) {
+    return {
+      id: 'NEWARK_PAYROLL_ER',
+      name: 'Newark Payroll Tax (Employer)',
+      payer: 'employer',
+      jurisdiction: 'local',
+      taxableWages: 0,
+      amount: 0,
+      detail: NJ_MULTISTATE_EXEMPTION_DETAIL,
+    };
+  }
 
   if (resolveCertBoolean(cert, 'newarkResidentApportionmentExcluded')) {
     return {
@@ -5133,6 +5175,79 @@ function newarkPayrollTaxEmployer(
       `the employer's quarterly Newark payroll — the $${cfg.quarterlyThresholdDollars}/quarter ` +
       `minimum and the >50%-resident-workforce apportionment are EMPLOYER-AGGREGATE facts this ` +
       `engine cannot verify per paycheck (see newarkPayrollTaxEmployer()'s own doc comment).`,
+  };
+}
+
+interface JerseyCityPayrollTaxConfig {
+  rate: number;
+  /** Quarterly payroll under which an employer owes nothing (an employer-wide fact this engine cannot see). */
+  quarterlyThresholdDollars: number;
+  /** ISO date the ordinance took effect. */
+  effectiveFrom: string;
+}
+
+/**
+ * Jersey City's payroll tax: 1% of an employer's payroll for services
+ * performed in the city, or performed elsewhere but supervised from it,
+ * with Jersey City RESIDENTS' wages exempt (Ordinance 18-133, effective
+ * 2019-01-01; N.J.S.A. 40:48C-14 et seq.). Payroll is the remuneration
+ * subject to federal income tax withholding, so the federal pretax
+ * exclusions apply. The employer pays it and "shall [not] deduct or
+ * withhold any amount from the remuneration payable to an Employee because
+ * of the tax" (section 304-21), so it is an employer line only. An employer
+ * with $2,500 or less of payroll in a calendar quarter, and the public,
+ * interstate and charitable employers the ordinance lists, owe nothing;
+ * those are employer-wide facts, so, as with Newark, the quarterly minimum
+ * is stated in the line's detail rather than tested.
+ */
+function jerseyCityPayrollTaxEmployer(
+  input: PaycheckInput,
+  ctx: ComputeContext,
+  rules: StateRuleset,
+): TaxLine | null {
+  const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
+  if (!hasLocality(cert, 'Jersey City')) return null;
+  const cfg = rules.jerseyCityPayrollTax as JerseyCityPayrollTaxConfig | undefined;
+  if (!cfg) return null;
+  if (input.checkDate < cfg.effectiveFrom) return null;
+
+  const exempt = federalRuleset(input.checkDate).incomeTax.exemptPretax as PretaxCategory[];
+  const taxableWages = ctx.taxableWagesFor(exempt);
+
+  if (resolveCertBoolean(cert, 'njOutOfStateEmployerPayrollTaxExempt')) {
+    return {
+      id: 'JERSEYCITY_PAYROLL_ER',
+      name: 'Jersey City Payroll Tax (Employer)',
+      payer: 'employer',
+      jurisdiction: 'local',
+      taxableWages: 0,
+      amount: 0,
+      detail: NJ_MULTISTATE_EXEMPTION_DETAIL,
+    };
+  }
+
+  if (resolveCertBoolean(cert, 'jerseyCityResident')) {
+    return {
+      id: 'JERSEYCITY_PAYROLL_ER',
+      name: 'Jersey City Payroll Tax (Employer)',
+      payer: 'employer',
+      jurisdiction: 'local',
+      taxableWages: 0,
+      amount: 0,
+      detail: '$0: this employee lives in Jersey City, and the ordinance exempts the wages of Jersey City residents from the employer payroll tax.',
+    };
+  }
+
+  return {
+    id: 'JERSEYCITY_PAYROLL_ER',
+    name: 'Jersey City Payroll Tax (Employer)',
+    payer: 'employer',
+    jurisdiction: 'local',
+    taxableWages,
+    amount: applyRate(taxableWages, cfg.rate),
+    detail:
+      fmt(taxableWages) + ' @ ' + (cfg.rate * 100).toFixed(2) + '%, paid by the employer on a non-resident employee (never withheld). ' +
+      'The $' + cfg.quarterlyThresholdDollars + '-a-quarter payroll minimum and the exempt-employer list are employer-wide facts this engine cannot verify per paycheck.',
   };
 }
 
@@ -5524,6 +5639,8 @@ interface WVServiceFeeCityConfig {
   priorWeeklyRate?: number; // Weirton: the rate in effect before rateEffectiveDate — undefined for every city with no known rate history
   rateEffectiveDate?: string; // ISO yyyy-mm-dd the CURRENT weeklyRate took effect; a check date before this uses priorWeeklyRate instead
   minDaysBeforeAttaching?: number; // calendar-year workday threshold — see certificate.daysWorkedInLocality
+  /** A notice carried on the line when the rate rests on conflicting or secondary sources (Madison, Smithers). */
+  dataQuality?: DataQuality;
 }
 
 /**
@@ -5589,6 +5706,7 @@ function westVirginiaMunicipalServiceFee(
         ? `, annualized (×52) and divided across ${ctx.periodsPerYear} pay periods/yr, rounded down to the cent`
         : `, city-published ${input.payFrequency} payroll amount $${publishedAmount.toFixed(2)}`) +
       ` — certificate.locality = "${locality}"`,
+    ...(city.dataQuality ? { dataQuality: city.dataQuality } : {}),
   };
 }
 
@@ -5888,13 +6006,36 @@ function kentuckyCityCountyTax(
   if (!workCityName && !workCountyName) return null;
 
   const notSchool = (e: KYJurisdictionEntry | undefined) => (e && !e.schoolDistrictTax ? e : undefined);
-  const cityEntry = workCityName ? notSchool(kyJurisdictionRuleset(workCityName, input.checkDate)) : undefined;
+  let cityEntry = workCityName ? notSchool(kyJurisdictionRuleset(workCityName, input.checkDate)) : undefined;
+  // An ordinance that starts a rate with a pay PERIOD (Whitesville, Ordinance 25.07 Section 14: the first full pay
+  // period of 2026-10-01) is keyed to the period's first day when the caller gives it, else to the check date.
+  const periodStart = payPeriodStartOf(input);
+  let periodKeyedNote: DataQuality | undefined;
+  if (cityEntry?.rateChangesKeyedTo === 'payPeriodStart') {
+    if (periodStart) {
+      cityEntry = workCityName ? notSchool(kyJurisdictionRuleset(workCityName, periodStart)) : undefined;
+    } else if (cityEntry.rateChangedOn) {
+      const days = (Date.parse(input.checkDate + 'T00:00:00Z') - Date.parse(cityEntry.rateChangedOn + 'T00:00:00Z')) / 86_400_000;
+      if (days < 35) {
+        periodKeyedNote = {
+          tier: 'inferred',
+          note: `${cityEntry.name}'s tax starts with the first full pay period beginning on or after ${cityEntry.rateChangedOn}. No payPeriodStart was supplied, so the check date stands in: a pay period that began before ${cityEntry.rateChangedOn} is taxed here but is not under the ordinance. Supply payPeriodStart.`,
+        };
+      }
+    }
+  }
+  const withPeriodNote = (q: { dataQuality?: DataQuality }): { dataQuality?: DataQuality } =>
+    q.dataQuality ? q : periodKeyedNote ? { dataQuality: periodKeyedNote } : q;
   const countyEntry = workCountyName
     ? notSchool(kyJurisdictionRuleset(workCountyName, input.checkDate))
     : undefined;
 
   const periodWages = ctx.taxableWagesFor([]);
   const residenceCityName = typeof cert.residenceCity === 'string' ? cert.residenceCity : undefined;
+  // A city that taxes only the pay for work done inside it (Whitesville's Ordinance 25.07, Section 3):
+  // the caller gives the share of this period's compensation earned inside the city. Default all of it.
+  const rawShare = cert.workCityWageShare;
+  const cityShare = typeof rawShare === 'number' && Number.isFinite(rawShare) && rawShare >= 0 && rawShare <= 1 ? rawShare : 1;
 
   // Louisville/Jefferson County Metro: work anywhere in the county owes
   // Metro's tax, and a city inside it (Jeffersontown, Lyndon, ...) adds its
@@ -5949,7 +6090,11 @@ function kentuckyCityCountyTax(
   };
 
   // Annual caps: see kyCappedWages().
-  const taxableFor = (entry: KYJurisdictionEntry): number => kyCappedWages(entry, periodWages, input, ctx);
+  const taxableFor = (entry: KYJurisdictionEntry): number => {
+    const capped = kyCappedWages(entry, periodWages, input, ctx);
+    return entry === cityEntry && cityShare < 1 ? Math.round(capped * cityShare) : capped;
+  };
+  const shareNote = cityShare < 1 && cityEntry ? `; ${(cityShare * 100).toFixed(1)}% of the pay is for work done inside ${cityEntry.name}, which is all the city taxes` : '';
   const capNote = (entry: KYJurisdictionEntry, taxable: number): string =>
     entry.capAtSSWageBase
       ? ` (${fmt(taxable)} of ${fmt(periodWages)}, SS-wage-base-capped)`
@@ -5976,12 +6121,12 @@ function kentuckyCityCountyTax(
       taxableWages: periodWages,
       amount,
       detail:
-        `${fmt(cityTax)} to ${cityEntry.name} @ ${cityRate.note}${capNote(cityEntry, cityTaxableWages)}; ` +
+        `${fmt(cityTax)} to ${cityEntry.name} @ ${cityRate.note}${capNote(cityEntry, cityTaxableWages)}${shareNote}; ` +
         `${fmt(netCountyTax)} to ${countyEntry.name} @ ${countyRate.note}${capNote(countyEntry, countyTaxableWages)}, ` +
         `less a ${fmt(credit)} KRS 68.197(6)-(7) credit for the city fee already paid ` +
         `(assumes the 30,000-300,000-population county credit tier applies to ${countyEntry.name} — not ` +
         `individually verified)`,
-      ...kyLineQuality([cityEntry, countyEntry], input, ctx, periodWages, countyEntry),
+      ...withPeriodNote(kyLineQuality([cityEntry, countyEntry], input, ctx, periodWages, countyEntry)),
     };
   }
 
@@ -6001,8 +6146,10 @@ function kentuckyCityCountyTax(
       ? `${fmt(taxableWages)} of ${fmt(periodWages)} (SS-wage-base-capped, KRS 68.197(10)(c)) @ ${r.note} to ${entry.name}`
       : entry.annualWageCap !== undefined
         ? `${fmt(taxableWages)} of ${fmt(periodWages)} @ ${r.note} to ${entry.name}; ${entry.name} taxes at most $${entry.annualWageCap.toLocaleString('en-US')} of wages a year (YTD from ytd.localIncomeTax['KY_LOCAL_${entry.name}'])`
-        : `${fmt(periodWages)} @ ${r.note} to ${entry.name}, full gross wages (KRS 67.750(2) adds back pretax deferrals)`,
-    ...kyLineQuality([entry], input, ctx, periodWages),
+        : entry === cityEntry && cityShare < 1
+          ? `${fmt(taxableWages)} of ${fmt(periodWages)} @ ${r.note} to ${entry.name}${shareNote} (pretax deferrals are added back)`
+          : `${fmt(periodWages)} @ ${r.note} to ${entry.name}, full gross wages (KRS 67.750(2) adds back pretax deferrals)`,
+    ...withPeriodNote(kyLineQuality([entry], input, ctx, periodWages)),
   };
 }
 
@@ -7675,6 +7822,186 @@ function portlandAreaLocalTax(
   }
 
   return lines;
+}
+
+interface EugeneCsptConfig {
+  employeeRate: number;
+  /** Annual wage threshold in dollars by effective date (the Oregon standard minimum wage x 2,080 hours, reset every July 1). */
+  thresholds: { from: string; annual: number; perPeriod?: Partial<Record<string, number>> }[];
+  /** Last day the tax is levied (Ordinance 20616 sunsets it). */
+  expires?: string;
+}
+
+/**
+ * Eugene (Oregon) Community Safety Payroll Tax, EMPLOYEE side. The employer
+ * withholds 0.44% of an employee's wages for an employer whose physical
+ * location is inside the Eugene city limits (residence is irrelevant), but
+ * only for an employee paid more than the threshold: the Oregon standard
+ * minimum wage x 2,080 hours, reset every July 1 ($31,304 from 2025-07-01,
+ * $32,344 from 2026-07-01); at or below it the employee is exempt. The
+ * city's rate chart tests each pay period's gross wages LESS OVERTIME, so
+ * that is what is compared with the threshold divided by the periods in a
+ * year; the 0.44% is then taken on the period's whole subject wages. The
+ * chart's exact per-period figures could not be read, so the line carries a
+ * secondary-source notice. Dispatched off certificate.locality 'Eugene'.
+ * The 0.21% EMPLOYER payroll tax (reduced for two or fewer employees) is
+ * not modelled: it depends on headcount and total payroll.
+ */
+function eugeneCommunitySafetyPayrollTax(
+  input: PaycheckInput,
+  ctx: ComputeContext,
+  rules: StateRuleset,
+): TaxLine | null {
+  const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
+  if (!hasLocality(cert, 'Eugene')) return null;
+  const cfg = rules.eugeneCommunitySafetyPayrollTax as EugeneCsptConfig | undefined;
+  if (!cfg) return null;
+  if (cfg.expires !== undefined && input.checkDate > cfg.expires) return null;
+
+  const change = cfg.thresholds.filter((t) => t.from <= input.checkDate).sort((a, b) => a.from.localeCompare(b.from)).at(-1);
+  if (!change) return null;
+
+  const exempt = (rules.exemptPretax ?? []) as PretaxCategory[];
+  const subjectWages = ctx.taxableWagesFor(exempt);
+  const overtime = input.earnings.filter((e) => e.overtime).reduce((sum, e) => sum + e.amount, 0);
+  const testWages = atLeastZero(subjectWages - overtime);
+  // The city's chart prints a whole-dollar cutoff per pay frequency (it rounds the
+  // annual figure divided by the periods); use it when the file carries it.
+  const chartCutoff = change.perPeriod?.[input.payFrequency];
+  const perPeriodThreshold = chartCutoff !== undefined ? dollars(chartCutoff) : dollars(change.annual) / ctx.periodsPerYear;
+  const covered = testWages > perPeriodThreshold;
+  const amount = covered ? applyRate(subjectWages, cfg.employeeRate) : 0;
+  const annualText = '$' + change.annual.toLocaleString('en-US');
+
+  return {
+    id: 'OR_EUGENE_CSPT',
+    name: 'Eugene Community Safety Payroll Tax (Employee)',
+    payer: 'employee',
+    jurisdiction: 'local',
+    taxableWages: covered ? subjectWages : 0,
+    amount,
+    detail: covered
+      ? fmt(subjectWages) + ' @ ' + (cfg.employeeRate * 100).toFixed(2) + '%: wages less overtime ' + fmt(testWages) + ' exceed the ' + fmt(perPeriodThreshold) + ' pay-period cutoff for the ' + annualText + ' annual threshold'
+      : 'no tax: wages less overtime ' + fmt(testWages) + ' do not exceed the ' + fmt(perPeriodThreshold) + ' pay-period cutoff for the ' + annualText + ' annual threshold (Oregon minimum wage x 2,080 hours)',
+    // The city's chart prints a cutoff for these frequencies (the owner read it on 2026-11-10); any other frequency is the annual figure divided evenly.
+    ...(chartCutoff !== undefined
+      ? {}
+      : {
+          dataQuality: {
+            tier: 'inferred' as const,
+            note: "Eugene's tax-rate chart for July 1, 2026 to June 30, 2027 has no row for this pay frequency (it lists weekly, biweekly, twice-monthly, monthly, daily and twice-annual), so the annual threshold of " + annualText + " is divided evenly by the pay periods.",
+          },
+        }),
+  };
+}
+
+/**
+ * Eugene's Community Safety Payroll Tax, EMPLOYER side: 0.21% of total gross
+ * wages paid at a location inside the city limits (the city's own return
+ * instructions: "The Employer Payroll Tax rate is 0.0021 (or .21 percent). The
+ * reduced tax rate is applied only on 4th quarter or final returns"). An
+ * employer with two or fewer employees pays 0.15% on the first $100,000 of
+ * wages for the year, and public government employers are exempt; both are
+ * employer-wide facts this engine cannot see, so they are stated in the notice
+ * and not applied. Dispatched off certificate.locality 'Eugene'.
+ */
+function eugeneCommunitySafetyPayrollTaxEmployer(
+  input: PaycheckInput,
+  ctx: ComputeContext,
+  rules: StateRuleset,
+): TaxLine | null {
+  const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
+  if (!hasLocality(cert, 'Eugene')) return null;
+  const cfg = rules.eugeneCommunitySafetyPayrollTax as (EugeneCsptConfig & { employerRate?: number }) | undefined;
+  if (!cfg || cfg.employerRate === undefined) return null;
+  if (cfg.expires !== undefined && input.checkDate > cfg.expires) return null;
+
+  const exempt = (rules.exemptPretax ?? []) as PretaxCategory[];
+  const wages = ctx.taxableWagesFor(exempt);
+  return {
+    id: 'OR_EUGENE_CSPT_ER',
+    name: 'Eugene Community Safety Payroll Tax (Employer)',
+    payer: 'employer',
+    jurisdiction: 'local',
+    taxableWages: wages,
+    amount: applyRate(wages, cfg.employerRate),
+    detail: fmt(wages) + ' @ ' + (cfg.employerRate * 100).toFixed(2) + '% of gross wages paid at a Eugene location',
+    dataQuality: {
+      tier: 'secondary_source',
+      note: "Eugene's own Employer Payroll Tax page gives 0.21% for the employer tax; this engine cannot apply the reduced rate (0.15% on the first $100,000 for an employer with two or fewer employees, taken on the fourth-quarter or final return) or the public-employer exemption, which depend on the employer as a whole. The 0.21% rate, the 0.15% reduced rate and the base of all subject wages paid to all employees (employees exempt from the employee tax included) are from the city's own Employer Payroll Tax page, read 2026-11-10. Subject wages are Oregon withholding wages after pretax deductions, per the city's employer guide as read by the owner (this project could not retrieve the guide), which is what is taken here.",
+    },
+  };
+}
+
+interface SpringfieldPayrollTaxConfig {
+  employeeRate: number;
+  employerRate: number;
+  effectiveFrom: string;
+}
+
+/**
+ * Springfield (Oregon) payroll tax, effective for pay periods BEGINNING on or
+ * after 2027-01-01 (Ordinance adopted 2026-06-01): 0.1% of applicable wages
+ * from the employee, withheld by the employer, and 0.1% from the employer, for
+ * wages associated with a taxable Springfield business location (not where the
+ * employee lives). Read from Ordinance No. 6515 as adopted on 2026-06-01 (6 to 0;
+ * Springfield Payroll Tax Code 7.1200-7.1216) and the city's own program pages.
+ * Wages (7.1202) exclude cafeteria-plan benefits that the employee does not take
+ * in cash (Section 125: health premiums, HSA, FSAs, dependent care) and qualified
+ * transportation fringes, but INCLUDE employee deferrals into 401(k), 403(b),
+ * 457 and similar plans, so the base here is gross pay less those excluded
+ * pretax categories. Not modelled: the code's small-amount exclusions (domestic
+ * service under $1,000 a year, seasonal agricultural labor under $300, casual
+ * labor under $50, and the rest of 7.1202), and the exclusion of hours worked at
+ * an employer location outside the city (7.1204(4)), which are facts about the
+ * employer and employee the engine cannot see. The first date the tax is owed is
+ * set by the City Manager's administrative rule (Ordinance Section 5); the
+ * city's own FAQ (read 2026-11-12) says it begins 2027-01-01 for pay periods
+ * beginning on or after that date, and the rule itself is not yet posted. The
+ * ordinance keys to the pay period, so payPeriodStart is used when given and
+ * the check date otherwise. An employer may elect to pay
+ * the employee share; that election is not modelled. Dispatched off
+ * certificate.locality 'Springfield'.
+ */
+function springfieldPayrollTax(
+  input: PaycheckInput,
+  ctx: ComputeContext,
+  rules: StateRuleset,
+): TaxLine[] {
+  const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
+  if (!hasLocality(cert, 'Springfield')) return [];
+  const cfg = rules.springfieldPayrollTax as SpringfieldPayrollTaxConfig | undefined;
+  const periodStartGiven = payPeriodStartOf(input);
+  if (!cfg || (periodStartGiven ?? input.checkDate) < cfg.effectiveFrom) return [];
+
+  // 7.1202 'Wages': Section 125 benefits and transportation fringes are out; 401(k)/403(b)/457 deferrals stay in.
+  const wages = ctx.taxableWagesFor(['section125', 'hsa', 'fsa', 'dependent_care', 'commuter']);
+  const quality = {
+    tier: 'inferred' as const,
+    note: "Ordinance No. 6515 (adopted 2026-06-01, read) sets 0.1% employee and 0.1% employer on wages for services at a business location in the city, with Section 125 benefits and transportation fringes excluded and retirement deferrals included. The city's own FAQ (read 2026-11-12) says the tax begins 2027-01-01 and employers withhold for pay periods beginning on or after that date; the ordinance leaves the exact date to the City Manager's administrative rule, which the city has not yet posted. The code's small-amount wage exclusions and its exclusion of hours worked at an employer location outside the city are not applied. The city keys the start to the pay period's first day: supply payPeriodStart, or the check date is used.",
+  };
+  return [
+    {
+      id: 'OR_SPRINGFIELD_PT',
+      name: 'Springfield Payroll Tax (Employee)',
+      payer: 'employee',
+      jurisdiction: 'local',
+      taxableWages: wages,
+      amount: applyRate(wages, cfg.employeeRate),
+      detail: fmt(wages) + ' @ ' + (cfg.employeeRate * 100).toFixed(2) + '%, withheld by the employer (W-2 locality code SPFLD)',
+      dataQuality: quality,
+    },
+    {
+      id: 'OR_SPRINGFIELD_PT_ER',
+      name: 'Springfield Payroll Tax (Employer)',
+      payer: 'employer',
+      jurisdiction: 'local',
+      taxableWages: wages,
+      amount: applyRate(wages, cfg.employerRate),
+      detail: fmt(wages) + ' @ ' + (cfg.employerRate * 100).toFixed(2) + '% on wages attributable to the Springfield location',
+      dataQuality: quality,
+    },
+  ];
 }
 
 interface CATwoBucketTable extends Partial<Record<string, number>> {}
@@ -10168,6 +10495,8 @@ interface GATablePeriod {
 }
 
 interface GAConfig {
+  /** Pay periods per year to annualize with where the G-4 booklet differs from the engine's generic count (daily is 365, not 260). */
+  annualizeMultiplier?: Partial<Record<string, number>>;
   effectiveDateOfNewTable: string;
   beforeMay11_2026: GATablePeriod;
   fromMay11_2026: GATablePeriod;
@@ -10194,7 +10523,8 @@ function georgiaWithholding(
   const cfg = rules.georgiaStatusDeduction as GAConfig;
   const exempt = (rules.exemptPretax ?? []) as PretaxCategory[];
   const periodWages = ctx.taxableWagesFor(exempt);
-  const annualWages = periodWages * ctx.periodsPerYear;
+  const periodsPerYear = cfg.annualizeMultiplier?.[input.payFrequency] ?? ctx.periodsPerYear;
+  const annualWages = periodWages * periodsPerYear;
 
   const table = input.checkDate >= cfg.effectiveDateOfNewTable ? cfg.fromMay11_2026 : cfg.beforeMay11_2026;
 
@@ -10221,7 +10551,7 @@ function georgiaWithholding(
 
   const taxableIncome = atLeastZero(annualWages - standardDeduction - dependentAllowance);
   const annualTax = applyRate(taxableIncome, table.rate);
-  const amount = roundHalfUp(annualTax / ctx.periodsPerYear);
+  const amount = roundHalfUp(annualTax / periodsPerYear);
 
   return {
     id: `${rules.code}_SIT`,
@@ -10234,7 +10564,7 @@ function georgiaWithholding(
       `${fmt(annualWages)}/yr less ${fmt(standardDeduction)} standard deduction ` +
       `(${higherDeduction ? 'MFJ, one spouse working' : 'Single/HoH/MFS/MFJ-both-working'}) ` +
       `less ${fmt(dependentAllowance)} (${dependents} dependents) = ${fmt(taxableIncome)} taxable ` +
-      `@ ${(table.rate * 100).toFixed(2)}% = ${fmt(annualTax)}/yr ÷ ${ctx.periodsPerYear} ` +
+      `@ ${(table.rate * 100).toFixed(2)}% = ${fmt(annualTax)}/yr ÷ ${periodsPerYear} ` +
       `(${table === cfg.fromMay11_2026 ? 'post' : 'pre'}-${cfg.effectiveDateOfNewTable} table)`,
   };
 }
@@ -10537,6 +10867,8 @@ function newMexicoWithholding(
 }
 
 interface HIConfig {
+  /** Pay periods per year to annualize with, where Booklet A differs from the engine's generic count (daily is 365, not 260). */
+  annualizeMultiplier?: Partial<Record<string, number>>;
   allowanceAmountAnnual: number;
   extraLumpSumAllowanceAnnual: number;
   brackets: {
@@ -10589,7 +10921,8 @@ function hawaiiWithholding(
   const cfg = rules.annualBracket as HIConfig;
   const exempt = (rules.exemptPretax ?? []) as PretaxCategory[];
   const periodWages = ctx.taxableWagesFor(exempt);
-  const annualWages = periodWages * ctx.periodsPerYear;
+  const periodsPerYear = cfg.annualizeMultiplier?.[input.payFrequency] ?? ctx.periodsPerYear;
+  const annualWages = periodWages * periodsPerYear;
 
   const cert = (input.workState?.certificate ?? {}) as Record<string, unknown>;
   const status = (cert.hawaiiMaritalStatus as string) ?? 'single';
@@ -10618,7 +10951,7 @@ function hawaiiWithholding(
   const bracket = findWIBracket(brackets, taxableIncome);
   const excess = taxableIncome - dollars(bracket.from);
   const annualTax = dollars(bracket.base) + applyRate(excess, bracket.rate);
-  const amount = roundHalfUp(annualTax / ctx.periodsPerYear);
+  const amount = roundHalfUp(annualTax / periodsPerYear);
 
   return {
     id: `${rules.code}_SIT`,
@@ -10632,7 +10965,7 @@ function hawaiiWithholding(
       `less ${fmt(lumpSumDeduction)} extra lump sum allowance = ${fmt(taxableIncome)} taxable ` +
       `(${status === 'married' ? 'Married' : 'Single incl. unmarried HoH'}), bracket ${fmt(dollars(bracket.from))}-` +
       `${bracket.to === null ? '∞' : fmt(dollars(bracket.to))}: ${fmt(dollars(bracket.base))} + ` +
-      `${(bracket.rate * 100).toFixed(2)}% × ${fmt(excess)} = ${fmt(annualTax)}/yr ÷ ${ctx.periodsPerYear}`,
+      `${(bracket.rate * 100).toFixed(2)}% × ${fmt(excess)} = ${fmt(annualTax)}/yr ÷ ${periodsPerYear}`,
   };
 }
 

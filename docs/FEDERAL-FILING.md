@@ -133,7 +133,7 @@ W-3 row) must be read.
 | --- | --- | --- | --- |
 | `irs_mef_94x` | IRS | e-Services account; an e-file application with the *software developer* provider option (principal, responsible official or delegated user with MeF authorities); ATS testing; the year's 94x schema and business rules from the e-Services mailbox | **Registered developers only** — distributed through the Registered User Portal / SOR mailbox, not downloadable |
 | `irs_eft_deposit` | IRS / Treasury | EFTPS enrollment, IRS Direct Pay, the IRS business tax account, or a third party that deposits for you and returns the EFT Trace Number | Public (cutoffs in Pub. 15, encoded in `paymentInstruction`) |
-| `ssa_bso_w2` | SSA | Business Services Online registration (allow 2+ weeks; credentials renewed since 2023-03-25); BSO online forms for ≤ 50 W-2s, or file upload of an EFW2 wage file above that | EFW2/EFW2C — published by SSA, but its site **returned HTTP 403 to automated retrieval** |
+| `ssa_bso_w2` | SSA | Business Services Online registration (allow 2+ weeks; credentials renewed since 2023-03-25; new Electronic Wage Reporting authorization and re-registration required since 2026-11-07, registration codes come by mail); BSO online forms for ≤ 50 W-2s, or file upload of an EFW2 wage file above that | EFW2/EFW2C — published by SSA, but its site **returned HTTP 403 to automated retrieval** |
 
 For a payroll product filing for other employers, the enrollment sequence (provider options, Form 8655,
 fingerprints, testing, A2A vs IFA, the security obligations) is in
