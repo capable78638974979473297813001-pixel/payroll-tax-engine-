@@ -363,6 +363,30 @@
         "https://www.deerpark-oh.gov/departments/tax-department/jedz-jedd-tax-information/",
         "https://www.sycamoretownship.org/economic-development"
       ]
+    },
+    "9049": {
+      "agency": "OH-ETNA-NORTH",
+      "verifiedOn": "2026-11-13",
+      "sources": [
+        "https://www.newarkohio.gov/economic-development/",
+        "https://www.newarkohio.gov/wp-content/uploads/26QZN-PAPER.pdf"
+      ]
+    },
+    "9050": {
+      "agency": "OH-ETNA-SOUTH",
+      "verifiedOn": "2026-11-13",
+      "sources": [
+        "https://www.newarkohio.gov/economic-development/",
+        "https://www.newarkohio.gov/wp-content/uploads/26MZS-Paper.pdf"
+      ]
+    },
+    "9034": {
+      "agency": "OH-PATASKALA-JEDD",
+      "verifiedOn": "2026-11-13",
+      "sources": [
+        "https://www.newarkohio.gov/economic-development/",
+        "https://www.newarkohio.gov/wp-content/uploads/26QD-PAPER.pdf"
+      ]
     }
   },
   "rosters": {

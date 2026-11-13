@@ -1639,5 +1639,80 @@
       "https://www.deerpark-oh.gov/departments/tax-department/"
     ],
     "verifiedOn": "2026-11-13"
+  },
+  "OH-ETNA-NORTH": {
+    "collector": "City of Newark Income Tax Division for Etna JEDZ North",
+    "registration": "Submit a separate Business Registration Form for each taxing authority. Check Etna JEDZ1 and return the completed form to Newark by mail, fax or email within the 10 business days requested on the form.",
+    "returns": [
+      [
+        "Etna JEDZ North Payroll Withholding",
+        "Use the district coupon for the assigned frequency. Newark’s schedule uses monthly withholding: below $200, pay quarterly by the last day of the following month. From $200 through $999.99, pay monthly by the 15th of the following month. At $1,000 or more, pay semimonthly by the third banking day after the 15th and after month-end. Use the dated packet for adjusted due dates."
+      ],
+      [
+        "Etna JEDZ North Annual Reconciliation",
+        "Reconcile 2026 withholding and attach district W-2 records by March 1, 2027. The linked district packet labels its calendar entry as 2025 despite printing a 2027 due date. Confirm the return is marked for tax year 2026 before filing."
+      ]
+    ],
+    "filing": "Use the Etna JEDZ North payroll withholding packet. Mail periodic returns to PO Box 327, Newark, OH 43058. Newark also accepts electronic withholding filings through its ACH Credit program. Continue paper periodic filings until the first successful electronic filing.",
+    "payment": "Use the district payee printed on the coupon. To pay by ACH credit, enroll separately for Etna JEDZ1 with Newark, obtain the bank file instructions and arrange for the payment to be credited by the due date.",
+    "sources": [
+      "https://www.newarkohio.gov/wp-content/uploads/26QZN-PAPER.pdf",
+      "https://www.newarkohio.gov/economic-development/",
+      "https://www.newarkohio.gov/income-taxes/",
+      "https://www.newarkohio.gov/download-material/268/tax-department/14715/ba11_2022",
+      "https://www.newarkohio.gov/wp-content/uploads/2025/02/ACH-Credit-Enrollment.pdf",
+      "https://www.newarkohio.gov/wp-content/uploads/26MZN-Paper.pdf"
+    ],
+    "verifiedOn": "2026-11-13"
+  },
+  "OH-ETNA-SOUTH": {
+    "collector": "City of Newark Income Tax Division for Etna JEDZ South",
+    "registration": "Submit a separate Business Registration Form for each taxing authority. Check Etna JEDZ2 and return the completed form to Newark by mail, fax or email within the 10 business days requested on the form.",
+    "returns": [
+      [
+        "Etna JEDZ South Payroll Withholding",
+        "Use the district coupon for the assigned frequency. Newark’s schedule uses monthly withholding: below $200, pay quarterly by the last day of the following month. From $200 through $999.99, pay monthly by the 15th of the following month. At $1,000 or more, pay semimonthly by the third banking day after the 15th and after month-end. Use the dated packet for adjusted due dates."
+      ],
+      [
+        "Etna JEDZ South Annual Reconciliation",
+        "Reconcile 2026 withholding and attach district W-2 records by March 1, 2027. The linked district packet labels its calendar entry as 2025 despite printing a 2027 due date. Confirm the return is marked for tax year 2026 before filing."
+      ]
+    ],
+    "filing": "Use the Etna JEDZ South payroll withholding packet. Mail periodic returns to PO Box 582, Newark, OH 43058. Newark also accepts electronic withholding filings through its ACH Credit program. Continue paper periodic filings until the first successful electronic filing.",
+    "payment": "Use the district payee printed on the coupon. To pay by ACH credit, enroll separately for Etna JEDZ2 with Newark, obtain the bank file instructions and arrange for the payment to be credited by the due date.",
+    "sources": [
+      "https://www.newarkohio.gov/wp-content/uploads/26MZS-Paper.pdf",
+      "https://www.newarkohio.gov/economic-development/",
+      "https://www.newarkohio.gov/income-taxes/",
+      "https://www.newarkohio.gov/download-material/268/tax-department/14715/ba11_2022",
+      "https://www.newarkohio.gov/wp-content/uploads/2025/02/ACH-Credit-Enrollment.pdf",
+      "https://www.newarkohio.gov/wp-content/uploads/26MZN-Paper.pdf"
+    ],
+    "verifiedOn": "2026-11-13"
+  },
+  "OH-PATASKALA-JEDD": {
+    "collector": "City of Newark Income Tax Division for Pataskala JEDD",
+    "registration": "Submit a separate Business Registration Form for each taxing authority. Check Pataskala JEDD and return the completed form to Newark by mail, fax or email within the 10 business days requested on the form.",
+    "returns": [
+      [
+        "Pataskala JEDD Payroll Withholding",
+        "Use the district coupon for the assigned frequency. Newark’s schedule uses monthly withholding: below $200, pay quarterly by the last day of the following month. From $200 through $999.99, pay monthly by the 15th of the following month. At $1,000 or more, pay semimonthly by the third banking day after the 15th and after month-end. Use the dated packet for adjusted due dates."
+      ],
+      [
+        "Pataskala JEDD Annual Reconciliation",
+        "Reconcile 2026 withholding and attach district W-2 records by March 1, 2027. The linked district packet labels its calendar entry as 2025 despite printing a 2027 due date. Confirm the return is marked for tax year 2026 before filing."
+      ]
+    ],
+    "filing": "Use the Pataskala JEDD payroll withholding packet. Mail periodic returns to PO Box 327, Newark, OH 43058. Newark also accepts electronic withholding filings through its ACH Credit program. Continue paper periodic filings until the first successful electronic filing.",
+    "payment": "Use the district payee printed on the coupon. To pay by ACH credit, enroll separately for Pataskala JEDD with Newark, obtain the bank file instructions and arrange for the payment to be credited by the due date.",
+    "sources": [
+      "https://www.newarkohio.gov/wp-content/uploads/26QD-PAPER.pdf",
+      "https://www.newarkohio.gov/economic-development/",
+      "https://www.newarkohio.gov/income-taxes/",
+      "https://www.newarkohio.gov/download-material/268/tax-department/14715/ba11_2022",
+      "https://www.newarkohio.gov/wp-content/uploads/2025/02/ACH-Credit-Enrollment.pdf",
+      "https://www.newarkohio.gov/wp-content/uploads/26MZN-Paper.pdf"
+    ],
+    "verifiedOn": "2026-11-13"
   }
 }

@@ -558,3 +558,17 @@ test('Deer Park provides separate employer forms for Kenwood JEDD and Northwest 
     assert.match(result.guide.returns[0][1], /last day of that month/);
   }
 });
+
+test('Newark-administered districts select their own withholding packets and mailing boxes', () => {
+  for (const [id, name, box] of [
+    ['9049', 'Etna JEDZ North', '327'],
+    ['9050', 'Etna JEDZ South', '582'],
+    ['9034', 'Pataskala JEDD', '327'],
+  ]) {
+    const { guide } = localWithholdingGuide('OH-jedd-jedz', id, 2026);
+    assert.equal(guide.returns[0][0], name + ' Payroll Withholding');
+    assert.ok(guide.filing.includes('PO Box ' + box + ','));
+    assert.match(guide.returns[1][1], /March 1, 2027/);
+    assert.match(guide.payment, /enroll separately/);
+  }
+});
