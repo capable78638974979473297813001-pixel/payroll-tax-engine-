@@ -1975,5 +1975,51 @@
       "https://www.monroeohio.org/DocumentCenter/View/3076/2026-Form-W1-Withholding-Tax-Forms-Quarterly"
     ],
     "verifiedOn": "2026-11-13"
+  },
+  "OH-VANDALIA-JEDD": {
+    "collector": "City of Vandalia Income Tax Division for Butler Township–Vandalia JEDD",
+    "registration": "Complete Vandalia’s Business Questionnaire, select Butler Twp JEDD, and give the worksite and employee start date. Return the questionnaire within 15 days as instructed on the form.",
+    "returns": [
+      [
+        "Butler Township JEDD W-1",
+        "Monthly returns and payments are due by the 15th of the following month. Quarterly filing is available when monthly withholding is below $200. Quarterly returns and payments are due by the last day of the following month. File a W-1 even for a period with no compensation."
+      ],
+      [
+        "Butler Township JEDD W-3",
+        "The district form specifies February 28 for the annual reconciliation and any balance due. Attach the applicable W-2s and report withholding by month or quarter."
+      ]
+    ],
+    "filing": "Use the Butler Township JEDD forms for the district account. File the W-1 and W-3 with the Vandalia Tax Office, PO Box 727, Vandalia, OH 45377-0727. Vandalia’s Online Filing Tool accepts withholding payments and annual reconciliations.",
+    "payment": "Make checks or money orders payable to City of Vandalia. Include the district account number and FEIN on the W-1. Vandalia also accepts electronic payments through its Online Filing Tool, ACH credit and the Ohio Business Gateway.",
+    "sources": [
+      "https://www.vandaliaohio.org/169/Income-Tax-Division",
+      "https://vandaliaohio.org/DocumentCenter/View/216/Business-Questionnaire-PDF",
+      "https://vandaliaohio.org/DocumentCenter/View/199/Withholding-Return-W-1-for-Butler-TWP-JEDD-PDF",
+      "https://vandaliaohio.org/DocumentCenter/View/197/Reconciliation-W-3-JEDD-PDF"
+    ],
+    "verifiedOn": "2026-11-13"
+  },
+  "OH-VANDALIA-JEDZ": {
+    "collector": "City of Vandalia Income Tax Division for Butler Township–Miller Lane JEDZ",
+    "registration": "Complete Vandalia’s Business Questionnaire, select Butler Twp JEDZ, and give the worksite and employee start date. Return the questionnaire within 15 days as instructed on the form.",
+    "returns": [
+      [
+        "Butler Township JEDZ W-1",
+        "Monthly returns and payments are due by the 15th of the following month. Quarterly filing is available when monthly withholding is below $200. Quarterly returns and payments are due by the last day of the following month. File a W-1 even for a period with no compensation."
+      ],
+      [
+        "Butler Township JEDZ W-3",
+        "The district form specifies February 28 for the annual reconciliation and any balance due. Attach the applicable W-2s and report withholding by month or quarter."
+      ]
+    ],
+    "filing": "Use the Butler Township JEDZ forms for the district account. File the W-1 and W-3 with the Vandalia Tax Office, PO Box 727, Vandalia, OH 45377-0727. Vandalia’s Online Filing Tool accepts withholding payments and annual reconciliations.",
+    "payment": "Make checks or money orders payable to City of Vandalia. Include the district account number and FEIN on the W-1. Vandalia also accepts electronic payments through its Online Filing Tool, ACH credit and the Ohio Business Gateway.",
+    "sources": [
+      "https://www.vandaliaohio.org/169/Income-Tax-Division",
+      "https://vandaliaohio.org/DocumentCenter/View/216/Business-Questionnaire-PDF",
+      "https://vandaliaohio.org/DocumentCenter/View/200/Withholding-Return-W-1-for-Butler-TWP-JEDZ-PDF",
+      "https://vandaliaohio.org/DocumentCenter/View/198/Reconciliation-W-3-JEDZ-PDF"
+    ],
+    "verifiedOn": "2026-11-13"
   }
 }

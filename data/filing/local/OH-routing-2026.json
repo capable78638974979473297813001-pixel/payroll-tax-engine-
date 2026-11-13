@@ -638,6 +638,22 @@
         "https://www.monroeohio.org/214/Income-Tax",
         "https://monroeohio.org/DocumentCenter/View/2861/Final-2024-ACFR"
       ]
+    },
+    "9011": {
+      "agency": "OH-VANDALIA-JEDD",
+      "sources": [
+        "https://www.vandaliaohio.org/169/Income-Tax-Division",
+        "https://vandaliaohio.org/DocumentCenter/View/199/Withholding-Return-W-1-for-Butler-TWP-JEDD-PDF"
+      ],
+      "verifiedOn": "2026-11-13"
+    },
+    "9046": {
+      "agency": "OH-VANDALIA-JEDZ",
+      "sources": [
+        "https://www.vandaliaohio.org/169/Income-Tax-Division",
+        "https://vandaliaohio.org/DocumentCenter/View/200/Withholding-Return-W-1-for-Butler-TWP-JEDZ-PDF"
+      ],
+      "verifiedOn": "2026-11-13"
     }
   },
   "rosters": {

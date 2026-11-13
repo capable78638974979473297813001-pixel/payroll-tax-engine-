@@ -674,3 +674,14 @@ test('Monroe collects for the Raceway and 2022 JEDDs and directs employers to co
   }
   assert.notEqual(localWithholdingGuide('OH-jedd-jedz', '9093', 2026).agency, 'OH-TURTLECREEK-MONROE-JEDD');
 });
+
+test('Butler Township worksites select the appropriate Vandalia or Dayton collector and forms', () => {
+  for (const [id, kind] of [['9011', 'JEDD'], ['9046', 'JEDZ']]) {
+    const { agency, guide } = localWithholdingGuide('OH-jedd-jedz', id, 2026);
+    assert.equal(agency, 'OH-VANDALIA-' + kind);
+    assert.deepEqual(guide.returns.map(([name]) => name), ['W-1', 'W-3'].map(form => 'Butler Township ' + kind + ' ' + form));
+    assert.ok(guide.registration.includes('select Butler Twp ' + kind));
+    assert.match(guide.payment, /payable to City of Vandalia/);
+  }
+  assert.equal(localWithholdingGuide('OH-jedd-jedz', '9081', 2026).agency, 'OH-DAYTON-BUTLER-JEDD');
+});
