@@ -1573,7 +1573,7 @@
     "returns": [
       [
         "JEDZ Withholding Payments Form",
-        "Monthly payments are due by the 15th of the following month when prior-year withholding exceeded $2,399 or any month of the preceding quarter exceeded $200. Include withholding required as well as amounts withheld. Otherwise pay quarterly by the last day of the following month, subject to the assigned schedule."
+        "Monthly withholding is due by the 15th of the following month when prior-year withholding exceeded $2,399 or any month of the preceding quarter exceeded $200, including tax required to be withheld. For quarterly accounts, Deer Park publishes the 15th of the month after the quarter. Ohio Revised Code 718.03(B)(1)(b) specifies the last day of that month. Confirm the district schedule with the tax office before the earlier date."
       ],
       [
         "JEDZ Year-End Reconciliation Form",
@@ -1612,6 +1612,31 @@
       "https://www.amberleyvillage.org/sites/g/files/vyhlif8491/f/uploads/jedz-business-letter.pdf",
       "https://codes.ohio.gov/ohio-revised-code/section-718.03",
       "https://codes.ohio.gov/ohio-revised-code/section-1.14"
+    ],
+    "verifiedOn": "2026-11-13"
+  },
+  "OH-DEER-PARK-SYCAMORE-JEDD": {
+    "collector": "City of Deer Park Tax Department for the Sycamore Township Kenwood JEDD",
+    "registration": "Submit the JEDD New Employer Withholding Account Registration Form to Deer Park. Confirm the worksite using the Kenwood JEDD address list on the district forms page.",
+    "returns": [
+      [
+        "JEDD Withholding Payments Form",
+        "Monthly withholding is due by the 15th of the following month when prior-year withholding exceeded $2,399 or any month of the preceding quarter exceeded $200, including tax required to be withheld. For quarterly accounts, Deer Park publishes the 15th of the month after the quarter. Ohio Revised Code 718.03(B)(1)(b) specifies the last day of that month. Confirm the district schedule with the tax office before the earlier date."
+      ],
+      [
+        "JEDD Year-End Reconciliation Form",
+        "Reconcile 2026 district withholding by March 1, 2027. The city publishes February 28 as the annual deadline and that date falls on Sunday in 2027."
+      ]
+    ],
+    "filing": "Use the JEDD forms for registration, periodic withholding and year-end reconciliation. Deer Park lists 7951, 7961, 7973, 7975 and 7997 Kenwood Road in this district. The same page lists separate forms and addresses for the Northwest JEDZ.",
+    "payment": "Remit to Deer Park with the JEDD Withholding Payments Form and district account reference. Confirm district crediting with the tax office before using the city online or phone payment service.",
+    "sources": [
+      "https://www.sycamoretownship.org/economic-development",
+      "https://www.deerpark-oh.gov/departments/tax-department/jedz-jedd-tax-information/",
+      "https://www.deerpark-oh.gov/departments/tax-department/due-dates/",
+      "https://codes.ohio.gov/ohio-revised-code/section-718.03",
+      "https://codes.ohio.gov/ohio-revised-code/section-1.14",
+      "https://www.deerpark-oh.gov/departments/tax-department/"
     ],
     "verifiedOn": "2026-11-13"
   }

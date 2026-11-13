@@ -355,6 +355,14 @@
         "https://sycamoretownship.org/township-government/economic-development/jedz/",
         "https://amberleyvillage.org/departments/tax/joint_economic_development_zone_jedz.php"
       ]
+    },
+    "9138": {
+      "agency": "OH-DEER-PARK-SYCAMORE-JEDD",
+      "verifiedOn": "2026-11-13",
+      "sources": [
+        "https://www.deerpark-oh.gov/departments/tax-department/jedz-jedd-tax-information/",
+        "https://www.sycamoretownship.org/economic-development"
+      ]
     }
   },
   "rosters": {

@@ -548,3 +548,13 @@ test('Kenwood JEDZ worksites select the appropriate employer registration and fo
   }
   assert.notEqual(localWithholdingGuide('OH-jedd-jedz', '9138', 2026).agency, 'OH-KENWOOD-NORTHWEST');
 });
+
+test('Deer Park provides separate employer forms for Kenwood JEDD and Northwest JEDZ', () => {
+  for (const [id, prefix] of [['9138', 'JEDD'], ['9059', 'JEDZ']]) {
+    const result = localWithholdingGuide('OH-jedd-jedz', id, 2026);
+    assert.equal(result.guide.returns[0][0], prefix + ' Withholding Payments Form');
+    assert.equal(result.guide.returns[1][0], prefix + ' Year-End Reconciliation Form');
+    assert.match(result.guide.returns[0][1], /quarterly accounts, Deer Park publishes the 15th/);
+    assert.match(result.guide.returns[0][1], /last day of that month/);
+  }
+});
