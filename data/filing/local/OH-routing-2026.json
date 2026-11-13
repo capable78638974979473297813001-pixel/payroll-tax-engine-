@@ -438,6 +438,22 @@
         "https://www.columbus.gov/Government/City-Auditor/Income-Tax-Division/Tax-Forms/JEDD-JEDZ-Tax-Forms",
         "https://www.columbus.gov/files/sharedassets/city/v/1/city-auditor/tax-forms/jedd/2026-it-11j_readerext.pdf"
       ]
+    },
+    "9007": {
+      "agency": "OH-BERKSHIRE-JEDD",
+      "verifiedOn": "2026-11-13",
+      "sources": [
+        "https://www.delawareohio.net/government/departments/income-tax/berkshire-jedd/employers",
+        "https://www.cityofdelawareoh.gov/files/assets/city/v/1/income-tax/documents/2026-jedd-employer-monthly-withholding-return-and-reconciliation-fill-in.pdf"
+      ]
+    },
+    "9139": {
+      "agency": "OH-BERKSHIRE-JEDD",
+      "verifiedOn": "2026-11-13",
+      "sources": [
+        "https://www.delawareohio.net/government/departments/income-tax/berkshire-jedd/employers",
+        "https://www.cityofdelawareoh.gov/files/assets/city/v/1/income-tax/documents/2026-jedd-employer-monthly-withholding-return-and-reconciliation-fill-in.pdf"
+      ]
     }
   },
   "rosters": {

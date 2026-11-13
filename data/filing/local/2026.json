@@ -1807,5 +1807,27 @@
       "https://www.columbus.gov/Government/City-Auditor/Income-Tax-Division/Filing-Payment-Information/Filing-Season-Information"
     ],
     "verifiedOn": "2026-11-13"
+  },
+  "OH-BERKSHIRE-JEDD": {
+    "collector": "City of Delaware Income Tax Department for Berkshire Township JEDD I and II",
+    "registration": "Call 740-203-1225 with the worksite address and federal employer identification number to confirm the district and obtain the JEDD tax account number.",
+    "returns": [
+      [
+        "Berkshire Township JEDD Employer’s Return of Tax Withheld",
+        "Monthly deposits are due by the 15th of the following month. Employers withholding less than $200 per month may remit quarterly by the last day of the month following the quarter."
+      ],
+      [
+        "Berkshire Township JEDD Annual Reconciliation",
+        "Report all 2026 district withholding and attach the applicable W-2s by March 1, 2027. Use EFW2 for more than ten W-2s."
+      ]
+    ],
+    "filing": "Enter the JEDD tax ID on the district coupon and annual reconciliation. Mail paper filings to City of Delaware Income Tax, PO Box 496, Delaware, OH 43015. Contact the department for electronic year-end filing instructions.",
+    "payment": "Employers required to deposit federal withholding by EFT must also pay district withholding by EFT. An EFT payment replaces the periodic coupon. For permitted paper payments make the check payable to City of Delaware Income Tax.",
+    "sources": [
+      "https://www.delawareohio.net/government/departments/income-tax/berkshire-jedd/employers",
+      "https://www.cityofdelawareoh.gov/files/assets/city/v/1/income-tax/documents/2026-jedd-employer-monthly-withholding-return-and-reconciliation-fill-in.pdf",
+      "https://codes.ohio.gov/ohio-revised-code/section-1.14"
+    ],
+    "verifiedOn": "2026-11-13"
   }
 }

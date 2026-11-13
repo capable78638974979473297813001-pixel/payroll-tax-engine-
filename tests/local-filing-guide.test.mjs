@@ -602,3 +602,13 @@ test('Columbus JEDD accounts select IT-11J district lines and annual IT-13J', ()
   }
   assert.equal(localWithholdingGuide('OH-municipality', '18000', 2026).agency, 'OH-COLUMBUS');
 });
+
+test('both Berkshire districts select the Delaware district packet and EFT instructions', () => {
+  for (const id of ['9007', '9139']) {
+    const { agency, guide } = localWithholdingGuide('OH-jedd-jedz', id, 2026);
+    assert.equal(agency, 'OH-BERKSHIRE-JEDD');
+    assert.match(guide.returns[0][1], /less than \$200 per month/);
+    assert.match(guide.returns[1][1], /March 1, 2027/);
+    assert.match(guide.payment, /EFT payment replaces the periodic coupon/);
+  }
+});
