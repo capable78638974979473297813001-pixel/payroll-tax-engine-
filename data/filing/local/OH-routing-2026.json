@@ -510,6 +510,78 @@
       "sources": [
         "https://www.cantonohio.gov/749/Joint-Economic-Development-Districts-JED"
       ]
+    },
+    "9091": {
+      "agency": "OH-CHEVIOT-JEDD",
+      "verifiedOn": "2026-11-13",
+      "sources": [
+        "https://cheviot.org/departments/tax/",
+        "https://cheviot.org/wp-content/uploads/2025/12/Western-Ridge-JEDD.pdf"
+      ]
+    },
+    "9101": {
+      "agency": "OH-CHEVIOT-JEDD",
+      "verifiedOn": "2026-11-13",
+      "sources": [
+        "https://cheviot.org/departments/tax/",
+        "https://cheviot.org/wp-content/uploads/2025/12/Christ-Childrens-JEDD-II.pdf"
+      ]
+    },
+    "9098": {
+      "agency": "OH-CHEVIOT-JEDD",
+      "verifiedOn": "2026-11-13",
+      "sources": [
+        "https://cheviot.org/departments/tax/",
+        "https://cheviot.org/wp-content/uploads/2025/12/MERCY-WEST-JEDD-III.pdf"
+      ]
+    },
+    "9089": {
+      "agency": "OH-CHEVIOT-JEDD",
+      "verifiedOn": "2026-11-13",
+      "sources": [
+        "https://cheviot.org/departments/tax/",
+        "https://cheviot.org/wp-content/uploads/2025/12/Harrison-Greene-JEDD.pdf"
+      ]
+    },
+    "9090": {
+      "agency": "OH-CHEVIOT-JEDD",
+      "verifiedOn": "2026-11-13",
+      "sources": [
+        "https://cheviot.org/departments/tax/",
+        "https://cheviot.org/wp-content/uploads/2025/12/UDF-JEDD.pdf"
+      ]
+    },
+    "9113": {
+      "agency": "OH-CHEVIOT-JEDD",
+      "verifiedOn": "2026-11-13",
+      "sources": [
+        "https://cheviot.org/departments/tax/",
+        "https://cheviot.org/wp-content/uploads/2025/12/McAlisters-JEDD.pdf"
+      ]
+    },
+    "9135": {
+      "agency": "OH-CHEVIOT-JEDD",
+      "verifiedOn": "2026-11-13",
+      "sources": [
+        "https://cheviot.org/departments/tax/",
+        "https://cheviot.org/wp-content/uploads/2025/12/Hampton-Inn-JEDD-VII.pdf"
+      ]
+    },
+    "9153": {
+      "agency": "OH-CHEVIOT-JEDD",
+      "verifiedOn": "2026-11-13",
+      "sources": [
+        "https://cheviot.org/departments/tax/",
+        "https://cheviot.org/wp-content/uploads/2026/01/Coopers-Hawk-JEDD.pdf"
+      ]
+    },
+    "9103": {
+      "agency": "OH-CHEVIOT-JEDD",
+      "verifiedOn": "2026-11-13",
+      "sources": [
+        "https://cheviot.org/departments/tax/",
+        "https://cheviot.org/wp-content/uploads/2025/12/Liberty-Nursing-Care-JEDD.pdf"
+      ]
     }
   },
   "rosters": {

@@ -626,3 +626,17 @@ test('Canton assigns distinct district identifiers to six Jackson JEDDs and Perr
   }
   assert.notEqual(localWithholdingGuide('OH-jedd-jedz', '9157', 2026).agency, 'OH-CANTON-JEDD');
 });
+
+test('Cheviot JEDDs route to the district registration and matching worksite contract', () => {
+  for (const [id, contract] of [
+    ['9091', 'Western-Ridge'], ['9101', 'Christ-Childrens'], ['9098', 'MERCY-WEST'],
+    ['9089', 'Harrison-Greene'], ['9090', 'UDF'], ['9113', 'McAlisters'],
+    ['9135', 'Hampton-Inn'], ['9153', 'Coopers-Hawk'], ['9103', 'Liberty-Nursing-Care'],
+  ]) {
+    const result = localWithholdingGuide('OH-jedd-jedz', id, 2026);
+    assert.equal(result.agency, 'OH-CHEVIOT-JEDD');
+    assert.ok(result.membershipSources.some(url => url.includes('/' + contract + '-JEDD')));
+    assert.match(result.guide.registration, /JEDD Tax Withholding Application/);
+    assert.match(result.guide.returns[1][1], /March 1, 2027/);
+  }
+});

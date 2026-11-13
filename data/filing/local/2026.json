@@ -1855,5 +1855,30 @@
       "https://codes.ohio.gov/ohio-revised-code/section-1.14"
     ],
     "verifiedOn": "2026-11-13"
+  },
+  "OH-CHEVIOT-JEDD": {
+    "collector": "City of Cheviot Tax Department for Green Township and Colerain Township JEDDs",
+    "registration": "Complete the JEDD Tax Withholding Application with the FEIN, worksite address, first wage date and payroll provider. Register within ten days after commencement of business and provide the required employee list within fifteen days of employment. Mail the application to the Tax Department, 3814 Harrison Avenue, Cheviot, OH 45211.",
+    "returns": [
+      [
+        "District employer withholding return",
+        "Confirm the district form and frequency with Cheviot. Under Ohio’s standard schedule, remit by the following 15th when prior-year withholding exceeded $2,399 or withholding in any month of the preceding quarter exceeded $200. Otherwise remit by the last day of the month after the quarter. Confirm any assigned semimonthly requirement."
+      ],
+      [
+        "District annual withholding reconciliation",
+        "Report 2026 district wages and withholding with employee W-2 information by March 1, 2027. Request the reconciliation for the worksite district."
+      ]
+    ],
+    "filing": "Call 513-661-7854 with the worksite address for district filing instructions. The published city W-1 and W-3 print the city rate. Obtain the correct district account and instructions before using a coupon.",
+    "payment": "Confirm the district payee, account and accepted payment method with the Cheviot Tax Department before sending a check or initiating an electronic deposit. Payroll providers should call for the instructions specific to each district.",
+    "sources": [
+      "https://cheviot.org/departments/tax/",
+      "https://cheviot.org/wp-content/uploads/2025/12/JEDD-TAX-WITHHOLDING-APPLICATION.pdf",
+      "https://cheviot.org/wp-content/uploads/2025/12/FORM-W-1-EMPLOYERS-RETURN-OF-TAXES-WITHHELD.pdf",
+      "https://cheviot.org/wp-content/uploads/2025/01/FORM-W-3-CITY-OF-CHEVIOT-TAX-RECONCILIATION.pdf",
+      "https://codes.ohio.gov/ohio-revised-code/section-718.03",
+      "https://codes.ohio.gov/ohio-revised-code/section-1.14"
+    ],
+    "verifiedOn": "2026-11-13"
   }
 }
