@@ -1417,5 +1417,30 @@
       "https://codes.ohio.gov/ohio-revised-code/section-1.14"
     ],
     "verifiedOn": "2026-11-12"
+  },
+  "OH-AKRON": {
+    "collector": "City of Akron Income Tax Division",
+    "registration": "Return the city business registration questionnaire with your FEIN, start date, payroll provider and Akron employee count. Sole proprietors also complete the individual questionnaire.",
+    "returns": [
+      [
+        "EFT withholding",
+        "Remit quarterly by the last day of the month after quarter-end unless monthly filing applies. For 2026 Q4 the next business day is February 1, 2027. Remit monthly by the 15th of the following month if prior-year withholding exceeded $2,399 or withholding exceeded $200 in any month of the preceding quarter."
+      ],
+      [
+        "AW-3",
+        "File the annual reconciliation with employee W-2 records. The ordinary 2026 deadline is March 1, 2027 because February 28 falls on Sunday. The city form allows until March 31 when the employer properly supplies all required W-2 fields on CD in an accepted data format. Confirm the current media instructions with the division before using the extension."
+      ]
+    ],
+    "filing": "File periodic withholding electronically. For the annual reconciliation follow AW-3 instructions for paper W-2s or structured wage data. The city rejects electronic W-2s submitted as PDFs or images.",
+    "payment": "Enroll for city EFT through the Akron withholding portal. Record each transaction confirmation and select the city account for city wages. Joint economic development districts have separate accounts.",
+    "sources": [
+      "https://www.akronohio.gov/Documents/Departments/Finance/Income%20Tax/Business/Business%20Registration.pdf",
+      "https://www.akronohio.gov/Documents/Departments/Finance/Income%20Tax/Business/akron_eft_worksheet.pdf",
+      "https://www.akronohio.gov/Documents/Departments/Finance/Income%20Tax/Business/aw_3.pdf",
+      "https://online.akronohio.gov/",
+      "https://codes.ohio.gov/ohio-revised-code/section-718.03",
+      "https://codes.ohio.gov/ohio-revised-code/section-1.14"
+    ],
+    "verifiedOn": "2026-11-12"
   }
 }

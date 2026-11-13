@@ -38,6 +38,8 @@ test('regional Ohio collectors use the registry; residual and ambiguous cities r
       assert.equal(result.agency, 'OH-DAYTON');
     } else if (row.municode === '21616') {
       assert.equal(result.agency, 'OH-DELTA');
+    } else if (row.municode === '01000') {
+      assert.equal(result.agency, 'OH-AKRON');
     } else if (row.municode === '77000') {
       assert.equal(result.agency, 'OH-TOLEDO');
     } else if (row.municode === '71983') {
@@ -419,4 +421,15 @@ test('Canton city withholding is distinct from North Canton and the Jackson Town
   assert.match(city.guide.returns[1][1], /March 1, 2027/);
   assert.notEqual(localWithholdingGuide('OH-municipality', '56294', 2026).agency, city.agency);
   assert.notEqual(localWithholdingGuide('OH-jedd-jedz', '9105', 2026).agency, city.agency);
+});
+
+test('Akron city withholding has its own deadlines and excludes its four JEDDs', () => {
+  const city = localWithholdingGuide('OH-municipality', '01000', 2026);
+  assert.equal(city.agency, 'OH-AKRON');
+  assert.match(city.guide.returns[0][1], /February 1, 2027/);
+  assert.equal(city.guide.returns[1][0], 'AW-3');
+  assert.match(city.guide.returns[1][1], /March 1, 2027/);
+  for (const district of ['9004', '9014', '9015', '9042']) {
+    assert.notEqual(localWithholdingGuide('OH-jedd-jedz', district, 2026).agency, city.agency);
+  }
 });

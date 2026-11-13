@@ -134,6 +134,14 @@
       "sources": [
         "https://www.cantonohio.gov/DocumentCenter/View/8562/2025-Withholding-Booklet-PDF"
       ]
+    },
+    "01000": {
+      "agency": "OH-AKRON",
+      "verifiedOn": "2026-11-12",
+      "sources": [
+        "https://www.akronohio.gov/Documents/Departments/Finance/Income%20Tax/Business/Business%20Registration.pdf",
+        "https://www.akronohio.gov/Documents/Departments/Finance/Income%20Tax/Business/akron_eft_worksheet.pdf"
+      ]
     }
   },
   "zones": {
