@@ -21,7 +21,7 @@ describe('2027 state minimum wages', () => {
   for (const [state, expected] of [
     ['WA', 1773], ['CA', 1740], ['CT', 1748], ['NJ', 1648], ['CO', 1571], ['ME', 1570],
     ['MN', 1187], ['OH', 1140], ['VA', 1375], ['NE', 1526], ['SD', 1230], ['MT', 1120],
-    ['AZ', 1565], ['RI', 1700], ['MI', 1500], ['FL', 1500],
+    ['AZ', 1565], ['RI', 1700], ['MI', 1500], ['FL', 1500], ['VT', 1491],
   ] as const) {
     test(`${state} is ${expected} cents on 2027-01-15`, () => assert.equal(cents(state), expected));
   }
@@ -35,8 +35,9 @@ describe('2027 state minimum wages', () => {
     for (const [s, c] of [['IL', 1500], ['MA', 1500], ['MO', 1500], ['TX', 725], ['NV', 1200]] as const) assert.equal(cents(s), c, s);
   });
 
-  test('a state whose rate was not yet announced keeps 2026 and says so (Vermont)', () => {
-    assert.equal(cents('VT'), 1442);
+  test("Vermont's 2027 rate is $14.91 from 2027-01-01 (Vermont DOL release, read 2026-11-13); 2026 stays $14.42", () => {
+    assert.equal(cents('VT'), 1491);
+    assert.equal(minimumWage({ checkDate: '2026-12-15', state: 'VT' }).cents, 1442);
   });
 
   test('the same state on a 2026 date is unchanged', () => {
@@ -52,7 +53,7 @@ describe('2027 state minimum wages', () => {
 });
 
 describe('2027 tipped cash wages', () => {
-  for (const [state, expected] of [['NJ', 661], ['CO', 1269], ['ME', 785], ['OH', 570], ['SD', 615], ['MI', 630], ['AZ', 1265], ['CT', 638], ['NE', 213], ['VA', 213]] as const) {
+  for (const [state, expected] of [['NJ', 661], ['CO', 1269], ['ME', 785], ['OH', 570], ['SD', 615], ['MI', 630], ['AZ', 1265], ['CT', 638], ['NE', 213], ['VA', 213], ['VT', 746]] as const) {
     test(`${state} tipped cash floor is ${expected} cents`, () => assert.equal(cents(state, { tipped: true }), expected));
   }
   test('a no-tip-credit state follows its standard rate (Washington, California)', () => {

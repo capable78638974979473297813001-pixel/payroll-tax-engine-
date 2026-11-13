@@ -29,7 +29,7 @@
     <p>It is not a guess. The inputs are diffed, then each difference is applied to the first paycheck one at a time, in a fixed order, and the engine is re-run after each. What a step moves is exactly what that change did given the changes before it, and the steps add up to the whole difference. When two changes interact, another order can split the credit differently; the total is the same.</p>
     <h2>A worked example: a move from Texas to California</h2>
     <p>The same $3,000.00 biweekly employee, moving from Texas to California. Net pay goes from $2,450.12 to $2,277.06, a drop of $173.06.</p>
-    <p><strong>workState.code: TX → CA.</strong> Net pay goes down $173.06. TX_SUI_ER (employer) −$81.00, CA_SIT +$134.06, CA_SUI_ER (employer) +$102.00, CA_DBL_EE +$39.00.</p>
+    <p><strong>workState.code: TX → CA.</strong> Net pay goes down $173.06. US_FUTA (employer) +$45.00, TX_SUI_ER (employer) −$81.00, CA_SIT +$134.06, CA_SUI_ER (employer) +$102.00, CA_DBL_EE +$39.00.</p>
     <p>Tax ids with <code>_ER</code> are employer taxes; they appear in the explanation but do not change take-home pay.</p>
     <h2>The request</h2>
     <div class="panel" style="margin-top:14px"><pre style="margin:0;padding:18px 22px;overflow:auto">POST /v1/paycheck/compare

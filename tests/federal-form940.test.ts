@@ -131,9 +131,20 @@ describe('Form 940 from a REAL year of engine pay runs (California, 2025 credit 
   });
 
   test('a year whose credit-reduction list is not final is flagged, not silently treated as 0.6%', () => {
-    const f = computeForm940({ employer, year: 2026, runs: yearOfRuns() }, company.id);
+    const f = computeForm940({ employer, year: 2026, runs: yearOfRuns(), creditReduction: { states: {}, determined: false } }, company.id);
     assert.equal(f.findings.some((x) => x.code === 'credit_reduction_not_determined'), true);
     assert.match(renderForm940(f), /Form 940 for 2026/);
+  });
+
+  test("with no override, 2026 uses DOL's final list shipped in the ruleset: California 1.5%, determined", () => {
+    // DOL/ETA/OUI final_credit_states_2026.xlsx (loaded 2026-11-13): CA 1.5% after its BCR add-on waiver.
+    const f = computeForm940({ employer, year: 2026, runs: yearOfRuns() }, company.id);
+    assert.equal(f.findings.some((x) => x.code === 'credit_reduction_not_determined'), false);
+    assert.equal(f.line2_creditReductionState, true);
+    assert.equal(f.line11_creditReduction, Math.round((f.line7_totalTaxableFutaWages * 15) / 1000));
+    assert.equal(f.scheduleA!.determined, true);
+    assert.equal(f.scheduleA!.rows[0].state, 'CA');
+    assert.equal(f.scheduleA!.rows[0].reductionRate, 0.015);
   });
 
   test('line 9 and lines 10/11 are mutually exclusive', () => {

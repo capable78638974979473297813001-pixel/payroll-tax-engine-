@@ -11941,9 +11941,9 @@ describe("ministers' housing allowance", () => {
 /**
  * FUTA credit reduction — the reason "FUTA is 0.6%" is only true in states
  * that repaid their federal unemployment loans. Driven from synthetic
- * rulesets rather than the shipped 2026 file, because the shipped file
- * correctly carries an EMPTY map: the year's determination is made after
- * November 10 and did not exist when it was written.
+ * rulesets rather than the shipped 2026 file, so each case controls the map.
+ * The shipped file carried an EMPTY map until DOL's final 2026 list was loaded
+ * on 2026-11-13 (California 1.5%); the last two tests pin that shipped list.
  */
 describe('FUTA credit reduction', () => {
   const earnings = [{ code: 'REG', category: 'regular' as const, amount: dollars(3000) }];
@@ -12024,14 +12024,33 @@ describe('FUTA credit reduction', () => {
     assert.equal(/determination is made after/.test(line.detail ?? ''), false);
   });
 
-  test('the shipped 2026 ruleset carries an EMPTY map, not a copy of last year', () => {
+  test("the shipped 2026 ruleset carries DOL's FINAL 2026 list (California 1.5%), not a copy of last year", () => {
     const federal = JSON.parse(
       readFileSync(join(import.meta.dirname, '..', 'data', 'federal', '2026.json'), 'utf8'),
     );
-    assert.deepEqual(federal.futa.creditReduction.states, {});
+    // DOL/ETA/OUI final_credit_states_2026.xlsx: CA 1.5% (BCR add-on waived); the Virgin Islands repaid before 2026-11-10.
+    assert.deepEqual(federal.futa.creditReduction.states, { CA: 0.015 });
+    assert.deepEqual(federal.futa.creditReduction.final.states, { CA: 0.015 });
+    assert.equal(federal.futa.creditReduction.final.source.verifiedOn, '2026-11-13');
+    assert.equal('VI' in federal.futa.creditReduction.states, false);
+    // The potential list stays as history and is never applied.
+    assert.equal(federal.futa.creditReduction.potential.states.CA, 0.053);
     // Last year's finals are kept as reference, never as a substitute.
     assert.equal(federal.futa.creditReduction.priorYear.year, 2025);
     assert.equal(federal.futa.creditReduction.priorYear.states.CA, 0.012);
+  });
+
+  test('a California paycheck under the shipped 2026 ruleset pays 0.6% + 1.5% = 2.1%, Ohio and the Virgin Islands 0.6%', () => {
+    const federal = JSON.parse(
+      readFileSync(join(import.meta.dirname, '..', 'data', 'federal', '2026.json'), 'utf8'),
+    );
+    const rules = { futa: { ...federal.futa, exemptPretax: [] } } as never;
+    const ca = futa(futaInput('CA'), ctx, rules)[0];
+    assert.equal(ca.amount, dollars(63.0)); // $3,000 of wages, under the $7,000 base: 2.1% of $3,000
+    assert.match(ca.detail ?? '', /1\.5% credit reduction/);
+    assert.equal(/determination is made after/.test(ca.detail ?? ''), false);
+    assert.equal(futa(futaInput('OH'), ctx, rules)[0].amount, dollars(18.0));
+    assert.equal(futa(futaInput('VI'), ctx, rules)[0].amount, dollars(18.0));
   });
 });
 

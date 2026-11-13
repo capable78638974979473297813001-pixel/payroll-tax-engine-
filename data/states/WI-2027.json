@@ -12,7 +12,7 @@
     "path": "suiEmployer.wageBase (confirmation, no change)",
     "from": 14000,
     "to": 14000,
-    "source": "https://dwd.wisconsin.gov/ui/employers/taxrates/ (2027 Tax Rate Schedule for Employers), read directly 2026-11-06: 'Under Wis. Stat. 108.18, Schedule D is in effect for 2027. Taxable wage base $14,000.' The rate table on that page was not compared to the file's Schedule D rows."
+    "source": "https://dwd.wisconsin.gov/ui/employers/taxrates/ (2027 Tax Rate Schedule for Employers; that address now returns not-found because DWD moved its pages to https://dwd.wisconsin.gov/ui/employer/taxrates, re-read 2026-11-13: same Schedule D, taxable wage base $14,000, new employer 2.50% + 0.55% = 3.05%), read directly 2026-11-06: 'Under Wis. Stat. 108.18, Schedule D is in effect for 2027. Taxable wage base $14,000.' The rate table on that page was not compared to the file's Schedule D rows."
    }
   ]
  },

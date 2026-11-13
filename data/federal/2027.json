@@ -7,6 +7,36 @@
     "note": "Carried forward from the 2026 file on 2026-10-13. Not yet checked against the 2027 official source: every figure is 2026's unless listed in updatedFor2027. Remove this block only after each figure has been re-verified against its 2027 source.",
     "updatedFor2027": [
       {
+        "path": "electiveDeferralLimits.section402gAggregate",
+        "from": 24500,
+        "to": 25500,
+        "source": "IRS Newsroom IR-2026-136 (2026-11-12), '401(k) limit increases to $25,500 for 2027, IRA limit remains $7,500' (irs.gov/newsroom/401k-limit-increases-to-25500-for-2027-ira-limit-remains-7500), read directly 2026-11-13; technical detail in Notice 2026-66"
+      },
+      {
+        "path": "electiveDeferralLimits.deferral457",
+        "from": 24500,
+        "to": 25500,
+        "source": "IRS Newsroom IR-2026-136 (2026-11-12), '401(k) limit increases to $25,500 for 2027, IRA limit remains $7,500' (irs.gov/newsroom/401k-limit-increases-to-25500-for-2027-ira-limit-remains-7500), read directly 2026-11-13; technical detail in Notice 2026-66"
+      },
+      {
+        "path": "electiveDeferralLimits.simple",
+        "from": 17000,
+        "to": 17500,
+        "source": "IRS Newsroom IR-2026-136 (2026-11-12), '401(k) limit increases to $25,500 for 2027, IRA limit remains $7,500' (irs.gov/newsroom/401k-limit-increases-to-25500-for-2027-ira-limit-remains-7500), read directly 2026-11-13; technical detail in Notice 2026-66"
+      },
+      {
+        "path": "electiveDeferralLimits.catchUp.age50",
+        "from": 8000,
+        "to": 8500,
+        "source": "IRS Newsroom IR-2026-136 (2026-11-12), '401(k) limit increases to $25,500 for 2027, IRA limit remains $7,500' (irs.gov/newsroom/401k-limit-increases-to-25500-for-2027-ira-limit-remains-7500), read directly 2026-11-13; technical detail in Notice 2026-66"
+      },
+      {
+        "path": "electiveDeferralLimits.catchUp.age60to63",
+        "from": 11250,
+        "to": 11750,
+        "source": "IRS Newsroom IR-2026-136 (2026-11-12), '401(k) limit increases to $25,500 for 2027, IRA limit remains $7,500' (irs.gov/newsroom/401k-limit-increases-to-25500-for-2027-ira-limit-remains-7500), read directly 2026-11-13; technical detail in Notice 2026-66"
+      },
+      {
         "path": "socialSecurity.wageBase",
         "from": 184500.0,
         "to": 192300.0,
@@ -510,16 +540,16 @@
     ]
   },
   "electiveDeferralLimits": {
-    "section402gAggregate": 24500.0,
-    "deferral457": 24500.0,
-    "simple": 17000.0,
-    "$comment": "IRS Newsroom, '401(k) limit increases to $24,500 for 2026' (irs.gov/newsroom/401k-limit-increases-to-24500-for-2026-ira-limit-increases-to-7500), read directly: the 402(g) elective-deferral limit for 401(k)/403(b)/governmental-457(b) plans rises to $24,500 for 2026 (up from $23,500 for 2025), and the SIMPLE plan limit rises to $17,000. section402gAggregate is 401(k)+403(b) COMBINED (one shared IRC 402(g) limit — an employee contributing to both still only gets $24,500 total between them); deferral457 is a governmental/tax-exempt 457(b) plan's own SEPARATE limit (IRC 457(e)(15)) at the same dollar figure but NOT aggregated with 401(k)/403(b) — an employee with both a 401(k) and a 457(b) can legally defer up to BOTH limits in the same year, not a double-count error; simple is SIMPLE IRA/401(k) plans' own separate, lower limit (IRC 408(p)) under yet another section, also not aggregated with the other two. STANDARD limits only — catch-up contributions for age 50+ ($8,000 for 2026, bringing the total to $32,500) and the SECURE 2.0 age-60-63 enhanced catch-up ($11,250) are deliberately NOT modelled here: this engine has no age/birthdate input anywhere, and guessing catch-up eligibility would risk UNDER-capping (treating money as taxable that the law actually still exempts) — the wrong direction for a tax engine to guess in, so every employee is capped at the standard figure regardless of actual age. See capElectiveDeferrals() in src/wages.ts and this file's own knownGaps entry.",
+    "section402gAggregate": 25500.0,
+    "deferral457": 25500.0,
+    "simple": 17500.0,
+    "$comment": "UPDATED FOR 2027 on 2026-11-13 from IRS Newsroom IR-2026-136 (read directly): the 401(k)/403(b)/governmental 457(b)/TSP elective-deferral limit is $25,500 (up from $24,500) and the SIMPLE limit is $17,500 (up from $17,000; the higher SECURE 2.0 SIMPLE amount is $19,100, not modelled). The explanation below is the 2026 record this replaced, and its dollar figures are 2026's. IRS Newsroom, '401(k) limit increases to $24,500 for 2026' (irs.gov/newsroom/401k-limit-increases-to-24500-for-2026-ira-limit-increases-to-7500), read directly: the 402(g) elective-deferral limit for 401(k)/403(b)/governmental-457(b) plans rises to $24,500 for 2026 (up from $23,500 for 2025), and the SIMPLE plan limit rises to $17,000. section402gAggregate is 401(k)+403(b) COMBINED (one shared IRC 402(g) limit — an employee contributing to both still only gets $24,500 total between them); deferral457 is a governmental/tax-exempt 457(b) plan's own SEPARATE limit (IRC 457(e)(15)) at the same dollar figure but NOT aggregated with 401(k)/403(b) — an employee with both a 401(k) and a 457(b) can legally defer up to BOTH limits in the same year, not a double-count error; simple is SIMPLE IRA/401(k) plans' own separate, lower limit (IRC 408(p)) under yet another section, also not aggregated with the other two. STANDARD limits only — catch-up contributions for age 50+ ($8,000 for 2026, bringing the total to $32,500) and the SECURE 2.0 age-60-63 enhanced catch-up ($11,250) are deliberately NOT modelled here: this engine has no age/birthdate input anywhere, and guessing catch-up eligibility would risk UNDER-capping (treating money as taxable that the law actually still exempts) — the wrong direction for a tax engine to guess in, so every employee is capped at the standard figure regardless of actual age. See capElectiveDeferrals() in src/wages.ts and this file's own knownGaps entry.",
     "catchUp": {
-      "age50": 8000,
-      "age60to63": 11250,
+      "age50": 8500,
+      "age60to63": 11750,
       "simpleAge50": 4000,
       "simpleAge60to63": 5250,
-      "$comment": "Carried forward from 2026: the IRS announces the 2027 limits in Nov. 2026 (the notice is not yet published); Milliman's October 2026 estimate is $8,500 for the 50+ catch-up, but an estimate is not a source, so the 2026 figures stand until the notice is read. age50 applies to 401(k), 403(b) and governmental 457(b) deferrals for an employee who reaches 50 by December 31; age60to63 replaces it for an employee who reaches 60, 61, 62 or 63 by December 31 (not 64 and over). simpleAge50 and simpleAge60to63 are the SIMPLE plan equivalents. The higher SIMPLE limits for small employers or 4%-match plans ($18,100 and a $3,850 catch-up in 2026) are not modelled. The 457(b) 'last three years before normal retirement age' special catch-up is not modelled."
+      "$comment": "UPDATED FOR 2027 on 2026-11-13 from IRS Newsroom IR-2026-136 (read directly): the age-50 catch-up is $8,500 (up from $8,000) and the age 60-63 catch-up is $11,750 (up from $11,250); the SIMPLE catch-ups are unchanged at $4,000 and $5,250. The older note follows. Carried forward from 2026: the IRS announces the 2027 limits in Nov. 2026 (the notice is not yet published); Milliman's October 2026 estimate is $8,500 for the 50+ catch-up, but an estimate is not a source, so the 2026 figures stand until the notice is read. age50 applies to 401(k), 403(b) and governmental 457(b) deferrals for an employee who reaches 50 by December 31; age60to63 replaces it for an employee who reaches 60, 61, 62 or 63 by December 31 (not 64 and over). simpleAge50 and simpleAge60to63 are the SIMPLE plan equivalents. The higher SIMPLE limits for small employers or 4%-match plans ($18,100 and a $3,850 catch-up in 2026) are not modelled. The 457(b) 'last three years before normal retirement age' special catch-up is not modelled."
     }
   },
   "knownGaps": [
