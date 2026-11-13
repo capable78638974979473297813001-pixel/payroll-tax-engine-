@@ -6,7 +6,15 @@
     "status": "carry-forward-from-2026",
     "createdOn": "2026-10-13",
     "basedOn": "data/states/VT-2026.json",
-    "note": "Carried forward from the 2026 file on 2026-10-13. Not yet checked against the 2027 official source: every figure is 2026's unless listed in updatedFor2027. Remove this block only after each figure has been re-verified against its 2027 source."
+    "note": "Carried forward from the 2026 file on 2026-10-13. Not yet checked against the 2027 official source: every figure is 2026's unless listed in updatedFor2027. Remove this block only after each figure has been re-verified against its 2027 source.",
+    "updatedFor2027": [
+      {
+        "path": "suiEmployer.wageBase",
+        "from": 15400,
+        "to": 16100,
+        "source": "Vermont Department of Labor press release 'announces Unemployment Insurance taxable wage base for 2027' (labor.vermont.gov/press-release/vermont-department-labor-announces-unemployment-insurance-taxable-wage-base-2027): effective January 1, 2027 the taxable wage base increases from $15,400 to $16,100, read directly 2026-11-13"
+      }
+    ]
   },
   "method": "bracket_per_period_allowance",
   "$scopeNote": "STATE income tax only. Vermont has no local income tax anywhere and no reciprocity agreements with any state (residents working elsewhere claim a return-level credit for taxes paid, 32 V.S.A. sec.5825 -- the same disclosed out-of-scope mechanism as every other state's own credit-for-taxes-paid convention in this project). Vermont's Child Care Contribution (CCC, 0.44% of wages subject to VT withholding) is EMPLOYER-paid only, confirmed directly from GB-1210-2026's own text ('Employers must pay a 0.44% payroll tax') -- context-only, not engine-consumed. Vermont Family and Medical Leave Insurance (VT-FMLI) is confirmed VOLUNTARY for both employers and employees (an insurance marketplace program, not a mandatory payroll tax) -- deliberately NOT modeled as a statePaidLeaveEmployee-style universal rate, since doing so would incorrectly deduct it from every Vermont paycheck when in fact most have no VT-FMLI deduction at all; see knownGaps.",
@@ -529,8 +537,8 @@
   ],
   "suiEmployer": {
     "$comment": "Normalized employer-side unemployment parameters — the shape src/taxes/state.ts reads. The detailed unemploymentInsurance block above stays the record of research; this exists because that block's shape varies too much between states to compute from directly (wage bases as objects, industry-keyed rate maps, differently-named keys).",
-    "wageBase": 15400,
-    "wageBaseSource": "2026 taxable wage bases cross-checked against EY's published 2026 state-by-state table; where this file already carried a numeric wage base, the two agreed unless noted in wageBaseNote.",
+    "wageBase": 16100,
+    "wageBaseSource": "2027: Vermont Department of Labor press release 'announces Unemployment Insurance taxable wage base for 2027' (labor.vermont.gov/press-release/vermont-department-labor-announces-unemployment-insurance-taxable-wage-base-2027): effective January 1, 2027 the taxable wage base increases from $15,400 to $16,100, read directly 2026-11-13. Earlier note for the 2026 figure: 2026 taxable wage bases cross-checked against EY's published 2026 state-by-state table; where this file already carried a numeric wage base, the two agreed unless noted in wageBaseNote.",
     "newEmployerRate": 0.01,
     "newEmployerRateSource": "OnPay's published 2026 state-by-state SUI table (secondary), used only where this file had no figure of its own. Cross-source tier, not primary.",
     "experienceRange": {

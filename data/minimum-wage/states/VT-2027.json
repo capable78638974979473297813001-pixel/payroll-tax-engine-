@@ -5,21 +5,21 @@
     "name": "Vermont"
   },
   "year": 2027,
-  "asOf": "2026-10-25",
+  "asOf": "2026-11-13",
   "hasStateMinimumWage": true,
   "standard": {
-    "hourly": 14.42,
-    "hourlyCents": 1442,
-    "effectiveFrom": "2026-01-01",
+    "hourly": 14.91,
+    "hourlyCents": 1491,
+    "effectiveFrom": "2027-01-01",
     "coverage": "Employers with TWO OR MORE employees (21 V.S.A. 384).",
     "note": "Annual adjustment: the greater of 5% or the CPI increase, capped at 5%."
   },
   "tipped": {
     "tipCreditAllowed": true,
-    "cashWage": 7.21,
-    "cashWageCents": 721,
-    "maxTipCredit": 7.21,
-    "maxTipCreditCents": 721,
+    "cashWage": 7.46,
+    "cashWageCents": 746,
+    "maxTipCredit": 7.45,
+    "maxTipCreditCents": 745,
     "tippedEmployeeThreshold": {
       "amount": 120.0,
       "period": "month"
@@ -52,13 +52,26 @@
   ],
   "confidence": "primary_source_confirmed",
   "knownGaps": [
-    "2027 RATE NOT ANNOUNCED as of 2026-10-25: Vermont's labor department had not posted a 2027 minimum wage when searched (the 2026 figure was announced 2025-10-06). The $14.42 here is 2026's; the statute indexes it by the greater of 5% or CPI, capped at 5%, so the 2027 figure will be higher."
+    "The 2027 rate was announced and loaded on 2026-11-13: $14.91 standard and $7.46 tipped cash wage (Vermont DOL release). The maximum tip credit is stored as $7.45, the standard rate less the tipped cash wage the department published."
   ],
   "provisional": {
     "status": "carry-forward-from-2026",
     "createdOn": "2026-10-25",
     "basedOn": "data/minimum-wage/states/VT-2026.json",
     "note": "Carried forward from the 2026 file on 2026-10-25 so that a 2027-dated query resolves instead of failing. Every figure is 2026's unless listed in updatedFor2027 (each with the state agency's own announcement or the statute). Remove this block only after every figure has been re-read against a 2027 source.",
-    "updatedFor2027": []
+    "updatedFor2027": [
+      {
+        "path": "standard.hourly",
+        "from": 14.42,
+        "to": 14.91,
+        "source": "Vermont Department of Labor press release 'announces minimum wage increase starting January 2027' (labor.vermont.gov/press-release/vermont-department-labor-announces-minimum-wage-increase-starting-january-2027): from $14.42 to $14.91 an hour on January 1, 2027; the tipped minimum wage from $7.21 to $7.46 (50% of the full minimum wage), under 21 V.S.A. 384, read directly 2026-11-13"
+      },
+      {
+        "path": "tipped.cashWage",
+        "from": 7.21,
+        "to": 7.46,
+        "source": "Vermont Department of Labor press release 'announces minimum wage increase starting January 2027' (labor.vermont.gov/press-release/vermont-department-labor-announces-minimum-wage-increase-starting-january-2027): from $14.42 to $14.91 an hour on January 1, 2027; the tipped minimum wage from $7.21 to $7.46 (50% of the full minimum wage), under 21 V.S.A. 384, read directly 2026-11-13"
+      }
+    ]
   }
 }
