@@ -1517,5 +1517,31 @@
       "https://codes.ohio.gov/ohio-revised-code/section-1.14"
     ],
     "verifiedOn": "2026-11-13"
+  },
+  "OH-JEFFERSON-WASHINGTON-CH-JEDD": {
+    "collector": "City of Washington Court House Tax Department for the Jefferson Township-Washington Court House JEDD",
+    "registration": "Complete the 2026 JEDD Business Questionnaire and submit it to the city Tax Department at 117 N Main St, Washington Court House, OH 43160. Confirm the account and filing frequency at 740-636-2342.",
+    "returns": [
+      [
+        "W1 1108",
+        "Use the district coupon for the assigned period. Quarterly payments are due at the end of the month following the quarter. Monthly payments are due by the 15th of the following month when prior-year withholding exceeded $2,399 or any month of the prior quarter exceeded $200, counting amounts required to be withheld. For semimonthly accounts, check the district coupon against the statutory third banking day after each half-month. Confirm any earlier printed date with the department."
+      ],
+      [
+        "W3 1108",
+        "Reconcile 2026 withholding by March 1, 2027 under the Ohio Sunday rule. The department lists a 2025 district W3 requiring W-2s. Request the 2026 district form and W-2 submission instructions before filing."
+      ]
+    ],
+    "filing": "Sign and mail the district W1 to the Tax Department at 117 N Main St, Washington Court House, OH 43160. The city describes Ohio Business Gateway filing for net profits. Confirm electronic withholding arrangements directly with the department.",
+    "payment": "Enclose a check or money order payable to Jefferson Township-Washington Court House JEDD with the district coupon.",
+    "sources": [
+      "https://www.cityofwch.com/183/Tax-Department",
+      "https://www.cityofwch.com/DocumentCenter/View/2062/2026-JEDD-Employers-Withholding-Quarterly",
+      "https://www.cityofwch.com/DocumentCenter/View/2061/2026-JEDD-Employers-Withholding-Monthly",
+      "https://www.cityofwch.com/DocumentCenter/View/2076/2026-JEDD-Withholding-Semi-Monthly",
+      "https://www.cityofwch.com/DocumentCenter/View/2057/2025-JEDD-Employers-Withholding-Reconciliation",
+      "https://codes.ohio.gov/ohio-revised-code/section-718.03",
+      "https://codes.ohio.gov/ohio-revised-code/section-1.14"
+    ],
+    "verifiedOn": "2026-11-13"
   }
 }

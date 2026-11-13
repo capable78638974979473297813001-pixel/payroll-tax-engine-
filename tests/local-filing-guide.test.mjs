@@ -468,3 +468,13 @@ test('Dayton township districts select the matching DW-1 and flag the city-only 
   }
   assert.match(localAgencyGuide('OH-DAYTON', 2026).filing, /100 or more employee records/);
 });
+
+test('Jefferson Township-Washington Court House uses district W1 coupons and a district payee', () => {
+  const result = localWithholdingGuide('OH-jedd-jedz', '9129', 2026);
+  assert.equal(result.agency, 'OH-JEFFERSON-WASHINGTON-CH-JEDD');
+  assert.match(result.guide.registration, /JEDD Business Questionnaire/);
+  assert.equal(result.guide.returns[0][0], 'W1 1108');
+  assert.match(result.guide.returns[1][1], /March 1, 2027/);
+  assert.match(result.guide.payment, /payable to Jefferson Township-Washington Court House JEDD/);
+  assert.notEqual(localWithholdingGuide('OH-jedd-jedz', '9123', 2026).agency, result.agency);
+});
