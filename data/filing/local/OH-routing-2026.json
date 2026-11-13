@@ -454,6 +454,62 @@
         "https://www.delawareohio.net/government/departments/income-tax/berkshire-jedd/employers",
         "https://www.cityofdelawareoh.gov/files/assets/city/v/1/income-tax/documents/2026-jedd-employer-monthly-withholding-return-and-reconciliation-fill-in.pdf"
       ]
+    },
+    "9107": {
+      "agency": "OH-CANTON-JEDD",
+      "collectorCode": "11-001",
+      "verifiedOn": "2026-11-13",
+      "sources": [
+        "https://www.cantonohio.gov/749/Joint-Economic-Development-Districts-JED"
+      ]
+    },
+    "9106": {
+      "agency": "OH-CANTON-JEDD",
+      "collectorCode": "16-001",
+      "verifiedOn": "2026-11-13",
+      "sources": [
+        "https://www.cantonohio.gov/749/Joint-Economic-Development-Districts-JED"
+      ]
+    },
+    "9105": {
+      "agency": "OH-CANTON-JEDD",
+      "collectorCode": "17-001",
+      "verifiedOn": "2026-11-13",
+      "sources": [
+        "https://www.cantonohio.gov/749/Joint-Economic-Development-Districts-JED"
+      ]
+    },
+    "9109": {
+      "agency": "OH-CANTON-JEDD",
+      "collectorCode": "18-001",
+      "verifiedOn": "2026-11-13",
+      "sources": [
+        "https://www.cantonohio.gov/749/Joint-Economic-Development-Districts-JED"
+      ]
+    },
+    "9119": {
+      "agency": "OH-CANTON-JEDD",
+      "collectorCode": "19-001",
+      "verifiedOn": "2026-11-13",
+      "sources": [
+        "https://www.cantonohio.gov/749/Joint-Economic-Development-Districts-JED"
+      ]
+    },
+    "9120": {
+      "agency": "OH-CANTON-JEDD",
+      "collectorCode": "19-002",
+      "verifiedOn": "2026-11-13",
+      "sources": [
+        "https://www.cantonohio.gov/749/Joint-Economic-Development-Districts-JED"
+      ]
+    },
+    "9131": {
+      "agency": "OH-CANTON-JEDD",
+      "collectorCode": "22-001",
+      "verifiedOn": "2026-11-13",
+      "sources": [
+        "https://www.cantonohio.gov/749/Joint-Economic-Development-Districts-JED"
+      ]
     }
   },
   "rosters": {

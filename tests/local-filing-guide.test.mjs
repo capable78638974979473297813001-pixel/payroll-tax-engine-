@@ -612,3 +612,17 @@ test('both Berkshire districts select the Delaware district packet and EFT instr
     assert.match(guide.payment, /EFT payment replaces the periodic coupon/);
   }
 });
+
+test('Canton assigns distinct district identifiers to six Jackson JEDDs and Perry Faircrest', () => {
+  for (const [finder, district] of [
+    ['9107', '11-001'], ['9106', '16-001'], ['9105', '17-001'], ['9109', '18-001'],
+    ['9119', '19-001'], ['9120', '19-002'], ['9131', '22-001'],
+  ]) {
+    const result = localWithholdingGuide('OH-jedd-jedz', finder, 2026);
+    assert.equal(result.agency, 'OH-CANTON-JEDD');
+    assert.equal(result.collectorCode, district);
+    assert.match(result.guide.returns[0][1], /third banking day/);
+    assert.match(result.guide.returns[1][1], /March 1, 2027/);
+  }
+  assert.notEqual(localWithholdingGuide('OH-jedd-jedz', '9157', 2026).agency, 'OH-CANTON-JEDD');
+});

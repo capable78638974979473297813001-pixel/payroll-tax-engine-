@@ -1829,5 +1829,31 @@
       "https://codes.ohio.gov/ohio-revised-code/section-1.14"
     ],
     "verifiedOn": "2026-11-13"
+  },
+  "OH-CANTON-JEDD": {
+    "collector": "Canton City Income Tax Department for the Jackson–Canton and Perry–Canton districts",
+    "registration": "Complete the Canton business registration questionnaire with the FEIN and worksite. Select the applicable JEDD. Canton issues a separate employer account number for each district. Use that account number on returns and payments.",
+    "returns": [
+      [
+        "JEDD Return of Income Tax Withheld",
+        "Remit semimonthly if withholding reaches $1,000 in any month or exceeded $11,999 in the prior calendar year. Pay by the third banking day after each half-month. Otherwise remit monthly by the following 15th if withholding reaches $200 in any month or exceeded $2,399 in the prior calendar year. Other employers may remit quarterly by the last day of the following month."
+      ],
+      [
+        "Annual Payroll Reconciliation (W-3)",
+        "Select the district as the tax authority and reconcile 2026 district wages, W-2s and deposits by March 1, 2027. Obtain the 2026 reconciliation from Canton when published."
+      ]
+    ],
+    "filing": "Select the worksite district on Canton’s JEDD directory for its withholding form. When filing on paper, follow the mailing instructions on the district coupon. Canton accepts electronic annual payroll reconciliation uploads through its Income Tax website.",
+    "payment": "Federal electronic withholding depositors must remit electronically for district withholding. Canton lists ACH debit, ACH credit and the Ohio Business Gateway. Request ACH credit specifications from the department and identify the correct district account.",
+    "sources": [
+      "https://www.cantonohio.gov/749/Joint-Economic-Development-Districts-JED",
+      "https://www.cantonohio.gov/DocumentCenter/View/3008/Corporate-PDF",
+      "https://cantonohio.gov/DocumentCenter/View/8562/2025-Withholding-Booklet-PDF",
+      "https://www.cantonohio.gov/773/Yearly-Forms",
+      "https://www.cantonohio.gov/740/Income-Tax",
+      "https://codes.ohio.gov/ohio-revised-code/section-718.03",
+      "https://codes.ohio.gov/ohio-revised-code/section-1.14"
+    ],
+    "verifiedOn": "2026-11-13"
   }
 }
