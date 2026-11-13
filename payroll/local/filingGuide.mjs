@@ -7,6 +7,7 @@ function readData(path) {
 const pennsylvania = readData('filing/local/PA-districts-2026.json');
 const profiles = readData('filing/local/2026.json');
 const michiganCities = readData('local/MI-cities-2026.json').cities;
+const alabamaCities = readData('local/AL-municipalities-2026.json').municipalities;
 const counties = readData('local/IN-counties-2026.json').counties;
 const districts = readData('local/OH-school-districts-2026.json').districts;
 const municipalities = readData('local/OH-municipalities-2026.json').municipalities;
@@ -74,14 +75,22 @@ export function localWithholdingGuide(kind, code, year) {
       if (code === 'LTD') row = { name: 'Lane Transit District' };
       agency = 'OR-DOR-TRANSIT';
       break;
-    case 'AL-city':
+    case 'AL-city': {
+      // The registry spells Hackleburg "Hacklebug" (the League's spelling); accept both.
+      const locality = code.trim().toLowerCase() === 'hackleburg' ? 'hacklebug' : code.trim().toLowerCase();
+      row = alabamaCities.find(city => city.name.toLowerCase() === locality);
+      if (!row) return { status: 'unknown-code' };
+      const cityAgency = 'AL-' + (row.name === 'Hacklebug' ? 'HACKLEBURG' : row.name.toUpperCase().replaceAll(' ', '-'));
+      if (Object.hasOwn(profiles, cityAgency)) agency = cityAgency;
+      break;
+    }
     case 'CO-city': {
-      const cities = kind === 'AL-city' ? ['Auburn', 'Bessemer', 'Birmingham', 'Gadsden', 'Leeds', 'Opelika'] : ['Denver', 'Glendale', 'Greenwood Village', 'Sheridan'];
+      const cities = ['Denver', 'Glendale', 'Greenwood Village', 'Sheridan'];
       const locality = code.trim().toLowerCase();
       const city = cities.find(name => name.toLowerCase() === locality);
       if (city) {
         row = { name: city };
-        agency = kind.slice(0, 2) + '-' + city.toUpperCase().replaceAll(' ', '-');
+        agency = 'CO-' + city.toUpperCase().replaceAll(' ', '-');
       }
       break;
     }

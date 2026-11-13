@@ -674,3 +674,59 @@ test('Monroe collects for the Raceway and 2022 JEDDs and directs employers to co
   }
   assert.notEqual(localWithholdingGuide('OH-jedd-jedz', '9093', 2026).agency, 'OH-TURTLECREEK-MONROE-JEDD');
 });
+
+// Alabama towns added 2026-11-13 from each collector's own form or ordinance.
+const alabamaRegistry = JSON.parse(readFileSync(new URL('../data/local/AL-municipalities-2026.json', import.meta.url), 'utf8')).municipalities;
+const pct = rate => (rate === 0.005 ? ['½%', '0.5%', '0.50%'] : [`${rate * 100}%`]);
+
+test('eleven Alabama towns share the Neumo return with their own jurisdiction code, rate and late terms', () => {
+  const expected = { Attalla: '9406', Beaverton: '9756', Guin: '9024', Hackleburg: '9349', Hamilton: '9359', Midfield: '9375', Mosses: '9677', Shorter: '9702', Southside: '9046', Sulligent: '9392', Tarrant: '9625' };
+  for (const [town, code] of Object.entries(expected)) {
+    const result = localWithholdingGuide('AL-city', town, 2026);
+    assert.equal(result.status, 'guide', town);
+    const [form, annual] = result.guide.returns;
+    assert.match(form[1], new RegExp(`jurisdiction code ${code}`), town);
+    assert.match(form[1], /postmarked by the 20th/, town);
+    assert.match(annual[1], /January 31/, town);
+    assert.match(result.guide.payment, /Tax Trust Account/, town);
+    assert.match(result.guide.filing, /PO Box 830725/, town);
+    assert.ok(result.guide.sources.every(url => url.startsWith('https://revds.com/')), town);
+    const entry = alabamaRegistry.find(city => city.name === (town === 'Hackleburg' ? 'Hacklebug' : town));
+    assert.ok(pct(entry.rate).some(text => form[1].includes(`rate ${text}`)), `${town} rate in the guide matches the registry ${entry.rate}`);
+  }
+  assert.equal(localWithholdingGuide('AL-city', 'Hacklebug', 2026).agency, 'AL-HACKLEBURG');
+  assert.match(localWithholdingGuide('AL-city', 'Mosses', 2026).guide.returns[0][1], /maximum 28%/);
+  assert.match(localWithholdingGuide('AL-city', 'Sulligent', 2026).guide.returns[0][1], /18% interest/);
+});
+
+test('Irondale, Fairfield, Glencoe, Notasulga and Red Bay carry their own collector, rate and due dates', () => {
+  const lookup = town => localWithholdingGuide('AL-city', town, 2026).guide;
+  const irondale = lookup('Irondale');
+  assert.match(irondale.returns[0][1], /0\.50%/);
+  assert.match(irondale.returns[0][1], /20th of the following month/);
+  assert.match(irondale.filing, /revenue@cityofirondaleal\.gov/);
+  assert.match(lookup('Fairfield').returns[0][1], /20th of the following month \(April 20/);
+  const glencoe = lookup('Glencoe');
+  assert.match(glencoe.returns[0][1], /2%/);
+  assert.match(glencoe.returns[0][1], /minimum \$25/);
+  assert.match(lookup('Notasulga').returns[0][1], /first quarter due April 1 and delinquent after April 30/i);
+  assert.match(lookup('Red Bay').returns[1][1], /January 31/);
+  for (const [town, rate] of [['Irondale', 0.005], ['Fairfield', 0.01], ['Glencoe', 0.02], ['Notasulga', 0.01], ['Red Bay', 0.005]]) {
+    assert.equal(alabamaRegistry.find(city => city.name === town).rate, rate, town);
+  }
+});
+
+test('Rainbow City is a partial guide that says its forms were not read', () => {
+  const rainbow = localWithholdingGuide('AL-city', 'Rainbow City', 2026).guide;
+  assert.match(rainbow.returns[0][1], /not read/);
+  assert.equal(rainbow.filing, 'Not verified.');
+});
+
+test('Alabama towns without a verified collector guide say so instead of guessing', () => {
+  for (const town of ['Bear Creek', 'Brilliant', 'Goodwater', 'Haleyville', 'Lynn', 'Tuskegee']) {
+    assert.equal(localWithholdingGuide('AL-city', town, 2026).status, 'collector-unverified', town);
+  }
+  const covered = alabamaRegistry.filter(city => localWithholdingGuide('AL-city', city.name, 2026).status === 'guide');
+  assert.equal(covered.length, 23);
+  assert.equal(localWithholdingGuide('AL-city', 'Atlantis', 2026).status, 'unknown-code');
+});

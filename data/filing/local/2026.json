@@ -1975,5 +1975,353 @@
       "https://www.monroeohio.org/DocumentCenter/View/3076/2026-Form-W1-Withholding-Tax-Forms-Quarterly"
     ],
     "verifiedOn": "2026-11-13"
+  },
+  "AL-ATTALLA": {
+    "collector": "Neumo Tax Remittance Department, the collecting agent named on Attalla's occupational tax return (the same shared return and remittance address the Leeds guide uses)",
+    "registration": "The return and the annual reconciliation both ask for a Neumo account number. Neither says how to obtain one, so the registration route is not verified: contact Neumo at (800) 556-7274 or its support portal (supportportal.neumo.com/tax).",
+    "returns": [
+      [
+        "Occupational Tax Return",
+        "Monthly. The return lists several jurisdictions: use the Attalla line, jurisdiction code 9406, rate 2%. It must be postmarked by the 20th of the following month. Late filing: 10% penalty; 6% interest per annum; $1.00 minimum per employee (as printed on the return updated 10/2026)."
+      ],
+      [
+        "Occupational Withholding Tax Annual Reconciliation Report",
+        "Due on or before January 31 for the prior year. Mark Attalla (code 9406), list all twelve month-ends with employees, taxable wages, tax withheld and remitted, and explain any difference between withheld and remitted in an attached statement. Enclose payment for any difference owed."
+      ]
+    ],
+    "filing": "Both forms are signed paper forms mailed to Neumo Tax Remittance Department, PO Box 830725, Birmingham, AL 35283-0725. Neither form describes an online filing channel, and none was verified.",
+    "payment": "Make the check payable to Tax Trust Account and send it with the signed return to the remittance address above. The return also authorizes an electronic check conversion.",
+    "sources": [
+      "https://revds.com/taxpayerpdfs/Alabama/taxpayerforms/Occupational%20Withholding%20Tax/Neumo%20Occupational%20Form.pdf",
+      "https://revds.com/taxpayerpdfs/Alabama/taxpayerforms/Occupational%20Withholding%20Tax/Universal%20Annual%20Reconciliation-Occupational%202026.pdf"
+    ],
+    "verifiedOn": "2026-11-13"
+  },
+  "AL-BEAVERTON": {
+    "collector": "Neumo Tax Remittance Department, the collecting agent named on Beaverton's occupational tax return (the same shared return and remittance address the Leeds guide uses)",
+    "registration": "The return and the annual reconciliation both ask for a Neumo account number. Neither says how to obtain one, so the registration route is not verified: contact Neumo at (800) 556-7274 or its support portal (supportportal.neumo.com/tax).",
+    "returns": [
+      [
+        "Occupational Tax Return",
+        "Monthly. The return lists several jurisdictions: use the Beaverton line, jurisdiction code 9756, rate 1%. It must be postmarked by the 20th of the following month. Late filing: 10% penalty; 6% interest per annum (as printed on the return updated 10/2026)."
+      ],
+      [
+        "Occupational Withholding Tax Annual Reconciliation Report",
+        "Due on or before January 31 for the prior year. Mark Beaverton (code 9756), list all twelve month-ends with employees, taxable wages, tax withheld and remitted, and explain any difference between withheld and remitted in an attached statement. Enclose payment for any difference owed."
+      ]
+    ],
+    "filing": "Both forms are signed paper forms mailed to Neumo Tax Remittance Department, PO Box 830725, Birmingham, AL 35283-0725. Neither form describes an online filing channel, and none was verified.",
+    "payment": "Make the check payable to Tax Trust Account and send it with the signed return to the remittance address above. The return also authorizes an electronic check conversion.",
+    "sources": [
+      "https://revds.com/taxpayerpdfs/Alabama/taxpayerforms/Occupational%20Withholding%20Tax/Neumo%20Occupational%20Form.pdf",
+      "https://revds.com/taxpayerpdfs/Alabama/taxpayerforms/Occupational%20Withholding%20Tax/Universal%20Annual%20Reconciliation-Occupational%202026.pdf"
+    ],
+    "verifiedOn": "2026-11-13"
+  },
+  "AL-GUIN": {
+    "collector": "Neumo Tax Remittance Department, the collecting agent named on Guin's occupational tax return (the same shared return and remittance address the Leeds guide uses)",
+    "registration": "The return and the annual reconciliation both ask for a Neumo account number. Neither says how to obtain one, so the registration route is not verified: contact Neumo at (800) 556-7274 or its support portal (supportportal.neumo.com/tax).",
+    "returns": [
+      [
+        "Occupational Tax Return",
+        "Monthly. The return lists several jurisdictions: use the Guin line, jurisdiction code 9024, rate 1%. It must be postmarked by the 20th of the following month. Late filing: 10% penalty; 6% interest per annum (as printed on the return updated 10/2026)."
+      ],
+      [
+        "Occupational Withholding Tax Annual Reconciliation Report",
+        "Due on or before January 31 for the prior year. Mark Guin (code 9024), list all twelve month-ends with employees, taxable wages, tax withheld and remitted, and explain any difference between withheld and remitted in an attached statement. Enclose payment for any difference owed."
+      ]
+    ],
+    "filing": "Both forms are signed paper forms mailed to Neumo Tax Remittance Department, PO Box 830725, Birmingham, AL 35283-0725. Neither form describes an online filing channel, and none was verified.",
+    "payment": "Make the check payable to Tax Trust Account and send it with the signed return to the remittance address above. The return also authorizes an electronic check conversion.",
+    "sources": [
+      "https://revds.com/taxpayerpdfs/Alabama/taxpayerforms/Occupational%20Withholding%20Tax/Neumo%20Occupational%20Form.pdf",
+      "https://revds.com/taxpayerpdfs/Alabama/taxpayerforms/Occupational%20Withholding%20Tax/Universal%20Annual%20Reconciliation-Occupational%202026.pdf"
+    ],
+    "verifiedOn": "2026-11-13"
+  },
+  "AL-HACKLEBURG": {
+    "collector": "Neumo Tax Remittance Department, the collecting agent named on Hackleburg's occupational tax return (the same shared return and remittance address the Leeds guide uses)",
+    "registration": "The return and the annual reconciliation both ask for a Neumo account number. Neither says how to obtain one, so the registration route is not verified: contact Neumo at (800) 556-7274 or its support portal (supportportal.neumo.com/tax).",
+    "returns": [
+      [
+        "Occupational Tax Return",
+        "Monthly. The return lists several jurisdictions: use the Hackleburg line, jurisdiction code 9349, rate 1%. It must be postmarked by the 20th of the following month. Late filing: 10% penalty; 12% interest per annum; $10.00 minimum (as printed on the return updated 10/2026)."
+      ],
+      [
+        "Occupational Withholding Tax Annual Reconciliation Report",
+        "Due on or before January 31 for the prior year. Mark Hackleburg (code 9349), list all twelve month-ends with employees, taxable wages, tax withheld and remitted, and explain any difference between withheld and remitted in an attached statement. Enclose payment for any difference owed."
+      ]
+    ],
+    "filing": "Both forms are signed paper forms mailed to Neumo Tax Remittance Department, PO Box 830725, Birmingham, AL 35283-0725. Neither form describes an online filing channel, and none was verified.",
+    "payment": "Make the check payable to Tax Trust Account and send it with the signed return to the remittance address above. The return also authorizes an electronic check conversion.",
+    "sources": [
+      "https://revds.com/taxpayerpdfs/Alabama/taxpayerforms/Occupational%20Withholding%20Tax/Neumo%20Occupational%20Form.pdf",
+      "https://revds.com/taxpayerpdfs/Alabama/taxpayerforms/Occupational%20Withholding%20Tax/Universal%20Annual%20Reconciliation-Occupational%202026.pdf"
+    ],
+    "verifiedOn": "2026-11-13"
+  },
+  "AL-HAMILTON": {
+    "collector": "Neumo Tax Remittance Department, the collecting agent named on Hamilton's occupational tax return (the same shared return and remittance address the Leeds guide uses)",
+    "registration": "The return and the annual reconciliation both ask for a Neumo account number. Neither says how to obtain one, so the registration route is not verified: contact Neumo at (800) 556-7274 or its support portal (supportportal.neumo.com/tax).",
+    "returns": [
+      [
+        "Occupational Tax Return",
+        "Monthly. The return lists several jurisdictions: use the Hamilton line, jurisdiction code 9359, rate 1%. It must be postmarked by the 20th of the following month. Late filing: 10% penalty; 12% interest per annum; $10.00 minimum (as printed on the return updated 10/2026)."
+      ],
+      [
+        "Occupational Withholding Tax Annual Reconciliation Report",
+        "Due on or before January 31 for the prior year. Mark Hamilton (code 9359), list all twelve month-ends with employees, taxable wages, tax withheld and remitted, and explain any difference between withheld and remitted in an attached statement. Enclose payment for any difference owed."
+      ]
+    ],
+    "filing": "Both forms are signed paper forms mailed to Neumo Tax Remittance Department, PO Box 830725, Birmingham, AL 35283-0725. Neither form describes an online filing channel, and none was verified.",
+    "payment": "Make the check payable to Tax Trust Account and send it with the signed return to the remittance address above. The return also authorizes an electronic check conversion.",
+    "sources": [
+      "https://revds.com/taxpayerpdfs/Alabama/taxpayerforms/Occupational%20Withholding%20Tax/Neumo%20Occupational%20Form.pdf",
+      "https://revds.com/taxpayerpdfs/Alabama/taxpayerforms/Occupational%20Withholding%20Tax/Universal%20Annual%20Reconciliation-Occupational%202026.pdf"
+    ],
+    "verifiedOn": "2026-11-13"
+  },
+  "AL-MIDFIELD": {
+    "collector": "Neumo Tax Remittance Department, the collecting agent named on Midfield's occupational tax return (the same shared return and remittance address the Leeds guide uses)",
+    "registration": "The return and the annual reconciliation both ask for a Neumo account number. Neither says how to obtain one, so the registration route is not verified: contact Neumo at (800) 556-7274 or its support portal (supportportal.neumo.com/tax).",
+    "returns": [
+      [
+        "Occupational Tax Return",
+        "Monthly. The return lists several jurisdictions: use the Midfield line, jurisdiction code 9375, rate 1%. It must be postmarked by the 20th of the following month. Late filing: 10% penalty; 12% interest per annum; $3.00 minimum (as printed on the return updated 10/2026)."
+      ],
+      [
+        "Occupational Withholding Tax Annual Reconciliation Report",
+        "Due on or before January 31 for the prior year. Mark Midfield (code 9375), list all twelve month-ends with employees, taxable wages, tax withheld and remitted, and explain any difference between withheld and remitted in an attached statement. Enclose payment for any difference owed."
+      ]
+    ],
+    "filing": "Both forms are signed paper forms mailed to Neumo Tax Remittance Department, PO Box 830725, Birmingham, AL 35283-0725. Neither form describes an online filing channel, and none was verified.",
+    "payment": "Make the check payable to Tax Trust Account and send it with the signed return to the remittance address above. The return also authorizes an electronic check conversion.",
+    "sources": [
+      "https://revds.com/taxpayerpdfs/Alabama/taxpayerforms/Occupational%20Withholding%20Tax/Neumo%20Occupational%20Form.pdf",
+      "https://revds.com/taxpayerpdfs/Alabama/taxpayerforms/Occupational%20Withholding%20Tax/Universal%20Annual%20Reconciliation-Occupational%202026.pdf"
+    ],
+    "verifiedOn": "2026-11-13"
+  },
+  "AL-MOSSES": {
+    "collector": "Neumo Tax Remittance Department, the collecting agent named on Mosses's occupational tax return (the same shared return and remittance address the Leeds guide uses)",
+    "registration": "The return and the annual reconciliation both ask for a Neumo account number. Neither says how to obtain one, so the registration route is not verified: contact Neumo at (800) 556-7274 or its support portal (supportportal.neumo.com/tax).",
+    "returns": [
+      [
+        "Occupational Tax Return",
+        "Monthly. The return lists several jurisdictions: use the Mosses line, jurisdiction code 9677, rate 1%. It must be postmarked by the 20th of the following month. Late filing: 10% penalty for the first month plus 2% for each further month or part of a month, maximum 28%; $3.00 minimum (as printed on the return updated 10/2026)."
+      ],
+      [
+        "Occupational Withholding Tax Annual Reconciliation Report",
+        "Due on or before January 31 for the prior year. Mark Mosses (code 9677), list all twelve month-ends with employees, taxable wages, tax withheld and remitted, and explain any difference between withheld and remitted in an attached statement. Enclose payment for any difference owed."
+      ]
+    ],
+    "filing": "Both forms are signed paper forms mailed to Neumo Tax Remittance Department, PO Box 830725, Birmingham, AL 35283-0725. Neither form describes an online filing channel, and none was verified.",
+    "payment": "Make the check payable to Tax Trust Account and send it with the signed return to the remittance address above. The return also authorizes an electronic check conversion.",
+    "sources": [
+      "https://revds.com/taxpayerpdfs/Alabama/taxpayerforms/Occupational%20Withholding%20Tax/Neumo%20Occupational%20Form.pdf",
+      "https://revds.com/taxpayerpdfs/Alabama/taxpayerforms/Occupational%20Withholding%20Tax/Universal%20Annual%20Reconciliation-Occupational%202026.pdf"
+    ],
+    "verifiedOn": "2026-11-13"
+  },
+  "AL-SHORTER": {
+    "collector": "Neumo Tax Remittance Department, the collecting agent named on Shorter's occupational tax return (the same shared return and remittance address the Leeds guide uses)",
+    "registration": "The return and the annual reconciliation both ask for a Neumo account number. Neither says how to obtain one, so the registration route is not verified: contact Neumo at (800) 556-7274 or its support portal (supportportal.neumo.com/tax).",
+    "returns": [
+      [
+        "Occupational Tax Return",
+        "Monthly. The return lists several jurisdictions: use the Shorter line, jurisdiction code 9702, rate 1%. It must be postmarked by the 20th of the following month. Late filing: 10% penalty; 6% interest per annum; $1.00 minimum (as printed on the return updated 10/2026)."
+      ],
+      [
+        "Occupational Withholding Tax Annual Reconciliation Report",
+        "Due on or before January 31 for the prior year. Mark Shorter (code 9702), list all twelve month-ends with employees, taxable wages, tax withheld and remitted, and explain any difference between withheld and remitted in an attached statement. Enclose payment for any difference owed."
+      ]
+    ],
+    "filing": "Both forms are signed paper forms mailed to Neumo Tax Remittance Department, PO Box 830725, Birmingham, AL 35283-0725. Neither form describes an online filing channel, and none was verified.",
+    "payment": "Make the check payable to Tax Trust Account and send it with the signed return to the remittance address above. The return also authorizes an electronic check conversion.",
+    "sources": [
+      "https://revds.com/taxpayerpdfs/Alabama/taxpayerforms/Occupational%20Withholding%20Tax/Neumo%20Occupational%20Form.pdf",
+      "https://revds.com/taxpayerpdfs/Alabama/taxpayerforms/Occupational%20Withholding%20Tax/Universal%20Annual%20Reconciliation-Occupational%202026.pdf"
+    ],
+    "verifiedOn": "2026-11-13"
+  },
+  "AL-SOUTHSIDE": {
+    "collector": "Neumo Tax Remittance Department, the collecting agent named on Southside's occupational tax return (the same shared return and remittance address the Leeds guide uses)",
+    "registration": "The return and the annual reconciliation both ask for a Neumo account number. Neither says how to obtain one, so the registration route is not verified: contact Neumo at (800) 556-7274 or its support portal (supportportal.neumo.com/tax).",
+    "returns": [
+      [
+        "Occupational Tax Return",
+        "Monthly. The return lists several jurisdictions: use the Southside line, jurisdiction code 9046, rate 2%. It must be postmarked by the 20th of the following month. Late filing: 10% penalty; 8% interest per annum; $10.00 minimum (as printed on the return updated 10/2026)."
+      ],
+      [
+        "Occupational Withholding Tax Annual Reconciliation Report",
+        "Due on or before January 31 for the prior year. Mark Southside (code 9046), list all twelve month-ends with employees, taxable wages, tax withheld and remitted, and explain any difference between withheld and remitted in an attached statement. Enclose payment for any difference owed."
+      ]
+    ],
+    "filing": "Both forms are signed paper forms mailed to Neumo Tax Remittance Department, PO Box 830725, Birmingham, AL 35283-0725. Neither form describes an online filing channel, and none was verified.",
+    "payment": "Make the check payable to Tax Trust Account and send it with the signed return to the remittance address above. The return also authorizes an electronic check conversion.",
+    "sources": [
+      "https://revds.com/taxpayerpdfs/Alabama/taxpayerforms/Occupational%20Withholding%20Tax/Neumo%20Occupational%20Form.pdf",
+      "https://revds.com/taxpayerpdfs/Alabama/taxpayerforms/Occupational%20Withholding%20Tax/Universal%20Annual%20Reconciliation-Occupational%202026.pdf"
+    ],
+    "verifiedOn": "2026-11-13"
+  },
+  "AL-SULLIGENT": {
+    "collector": "Neumo Tax Remittance Department, the collecting agent named on Sulligent's occupational tax return (the same shared return and remittance address the Leeds guide uses)",
+    "registration": "The return and the annual reconciliation both ask for a Neumo account number. Neither says how to obtain one, so the registration route is not verified: contact Neumo at (800) 556-7274 or its support portal (supportportal.neumo.com/tax).",
+    "returns": [
+      [
+        "Occupational Tax Return",
+        "Monthly. The return lists several jurisdictions: use the Sulligent line, jurisdiction code 9392, rate 1%. It must be postmarked by the 20th of the following month. Late filing: 10% penalty; 18% interest per annum; $50.00 minimum (as printed on the return updated 10/2026)."
+      ],
+      [
+        "Occupational Withholding Tax Annual Reconciliation Report",
+        "Due on or before January 31 for the prior year. Mark Sulligent (code 9392), list all twelve month-ends with employees, taxable wages, tax withheld and remitted, and explain any difference between withheld and remitted in an attached statement. Enclose payment for any difference owed."
+      ]
+    ],
+    "filing": "Both forms are signed paper forms mailed to Neumo Tax Remittance Department, PO Box 830725, Birmingham, AL 35283-0725. Neither form describes an online filing channel, and none was verified.",
+    "payment": "Make the check payable to Tax Trust Account and send it with the signed return to the remittance address above. The return also authorizes an electronic check conversion.",
+    "sources": [
+      "https://revds.com/taxpayerpdfs/Alabama/taxpayerforms/Occupational%20Withholding%20Tax/Neumo%20Occupational%20Form.pdf",
+      "https://revds.com/taxpayerpdfs/Alabama/taxpayerforms/Occupational%20Withholding%20Tax/Universal%20Annual%20Reconciliation-Occupational%202026.pdf"
+    ],
+    "verifiedOn": "2026-11-13"
+  },
+  "AL-TARRANT": {
+    "collector": "Neumo Tax Remittance Department, the collecting agent named on Tarrant's occupational tax return (the same shared return and remittance address the Leeds guide uses)",
+    "registration": "The return and the annual reconciliation both ask for a Neumo account number. Neither says how to obtain one, so the registration route is not verified: contact Neumo at (800) 556-7274 or its support portal (supportportal.neumo.com/tax).",
+    "returns": [
+      [
+        "Occupational Tax Return",
+        "Monthly. The return lists several jurisdictions: use the Tarrant line, jurisdiction code 9625, rate ½%. It must be postmarked by the 20th of the following month. Late filing: 10% penalty; 12% interest per annum; $25.00 minimum (as printed on the return updated 10/2026)."
+      ],
+      [
+        "Occupational Withholding Tax Annual Reconciliation Report",
+        "Due on or before January 31 for the prior year. Mark Tarrant (code 9625), list all twelve month-ends with employees, taxable wages, tax withheld and remitted, and explain any difference between withheld and remitted in an attached statement. Enclose payment for any difference owed."
+      ]
+    ],
+    "filing": "Both forms are signed paper forms mailed to Neumo Tax Remittance Department, PO Box 830725, Birmingham, AL 35283-0725. Neither form describes an online filing channel, and none was verified.",
+    "payment": "Make the check payable to Tax Trust Account and send it with the signed return to the remittance address above. The return also authorizes an electronic check conversion.",
+    "sources": [
+      "https://revds.com/taxpayerpdfs/Alabama/taxpayerforms/Occupational%20Withholding%20Tax/Neumo%20Occupational%20Form.pdf",
+      "https://revds.com/taxpayerpdfs/Alabama/taxpayerforms/Occupational%20Withholding%20Tax/Universal%20Annual%20Reconciliation-Occupational%202026.pdf"
+    ],
+    "verifiedOn": "2026-11-13"
+  },
+  "AL-IRONDALE": {
+    "collector": "City of Irondale Revenue Department, 101 20th Street South, Irondale, AL 35210; (205) 956-9200; revenue@cityofirondaleal.gov",
+    "registration": "The return carries a taxpayer number issued by the city. The city's page does not describe how to register, so call the Revenue Department at (205) 956-9200.",
+    "returns": [
+      [
+        "Employer's Monthly Return of Occupational License Fee",
+        "Monthly, due the 20th of the following month. The fee is 0.50% (Ordinance 2024-12, effective July 2, 2024; it was 1% from August 1, 2018 under Ordinance 2018-10 and 0.75% from July 19, 2022). Penalty: 10% of the fee or $3, whichever is greater, if filed after the 20th; interest of 4% a year as printed on the form. The PDF on the city's site that was read still prints 1% in its text, while the city's page says the rate is 0.50% and lists a separate 0.50% form, so confirm you are using the current one."
+      ],
+      [
+        "Annual Return",
+        "The city furnishes an Annual Return form to each employer in December. It lists every employee's name and address, period of employment, total compensation and fee withheld. The city's page also lists a Reconciliation of Returns form, which was not read."
+      ]
+    ],
+    "filing": "The form says to send the completed return to revenue@cityofirondaleal.gov.",
+    "payment": "By ACH credit or credit card (Visa, MasterCard, Discover), as printed on the form.",
+    "sources": [
+      "https://cityofirondaleal.gov/occupational-license-fee/",
+      "https://cityofirondaleal.gov/wp-content/uploads/Occupational-Tax-Form.pdf"
+    ],
+    "verifiedOn": "2026-11-13"
+  },
+  "AL-FAIRFIELD": {
+    "collector": "City of Fairfield Revenue Department, in the Office of the City Clerk and Treasurer (Ordinance 1019)",
+    "registration": "Ordinance 1019 has the City Clerk's Office select the occupational license tax number applied to licensees and says the Revenue Department provides the forms. It gives no registration steps and no current form or portal was found.",
+    "returns": [
+      [
+        "Quarterly return with payment",
+        "Fee of 1% of compensation, deducted from each payment. Quarters end March 31, June 30, September 30 and December 31; payment and the quarterly return for the prior quarter are due on or before the 20th of the following month (April 20 for the first quarter). Records are kept at least five years."
+      ],
+      [
+        "Annual return by employees",
+        "On or before January 31, an affected employee files a return only if the employer failed to file a required quarterly return. The ordinance sets no separate annual employer reconciliation; the 2009 initial return it required is historical."
+      ]
+    ],
+    "filing": "File with the Fairfield Revenue Department / City Clerk's Office on the form the Revenue Department provides. The channel is not stated.",
+    "payment": "Not stated in the ordinance. Contact the Revenue Department.",
+    "sources": [
+      "https://cityoffairfieldal.org/wp-content/uploads/2025/02/Ordinance-1019-Occupational-Tax_rotated.pdf"
+    ],
+    "note": "Read from the scanned ordinance as adopted 2008-12-01 and hosted on the city's site (11 pages; pages 1, 4 and 5 read). Later amendments, a current form and payment instructions were not found.",
+    "verifiedOn": "2026-11-13"
+  },
+  "AL-GLENCOE": {
+    "collector": "City of Glencoe Revenue Department, 201 West Chastain Blvd., Glencoe, AL 35905; City Clerk Tashia Blackerby, (256) 492-1424 on the form and (256) 492-4911 on the city's revenue page",
+    "registration": "The form has no registration steps. Contact the Revenue Department, and notify the revenue officer of a change of name, address or ownership.",
+    "returns": [
+      [
+        "Form G-1 Employer's Monthly/Quarterly Return of Occupational Tax Withheld",
+        "Ordinance 2010-002, 2%. A monthly return is filed and the tax paid by the 20th of the following month, with a postmark on or before the 20th. Report taxable employees, total pay, less pay for services outside Glencoe; if no wages were paid, mark None and return the form with an explanation. Penalty: 10% of the amount due plus 2% a month until paid, maximum 28%, minimum $25."
+      ],
+      [
+        "Quarterly return and reconciliation forms",
+        "The city's revenue page also offers an Employer's quarterly return and reconciliation forms. Those were not read, so their due dates are not verified."
+      ]
+    ],
+    "filing": "Mail to City of Glencoe, Revenue Department, 201 West Chastain Blvd., Glencoe, AL 35905. No online channel appears on the form.",
+    "payment": "Remit with the return to the same address, as the form instructs; no other payment method is stated.",
+    "sources": [
+      "https://cityofglencoe.org/revenue/",
+      "https://cityofglencoe.org/wp-content/uploads/2021/09/Glencoe-Occupational-Tax-Form.pdf"
+    ],
+    "verifiedOn": "2026-11-13"
+  },
+  "AL-NOTASULGA": {
+    "collector": "Town of Notasulga, Town Clerk Barbara Inman, 76 West Main Street, Notasulga, AL; (334) 257-1454",
+    "registration": "The town's page gives no registration steps. Contact the Town Clerk; the reporting frequency depends on how the account is set up.",
+    "returns": [
+      [
+        "Occupational license fee return",
+        "Ordinance 97-11-01, 1% of compensation earned in Notasulga. Quarterly or annual depending on the account. First quarter due April 1 and delinquent after April 30; second quarter due July 1, delinquent after July 31; third quarter due October 1, delinquent after October 31; fourth quarter due January 1, delinquent after January 31. Federal employers may, but need not, withhold; if they do not, the employee files a town return."
+      ]
+    ],
+    "filing": "The town's page links an Occupation License Fee Form PDF, which was not read, so the filing channel is not verified.",
+    "payment": "The page links a bill-pay site and a portal, but does not say whether the occupational fee is payable there. Confirm with the Town Clerk.",
+    "sources": [
+      "https://notasulgaal.com/occupational-license"
+    ],
+    "verifiedOn": "2026-11-13"
+  },
+  "AL-RED-BAY": {
+    "collector": "City of Red Bay, City Clerk's Office (Ordinance 90-2-7)",
+    "registration": "The ordinance gives no registration steps; employers use a form the city makes available. Contact the City Clerk.",
+    "returns": [
+      [
+        "Monthly return and payment",
+        "One-half of one percent (0.5%) of compensation, deducted from each payment. Payment and the return, on a form the city provides, are due on or before the 20th of the month following each month."
+      ],
+      [
+        "Annual return",
+        "Each employer files with the City Clerk's Office on or before January 31 a return showing each employee's compensation, the fees deducted and paid for the prior year, and each employee's last known address. Records are kept at least five years."
+      ]
+    ],
+    "filing": "With the City Clerk's Office. The city announced online occupational tax forms, which were not read, so the filing channel is not verified.",
+    "payment": "Not stated in the ordinance. Contact the City Clerk.",
+    "sources": [
+      "https://irp.cdn-website.com/cf7ad1ec/files/uploaded/CORB+OCC+ORD+%281%29.pdf"
+    ],
+    "note": "Read from the scanned ordinance (12 pages; pages 1, 4 and 5 read). Amendments and the city's current forms were not read.",
+    "verifiedOn": "2026-11-13"
+  },
+  "AL-RAINBOW-CITY": {
+    "collector": "City of Rainbow City Revenue Department, 3700 Rainbow Drive, Rainbow City, AL 35906; (256) 413-1209; revenue@rbcalabama.com",
+    "registration": "Not verified. The city's revenue page says the department collects occupational tax; call (256) 413-1209.",
+    "returns": [
+      [
+        "Forms G-1 and G-3",
+        "The city posts a quarterly/monthly return (G-1) and a reconciliation of quarterly returns (G-3), but its site refused this project's automated reads of both, so their due dates, penalties and payment steps were not read and are not stated here."
+      ]
+    ],
+    "filing": "Not verified.",
+    "payment": "Not verified. The revenue page offers online payment of taxes.",
+    "sources": [
+      "https://www.rbcalabama.com/revenue-department/"
+    ],
+    "note": "Partial guide: only the collector and contacts are confirmed.",
+    "verifiedOn": "2026-11-13"
   }
 }

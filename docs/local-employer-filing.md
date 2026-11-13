@@ -6,7 +6,7 @@ Use `localWithholdingGuide(kind, code, 2026)` from `payroll/local/filingGuide.mj
 | --- | --- | --- |
 | OR-city | Oregon city with a verified Community Safety Payroll Tax guide | `Eugene` |
 | OR-transit-district | Oregon employer transit district code on Form OQ | `TM` or `LTD` |
-| AL-city | Alabama city name with a verified occupational tax guide | `Auburn`, `Bessemer`, `Birmingham`, `Gadsden`, `Leeds` or `Opelika` |
+| AL-city | Alabama town name from the municipal registry (`Hackleburg` is accepted for the registry's `Hacklebug`) | `Auburn`, `Birmingham`, `Leeds`, `Attalla` or `Irondale` |
 | CO-city | Colorado city name with a verified OPT guide | `Denver` |
 | DE-city | Delaware wage tax city name | `Wilmington` |
 | MO-city | Missouri earnings tax city name | `St. Louis` |
@@ -29,7 +29,7 @@ A guide provides registration, returns, deadlines, payment instructions and date
 
 The first release covers Indiana county withholding, Ohio school districts, Ohio municipalities already identified as RITA or CCA, and the Pennsylvania EIT district directory. Philadelphia uses its own Wage Tax rules. Pennsylvania district entries identify the collector and its published website, with statutory employer instructions and explicit gaps for collector-specific methods. All 69 Act 32 district entries include collector-specific registration, filing and payment instructions. Philadelphia has its own Wage Tax guide. Check collector calendars for filing-period deadlines. Section 512 sets the quarterly EIT deadline at the end of the following month, while some agency FAQs give a 30-day schedule. After confirming the worksite LST collector in the DCED address search, use `localAgencyGuide("PA-BERKHEIMER-LST", 2026)` or `localAgencyGuide("PA-KEYSTONE-LST", 2026)`. The EIT district code alone cannot identify the LST collector.
 
-Open work includes Ohio independent municipal collectors, the remaining JEDD/JEDZ collectors, Pennsylvania LST, Kentucky occupational districts, Alabama localities and other local withholding or employer payroll taxes in the engine. Verify the collector, registration route, channels, return and reconciliation forms, deadlines and payment instructions for each. Preserve rate data and keep unsupported workflows explicit.
+Open work includes Ohio independent municipal collectors, the remaining JEDD/JEDZ collectors, Pennsylvania LST, Kentucky occupational districts, the six Alabama towns above and other local withholding or employer payroll taxes in the engine. Verify the collector, registration route, channels, return and reconciliation forms, deadlines and payment instructions for each. Preserve rate data and keep unsupported workflows explicit.
 
 Run `node --test tests/local-filing-guide.test.mjs` from the repository root.
 
@@ -50,3 +50,11 @@ For Covington worksites, look up both `KY-KENTON` and `KY-COVINGTON`. Kenton Cou
 In Bowling Green, use `KY-BOWLING-GREEN` for city withholding and `KY-WARREN` for county withholding. Use `KY-WARREN-SCHOOLS` for wages earned in Warren County by a resident of the Warren County School District. Verify the employee’s home school district before selecting the school guide.
 
 Use `KY-OWENSBORO-DAVIESS` for the common administrator. The standard E-1 has separate columns for work inside and outside Owensboro. Employers with wages in both jurisdictions file a separate annual REC for each.
+
+## Alabama coverage (2026-11-13)
+
+23 of the 29 registered Alabama towns return a guide; the other six return `collector-unverified` rather than a guess: Bear Creek, Brilliant, Goodwater, Haleyville, Lynn and Tuskegee. No official page that says how employers file for those six was found (the Department of Revenue pages for Tuskegee and Haleyville did not render readable content, and they are sales and use tax notices).
+
+- **Neumo return (eleven towns plus Leeds):** Attalla 9406, Beaverton 9756, Guin 9024, Hackleburg 9349, Hamilton 9359, Midfield 9375, Mosses 9677, Shorter 9702, Southside 9046, Sulligent 9392 and Tarrant 9625 file the shared monthly Occupational Tax Return (updated 10/2026, postmarked by the 20th) and the Universal Annual Reconciliation (due January 31) to Neumo Tax Remittance Department, PO Box 830725, Birmingham, AL 35283-0725. How to obtain a Neumo account number is not on either form, so the guides say registration is unverified.
+- **Own collectors:** Irondale (monthly, 0.50%; the PDF form on its site still prints 1%), Fairfield (Ordinance 1019, quarterly by the 20th, read from the 2008 scan), Glencoe (Form G-1, 2%, monthly by the 20th), Notasulga (quarterly or annual by account, Ordinance 97-11-01) and Red Bay (Ordinance 90-2-7, monthly by the 20th, annual by January 31).
+- **Rainbow City is partial:** the collector and contacts are confirmed; its G-1 and G-3 forms were blocked to automated reads, so deadlines and penalties are not stated.
