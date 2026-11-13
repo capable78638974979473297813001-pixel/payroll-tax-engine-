@@ -163,7 +163,9 @@ The W-2 e-file mandate (at least 10 information returns in total) and the SSA ro
   more than 50 W-2s.
 - **Form 940 (2026)** is not published yet; this follows the 2025 form. The FUTA
   credit-reduction list for a year is final only after November 10; until the engine
-  data carries it the return says so (`credit_reduction_not_determined`).
+  data carries it the return says so (`credit_reduction_not_determined`). The 2026 data now carries
+  DOL's final list (California 1.5%, loaded 2026-11-13), so a 2026 return no longer
+  carries that finding by default.
 - **Federal only.** State and local agencies (withholding, SUI wage reports,
   new-hire reporting) are not part of this module.
 - Penalty figures are estimates: the 15% tier needs the date of an IRS notice, and
