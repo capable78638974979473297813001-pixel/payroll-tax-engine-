@@ -512,3 +512,14 @@ test('Xenia district withholding uses its own RITA code', () => {
   assert.equal(district.collectorCode, '859');
   assert.equal(localWithholdingGuide('OH-municipality', '86772', 2026).collectorCode, '905');
 });
+
+test('Beachwood East, West and city preserve three distinct RITA filing codes', () => {
+  for (const [finder, code] of [['9005', '051'], ['9006', '052']]) {
+    const zone = localWithholdingGuide('OH-jedd-jedz', finder, 2026);
+    assert.equal(zone.agency, 'OH-RITA');
+    assert.equal(zone.collectorCode, code);
+    assert.equal(zone.membershipVerifiedOn, '2026-11-13');
+    assert.deepEqual(zone.guide.returns.slice(0, 2).map(([form]) => form), ['11', '17']);
+  }
+  assert.equal(localWithholdingGuide('OH-municipality', '04500', 2026).collectorCode, '050');
+});

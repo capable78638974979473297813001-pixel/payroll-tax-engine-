@@ -283,6 +283,26 @@
         "https://www.ritaohio.com/Municipalities/Home/MemberPage?id=859",
         "https://service.ritaohio.com/Business/Tax%20Rates%20Table.pdf"
       ]
+    },
+    "9005": {
+      "agency": "OH-RITA",
+      "collectorCode": "051",
+      "verifiedOn": "2026-11-13",
+      "sources": [
+        "https://www.ritaohio.com/Municipalities/Home/MemberPage?id=051",
+        "https://service.ritaohio.com/Business/Tax%20Rates%20Table.pdf",
+        "https://dam.assets.ohio.gov/image/upload/tax.ohio.gov/muni-net-profit/ascii%20and%20xml/ASCII%20Instructions%207.19.23.pdf"
+      ]
+    },
+    "9006": {
+      "agency": "OH-RITA",
+      "collectorCode": "052",
+      "verifiedOn": "2026-11-13",
+      "sources": [
+        "https://www.ritaohio.com/Municipalities/Home/MemberPage?id=052",
+        "https://service.ritaohio.com/Business/Tax%20Rates%20Table.pdf",
+        "https://dam.assets.ohio.gov/image/upload/tax.ohio.gov/muni-net-profit/ascii%20and%20xml/ASCII%20Instructions%207.19.23.pdf"
+      ]
     }
   },
   "rosters": {
