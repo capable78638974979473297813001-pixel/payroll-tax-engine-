@@ -640,3 +640,13 @@ test('Cheviot JEDDs route to the district registration and matching worksite con
     assert.match(result.guide.returns[1][1], /March 1, 2027/);
   }
 });
+
+test('Harpersfield–Geneva districts use the JEDD voucher, payee and Form 38', () => {
+  for (const id of ['9083', '9084', '9092']) {
+    const { agency, guide } = localWithholdingGuide('OH-jedd-jedz', id, 2026);
+    assert.equal(agency, 'OH-HARPERSFIELD-GENEVA-JEDD');
+    assert.deepEqual(guide.returns.map(([name]) => name), ['JEDD Withholding Voucher', 'Form 38']);
+    assert.match(guide.returns[0][1], /30th.*last day/);
+    assert.match(guide.payment, /payable to Harpersfield\/Geneva JEDD/);
+  }
+});

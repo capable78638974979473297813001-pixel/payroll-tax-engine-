@@ -582,6 +582,30 @@
         "https://cheviot.org/departments/tax/",
         "https://cheviot.org/wp-content/uploads/2025/12/Liberty-Nursing-Care-JEDD.pdf"
       ]
+    },
+    "9083": {
+      "agency": "OH-HARPERSFIELD-GENEVA-JEDD",
+      "verifiedOn": "2026-11-13",
+      "sources": [
+        "https://genevaohio.gov/wp-content/uploads/2023/05/Harpersfield-Geneva-Jedd-Tax-Return-1.pdf",
+        "https://genevaohio.gov/wp-content/uploads/2023/05/JEDD-Year-End-Reconciliation.pdf"
+      ]
+    },
+    "9084": {
+      "agency": "OH-HARPERSFIELD-GENEVA-JEDD",
+      "verifiedOn": "2026-11-13",
+      "sources": [
+        "https://genevaohio.gov/wp-content/uploads/2023/05/Harpersfield-Geneva-Jedd-Tax-Return-1.pdf",
+        "https://genevaohio.gov/wp-content/uploads/2023/05/JEDD-Year-End-Reconciliation.pdf"
+      ]
+    },
+    "9092": {
+      "agency": "OH-HARPERSFIELD-GENEVA-JEDD",
+      "verifiedOn": "2026-11-13",
+      "sources": [
+        "https://genevaohio.gov/wp-content/uploads/2023/05/Harpersfield-Geneva-Jedd-Tax-Return-1.pdf",
+        "https://genevaohio.gov/wp-content/uploads/2023/05/JEDD-Year-End-Reconciliation.pdf"
+      ]
     }
   },
   "rosters": {

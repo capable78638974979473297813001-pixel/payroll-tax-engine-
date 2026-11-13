@@ -1880,5 +1880,31 @@
       "https://codes.ohio.gov/ohio-revised-code/section-1.14"
     ],
     "verifiedOn": "2026-11-13"
+  },
+  "OH-HARPERSFIELD-GENEVA-JEDD": {
+    "collector": "Harpersfield/Geneva JEDD Division of Taxation, City of Geneva",
+    "registration": "Submit the JEDD Withholding and Business Registration form to the Geneva tax office. Identify the worksite, number of district employees, business start date for district tax and any other locations in the districts. Use the account for the applicable JEDD I, II or III.",
+    "returns": [
+      [
+        "JEDD Withholding Voucher",
+        "File monthly by the following 15th if prior-year withholding exceeded $2,399 or any month in the preceding quarter exceeded $200. Otherwise file quarterly. Geneva’s withholding notice says the 30th of the following month, while Ohio Revised Code 718.03 specifies the last day of that month. Use the earlier date pending confirmation from Geneva."
+      ],
+      [
+        "Form 38",
+        "Reconcile 2026 withholding by March 1, 2027. Include copies of all W-2s and 1099s with the district reconciliation."
+      ]
+    ],
+    "filing": "Mail paper district vouchers and Form 38 to Harpersfield/Geneva JEDD, Division of Taxation, 44 North Forest Street, Geneva, OH 44041. Select the JEDD forms in Geneva’s tax documents directory.",
+    "payment": "Enclose a check payable to Harpersfield/Geneva JEDD with the district voucher and identify the applicable district account.",
+    "sources": [
+      "https://genevaohio.gov/tax-documents/",
+      "https://genevaohio.gov/wp-content/uploads/2023/05/Harpersfield-Geneva-Jedd-Tax-Return-1.pdf",
+      "https://genevaohio.gov/wp-content/uploads/2023/05/JEDD-Business-Registration-Form.pdf",
+      "https://genevaohio.gov/wp-content/uploads/2023/05/Important-Withholding-Tax-Changes.pdf",
+      "https://genevaohio.gov/wp-content/uploads/2023/05/JEDD-Year-End-Reconciliation.pdf",
+      "https://codes.ohio.gov/ohio-revised-code/section-718.03",
+      "https://codes.ohio.gov/ohio-revised-code/section-1.14"
+    ],
+    "verifiedOn": "2026-11-13"
   }
 }
