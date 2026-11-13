@@ -97,7 +97,11 @@ test('Ohio zones resolve by Finder zone ID, with explicit gaps', () => {
     const result = localWithholdingGuide('OH-jedd-jedz', zone.jeddId, 2026);
     assert.equal(result.jurisdiction, zone.name);
     if (result.status === 'guide') {
-      assert.match(result.collectorCode, /^\d{3}$/);
+      if (result.collectorCodeStatus === 'unverified') {
+        assert.equal(result.collectorCode, undefined);
+      } else if (['OH-RITA', 'OH-CCA'].includes(result.agency)) {
+        assert.match(result.collectorCode, /^\d{3}$/);
+      }
       assert.ok(result.membershipSources.length);
     } else {
       assert.equal(result.status, 'collector-unverified');
@@ -432,4 +436,241 @@ test('Akron city withholding has its own deadlines and excludes its four JEDDs',
   for (const district of ['9004', '9014', '9015', '9042']) {
     assert.notEqual(localWithholdingGuide('OH-jedd-jedz', district, 2026).agency, city.agency);
   }
+});
+
+test('Springfield city and its airport district use separate RITA filing codes', () => {
+  const airport = localWithholdingGuide('OH-jedd-jedz', '9041', 2026);
+  const city = localWithholdingGuide('OH-municipality', '74118', 2026);
+  assert.equal(airport.agency, 'OH-RITA');
+  assert.equal(airport.collectorCode, '872');
+  assert.equal(airport.membershipVerifiedOn, '2026-11-12');
+  assert.deepEqual(airport.guide.returns.slice(0, 2).map(([form]) => form), ['11', '17']);
+  assert.equal(city.collectorCode, '773');
+  assert.equal(localWithholdingGuide('OH-jedd-jedz', '872', 2026).status, 'unknown-code');
+});
+
+test('Akron district accounts use JW-3 while the city uses AW-3', () => {
+  for (const id of ['9004', '9014', '9015', '9042']) {
+    const result = localWithholdingGuide('OH-jedd-jedz', id, 2026);
+    assert.equal(result.agency, 'OH-AKRON-JEDD');
+    assert.equal(result.guide.returns[1][0], 'JW-3');
+    assert.match(result.guide.returns[1][1], /March 1, 2027/);
+    assert.equal(result.collectorCode, undefined);
+  }
+  assert.equal(localWithholdingGuide('OH-municipality', '01000', 2026).guide.returns[1][0], 'AW-3');
+});
+
+test('Dayton township districts select the matching DW-1 and flag the city-only DW-3 lines', () => {
+  for (const [id, name, coupon] of [['9080', 'Miami', 'MT-DAY'], ['9081', 'Butler', 'BT-DAY']]) {
+    const result = localWithholdingGuide('OH-jedd-jedz', id, 2026);
+    assert.equal(result.agency, 'OH-DAYTON-' + name.toUpperCase() + '-JEDD');
+    assert.equal(result.guide.returns[0][0], 'DW-1 ' + coupon + ' JEDD');
+    assert.match(result.guide.returns[1][1], /Ask Dayton how to report district wages/);
+    assert.match(result.guide.payment, /643700/);
+  }
+  assert.match(localAgencyGuide('OH-DAYTON', 2026).filing, /100 or more employee records/);
+});
+
+test('Jefferson Township-Washington Court House uses district W1 coupons and a district payee', () => {
+  const result = localWithholdingGuide('OH-jedd-jedz', '9129', 2026);
+  assert.equal(result.agency, 'OH-JEFFERSON-WASHINGTON-CH-JEDD');
+  assert.match(result.guide.registration, /JEDD Business Questionnaire/);
+  assert.equal(result.guide.returns[0][0], 'W1 1108');
+  assert.match(result.guide.returns[1][1], /March 1, 2027/);
+  assert.match(result.guide.payment, /payable to Jefferson Township-Washington Court House JEDD/);
+  assert.notEqual(localWithholdingGuide('OH-jedd-jedz', '9123', 2026).agency, result.agency);
+});
+
+test('Jersey-New Albany districts have separate RITA memberships beginning in May 2026', () => {
+  for (const [finder, memberPage] of [['9158', '910'], ['9159', '911'], ['9160', '913']]) {
+    const district = localWithholdingGuide('OH-jedd-jedz', finder, 2026);
+    assert.equal(district.agency, 'OH-RITA');
+    assert.equal(district.administrationStartedOn, '2026-05-01');
+    assert.ok(district.membershipSources.some(url => url.endsWith('id=' + memberPage)));
+    assert.match(district.filingNote, /separately on Form 11/);
+    assert.equal(district.collectorCodeStatus, 'unverified');
+    assert.equal(district.collectorCode, undefined);
+  }
+  assert.equal(localWithholdingGuide('OH-municipality', '53970', 2026).collectorCode, '535');
+});
+
+test('Kent district lookups retain the July 2026 collection handoff', () => {
+  for (const id of ['9009', '9021']) {
+    const district = localWithholdingGuide('OH-jedd-jedz', id, 2026);
+    assert.equal(district.agency, 'OH-RITA');
+    assert.equal(district.administrationStartedOn, '2026-07-01');
+    assert.match(district.filingNote, /earlier periods and amendments with Kent/);
+    assert.equal(district.collectorCodeStatus, 'unverified');
+    assert.equal(district.collectorCode, undefined);
+  }
+  assert.equal(localWithholdingGuide('OH-municipality', '39872', 2026).collectorCode, '392');
+});
+
+test('Xenia district withholding uses its own RITA code', () => {
+  const district = localWithholdingGuide('OH-jedd-jedz', '9097', 2026);
+  assert.equal(district.agency, 'OH-RITA');
+  assert.equal(district.collectorCode, '859');
+  assert.equal(localWithholdingGuide('OH-municipality', '86772', 2026).collectorCode, '905');
+});
+
+test('Beachwood East, West and city preserve three distinct RITA filing codes', () => {
+  for (const [finder, code] of [['9005', '051'], ['9006', '052']]) {
+    const zone = localWithholdingGuide('OH-jedd-jedz', finder, 2026);
+    assert.equal(zone.agency, 'OH-RITA');
+    assert.equal(zone.collectorCode, code);
+    assert.equal(zone.membershipVerifiedOn, '2026-11-13');
+    assert.deepEqual(zone.guide.returns.slice(0, 2).map(([form]) => form), ['11', '17']);
+  }
+  assert.equal(localWithholdingGuide('OH-municipality', '04500', 2026).collectorCode, '050');
+});
+
+test('Eaton and Elyria township districts route separately from Elyria city', () => {
+  for (const [finder, code] of [['9016', '292'], ['9017', '282']]) {
+    const district = localWithholdingGuide('OH-jedd-jedz', finder, 2026);
+    assert.equal(district.agency, 'OH-RITA');
+    assert.equal(district.collectorCode, code);
+    assert.deepEqual(district.guide.returns.slice(0, 2).map(([form]) => form), ['11', '17']);
+  }
+  assert.equal(localWithholdingGuide('OH-municipality', '25256', 2026).collectorCode, '277');
+});
+
+test('Kenwood JEDZ worksites select the appropriate employer registration and forms', () => {
+  for (const [id, agency, form] of [
+    ['9057', 'OH-KENWOOD-MADEIRA', 'JEDZ employer withholding'],
+    ['9058', 'OH-KENWOOD-MADEIRA', 'JEDZ employer withholding'],
+    ['9059', 'OH-KENWOOD-NORTHWEST', 'JEDZ Withholding Payments Form'],
+    ['9060', 'OH-KENWOOD-SOUTHWEST', 'JEDZ withholding remittance'],
+  ]) {
+    const result = localWithholdingGuide('OH-jedd-jedz', id, 2026);
+    assert.equal(result.agency, agency);
+    assert.equal(result.guide.returns[0][0], form);
+    assert.match(result.guide.returns[1][1], /March 1, 2027/);
+  }
+  assert.notEqual(localWithholdingGuide('OH-jedd-jedz', '9138', 2026).agency, 'OH-KENWOOD-NORTHWEST');
+});
+
+test('Deer Park provides separate employer forms for Kenwood JEDD and Northwest JEDZ', () => {
+  for (const [id, prefix] of [['9138', 'JEDD'], ['9059', 'JEDZ']]) {
+    const result = localWithholdingGuide('OH-jedd-jedz', id, 2026);
+    assert.equal(result.guide.returns[0][0], prefix + ' Withholding Payments Form');
+    assert.equal(result.guide.returns[1][0], prefix + ' Year-End Reconciliation Form');
+    assert.match(result.guide.returns[0][1], /quarterly accounts, Deer Park publishes the 15th/);
+    assert.match(result.guide.returns[0][1], /last day of that month/);
+  }
+});
+
+test('Newark-administered districts select their own withholding packets and mailing boxes', () => {
+  for (const [id, name, box] of [
+    ['9049', 'Etna JEDZ North', '327'],
+    ['9050', 'Etna JEDZ South', '582'],
+    ['9034', 'Pataskala JEDD', '327'],
+  ]) {
+    const { guide } = localWithholdingGuide('OH-jedd-jedz', id, 2026);
+    assert.equal(guide.returns[0][0], name + ' Payroll Withholding');
+    assert.ok(guide.filing.includes('PO Box ' + box + ','));
+    assert.match(guide.returns[1][1], /March 1, 2027/);
+    assert.match(guide.payment, /enroll separately/);
+  }
+});
+
+test('Monclova-Maumee-Toledo selects its zone return and payroll-agent EFT rule', () => {
+  const district = localWithholdingGuide('OH-jedd-jedz', '9053', 2026);
+  assert.equal(district.agency, 'OH-MMT-JEDZ');
+  assert.equal(district.guide.returns[0][0], 'MMT-W-1');
+  assert.match(district.guide.payment, /EFT unless the tax administrator grants an exemption/);
+  assert.match(district.guide.returns[1][1], /March 1, 2027/);
+  assert.notEqual(localWithholdingGuide('OH-jedd-jedz', '9065', 2026).agency, district.agency);
+});
+
+test('Toledo Express Airport and Troy Township use distinct JEDD accounts and W-3s', () => {
+  for (const [zone, prefix] of [['9065', 'TEA'], ['9067', 'TROY']]) {
+    const result = localWithholdingGuide('OH-jedd-jedz', zone, 2026);
+    assert.equal(result.agency, 'OH-TOLEDO-' + prefix + '-JEDD');
+    assert.equal(result.guide.returns[1][0], prefix + ' JEDD W-3');
+    assert.match(result.guide.returns[1][1], /March 1, 2027/);
+    assert.match(result.guide.returns[0][1], /30-day postmark rule/);
+  }
+  assert.equal(localWithholdingGuide('OH-municipality', '77000', 2026).agency, 'OH-TOLEDO');
+});
+
+test('Columbus JEDD accounts select IT-11J district lines and annual IT-13J', () => {
+  for (const [finder, line] of [['9031', '20'], ['9036', '22'], ['9077', '24']]) {
+    const district = localWithholdingGuide('OH-jedd-jedz', finder, 2026);
+    assert.equal(district.collectorCode, line);
+    assert.equal(district.agency, 'OH-COLUMBUS-JEDD');
+    assert.deepEqual(district.guide.returns.map(([form]) => form), ['IT-11J', 'IT-13J']);
+  }
+  assert.equal(localWithholdingGuide('OH-municipality', '18000', 2026).agency, 'OH-COLUMBUS');
+});
+
+test('both Berkshire districts select the Delaware district packet and EFT instructions', () => {
+  for (const id of ['9007', '9139']) {
+    const { agency, guide } = localWithholdingGuide('OH-jedd-jedz', id, 2026);
+    assert.equal(agency, 'OH-BERKSHIRE-JEDD');
+    assert.match(guide.returns[0][1], /less than \$200 per month/);
+    assert.match(guide.returns[1][1], /March 1, 2027/);
+    assert.match(guide.payment, /EFT payment replaces the periodic coupon/);
+  }
+});
+
+test('Canton assigns distinct district identifiers to six Jackson JEDDs and Perry Faircrest', () => {
+  for (const [finder, district] of [
+    ['9107', '11-001'], ['9106', '16-001'], ['9105', '17-001'], ['9109', '18-001'],
+    ['9119', '19-001'], ['9120', '19-002'], ['9131', '22-001'],
+  ]) {
+    const result = localWithholdingGuide('OH-jedd-jedz', finder, 2026);
+    assert.equal(result.agency, 'OH-CANTON-JEDD');
+    assert.equal(result.collectorCode, district);
+    assert.match(result.guide.returns[0][1], /third banking day/);
+    assert.match(result.guide.returns[1][1], /March 1, 2027/);
+  }
+  assert.notEqual(localWithholdingGuide('OH-jedd-jedz', '9157', 2026).agency, 'OH-CANTON-JEDD');
+});
+
+test('Cheviot JEDDs route to the district registration and matching worksite contract', () => {
+  for (const [id, contract] of [
+    ['9091', 'Western-Ridge'], ['9101', 'Christ-Childrens'], ['9098', 'MERCY-WEST'],
+    ['9089', 'Harrison-Greene'], ['9090', 'UDF'], ['9113', 'McAlisters'],
+    ['9135', 'Hampton-Inn'], ['9153', 'Coopers-Hawk'], ['9103', 'Liberty-Nursing-Care'],
+  ]) {
+    const result = localWithholdingGuide('OH-jedd-jedz', id, 2026);
+    assert.equal(result.agency, 'OH-CHEVIOT-JEDD');
+    assert.ok(result.membershipSources.some(url => url.includes('/' + contract + '-JEDD')));
+    assert.match(result.guide.registration, /JEDD Tax Withholding Application/);
+    assert.match(result.guide.returns[1][1], /March 1, 2027/);
+  }
+});
+
+test('Harpersfield–Geneva districts use the JEDD voucher, payee and Form 38', () => {
+  for (const id of ['9083', '9084', '9092']) {
+    const { agency, guide } = localWithholdingGuide('OH-jedd-jedz', id, 2026);
+    assert.equal(agency, 'OH-HARPERSFIELD-GENEVA-JEDD');
+    assert.deepEqual(guide.returns.map(([name]) => name), ['JEDD Withholding Voucher', 'Form 38']);
+    assert.match(guide.returns[0][1], /30th.*last day/);
+    assert.match(guide.payment, /payable to Harpersfield\/Geneva JEDD/);
+  }
+});
+
+test('Fairfield selects separate township registration and withholding packets by worksite', () => {
+  for (const [id, district, worksite, registration] of [
+    ['9137', 'Fairfield Township JEDD', 'Seward Road', 'FF JEDD Business Registration'],
+    ['9044', 'West Chester JEDD', 'Aviation Way', 'WC JEDD1 Business Registration'],
+  ]) {
+    const { guide } = localWithholdingGuide('OH-jedd-jedz', id, 2026);
+    assert.ok(guide.registration.includes(worksite));
+    assert.ok(guide.registration.includes(registration));
+    assert.equal(guide.returns[0][0], district + ' Return of Income Tax Withheld');
+    assert.equal(guide.returns[1][0], district + ' Annual Reconciliation');
+    assert.match(guide.payment, /postmarked by the due date/);
+  }
+});
+
+test('Monroe collects for the Raceway and 2022 JEDDs and directs employers to confirm district coupons', () => {
+  for (const id of ['9096', '9136']) {
+    const { agency, guide } = localWithholdingGuide('OH-jedd-jedz', id, 2026);
+    assert.equal(agency, 'OH-TURTLECREEK-MONROE-JEDD');
+    assert.match(guide.registration, /513-539-7374, option 3/);
+    assert.match(guide.payment, /confirm the district payee/);
+  }
+  assert.notEqual(localWithholdingGuide('OH-jedd-jedz', '9093', 2026).agency, 'OH-TURTLECREEK-MONROE-JEDD');
 });

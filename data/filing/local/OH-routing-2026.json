@@ -145,6 +145,13 @@
     }
   },
   "zones": {
+    "9041": {
+      "agency": "OH-RITA",
+      "verifiedOn": "2026-11-12",
+      "sources": [
+        "https://www.ritaohio.com/municipalities/Home/MemberPage?id=872"
+      ]
+    },
     "9003": {
       "agency": "OH-RITA",
       "sources": [
@@ -155,6 +162,481 @@
       "agency": "OH-CCA",
       "sources": [
         "https://www.ccaohio.gov/sites/default/files/2025-12/2026%20Withholding%20Form-i.pdf"
+      ]
+    },
+    "9004": {
+      "agency": "OH-AKRON-JEDD",
+      "verifiedOn": "2026-11-12",
+      "sources": [
+        "https://cms2.revize.com/revize/akronoh/Documents/Departments/Finance/Income%20Tax/JEDD/JEDD%20Business%20Registration.pdf",
+        "https://online.akronohio.gov/"
+      ]
+    },
+    "9014": {
+      "agency": "OH-AKRON-JEDD",
+      "verifiedOn": "2026-11-12",
+      "sources": [
+        "https://cms2.revize.com/revize/akronoh/Documents/Departments/Finance/Income%20Tax/JEDD/JEDD%20Business%20Registration.pdf",
+        "https://online.akronohio.gov/"
+      ]
+    },
+    "9015": {
+      "agency": "OH-AKRON-JEDD",
+      "verifiedOn": "2026-11-12",
+      "sources": [
+        "https://cms2.revize.com/revize/akronoh/Documents/Departments/Finance/Income%20Tax/JEDD/JEDD%20Business%20Registration.pdf",
+        "https://online.akronohio.gov/"
+      ]
+    },
+    "9042": {
+      "agency": "OH-AKRON-JEDD",
+      "verifiedOn": "2026-11-12",
+      "sources": [
+        "https://cms2.revize.com/revize/akronoh/Documents/Departments/Finance/Income%20Tax/JEDD/JEDD%20Business%20Registration.pdf",
+        "https://online.akronohio.gov/"
+      ]
+    },
+    "9080": {
+      "agency": "OH-DAYTON-MIAMI-JEDD",
+      "verifiedOn": "2026-11-13",
+      "sources": [
+        "https://www.daytonohio.gov/261/Joint-Economic-Development-District",
+        "https://www.daytonohio.gov/DocumentCenter/View/2428/MT-DAYTON-JEDD-DW-1---12-2025"
+      ]
+    },
+    "9081": {
+      "agency": "OH-DAYTON-BUTLER-JEDD",
+      "verifiedOn": "2026-11-13",
+      "sources": [
+        "https://www.daytonohio.gov/261/Joint-Economic-Development-District",
+        "https://www.daytonohio.gov/DocumentCenter/View/2429/BT-DAYTON-JEDD-DW-1---9-2016"
+      ]
+    },
+    "9129": {
+      "agency": "OH-JEFFERSON-WASHINGTON-CH-JEDD",
+      "verifiedOn": "2026-11-13",
+      "sources": [
+        "https://www.cityofwch.com/183/Tax-Department",
+        "https://www.cityofwch.com/DocumentCenter/View/2062/2026-JEDD-Employers-Withholding-Quarterly"
+      ]
+    },
+    "9158": {
+      "agency": "OH-RITA",
+      "verifiedOn": "2026-11-13",
+      "administrationStartedOn": "2026-05-01",
+      "collectorCodeStatus": "unverified",
+      "filingNote": "RITA began administering this district on May 1, 2026. Report its withholding separately on Form 11. Select the district by name in MyAccount and confirm its boundary before allocating wages.",
+      "sources": [
+        "https://www.ritaohio.com/Municipalities/Home/MemberPage?id=910",
+        "https://www.ritaohio.com/Media/703129/2026%20FORM%2011%20INSTRL..pdf"
+      ]
+    },
+    "9159": {
+      "agency": "OH-RITA",
+      "verifiedOn": "2026-11-13",
+      "administrationStartedOn": "2026-05-01",
+      "collectorCodeStatus": "unverified",
+      "filingNote": "RITA began administering this district on May 1, 2026. Report its withholding separately on Form 11. Select the district by name in MyAccount and confirm its boundary before allocating wages.",
+      "sources": [
+        "https://www.ritaohio.com/Municipalities/Home/MemberPage?id=911",
+        "https://www.ritaohio.com/Media/703129/2026%20FORM%2011%20INSTRL..pdf"
+      ]
+    },
+    "9160": {
+      "agency": "OH-RITA",
+      "verifiedOn": "2026-11-13",
+      "administrationStartedOn": "2026-05-01",
+      "collectorCodeStatus": "unverified",
+      "filingNote": "RITA began administering this district on May 1, 2026. Report its withholding separately on Form 11. Select the district by name in MyAccount and confirm its boundary before allocating wages.",
+      "sources": [
+        "https://www.ritaohio.com/Municipalities/Home/MemberPage?id=913",
+        "https://www.ritaohio.com/Media/703129/2026%20FORM%2011%20INSTRL..pdf"
+      ]
+    },
+    "9009": {
+      "agency": "OH-RITA",
+      "verifiedOn": "2026-11-13",
+      "administrationStartedOn": "2026-07-01",
+      "collectorCodeStatus": "unverified",
+      "filingNote": "RITA took over July 1, 2026. Confirm earlier periods and amendments with Kent at 330-678-8103. Select the district by name. File monthly by the 15th of the following month if prior-year withholding was at least $2,400 or any month in the preceding quarter exceeded $200. Otherwise file quarterly by the last day of the following month.",
+      "sources": [
+        "https://www.kentohio.gov/living-here/taxes/",
+        "https://ritaohio.com/Municipalities/Home/MemberPage?id=314"
+      ]
+    },
+    "9021": {
+      "agency": "OH-RITA",
+      "verifiedOn": "2026-11-13",
+      "administrationStartedOn": "2026-07-01",
+      "collectorCodeStatus": "unverified",
+      "filingNote": "RITA took over July 1, 2026. Confirm earlier periods and amendments with Kent at 330-678-8103. Select the district by name. File monthly by the 15th of the following month if prior-year withholding was at least $2,400 or any month in the preceding quarter exceeded $200. Otherwise file quarterly by the last day of the following month.",
+      "sources": [
+        "https://www.kentohio.gov/living-here/taxes/",
+        "https://ritaohio.com/Municipalities/Home/MemberPage?id=416"
+      ]
+    },
+    "9097": {
+      "agency": "OH-RITA",
+      "collectorCode": "859",
+      "verifiedOn": "2026-11-13",
+      "sources": [
+        "https://www.ritaohio.com/Municipalities/Home/MemberPage?id=859",
+        "https://service.ritaohio.com/Business/Tax%20Rates%20Table.pdf"
+      ]
+    },
+    "9005": {
+      "agency": "OH-RITA",
+      "collectorCode": "051",
+      "verifiedOn": "2026-11-13",
+      "sources": [
+        "https://www.ritaohio.com/Municipalities/Home/MemberPage?id=051",
+        "https://service.ritaohio.com/Business/Tax%20Rates%20Table.pdf",
+        "https://dam.assets.ohio.gov/image/upload/tax.ohio.gov/muni-net-profit/ascii%20and%20xml/ASCII%20Instructions%207.19.23.pdf"
+      ]
+    },
+    "9006": {
+      "agency": "OH-RITA",
+      "collectorCode": "052",
+      "verifiedOn": "2026-11-13",
+      "sources": [
+        "https://www.ritaohio.com/Municipalities/Home/MemberPage?id=052",
+        "https://service.ritaohio.com/Business/Tax%20Rates%20Table.pdf",
+        "https://dam.assets.ohio.gov/image/upload/tax.ohio.gov/muni-net-profit/ascii%20and%20xml/ASCII%20Instructions%207.19.23.pdf"
+      ]
+    },
+    "9016": {
+      "agency": "OH-RITA",
+      "collectorCode": "292",
+      "verifiedOn": "2026-11-13",
+      "sources": [
+        "https://www.ritaohio.com/Municipalities/Home/MemberPage?id=292",
+        "https://service.ritaohio.com/Business/Tax_Rates_Table.pdf",
+        "https://dam.assets.ohio.gov/image/upload/v1741618460/tax.ohio.gov/muni-net-profit/municipal.tax.rate-3.7.25.pdf"
+      ]
+    },
+    "9017": {
+      "agency": "OH-RITA",
+      "collectorCode": "282",
+      "verifiedOn": "2026-11-13",
+      "sources": [
+        "https://www.ritaohio.com/Municipalities/Home/MemberPage?id=282",
+        "https://service.ritaohio.com/Business/Tax_Rates_Table.pdf",
+        "https://dam.assets.ohio.gov/image/upload/v1741618460/tax.ohio.gov/muni-net-profit/municipal.tax.rate-3.7.25.pdf"
+      ]
+    },
+    "9057": {
+      "agency": "OH-KENWOOD-MADEIRA",
+      "verifiedOn": "2026-11-13",
+      "sources": [
+        "https://sycamoretownship.org/township-government/economic-development/jedz/",
+        "https://cms2.revize.com/revize/madeiraoh/Tax%20Department/JEDZ%20Forms/Business%20Forms/Business%20Questionnaire.pdf"
+      ]
+    },
+    "9058": {
+      "agency": "OH-KENWOOD-MADEIRA",
+      "verifiedOn": "2026-11-13",
+      "sources": [
+        "https://sycamoretownship.org/township-government/economic-development/jedz/",
+        "https://cms2.revize.com/revize/madeiraoh/Tax%20Department/JEDZ%20Forms/Business%20Forms/Business%20Questionnaire.pdf"
+      ]
+    },
+    "9059": {
+      "agency": "OH-KENWOOD-NORTHWEST",
+      "verifiedOn": "2026-11-13",
+      "sources": [
+        "https://sycamoretownship.org/township-government/economic-development/jedz/",
+        "https://www.deerpark-oh.gov/departments/tax-department/jedz-jedd-tax-information/"
+      ]
+    },
+    "9060": {
+      "agency": "OH-KENWOOD-SOUTHWEST",
+      "verifiedOn": "2026-11-13",
+      "sources": [
+        "https://sycamoretownship.org/township-government/economic-development/jedz/",
+        "https://amberleyvillage.org/departments/tax/joint_economic_development_zone_jedz.php"
+      ]
+    },
+    "9138": {
+      "agency": "OH-DEER-PARK-SYCAMORE-JEDD",
+      "verifiedOn": "2026-11-13",
+      "sources": [
+        "https://www.deerpark-oh.gov/departments/tax-department/jedz-jedd-tax-information/",
+        "https://www.sycamoretownship.org/economic-development"
+      ]
+    },
+    "9049": {
+      "agency": "OH-ETNA-NORTH",
+      "verifiedOn": "2026-11-13",
+      "sources": [
+        "https://www.newarkohio.gov/economic-development/",
+        "https://www.newarkohio.gov/wp-content/uploads/26QZN-PAPER.pdf"
+      ]
+    },
+    "9050": {
+      "agency": "OH-ETNA-SOUTH",
+      "verifiedOn": "2026-11-13",
+      "sources": [
+        "https://www.newarkohio.gov/economic-development/",
+        "https://www.newarkohio.gov/wp-content/uploads/26MZS-Paper.pdf"
+      ]
+    },
+    "9034": {
+      "agency": "OH-PATASKALA-JEDD",
+      "verifiedOn": "2026-11-13",
+      "sources": [
+        "https://www.newarkohio.gov/economic-development/",
+        "https://www.newarkohio.gov/wp-content/uploads/26QD-PAPER.pdf"
+      ]
+    },
+    "9053": {
+      "agency": "OH-MMT-JEDZ",
+      "verifiedOn": "2026-11-13",
+      "sources": [
+        "https://www.maumee.org/DocumentCenter/View/952/MMT-JEDZ-Employer-Return-of-Tax-Withheld--2019-and-After-PDF",
+        "https://www.maumee.org/DocumentCenter/View/973/Income-Tax-Resolution-for-the-Toledo-Maumee-Monclova-Joint-Economic-Development-Zone-Board-PDF"
+      ]
+    },
+    "9065": {
+      "agency": "OH-TOLEDO-TEA-JEDD",
+      "verifiedOn": "2026-11-13",
+      "sources": [
+        "https://toledo.oh.gov/pay-taxes/joint-economic-development-district-jedd",
+        "https://cdn.toledo.oh.gov/uploads/documents/Finance/Taxation-and-Treasury/JEDD/2026-TEA-Quarterly-Withholding-Packet-fillable.pdf"
+      ]
+    },
+    "9067": {
+      "agency": "OH-TOLEDO-TROY-JEDD",
+      "verifiedOn": "2026-11-13",
+      "sources": [
+        "https://toledo.oh.gov/pay-taxes/joint-economic-development-district-jedd",
+        "https://cdn.toledo.oh.gov/uploads/documents/Finance/Taxation-and-Treasury/JEDD/2026-TROY-Quarterly-Withholding-Packet-fillable.pdf"
+      ]
+    },
+    "9031": {
+      "agency": "OH-COLUMBUS-JEDD",
+      "collectorCode": "20",
+      "verifiedOn": "2026-11-13",
+      "sources": [
+        "https://www.columbus.gov/Government/City-Auditor/Income-Tax-Division/Tax-Forms/JEDD-JEDZ-Tax-Forms",
+        "https://www.columbus.gov/files/sharedassets/city/v/1/city-auditor/tax-forms/jedd/2026-it-11j_readerext.pdf"
+      ]
+    },
+    "9036": {
+      "agency": "OH-COLUMBUS-JEDD",
+      "collectorCode": "22",
+      "verifiedOn": "2026-11-13",
+      "sources": [
+        "https://www.columbus.gov/Government/City-Auditor/Income-Tax-Division/Tax-Forms/JEDD-JEDZ-Tax-Forms",
+        "https://www.columbus.gov/files/sharedassets/city/v/1/city-auditor/tax-forms/jedd/2026-it-11j_readerext.pdf"
+      ]
+    },
+    "9077": {
+      "agency": "OH-COLUMBUS-JEDD",
+      "collectorCode": "24",
+      "verifiedOn": "2026-11-13",
+      "sources": [
+        "https://www.columbus.gov/Government/City-Auditor/Income-Tax-Division/Tax-Forms/JEDD-JEDZ-Tax-Forms",
+        "https://www.columbus.gov/files/sharedassets/city/v/1/city-auditor/tax-forms/jedd/2026-it-11j_readerext.pdf"
+      ]
+    },
+    "9007": {
+      "agency": "OH-BERKSHIRE-JEDD",
+      "verifiedOn": "2026-11-13",
+      "sources": [
+        "https://www.delawareohio.net/government/departments/income-tax/berkshire-jedd/employers",
+        "https://www.cityofdelawareoh.gov/files/assets/city/v/1/income-tax/documents/2026-jedd-employer-monthly-withholding-return-and-reconciliation-fill-in.pdf"
+      ]
+    },
+    "9139": {
+      "agency": "OH-BERKSHIRE-JEDD",
+      "verifiedOn": "2026-11-13",
+      "sources": [
+        "https://www.delawareohio.net/government/departments/income-tax/berkshire-jedd/employers",
+        "https://www.cityofdelawareoh.gov/files/assets/city/v/1/income-tax/documents/2026-jedd-employer-monthly-withholding-return-and-reconciliation-fill-in.pdf"
+      ]
+    },
+    "9107": {
+      "agency": "OH-CANTON-JEDD",
+      "collectorCode": "11-001",
+      "verifiedOn": "2026-11-13",
+      "sources": [
+        "https://www.cantonohio.gov/749/Joint-Economic-Development-Districts-JED"
+      ]
+    },
+    "9106": {
+      "agency": "OH-CANTON-JEDD",
+      "collectorCode": "16-001",
+      "verifiedOn": "2026-11-13",
+      "sources": [
+        "https://www.cantonohio.gov/749/Joint-Economic-Development-Districts-JED"
+      ]
+    },
+    "9105": {
+      "agency": "OH-CANTON-JEDD",
+      "collectorCode": "17-001",
+      "verifiedOn": "2026-11-13",
+      "sources": [
+        "https://www.cantonohio.gov/749/Joint-Economic-Development-Districts-JED"
+      ]
+    },
+    "9109": {
+      "agency": "OH-CANTON-JEDD",
+      "collectorCode": "18-001",
+      "verifiedOn": "2026-11-13",
+      "sources": [
+        "https://www.cantonohio.gov/749/Joint-Economic-Development-Districts-JED"
+      ]
+    },
+    "9119": {
+      "agency": "OH-CANTON-JEDD",
+      "collectorCode": "19-001",
+      "verifiedOn": "2026-11-13",
+      "sources": [
+        "https://www.cantonohio.gov/749/Joint-Economic-Development-Districts-JED"
+      ]
+    },
+    "9120": {
+      "agency": "OH-CANTON-JEDD",
+      "collectorCode": "19-002",
+      "verifiedOn": "2026-11-13",
+      "sources": [
+        "https://www.cantonohio.gov/749/Joint-Economic-Development-Districts-JED"
+      ]
+    },
+    "9131": {
+      "agency": "OH-CANTON-JEDD",
+      "collectorCode": "22-001",
+      "verifiedOn": "2026-11-13",
+      "sources": [
+        "https://www.cantonohio.gov/749/Joint-Economic-Development-Districts-JED"
+      ]
+    },
+    "9091": {
+      "agency": "OH-CHEVIOT-JEDD",
+      "verifiedOn": "2026-11-13",
+      "sources": [
+        "https://cheviot.org/departments/tax/",
+        "https://cheviot.org/wp-content/uploads/2025/12/Western-Ridge-JEDD.pdf"
+      ]
+    },
+    "9101": {
+      "agency": "OH-CHEVIOT-JEDD",
+      "verifiedOn": "2026-11-13",
+      "sources": [
+        "https://cheviot.org/departments/tax/",
+        "https://cheviot.org/wp-content/uploads/2025/12/Christ-Childrens-JEDD-II.pdf"
+      ]
+    },
+    "9098": {
+      "agency": "OH-CHEVIOT-JEDD",
+      "verifiedOn": "2026-11-13",
+      "sources": [
+        "https://cheviot.org/departments/tax/",
+        "https://cheviot.org/wp-content/uploads/2025/12/MERCY-WEST-JEDD-III.pdf"
+      ]
+    },
+    "9089": {
+      "agency": "OH-CHEVIOT-JEDD",
+      "verifiedOn": "2026-11-13",
+      "sources": [
+        "https://cheviot.org/departments/tax/",
+        "https://cheviot.org/wp-content/uploads/2025/12/Harrison-Greene-JEDD.pdf"
+      ]
+    },
+    "9090": {
+      "agency": "OH-CHEVIOT-JEDD",
+      "verifiedOn": "2026-11-13",
+      "sources": [
+        "https://cheviot.org/departments/tax/",
+        "https://cheviot.org/wp-content/uploads/2025/12/UDF-JEDD.pdf"
+      ]
+    },
+    "9113": {
+      "agency": "OH-CHEVIOT-JEDD",
+      "verifiedOn": "2026-11-13",
+      "sources": [
+        "https://cheviot.org/departments/tax/",
+        "https://cheviot.org/wp-content/uploads/2025/12/McAlisters-JEDD.pdf"
+      ]
+    },
+    "9135": {
+      "agency": "OH-CHEVIOT-JEDD",
+      "verifiedOn": "2026-11-13",
+      "sources": [
+        "https://cheviot.org/departments/tax/",
+        "https://cheviot.org/wp-content/uploads/2025/12/Hampton-Inn-JEDD-VII.pdf"
+      ]
+    },
+    "9153": {
+      "agency": "OH-CHEVIOT-JEDD",
+      "verifiedOn": "2026-11-13",
+      "sources": [
+        "https://cheviot.org/departments/tax/",
+        "https://cheviot.org/wp-content/uploads/2026/01/Coopers-Hawk-JEDD.pdf"
+      ]
+    },
+    "9103": {
+      "agency": "OH-CHEVIOT-JEDD",
+      "verifiedOn": "2026-11-13",
+      "sources": [
+        "https://cheviot.org/departments/tax/",
+        "https://cheviot.org/wp-content/uploads/2025/12/Liberty-Nursing-Care-JEDD.pdf"
+      ]
+    },
+    "9083": {
+      "agency": "OH-HARPERSFIELD-GENEVA-JEDD",
+      "verifiedOn": "2026-11-13",
+      "sources": [
+        "https://genevaohio.gov/wp-content/uploads/2023/05/Harpersfield-Geneva-Jedd-Tax-Return-1.pdf",
+        "https://genevaohio.gov/wp-content/uploads/2023/05/JEDD-Year-End-Reconciliation.pdf"
+      ]
+    },
+    "9084": {
+      "agency": "OH-HARPERSFIELD-GENEVA-JEDD",
+      "verifiedOn": "2026-11-13",
+      "sources": [
+        "https://genevaohio.gov/wp-content/uploads/2023/05/Harpersfield-Geneva-Jedd-Tax-Return-1.pdf",
+        "https://genevaohio.gov/wp-content/uploads/2023/05/JEDD-Year-End-Reconciliation.pdf"
+      ]
+    },
+    "9092": {
+      "agency": "OH-HARPERSFIELD-GENEVA-JEDD",
+      "verifiedOn": "2026-11-13",
+      "sources": [
+        "https://genevaohio.gov/wp-content/uploads/2023/05/Harpersfield-Geneva-Jedd-Tax-Return-1.pdf",
+        "https://genevaohio.gov/wp-content/uploads/2023/05/JEDD-Year-End-Reconciliation.pdf"
+      ]
+    },
+    "9137": {
+      "agency": "OH-FAIRFIELD-TOWNSHIP-JEDD",
+      "sources": [
+        "https://www.fairfield-city.org/270/Joint-Economic-Development-Districts-JED",
+        "https://www.fairfield-city.org/DocumentCenter/View/17053/2026-FF-JEDD-Quarterly-Withholding"
+      ],
+      "verifiedOn": "2026-11-13"
+    },
+    "9044": {
+      "agency": "OH-WEST-CHESTER-JEDD",
+      "sources": [
+        "https://www.fairfield-city.org/270/Joint-Economic-Development-Districts-JED",
+        "https://www.fairfield-city.org/DocumentCenter/View/17044/2026-WC-JEDD-Quarterly-Withholding"
+      ],
+      "verifiedOn": "2026-11-13"
+    },
+    "9096": {
+      "agency": "OH-TURTLECREEK-MONROE-JEDD",
+      "verifiedOn": "2026-11-13",
+      "sources": [
+        "https://www.monroeohio.org/214/Income-Tax",
+        "https://monroeohio.org/DocumentCenter/View/2861/Final-2024-ACFR"
+      ]
+    },
+    "9136": {
+      "agency": "OH-TURTLECREEK-MONROE-JEDD",
+      "verifiedOn": "2026-11-13",
+      "sources": [
+        "https://www.monroeohio.org/214/Income-Tax",
+        "https://monroeohio.org/DocumentCenter/View/2861/Final-2024-ACFR"
       ]
     }
   },
@@ -575,6 +1057,7 @@
         "9008": "117",
         "9010": "137",
         "9012": "151",
+        "9041": "872",
         "9047": "293",
         "9033": "581",
         "9086": "135",
