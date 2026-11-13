@@ -323,6 +323,38 @@
         "https://service.ritaohio.com/Business/Tax_Rates_Table.pdf",
         "https://dam.assets.ohio.gov/image/upload/v1741618460/tax.ohio.gov/muni-net-profit/municipal.tax.rate-3.7.25.pdf"
       ]
+    },
+    "9057": {
+      "agency": "OH-KENWOOD-MADEIRA",
+      "verifiedOn": "2026-11-13",
+      "sources": [
+        "https://sycamoretownship.org/township-government/economic-development/jedz/",
+        "https://cms2.revize.com/revize/madeiraoh/Tax%20Department/JEDZ%20Forms/Business%20Forms/Business%20Questionnaire.pdf"
+      ]
+    },
+    "9058": {
+      "agency": "OH-KENWOOD-MADEIRA",
+      "verifiedOn": "2026-11-13",
+      "sources": [
+        "https://sycamoretownship.org/township-government/economic-development/jedz/",
+        "https://cms2.revize.com/revize/madeiraoh/Tax%20Department/JEDZ%20Forms/Business%20Forms/Business%20Questionnaire.pdf"
+      ]
+    },
+    "9059": {
+      "agency": "OH-KENWOOD-NORTHWEST",
+      "verifiedOn": "2026-11-13",
+      "sources": [
+        "https://sycamoretownship.org/township-government/economic-development/jedz/",
+        "https://www.deerpark-oh.gov/departments/tax-department/jedz-jedd-tax-information/"
+      ]
+    },
+    "9060": {
+      "agency": "OH-KENWOOD-SOUTHWEST",
+      "verifiedOn": "2026-11-13",
+      "sources": [
+        "https://sycamoretownship.org/township-government/economic-development/jedz/",
+        "https://amberleyvillage.org/departments/tax/joint_economic_development_zone_jedz.php"
+      ]
     }
   },
   "rosters": {

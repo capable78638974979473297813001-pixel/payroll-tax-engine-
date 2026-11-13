@@ -533,3 +533,18 @@ test('Eaton and Elyria township districts route separately from Elyria city', ()
   }
   assert.equal(localWithholdingGuide('OH-municipality', '25256', 2026).collectorCode, '277');
 });
+
+test('Kenwood JEDZ worksites select the appropriate employer registration and forms', () => {
+  for (const [id, agency, form] of [
+    ['9057', 'OH-KENWOOD-MADEIRA', 'JEDZ employer withholding'],
+    ['9058', 'OH-KENWOOD-MADEIRA', 'JEDZ employer withholding'],
+    ['9059', 'OH-KENWOOD-NORTHWEST', 'JEDZ Withholding Payments Form'],
+    ['9060', 'OH-KENWOOD-SOUTHWEST', 'JEDZ withholding remittance'],
+  ]) {
+    const result = localWithholdingGuide('OH-jedd-jedz', id, 2026);
+    assert.equal(result.agency, agency);
+    assert.equal(result.guide.returns[0][0], form);
+    assert.match(result.guide.returns[1][1], /March 1, 2027/);
+  }
+  assert.notEqual(localWithholdingGuide('OH-jedd-jedz', '9138', 2026).agency, 'OH-KENWOOD-NORTHWEST');
+});

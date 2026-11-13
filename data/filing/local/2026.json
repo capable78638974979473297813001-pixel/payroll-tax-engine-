@@ -1543,5 +1543,76 @@
       "https://codes.ohio.gov/ohio-revised-code/section-1.14"
     ],
     "verifiedOn": "2026-11-13"
+  },
+  "OH-KENWOOD-MADEIRA": {
+    "collector": "City of Madeira for Sycamore Township Kenwood Central and East JEDZs",
+    "registration": "Return the Sycamore Township JEDZ Business Questionnaire within 10 days of starting business. Identify the worksite, FEIN and payroll contact. Madeira accepts the questionnaire by email or fax as printed on the form.",
+    "returns": [
+      [
+        "JEDZ employer withholding",
+        "The district registration form instructs employers to pay monthly. Monthly remittance is due by the 15th of the following month. Confirm any different assigned frequency with Madeira."
+      ],
+      [
+        "Annual employer withholding reconciliation",
+        "Reconcile 2026 district withholding by March 1, 2027. Request the employer reconciliation and W-2 submission instructions from Madeira."
+      ]
+    ],
+    "filing": "Identify Central or East using the township worksite address list and map. Request the district withholding return from Madeira at 513-272-4212.",
+    "payment": "Remit to the Sycamore Township JEDZ account administered by Madeira. Confirm the payment method and district account reference with the tax office at 513-272-4212 before the first payment.",
+    "sources": [
+      "https://sycamoretownship.org/township-government/economic-development/jedz/",
+      "https://cms2.revize.com/revize/madeiraoh/Tax%20Department/JEDZ%20Forms/Business%20Forms/Business%20Questionnaire.pdf",
+      "https://codes.ohio.gov/ohio-revised-code/section-718.03",
+      "https://codes.ohio.gov/ohio-revised-code/section-1.14"
+    ],
+    "verifiedOn": "2026-11-13"
+  },
+  "OH-KENWOOD-NORTHWEST": {
+    "collector": "City of Deer Park for Sycamore Township Kenwood Northwest JEDZ",
+    "registration": "Use the Northwest JEDZ New Employer Withholding Account Registration Form on the Deer Park district forms page.",
+    "returns": [
+      [
+        "JEDZ Withholding Payments Form",
+        "Monthly payments are due by the 15th of the following month when prior-year withholding exceeded $2,399 or any month of the preceding quarter exceeded $200. Include withholding required as well as amounts withheld. Otherwise pay quarterly by the last day of the following month, subject to the assigned schedule."
+      ],
+      [
+        "JEDZ Year-End Reconciliation Form",
+        "Reconcile 2026 withholding by March 1, 2027. Use the Northwest JEDZ reconciliation."
+      ]
+    ],
+    "filing": "Verify the worksite against the Northwest address list. File with Deer Park using the JEDZ forms. The same page also lists separate Kenwood JEDD forms.",
+    "payment": "Remit with the JEDZ Withholding Payments Form using the district account. Confirm electronic payment instructions with Deer Park before sending an electronic payment.",
+    "sources": [
+      "https://sycamoretownship.org/township-government/economic-development/jedz/",
+      "https://www.deerpark-oh.gov/departments/tax-department/jedz-jedd-tax-information/",
+      "https://www.deerpark-oh.gov/departments/tax-department/due-dates/",
+      "https://codes.ohio.gov/ohio-revised-code/section-718.03",
+      "https://codes.ohio.gov/ohio-revised-code/section-1.14"
+    ],
+    "verifiedOn": "2026-11-13"
+  },
+  "OH-KENWOOD-SOUTHWEST": {
+    "collector": "Amberley Village for Sycamore Township Kenwood Southwest JEDZ",
+    "registration": "Complete the district Business Questionnaire. If Amberley sends a registration letter, return the questionnaire within 10 days of receipt.",
+    "returns": [
+      [
+        "JEDZ withholding remittance",
+        "Monthly payments are due by the 15th of the following month when prior-year withholding exceeded $2,399 or any month of the preceding quarter exceeded $200. Include withholding required as well as amounts withheld. Otherwise pay quarterly by the last day of the following month, subject to the assigned schedule."
+      ],
+      [
+        "JEDZ Employer Withholding Reconciliation",
+        "Reconcile 2026 withholding by March 1, 2027. Attach district employee W-2s. Include a written explanation when Medicare wages are below another wage box."
+      ]
+    ],
+    "filing": "File district forms with Kenwood Southwest JEDZ, c/o Amberley Village, 7149 Ridge Rd, Cincinnati, OH 45237. Check the district address list and its two property exemptions.",
+    "payment": "Submit the remittance to the Southwest JEDZ account through Amberley. The district page provides the quarterly withholding form. Monthly filers should obtain their payment instructions from the tax office at 513-531-0130.",
+    "sources": [
+      "https://sycamoretownship.org/township-government/economic-development/jedz/",
+      "https://amberleyvillage.org/departments/tax/joint_economic_development_zone_jedz.php",
+      "https://www.amberleyvillage.org/sites/g/files/vyhlif8491/f/uploads/jedz-business-letter.pdf",
+      "https://codes.ohio.gov/ohio-revised-code/section-718.03",
+      "https://codes.ohio.gov/ohio-revised-code/section-1.14"
+    ],
+    "verifiedOn": "2026-11-13"
   }
 }
