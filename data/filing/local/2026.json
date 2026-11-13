@@ -1739,5 +1739,49 @@
       "https://codes.ohio.gov/ohio-revised-code/section-1.14"
     ],
     "verifiedOn": "2026-11-13"
+  },
+  "OH-TOLEDO-TEA-JEDD": {
+    "collector": "City of Toledo Division of Taxation for the Toledo Express Airport JEDD",
+    "registration": "Submit the Toledo New Business Registration Form to the Division of Taxation with the district worksite, payroll name and FEIN. Obtain the TEA JEDD account number used on the district coupons.",
+    "returns": [
+      [
+        "TEA JEDD withholding coupons",
+        "File monthly when withholding or required withholding exceeded $2,399 in the prior year or $200 in any month of the preceding quarter. Monthly payments are due by the 15th of the following month. Other accounts file quarterly. The 2026 coupons list April 30, July 31, November 2 and February 1, 2027. The booklet also gives a 30-day postmark rule. If that would produce an earlier date, confirm the deadline with Toledo before that date."
+      ],
+      [
+        "TEA JEDD W-3",
+        "Reconcile 2026 district wages and withholding by March 1, 2027. Include employee W-2s with other municipal withholding. Use the W-3 headed Toledo Express Airport-Toledo JEDD."
+      ]
+    ],
+    "filing": "Enter the TEA JEDD account and FEIN on district coupons. For the annual filing, submit the district W-3 with paper W-2s or upload wage data in EFW2 text format. Use the district worksheet for workplace wages.",
+    "payment": "Pay through the Ohio Business Gateway using the district account. If the commissioner requires EFT for a federal electronic depositor, ensure the payment is credited by the deadline. For paper deposits, mail a check or money order payable to Commissioner of Taxation with the coupon to PO Box 632014, Cincinnati, OH 45263-2014. Send deposit coupons without payment to PO Box 929, Toledo, OH 43697-0929.",
+    "sources": [
+      "https://toledo.oh.gov/pay-taxes/joint-economic-development-district-jedd",
+      "https://cdn.toledo.oh.gov/uploads/documents/Finance/Taxation-and-Treasury/JEDD/2026-TEA-Quarterly-Withholding-Packet-fillable.pdf",
+      "https://cdn.toledo.oh.gov/uploads/documents/Finance/Taxation-and-Treasury/JEDD/New-Business-Registration-Form-REVISED-11-2023.pdf"
+    ],
+    "verifiedOn": "2026-11-13"
+  },
+  "OH-TOLEDO-TROY-JEDD": {
+    "collector": "City of Toledo Division of Taxation for the Troy Township JEDD",
+    "registration": "Submit the Toledo New Business Registration Form to the Division of Taxation with the district worksite, payroll name and FEIN. Obtain the TROY JEDD account number used on the district coupons.",
+    "returns": [
+      [
+        "TROY JEDD withholding coupons",
+        "File monthly when withholding or required withholding exceeded $2,399 in the prior year or $200 in any month of the preceding quarter. Monthly payments are due by the 15th of the following month. Other accounts file quarterly. The 2026 coupons list April 30, July 31, November 2 and February 1, 2027. The booklet also gives a 30-day postmark rule. If that would produce an earlier date, confirm the deadline with Toledo before that date."
+      ],
+      [
+        "TROY JEDD W-3",
+        "Reconcile 2026 district wages and withholding by March 1, 2027. Include employee W-2s with other municipal withholding. Use the W-3 headed Troy Township-Toledo JEDD."
+      ]
+    ],
+    "filing": "Enter the TROY JEDD account and FEIN on district coupons. For the annual filing, submit the district W-3 with paper W-2s or upload wage data in EFW2 text format. Use the district worksheet for workplace wages.",
+    "payment": "Pay through the Ohio Business Gateway using the district account. If the commissioner requires EFT for a federal electronic depositor, ensure the payment is credited by the deadline. For paper deposits, mail a check or money order payable to Commissioner of Taxation with the coupon to PO Box 632014, Cincinnati, OH 45263-2014. Send deposit coupons without payment to PO Box 929, Toledo, OH 43697-0929.",
+    "sources": [
+      "https://toledo.oh.gov/pay-taxes/joint-economic-development-district-jedd",
+      "https://cdn.toledo.oh.gov/uploads/documents/Finance/Taxation-and-Treasury/JEDD/2026-TROY-Quarterly-Withholding-Packet-fillable.pdf",
+      "https://cdn.toledo.oh.gov/uploads/documents/Finance/Taxation-and-Treasury/JEDD/New-Business-Registration-Form-REVISED-11-2023.pdf"
+    ],
+    "verifiedOn": "2026-11-13"
   }
 }

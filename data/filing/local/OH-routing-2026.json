@@ -395,6 +395,22 @@
         "https://www.maumee.org/DocumentCenter/View/952/MMT-JEDZ-Employer-Return-of-Tax-Withheld--2019-and-After-PDF",
         "https://www.maumee.org/DocumentCenter/View/973/Income-Tax-Resolution-for-the-Toledo-Maumee-Monclova-Joint-Economic-Development-Zone-Board-PDF"
       ]
+    },
+    "9065": {
+      "agency": "OH-TOLEDO-TEA-JEDD",
+      "verifiedOn": "2026-11-13",
+      "sources": [
+        "https://toledo.oh.gov/pay-taxes/joint-economic-development-district-jedd",
+        "https://cdn.toledo.oh.gov/uploads/documents/Finance/Taxation-and-Treasury/JEDD/2026-TEA-Quarterly-Withholding-Packet-fillable.pdf"
+      ]
+    },
+    "9067": {
+      "agency": "OH-TOLEDO-TROY-JEDD",
+      "verifiedOn": "2026-11-13",
+      "sources": [
+        "https://toledo.oh.gov/pay-taxes/joint-economic-development-district-jedd",
+        "https://cdn.toledo.oh.gov/uploads/documents/Finance/Taxation-and-Treasury/JEDD/2026-TROY-Quarterly-Withholding-Packet-fillable.pdf"
+      ]
     }
   },
   "rosters": {

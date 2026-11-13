@@ -581,3 +581,14 @@ test('Monclova-Maumee-Toledo selects its zone return and payroll-agent EFT rule'
   assert.match(district.guide.returns[1][1], /March 1, 2027/);
   assert.notEqual(localWithholdingGuide('OH-jedd-jedz', '9065', 2026).agency, district.agency);
 });
+
+test('Toledo Express Airport and Troy Township use distinct JEDD accounts and W-3s', () => {
+  for (const [zone, prefix] of [['9065', 'TEA'], ['9067', 'TROY']]) {
+    const result = localWithholdingGuide('OH-jedd-jedz', zone, 2026);
+    assert.equal(result.agency, 'OH-TOLEDO-' + prefix + '-JEDD');
+    assert.equal(result.guide.returns[1][0], prefix + ' JEDD W-3');
+    assert.match(result.guide.returns[1][1], /March 1, 2027/);
+    assert.match(result.guide.returns[0][1], /30-day postmark rule/);
+  }
+  assert.equal(localWithholdingGuide('OH-municipality', '77000', 2026).agency, 'OH-TOLEDO');
+});
