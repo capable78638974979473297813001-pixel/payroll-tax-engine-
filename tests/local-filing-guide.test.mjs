@@ -32,6 +32,8 @@ test('regional Ohio collectors use the registry; residual and ambiguous cities r
       assert.equal(result.agency, 'OH-CINCINNATI');
     } else if (row.municode === '18000') {
       assert.equal(result.agency, 'OH-COLUMBUS');
+    } else if (row.municode === '21000') {
+      assert.equal(result.agency, 'OH-DAYTON');
     } else if (row.municode === '21616') {
       assert.equal(result.agency, 'OH-DELTA');
     } else if (row.municode === '77000') {
@@ -395,4 +397,14 @@ test('Toledo city coupons and W-3 use the 2026 packet deadlines', () => {
   assert.equal(result.guide.returns[1][0], 'W-3');
   assert.match(result.guide.returns[1][1], /March 1, 2027/);
   assert.notEqual(localWithholdingGuide('OH-jedd-jedz', '9065', 2026).agency, result.agency);
+});
+
+test('Dayton city withholding and the two township JEDDs use distinct routes', () => {
+  const result = localWithholdingGuide('OH-municipality', '21000', 2026);
+  assert.equal(result.jurisdiction, 'Dayton');
+  assert.equal(result.guide.returns[0][0], 'DW-1');
+  assert.match(result.guide.returns[1][1], /March 1, 2027/);
+  for (const district of ['9080', '9081']) {
+    assert.notEqual(localWithholdingGuide('OH-jedd-jedz', district, 2026).agency, result.agency);
+  }
 });

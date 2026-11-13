@@ -1366,5 +1366,31 @@
       "https://toledo.oh.gov/pay-taxes/faq"
     ],
     "verifiedOn": "2026-11-12"
+  },
+  "OH-DAYTON": {
+    "collector": "City of Dayton Finance Department",
+    "registration": "Mail or fax the New Business Questionnaire. Select Employee Withholding and Dayton City Limits and supply the FEIN. For eBill enrollment, request the existing city withholding account number from the tax office.",
+    "returns": [
+      [
+        "DW-1",
+        "Monthly returns and payments are due on the 15th of the following month. Quarterly returns and payments are due by the last day of the following month. Dayton lists monthly filing above $2,399 last year or $600 last quarter. Ohio law also requires monthly remittance if withholding or required withholding exceeded $200 in any month of the preceding quarter, even if the quarter totaled $600 or less. Confirm the account schedule with Dayton if these tests differ."
+      ],
+      [
+        "DW-3",
+        "Reconcile 2026 withholding by March 1, 2027 under the Ohio Sunday rule. Include W-2s or an equivalent listing and applicable 1099-MISC and 1099-NEC copies. Pay any balance separately."
+      ]
+    ],
+    "filing": "Use the city DW-1 for Dayton wages. Submit zero returns through the city zero-withholding portal. Mail DW-3 to the address on the form. For more than 100 employees, confirm the 2026 electronic media specifications with Dayton because its forms page currently lists 2025 specifications.",
+    "payment": "Use eBill, bank-initiated ACH or Ohio Business Gateway. The city payment portal excludes paper checks and credit cards.",
+    "sources": [
+      "https://daytonohio.gov/279/Tax-Forms",
+      "https://www.daytonohio.gov/DocumentCenter/View/2427/City-of-Dayton-DW-1---12-2016",
+      "https://www.daytonohio.gov/DocumentCenter/View/2432/New-Business-Questionnaire-Rev-2-2016",
+      "https://www.daytonohio.gov/DocumentCenter/View/615/DW-3-Annual-Reconciliation-PDF",
+      "https://tax.daytonohio.gov/",
+      "https://codes.ohio.gov/ohio-revised-code/section-718.03",
+      "https://codes.ohio.gov/ohio-revised-code/section-1.14"
+    ],
+    "verifiedOn": "2026-11-12"
   }
 }

@@ -120,6 +120,13 @@
         "https://www.ritaohio.com/Municipalities/Home/MemberPage?id=258",
         "https://villageofdelta.org/1209/Income-Tax"
       ]
+    },
+    "21000": {
+      "agency": "OH-DAYTON",
+      "verifiedOn": "2026-11-12",
+      "sources": [
+        "https://www.daytonohio.gov/DocumentCenter/View/2427/City-of-Dayton-DW-1---12-2016"
+      ]
     }
   },
   "zones": {
