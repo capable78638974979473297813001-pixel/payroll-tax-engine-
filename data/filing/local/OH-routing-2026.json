@@ -163,6 +163,38 @@
       "sources": [
         "https://www.ccaohio.gov/sites/default/files/2025-12/2026%20Withholding%20Form-i.pdf"
       ]
+    },
+    "9004": {
+      "agency": "OH-AKRON-JEDD",
+      "verifiedOn": "2026-11-12",
+      "sources": [
+        "https://cms2.revize.com/revize/akronoh/Documents/Departments/Finance/Income%20Tax/JEDD/JEDD%20Business%20Registration.pdf",
+        "https://online.akronohio.gov/"
+      ]
+    },
+    "9014": {
+      "agency": "OH-AKRON-JEDD",
+      "verifiedOn": "2026-11-12",
+      "sources": [
+        "https://cms2.revize.com/revize/akronoh/Documents/Departments/Finance/Income%20Tax/JEDD/JEDD%20Business%20Registration.pdf",
+        "https://online.akronohio.gov/"
+      ]
+    },
+    "9015": {
+      "agency": "OH-AKRON-JEDD",
+      "verifiedOn": "2026-11-12",
+      "sources": [
+        "https://cms2.revize.com/revize/akronoh/Documents/Departments/Finance/Income%20Tax/JEDD/JEDD%20Business%20Registration.pdf",
+        "https://online.akronohio.gov/"
+      ]
+    },
+    "9042": {
+      "agency": "OH-AKRON-JEDD",
+      "verifiedOn": "2026-11-12",
+      "sources": [
+        "https://cms2.revize.com/revize/akronoh/Documents/Departments/Finance/Income%20Tax/JEDD/JEDD%20Business%20Registration.pdf",
+        "https://online.akronohio.gov/"
+      ]
     }
   },
   "rosters": {

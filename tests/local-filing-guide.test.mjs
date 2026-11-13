@@ -97,7 +97,9 @@ test('Ohio zones resolve by Finder zone ID, with explicit gaps', () => {
     const result = localWithholdingGuide('OH-jedd-jedz', zone.jeddId, 2026);
     assert.equal(result.jurisdiction, zone.name);
     if (result.status === 'guide') {
-      assert.match(result.collectorCode, /^\d{3}$/);
+      if (['OH-RITA', 'OH-CCA'].includes(result.agency)) {
+        assert.match(result.collectorCode, /^\d{3}$/);
+      }
       assert.ok(result.membershipSources.length);
     } else {
       assert.equal(result.status, 'collector-unverified');
@@ -443,4 +445,15 @@ test('Springfield city and its airport district use separate RITA filing codes',
   assert.deepEqual(airport.guide.returns.slice(0, 2).map(([form]) => form), ['11', '17']);
   assert.equal(city.collectorCode, '773');
   assert.equal(localWithholdingGuide('OH-jedd-jedz', '872', 2026).status, 'unknown-code');
+});
+
+test('Akron district accounts use JW-3 while the city uses AW-3', () => {
+  for (const id of ['9004', '9014', '9015', '9042']) {
+    const result = localWithholdingGuide('OH-jedd-jedz', id, 2026);
+    assert.equal(result.agency, 'OH-AKRON-JEDD');
+    assert.equal(result.guide.returns[1][0], 'JW-3');
+    assert.match(result.guide.returns[1][1], /March 1, 2027/);
+    assert.equal(result.collectorCode, undefined);
+  }
+  assert.equal(localWithholdingGuide('OH-municipality', '01000', 2026).guide.returns[1][0], 'AW-3');
 });
