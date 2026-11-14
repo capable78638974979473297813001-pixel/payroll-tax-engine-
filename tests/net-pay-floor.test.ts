@@ -134,3 +134,66 @@ describe('net pay after garnishments is floored at $0.00 by cutting voluntary de
     assert.ok(r.warnings!.some((w) => /Net pay is negative/.test(w)));
   });
 });
+
+describe('pre-tax deductions are cut in tiers', () => {
+  const hsa = (amount: number): Deduction => ({ code: 'HSA', category: 'hsa', amount: dollars(amount) });
+  const loan = (amount: number): Deduction => ({ code: 'LOAN', category: null, amount: dollars(amount) });
+  const amountOf = (r: ReturnType<typeof calculatePaycheckWithGarnishments>, code: string) => r.deductions.find((d) => d.code === code)!.amount;
+  // Texas has no income tax, so only FICA is in play.
+  const tx = (deductions: Deduction[]): PaycheckInput => ({ ...paycheck(100, deductions), workState: { code: 'TX' } });
+
+  test('post-tax first: a loan is cut before a 401(k) or an HSA, and the 401(k) and HSA stay whole', () => {
+    // $100 gross against HSA $10 + 401(k) $60 + loan $40.
+    const r = calculatePaycheckWithGarnishments({ paycheck: tx([hsa(10), k401(60), loan(40)]), orders: [] });
+    assert.equal(amountOf(r, 'HSA'), 1000);
+    assert.equal(amountOf(r, '401K'), 6000);
+    assert.ok(amountOf(r, 'LOAN') > 0 && amountOf(r, 'LOAN') < 4000);
+    assert.equal(r.netPayAfterGarnishments, 0);
+  });
+
+  test('then retirement deferrals: with the loan gone, the 401(k) is cut and the HSA is still whole', () => {
+    const r = calculatePaycheckWithGarnishments({ paycheck: tx([hsa(30), k401(70), loan(10)]), orders: [] });
+    assert.equal(amountOf(r, 'LOAN'), 0);
+    assert.equal(amountOf(r, 'HSA'), 3000);
+    assert.ok(amountOf(r, '401K') < 7000);
+    assert.equal(r.netPayAfterGarnishments, 0);
+    assert.ok(!r.warnings.some((w) => /cafeteria/.test(w)), r.warnings.join(' | '));
+  });
+
+  test('a cafeteria-plan election is cut only as a last resort, and the cut is flagged', () => {
+    // $100 gross, protected $50 dues, section 125 premium $60: the premium is the only thing that can give.
+    const dues: Deduction = { code: 'DUES', category: null, amount: dollars(50) };
+    const prem: Deduction = { code: 'MED', category: 'section125', amount: dollars(60) };
+    const r = calculatePaycheckWithGarnishments({ paycheck: tx([prem, dues]), orders: [], protectedDeductionCodes: ['DUES'] });
+    assert.equal(amountOf(r, 'DUES'), 5000);
+    assert.ok(amountOf(r, 'MED') < 6000);
+    assert.equal(r.netPayAfterGarnishments, 0);
+    assert.ok(r.warnings.some((w) => /cafeteria-plan election \(section125\)/.test(w)), r.warnings.join(' | '));
+  });
+});
+
+describe('what each pre-tax deduction saved in tax', () => {
+  test('a $20 401(k) on $100 saves the Michigan tax on $20: round(100 x 4.25%) - round(80 x 4.25%) = 425 - 340 = 85 cents', () => {
+    // Federal income tax is $0 either way (annualised wages are under the standard deduction)
+    // and a 401(k) does not reduce FICA wages, so the whole saving is Michigan's.
+    const r = calculatePaycheckWithGarnishments({ paycheck: paycheck(100, [k401(20)]), orders: [] });
+    assert.deepEqual(r.taxSavings, [{ code: '401K', category: 'deferral_401k', amount: 2000, taxSaved: 85 }]);
+    assert.equal(r.totalPretaxTaxSavings, 85);
+  });
+
+  test('post-tax deductions save nothing and are not listed', () => {
+    const loan: Deduction = { code: 'LOAN', category: null, amount: dollars(20) };
+    const r = calculatePaycheckWithGarnishments({ paycheck: paycheck(100, [loan]), orders: [] });
+    assert.deepEqual(r.taxSavings, []);
+    assert.equal(r.totalPretaxTaxSavings, 0);
+  });
+
+  test('the saving is measured on the deduction actually taken, after any cut', () => {
+    // The audio case: 401(k) cut from $100.00 to $45.00. MI wages $55.00 -> round(55 x 4.25%) = 234 against
+    // round(100 x 4.25%) = 425, so the saving is 191 cents (not the $100.00 elected).
+    const r = calculatePaycheckWithGarnishments({ paycheck: paycheck(100, [k401(100)]), orders: [support] });
+    assert.equal(r.taxSavings[0].amount, 4500);
+    assert.equal(r.taxSavings[0].taxSaved, 191);
+  });
+});
+

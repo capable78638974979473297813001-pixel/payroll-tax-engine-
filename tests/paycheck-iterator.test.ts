@@ -111,10 +111,42 @@ describe('payPeriods carries the year-to-date ledger between checks', () => {
   });
 });
 
+describe('percent-of-pay pre-tax elections', () => {
+  const pct = (percentOfGross: number) => ({ code: '401K', category: 'deferral_401k' as const, percentOfGross });
+
+  test('6% of $1,000 is $60.00, then 6% of $1,250 is $75.00 when pay changes', () => {
+    const periods = [...payPeriods({
+      firstCheckDate: '2026-01-31', payFrequency: 'monthly', maxChecks: 2,
+      template: ({ index }) => ({ ...template(index === 0 ? 1000 : 1250, 'TX'), deductions: [pct(0.06)] }),
+    })];
+    assert.deepEqual(periods.map((p) => p.result.deductions[0].amount), [6000, 7500]);
+    assert.equal(periods[1].ytd.electiveDeferrals?.section402gAggregate, 13_500);
+  });
+
+  test('only regular and supplemental pay is the base: a reimbursement is not pay', () => {
+    const t = { ...template(1000, 'TX'), deductions: [pct(0.1)] };
+    t.earnings = [...t.earnings, { code: 'MILES', category: 'reimbursement', amount: dollars(500) }];
+    const [p] = [...payPeriods({ firstCheckDate: '2026-01-31', payFrequency: 'monthly', maxChecks: 1, template: t })];
+    assert.equal(p.result.deductions[0].amount, 10_000);
+  });
+
+  test('a fraction written as a percent (6 instead of 0.06) is refused', () => {
+    assert.throws(
+      () => [...payPeriods({ firstCheckDate: '2026-01-31', payFrequency: 'monthly', maxChecks: 1, template: { ...template(1000, 'TX'), deductions: [pct(6)] } })],
+      /between 0 and 1/,
+    );
+  });
+
+  test('the batch iterator takes them too', () => {
+    const [o] = [...paychecks([{ id: 'x', paycheck: { ...template(200, 'TX'), deductions: [pct(0.1)], checkDate: '2026-11-13', payFrequency: 'weekly', ytd: { socialSecurity: 0, medicare: 0, futa: 0 } } }])];
+    assert.ok(o.ok && o.result.deductions[0].amount === 2000);
+  });
+});
+
 describe('paychecks (batch)', () => {
   const item = (id: string, gross: number, state = 'TX'): BatchItem => ({
     id,
-    paycheck: { ...template(gross, state), checkDate: '2026-11-13', payFrequency: 'weekly', ytd: { socialSecurity: 0, medicare: 0, futa: 0 } } as PaycheckInput,
+    paycheck: { ...template(gross, state), checkDate: '2026-11-13', payFrequency: 'weekly', ytd: { socialSecurity: 0, medicare: 0, futa: 0 } },
   });
 
   test('yields one outcome per item in order, and a bad check does not stop the run', () => {

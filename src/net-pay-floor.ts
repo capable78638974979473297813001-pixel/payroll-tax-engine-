@@ -13,9 +13,12 @@
  *   1. Employee taxes. Social Security and Medicare are owed on a 401(k)
  *      deferral too, so they stay even when the deferral takes all the cash.
  *   2. Court-ordered garnishments, up to the CCPA ceiling (see garnishment.ts).
- *   3. Voluntary deductions (401(k), insurance, loan repayments ...), which are
- *      cut back, and only as far as needed, so the cheque lands on exactly
- *      $0.00 instead of below it.
+ *   3. Voluntary deductions, cut back only as far as needed so the cheque
+ *      lands on exactly $0.00 instead of below it. They are not all equal, so
+ *      they are cut in tiers (see cutTier()): post-tax first, then retirement
+ *      deferrals, then commuter and dependent-care benefits, and last of all
+ *      the cafeteria-plan elections (section 125 premiums, HSA, FSA), which
+ *      a plan generally locks for the year, so cutting one is flagged.
  *
  * Cutting a voluntary PRE-tax deduction raises taxable wages, which can raise
  * income tax, which lowers disposable earnings, which can lower the
@@ -30,7 +33,7 @@ import { calculateGarnishments } from './garnishment.ts';
 import { fmt } from './money.ts';
 import type { Cents } from './money.ts';
 import type { GarnishmentOrder, GarnishmentResult } from './garnishment.ts';
-import type { Deduction, PaycheckInput, PaycheckResult } from './types.ts';
+import type { Deduction, PaycheckInput, PaycheckResult, PretaxCategory } from './types.ts';
 
 export interface DeductionReduction {
   code: string;
@@ -38,6 +41,15 @@ export interface DeductionReduction {
   requested: Cents;
   /** What could be taken without taking the cheque below $0.00. */
   applied: Cents;
+}
+
+export interface PretaxTaxSaving {
+  code: string;
+  category: PretaxCategory;
+  /** The amount taken on this check. */
+  amount: Cents;
+  /** Employee tax (federal, state, local, FICA) that amount avoided. */
+  taxSaved: Cents;
 }
 
 export interface PaycheckWithGarnishmentsInput {
@@ -52,9 +64,9 @@ export interface PaycheckWithGarnishmentsInput {
   protectedDeductionCodes?: string[];
   /**
    * The order voluntary deductions are cut in, first cut first, by code.
-   * Codes not listed follow, in the default order. The default is: post-tax
-   * deductions before pre-tax ones (cutting those changes no tax), and within
-   * each group the one listed LAST first.
+   * Codes not listed follow, in the default order: by cutTier() (post-tax,
+   * then retirement deferrals, then commuter/dependent care, then cafeteria
+   * plan elections), and within a tier the one listed LAST first.
    */
   reductionOrder?: string[];
 }
@@ -69,8 +81,48 @@ export interface PaycheckWithGarnishmentsResult {
   reductions: DeductionReduction[];
   /** paycheck.netPay less every garnishment withheld. Never below zero unless warnings say why. */
   netPayAfterGarnishments: Cents;
+  /**
+   * What each pre-tax deduction actually taken saves in employee tax on this
+   * check, worked out by running the engine again with that one deduction
+   * removed and the others left alone. Because the taxes interact (a bracket
+   * boundary, a wage-base cap), the per-deduction figures need not add up to
+   * `totalPretaxTaxSavings`.
+   */
+  taxSavings: PretaxTaxSaving[];
+  /** The same measure for all pre-tax deductions removed together. */
+  totalPretaxTaxSavings: Cents;
   warnings: string[];
 }
+
+/**
+ * Default cut priority, lowest first.
+ *
+ *   0  post-tax deductions: cutting one changes no tax.
+ *   1  retirement deferrals (401(k), 403(b), 457(b), SIMPLE): an employee can
+ *      change or stop these at any time.
+ *   2  commuter and dependent-care benefits.
+ *   3  section 125 premiums, HSA and FSA: cafeteria-plan elections are
+ *      generally irrevocable for the plan year outside a qualifying event, so
+ *      they go last and a cut is flagged for the employer to confirm.
+ */
+export function cutTier(category: PretaxCategory | null): 0 | 1 | 2 | 3 {
+  switch (category) {
+    case null:
+      return 0;
+    case 'deferral_401k':
+    case 'deferral_403b':
+    case 'deferral_457':
+    case 'deferral_simple':
+      return 1;
+    case 'commuter':
+    case 'dependent_care':
+      return 2;
+    default:
+      return 3; // section125, hsa, fsa
+  }
+}
+
+const CAFETERIA: ReadonlySet<PretaxCategory> = new Set(['section125', 'hsa', 'fsa']);
 
 function run(input: PaycheckWithGarnishmentsInput, deductions: Deduction[]) {
   const paycheck = calculatePaycheck({ ...input.paycheck, deductions });
@@ -135,9 +187,9 @@ export function* netPayFloorSteps(
       const [eb, ob] = rank(b);
       if (ea !== eb) return ea - eb;
       if (ea === 0) return oa - ob;
-      const postA = original[a].category === null ? 0 : 1;
-      const postB = original[b].category === null ? 0 : 1;
-      if (postA !== postB) return postA - postB;
+      const ta = cutTier(original[a].category);
+      const tb = cutTier(original[b].category);
+      if (ta !== tb) return ta - tb;
       return b - a;
     });
   const totalCuttable = cuttable.reduce((sum, i) => sum + original[i].amount, 0);
@@ -198,7 +250,27 @@ export function* netPayFloorSteps(
       `Deduction ${r.code} was cut from ${fmt(r.requested)} to ${fmt(r.applied)} so net pay after ` +
         `taxes and garnishments is not below $0.00.`,
     );
+    const cat = original.find((d) => d.code === r.code)?.category;
+    if (cat && CAFETERIA.has(cat)) {
+      warnings.push(
+        `${r.code} is a cafeteria-plan election (${cat}). Plans generally lock these for the plan year ` +
+          `outside a qualifying event, so confirm the plan allows this reduction before paying the cheque.`,
+      );
+    }
   }
+
+  // Tax each pre-tax deduction saved: the engine again, minus that deduction.
+  const employeeTaxes = (ds: Deduction[]) => calculatePaycheck({ ...input.paycheck, deductions: ds }).employeeTaxTotal;
+  const actualTaxes = best.paycheck.employeeTaxTotal;
+  const taxSavings: PretaxTaxSaving[] = [];
+  for (let i = 0; i < deductions.length; i++) {
+    const d = deductions[i];
+    if (d.category === null || d.amount <= 0) continue;
+    taxSavings.push({ code: d.code, category: d.category, amount: d.amount, taxSaved: employeeTaxes(deductions.filter((_, j) => j !== i)) - actualTaxes });
+  }
+  const totalPretaxTaxSavings = taxSavings.length
+    ? employeeTaxes(deductions.filter((d) => d.category === null)) - actualTaxes
+    : 0;
 
   return {
     paycheck: best.paycheck,
@@ -206,6 +278,8 @@ export function* netPayFloorSteps(
     deductions,
     reductions,
     netPayAfterGarnishments: best.net,
+    taxSavings,
+    totalPretaxTaxSavings,
     warnings,
   };
 }

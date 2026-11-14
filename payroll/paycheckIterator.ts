@@ -1,9 +1,10 @@
 import { calculatePaycheckWithGarnishments } from '../src/net-pay-floor.ts';
+import { applyRate } from '../src/money.ts';
 import { accumulateYtd, freshYearToDate } from './ytd.ts';
 import type { Cents } from '../src/money.ts';
 import type { GarnishmentOrder } from '../src/garnishment.ts';
 import type { PaycheckWithGarnishmentsResult } from '../src/net-pay-floor.ts';
-import type { PaycheckInput } from '../src/types.ts';
+import type { Deduction, PaycheckInput, PretaxCategory } from '../src/types.ts';
 import type { ExtendedYearToDate } from './types.ts';
 
 /**
@@ -68,8 +69,42 @@ export function* payDates(first: string, frequency: IteratedFrequency, year?: nu
   }
 }
 
+/**
+ * A deduction as an employee elects it: a fixed dollar amount, or a percentage
+ * of this check's pay ("6% to the 401(k)"). The percentage is worked out per
+ * check, so it follows pay that changes from one period to the next.
+ */
+export type DeductionSpec =
+  | Deduction
+  | {
+      code: string;
+      category: PretaxCategory | null;
+      /** A fraction: 0.06 is 6%. Of the check's regular and supplemental earnings. */
+      percentOfGross: number;
+    };
+
+/** Pay the percentage applies to: regular and supplemental earnings, the pay a deferral election is normally written against. Reimbursements and imputed income are not pay. */
+export function electionBase(earnings: PaycheckInput['earnings']): number {
+  return earnings.filter((e) => e.category === 'regular' || e.category === 'supplemental').reduce((sum, e) => sum + e.amount, 0);
+}
+
+/** Turn percentage elections into dollar amounts for one check. */
+export function resolveDeductions(specs: readonly DeductionSpec[], earnings: PaycheckInput['earnings']): Deduction[] {
+  const base = electionBase(earnings);
+  return specs.map((d) => {
+    if (!('percentOfGross' in d)) return d;
+    const f = d.percentOfGross;
+    if (!Number.isFinite(f) || f < 0 || f > 1) {
+      throw new Error(`Deduction ${d.code}: percentOfGross must be between 0 and 1 (0.06 means 6%), got ${f}.`);
+    }
+    return { code: d.code, category: d.category, amount: applyRate(base, f) };
+  });
+}
+
 /** Everything about one check except its date, frequency and YTD, which the iterator supplies. */
-export type PeriodTemplate = Omit<PaycheckInput, 'checkDate' | 'payFrequency' | 'ytd'>;
+export type PeriodTemplate = Omit<PaycheckInput, 'checkDate' | 'payFrequency' | 'ytd' | 'deductions'> & {
+  deductions: readonly DeductionSpec[];
+};
 
 export interface PayPeriodsInput {
   /** First pay date. For weekly and biweekly it anchors the whole calendar. */
@@ -116,7 +151,7 @@ export function* payPeriods(input: PayPeriodsInput): Generator<PayPeriod, void, 
     if (input.maxChecks !== undefined && index >= input.maxChecks) return;
     const template = typeof input.template === 'function' ? input.template({ index, checkDate }) : input.template;
     const result = calculatePaycheckWithGarnishments({
-      paycheck: { ...template, checkDate, payFrequency: input.payFrequency, ytd },
+      paycheck: { ...template, deductions: resolveDeductions(template.deductions, template.earnings), checkDate, payFrequency: input.payFrequency, ytd },
       orders: input.orders ?? [],
       protectedDeductionCodes: input.protectedDeductionCodes,
       reductionOrder: input.reductionOrder,
@@ -138,7 +173,8 @@ export function* payPeriods(input: PayPeriodsInput): Generator<PayPeriod, void, 
 export interface BatchItem {
   /** Caller's own identifier, echoed on the result. */
   id?: string;
-  paycheck: PaycheckInput;
+  /** A full check; its deductions may be dollar amounts or percentage elections. */
+  paycheck: Omit<PaycheckInput, 'deductions'> & { deductions: readonly DeductionSpec[] };
   orders?: GarnishmentOrder[];
   protectedDeductionCodes?: string[];
   reductionOrder?: string[];
@@ -160,7 +196,7 @@ export function* paychecks(items: Iterable<BatchItem>): Generator<BatchOutcome, 
   for (const item of items) {
     try {
       const result = calculatePaycheckWithGarnishments({
-        paycheck: item.paycheck,
+        paycheck: { ...item.paycheck, deductions: resolveDeductions(item.paycheck.deductions, item.paycheck.earnings) },
         orders: item.orders ?? [],
         protectedDeductionCodes: item.protectedDeductionCodes,
         reductionOrder: item.reductionOrder,
