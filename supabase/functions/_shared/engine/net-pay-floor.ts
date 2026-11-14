@@ -84,17 +84,48 @@ function run(input: PaycheckWithGarnishmentsInput, deductions: Deduction[]) {
   return { paycheck, garnishments, net: paycheck.netPay - garnishments.totalWithheld };
 }
 
-export function calculatePaycheckWithGarnishments(
+/** One trial of the cut search: what the cheque looks like if `cut` cents come off the voluntary deductions. */
+export interface NetPayFloorStep {
+  /**
+   * `elected`: nothing cut. `all-cut`: every voluntary deduction cut, to see
+   * whether any cut can work. `search`: one probe of the binary search.
+   * `final`: the answer the search settled on.
+   */
+  phase: 'elected' | 'all-cut' | 'search' | 'final';
+  cut: Cents;
+  deductions: Deduction[];
+  employeeTaxes: Cents;
+  garnished: Cents;
+  /** Net pay after taxes, deductions and garnishments. */
+  net: Cents;
+  /** net >= 0: this cut is enough. */
+  fits: boolean;
+}
+
+type Trial = ReturnType<typeof run>;
+
+function stepOf(phase: NetPayFloorStep['phase'], cut: Cents, deductions: Deduction[], t: Trial): NetPayFloorStep {
+  return { phase, cut, deductions, employeeTaxes: t.paycheck.employeeTaxTotal, garnished: t.garnishments.totalWithheld, net: t.net, fits: t.net >= 0 };
+}
+
+/**
+ * The same calculation as calculatePaycheckWithGarnishments(), as a
+ * generator: it yields every trial it runs, in order, and RETURNS the final
+ * result. Use it to show how the engine reached $0.00, or to debug a cut that
+ * looks wrong. `for...of` sees only the steps; call .next() until `done` to
+ * get the return value, or just call calculatePaycheckWithGarnishments().
+ */
+export function* netPayFloorSteps(
   input: PaycheckWithGarnishmentsInput,
-): PaycheckWithGarnishmentsResult {
+): Generator<NetPayFloorStep, PaycheckWithGarnishmentsResult, undefined> {
   const original = input.paycheck.deductions;
   const protectedCodes = new Set(input.protectedDeductionCodes ?? []);
   const explicit = input.reductionOrder ?? [];
 
   // Indices of cuttable deductions, first cut first.
-  const rank = (i: number): [number, number, number] => {
+  const rank = (i: number): [number, number] => {
     const e = explicit.indexOf(original[i].code);
-    return [e === -1 ? 1 : 0, e === -1 ? 0 : e, 0];
+    return [e === -1 ? 1 : 0, e === -1 ? 0 : e];
   };
   const cuttable = original
     .map((_, i) => i)
@@ -126,10 +157,12 @@ export function calculatePaycheckWithGarnishments(
 
   const warnings: string[] = [];
   let best = run(input, original);
+  yield stepOf('elected', 0, original, best);
   let cut = 0;
 
   if (best.net < 0) {
     const atMax = run(input, withCut(totalCuttable));
+    yield stepOf('all-cut', totalCuttable, withCut(totalCuttable), atMax);
     if (atMax.net < 0) {
       // Even with every voluntary deduction gone the cheque cannot cover what
       // the caller marked as protected. Say so rather than pretend.
@@ -145,7 +178,9 @@ export function calculatePaycheckWithGarnishments(
       let hi = totalCuttable;
       while (lo < hi) {
         const mid = Math.floor((lo + hi) / 2);
-        if (run(input, withCut(mid)).net >= 0) hi = mid;
+        const probe = run(input, withCut(mid));
+        yield stepOf('search', mid, withCut(mid), probe);
+        if (probe.net >= 0) hi = mid;
         else lo = mid + 1;
       }
       cut = lo;
@@ -154,6 +189,7 @@ export function calculatePaycheckWithGarnishments(
   }
 
   const deductions = withCut(cut);
+  yield stepOf('final', cut, deductions, best);
   const reductions: DeductionReduction[] = original
     .map((d, i) => ({ code: d.code, requested: d.amount, applied: deductions[i].amount }))
     .filter((r) => r.applied !== r.requested);
@@ -172,4 +208,13 @@ export function calculatePaycheckWithGarnishments(
     netPayAfterGarnishments: best.net,
     warnings,
   };
+}
+
+export function calculatePaycheckWithGarnishments(
+  input: PaycheckWithGarnishmentsInput,
+): PaycheckWithGarnishmentsResult {
+  const steps = netPayFloorSteps(input);
+  let next = steps.next();
+  while (!next.done) next = steps.next();
+  return next.value;
 }
