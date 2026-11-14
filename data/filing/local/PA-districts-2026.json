@@ -455,7 +455,22 @@
       "verifiedOn": "2026-11-11",
       "gaps": [
         "Confirm the LST collector separately for each worksite."
-      ]
+      ],
+      "lst": {
+        "registration": "Not read: the bureau's site reset every automated request except one page.",
+        "returns": [
+          [
+            "Local Services Tax",
+            "The bureau's navigation lists a Local Services Tax page and Zero Quarterly Filings; neither could be read."
+          ]
+        ],
+        "filing": "Not read.",
+        "payment": "Not read.",
+        "sources": [
+          "https://yatb.com/filing-online%2Felectronic"
+        ],
+        "verifiedOn": "2026-11-14"
+      }
     },
     "Capital Tax Collection Bureau": {
       "registration": "Submit the Capital Tax Collection Bureau Employer Registration Form for each new employer account.",
@@ -468,7 +483,22 @@
       "verifiedOn": "2026-11-11",
       "gaps": [
         "Confirm the LST collector separately for each worksite."
-      ]
+      ],
+      "lst": {
+        "registration": "Every new employer completes the bureau's Employer Registration Form.",
+        "returns": [
+          [
+            "Local Service Tax information for employers",
+            "The bureau has a Local Service Tax page for employers and a notice 'New LST Collections 01/05/2026'. Neither was read, so forms and due dates are not stated."
+          ]
+        ],
+        "filing": "Online filing is required for employers with 26 or more employees (stated for the Earned Income Tax filings); LST channel not read.",
+        "payment": "Not read.",
+        "sources": [
+          "https://captax.com/employers/"
+        ],
+        "verifiedOn": "2026-11-14"
+      }
     },
     "Jordan Tax Service, Inc.": {
       "registration": "Register each work location in Jordan Tax Service’s Act 32 employer system. Request approval before starting a combined monthly return.",
@@ -481,7 +511,22 @@
       "verifiedOn": "2026-11-11",
       "gaps": [
         "Confirm the LST collector separately for each worksite."
-      ]
+      ],
+      "lst": {
+        "registration": "Not read.",
+        "returns": [
+          [
+            "Local Services Tax",
+            "Nothing about LST was found; the bureau's combined-return request form and Act 32 presentation could not be read."
+          ]
+        ],
+        "filing": "Not read.",
+        "payment": "Not read.",
+        "sources": [
+          "https://www.jordantax.com/"
+        ],
+        "verifiedOn": "2026-11-14"
+      }
     },
     "Centre Tax Agency": {
       "registration": "Complete Centre Tax Agency’s Business/Employer Registration Form and enroll separately in eReporting for online filing.",
@@ -494,7 +539,23 @@
       "verifiedOn": "2026-11-11",
       "gaps": [
         "Confirm the LST collector separately for each worksite."
-      ]
+      ],
+      "lst": {
+        "registration": "The agency's employer forms page offers a registration form for Earned Income Tax and/or Local Services Tax withholding.",
+        "returns": [
+          [
+            "Employer's Quarterly Tax Return",
+            "The tax office sends paper quarterly returns to employers unless notified otherwise. Due dates were not read."
+          ]
+        ],
+        "filing": "Paper quarterly return, or eReporting for EIT and/or LST (direct entry or upload). An Excel template lets EIT and LST be filed in one file. Employers filing combined returns to one district must file and pay electronically every month.",
+        "payment": "Electronically through eReporting if the employer chooses; other payment methods were not read.",
+        "sources": [
+          "https://www.statecollegepa.us/employer-tax-forms",
+          "https://statecollegepa.us/filing-options"
+        ],
+        "verifiedOn": "2026-11-14"
+      }
     },
     "Cumberland County Tax Bureau": {
       "registration": "Send Cumberland’s Employer Registration form with the physical worksite address by mail, email or fax. The bureau sends a verification letter with the account number.",
@@ -507,7 +568,31 @@
       "verifiedOn": "2026-11-11",
       "gaps": [
         "Confirm the LST collector separately for each worksite."
-      ]
+      ],
+      "lst": {
+        "registration": "Complete the Employer Registration form with the full physical work location and email, fax or mail it; the bureau sends a verification letter with the account number within 24 to 48 hours.",
+        "returns": [
+          [
+            "LST annual reconciliation",
+            "A spreadsheet with the account number, business name and, for each employee, full name, full SSN and total LST withheld for the year, compared by the bureau with the quarterly detail and payments received. Its due date was not read."
+          ],
+          [
+            "Quarterly LST detail",
+            "Reported with the quarterly detail and payments. Due dates were not read."
+          ]
+        ],
+        "filing": "Employers with twenty or more employees must file online. W-2 box 14 carries only LST withheld; box 19 only EIT.",
+        "payment": "Online payments through the bureau's employer system; other options were not read.",
+        "notes": [
+          "Effective January 1, 2026 Dickinson Township and South Newton Township LST is $52.",
+          "An employee's LST exemption form goes to the employer and is not mailed to the bureau; the employer checks the supporting documents."
+        ],
+        "sources": [
+          "https://www.cumberlandtax.org/",
+          "https://cumberlandtax.org/about/faqs"
+        ],
+        "verifiedOn": "2026-11-14"
+      }
     },
     "Southwest Regional Tax Bureau": {
       "registration": "Register in Southwest Regional Tax Bureau’s eReporting system even if a payroll service handles filing.",
@@ -521,7 +606,27 @@
       "gaps": [
         "Confirm the LST collector separately for each worksite.",
         "The bureau also publishes a 30-day schedule. Confirm the assigned due date if it differs from section 512."
-      ]
+      ],
+      "lst": {
+        "registration": "Register in eReporting, which also meets the Act 32 registration requirement; the bureau also posts an Employer Registration Form.",
+        "returns": [
+          [
+            "Employer LST Quarterly Tax Form",
+            "Posted on the bureau's resources page; due dates were not read."
+          ],
+          [
+            "Employer LST Annual Summary Report",
+            "Posted on the bureau's resources page; due date was not read."
+          ]
+        ],
+        "filing": "eReporting (the bureau asks employers with ten or more employees to file electronically), or the posted paper forms.",
+        "payment": "Not read.",
+        "sources": [
+          "https://www.swrtb.org/?page_id=24",
+          "https://www.swrtb.org/?page_id=18"
+        ],
+        "verifiedOn": "2026-11-14"
+      }
     },
     "Franklin County Area Tax Bureau": {
       "registration": "Submit Franklin’s New Employer Registration form. Complete the separate Employer Electronic Filing Registration form for access to e-file.",
@@ -544,7 +649,27 @@
           "541",
           "Annual employer reconciliation, generally due the last day of February. Consult the assigned collector for year-end and cessation instructions."
         ]
-      ]
+      ],
+      "lst": {
+        "registration": "New Employer Registration Form and information are on the bureau's employer forms page.",
+        "returns": [
+          [
+            "LST Annual Reconciliation Listing",
+            "Posted with the LST Application for Exemption and Request for Refund on the employer forms page; its due date was not read."
+          ],
+          [
+            "Quarterly return",
+            "The page lists Employer Withholding Tax Return (Form 511) and Annual Reconciliation (Form 541) without saying whether they carry LST."
+          ]
+        ],
+        "filing": "E-file registration and a CSV template are posted; the e-file registration form says it reports EIT and LST detail.",
+        "payment": "Not read.",
+        "sources": [
+          "https://www.fcatb.org/index.php/employer-tax-forms/",
+          "https://www.fcatb.org/Efile%20Registration.pdf"
+        ],
+        "verifiedOn": "2026-11-14"
+      }
     },
     "Lancaster County Tax Collection Bureau": {
       "registration": "Employers filing directly register in Lancaster eReporting with their physical Lancaster worksite and PSD code. If a payroll provider files and pays, contact the bureau’s employer department to register the business.",
@@ -567,7 +692,27 @@
           "Annual employer reconciliation",
           "The bureau’s calendar lists March 2, 2027. Its stated next-business-day rule points to March 1. Confirm with the bureau before relying on March 2."
         ]
-      ]
+      ],
+      "lst": {
+        "registration": "Register once for both Earned Income Tax and Local Services Tax in Employer eReporting (eReporting.lctcb.org) with a Lancaster County address and PSD code; the bureau emails verification and then a link to set a password, usually within 24 hours. If a payroll provider files and pays, call or email the bureau's employer department to register the business.",
+        "returns": [
+          [
+            "Quarterly Local Services Tax return",
+            "The bureau has adopted the EIT due dates for quarterly LST: the last day of the month after the quarter, moved to the next business day when it falls on a weekend or holiday. For 2026: April 30, July 31, November 2 and February 1, 2027."
+          ],
+          [
+            "Annual reconciliation",
+            "The bureau's calendar lists March 2, 2027 for 2026 (that calendar states the date for the Earned Income Tax annual reconciliation; whether it also governs LST was not stated)."
+          ]
+        ],
+        "filing": "All employers submit monthly, quarterly and year-end EIT and LST detail electronically as an EFW2 or Excel file; an Excel template and combined EIT and LST instructions are on the bureau's page.",
+        "payment": "Pay in Employer eReporting, or by ACH credit using the bureau's instructions; a type-and-print payment coupon is also posted.",
+        "sources": [
+          "https://www.lctcb.org/?page_id=70",
+          "https://www.lctcb.org/wp-content/uploads/Employer-Due-Dates-for-2026.pdf"
+        ],
+        "verifiedOn": "2026-11-14"
+      }
     },
     "Danville Area Earned Income Tax Office": {
       "registration": "Submit the Danville employer registration form. Contact the office to activate the PALite employer account.",
@@ -580,7 +725,23 @@
       "verifiedOn": "2026-11-11",
       "gaps": [
         "Confirm the LST collector separately for each worksite."
-      ]
+      ],
+      "lst": {
+        "registration": "Not read.",
+        "returns": [
+          [
+            "Local Services Tax",
+            "Nothing about LST was found on the office's page or its employer portal."
+          ]
+        ],
+        "filing": "Not read.",
+        "payment": "Not read.",
+        "sources": [
+          "https://danveito.com/",
+          "https://employer.palite.org/EmployerOnlineV2/"
+        ],
+        "verifiedOn": "2026-11-14"
+      }
     },
     "Berks Earned Income Tax Bureau": {
       "registration": "Register the organization and worksites in Berks eReporting before submitting detail or a payment.",
@@ -605,7 +766,22 @@
           "Annual employer reconciliation",
           "The bureau lists March 1, 2027 for 2026 year-end detail."
         ]
-      ]
+      ],
+      "lst": {
+        "registration": "Not read.",
+        "returns": [
+          [
+            "LST forms and due dates",
+            "The bureau's employer pages list LST forms, Local Services Tax rates and a due-dates page that refers to the Lancaster printout. Those pages were not read in detail."
+          ]
+        ],
+        "filing": "eReporting is listed.",
+        "payment": "Payment options other than eReporting are listed on a separate page that was not read.",
+        "sources": [
+          "https://www.berkseit.com/employers/"
+        ],
+        "verifiedOn": "2026-11-14"
+      }
     },
     "Blair County Tax Collection Bureau": {
       "registration": "Submit the bureau’s employer registration and complete its Employer Online Filing Questionnaire for PALite access.",
@@ -620,7 +796,29 @@
       "gaps": [
         "Confirm the LST collector separately for each worksite.",
         "The bureau also publishes a 30-day schedule. Confirm the assigned due date if it differs from section 512."
-      ]
+      ],
+      "lst": {
+        "registration": "Employer Registration (PDF) on the bureau's employer page.",
+        "returns": [
+          [
+            "Employer Local Services Tax Return",
+            "The bureau posts the return form and return coupons. Due dates were not read."
+          ],
+          [
+            "Employer LST Reconciliation",
+            "Posted as a PDF; its due date was not read."
+          ]
+        ],
+        "filing": "Paper forms from the employer page, with an online filing page listed.",
+        "payment": "Return coupons are posted; other payment methods were not read.",
+        "notes": [
+          "The page posts an LST exemption certificate and municipal LST notices for Bellwood Borough (2024) and Allegheny Township (2022)."
+        ],
+        "sources": [
+          "https://blairtax.org/for-employers"
+        ],
+        "verifiedOn": "2026-11-14"
+      }
     }
   }
 }

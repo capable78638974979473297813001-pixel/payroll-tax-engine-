@@ -160,7 +160,7 @@ test('PA LST uses a separately identified collector and its own form and remitta
   const keystone = localAgencyGuide('PA-KEYSTONE-LST', 2026);
   assert.match(keystone.returns[0][1], /zero-filing/);
   assert.match(keystone.payment, /electronically/);
-  assert.equal(localWithholdingGuide('PA-LST-district', '71', 2026).status, 'unsupported-jurisdiction-type');
+  assert.equal(localWithholdingGuide('PA-LST-municipality', '71', 2026).status, 'unsupported-jurisdiction-type'); // LST is looked up by district, not municipality
   assert.equal(localAgencyGuide('PA-KEYSTONE-LST', 2025), null);
 });
 
@@ -729,4 +729,42 @@ test('Alabama towns without a verified collector guide say so instead of guessin
   const covered = alabamaRegistry.filter(city => localWithholdingGuide('AL-city', city.name, 2026).status === 'guide');
   assert.equal(covered.length, 23);
   assert.equal(localWithholdingGuide('AL-city', 'Atlantis', 2026).status, 'unknown-code');
+});
+
+// Pennsylvania Local Services Tax, added 2026-11-14.
+const paDirectory = JSON.parse(readFileSync(new URL('../data/filing/local/PA-districts-2026.json', import.meta.url), 'utf8'));
+
+test('every Act 32 district except Philadelphia routes its LST filing to a guide for its collector', () => {
+  for (const [code, district] of Object.entries(paDirectory.districts)) {
+    const result = localWithholdingGuide('PA-LST-district', code, 2026);
+    if (code === '51') {
+      assert.equal(result.status, 'collector-unverified');
+      continue;
+    }
+    assert.equal(result.status, 'guide', code);
+    assert.equal(result.guide.collector, district.collector, code);
+    assert.equal(result.confirmLstCollectorForWorksite, true, code);
+    assert.ok(result.guide.sources.length > 0, code);
+  }
+  assert.equal(localWithholdingGuide('PA-LST-district', '99', 2026).status, 'unknown-code');
+});
+
+test('Keystone and Berkheimer districts use their existing LST profiles; other bureaus carry their own', () => {
+  assert.equal(localWithholdingGuide('PA-LST-district', '10', 2026).agency, 'PA-BERKHEIMER-LST');
+  const keystone = Object.entries(paDirectory.districts).find(([, district]) => district.collector === 'Keystone Collections Group')[0];
+  assert.equal(localWithholdingGuide('PA-LST-district', keystone, 2026).agency, 'PA-KEYSTONE-LST');
+  const lancaster = Object.entries(paDirectory.districts).find(([, district]) => district.collector === 'Lancaster County Tax Collection Bureau')[0];
+  const guide = localWithholdingGuide('PA-LST-district', lancaster, 2026).guide;
+  assert.match(guide.returns[0][1], /November 2 and February 1, 2027/);
+  assert.match(guide.registration, /eReporting\.lctcb\.org/);
+});
+
+test('bureaus whose LST pages could not be read say so instead of inventing steps', () => {
+  for (const collector of ['York Adams Tax Bureau', 'Danville Area Earned Income Tax Office', 'Jordan Tax Service, Inc.']) {
+    const lst = paDirectory.collectorInstructions[collector].lst;
+    assert.match(lst.registration, /Not read/, collector);
+    assert.match(lst.filing, /Not read/, collector);
+    assert.match(lst.payment, /Not read/, collector);
+  }
+  assert.match(paDirectory.collectorInstructions['Cumberland County Tax Bureau'].lst.notes[0], /Dickinson Township and South Newton Township LST is \$52/);
 });

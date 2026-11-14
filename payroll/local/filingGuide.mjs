@@ -64,6 +64,24 @@ export function localWithholdingGuide(kind, code, year) {
         },
       };
     }
+    case 'PA-LST-district': {
+      if (!Object.hasOwn(pennsylvania.districts, code)) return { status: 'unknown-code' };
+      const district = pennsylvania.districts[code];
+      // Philadelphia is outside Act 32 and no LST filing for it was verified.
+      if (code === '51') return { status: 'collector-unverified', jurisdiction: district.district, code };
+      const lstAgency = { 'Keystone Collections Group': 'PA-KEYSTONE-LST', 'Berkheimer Tax Administrator': 'PA-BERKHEIMER-LST' }[district.collector];
+      const lstGuide = lstAgency ? localAgencyGuide(lstAgency, year) : pennsylvania.collectorInstructions[district.collector]?.lst;
+      if (!lstGuide) return { status: 'collector-unverified', jurisdiction: district.district, code };
+      return {
+        status: 'guide',
+        jurisdiction: district.district,
+        code,
+        ...(lstAgency && { agency: lstAgency }),
+        guide: { ...structuredClone(lstGuide), collector: district.collector, website: district.website },
+        // The LST collector can differ from the EIT collector for a given worksite municipality or school district.
+        confirmLstCollectorForWorksite: true,
+      };
+    }
     case 'OR-city':
       if (code.trim().toLowerCase() === 'eugene') {
         row = { name: 'Eugene' };

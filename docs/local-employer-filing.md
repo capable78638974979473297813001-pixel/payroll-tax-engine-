@@ -16,6 +16,7 @@ Use `localWithholdingGuide(kind, code, 2026)` from `payroll/local/filingGuide.mj
 | OH-municipality | Ohio Finder municipal code or documented Census place-code fallback | `00142` |
 | OH-jedd-jedz | Four-digit Ohio Finder zone ID | `9055` |
 | PA-EIT-district | Two-digit collection district from the DCED directory | `70` |
+| PA-LST-district | Same two-digit district; returns the LST filing guide for that district's collector | `70` |
 
 ```js
 import { localWithholdingGuide } from './payroll/local/filingGuide.mjs';
@@ -58,3 +59,10 @@ Use `KY-OWENSBORO-DAVIESS` for the common administrator. The standard E-1 has se
 - **Neumo return (eleven towns plus Leeds):** Attalla 9406, Beaverton 9756, Guin 9024, Hackleburg 9349, Hamilton 9359, Midfield 9375, Mosses 9677, Shorter 9702, Southside 9046, Sulligent 9392 and Tarrant 9625 file the shared monthly Occupational Tax Return (updated 10/2026, postmarked by the 20th) and the Universal Annual Reconciliation (due January 31) to Neumo Tax Remittance Department, PO Box 830725, Birmingham, AL 35283-0725. How to obtain a Neumo account number is not on either form, so the guides say registration is unverified.
 - **Own collectors:** Irondale (monthly, 0.50%; the PDF form on its site still prints 1%), Fairfield (Ordinance 1019, quarterly by the 20th, read from the 2008 scan), Glencoe (Form G-1, 2%, monthly by the 20th), Notasulga (quarterly or annual by account, Ordinance 97-11-01) and Red Bay (Ordinance 90-2-7, monthly by the 20th, annual by January 31).
 - **Rainbow City is partial:** the collector and contacts are confirmed; its G-1 and G-3 forms were blocked to automated reads, so deadlines and penalties are not stated.
+
+## Pennsylvania Local Services Tax (2026-11-14)
+
+`localWithholdingGuide('PA-LST-district', code, 2026)` returns an LST guide for 69 of the 70 districts. Philadelphia returns `collector-unverified`. The guide is for the district's EIT collector: Keystone and Berkheimer districts use their existing LST profiles, and the other eleven bureaus carry an `lst` block in `data/filing/local/PA-districts-2026.json`. The result always sets `confirmLstCollectorForWorksite` because the LST collector for a worksite municipality or school district can differ from the EIT collector (the register names a separate LST collector for about 360 of its 1,943 LST rows, many of them individuals).
+
+Only Lancaster's LST due dates were read (the last day of the month after quarter-end, rolled to the next business day). Capital, Cumberland, Centre, Southwest Regional, Franklin, Blair and Berks pages were read for forms, registration and channels, with due dates marked "not read" where the pages did not state them. York Adams, Danville and Jordan could not be read and say so.
+
