@@ -768,3 +768,26 @@ test('bureaus whose LST pages could not be read say so instead of inventing step
   }
   assert.match(paDirectory.collectorInstructions['Cumberland County Tax Bureau'].lst.notes[0], /Dickinson Township and South Newton Township LST is \$52/);
 });
+
+// Kentucky occupational tax lookup, added 2026-11-14.
+const kentuckyScraped = JSON.parse(readFileSync(new URL('../data/local/KY-occupational-2026.json', import.meta.url), 'utf8')).jurisdictions.scraped;
+
+test('Kentucky lookups return a verified guide, both guides for Covington, and say so when the collector is unverified', () => {
+  const lookup = name => localWithholdingGuide('KY-occupational', name, 2026);
+  assert.equal(lookup('Bowling Green').agency, 'KY-BOWLING-GREEN');
+  assert.equal(lookup(' owensboro ').agency, 'KY-OWENSBORO-DAVIESS');
+  assert.equal(lookup('Daviess County').agency, 'KY-OWENSBORO-DAVIESS');
+  assert.equal(lookup('Louisville Metro').agency, 'KY-LMRC');
+  assert.equal(lookup('Fayette County Public School District').agency, 'KY-FCPS');
+  const covington = lookup('Covington');
+  assert.equal(covington.agency, 'KY-KENTON');
+  assert.deepEqual(covington.additionalGuides.map(entry => entry.agency), ['KY-COVINGTON']);
+  assert.equal(lookup('Bardstown').status, 'collector-unverified');
+  assert.equal(lookup('Atlantis').status, 'unknown-code');
+});
+
+test('every Kentucky jurisdiction with a mapped agency resolves to a real profile', () => {
+  const mapped = kentuckyScraped.filter(entry => localWithholdingGuide('KY-occupational', entry.name, 2026).status === 'guide');
+  assert.ok(mapped.length >= 9, String(mapped.length));
+  for (const entry of mapped) assert.ok(localWithholdingGuide('KY-occupational', entry.name, 2026).guide.collector, entry.name);
+});

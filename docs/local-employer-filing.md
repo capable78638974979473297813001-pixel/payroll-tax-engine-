@@ -17,6 +17,7 @@ Use `localWithholdingGuide(kind, code, 2026)` from `payroll/local/filingGuide.mj
 | OH-jedd-jedz | Four-digit Ohio Finder zone ID | `9055` |
 | PA-EIT-district | Two-digit collection district from the DCED directory | `70` |
 | PA-LST-district | Same two-digit district; returns the LST filing guide for that district's collector | `70` |
+| KY-occupational | Kentucky taxing district name from the Secretary of State roster in `data/local/KY-occupational-2026.json` | `Bowling Green`, `Covington` or `Daviess County` |
 
 ```js
 import { localWithholdingGuide } from './payroll/local/filingGuide.mjs';
@@ -65,4 +66,8 @@ Use `KY-OWENSBORO-DAVIESS` for the common administrator. The standard E-1 has se
 `localWithholdingGuide('PA-LST-district', code, 2026)` returns an LST guide for 69 of the 70 districts. Philadelphia returns `collector-unverified`. The guide is for the district's EIT collector: Keystone and Berkheimer districts use their existing LST profiles, and the other eleven bureaus carry an `lst` block in `data/filing/local/PA-districts-2026.json`. The result always sets `confirmLstCollectorForWorksite` because the LST collector for a worksite municipality or school district can differ from the EIT collector (the register names a separate LST collector for about 360 of its 1,943 LST rows, many of them individuals).
 
 Only Lancaster's LST due dates were read (the last day of the month after quarter-end, rolled to the next business day). Capital, Cumberland, Centre, Southwest Regional, Franklin, Blair and Berks pages were read for forms, registration and channels, with due dates marked "not read" where the pages did not state them. York Adams, Danville and Jordan could not be read and say so.
+
+## Kentucky coverage (2026-11-14)
+
+`localWithholdingGuide('KY-occupational', name, 2026)` resolves any of the 256 roster entries. 11 return a verified guide (Louisville Metro and Jefferson County, Lexington-Fayette and Fayette County, Fayette County Public Schools, Kenton County, Covington with both its county and city guides in `additionalGuides`, Bowling Green, Warren County, Warren County Public Schools, Owensboro, Daviess County and its fiscal court). The other 245 return `collector-unverified`: their rates are in the engine, but nobody has read their filing instructions. Each needs its own city, county or school-board page, so this is a long list rather than one source. The Secretary of State's roster is an interactive form and was not re-scraped for contact details.
 

@@ -8,6 +8,23 @@ const pennsylvania = readData('filing/local/PA-districts-2026.json');
 const profiles = readData('filing/local/2026.json');
 const michiganCities = readData('local/MI-cities-2026.json').cities;
 const alabamaCities = readData('local/AL-municipalities-2026.json').municipalities;
+const kentuckyJurisdictions = readData('local/KY-occupational-2026.json').jurisdictions.scraped;
+// Only jurisdictions whose collector has a verified guide. Covington files with both the county and the city.
+const kentuckyAgencies = {
+  'louisville metro': ['KY-LMRC'],
+  'jefferson county': ['KY-LMRC'],
+  'lexington-fayette': ['KY-LFUCG'],
+  'fayette county': ['KY-LFUCG'],
+  'fayette county public school district': ['KY-FCPS'],
+  'kenton county': ['KY-KENTON'],
+  covington: ['KY-KENTON', 'KY-COVINGTON'],
+  'bowling green': ['KY-BOWLING-GREEN'],
+  'warren county': ['KY-WARREN'],
+  'warren county public schools': ['KY-WARREN-SCHOOLS'],
+  owensboro: ['KY-OWENSBORO-DAVIESS'],
+  'daviess county': ['KY-OWENSBORO-DAVIESS'],
+  'daviess county fiscal court': ['KY-OWENSBORO-DAVIESS'],
+};
 const counties = readData('local/IN-counties-2026.json').counties;
 const districts = readData('local/OH-school-districts-2026.json').districts;
 const municipalities = readData('local/OH-municipalities-2026.json').municipalities;
@@ -80,6 +97,22 @@ export function localWithholdingGuide(kind, code, year) {
         guide: { ...structuredClone(lstGuide), collector: district.collector, website: district.website },
         // The LST collector can differ from the EIT collector for a given worksite municipality or school district.
         confirmLstCollectorForWorksite: true,
+      };
+    }
+    case 'KY-occupational': {
+      const locality = code.trim().toLowerCase();
+      row = kentuckyJurisdictions.find(entry => entry.name.toLowerCase() === locality);
+      if (!row && ['louisville metro', 'lexington-fayette'].includes(locality)) row = { name: locality === 'louisville metro' ? 'Louisville Metro' : 'Lexington-Fayette' };
+      if (!row) return { status: 'unknown-code' };
+      const agencyIds = kentuckyAgencies[row.name.toLowerCase()];
+      if (!agencyIds) return { status: 'collector-unverified', jurisdiction: row.name, code };
+      return {
+        status: 'guide',
+        jurisdiction: row.name,
+        code,
+        agency: agencyIds[0],
+        guide: localAgencyGuide(agencyIds[0], year),
+        ...(agencyIds.length > 1 && { additionalGuides: agencyIds.slice(1).map(id => ({ agency: id, guide: localAgencyGuide(id, year) })) }),
       };
     }
     case 'OR-city':
