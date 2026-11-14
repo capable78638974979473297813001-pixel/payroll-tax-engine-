@@ -827,13 +827,14 @@
         "name": "Clinton",
         "category": "Gross Receipts",
         "rate": "0.5%",
-        "cap": "$200/per employee",
-        "wageRateDecimal": 0.005,
+        "cap": "$400/per employee",
+        "wageRateDecimal": 0.01,
         "wageRateResidentDecimal": null,
         "wageRateNonresidentDecimal": null,
-        "wageRateStatus": "cross_source_confirmed",
-        "wageRateNote": "The scraped category is \"Gross Receipts\" (usually NOT the wage rate, per this file's own established pattern), but an independent secondary source (tax-rates.org) frames this same 0.5% figure specifically as a flat CITY INCOME TAX applying to both residents and nonresidents who work in Clinton -- wage-tax language, not business-revenue language, and matching magnitude. NOT the same jurisdiction as 'Clinton County' (Albany, a different county entirely, already confirmed elsewhere in this file at 1.25%) -- that figure was found and deliberately NOT applied here.",
-        "wageRateSource": "tax-rates.org (Clinton, KY local income tax page) via WebSearch aggregation."
+        "wageRateStatus": "confirmed_via_city_official_form_2026_11_14",
+        "wageRateNote": "CORRECTED 2026-11-14: the City of Clinton's own 2026 quarterly return (cityofclintonky.com, March 2026 upload, read directly) prints 'Actual Tax Due for Quarter at 1%' and says the maximum occupational license tax is $400 per employee per year (withholding stops once reached), i.e. 1% of the first $40,000 of wages. The earlier 0.5% came from a secondary source (tax-rates.org). 2025 left as it was (no 2025 form read).",
+        "wageRateSource": "https://cityofclintonky.com/wp-content/uploads/sites/99/2026/03/Quarterly.pdf",
+        "annualWageCap": 40000
       },
       {
         "name": "Clinton County",
@@ -1094,12 +1095,12 @@
         "rate": "1.5%",
         "category": "Payroll/Net Profits",
         "source": "WebSearch summary of Hopkins County occupational tax pages",
-        "wageRateDecimal": 0.0125,
+        "wageRateDecimal": 0.015,
         "wageRateResidentDecimal": null,
         "wageRateNonresidentDecimal": null,
-        "wageRateStatus": "confirmed_via_klc_statewide_survey",
-        "wageRateNote": "CORRECTS this file's own earlier figure (1.50% (ambiguous scraped category, inferred tier)), which turned out wrong -- KLC's official FY2023 statewide survey (a dedicated Payroll Tax Rate column, cross-checked against dozens of other entries in this same file this same session, all matching) gives the real rate.",
-        "wageRateSource": "Kentucky League of Cities official statewide survey, 'City Occupational License Tax Rates, FY 2023' (kleague.sharepoint.com), Payroll Tax Rate column."
+        "wageRateStatus": "confirmed_via_city_official_form_2026_11_14",
+        "wageRateNote": "CORRECTED 2026-11-14: the City of Earlington's own Occupational Payroll Tax Return (earlingtongovcity.com, January 2025 upload, read directly) prints 'Actual Tax Due in Period at 1.5%'. The earlier 1.25% came from KLC's FY2023 statewide survey, which the city's own form supersedes. 2025 left as it was.",
+        "wageRateSource": "https://earlingtongovcity.com/wp-content/uploads/sites/113/2025/01/Occupational-Payroll-Tax-Return.pdf"
       },
       {
         "name": "Eddyville",
@@ -1746,12 +1747,12 @@
         "name": "Hodgenville",
         "category": "Net Profits",
         "rate": "1%",
-        "wageRateDecimal": 0.0075,
+        "wageRateDecimal": 0.01,
         "wageRateResidentDecimal": null,
         "wageRateNonresidentDecimal": null,
-        "wageRateStatus": "cross_source_confirmed",
-        "wageRateNote": "CORRECTS the scraped 1% figure: tax-rates.org consistently reports 0.75% for both residents and nonresidents across independent searches. One tier below primary-source confirmation (no city ordinance text was successfully read this pass -- amlegal.com blocked automated access), flagged accordingly rather than treated as fully confirmed.",
-        "wageRateSource": "tax-rates.org (Hodgenville, KY) via WebSearch aggregation, consistent across two independent search queries."
+        "wageRateStatus": "confirmed_via_city_ordinance_2026_11_14",
+        "wageRateNote": "CORRECTED 2026-11-14: Hodgenville's code (codelibrary.amlegal.com, 'latest', read directly) measures the occupational license fee by 1% of all salaries, wages, commissions and other compensation and net profits earned in the city (stated to apply from 2020-01-01). The earlier 0.75% came from tax-rates.org, whose figure this ordinance contradicts.",
+        "wageRateSource": "https://codelibrary.amlegal.com/codes/hodgenville/latest/hodgenville_ky/0-0-0-6552"
       },
       {
         "name": "Hopkins County",
@@ -2631,12 +2632,12 @@
         "name": "Owenton",
         "category": "Gross Receipts",
         "rate": "1%",
-        "wageRateDecimal": 0.01,
+        "wageRateDecimal": 0.015,
         "wageRateResidentDecimal": null,
         "wageRateNonresidentDecimal": null,
-        "wageRateStatus": "cross_source_confirmed_convergent",
-        "wageRateNote": "Two independently-derived sources agree on the same figure: the original KY SOS scrape (category Gross Receipts) and a separately-sourced tax-rates.org figure, framed there as a flat city income tax on residents/nonresidents. Neither source alone would be fully trusted here (tax-rates.org proved wrong elsewhere in this same research pass -- e.g. it showed 0.01% for Elsmere/Erlanger, both since corrected to their real, much higher rates via primary sources) -- applied specifically because the two independently-derived figures converge on the same number, unlike the cases where they diverged and were deliberately left unconfirmed instead of guessed at.",
-        "wageRateSource": "tax-rates.org via WebSearch aggregation, converging with this file's own original KY SOS scrape figure."
+        "wageRateStatus": "confirmed_via_city_ordinance_2026_11_14",
+        "wageRateNote": "CORRECTED 2026-11-14: Owenton's code (codelibrary.amlegal.com, 'latest', read directly) says the occupational license tax 'shall be measured by 1.5%' of all wages and compensation paid or payable in the city for work done in the city by every resident and nonresident. The earlier 1% rested on a scrape plus tax-rates.org. The ordinance's effective date was not read, so 2025 is left as it was.",
+        "wageRateSource": "https://codelibrary.amlegal.com/codes/owentonky/latest/owenton_ky/0-0-0-3439"
       },
       {
         "name": "Paducah",
@@ -2856,11 +2857,11 @@
         "name": "Raceland",
         "category": "Net Profits",
         "rate": "1.5%",
-        "wageRateDecimal": 0.015,
+        "wageRateDecimal": 0.01,
         "wageRateResidentDecimal": null,
         "wageRateNonresidentDecimal": null,
-        "wageRateStatus": "inferred_small_city_single_rate_pattern",
-        "wageRateNote": "2026-09-30 LEAD, rate NOT changed: the city's own business-license letter mentions only the $100 license, not a payroll rate. Two older compilations list Raceland at 1.00% (Tax Foundation, 2011; a 2020 Realtors state-and-local-tax table), against the inferred 1.5% on file. No current source found. Previous note: INFERENCE, not a primary confirmation for THIS specific city -- disclosed as the lowest-confidence tier in this file, distinct from every other tier. Exhausted the reasonable avenues: the KY Secretary of State's own KRS 67.766 database (the primary source this scrape came from) shows only this bare 'Net Profits'/mixed-category figure, no separate wage figure; the city's own website (if one exists) has no occupational-tax page; no news coverage or secondary aggregator was found. Applied because this project's own confirmed history for Kentucky small cities shows this exact pattern (a single ambiguous 'Net Profits' rate) turns out to ALSO be the wage rate far more often than not (Elizabethtown, Henderson, Georgetown, Allen/Butler/Clay/Nicholas/Breathitt counties, Russellville, and others, all independently confirmed) -- genuinely different from a 'Gross Receipts' category, which this same file's corrections (Erlanger, Fort Wright, Independence, Villa Hills, Fort Mitchell) show is essentially NEVER the wage rate, so that category is deliberately NOT extended this same inference and stays unconfirmed.",
+        "wageRateStatus": "confirmed_via_city_ordinance_2026_11_14",
+        "wageRateNote": "CORRECTED 2026-11-14: Raceland Ordinance 2021-04 (the city's own PDF, a scan, read as an image) lowers the city occupational license fee to One (1.0%) Percent of all salaries, wages, commissions and other compensation earned in the city. Changes after 2021 were not checked. The earlier 1.5% was an inferred pattern.",
         "wageRateSource": [
           {
             "title": "earlier source note",
@@ -2872,7 +2873,8 @@
             "says": "Raceland, 1.00%, same.",
             "verifiedOn": "2026-09-30"
           }
-        ]
+        ],
+        "wageRateSource": "https://www.racelandky.org/_files/ugd/17eea6_02e48bf6c20445efafc43efbaede8e14.pdf"
       },
       {
         "name": "Radcliff",
@@ -3406,12 +3408,12 @@
         "category": "Gross Receipts",
         "rate": "1%",
         "cap": "Social Security Cap",
-        "wageRateDecimal": 0.01,
+        "wageRateDecimal": 0.0175,
         "wageRateResidentDecimal": null,
         "wageRateNonresidentDecimal": null,
-        "wageRateStatus": "cross_source_confirmed_convergent",
-        "wageRateNote": "Two independently-derived sources agree on the same figure: the original KY SOS scrape (category Gross Receipts) and a separately-sourced tax-rates.org figure, framed there as a flat city income tax on residents/nonresidents. Neither source alone would be fully trusted here (tax-rates.org proved wrong elsewhere in this same research pass -- e.g. it showed 0.01% for Elsmere/Erlanger, both since corrected to their real, much higher rates via primary sources) -- applied specifically because the two independently-derived figures converge on the same number, unlike the cases where they diverged and were deliberately left unconfirmed instead of guessed at.",
-        "wageRateSource": "tax-rates.org via WebSearch aggregation, converging with this file's own original KY SOS scrape figure."
+        "wageRateStatus": "confirmed_via_city_ordinance_2026_11_14",
+        "wageRateNote": "CORRECTED 2026-11-14: Warsaw's code (codelibrary.amlegal.com, 'latest', read directly; section 114.03 as amended by Ord. 2024-02) says the occupational license tax is measured by 1.75% of all wages and compensation paid or payable in the city. The earlier 1% rested on a scrape plus tax-rates.org.",
+        "wageRateSource": "https://codelibrary.amlegal.com/codes/warsaw/latest/warsaw_ky/0-0-0-3804"
       },
       {
         "name": "Washington County",

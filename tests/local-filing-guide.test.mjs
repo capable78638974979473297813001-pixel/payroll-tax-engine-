@@ -782,12 +782,61 @@ test('Kentucky lookups return a verified guide, both guides for Covington, and s
   const covington = lookup('Covington');
   assert.equal(covington.agency, 'KY-KENTON');
   assert.deepEqual(covington.additionalGuides.map(entry => entry.agency), ['KY-COVINGTON']);
-  assert.equal(lookup('Bardstown').status, 'collector-unverified');
+  assert.equal(lookup('Bardwell').status, 'collector-unverified'); // its official site is a parked domain
+  assert.equal(lookup('Bardstown').guideStatus, 'verified');
   assert.equal(lookup('Atlantis').status, 'unknown-code');
 });
 
 test('every Kentucky jurisdiction with a mapped agency resolves to a real profile', () => {
-  const mapped = kentuckyScraped.filter(entry => localWithholdingGuide('KY-occupational', entry.name, 2026).status === 'guide');
+  const mapped = kentuckyScraped.filter(entry => localWithholdingGuide('KY-occupational', entry.name, 2026).agency);
   assert.ok(mapped.length >= 9, String(mapped.length));
   for (const entry of mapped) assert.ok(localWithholdingGuide('KY-occupational', entry.name, 2026).guide.collector, entry.name);
+});
+
+const kentuckyGuides = JSON.parse(readFileSync(new URL('../data/filing/local/KY-2026.json', import.meta.url), 'utf8')).guides;
+
+test('researched Kentucky guides name real roster entries, cite https sources and only use verified or partial status', () => {
+  const roster = new Set(kentuckyScraped.map(entry => entry.name));
+  assert.ok(Object.keys(kentuckyGuides).length >= 200, String(Object.keys(kentuckyGuides).length));
+  for (const [name, guide] of Object.entries(kentuckyGuides)) {
+    assert.ok(roster.has(name), name);
+    assert.ok(['verified', 'partial'].includes(guide.status), name);
+    assert.ok(guide.sources.length > 0 && guide.sources.every(url => url.startsWith('https://') || url.startsWith('http://')), name);
+    assert.equal(guide.verifiedOn, '2026-11-14', name);
+    if (guide.status === 'verified') assert.ok(guide.returns.length > 0, name);
+    assert.equal(guide.sources.some(url => /a-zcompanies|facebook|drive\.google/.test(url)), false, name);
+  }
+  assert.equal('Bath County' in kentuckyGuides, false); // its only source was a vendor domain
+});
+
+test('Kentucky lookups carry the guide status and key facts read from official pages', () => {
+  const lookup = name => localWithholdingGuide('KY-occupational', name, 2026);
+  const kenton = lookup('Elsmere');
+  assert.equal(kenton.status, 'guide');
+  assert.match(kenton.guide.collector, /Kenton County/);
+  assert.equal(lookup('Grant County').guideStatus, 'verified');
+  const unverified = kentuckyScraped.filter(entry => lookup(entry.name).status === 'collector-unverified').map(entry => entry.name);
+  assert.ok(unverified.length < 40, String(unverified.length));
+  assert.ok(unverified.includes('Bath County') && unverified.includes('Bardwell'));
+});
+
+// Rates corrected on 2026-11-14 against each city's own form or ordinance (see wageRateNote in the data).
+test('six Kentucky city rates follow their own forms and ordinances; the agents\' disputed ones stay put', () => {
+  const rate = (year, name) => JSON.parse(readFileSync(new URL(`../data/local/KY-occupational-${year}.json`, import.meta.url), 'utf8')).jurisdictions.scraped.find(entry => entry.name === name);
+  for (const year of [2026, 2027]) {
+    assert.equal(rate(year, 'Clinton').wageRateDecimal, 0.01);
+    assert.equal(rate(year, 'Clinton').annualWageCap, 40000); // $400 maximum at 1%
+    assert.equal(rate(year, 'Earlington').wageRateDecimal, 0.015);
+    assert.equal(rate(year, 'Owenton').wageRateDecimal, 0.015);
+  }
+  for (const year of [2025, 2026, 2027]) {
+    assert.equal(rate(year, 'Warsaw').wageRateDecimal, 0.0175);
+    assert.equal(rate(year, 'Hodgenville').wageRateDecimal, 0.01);
+    assert.equal(rate(year, 'Raceland').wageRateDecimal, 0.01);
+  }
+  // Read against the originals and found already right or unresolved: the engine's values stand.
+  assert.equal(rate(2026, 'Middlesboro').wageRateDecimal, 0.0245); // the ordinance's 2% is the net-profits fee
+  assert.equal(rate(2026, 'Washington County').wageRateDecimal, 0.0075); // form 501Q: 3/4 of 1% of line 2
+  assert.equal(rate(2026, 'Guthrie').wageRateDecimal, 0.01); // city form says 2%, state roster says 1%: unresolved
+  assert.equal(rate(2026, 'Paintsville').wageRateDecimal, 0.015); // code library says 1.25%, news says raised to 1.5% in 2023: unresolved
 });

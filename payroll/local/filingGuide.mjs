@@ -9,6 +9,7 @@ const profiles = readData('filing/local/2026.json');
 const michiganCities = readData('local/MI-cities-2026.json').cities;
 const alabamaCities = readData('local/AL-municipalities-2026.json').municipalities;
 const kentuckyJurisdictions = readData('local/KY-occupational-2026.json').jurisdictions.scraped;
+const kentuckyGuides = readData('filing/local/KY-2026.json').guides;
 // Only jurisdictions whose collector has a verified guide. Covington files with both the county and the city.
 const kentuckyAgencies = {
   'louisville metro': ['KY-LMRC'],
@@ -105,7 +106,11 @@ export function localWithholdingGuide(kind, code, year) {
       if (!row && ['louisville metro', 'lexington-fayette'].includes(locality)) row = { name: locality === 'louisville metro' ? 'Louisville Metro' : 'Lexington-Fayette' };
       if (!row) return { status: 'unknown-code' };
       const agencyIds = kentuckyAgencies[row.name.toLowerCase()];
-      if (!agencyIds) return { status: 'collector-unverified', jurisdiction: row.name, code };
+      if (!agencyIds) {
+        const researched = Object.hasOwn(kentuckyGuides, row.name) ? kentuckyGuides[row.name] : undefined;
+        if (!researched) return { status: 'collector-unverified', jurisdiction: row.name, code };
+        return { status: 'guide', jurisdiction: row.name, code, guideStatus: researched.status, guide: structuredClone(researched) };
+      }
       return {
         status: 'guide',
         jurisdiction: row.name,
