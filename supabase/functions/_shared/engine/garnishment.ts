@@ -76,6 +76,14 @@ export interface GarnishmentOrder {
    */
   amountOrdered: Cents;
   /**
+   * An order that says "the lesser of $X or Y% of disposable earnings": Y as a
+   * fraction (0.5 for 50%), with X in amountOrdered. The engine withholds the
+   * lesser of the two, then applies the statutory ceiling on top as always.
+   * Disposable earnings are the CCPA figure (see disposableEarnings()), the
+   * same one the ceiling uses. Absent means the order has no percentage limit.
+   */
+  maxDisposableEarningsFraction?: number;
+  /**
    * child_support only: is the employee ALSO currently supporting a spouse
    * or child not covered by this particular order? Decides the 50%/55%
    * ceiling (true) vs. 60%/65% (false) — never defaulted, same discipline
@@ -665,8 +673,16 @@ function prorate(demands: Cents[], total: Cents): Cents[] {
  * only decides how much CAN be withheld, never mutates the paycheck.
  */
 export function calculateGarnishments(input: GarnishmentInput): GarnishmentResult {
-  const { checkDate, payFrequency, workState, paycheck, orders } = input;
+  const { checkDate, payFrequency, workState, paycheck } = input;
   const disposable = disposableEarnings(paycheck);
+  const orders = input.orders.map((o) => {
+    const f = o.maxDisposableEarningsFraction;
+    if (f === undefined) return o;
+    if (!Number.isFinite(f) || f < 0 || f > 1) {
+      throw new Error(`Order "${o.id}": maxDisposableEarningsFraction must be between 0 and 1 (0.5 means 50%), got ${f}.`);
+    }
+    return { ...o, amountOrdered: Math.min(o.amountOrdered, applyRate(disposable, f)) };
+  });
   const gross = paycheck.grossPay;
   const fed = garnishmentFederalRuleset(checkDate);
   const override = garnishmentStateOverride(workState, checkDate);
